@@ -1,0 +1,70 @@
+# Fichiers et dossiers à ignorer lors du déploiement Vercel
+
+# Dossiers de développement
+node_modules
+.git
+.gitignore
+.vscode
+.idea
+
+# Fichiers de configuration locale
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Fichiers temporaires
+.tmp
+.temp
+*.tmp
+*.temp
+
+# Fichiers de cache
+.cache
+.parcel-cache
+.next
+.nuxt
+.vuepress/dist
+
+# Fichiers de test
+coverage
+.nyc_output
+test-results
+playwright-report
+
+# Fichiers de documentation de développement
+README.md
+CREATE_FUNCTIONS_README.md
+FUNCTIONS_SUMMARY.md
+IMPROVEMENTS.md
+
+# Scripts de développement
+scripts/
+supabase/migrations/
+supabase/functions/create-missing-functions.sql
+
+# Fichiers de configuration de développement
+.eslintrc.*
+.prettierrc.*
+tsconfig.json
+vite.config.ts
+
+# Fichiers de test
+*.test.*
+*.spec.*
+__tests__/
+test/
+tests/
+
+# Fichiers de déploiement alternatifs
+netlify.toml
+firebase.json
+docker-compose.yml
+Dockerfile
