@@ -25,7 +25,8 @@ import {
   ChevronRight,
   X,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  BarChart3
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -44,19 +45,19 @@ interface Product {
   name: string;
   slug: string;
   description: string | null;
-  short_description: string | null;
+  short_description?: string | null;
   price: number;
-  promotional_price: number | null;
+  promotional_price?: number | null;
   currency: string;
   image_url: string | null;
-  images: string[];
+  images?: string[];
   category: string | null;
   product_type: string | null;
   rating: number;
   reviews_count: number;
-  sales_count: number;
+  sales_count?: number;
   is_active: boolean;
-  is_featured: boolean;
+  is_featured?: boolean;
   created_at: string;
   updated_at: string;
   stores?: {
@@ -184,7 +185,7 @@ const Marketplace = () => {
       
       if (error) throw error;
       
-      setProducts(data || []);
+      setProducts((data || []) as Product[]);
       setPagination(prev => ({ ...prev, totalItems: data?.length || 0 }));
       
     } catch (error) {
@@ -270,8 +271,8 @@ const Marketplace = () => {
   }, [products]);
 
   // Gestion des filtres
-  const updateFilter = (key: keyof FilterState, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+  const updateFilter = (filters: Partial<FilterState>) => {
+    setFilters(prev => ({ ...prev, ...filters }));
     setPagination(prev => ({ ...prev, currentPage: 1 }));
   };
 
@@ -444,7 +445,7 @@ const Marketplace = () => {
                 type="text"
               placeholder="Rechercher un produit ou un vendeur..."
                 value={filters.search}
-                onChange={(e) => updateFilter("search", e.target.value)}
+                onChange={(e) => updateFilter({ search: e.target.value })}
                 className="pl-12 pr-4 py-4 text-lg bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
@@ -527,7 +528,7 @@ const Marketplace = () => {
                     <label className="text-sm font-medium text-slate-300 mb-2 block">Catégorie</label>
                     <select
                       value={filters.category}
-                      onChange={(e) => updateFilter("category", e.target.value)}
+                      onChange={(e) => updateFilter({ category: e.target.value })}
                       className="w-full p-2 bg-slate-700 border-slate-600 text-white rounded-md"
                     >
                       <option value="all">Toutes les catégories</option>
@@ -542,7 +543,7 @@ const Marketplace = () => {
                     <label className="text-sm font-medium text-slate-300 mb-2 block">Type</label>
                     <select
                       value={filters.productType}
-                      onChange={(e) => updateFilter("productType", e.target.value)}
+                      onChange={(e) => updateFilter({ productType: e.target.value })}
                       className="w-full p-2 bg-slate-700 border-slate-600 text-white rounded-md"
                     >
                       <option value="all">Tous les types</option>
@@ -557,7 +558,7 @@ const Marketplace = () => {
                     <label className="text-sm font-medium text-slate-300 mb-2 block">Prix</label>
                     <select
                       value={filters.priceRange}
-                      onChange={(e) => updateFilter("priceRange", e.target.value)}
+                      onChange={(e) => updateFilter({ priceRange: e.target.value })}
                       className="w-full p-2 bg-slate-700 border-slate-600 text-white rounded-md"
                     >
                       {PRICE_RANGES.map(range => (
@@ -571,7 +572,7 @@ const Marketplace = () => {
                     <label className="text-sm font-medium text-slate-300 mb-2 block">Note minimum</label>
                     <select
                       value={filters.rating}
-                      onChange={(e) => updateFilter("rating", e.target.value)}
+                      onChange={(e) => updateFilter({ rating: e.target.value })}
                       className="w-full p-2 bg-slate-700 border-slate-600 text-white rounded-md"
                     >
                       <option value="all">Toutes les notes</option>
@@ -605,11 +606,11 @@ const Marketplace = () => {
               {/* Tri */}
               <div className="flex items-center gap-2">
                 <label className="text-sm text-slate-300">Trier par:</label>
-                <select
-                  value={filters.sortBy}
-                  onChange={(e) => updateFilter("sortBy", e.target.value)}
-                  className="p-2 bg-slate-700 border-slate-600 text-white rounded-md text-sm"
-                >
+                    <select
+                      value={filters.sortBy}
+                      onChange={(e) => updateFilter({ sortBy: e.target.value })}
+                      className="p-2 bg-slate-700 border-slate-600 text-white rounded-md text-sm"
+                    >
                   {SORT_OPTIONS.map(option => (
                     <option key={option.value} value={option.value}>{option.label}</option>
                   ))}
@@ -617,7 +618,7 @@ const Marketplace = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => updateFilter("sortOrder", filters.sortOrder === "asc" ? "desc" : "asc")}
+                  onClick={() => updateFilter({ sortOrder: filters.sortOrder === "asc" ? "desc" : "asc" })}
                   className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
                 >
                   {filters.sortOrder === "asc" ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
@@ -629,7 +630,7 @@ const Marketplace = () => {
                 <Button
                   variant={filters.viewMode === "grid" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => updateFilter("viewMode", "grid")}
+                  onClick={() => updateFilter({ viewMode: "grid" })}
                   className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
                 >
                   <Grid3X3 className="h-4 w-4" />
@@ -637,7 +638,7 @@ const Marketplace = () => {
                 <Button
                   variant={filters.viewMode === "list" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => updateFilter("viewMode", "list")}
+                  onClick={() => updateFilter({ viewMode: "list" })}
                   className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
                 >
                   <List className="h-4 w-4" />
@@ -815,7 +816,7 @@ const ProductCardAdvanced = ({
   const price = product.promotional_price || product.price;
   const hasPromo = product.promotional_price && product.promotional_price < product.price;
   const discountPercent = hasPromo
-    ? Math.round(((product.price - product.promotional_price!) / product.price) * 100)
+    ? Math.round(((product.price - (product.promotional_price || 0)) / product.price) * 100)
     : 0;
 
   const renderStars = (rating: number) => (
@@ -1040,7 +1041,7 @@ const ProductCardAdvanced = ({
 
           <div className="flex items-center justify-between mb-4">
             <div className="text-sm text-slate-400">
-              {product.sales_count} vente{product.sales_count !== 1 ? "s" : ""}
+              {product.sales_count || 0} vente{(product.sales_count || 0) !== 1 ? "s" : ""}
             </div>
             <div className="text-right">
               {hasPromo && (

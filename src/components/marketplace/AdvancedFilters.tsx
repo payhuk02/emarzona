@@ -32,7 +32,16 @@ interface AdvancedFiltersProps {
     sortOrder: 'asc' | 'desc';
     viewMode: 'grid' | 'list';
   };
-  onFiltersChange: (filters: any) => void;
+  onFiltersChange: (filters: Partial<{
+    search: string;
+    category: string;
+    productType: string;
+    priceRange: string;
+    rating: string;
+    sortBy: string;
+    sortOrder: 'asc' | 'desc';
+    viewMode: 'grid' | 'list';
+  }>) => void;
   categories: string[];
   productTypes: string[];
   priceRange: [number, number];
