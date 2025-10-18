@@ -1,0 +1,29 @@
+version: 1
+rules:
+  - match: "**/*.tsx"
+    ai_context: true
+    note: "Fichiers React TypeScript (composants et pages)"
+  - match: "**/*.ts"
+    ai_context: true
+    note: "Scripts TypeScript (hooks, utilitaires, intégrations Supabase)"
+  - match: "**/*.js"
+    ai_context: true
+    note: "Scripts JS divers (configurations, scripts Node)"
+  - match: "supabase/**/*.ts"
+    ai_context: true
+    note: "Fonctions Edge Supabase"
+  - match: "src/pages/admin/**/*.tsx"
+    ai_context: true
+    note: "Interface administrateur Payhuk"
+  - match: "src/pages/**/*.tsx"
+    ai_context: true
+    note: "Pages principales (boutique, marketplace, etc.)"
+  - match: "src/components/**/*.tsx"
+    ai_context: true
+    note: "Composants réutilisables (UI et logiques)"
+  - match: "src/lib/**/*.ts"
+    ai_context: true
+    note: "Utilitaires et helpers globaux"
+  - match: ".env"
+    ai_context: false
+    note: "Ne pas analyser ce fichier (contient des clés sensibles)"

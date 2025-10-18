@@ -1,0 +1,11 @@
+name: Payhuk AI Workspace
+version: 1.0.0
+default_model: gpt-4o
+context:
+  - type: current_file
+    max_lines: 300
+  - type: git
+    max_files: 40
+    max_chars: 80000
+  - type: workspace
+    max_chars: 400000

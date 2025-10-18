@@ -1,0 +1,399 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 220 30% 12%;
+    --foreground: 0 0% 98%;
+
+    --card: 220 25% 16%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 220 25% 16%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 210 100% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 20% 22%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 220 20% 20%;
+    --muted-foreground: 220 10% 65%;
+
+    --accent: 45 100% 60%;
+    --accent-foreground: 220 30% 12%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 20% 24%;
+    --input: 220 20% 24%;
+    --ring: 210 100% 60%;
+
+    --radius: 1rem;
+
+    --gradient-primary: linear-gradient(135deg, hsl(210, 100%, 60%) 0%, hsl(220, 90%, 50%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(45, 100%, 60%) 0%, hsl(40, 100%, 55%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220, 40%, 15%) 0%, hsl(220, 50%, 8%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(220, 30%, 12%) 0%, hsl(220, 35%, 18%) 100%);
+
+    --shadow-soft: 0 4px 16px -2px hsl(220 100% 10% / 0.3);
+    --shadow-medium: 0 8px 32px -4px hsl(220 100% 10% / 0.4);
+    --shadow-large: 0 16px 64px -8px hsl(220 100% 10% / 0.5);
+    --shadow-glow: 0 0 40px hsl(210 100% 60% / 0.3);
+
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 20 14.3% 4.1%;
+    --sidebar-primary: 25 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 33 100% 96.5%;
+    --sidebar-accent-foreground: 25 95% 53%;
+    --sidebar-border: 20 5.9% 90%;
+    --sidebar-ring: 25 95% 53%;
+  }
+
+  .dark {
+    --background: 220 35% 8%;
+    --foreground: 0 0% 98%;
+
+    --card: 220 30% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 220 30% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 210 100% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 25% 18%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 220 25% 16%;
+    --muted-foreground: 220 10% 70%;
+
+    --accent: 45 100% 62%;
+    --accent-foreground: 220 35% 8%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 25% 20%;
+    --input: 220 25% 20%;
+    --ring: 210 100% 65%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(210, 100%, 65%) 0%, hsl(220, 95%, 55%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(45, 100%, 62%) 0%, hsl(40, 100%, 58%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220, 45%, 12%) 0%, hsl(220, 55%, 6%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(220, 35%, 8%) 0%, hsl(220, 40%, 14%) 100%);
+
+    --shadow-soft: 0 4px 16px -2px hsl(220 100% 5% / 0.4);
+    --shadow-medium: 0 8px 32px -4px hsl(220 100% 5% / 0.5);
+    --shadow-large: 0 16px 64px -8px hsl(220 100% 5% / 0.6);
+    --shadow-glow: 0 0 50px hsl(210 100% 65% / 0.4);
+
+    --sidebar-background: 24 9.8% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 25 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 25 9.1% 14.9%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 24 9.8% 15%;
+    --sidebar-ring: 25 95% 53%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  #root {
+    min-height: 100vh;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    box-sizing: border-box;
+  }
+
+  img, video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .animate-fade-in, .animate-fade-in-up, .hover-scale {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+
+@layer utilities {
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+  
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .gradient-dark {
+    background: var(--gradient-dark);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
+  }
+
+  .shadow-large {
+    box-shadow: var(--shadow-large);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  /* Page transitions */
+  .page-transition {
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
+  }
+
+  .page-transition.fadeOut {
+    animation-name: fadeOutPage;
+  }
+
+  .page-transition.fadeIn {
+    animation-name: fadeInPage;
+  }
+
+  /* Link hover effects */
+  .nav-link {
+    position: relative;
+    transition: var(--transition-smooth);
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: hsl(var(--primary));
+    transition: width 0.3s ease;
+  }
+
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    width: 100%;
+  }
+
+  /* Button ripple effect */
+  .btn-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .btn-ripple:active::after {
+    width: 200px;
+    height: 200px;
+  }
+
+  /* Product card zoom effect */
+  .product-card-zoom {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .product-card-zoom:hover {
+    transform: scale(1.02);
+  }
+
+  .product-card-zoom:active {
+    transform: scale(0.98);
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeOutPage {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes fadeInPage {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideOutRight {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+  }
+}
+
+/* TipTap Editor Styles */
+.ProseMirror {
+  @apply focus:outline-none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  @apply text-muted-foreground;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.ProseMirror h1 {
+  @apply text-3xl font-bold mb-4;
+}
+
+.ProseMirror h2 {
+  @apply text-2xl font-bold mb-3;
+}
+
+.ProseMirror h3 {
+  @apply text-xl font-bold mb-2;
+}
+
+.ProseMirror ul {
+  @apply list-disc pl-6 mb-4;
+}
+
+.ProseMirror ol {
+  @apply list-decimal pl-6 mb-4;
+}
+
+.ProseMirror blockquote {
+  @apply border-l-4 border-primary pl-4 italic my-4;
+}
+
+.ProseMirror a {
+  @apply text-primary underline cursor-pointer;
+}
+
+.ProseMirror code {
+  @apply bg-muted px-1 py-0.5 rounded text-sm;
+}
+
+.ProseMirror pre {
+  @apply bg-muted p-4 rounded my-4 overflow-x-auto;
+}
+
+.ProseMirror strong {
+  @apply font-bold;
+}
+
+.ProseMirror em {
+  @apply italic;
+}
+
+.ProseMirror u {
+  @apply underline;
+}
