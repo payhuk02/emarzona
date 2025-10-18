@@ -1,14 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Database, ExternalLink, Copy, CheckCircle2, AlertCircle, Info } from 'lucide-react';
-import { useState } from 'react';
-
-export const DatabaseMigrationInstructions = () => {
-  const [copied, setCopied] = useState(false);
-
-  const sqlCode = `-- Complete Profile System Migration
+-- Complete Profile System Migration
 -- This migration fixes all profile-related issues and creates necessary tables/functions
 
 -- ============================================
@@ -248,119 +238,43 @@ CREATE INDEX IF NOT EXISTS idx_profiles_first_name ON public.profiles(first_name
 CREATE INDEX IF NOT EXISTS idx_profiles_last_name ON public.profiles(last_name);
 CREATE INDEX IF NOT EXISTS idx_profiles_location ON public.profiles(location);
 CREATE INDEX IF NOT EXISTS idx_profiles_referral_code ON public.profiles(referral_code);
-CREATE INDEX IF NOT EXISTS idx_profiles_is_suspended ON public.profiles(is_suspended);`;
+CREATE INDEX IF NOT EXISTS idx_profiles_is_suspended ON public.profiles(is_suspended);
 
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(sqlCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy: ', err);
-    }
-  };
+-- ============================================
+-- 8. VERIFICATION QUERIES
+-- ============================================
 
-  return (
-    <div className="space-y-6">
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Action requise :</strong> Migration complète du système de profil nécessaire pour corriger toutes les erreurs.
-        </AlertDescription>
-      </Alert>
+-- Verify table structure
+SELECT 
+  column_name, 
+  data_type, 
+  is_nullable,
+  column_default
+FROM information_schema.columns 
+WHERE table_name = 'profiles' 
+AND table_schema = 'public'
+ORDER BY ordinal_position;
 
-      <Card className="bg-background border-border shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Database className="h-5 w-5 text-primary" /> Instructions de Migration
-          </CardTitle>
-          <CardDescription>
-            Suivez ces étapes pour appliquer la migration complète du système de profil.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <Badge variant="outline" className="mt-1">1</Badge>
-              <div>
-                <p className="font-medium">Ouvrir le Dashboard Supabase</p>
-                <p className="text-sm text-muted-foreground">
-                  Connectez-vous à votre projet Supabase
-                </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="mt-2"
-                  onClick={() => window.open('https://supabase.com/dashboard', '_blank')}
-                >
-                  <ExternalLink className="mr-2 h-4 w-4" /> Ouvrir Supabase Dashboard
-                </Button>
-              </div>
-            </div>
+-- Verify policies
+SELECT 
+  schemaname,
+  tablename,
+  policyname,
+  permissive,
+  roles,
+  cmd,
+  qual,
+  with_check
+FROM pg_policies 
+WHERE tablename = 'profiles' 
+ORDER BY policyname;
 
-            <div className="flex items-start gap-3">
-              <Badge variant="outline" className="mt-1">2</Badge>
-              <div>
-                <p className="font-medium">Naviguer vers l'éditeur SQL</p>
-                <p className="text-sm text-muted-foreground">
-                  Dans le menu de gauche, cliquez sur "SQL Editor"
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Badge variant="outline" className="mt-1">3</Badge>
-              <div>
-                <p className="font-medium">Exécuter le script SQL</p>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Copiez et exécutez le script SQL complet pour créer toutes les tables et fonctions nécessaires :
-                </p>
-                <div className="relative">
-                  <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto border">
-                    {sqlCode}
-                  </pre>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="absolute top-2 right-2"
-                    onClick={copyToClipboard}
-                  >
-                    {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Badge variant="outline" className="mt-1">4</Badge>
-              <div>
-                <p className="font-medium">Vérifier l'exécution</p>
-                <p className="text-sm text-muted-foreground">
-                  Le script devrait s'exécuter sans erreur. Vous verrez un message de confirmation.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Badge variant="outline" className="mt-1">5</Badge>
-              <div>
-                <p className="font-medium">Actualiser la page</p>
-                <p className="text-sm text-muted-foreground">
-                  Revenez sur cette page et actualisez pour voir les nouveaux champs.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <Alert className="bg-blue-500/10 border-blue-500 text-blue-300">
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Note :</strong> Ce script complet crée toutes les tables, fonctions, politiques RLS et triggers nécessaires 
-              pour un système de profil entièrement fonctionnel. Cette migration est sûre et n'affectera pas les données existantes.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
+-- Verify functions exist
+SELECT 
+  routine_name,
+  routine_type,
+  data_type
+FROM information_schema.routines 
+WHERE routine_schema = 'public' 
+AND routine_name IN ('update_updated_at_column', 'has_role', 'handle_new_user')
+ORDER BY routine_name;
