@@ -44,6 +44,10 @@ README.md
 CREATE_FUNCTIONS_README.md
 FUNCTIONS_SUMMARY.md
 IMPROVEMENTS.md
+SPA_ROUTING_FIX.md
+VERCEL_FIX_DOCUMENTATION.md
+VERCEL_DEPLOYMENT.md
+VERCEL_CONFIG_SUMMARY.md
 
 # Scripts de développement
 scripts/
@@ -54,7 +58,6 @@ supabase/functions/create-missing-functions.sql
 .eslintrc.*
 .prettierrc.*
 tsconfig.json
-vite.config.ts
 
 # Fichiers de test
 *.test.*
