@@ -44,140 +44,145 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
   const productUrl = `${window.location.origin}/${storeSlug}/${formData.slug}`;
 
   return (
-    <div className="space-y-6">
+    <div className="saas-space-y-6">
       {/* Sélecteur de type de produit */}
-      <Card className="border-primary/20 bg-primary/5">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Package className="h-5 w-5 text-primary" />
-            Type de produit
-          </CardTitle>
-          <CardDescription>
-            Choisissez le type de produit que vous souhaitez vendre
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            <div
-              className={cn(
-                "p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md",
-                formData.product_type === "digital" 
-                  ? "border-primary bg-primary/10" 
-                  : "border-border hover:border-primary/50"
-              )}
-              onClick={() => updateFormData("product_type", "digital")}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <Smartphone className="h-6 w-6 text-primary" />
-                <h3 className="font-semibold">Produit Digital</h3>
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                Ebooks, formations, logiciels, templates, fichiers téléchargeables
-              </p>
-              <div className="flex flex-wrap gap-1">
-                <Badge variant="secondary" className="text-xs">Téléchargement instantané</Badge>
-                <Badge variant="secondary" className="text-xs">Pas de stock</Badge>
-                <Badge variant="secondary" className="text-xs">Livraison automatique</Badge>
-              </div>
+      <div className="saas-section-card">
+        <div className="flex items-center gap-2 mb-3">
+          <Package className="h-5 w-5 text-blue-600" />
+          <h3 className="saas-section-title">Type de produit</h3>
+        </div>
+        <p className="saas-section-description">
+          Choisissez le type de produit que vous souhaitez vendre
+        </p>
+        
+        <div className="saas-grid saas-grid-cols-3">
+          <div
+            className={cn(
+              "p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md",
+              formData.product_type === "digital" 
+                ? "border-blue-500 bg-blue-50" 
+                : "border-gray-200 hover:border-blue-300"
+            )}
+            onClick={() => updateFormData("product_type", "digital")}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <Smartphone className="h-6 w-6 text-blue-600" />
+              <h3 className="font-semibold saas-text-primary">Produit Digital</h3>
             </div>
-
-            <div
-              className={cn(
-                "p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md",
-                formData.product_type === "physical" 
-                  ? "border-primary bg-primary/10" 
-                  : "border-border hover:border-primary/50"
-              )}
-              onClick={() => updateFormData("product_type", "physical")}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <Package className="h-6 w-6 text-primary" />
-                <h3 className="font-semibold">Produit Physique</h3>
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                Vêtements, accessoires, objets artisanaux, produits manufacturés
-              </p>
-              <div className="flex flex-wrap gap-1">
-                <Badge variant="secondary" className="text-xs">Livraison requise</Badge>
-                <Badge variant="secondary" className="text-xs">Gestion stock</Badge>
-                <Badge variant="secondary" className="text-xs">Adresse client</Badge>
-              </div>
-            </div>
-
-            <div
-              className={cn(
-                "p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md",
-                formData.product_type === "service" 
-                  ? "border-primary bg-primary/10" 
-                  : "border-border hover:border-primary/50"
-              )}
-              onClick={() => updateFormData("product_type", "service")}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <Wrench className="h-6 w-6 text-primary" />
-                <h3 className="font-semibold">Service</h3>
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                Consultations, coaching, design, développement, maintenance
-              </p>
-              <div className="flex flex-wrap gap-1">
-                <Badge variant="secondary" className="text-xs">Rendez-vous</Badge>
-                <Badge variant="secondary" className="text-xs">Prestation</Badge>
-                <Badge variant="secondary" className="text-xs">Sur mesure</Badge>
-              </div>
+            <p className="saas-label-description mb-3">
+              Ebooks, formations, logiciels, templates, fichiers téléchargeables
+            </p>
+            <div className="flex flex-wrap gap-1">
+              <span className="saas-badge">Téléchargement instantané</span>
+              <span className="saas-badge">Pas de stock</span>
+              <span className="saas-badge">Livraison automatique</span>
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <div
+            className={cn(
+              "p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md",
+              formData.product_type === "physical" 
+                ? "border-blue-500 bg-blue-50" 
+                : "border-gray-200 hover:border-blue-300"
+            )}
+            onClick={() => updateFormData("product_type", "physical")}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <Package className="h-6 w-6 text-blue-600" />
+              <h3 className="font-semibold saas-text-primary">Produit Physique</h3>
+            </div>
+            <p className="saas-label-description mb-3">
+              Vêtements, accessoires, objets artisanaux, produits manufacturés
+            </p>
+            <div className="flex flex-wrap gap-1">
+              <span className="saas-badge">Livraison requise</span>
+              <span className="saas-badge">Gestion stock</span>
+              <span className="saas-badge">Adresse client</span>
+            </div>
+          </div>
+
+          <div
+            className={cn(
+              "p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md",
+              formData.product_type === "service" 
+                ? "border-blue-500 bg-blue-50" 
+                : "border-gray-200 hover:border-blue-300"
+            )}
+            onClick={() => updateFormData("product_type", "service")}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <Wrench className="h-6 w-6 text-blue-600" />
+              <h3 className="font-semibold saas-text-primary">Service</h3>
+            </div>
+            <p className="saas-label-description mb-3">
+              Consultations, coaching, design, développement, maintenance
+            </p>
+            <div className="flex flex-wrap gap-1">
+              <span className="saas-badge">Rendez-vous</span>
+              <span className="saas-badge">Prestation</span>
+              <span className="saas-badge">Sur mesure</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Champs obligatoires */}
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="name">Nom du produit *</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => updateFormData("name", e.target.value)}
-            placeholder="Ex: Guide complet Facebook Ads 2025"
-            className="touch-target"
-          />
+      <div className="saas-section-card">
+        <div className="flex items-center gap-2 mb-3">
+          <Info className="h-5 w-5 text-gray-600" />
+          <h3 className="saas-section-title">Informations de base</h3>
         </div>
-
-        <div>
-          <Label htmlFor="slug">URL du produit *</Label>
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <Input
-                id="slug"
-                value={formData.slug}
-                onChange={(e) => updateFormData("slug", generateSlug(e.target.value))}
-                placeholder="guide-facebook-ads-2025"
-              />
-              {checkingSlug ? (
-                <div className="flex items-center text-muted-foreground">
-                  <span className="text-sm">Vérification...</span>
-                </div>
-              ) : slugAvailable === true ? (
-                <div className="flex items-center text-green-600">
-                  <CheckCircle2 className="h-5 w-5" />
-                </div>
-              ) : slugAvailable === false ? (
-                <div className="flex items-center text-destructive">
-                  <XCircle className="h-5 w-5" />
-                </div>
-              ) : null}
-            </div>
-            <p className="text-sm text-muted-foreground break-all">{productUrl}</p>
+        <p className="saas-section-description">
+          Renseignez les informations essentielles de votre produit
+        </p>
+        
+        <div className="saas-space-y-4">
+          <div>
+            <label className="saas-label">Nom du produit *</label>
+            <Input
+              value={formData.name}
+              onChange={(e) => updateFormData("name", e.target.value)}
+              placeholder="Ex: Guide complet Facebook Ads 2025"
+              className="saas-input"
+            />
           </div>
-        </div>
 
-        <div>
-          <Label htmlFor="category">Catégorie *</Label>
-          <Select value={formData.category} onValueChange={(value) => updateFormData("category", value)}>
-            <SelectTrigger className="touch-target">
-              <SelectValue placeholder="Sélectionnez une catégorie" />
-            </SelectTrigger>
-            <SelectContent>
+          <div>
+            <label className="saas-label">URL du produit *</label>
+            <div className="saas-space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  value={formData.slug}
+                  onChange={(e) => updateFormData("slug", generateSlug(e.target.value))}
+                  placeholder="guide-facebook-ads-2025"
+                  className="saas-input flex-1"
+                />
+                {checkingSlug ? (
+                  <div className="flex items-center text-gray-500">
+                    <span className="text-sm">Vérification...</span>
+                  </div>
+                ) : slugAvailable === true ? (
+                  <div className="flex items-center text-green-600">
+                    <CheckCircle2 className="h-5 w-5" />
+                  </div>
+                ) : slugAvailable === false ? (
+                  <div className="flex items-center text-red-600">
+                    <XCircle className="h-5 w-5" />
+                  </div>
+                ) : null}
+              </div>
+              <p className="text-sm saas-text-secondary break-all">{productUrl}</p>
+            </div>
+          </div>
+
+          <div>
+            <label className="saas-label">Catégorie *</label>
+            <Select value={formData.category} onValueChange={(value) => updateFormData("category", value)}>
+              <SelectTrigger className="saas-input">
+                <SelectValue placeholder="Sélectionnez une catégorie" />
+              </SelectTrigger>
+              <SelectContent>
               {formData.product_type === "digital" && (
                 <>
                   <SelectItem value="Formation">Formation</SelectItem>
@@ -217,9 +222,11 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   <SelectItem value="Formation">Formation</SelectItem>
                 </>
               )}
-            </SelectContent>
-          </Select>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
+      </div>
 
         <div>
           <Label htmlFor="pricing_model">Modèle de tarification *</Label>
