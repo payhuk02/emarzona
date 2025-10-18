@@ -51,30 +51,25 @@ interface Product {
   name: string;
   slug: string;
   description: string | null;
-  short_description?: string | null;
   price: number;
   promotional_price?: number | null;
   currency: string;
   image_url: string | null;
-  images?: string[];
+  images?: any; // Json field
   category: string | null;
   product_type: string | null;
-  rating: number;
-  reviews_count: number;
-  sales_count?: number;
+  rating: number | null;
+  reviews_count: number | null;
   is_active: boolean;
-  is_featured?: boolean;
+  is_draft: boolean | null;
   created_at: string;
   updated_at: string;
-  tags?: string[];
   stores?: {
+    id: string;
     name: string;
     slug: string;
     logo_url: string | null;
-    verified: boolean;
-    rating: number;
-    total_products: number;
-    joined_at: string;
+    created_at: string;
   } | null;
 }
 
@@ -174,16 +169,15 @@ const Marketplace = () => {
         .select(`
           *,
           stores!inner (
+            id,
             name,
             slug,
             logo_url,
-            verified,
-            rating,
-            total_products,
             created_at
           )
         `)
-        .eq("is_active", true);
+        .eq("is_active", true)
+        .eq("is_draft", false); // Seulement les produits publiés
 
       // Appliquer les filtres
       if (filters.category !== "all") {
@@ -207,25 +201,22 @@ const Marketplace = () => {
         query = query.gte("rating", Number(filters.rating));
       }
 
-      if (filters.verifiedOnly) {
-        query = query.eq("stores.verified", true);
-      }
-
-      if (filters.featuredOnly) {
-        query = query.eq("is_featured", true);
-      }
-
-      if (filters.inStock) {
-        query = query.gt("sales_count", 0);
-      }
-
       // Appliquer le tri
-      query = query.order(filters.sortBy, { ascending: filters.sortOrder === "asc" });
+      if (filters.sortBy === "sales_count") {
+        // Tri par nombre de ventes (approximatif avec reviews_count)
+        query = query.order("reviews_count", { ascending: filters.sortOrder === "asc" });
+      } else {
+        query = query.order(filters.sortBy, { ascending: filters.sortOrder === "asc" });
+      }
 
       const { data, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        console.error("Erreur Supabase:", error);
+        throw error;
+      }
       
+      console.log("Produits chargés:", data);
       setProducts((data || []) as unknown as Product[]);
       setPagination(prev => ({ ...prev, totalItems: data?.length || 0 }));
       
@@ -252,7 +243,7 @@ const Marketplace = () => {
         { event: "*", schema: "public", table: "products" },
         (payload) => {
           console.log("🔁 Changement détecté sur products :", payload);
-          
+
           if (payload.eventType === "INSERT") {
             setProducts((prev) => [payload.new as Product, ...prev]);
           } else if (payload.eventType === "UPDATE") {
@@ -503,16 +494,16 @@ const Marketplace = () => {
   const stats = useMemo(() => ({
     totalProducts: products.length,
     totalStores: new Set(products.map(p => p.store_id)).size,
-    averageRating: products.reduce((sum, p) => sum + p.rating, 0) / products.length || 0,
-    totalSales: products.reduce((sum, p) => sum + (p.sales_count || 0), 0),
+    averageRating: products.reduce((sum, p) => sum + (p.rating || 0), 0) / products.length || 0,
+    totalSales: products.reduce((sum, p) => sum + (p.reviews_count || 0), 0), // Approximation avec reviews_count
     categoriesCount: categories.length,
-    featuredProducts: products.filter(p => p.is_featured).length
+    featuredProducts: products.filter(p => p.promotional_price && p.promotional_price < p.price).length // Produits en promo
   }), [products, categories]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <MarketplaceHeader />
-      
+
       {/* Hero Section */}
       <section className="relative py-16 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 animate-pulse"></div>
@@ -521,8 +512,8 @@ const Marketplace = () => {
             <div className="flex items-center justify-center gap-2 mb-4">
               <Sparkles className="h-8 w-8 text-yellow-400 animate-pulse" />
               <h1 className="text-4xl md:text-6xl font-bold text-white bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Marketplace Payhuk
-              </h1>
+            Marketplace Payhuk
+          </h1>
               <Sparkles className="h-8 w-8 text-yellow-400 animate-pulse" />
             </div>
             <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-4xl mx-auto leading-relaxed">
@@ -556,14 +547,14 @@ const Marketplace = () => {
           <div className="max-w-4xl mx-auto">
             <div className="relative mb-6">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
-              <Input
+            <Input
                 type="text"
                 placeholder="Rechercher un produit, une boutique ou une catégorie..."
                 value={filters.search}
                 onChange={(e) => updateFilter({ search: e.target.value })}
                 className="pl-12 pr-4 py-4 text-lg bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 transition-all duration-300"
-              />
-            </div>
+            />
+          </div>
 
             {/* Filtres rapides */}
             <div className="flex flex-wrap gap-3 justify-center">
@@ -845,8 +836,8 @@ const Marketplace = () => {
               <div className={`grid gap-6 ${filters.viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}>
                 {paginatedProducts.map((product) => (
                   <ProductCardAdvanced
-                    key={product.id}
-                    product={product}
+                  key={product.id}
+                  product={product}
                     viewMode={filters.viewMode}
                     isFavorite={favorites.has(product.id)}
                     isPurchasing={purchasing.has(product.id)}
@@ -855,9 +846,9 @@ const Marketplace = () => {
                     onShare={() => handleShare(product)}
                     onAddToComparison={() => addToComparison(product)}
                     isInComparison={comparisonProducts.some(p => p.id === product.id)}
-                  />
-                ))}
-              </div>
+                />
+              ))}
+            </div>
 
               {/* Pagination */}
               {totalPages > 1 && (
@@ -939,20 +930,20 @@ const Marketplace = () => {
           <div className="flex items-center justify-center gap-2 mb-4">
             <Rocket className="h-8 w-8 text-white animate-bounce" />
             <h2 className="text-3xl md:text-4xl font-bold text-white">
-              Prêt à lancer votre boutique ?
-            </h2>
+            Prêt à lancer votre boutique ?
+          </h2>
             <Rocket className="h-8 w-8 text-white animate-bounce" />
           </div>
           <p className="text-xl text-blue-100 mb-8">
             Rejoignez des centaines d'entrepreneurs qui développent leur business avec Payhuk.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/auth">
+          <Link to="/auth">
               <Button size="lg" className="bg-white text-blue-600 font-semibold h-14 px-8 hover:bg-blue-50 transition-all duration-300 hover:scale-105">
-                Commencer gratuitement
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
+              Commencer gratuitement
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
             <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600 h-14 px-8 transition-all duration-300 hover:scale-105">
               <Users className="mr-2 h-5 w-5" />
               Rejoindre la communauté
@@ -1022,19 +1013,22 @@ const ProductCardAdvanced = ({
     ? Math.round(((product.price - (product.promotional_price || 0)) / product.price) * 100)
     : 0;
 
-  const renderStars = (rating: number) => (
-    <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <Star
-          key={star}
-          className={`h-4 w-4 ${
-            star <= rating ? "fill-yellow-400 text-yellow-400" : "text-slate-400"
-          }`}
-        />
-      ))}
-      <span className="text-sm text-slate-400 ml-1">({rating})</span>
-    </div>
-  );
+  const renderStars = (rating: number | null) => {
+    const ratingValue = rating || 0;
+    return (
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`h-4 w-4 ${
+              star <= ratingValue ? "fill-yellow-400 text-yellow-400" : "text-slate-400"
+            }`}
+          />
+        ))}
+        <span className="text-sm text-slate-400 ml-1">({ratingValue})</span>
+      </div>
+    );
+  };
 
   const handleCardClick = () => {
     window.open(`/${product.stores?.slug}/${product.slug}`, '_blank');
@@ -1064,10 +1058,10 @@ const ProductCardAdvanced = ({
                     -{discountPercent}%
                   </Badge>
                 )}
-                {product.is_featured && (
+                {hasPromo && (
                   <Badge className="absolute top-2 right-2 bg-yellow-600 text-white">
                     <Crown className="h-3 w-3 mr-1" />
-                    Vedette
+                    Promo
                   </Badge>
                 )}
               </div>
@@ -1083,18 +1077,12 @@ const ProductCardAdvanced = ({
                         {product.category}
                       </Badge>
                     )}
-                    {product.stores?.verified && (
-                      <Badge className="bg-green-600 text-white">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Vérifié
-                      </Badge>
-                    )}
                   </div>
                   <h3 className="text-lg font-semibold text-white mb-1 line-clamp-2 cursor-pointer hover:text-blue-400 transition-colors" onClick={handleCardClick}>
                     {product.name}
                   </h3>
                   <p className="text-slate-400 text-sm mb-2 line-clamp-2">
-                    {product.short_description || product.description}
+                    {product.description}
                   </p>
                 </div>
               </div>
@@ -1105,7 +1093,7 @@ const ProductCardAdvanced = ({
                     {renderStars(product.rating)}
                   </div>
                   <div className="text-sm text-slate-400">
-                    {product.sales_count || 0} vente{(product.sales_count || 0) !== 1 ? "s" : ""}
+                    {product.reviews_count || 0} avis
                   </div>
                   <div className="text-sm text-slate-400">
                     Par {product.stores?.name}
@@ -1205,10 +1193,10 @@ const ProductCardAdvanced = ({
                 -{discountPercent}%
               </Badge>
             )}
-            {product.is_featured && (
+            {hasPromo && (
               <Badge className="bg-yellow-600 text-white">
                 <Crown className="h-3 w-3 mr-1" />
-                Vedette
+                Promo
               </Badge>
             )}
           </div>
@@ -1276,12 +1264,6 @@ const ProductCardAdvanced = ({
                 {product.category}
               </Badge>
             )}
-            {product.stores?.verified && (
-              <Badge className="bg-green-600 text-white text-xs">
-                <CheckCircle2 className="h-3 w-3 mr-1" />
-                Vérifié
-              </Badge>
-            )}
           </div>
 
           <h3 className="font-semibold text-white mb-2 line-clamp-2 cursor-pointer hover:text-blue-400 transition-colors" onClick={handleCardClick}>
@@ -1294,7 +1276,7 @@ const ProductCardAdvanced = ({
 
           <div className="flex items-center justify-between mb-4">
             <div className="text-sm text-slate-400">
-              {product.sales_count || 0} vente{(product.sales_count || 0) !== 1 ? "s" : ""}
+              {product.reviews_count || 0} avis
             </div>
             <div className="text-right">
               {hasPromo && (
