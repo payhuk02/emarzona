@@ -12,6 +12,12 @@ import { ProductVisualTab } from "./tabs/ProductVisualTab";
 import { ProductFilesTab } from "./tabs/ProductFilesTab";
 import { ProductCustomFieldsTab } from "./tabs/ProductCustomFieldsTab";
 import { ProductFAQTab } from "./tabs/ProductFAQTab";
+import { ProductSeoTab } from "./tabs/ProductSeoTab";
+import { ProductAnalyticsTab } from "./tabs/ProductAnalyticsTab";
+import { ProductPixelsTab } from "./tabs/ProductPixelsTab";
+import { ProductVariantsTab } from "./tabs/ProductVariantsTab";
+import { ProductPromotionsTab } from "./tabs/ProductPromotionsTab";
+import { ProductFeatureTest } from "./tabs/ProductFeatureTest";
 import { generateSlug } from "@/lib/store-utils";
 
 interface ProductFormProps {
@@ -227,25 +233,25 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
                 variant="outline" 
                 onClick={handlePreview} 
                 disabled={!formData.slug}
-                className="flex-1 sm:flex-none"
+                className="flex-1 sm:flex-none min-w-0"
                 size="sm"
               >
-                <Eye className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Voir</span>
+                <Eye className="h-4 w-4 sm:mr-2 flex-shrink-0" />
+                <span className="hidden sm:inline truncate">Voir</span>
               </Button>
               <Button 
                 onClick={() => handleSave(true)} 
                 disabled={loading}
-                className="flex-1 sm:flex-none"
+                className="flex-1 sm:flex-none min-w-0"
                 size="sm"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" />
-                    <span className="hidden sm:inline">Enregistrement...</span>
+                    <Loader2 className="h-4 w-4 sm:mr-2 animate-spin flex-shrink-0" />
+                    <span className="hidden sm:inline truncate">Enregistrement...</span>
                   </>
                 ) : (
-                  "Publier"
+                  <span className="truncate">Publier</span>
                 )}
               </Button>
               <Button variant="outline" size="icon" className="shrink-0">
@@ -261,25 +267,46 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
         <Card>
           <CardContent className="p-3 sm:p-6">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-4 sm:mb-6 h-auto gap-1">
-                <TabsTrigger value="info" className="text-xs sm:text-sm py-2">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-4 sm:mb-6 h-auto gap-1 overflow-x-auto">
+                <TabsTrigger value="info" className="text-xs sm:text-sm py-2 min-w-0">
                   <span className="hidden sm:inline">Informations</span>
                   <span className="sm:hidden">Info</span>
                 </TabsTrigger>
-                <TabsTrigger value="description" className="text-xs sm:text-sm py-2">
+                <TabsTrigger value="description" className="text-xs sm:text-sm py-2 min-w-0">
                   <span className="hidden sm:inline">Description</span>
                   <span className="sm:hidden">Desc</span>
                 </TabsTrigger>
-                <TabsTrigger value="visual" className="text-xs sm:text-sm py-2">
+                <TabsTrigger value="visual" className="text-xs sm:text-sm py-2 min-w-0">
                   <span className="hidden lg:inline">Visuel & Design</span>
                   <span className="lg:hidden">Visuel</span>
                 </TabsTrigger>
-                <TabsTrigger value="files" className="text-xs sm:text-sm py-2">Fichiers</TabsTrigger>
-                <TabsTrigger value="custom" className="text-xs sm:text-sm py-2">
+                <TabsTrigger value="files" className="text-xs sm:text-sm py-2 min-w-0">Fichiers</TabsTrigger>
+                <TabsTrigger value="custom" className="text-xs sm:text-sm py-2 min-w-0">
                   <span className="hidden sm:inline">Champs perso.</span>
                   <span className="sm:hidden">Perso</span>
                 </TabsTrigger>
-                <TabsTrigger value="faq" className="text-xs sm:text-sm py-2">FAQ</TabsTrigger>
+                <TabsTrigger value="faq" className="text-xs sm:text-sm py-2 min-w-0">FAQ</TabsTrigger>
+                <TabsTrigger value="seo" className="text-xs sm:text-sm py-2 min-w-0">SEO</TabsTrigger>
+                <TabsTrigger value="analytics" className="text-xs sm:text-sm py-2 min-w-0">
+                  <span className="hidden sm:inline">Analytics</span>
+                  <span className="sm:hidden">Stats</span>
+                </TabsTrigger>
+                <TabsTrigger value="pixels" className="text-xs sm:text-sm py-2 min-w-0">
+                  <span className="hidden sm:inline">Pixels</span>
+                  <span className="sm:hidden">Track</span>
+                </TabsTrigger>
+                <TabsTrigger value="variants" className="text-xs sm:text-sm py-2 min-w-0">
+                  <span className="hidden sm:inline">Variantes</span>
+                  <span className="sm:hidden">Var</span>
+                </TabsTrigger>
+                <TabsTrigger value="promotions" className="text-xs sm:text-sm py-2 min-w-0">
+                  <span className="hidden sm:inline">Promotions</span>
+                  <span className="sm:hidden">Promo</span>
+                </TabsTrigger>
+                <TabsTrigger value="test" className="text-xs sm:text-sm py-2 min-w-0">
+                  <span className="hidden sm:inline">Tests</span>
+                  <span className="sm:hidden">Test</span>
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="info">
@@ -327,6 +354,45 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
                   updateFormData={updateFormData}
                 />
               </TabsContent>
+
+              <TabsContent value="seo">
+                <ProductSeoTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </TabsContent>
+
+              <TabsContent value="analytics">
+                <ProductAnalyticsTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </TabsContent>
+
+              <TabsContent value="pixels">
+                <ProductPixelsTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </TabsContent>
+
+              <TabsContent value="variants">
+                <ProductVariantsTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </TabsContent>
+
+              <TabsContent value="promotions">
+                <ProductPromotionsTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </TabsContent>
+
+              <TabsContent value="test">
+                <ProductFeatureTest />
+              </TabsContent>
             </Tabs>
 
             {/* Save Button */}
@@ -334,24 +400,24 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
               <Button 
                 variant="outline" 
                 onClick={() => navigate("/dashboard/products")}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto min-w-0"
               >
-                Annuler
+                <span className="truncate">Annuler</span>
               </Button>
               <Button 
                 onClick={() => handleSave(false)} 
                 disabled={loading}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto min-w-0"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Enregistrement...
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin flex-shrink-0" />
+                    <span className="truncate">Enregistrement...</span>
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Enregistrer
+                    <Save className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">Enregistrer</span>
                   </>
                 )}
               </Button>
