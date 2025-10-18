@@ -444,8 +444,8 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 product-form-container modern-bg-secondary">
-        <Card className="product-card modern-bg-card modern-border modern-shadow-md">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 product-form-container">
+        <Card className="product-card">
           <CardContent className="p-3 sm:p-6">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-7 mb-4 sm:mb-6 h-auto gap-1 overflow-x-auto product-tabs-list">
