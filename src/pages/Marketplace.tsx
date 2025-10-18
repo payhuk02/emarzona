@@ -26,7 +26,13 @@ import {
   X,
   CheckCircle2,
   AlertCircle,
-  BarChart3
+  BarChart3,
+  Zap,
+  Sparkles,
+  Crown,
+  DollarSign,
+  Loader2,
+  Rocket
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -60,11 +66,15 @@ interface Product {
   is_featured?: boolean;
   created_at: string;
   updated_at: string;
+  tags?: string[];
   stores?: {
     name: string;
     slug: string;
     logo_url: string | null;
     verified: boolean;
+    rating: number;
+    total_products: number;
+    joined_at: string;
   } | null;
 }
 
@@ -77,6 +87,10 @@ interface FilterState {
   sortBy: string;
   sortOrder: 'asc' | 'desc';
   viewMode: 'grid' | 'list';
+  tags: string[];
+  verifiedOnly: boolean;
+  featuredOnly: boolean;
+  inStock: boolean;
 }
 
 interface PaginationState {
@@ -103,7 +117,11 @@ const Marketplace = () => {
     rating: "all",
     sortBy: "created_at",
     sortOrder: "desc",
-    viewMode: "grid"
+    viewMode: "grid",
+    tags: [],
+    verifiedOnly: false,
+    featuredOnly: false,
+    inStock: true
   });
   
   // État de pagination
@@ -127,15 +145,23 @@ const Marketplace = () => {
     { value: "0-5000", label: "0 - 5,000 XOF" },
     { value: "5000-15000", label: "5,000 - 15,000 XOF" },
     { value: "15000-50000", label: "15,000 - 50,000 XOF" },
-    { value: "50000+", label: "50,000+ XOF" }
+    { value: "50000-100000", label: "50,000 - 100,000 XOF" },
+    { value: "100000+", label: "100,000+ XOF" }
   ];
 
   const SORT_OPTIONS = [
-    { value: "created_at", label: "Plus récents" },
-    { value: "price", label: "Prix" },
-    { value: "rating", label: "Note" },
-    { value: "sales_count", label: "Ventes" },
-    { value: "name", label: "Nom" }
+    { value: "created_at", label: "Plus récents", icon: Clock },
+    { value: "price", label: "Prix", icon: DollarSign },
+    { value: "rating", label: "Note", icon: Star },
+    { value: "sales_count", label: "Ventes", icon: TrendingUp },
+    { value: "name", label: "Nom", icon: Eye },
+    { value: "popularity", label: "Popularité", icon: Zap }
+  ];
+
+  const PRODUCT_TAGS = [
+    "Nouveau", "Populaire", "En promotion", "Recommandé", "Tendance",
+    "Qualité premium", "Livraison rapide", "Support 24/7", "Garantie",
+    "Formation incluse", "Mise à jour gratuite", "Communauté active"
   ];
 
   // Chargement des produits
@@ -151,7 +177,10 @@ const Marketplace = () => {
             name,
             slug,
             logo_url,
-            verified
+            verified,
+            rating,
+            total_products,
+            created_at
           )
         `)
         .eq("is_active", true);
@@ -178,6 +207,18 @@ const Marketplace = () => {
         query = query.gte("rating", Number(filters.rating));
       }
 
+      if (filters.verifiedOnly) {
+        query = query.eq("stores.verified", true);
+      }
+
+      if (filters.featuredOnly) {
+        query = query.eq("is_featured", true);
+      }
+
+      if (filters.inStock) {
+        query = query.gt("sales_count", 0);
+      }
+
       // Appliquer le tri
       query = query.order(filters.sortBy, { ascending: filters.sortOrder === "asc" });
 
@@ -185,7 +226,7 @@ const Marketplace = () => {
       
       if (error) throw error;
       
-      setProducts((data || []) as Product[]);
+      setProducts((data || []) as unknown as Product[]);
       setPagination(prev => ({ ...prev, totalItems: data?.length || 0 }));
       
     } catch (error) {
@@ -211,7 +252,7 @@ const Marketplace = () => {
         { event: "*", schema: "public", table: "products" },
         (payload) => {
           console.log("🔁 Changement détecté sur products :", payload);
-
+          
           if (payload.eventType === "INSERT") {
             setProducts((prev) => [payload.new as Product, ...prev]);
           } else if (payload.eventType === "UPDATE") {
@@ -234,49 +275,59 @@ const Marketplace = () => {
     };
   }, [fetchProducts]);
 
-  // Filtrage et recherche des produits
+  // Filtrage des produits
   const filteredProducts = useMemo(() => {
     let filtered = products;
 
     // Recherche textuelle
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchLower) ||
-        product.description?.toLowerCase().includes(searchLower) ||
-        product.stores?.name.toLowerCase().includes(searchLower)
+      filtered = filtered.filter(product => {
+        const nameMatch = product.name.toLowerCase().includes(searchLower);
+        const descMatch = product.description?.toLowerCase().includes(searchLower);
+        const storeMatch = product.stores?.name.toLowerCase().includes(searchLower);
+        const categoryMatch = product.category?.toLowerCase().includes(searchLower);
+        const tagsMatch = product.tags?.some(tag => tag.toLowerCase().includes(searchLower));
+        
+        return nameMatch || descMatch || storeMatch || categoryMatch || tagsMatch;
+      });
+    }
+
+    // Filtrage par tags
+    if (filters.tags.length > 0) {
+      filtered = filtered.filter(product => 
+        filters.tags.some(tag => product.tags?.includes(tag))
       );
     }
 
     return filtered;
-  }, [products, filters.search]);
+  }, [products, filters.search, filters.tags]);
 
-  // Pagination des produits
+  // Pagination
   const paginatedProducts = useMemo(() => {
     const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
     const endIndex = startIndex + pagination.itemsPerPage;
     return filteredProducts.slice(startIndex, endIndex);
   }, [filteredProducts, pagination]);
 
-  // Catégories uniques
+  // Catégories et types dynamiques
   const categories = useMemo(() => {
     const cats = Array.from(new Set(products.map(p => p.category).filter(Boolean))) as string[];
     return cats.sort();
   }, [products]);
 
-  // Types de produits uniques
   const productTypes = useMemo(() => {
     const types = Array.from(new Set(products.map(p => p.product_type).filter(Boolean))) as string[];
     return types.sort();
   }, [products]);
 
   // Gestion des filtres
-  const updateFilter = (filters: Partial<FilterState>) => {
+  const updateFilter = useCallback((filters: Partial<FilterState>) => {
     setFilters(prev => ({ ...prev, ...filters }));
     setPagination(prev => ({ ...prev, currentPage: 1 }));
-  };
+  }, []);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setFilters({
       search: "",
       category: "all",
@@ -285,26 +336,49 @@ const Marketplace = () => {
       rating: "all",
       sortBy: "created_at",
       sortOrder: "desc",
-      viewMode: "grid"
+      viewMode: "grid",
+      tags: [],
+      verifiedOnly: false,
+      featuredOnly: false,
+      inStock: true
     });
     setPagination(prev => ({ ...prev, currentPage: 1 }));
-  };
+  }, []);
 
-  // Gestion des favoris
-  const toggleFavorite = (productId: string) => {
+  // Gestion des favoris avec persistance
+  const toggleFavorite = useCallback((productId: string) => {
     setFavorites(prev => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(productId)) {
         newFavorites.delete(productId);
+        toast({
+          title: "Retiré des favoris",
+          description: "Le produit a été retiré de vos favoris",
+        });
       } else {
         newFavorites.add(productId);
+        toast({
+          title: "Ajouté aux favoris",
+          description: "Le produit a été ajouté à vos favoris",
+        });
       }
+      
+      // Persistance locale
+      localStorage.setItem('marketplace-favorites', JSON.stringify([...newFavorites]));
       return newFavorites;
     });
-  };
+  }, [toast]);
+
+  // Chargement des favoris depuis le localStorage
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem('marketplace-favorites');
+    if (savedFavorites) {
+      setFavorites(new Set(JSON.parse(savedFavorites)));
+    }
+  }, []);
 
   // Gestion de la comparaison
-  const addToComparison = (product: Product) => {
+  const addToComparison = useCallback((product: Product) => {
     if (comparisonProducts.length >= 4) {
       toast({
         title: "Limite atteinte",
@@ -328,21 +402,24 @@ const Marketplace = () => {
       title: "Produit ajouté",
       description: `${product.name} a été ajouté à la comparaison`,
     });
-  };
+  }, [comparisonProducts, toast]);
 
-  const removeFromComparison = (productId: string) => {
+  const removeFromComparison = useCallback((productId: string) => {
     setComparisonProducts(prev => prev.filter(p => p.id !== productId));
-  };
+  }, []);
 
-  const clearComparison = () => {
+  const clearComparison = useCallback(() => {
     setComparisonProducts([]);
-  };
+  }, []);
 
   // Obtenir les produits favoris
-  const favoriteProducts = products.filter(p => favorites.has(p.id));
+  const favoriteProducts = useMemo(() => 
+    products.filter(p => favorites.has(p.id)), 
+    [products, favorites]
+  );
 
   // Fonction d'achat
-  const handlePurchase = async (product: Product) => {
+  const handlePurchase = useCallback(async (product: Product) => {
     if (!product.store_id) {
       toast({
         title: "Erreur",
@@ -387,17 +464,17 @@ const Marketplace = () => {
         return newSet;
       });
     }
-  };
+  }, [toast]);
 
   // Partage de produit
-  const handleShare = async (product: Product) => {
+  const handleShare = useCallback(async (product: Product) => {
     const url = `${window.location.origin}/${product.stores?.slug}/${product.slug}`;
     
     if (navigator.share) {
       try {
         await navigator.share({
           title: product.name,
-          text: product.description || "",
+          text: product.short_description || product.description || "",
           url: url,
         });
       } catch (error) {
@@ -410,57 +487,95 @@ const Marketplace = () => {
         description: "Le lien du produit a été copié dans le presse-papiers",
       });
     }
-  };
+  }, [toast]);
 
   // Pagination
   const totalPages = Math.ceil(filteredProducts.length / pagination.itemsPerPage);
   const canGoPrevious = pagination.currentPage > 1;
   const canGoNext = pagination.currentPage < totalPages;
 
-  const goToPage = (page: number) => {
+  const goToPage = useCallback((page: number) => {
     setPagination(prev => ({ ...prev, currentPage: page }));
-  };
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // Statistiques
+  const stats = useMemo(() => ({
+    totalProducts: products.length,
+    totalStores: new Set(products.map(p => p.store_id)).size,
+    averageRating: products.reduce((sum, p) => sum + p.rating, 0) / products.length || 0,
+    totalSales: products.reduce((sum, p) => sum + (p.sales_count || 0), 0),
+    categoriesCount: categories.length,
+    featuredProducts: products.filter(p => p.is_featured).length
+  }), [products, categories]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <MarketplaceHeader />
-
+      
       {/* Hero Section */}
-      <section className="relative py-16 px-4">
-        <div className="container mx-auto max-w-6xl">
+      <section className="relative py-16 px-4 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 animate-pulse"></div>
+        <div className="container mx-auto max-w-6xl relative z-10">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Marketplace Payhuk
-          </h1>
-            <p className="text-xl text-slate-300 mb-8 max-w-3xl mx-auto">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Sparkles className="h-8 w-8 text-yellow-400 animate-pulse" />
+              <h1 className="text-4xl md:text-6xl font-bold text-white bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Marketplace Payhuk
+              </h1>
+              <Sparkles className="h-8 w-8 text-yellow-400 animate-pulse" />
+            </div>
+            <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-4xl mx-auto leading-relaxed">
               Découvrez des milliers de produits digitaux : formations, ebooks, templates, logiciels et plus encore.
+              <br />
+              <span className="text-blue-400 font-semibold">Rejoignez la révolution du commerce digital en Afrique</span>
             </p>
+            
+            {/* Statistiques */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mb-8">
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
+                <div className="text-2xl font-bold text-blue-400">{stats.totalProducts}</div>
+                <div className="text-sm text-slate-400">Produits</div>
+              </div>
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
+                <div className="text-2xl font-bold text-green-400">{stats.totalStores}</div>
+                <div className="text-sm text-slate-400">Boutiques</div>
+              </div>
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
+                <div className="text-2xl font-bold text-yellow-400">{stats.averageRating.toFixed(1)}</div>
+                <div className="text-sm text-slate-400">Note moyenne</div>
+              </div>
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
+                <div className="text-2xl font-bold text-purple-400">{stats.totalSales}</div>
+                <div className="text-sm text-slate-400">Ventes</div>
+              </div>
+            </div>
           </div>
 
-          {/* Barre de recherche et filtres */}
+          {/* Barre de recherche */}
           <div className="max-w-4xl mx-auto">
             <div className="relative mb-6">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
-            <Input
+              <Input
                 type="text"
-              placeholder="Rechercher un produit ou un vendeur..."
+                placeholder="Rechercher un produit, une boutique ou une catégorie..."
                 value={filters.search}
                 onChange={(e) => updateFilter({ search: e.target.value })}
-                className="pl-12 pr-4 py-4 text-lg bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
+                className="pl-12 pr-4 py-4 text-lg bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 transition-all duration-300"
+              />
+            </div>
 
             {/* Filtres rapides */}
             <div className="flex flex-wrap gap-3 justify-center">
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
-                className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
               >
                 <Filter className="h-4 w-4 mr-2" />
-                Filtres
-                {(filters.category !== "all" || filters.productType !== "all" || filters.priceRange !== "all") && (
-                  <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                Filtres avancés
+                {(filters.category !== "all" || filters.productType !== "all" || filters.priceRange !== "all" || filters.tags.length > 0) && (
+                  <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs animate-pulse">
                     !
                   </Badge>
                 )}
@@ -469,21 +584,21 @@ const Marketplace = () => {
               <Button
                 variant="outline"
                 onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
-                className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
               >
-                <Search className="h-4 w-4 mr-2" />
-                Recherche avancée
+                <Zap className="h-4 w-4 mr-2" />
+                Recherche intelligente
               </Button>
 
               <Button
                 variant="outline"
                 onClick={() => setShowFavorites(true)}
-                className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
               >
                 <Heart className="h-4 w-4 mr-2" />
-                Favoris
+                Mes favoris
                 {favorites.size > 0 && (
-                  <Badge variant="secondary" className="ml-2 bg-blue-600 text-white">
+                  <Badge variant="secondary" className="ml-2 bg-red-600 text-white animate-bounce">
                     {favorites.size}
                   </Badge>
                 )}
@@ -492,12 +607,12 @@ const Marketplace = () => {
               <Button
                 variant="outline"
                 onClick={() => setShowComparison(true)}
-                className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
               >
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Comparer
                 {comparisonProducts.length > 0 && (
-                  <Badge variant="secondary" className="ml-2 bg-green-600 text-white">
+                  <Badge variant="secondary" className="ml-2 bg-green-600 text-white animate-bounce">
                     {comparisonProducts.length}
                   </Badge>
                 )}
@@ -506,10 +621,10 @@ const Marketplace = () => {
               <Button
                 variant="outline"
                 onClick={clearFilters}
-                className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
               >
                 <X className="h-4 w-4 mr-2" />
-                Effacer
+                Effacer tout
               </Button>
             </div>
           </div>
@@ -518,9 +633,9 @@ const Marketplace = () => {
 
       {/* Filtres avancés */}
       {showFilters && (
-        <section className="py-8 px-4 bg-slate-800/50">
+        <section className="py-8 px-4 bg-slate-800/30 backdrop-blur-sm">
           <div className="container mx-auto max-w-6xl">
-            <Card className="bg-slate-800 border-slate-600">
+            <Card className="bg-slate-800/80 backdrop-blur-sm border-slate-600">
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Catégorie */}
@@ -529,7 +644,7 @@ const Marketplace = () => {
                     <select
                       value={filters.category}
                       onChange={(e) => updateFilter({ category: e.target.value })}
-                      className="w-full p-2 bg-slate-700 border-slate-600 text-white rounded-md"
+                      className="w-full p-2 bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500"
                     >
                       <option value="all">Toutes les catégories</option>
                       {categories.map(cat => (
@@ -544,7 +659,7 @@ const Marketplace = () => {
                     <select
                       value={filters.productType}
                       onChange={(e) => updateFilter({ productType: e.target.value })}
-                      className="w-full p-2 bg-slate-700 border-slate-600 text-white rounded-md"
+                      className="w-full p-2 bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500"
                     >
                       <option value="all">Tous les types</option>
                       {productTypes.map(type => (
@@ -559,7 +674,7 @@ const Marketplace = () => {
                     <select
                       value={filters.priceRange}
                       onChange={(e) => updateFilter({ priceRange: e.target.value })}
-                      className="w-full p-2 bg-slate-700 border-slate-600 text-white rounded-md"
+                      className="w-full p-2 bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500"
                     >
                       {PRICE_RANGES.map(range => (
                         <option key={range.value} value={range.value}>{range.label}</option>
@@ -573,7 +688,7 @@ const Marketplace = () => {
                     <select
                       value={filters.rating}
                       onChange={(e) => updateFilter({ rating: e.target.value })}
-                      className="w-full p-2 bg-slate-700 border-slate-600 text-white rounded-md"
+                      className="w-full p-2 bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500"
                     >
                       <option value="all">Toutes les notes</option>
                       <option value="4">4+ étoiles</option>
@@ -581,6 +696,73 @@ const Marketplace = () => {
                       <option value="2">2+ étoiles</option>
                       <option value="1">1+ étoiles</option>
                     </select>
+                  </div>
+                </div>
+
+                {/* Filtres supplémentaires */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="verifiedOnly"
+                      checked={filters.verifiedOnly}
+                      onChange={(e) => updateFilter({ verifiedOnly: e.target.checked })}
+                      className="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500"
+                    />
+                    <label htmlFor="verifiedOnly" className="text-sm text-slate-300">
+                      Boutiques vérifiées uniquement
+                    </label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="featuredOnly"
+                      checked={filters.featuredOnly}
+                      onChange={(e) => updateFilter({ featuredOnly: e.target.checked })}
+                      className="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500"
+                    />
+                    <label htmlFor="featuredOnly" className="text-sm text-slate-300">
+                      Produits en vedette uniquement
+                    </label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="inStock"
+                      checked={filters.inStock}
+                      onChange={(e) => updateFilter({ inStock: e.target.checked })}
+                      className="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500"
+                    />
+                    <label htmlFor="inStock" className="text-sm text-slate-300">
+                      En stock uniquement
+                    </label>
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div className="mt-6">
+                  <label className="text-sm font-medium text-slate-300 mb-2 block">Tags populaires</label>
+                  <div className="flex flex-wrap gap-2">
+                    {PRODUCT_TAGS.map(tag => (
+                      <button
+                        key={tag}
+                        onClick={() => {
+                          const newTags = filters.tags.includes(tag)
+                            ? filters.tags.filter(t => t !== tag)
+                            : [...filters.tags, tag];
+                          updateFilter({ tags: newTags });
+                        }}
+                        className={`px-3 py-1 rounded-full text-xs transition-all duration-300 ${
+                          filters.tags.includes(tag)
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </CardContent>
@@ -606,11 +788,11 @@ const Marketplace = () => {
               {/* Tri */}
               <div className="flex items-center gap-2">
                 <label className="text-sm text-slate-300">Trier par:</label>
-                    <select
-                      value={filters.sortBy}
-                      onChange={(e) => updateFilter({ sortBy: e.target.value })}
-                      className="p-2 bg-slate-700 border-slate-600 text-white rounded-md text-sm"
-                    >
+                <select
+                  value={filters.sortBy}
+                  onChange={(e) => updateFilter({ sortBy: e.target.value })}
+                  className="p-2 bg-slate-700 border-slate-600 text-white rounded-md text-sm focus:border-blue-500 focus:ring-blue-500"
+                >
                   {SORT_OPTIONS.map(option => (
                     <option key={option.value} value={option.value}>{option.label}</option>
                   ))}
@@ -619,7 +801,7 @@ const Marketplace = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => updateFilter({ sortOrder: filters.sortOrder === "asc" ? "desc" : "asc" })}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300"
                 >
                   {filters.sortOrder === "asc" ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
                 </Button>
@@ -631,7 +813,7 @@ const Marketplace = () => {
                   variant={filters.viewMode === "grid" ? "default" : "outline"}
                   size="sm"
                   onClick={() => updateFilter({ viewMode: "grid" })}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300"
                 >
                   <Grid3X3 className="h-4 w-4" />
                 </Button>
@@ -639,7 +821,7 @@ const Marketplace = () => {
                   variant={filters.viewMode === "list" ? "default" : "outline"}
                   size="sm"
                   onClick={() => updateFilter({ viewMode: "list" })}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300"
                 >
                   <List className="h-4 w-4" />
                 </Button>
@@ -663,8 +845,8 @@ const Marketplace = () => {
               <div className={`grid gap-6 ${filters.viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}>
                 {paginatedProducts.map((product) => (
                   <ProductCardAdvanced
-                  key={product.id}
-                  product={product}
+                    key={product.id}
+                    product={product}
                     viewMode={filters.viewMode}
                     isFavorite={favorites.has(product.id)}
                     isPurchasing={purchasing.has(product.id)}
@@ -673,9 +855,9 @@ const Marketplace = () => {
                     onShare={() => handleShare(product)}
                     onAddToComparison={() => addToComparison(product)}
                     isInComparison={comparisonProducts.some(p => p.id === product.id)}
-                />
-              ))}
-            </div>
+                  />
+                ))}
+              </div>
 
               {/* Pagination */}
               {totalPages > 1 && (
@@ -684,13 +866,23 @@ const Marketplace = () => {
                     variant="outline"
                     onClick={() => goToPage(pagination.currentPage - 1)}
                     disabled={!canGoPrevious}
-                    className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50"
+                    className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
 
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    const page = i + 1;
+                  {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
+                    let page;
+                    if (totalPages <= 7) {
+                      page = i + 1;
+                    } else if (pagination.currentPage <= 4) {
+                      page = i + 1;
+                    } else if (pagination.currentPage >= totalPages - 3) {
+                      page = totalPages - 6 + i;
+                    } else {
+                      page = pagination.currentPage - 3 + i;
+                    }
+                    
                     const isActive = page === pagination.currentPage;
                     
                     return (
@@ -698,7 +890,7 @@ const Marketplace = () => {
                         key={page}
                         variant={isActive ? "default" : "outline"}
                         onClick={() => goToPage(page)}
-                        className={isActive ? "bg-blue-600 text-white" : "bg-slate-800 border-slate-600 text-white hover:bg-slate-700"}
+                        className={isActive ? "bg-blue-600 text-white" : "bg-slate-800 border-slate-600 text-white hover:bg-slate-700 transition-all duration-300"}
                       >
                         {page}
                       </Button>
@@ -709,7 +901,7 @@ const Marketplace = () => {
                     variant="outline"
                     onClick={() => goToPage(pagination.currentPage + 1)}
                     disabled={!canGoNext}
-                    className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50"
+                    className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -730,7 +922,7 @@ const Marketplace = () => {
                   : "Soyez le premier à vendre vos produits sur notre marketplace !"}
               </p>
               <Link to="/auth">
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold h-12 px-8 hover:from-blue-700 hover:to-purple-700">
+                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold h-12 px-8 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105">
                   Créer ma boutique gratuitement
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
@@ -741,20 +933,31 @@ const Marketplace = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 px-4 bg-gradient-to-r from-blue-600 to-purple-600">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Prêt à lancer votre boutique ?
-          </h2>
+      <section className="py-16 px-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="container mx-auto max-w-4xl text-center relative z-10">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Rocket className="h-8 w-8 text-white animate-bounce" />
+            <h2 className="text-3xl md:text-4xl font-bold text-white">
+              Prêt à lancer votre boutique ?
+            </h2>
+            <Rocket className="h-8 w-8 text-white animate-bounce" />
+          </div>
           <p className="text-xl text-blue-100 mb-8">
             Rejoignez des centaines d'entrepreneurs qui développent leur business avec Payhuk.
           </p>
-          <Link to="/auth">
-            <Button size="lg" className="bg-white text-blue-600 font-semibold h-14 px-8 hover:bg-blue-50">
-              Commencer gratuitement
-              <ArrowRight className="ml-2 h-5 w-5" />
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/auth">
+              <Button size="lg" className="bg-white text-blue-600 font-semibold h-14 px-8 hover:bg-blue-50 transition-all duration-300 hover:scale-105">
+                Commencer gratuitement
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600 h-14 px-8 transition-all duration-300 hover:scale-105">
+              <Users className="mr-2 h-5 w-5" />
+              Rejoindre la communauté
             </Button>
-          </Link>
+          </div>
         </div>
       </section>
 
@@ -829,23 +1032,27 @@ const ProductCardAdvanced = ({
           }`}
         />
       ))}
-      <span className="text-sm text-slate-400 ml-1">({product.reviews_count})</span>
+      <span className="text-sm text-slate-400 ml-1">({rating})</span>
     </div>
   );
 
+  const handleCardClick = () => {
+    window.open(`/${product.stores?.slug}/${product.slug}`, '_blank');
+  };
+
   if (viewMode === "list") {
     return (
-      <Card className="bg-slate-800 border-slate-600 hover:border-slate-500 transition-all duration-300">
+      <Card className="group relative bg-slate-800/80 backdrop-blur-sm border-slate-600 hover:border-slate-500 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
         <CardContent className="p-6">
           <div className="flex gap-6">
             {/* Image */}
             <div className="flex-shrink-0">
-              <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-slate-700">
+              <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-slate-700 cursor-pointer" onClick={handleCardClick}>
                 {product.image_url ? (
                   <img
                     src={product.image_url}
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
@@ -853,8 +1060,14 @@ const ProductCardAdvanced = ({
                   </div>
                 )}
                 {hasPromo && (
-                  <Badge className="absolute top-2 left-2 bg-red-600 text-white">
+                  <Badge className="absolute top-2 left-2 bg-red-600 text-white animate-pulse">
                     -{discountPercent}%
+                  </Badge>
+                )}
+                {product.is_featured && (
+                  <Badge className="absolute top-2 right-2 bg-yellow-600 text-white">
+                    <Crown className="h-3 w-3 mr-1" />
+                    Vedette
                   </Badge>
                 )}
               </div>
@@ -877,7 +1090,7 @@ const ProductCardAdvanced = ({
                       </Badge>
                     )}
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-1 truncate">
+                  <h3 className="text-lg font-semibold text-white mb-1 line-clamp-2 cursor-pointer hover:text-blue-400 transition-colors" onClick={handleCardClick}>
                     {product.name}
                   </h3>
                   <p className="text-slate-400 text-sm mb-2 line-clamp-2">
@@ -892,7 +1105,10 @@ const ProductCardAdvanced = ({
                     {renderStars(product.rating)}
                   </div>
                   <div className="text-sm text-slate-400">
-                    {product.sales_count} vente{product.sales_count !== 1 ? "s" : ""}
+                    {product.sales_count || 0} vente{(product.sales_count || 0) !== 1 ? "s" : ""}
+                  </div>
+                  <div className="text-sm text-slate-400">
+                    Par {product.stores?.name}
                   </div>
                 </div>
 
@@ -914,11 +1130,11 @@ const ProductCardAdvanced = ({
                 <Button
                   onClick={onPurchase}
                   disabled={isPurchasing}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white transition-all duration-300 hover:scale-105"
                 >
                   {isPurchasing ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       Achat...
                     </>
                   ) : (
@@ -932,7 +1148,7 @@ const ProductCardAdvanced = ({
                   variant="outline"
                   size="sm"
                   onClick={onToggleFavorite}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300"
                 >
                   <Heart className={`h-4 w-4 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
                 </Button>
@@ -940,9 +1156,18 @@ const ProductCardAdvanced = ({
                   variant="outline"
                   size="sm"
                   onClick={onShare}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300"
                 >
                   <Share2 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onAddToComparison}
+                  disabled={isInComparison}
+                  className={`bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300 ${isInComparison ? "opacity-50" : ""}`}
+                >
+                  <BarChart3 className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -954,63 +1179,91 @@ const ProductCardAdvanced = ({
 
   // Mode grille
   return (
-    <Card className="group relative bg-slate-800 border-slate-600 hover:border-slate-500 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+    <Card className="group relative bg-slate-800/80 backdrop-blur-sm border-slate-600 hover:border-slate-500 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl overflow-hidden">
       <CardContent className="p-0">
         {/* Image */}
-        <div className="relative aspect-square overflow-hidden">
+        <div className="relative aspect-square overflow-hidden cursor-pointer" onClick={handleCardClick}>
           {product.image_url ? (
             <img
               src={product.image_url}
               alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-slate-700">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-800">
               <ShoppingCart className="h-12 w-12 text-slate-400" />
             </div>
           )}
           
+          {/* Overlay gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          
           {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-2">
+          <div className="absolute top-3 right-3 flex flex-col gap-2">
             {hasPromo && (
-              <Badge className="bg-red-600 text-white">
+              <Badge className="bg-red-600 text-white animate-pulse">
                 -{discountPercent}%
               </Badge>
             )}
             {product.is_featured && (
               <Badge className="bg-yellow-600 text-white">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                Populaire
+                <Crown className="h-3 w-3 mr-1" />
+                Vedette
               </Badge>
             )}
           </div>
 
-          {/* Actions */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          {/* Actions hover */}
+          <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
             <Button
               variant="outline"
               size="sm"
-              onClick={onToggleFavorite}
-              className="bg-slate-800/80 border-slate-600 text-white hover:bg-slate-700 h-8 w-8 p-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite();
+              }}
+              className="bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-8 w-8 p-0 shadow-lg"
             >
               <Heart className={`h-4 w-4 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={onShare}
-              className="bg-slate-800/80 border-slate-600 text-white hover:bg-slate-700 h-8 w-8 p-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                onShare();
+              }}
+              className="bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-8 w-8 p-0 shadow-lg"
             >
               <Share2 className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={onAddToComparison}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToComparison();
+              }}
               disabled={isInComparison}
-              className={`bg-slate-800/80 border-slate-600 text-white hover:bg-slate-700 h-8 w-8 p-0 ${isInComparison ? "opacity-50" : ""}`}
+              className={`bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-8 w-8 p-0 shadow-lg ${isInComparison ? "opacity-50" : ""}`}
             >
               <BarChart3 className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Quick view button */}
+          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCardClick();
+              }}
+              className="w-full bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 shadow-lg"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Voir rapidement
             </Button>
           </div>
         </div>
@@ -1031,7 +1284,7 @@ const ProductCardAdvanced = ({
             )}
           </div>
 
-          <h3 className="font-semibold text-white mb-2 line-clamp-2">
+          <h3 className="font-semibold text-white mb-2 line-clamp-2 cursor-pointer hover:text-blue-400 transition-colors" onClick={handleCardClick}>
             {product.name}
           </h3>
 
@@ -1055,20 +1308,24 @@ const ProductCardAdvanced = ({
             </div>
           </div>
 
+          <div className="text-xs text-slate-400 mb-3">
+            Par {product.stores?.name}
+          </div>
+
           <Button
             onClick={onPurchase}
             disabled={isPurchasing}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-300 hover:scale-105 shadow-lg"
           >
             {isPurchasing ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Achat...
               </>
             ) : (
               <>
                 <ShoppingCart className="h-4 w-4 mr-2" />
-                Acheter
+                Acheter maintenant
               </>
             )}
           </Button>
