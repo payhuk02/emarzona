@@ -145,7 +145,7 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
                   
                   {editingPromotion === index && (
                     <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <Label htmlFor={`promotion-name-${index}`}>Nom de la promotion</Label>
                           <Input
@@ -153,12 +153,13 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
                             value={promotion.name}
                             onChange={(e) => updatePromotion(index, "name", e.target.value)}
                             placeholder="Ex: Réduction de lancement"
+                            className="touch-target"
                           />
                         </div>
                         <div>
                           <Label htmlFor={`promotion-type-${index}`}>Type de promotion</Label>
                           <Select value={promotion.type} onValueChange={(value) => updatePromotion(index, "type", value)}>
-                            <SelectTrigger>
+                            <SelectTrigger className="touch-target">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -170,7 +171,7 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <Label htmlFor={`promotion-value-${index}`}>
                             {promotion.type === "percentage" ? "Pourcentage (%)" : 
@@ -182,6 +183,7 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
                             value={promotion.value}
                             onChange={(e) => updatePromotion(index, "value", parseFloat(e.target.value) || 0)}
                             placeholder="0"
+                            className="touch-target"
                           />
                         </div>
                         <div>
@@ -192,11 +194,12 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
                             value={promotion.min_quantity}
                             onChange={(e) => updatePromotion(index, "min_quantity", parseInt(e.target.value) || 1)}
                             placeholder="1"
+                            className="touch-target"
                           />
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <Label htmlFor={`promotion-max-uses-${index}`}>Utilisations max</Label>
                           <Input
@@ -205,6 +208,7 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
                             value={promotion.max_uses || ""}
                             onChange={(e) => updatePromotion(index, "max_uses", parseInt(e.target.value) || null)}
                             placeholder="Illimité"
+                            className="touch-target"
                           />
                         </div>
                         <div>
@@ -215,11 +219,12 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
                             value={promotion.customer_limit || ""}
                             onChange={(e) => updatePromotion(index, "customer_limit", parseInt(e.target.value) || null)}
                             placeholder="Illimité"
+                            className="touch-target"
                           />
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <Label>Date de début</Label>
                           <Popover>
@@ -232,7 +237,7 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
                                 )}
                               >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                {promotion.start_date ? format(promotion.start_date, "PPP") : "Sélectionner"}
+                                <span className="truncate">{promotion.start_date ? format(promotion.start_date, "PPP") : "Sélectionner"}</span>
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
@@ -257,7 +262,7 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
                                 )}
                               >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                {promotion.end_date ? format(promotion.end_date, "PPP") : "Sélectionner"}
+                                <span className="truncate">{promotion.end_date ? format(promotion.end_date, "PPP") : "Sélectionner"}</span>
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
@@ -287,7 +292,7 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
           Types de promotions
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <Card className="border-green-200 bg-green-50/50">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -495,7 +500,7 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">{promotions.length}</div>
               <div className="text-sm text-muted-foreground">Promotions configurées</div>

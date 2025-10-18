@@ -96,7 +96,7 @@ export const ProductPixelsTab = ({ formData, updateFormData }: ProductPixelsTabP
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {pixelPlatforms.map((platform) => {
               const Icon = platform.icon;
               const isActive = pixelStatus[platform.id as keyof typeof pixelStatus];
@@ -131,7 +131,7 @@ export const ProductPixelsTab = ({ formData, updateFormData }: ProductPixelsTabP
           Configuration des pixels
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {/* Facebook Pixel */}
           <Card className="border-blue-200 bg-blue-50/50">
             <CardHeader className="pb-3">
@@ -418,7 +418,7 @@ export const ProductPixelsTab = ({ formData, updateFormData }: ProductPixelsTabP
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-2">
                 <Label>Événements de test</Label>
                 <div className="space-y-2">

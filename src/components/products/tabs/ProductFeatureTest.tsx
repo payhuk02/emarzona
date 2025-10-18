@@ -13,7 +13,8 @@ import {
   BarChart3,
   Target,
   Percent,
-  Settings
+  Settings,
+  Trash2
 } from "lucide-react";
 
 interface FeatureTestProps {
@@ -52,12 +53,13 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
       {
         name: "ProductInfoTab",
         component: "ProductInfoTab",
-        test: () => {
+        test: async () => {
           try {
-            // Vérifier que le composant peut être importé
-            const ProductInfoTab = require("@/components/products/tabs/ProductInfoTab").ProductInfoTab;
-            return ProductInfoTab !== undefined;
+            // Vérifier que le composant peut être importé dynamiquement
+            const module = await import("@/components/products/tabs/ProductInfoTab");
+            return module.ProductInfoTab !== undefined;
           } catch (error) {
+            console.error("Erreur import ProductInfoTab:", error);
             return false;
           }
         }
@@ -65,11 +67,12 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
       {
         name: "ProductSeoTab",
         component: "ProductSeoTab",
-        test: () => {
+        test: async () => {
           try {
-            const ProductSeoTab = require("@/components/products/tabs/ProductSeoTab").ProductSeoTab;
-            return ProductSeoTab !== undefined;
+            const module = await import("@/components/products/tabs/ProductSeoTab");
+            return module.ProductSeoTab !== undefined;
           } catch (error) {
+            console.error("Erreur import ProductSeoTab:", error);
             return false;
           }
         }
@@ -77,11 +80,12 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
       {
         name: "ProductAnalyticsTab",
         component: "ProductAnalyticsTab",
-        test: () => {
+        test: async () => {
           try {
-            const ProductAnalyticsTab = require("@/components/products/tabs/ProductAnalyticsTab").ProductAnalyticsTab;
-            return ProductAnalyticsTab !== undefined;
+            const module = await import("@/components/products/tabs/ProductAnalyticsTab");
+            return module.ProductAnalyticsTab !== undefined;
           } catch (error) {
+            console.error("Erreur import ProductAnalyticsTab:", error);
             return false;
           }
         }
@@ -89,11 +93,12 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
       {
         name: "ProductPixelsTab",
         component: "ProductPixelsTab",
-        test: () => {
+        test: async () => {
           try {
-            const ProductPixelsTab = require("@/components/products/tabs/ProductPixelsTab").ProductPixelsTab;
-            return ProductPixelsTab !== undefined;
+            const module = await import("@/components/products/tabs/ProductPixelsTab");
+            return module.ProductPixelsTab !== undefined;
           } catch (error) {
+            console.error("Erreur import ProductPixelsTab:", error);
             return false;
           }
         }
@@ -101,11 +106,12 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
       {
         name: "ProductVariantsTab",
         component: "ProductVariantsTab",
-        test: () => {
+        test: async () => {
           try {
-            const ProductVariantsTab = require("@/components/products/tabs/ProductVariantsTab").ProductVariantsTab;
-            return ProductVariantsTab !== undefined;
+            const module = await import("@/components/products/tabs/ProductVariantsTab");
+            return module.ProductVariantsTab !== undefined;
           } catch (error) {
+            console.error("Erreur import ProductVariantsTab:", error);
             return false;
           }
         }
@@ -113,11 +119,12 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
       {
         name: "ProductPromotionsTab",
         component: "ProductPromotionsTab",
-        test: () => {
+        test: async () => {
           try {
-            const ProductPromotionsTab = require("@/components/products/tabs/ProductPromotionsTab").ProductPromotionsTab;
-            return ProductPromotionsTab !== undefined;
+            const module = await import("@/components/products/tabs/ProductPromotionsTab");
+            return module.ProductPromotionsTab !== undefined;
           } catch (error) {
+            console.error("Erreur import ProductPromotionsTab:", error);
             return false;
           }
         }
@@ -127,16 +134,26 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
     // Exécuter les tests des composants
     for (const test of componentTests) {
       testResults.total++;
-      const passed = test.test();
-      if (passed) {
-        testResults.passed++;
-        testResults.details.push({
-          name: test.name,
-          status: 'passed',
-          message: 'Composant importé avec succès',
-          component: test.component
-        });
-      } else {
+      try {
+        const passed = await test.test();
+        if (passed) {
+          testResults.passed++;
+          testResults.details.push({
+            name: test.name,
+            status: 'passed',
+            message: 'Composant importé avec succès',
+            component: test.component
+          });
+        } else {
+          testResults.failed++;
+          testResults.details.push({
+            name: test.name,
+            status: 'failed',
+            message: 'Erreur lors de l\'import du composant',
+            component: test.component
+          });
+        }
+      } catch (error) {
         testResults.failed++;
         testResults.details.push({
           name: test.name,

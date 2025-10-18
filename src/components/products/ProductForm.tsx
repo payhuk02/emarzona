@@ -19,6 +19,7 @@ import { ProductVariantsTab } from "./tabs/ProductVariantsTab";
 import { ProductPromotionsTab } from "./tabs/ProductPromotionsTab";
 import { ProductFeatureTest } from "./tabs/ProductFeatureTest";
 import { generateSlug } from "@/lib/store-utils";
+import "@/styles/product-creation.css";
 
 interface ProductFormProps {
   storeId: string;
@@ -263,47 +264,47 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        <Card>
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 product-form-container">
+        <Card className="product-card">
           <CardContent className="p-3 sm:p-6">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-4 sm:mb-6 h-auto gap-1 overflow-x-auto">
-                <TabsTrigger value="info" className="text-xs sm:text-sm py-2 min-w-0">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-7 mb-4 sm:mb-6 h-auto gap-1 overflow-x-auto product-tabs-list">
+                <TabsTrigger value="info" className="text-xs sm:text-sm py-2 px-2 min-w-0 flex-shrink-0 product-tab-trigger product-focus-visible">
                   <span className="hidden sm:inline">Informations</span>
                   <span className="sm:hidden">Info</span>
                 </TabsTrigger>
-                <TabsTrigger value="description" className="text-xs sm:text-sm py-2 min-w-0">
+                <TabsTrigger value="description" className="text-xs sm:text-sm py-2 px-2 min-w-0 flex-shrink-0 product-tab-trigger product-focus-visible">
                   <span className="hidden sm:inline">Description</span>
                   <span className="sm:hidden">Desc</span>
                 </TabsTrigger>
-                <TabsTrigger value="visual" className="text-xs sm:text-sm py-2 min-w-0">
+                <TabsTrigger value="visual" className="text-xs sm:text-sm py-2 px-2 min-w-0 flex-shrink-0 product-tab-trigger product-focus-visible">
                   <span className="hidden lg:inline">Visuel & Design</span>
                   <span className="lg:hidden">Visuel</span>
                 </TabsTrigger>
-                <TabsTrigger value="files" className="text-xs sm:text-sm py-2 min-w-0">Fichiers</TabsTrigger>
-                <TabsTrigger value="custom" className="text-xs sm:text-sm py-2 min-w-0">
+                <TabsTrigger value="files" className="text-xs sm:text-sm py-2 px-2 min-w-0 flex-shrink-0 product-tab-trigger product-focus-visible">Fichiers</TabsTrigger>
+                <TabsTrigger value="custom" className="text-xs sm:text-sm py-2 px-2 min-w-0 flex-shrink-0 product-tab-trigger product-focus-visible">
                   <span className="hidden sm:inline">Champs perso.</span>
                   <span className="sm:hidden">Perso</span>
                 </TabsTrigger>
-                <TabsTrigger value="faq" className="text-xs sm:text-sm py-2 min-w-0">FAQ</TabsTrigger>
-                <TabsTrigger value="seo" className="text-xs sm:text-sm py-2 min-w-0">SEO</TabsTrigger>
-                <TabsTrigger value="analytics" className="text-xs sm:text-sm py-2 min-w-0">
+                <TabsTrigger value="faq" className="text-xs sm:text-sm py-2 px-2 min-w-0 flex-shrink-0 product-tab-trigger product-focus-visible">FAQ</TabsTrigger>
+                <TabsTrigger value="seo" className="text-xs sm:text-sm py-2 px-2 min-w-0 flex-shrink-0 product-tab-trigger product-focus-visible">SEO</TabsTrigger>
+                <TabsTrigger value="analytics" className="text-xs sm:text-sm py-2 px-2 min-w-0 flex-shrink-0 product-tab-trigger product-focus-visible">
                   <span className="hidden sm:inline">Analytics</span>
                   <span className="sm:hidden">Stats</span>
                 </TabsTrigger>
-                <TabsTrigger value="pixels" className="text-xs sm:text-sm py-2 min-w-0">
+                <TabsTrigger value="pixels" className="text-xs sm:text-sm py-2 px-2 min-w-0 flex-shrink-0 product-tab-trigger product-focus-visible">
                   <span className="hidden sm:inline">Pixels</span>
                   <span className="sm:hidden">Track</span>
                 </TabsTrigger>
-                <TabsTrigger value="variants" className="text-xs sm:text-sm py-2 min-w-0">
+                <TabsTrigger value="variants" className="text-xs sm:text-sm py-2 px-2 min-w-0 flex-shrink-0 product-tab-trigger product-focus-visible">
                   <span className="hidden sm:inline">Variantes</span>
                   <span className="sm:hidden">Var</span>
                 </TabsTrigger>
-                <TabsTrigger value="promotions" className="text-xs sm:text-sm py-2 min-w-0">
+                <TabsTrigger value="promotions" className="text-xs sm:text-sm py-2 px-2 min-w-0 flex-shrink-0 product-tab-trigger product-focus-visible">
                   <span className="hidden sm:inline">Promotions</span>
                   <span className="sm:hidden">Promo</span>
                 </TabsTrigger>
-                <TabsTrigger value="test" className="text-xs sm:text-sm py-2 min-w-0">
+                <TabsTrigger value="test" className="text-xs sm:text-sm py-2 px-2 min-w-0 flex-shrink-0 product-tab-trigger product-focus-visible">
                   <span className="hidden sm:inline">Tests</span>
                   <span className="sm:hidden">Test</span>
                 </TabsTrigger>

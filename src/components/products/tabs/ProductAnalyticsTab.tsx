@@ -53,7 +53,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
   return (
     <div className="space-y-6">
       {/* Vue d'ensemble des performances */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card className="border-blue-200 bg-blue-50/50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -126,7 +126,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
           Configuration du tracking
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <Card className="border-blue-200 bg-blue-50/50">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -260,7 +260,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="target_views">Objectif vues (mensuel)</Label>
                 <Input
@@ -269,6 +269,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                   value={formData.target_views || ""}
                   onChange={(e) => updateFormData("target_views", parseInt(e.target.value) || null)}
                   placeholder="1000"
+                  className="touch-target"
                 />
               </div>
               <div>
@@ -279,11 +280,12 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                   value={formData.target_conversions || ""}
                   onChange={(e) => updateFormData("target_conversions", parseInt(e.target.value) || null)}
                   placeholder="50"
+                  className="touch-target"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="target_revenue">Objectif revenus (mensuel)</Label>
                 <Input
@@ -292,6 +294,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                   value={formData.target_revenue || ""}
                   onChange={(e) => updateFormData("target_revenue", parseFloat(e.target.value) || null)}
                   placeholder="5000"
+                  className="touch-target"
                 />
               </div>
               <div>
@@ -303,6 +306,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                   value={formData.target_conversion_rate || ""}
                   onChange={(e) => updateFormData("target_conversion_rate", parseFloat(e.target.value) || null)}
                   placeholder="5.0"
+                  className="touch-target"
                 />
               </div>
             </div>
@@ -343,7 +347,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
           Rapports et export
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <Card className="border-gray-200 bg-gray-50/50">
             <CardContent className="p-4 text-center">
               <Calendar className="h-8 w-8 text-gray-600 mx-auto mb-2" />
@@ -397,7 +401,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">{analyticsData.views}</div>
               <div className="text-sm text-muted-foreground">Vues aujourd'hui</div>

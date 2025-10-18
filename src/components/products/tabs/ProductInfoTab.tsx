@@ -57,7 +57,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <div
               className={cn(
                 "p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md",
@@ -236,7 +236,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
           </Select>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
             <Label htmlFor="price">Prix *</Label>
             <Input
@@ -245,6 +245,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
               value={formData.price}
               onChange={(e) => updateFormData("price", parseFloat(e.target.value) || 0)}
               placeholder="0"
+              className="touch-target"
             />
           </div>
           <div>
@@ -300,12 +301,12 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
         <div>
           <Label>Période de validité du prix de vente</Label>
           <p className="text-sm text-muted-foreground mb-2">Créez l'urgence avec des offres limitées dans le temps</p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className={cn("justify-start text-left font-normal", !formData.sale_start_date && "text-muted-foreground")}>
+                <Button variant="outline" className={cn("justify-start text-left font-normal w-full", !formData.sale_start_date && "text-muted-foreground")}>
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.sale_start_date ? format(new Date(formData.sale_start_date), "PPP") : "Date de début"}
+                  <span className="truncate">{formData.sale_start_date ? format(new Date(formData.sale_start_date), "PPP") : "Date de début"}</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -320,9 +321,9 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className={cn("justify-start text-left font-normal", !formData.sale_end_date && "text-muted-foreground")}>
+                <Button variant="outline" className={cn("justify-start text-left font-normal w-full", !formData.sale_end_date && "text-muted-foreground")}>
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.sale_end_date ? format(new Date(formData.sale_end_date), "PPP") : "Date de fin"}
+                  <span className="truncate">{formData.sale_end_date ? format(new Date(formData.sale_end_date), "PPP") : "Date de fin"}</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
