@@ -1,7 +1,62 @@
-/* Styles pour améliorer l'affichage des textes et la responsivité de la page Créer un produit */
+/* Styles modernes et professionnels pour la page Créer un produit - Palette de couleurs améliorée */
+
+/* Variables CSS pour une palette professionnelle moderne */
+:root {
+  /* Couleurs principales */
+  --primary: #3b82f6;
+  --primary-dark: #1d4ed8;
+  --primary-light: #dbeafe;
+  --secondary: #64748b;
+  --secondary-light: #f1f5f9;
+  --accent: #10b981;
+  --accent-light: #d1fae5;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --danger: #ef4444;
+  --danger-light: #fee2e2;
+
+  /* Fond et surfaces - Palette moderne et claire */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-muted: #f8fafc;
+  --bg-hover: #f1f5f9;
+  --bg-active: #e2e8f0;
+
+  /* Texte - Contraste optimisé */
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  --text-inverse: #ffffff;
+
+  /* Bordures et ombres */
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --border-dark: #cbd5e1;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+
+  /* Rayons */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+}
+
+/* Application du fond principal moderne */
+body {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
 
 /* Amélioration de la lisibilité des textes */
 .product-form-container {
+  background-color: var(--bg-secondary);
+  min-height: calc(100vh - 60px);
   font-size: 14px;
   line-height: 1.5;
 }
@@ -17,6 +72,18 @@
   min-height: 44px; /* Taille minimale recommandée pour les éléments tactiles */
   padding: 12px 16px;
   font-size: 16px; /* Évite le zoom automatique sur iOS */
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.touch-target:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.touch-target::placeholder {
+  color: var(--text-light);
 }
 
 @media (min-width: 641px) {
@@ -32,6 +99,11 @@
   overflow-x: auto;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 0.5rem;
+  box-shadow: var(--shadow);
 }
 
 .product-tabs-list::-webkit-scrollbar {
@@ -42,17 +114,39 @@
   white-space: nowrap;
   flex-shrink: 0;
   min-width: fit-content;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.product-tab-trigger:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.product-tab-trigger[data-state="active"] {
+  background: var(--primary);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow);
 }
 
 /* Amélioration des cartes et contenus */
 .product-card {
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s ease;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
 }
 
 .product-card:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
 }
 
 /* Amélioration des grilles responsives */
@@ -87,8 +181,17 @@
   min-height: 44px;
   padding: 12px 24px;
   font-weight: 500;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   transition: all 0.2s ease;
+  background: var(--primary);
+  color: var(--text-inverse);
+  border: none;
+}
+
+.product-button:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 @media (min-width: 641px) {
@@ -102,11 +205,11 @@
 .product-label {
   font-weight: 500;
   margin-bottom: 0.5rem;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .product-description {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.875rem;
   line-height: 1.4;
   margin-bottom: 0.75rem;
@@ -117,7 +220,10 @@
   font-size: 0.75rem;
   font-weight: 500;
   padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-muted);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
 }
 
 /* Amélioration des icônes */
@@ -125,6 +231,7 @@
   width: 1.25rem;
   height: 1.25rem;
   flex-shrink: 0;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 640px) {
@@ -137,43 +244,57 @@
 /* Amélioration des séparateurs */
 .product-separator {
   margin: 1.5rem 0;
-  border-color: #e5e7eb;
+  border-color: var(--border-light);
 }
 
 /* Amélioration des champs de formulaire */
 .product-input {
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .product-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.product-input::placeholder {
+  color: var(--text-light);
 }
 
 /* Amélioration des sélecteurs */
 .product-select {
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
 }
 
 .product-select:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 /* Amélioration des textarea */
 .product-textarea {
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
   resize: vertical;
   min-height: 100px;
 }
 
 .product-textarea:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.product-textarea::placeholder {
+  color: var(--text-light);
 }
 
 /* Amélioration des switches */
@@ -184,13 +305,17 @@
 
 /* Amélioration des popovers et modales */
 .product-popover {
-  border-radius: 8px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
 }
 
 /* Amélioration des calendriers */
 .product-calendar {
-  border-radius: 8px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
 }
 
 /* Amélioration de l'espacement */
@@ -212,6 +337,7 @@
   font-weight: 700;
   line-height: 1.2;
   margin-bottom: 1rem;
+  color: var(--text-primary);
 }
 
 .product-heading-2 {
@@ -219,6 +345,7 @@
   font-weight: 600;
   line-height: 1.3;
   margin-bottom: 0.75rem;
+  color: var(--text-primary);
 }
 
 .product-heading-3 {
@@ -226,6 +353,7 @@
   font-weight: 600;
   line-height: 1.4;
   margin-bottom: 0.5rem;
+  color: var(--text-primary);
 }
 
 @media (max-width: 640px) {
@@ -260,7 +388,7 @@
 
 /* Amélioration de l'accessibilité */
 .product-focus-visible:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
@@ -268,6 +396,7 @@
 .product-loading {
   opacity: 0.6;
   pointer-events: none;
+  position: relative;
 }
 
 .product-loading::after {
@@ -278,7 +407,7 @@
   width: 20px;
   height: 20px;
   margin: -10px 0 0 -10px;
-  border: 2px solid #3b82f6;
+  border: 2px solid var(--primary);
   border-radius: 50%;
   border-top-color: transparent;
   animation: spin 1s linear infinite;
@@ -292,22 +421,45 @@
 
 /* Amélioration des états d'erreur */
 .product-error {
-  border-color: #ef4444;
-  background-color: #fef2f2;
+  border-color: var(--danger);
+  background-color: var(--danger-light);
 }
 
 .product-error:focus {
-  border-color: #ef4444;
+  border-color: var(--danger);
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
 /* Amélioration des états de succès */
 .product-success {
-  border-color: #10b981;
-  background-color: #f0fdf4;
+  border-color: var(--accent);
+  background-color: var(--accent-light);
 }
 
 .product-success:focus {
-  border-color: #10b981;
+  border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
+
+/* Classes utilitaires pour les nouvelles couleurs */
+.modern-bg-primary { background-color: var(--bg-primary); }
+.modern-bg-secondary { background-color: var(--bg-secondary); }
+.modern-bg-card { background-color: var(--bg-card); }
+.modern-bg-muted { background-color: var(--bg-muted); }
+
+.modern-text-primary { color: var(--text-primary); }
+.modern-text-secondary { color: var(--text-secondary); }
+.modern-text-muted { color: var(--text-muted); }
+.modern-text-light { color: var(--text-light); }
+
+.modern-border { border-color: var(--border); }
+.modern-border-light { border-color: var(--border-light); }
+
+.modern-shadow { box-shadow: var(--shadow); }
+.modern-shadow-md { box-shadow: var(--shadow-md); }
+.modern-shadow-lg { box-shadow: var(--shadow-lg); }
+
+.modern-radius-sm { border-radius: var(--radius-sm); }
+.modern-radius-md { border-radius: var(--radius-md); }
+.modern-radius-lg { border-radius: var(--radius-lg); }
+.modern-radius-xl { border-radius: var(--radius-xl); }

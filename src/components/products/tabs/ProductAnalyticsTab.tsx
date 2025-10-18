@@ -51,15 +51,23 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 modern-bg-secondary">
+      {/* En-tête */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold modern-text-primary">Analytics & Tracking</h2>
+          <p className="modern-text-muted">Surveillez les performances de votre produit</p>
+        </div>
+      </div>
+
       {/* Vue d'ensemble des performances */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <Card className="border-blue-200 bg-blue-50/50">
+        <Card className="modern-bg-card modern-border modern-shadow-md modern-stats-card views">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600">Vues</p>
-                <p className="text-2xl font-bold text-blue-800">{analyticsData.views}</p>
+                <p className="text-sm font-medium modern-text-secondary">Vues</p>
+                <p className="text-2xl font-bold modern-text-primary">{analyticsData.views}</p>
               </div>
               <Eye className="h-8 w-8 text-blue-600" />
             </div>
@@ -70,12 +78,12 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
           </CardContent>
         </Card>
 
-        <Card className="border-green-200 bg-green-50/50">
+        <Card className="modern-bg-card modern-border modern-shadow-md modern-stats-card clicks">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-600">Clics</p>
-                <p className="text-2xl font-bold text-green-800">{analyticsData.clicks}</p>
+                <p className="text-sm font-medium modern-text-secondary">Clics</p>
+                <p className="text-2xl font-bold modern-text-primary">{analyticsData.clicks}</p>
               </div>
               <MousePointer className="h-8 w-8 text-green-600" />
             </div>
@@ -86,12 +94,12 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
           </CardContent>
         </Card>
 
-        <Card className="border-purple-200 bg-purple-50/50">
+        <Card className="modern-bg-card modern-border modern-shadow-md modern-stats-card conversions">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-purple-600">Conversions</p>
-                <p className="text-2xl font-bold text-purple-800">{analyticsData.conversions}</p>
+                <p className="text-sm font-medium modern-text-secondary">Conversions</p>
+                <p className="text-2xl font-bold modern-text-primary">{analyticsData.conversions}</p>
               </div>
               <Target className="h-8 w-8 text-purple-600" />
             </div>
@@ -102,12 +110,12 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
           </CardContent>
         </Card>
 
-        <Card className="border-orange-200 bg-orange-50/50">
+        <Card className="modern-bg-card modern-border modern-shadow-md modern-stats-card rate">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-orange-600">Taux de conversion</p>
-                <p className="text-2xl font-bold text-orange-800">{analyticsData.conversionRate.toFixed(1)}%</p>
+                <p className="text-sm font-medium modern-text-secondary">Taux de conversion</p>
+                <p className="text-2xl font-bold modern-text-primary">{analyticsData.conversionRate.toFixed(1)}%</p>
               </div>
               <BarChart3 className="h-8 w-8 text-orange-600" />
             </div>
@@ -120,303 +128,279 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
       </div>
 
       {/* Configuration du tracking */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Settings className="h-5 w-5 text-primary" />
-          Configuration du tracking
-        </h3>
+      <Card className="modern-bg-card modern-border modern-shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 modern-text-primary">
+            <Settings className="h-5 w-5" />
+            Configuration du tracking
+          </CardTitle>
+          <CardDescription className="modern-text-muted">
+            Surveillez les interactions des utilisateurs
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="modern-text-primary">Tracking des événements</Label>
+              <p className="text-sm modern-text-muted">Enregistrer les interactions utilisateur</p>
+            </div>
+            <Switch
+              checked={formData.track_events || false}
+              onCheckedChange={(checked) => updateFormData("track_events", checked)}
+            />
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          <Card className="border-blue-200 bg-blue-50/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Activity className="h-4 w-4 text-blue-600" />
-                Tracking des événements
-              </CardTitle>
-              <CardDescription>
-                Surveillez les interactions des utilisateurs
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Tracking des vues</Label>
-                  <p className="text-sm text-muted-foreground">Enregistrer chaque vue de produit</p>
-                </div>
-                <Switch
-                  checked={formData.track_views || false}
-                  onCheckedChange={(checked) => updateFormData("track_views", checked)}
-                />
-              </div>
+          <Separator className="modern-border-light" />
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Tracking des clics</Label>
-                  <p className="text-sm text-muted-foreground">Enregistrer les clics sur les boutons</p>
-                </div>
-                <Switch
-                  checked={formData.track_clicks || false}
-                  onCheckedChange={(checked) => updateFormData("track_clicks", checked)}
-                />
-              </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="modern-text-primary">Tracking des vues</Label>
+              <p className="text-sm modern-text-muted">Enregistrer chaque vue de produit</p>
+            </div>
+            <Switch
+              checked={formData.track_views || false}
+              onCheckedChange={(checked) => updateFormData("track_views", checked)}
+            />
+          </div>
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Tracking des achats</Label>
-                  <p className="text-sm text-muted-foreground">Enregistrer les conversions</p>
-                </div>
-                <Switch
-                  checked={formData.track_purchases || false}
-                  onCheckedChange={(checked) => updateFormData("track_purchases", checked)}
-                />
-              </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="modern-text-primary">Tracking des clics</Label>
+              <p className="text-sm modern-text-muted">Enregistrer les clics sur les boutons</p>
+            </div>
+            <Switch
+              checked={formData.track_clicks || false}
+              onCheckedChange={(checked) => updateFormData("track_clicks", checked)}
+            />
+          </div>
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Tracking du temps passé</Label>
-                  <p className="text-sm text-muted-foreground">Mesurer l'engagement</p>
-                </div>
-                <Switch
-                  checked={formData.track_time_spent || false}
-                  onCheckedChange={(checked) => updateFormData("track_time_spent", checked)}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="modern-text-primary">Tracking des achats</Label>
+              <p className="text-sm modern-text-muted">Enregistrer les conversions</p>
+            </div>
+            <Switch
+              checked={formData.track_purchases || false}
+              onCheckedChange={(checked) => updateFormData("track_purchases", checked)}
+            />
+          </div>
 
-          <Card className="border-green-200 bg-green-50/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <PieChart className="h-4 w-4 text-green-600" />
-                Analytics externes
-              </CardTitle>
-              <CardDescription>
-                Intégration avec des outils tiers
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="google_analytics_id">Google Analytics ID</Label>
-                <Input
-                  id="google_analytics_id"
-                  value={formData.google_analytics_id || ""}
-                  onChange={(e) => updateFormData("google_analytics_id", e.target.value)}
-                  placeholder="GA-XXXXXXXXX"
-                />
-              </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="modern-text-primary">Tracking du temps passé</Label>
+              <p className="text-sm modern-text-muted">Mesurer l'engagement</p>
+            </div>
+            <Switch
+              checked={formData.track_time_spent || false}
+              onCheckedChange={(checked) => updateFormData("track_time_spent", checked)}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-              <div className="space-y-2">
-                <Label htmlFor="facebook_pixel_id">Facebook Pixel ID</Label>
-                <Input
-                  id="facebook_pixel_id"
-                  value={formData.facebook_pixel_id || ""}
-                  onChange={(e) => updateFormData("facebook_pixel_id", e.target.value)}
-                  placeholder="123456789012345"
-                />
-              </div>
+      {/* Analytics externes */}
+      <Card className="modern-bg-card modern-border modern-shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 modern-text-primary">
+            <Activity className="h-5 w-5" />
+            Analytics externes
+          </CardTitle>
+          <CardDescription className="modern-text-muted">
+            Intégration avec des outils tiers
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="google_analytics_id" className="modern-text-primary">Google Analytics ID</Label>
+            <Input
+              id="google_analytics_id"
+              value={formData.google_analytics_id || ""}
+              onChange={(e) => updateFormData("google_analytics_id", e.target.value)}
+              placeholder="GA-XXXXXXXXX"
+              className="modern-input"
+            />
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="google_tag_manager_id">Google Tag Manager ID</Label>
-                <Input
-                  id="google_tag_manager_id"
-                  value={formData.google_tag_manager_id || ""}
-                  onChange={(e) => updateFormData("google_tag_manager_id", e.target.value)}
-                  placeholder="GTM-XXXXXXX"
-                />
-              </div>
+          <div>
+            <Label htmlFor="facebook_pixel_id" className="modern-text-primary">Facebook Pixel ID</Label>
+            <Input
+              id="facebook_pixel_id"
+              value={formData.facebook_pixel_id || ""}
+              onChange={(e) => updateFormData("facebook_pixel_id", e.target.value)}
+              placeholder="123456789012345"
+              className="modern-input"
+            />
+          </div>
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Tracking avancé</Label>
-                  <p className="text-sm text-muted-foreground">Événements personnalisés</p>
-                </div>
-                <Switch
-                  checked={formData.advanced_tracking || false}
-                  onCheckedChange={(checked) => updateFormData("advanced_tracking", checked)}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+          <div>
+            <Label htmlFor="google_tag_manager_id" className="modern-text-primary">Google Tag Manager ID</Label>
+            <Input
+              id="google_tag_manager_id"
+              value={formData.google_tag_manager_id || ""}
+              onChange={(e) => updateFormData("google_tag_manager_id", e.target.value)}
+              placeholder="GTM-XXXXXXX"
+              className="modern-input"
+            />
+          </div>
 
-      <Separator />
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="modern-text-primary">Tracking avancé</Label>
+              <p className="text-sm modern-text-muted">Événements personnalisés</p>
+            </div>
+            <Switch
+              checked={formData.advanced_tracking || false}
+              onCheckedChange={(checked) => updateFormData("advanced_tracking", checked)}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Objectifs et alertes */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Target className="h-5 w-5 text-primary" />
-          Objectifs et alertes
-        </h3>
-
-        <Card className="border-purple-200 bg-purple-50/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Zap className="h-4 w-4 text-purple-600" />
-              Configuration des objectifs
-            </CardTitle>
-            <CardDescription>
-              Définissez des objectifs de performance pour ce produit
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div>
-                <Label htmlFor="target_views">Objectif vues (mensuel)</Label>
-                <Input
-                  id="target_views"
-                  type="number"
-                  value={formData.target_views || ""}
-                  onChange={(e) => updateFormData("target_views", parseInt(e.target.value) || null)}
-                  placeholder="1000"
-                  className="touch-target"
-                />
-              </div>
-              <div>
-                <Label htmlFor="target_conversions">Objectif conversions (mensuel)</Label>
-                <Input
-                  id="target_conversions"
-                  type="number"
-                  value={formData.target_conversions || ""}
-                  onChange={(e) => updateFormData("target_conversions", parseInt(e.target.value) || null)}
-                  placeholder="50"
-                  className="touch-target"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div>
-                <Label htmlFor="target_revenue">Objectif revenus (mensuel)</Label>
-                <Input
-                  id="target_revenue"
-                  type="number"
-                  value={formData.target_revenue || ""}
-                  onChange={(e) => updateFormData("target_revenue", parseFloat(e.target.value) || null)}
-                  placeholder="5000"
-                  className="touch-target"
-                />
-              </div>
-              <div>
-                <Label htmlFor="target_conversion_rate">Objectif taux de conversion (%)</Label>
-                <Input
-                  id="target_conversion_rate"
-                  type="number"
-                  step="0.1"
-                  value={formData.target_conversion_rate || ""}
-                  onChange={(e) => updateFormData("target_conversion_rate", parseFloat(e.target.value) || null)}
-                  placeholder="5.0"
-                  className="touch-target"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Alertes par email</Label>
-                <p className="text-sm text-muted-foreground">Notifications automatiques</p>
-              </div>
-              <Switch
-                checked={formData.email_alerts || false}
-                onCheckedChange={(checked) => updateFormData("email_alerts", checked)}
+      <Card className="modern-bg-card modern-border modern-shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 modern-text-primary">
+            <Target className="h-5 w-5" />
+            Objectifs et alertes
+          </CardTitle>
+          <CardDescription className="modern-text-muted">
+            Définissez des objectifs de performance pour ce produit
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="monthly_views_goal" className="modern-text-primary">Objectif vues (mensuel)</Label>
+              <Input
+                id="monthly_views_goal"
+                type="number"
+                value={formData.monthly_views_goal || ""}
+                onChange={(e) => updateFormData("monthly_views_goal", parseInt(e.target.value))}
+                placeholder="1000"
+                className="modern-input"
               />
             </div>
 
-            {formData.email_alerts && (
-              <div className="space-y-2">
-                <Label htmlFor="alert_email">Email pour les alertes</Label>
-                <Input
-                  id="alert_email"
-                  type="email"
-                  value={formData.alert_email || ""}
-                  onChange={(e) => updateFormData("alert_email", e.target.value)}
-                  placeholder="votre@email.com"
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            <div>
+              <Label htmlFor="monthly_revenue_goal" className="modern-text-primary">Objectif revenus (mensuel)</Label>
+              <Input
+                id="monthly_revenue_goal"
+                type="number"
+                value={formData.monthly_revenue_goal || ""}
+                onChange={(e) => updateFormData("monthly_revenue_goal", parseInt(e.target.value))}
+                placeholder="5000"
+                className="modern-input"
+              />
+            </div>
 
-      <Separator />
+            <div>
+              <Label htmlFor="monthly_conversions_goal" className="modern-text-primary">Objectif conversions (mensuel)</Label>
+              <Input
+                id="monthly_conversions_goal"
+                type="number"
+                value={formData.monthly_conversions_goal || ""}
+                onChange={(e) => updateFormData("monthly_conversions_goal", parseInt(e.target.value))}
+                placeholder="50"
+                className="modern-input"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="conversion_rate_goal" className="modern-text-primary">Objectif taux de conversion (%)</Label>
+              <Input
+                id="conversion_rate_goal"
+                type="number"
+                step="0.1"
+                value={formData.conversion_rate_goal || ""}
+                onChange={(e) => updateFormData("conversion_rate_goal", parseFloat(e.target.value))}
+                placeholder="5.0"
+                className="modern-input"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="modern-text-primary">Alertes par email</Label>
+              <p className="text-sm modern-text-muted">Notifications automatiques</p>
+            </div>
+            <Switch
+              checked={formData.email_alerts || false}
+              onCheckedChange={(checked) => updateFormData("email_alerts", checked)}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Rapports et export */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-primary" />
-          Rapports et export
-        </h3>
+      <Card className="modern-bg-card modern-border modern-shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 modern-text-primary">
+            <PieChart className="h-5 w-5" />
+            Rapports et export
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="text-center p-4 modern-bg-muted modern-border rounded-lg">
+              <Calendar className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+              <h3 className="font-semibold modern-text-primary mb-1">Rapport quotidien</h3>
+              <p className="text-sm modern-text-muted mb-3">Résumé des performances du jour</p>
+              <Button className="w-full modern-button">Générer</Button>
+            </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          <Card className="border-gray-200 bg-gray-50/50">
-            <CardContent className="p-4 text-center">
-              <Calendar className="h-8 w-8 text-gray-600 mx-auto mb-2" />
-              <h4 className="font-semibold mb-2">Rapport quotidien</h4>
-              <p className="text-sm text-muted-foreground mb-3">
-                Résumé des performances du jour
-              </p>
-              <Button variant="outline" size="sm" className="w-full">
-                Générer
-              </Button>
-            </CardContent>
-          </Card>
+            <div className="text-center p-4 modern-bg-muted modern-border rounded-lg">
+              <BarChart3 className="h-8 w-8 mx-auto mb-2 text-green-600" />
+              <h3 className="font-semibold modern-text-primary mb-1">Rapport mensuel</h3>
+              <p className="text-sm modern-text-muted mb-3">Analyse complète du mois</p>
+              <Button className="w-full modern-button">Générer</Button>
+            </div>
 
-          <Card className="border-gray-200 bg-gray-50/50">
-            <CardContent className="p-4 text-center">
-              <BarChart3 className="h-8 w-8 text-gray-600 mx-auto mb-2" />
-              <h4 className="font-semibold mb-2">Rapport mensuel</h4>
-              <p className="text-sm text-muted-foreground mb-3">
-                Analyse complète du mois
-              </p>
-              <Button variant="outline" size="sm" className="w-full">
-                Générer
-              </Button>
-            </CardContent>
-          </Card>
+            <div className="text-center p-4 modern-bg-muted modern-border rounded-lg">
+              <Zap className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+              <h3 className="font-semibold modern-text-primary mb-1">Export CSV</h3>
+              <p className="text-sm modern-text-muted mb-3">Données brutes pour analyse</p>
+              <Button className="w-full modern-button">Exporter</Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-          <Card className="border-gray-200 bg-gray-50/50">
-            <CardContent className="p-4 text-center">
-              <TrendingUp className="h-8 w-8 text-gray-600 mx-auto mb-2" />
-              <h4 className="font-semibold mb-2">Export CSV</h4>
-              <p className="text-sm text-muted-foreground mb-3">
-                Données brutes pour analyse
-              </p>
-              <Button variant="outline" size="sm" className="w-full">
-                Exporter
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Aperçu des données en temps réel */}
-      <Card className="border-blue-200 bg-blue-50/50">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Activity className="h-4 w-4 text-blue-600" />
+      {/* Données en temps réel */}
+      <Card className="modern-bg-card modern-border modern-shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 modern-text-primary">
+            <Zap className="h-5 w-5" />
             Données en temps réel
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="modern-text-muted">
             Activité actuelle sur ce produit
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{analyticsData.views}</div>
-              <div className="text-sm text-muted-foreground">Vues aujourd'hui</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="text-center p-3 modern-bg-muted modern-border rounded-lg">
+              <Eye className="h-6 w-6 mx-auto mb-1 text-blue-600" />
+              <p className="text-lg font-bold modern-text-primary">{analyticsData.views}</p>
+              <p className="text-xs modern-text-muted">Vues aujourd'hui</p>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{analyticsData.clicks}</div>
-              <div className="text-sm text-muted-foreground">Clics aujourd'hui</div>
+
+            <div className="text-center p-3 modern-bg-muted modern-border rounded-lg">
+              <MousePointer className="h-6 w-6 mx-auto mb-1 text-green-600" />
+              <p className="text-lg font-bold modern-text-primary">{analyticsData.clicks}</p>
+              <p className="text-xs modern-text-muted">Clics aujourd'hui</p>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">{analyticsData.conversions}</div>
-              <div className="text-sm text-muted-foreground">Conversions aujourd'hui</div>
+
+            <div className="text-center p-3 modern-bg-muted modern-border rounded-lg">
+              <Target className="h-6 w-6 mx-auto mb-1 text-purple-600" />
+              <p className="text-lg font-bold modern-text-primary">{analyticsData.conversions}</p>
+              <p className="text-xs modern-text-muted">Conversions aujourd'hui</p>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">{analyticsData.conversionRate.toFixed(1)}%</div>
-              <div className="text-sm text-muted-foreground">Taux de conversion</div>
+
+            <div className="text-center p-3 modern-bg-muted modern-border rounded-lg">
+              <BarChart3 className="h-6 w-6 mx-auto mb-1 text-orange-600" />
+              <p className="text-lg font-bold modern-text-primary">{analyticsData.conversionRate.toFixed(1)}%</p>
+              <p className="text-xs modern-text-muted">Taux de conversion</p>
             </div>
           </div>
         </CardContent>
