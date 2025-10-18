@@ -8,7 +8,28 @@ import { useState } from 'react';
 export const DatabaseMigrationInstructions = () => {
   const [copied, setCopied] = useState(false);
 
-  const sqlCode = `ALTER TABLE public.profiles 
+  const sqlCode = `-- Fix RLS policies for profiles table
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
+
+CREATE POLICY "Users can view their own profile" 
+ON public.profiles 
+FOR SELECT 
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own profile" 
+ON public.profiles 
+FOR INSERT 
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own profile" 
+ON public.profiles 
+FOR UPDATE 
+USING (auth.uid() = user_id);
+
+-- Add missing profile fields
+ALTER TABLE public.profiles 
 ADD COLUMN IF NOT EXISTS bio TEXT,
 ADD COLUMN IF NOT EXISTS phone TEXT,
 ADD COLUMN IF NOT EXISTS location TEXT,
@@ -29,7 +50,7 @@ ADD COLUMN IF NOT EXISTS website TEXT;`;
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          <strong>Action requise :</strong> Les colonnes de profil supplémentaires n'existent pas encore dans la base de données.
+          <strong>Action requise :</strong> Erreur de politique de sécurité (RLS) empêchant la création/lecture du profil.
         </AlertDescription>
       </Alert>
 
@@ -39,7 +60,7 @@ ADD COLUMN IF NOT EXISTS website TEXT;`;
             <Database className="h-5 w-5 text-primary" /> Instructions de Migration
           </CardTitle>
           <CardDescription>
-            Suivez ces étapes pour ajouter les champs manquants à votre base de données Supabase.
+            Suivez ces étapes pour corriger les politiques de sécurité et ajouter les champs manquants.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -77,7 +98,7 @@ ADD COLUMN IF NOT EXISTS website TEXT;`;
               <div>
                 <p className="font-medium">Exécuter le script SQL</p>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Copiez et exécutez le code SQL suivant :
+                  Copiez et exécutez le code SQL suivant pour corriger les politiques RLS et ajouter les champs :
                 </p>
                 <div className="relative">
                   <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto border">
@@ -119,8 +140,8 @@ ADD COLUMN IF NOT EXISTS website TEXT;`;
           <Alert className="bg-blue-500/10 border-blue-500 text-blue-300">
             <Info className="h-4 w-4" />
             <AlertDescription>
-              <strong>Note :</strong> Cette migration est sûre et n'affectera pas les données existantes. 
-              Les nouvelles colonnes seront ajoutées avec des valeurs NULL par défaut.
+              <strong>Note :</strong> Ce script corrige les politiques de sécurité (RLS) qui empêchent la création de profils 
+              et ajoute les champs manquants. Cette migration est sûre et n'affectera pas les données existantes.
             </AlertDescription>
           </Alert>
         </CardContent>
