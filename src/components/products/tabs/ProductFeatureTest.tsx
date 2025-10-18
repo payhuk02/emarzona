@@ -34,7 +34,7 @@ interface TestDetail {
   component: string;
 }
 
-export const FeatureTest = ({ onTestComplete }: FeatureTestProps) => {
+export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
   const [isRunning, setIsRunning] = useState(false);
   const [results, setResults] = useState<TestResults | null>(null);
 

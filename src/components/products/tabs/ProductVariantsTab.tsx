@@ -12,7 +12,7 @@ import {
   Edit, 
   Package, 
   Palette, 
-  Size, 
+  Ruler, 
   Weight,
   Zap,
   Settings,
@@ -255,7 +255,7 @@ export const ProductVariantsTab = ({ formData, updateFormData }: ProductVariants
           <Card className="border-purple-200 bg-purple-50/50">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <Size className="h-4 w-4 text-purple-600" />
+                <Ruler className="h-4 w-4 text-purple-600" />
                 Attributs dimensionnels
               </CardTitle>
             </CardHeader>
