@@ -7,6 +7,8 @@ import { StoreSettings } from "@/components/settings/StoreSettings";
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { DomainSettings } from "@/components/settings/DomainSettings";
+import { ProfileDebug } from "@/components/debug/ProfileDebug";
+import { ProfileTest } from "@/components/debug/ProfileTest";
 
 const Settings = () => {
   return (
@@ -45,8 +47,11 @@ const Settings = () => {
                       <TabsTrigger value="notifications" className="text-xs py-2">
                         Notifications
                       </TabsTrigger>
-                      <TabsTrigger value="security" className="text-xs py-2 col-span-2">
+                      <TabsTrigger value="security" className="text-xs py-2">
                         Sécurité
+                      </TabsTrigger>
+                      <TabsTrigger value="debug" className="text-xs py-2">
+                        Debug
                       </TabsTrigger>
                     </TabsList>
                   </div>
@@ -66,15 +71,18 @@ const Settings = () => {
                       <TabsTrigger value="notifications" className="text-sm py-2.5">
                         Notifications
                       </TabsTrigger>
-                      <TabsTrigger value="security" className="text-sm py-2.5 col-span-2">
+                      <TabsTrigger value="security" className="text-sm py-2.5">
                         Sécurité
+                      </TabsTrigger>
+                      <TabsTrigger value="debug" className="text-sm py-2.5">
+                        Debug
                       </TabsTrigger>
                     </TabsList>
                   </div>
 
                   {/* Desktop View (> 1024px) */}
                   <div className="hidden lg:block">
-                    <TabsList className="grid w-full grid-cols-5 h-auto">
+                    <TabsList className="grid w-full grid-cols-6 h-auto">
                       <TabsTrigger value="profile" className="py-3">
                         Profil
                       </TabsTrigger>
@@ -89,6 +97,9 @@ const Settings = () => {
                       </TabsTrigger>
                       <TabsTrigger value="security" className="py-3">
                         Sécurité
+                      </TabsTrigger>
+                      <TabsTrigger value="debug" className="py-3">
+                        Debug
                       </TabsTrigger>
                     </TabsList>
                   </div>
@@ -157,6 +168,21 @@ const Settings = () => {
                     </CardHeader>
                     <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
                       <SecuritySettings />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Debug Tab */}
+                <TabsContent value="debug" className="space-y-3 sm:space-y-4 animate-fade-in">
+                  <Card className="border-none shadow-lg">
+                    <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
+                      <CardTitle className="text-lg sm:text-xl">Debug Profil</CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">
+                        Testez la connexion et la structure de la base de données
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
+                      <ProfileTest />
                     </CardContent>
                   </Card>
                 </TabsContent>

@@ -10,6 +10,10 @@ interface Profile {
   display_name: string | null;
   first_name: string | null;
   last_name: string | null;
+  bio: string | null;
+  phone: string | null;
+  location: string | null;
+  website: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -34,39 +38,59 @@ export const useProfile = () => {
     if (!user) return;
 
     try {
+      setLoading(true);
+      console.log('🔄 Fetching profile for user:', user.id);
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Profile fetch error:', error);
+        throw error;
+      }
 
       // Create profile if it doesn't exist
       if (!data) {
+        console.log('ℹ️  No profile found, creating new one...');
         const { data: newProfile, error: createError } = await supabase
           .from('profiles')
           .insert([
             {
               user_id: user.id,
               display_name: user.email,
+              first_name: null,
+              last_name: null,
+              bio: null,
+              phone: null,
+              location: null,
+              website: null,
             },
           ])
           .select()
           .single();
 
-        if (createError) throw createError;
+        if (createError) {
+          console.error('❌ Profile creation error:', createError);
+          throw createError;
+        }
+        
+        console.log('✅ Profile created:', newProfile);
         setProfile(newProfile);
       } else {
+        console.log('✅ Profile found:', data);
         setProfile(data);
       }
     } catch (error: any) {
-      console.error('Error fetching profile:', error);
+      console.error('❌ Error fetching profile:', error);
       toast({
         title: 'Erreur',
-        description: 'Impossible de charger le profil',
+        description: error.message || 'Impossible de charger le profil',
         variant: 'destructive',
       });
+      setProfile(null);
     } finally {
       setLoading(false);
     }
@@ -223,13 +247,21 @@ export const useProfile = () => {
     }
   };
 
-  const updateProfile = async (updates: { first_name?: string; last_name?: string; display_name?: string }) => {
+  const updateProfile = async (updates: { 
+    first_name?: string; 
+    last_name?: string; 
+    display_name?: string;
+    bio?: string;
+    phone?: string;
+    location?: string;
+    website?: string;
+  }) => {
     if (!user) return false;
 
     try {
       const { error } = await supabase
         .from('profiles')
-        .update(updates)
+        .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('user_id', user.id);
 
       if (error) throw error;

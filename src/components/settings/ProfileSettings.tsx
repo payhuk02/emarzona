@@ -8,9 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
-import { Loader2, Upload, X, User, Mail, Calendar, Shield, CheckCircle2, AlertCircle, Edit3, Save, RotateCcw, Phone, MapPin, Globe, FileText } from "lucide-react";
+import { Loader2, Upload, X, User, Mail, Calendar, Shield, CheckCircle2, AlertCircle, Edit3, Save, RotateCcw, Phone, MapPin, Globe, FileText, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export const ProfileSettings = () => {
