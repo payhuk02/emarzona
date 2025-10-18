@@ -50,7 +50,8 @@ async function testOrderItemsRelationship() {
           id,
           product_name,
           quantity,
-          unit_price
+          unit_price,
+          total_price
         )
       `)
       .limit(3);

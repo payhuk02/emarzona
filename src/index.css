@@ -152,6 +152,47 @@ All colors MUST be HSL.
     transform: translateZ(0);
     backface-visibility: hidden;
   }
+
+  /* Optimisations mobile et interactions tactiles */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .touch-friendly {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Réduction des animations pour économiser la batterie */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Optimisations pour très petits écrans */
+  @media (max-width: 475px) {
+    .container {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+    
+    .text-responsive-xs {
+      font-size: 0.75rem;
+      line-height: 1rem;
+    }
+    
+    .p-responsive-xs {
+      padding: 0.5rem;
+    }
+    
+    .gap-responsive-xs {
+      gap: 0.5rem;
+    }
+  }
 }
 
 @layer utilities {

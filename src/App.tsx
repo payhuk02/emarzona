@@ -9,6 +9,7 @@ import { ScrollToTop } from "@/components/navigation/ScrollToTop";
 import { LoadingBar } from "@/components/navigation/LoadingBar";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import { useDarkMode } from "@/hooks/useDarkMode";
+import { PerformanceOptimizer } from "@/components/optimization/PerformanceOptimizer";
 
 // Pages principales
 import Landing from "./pages/Landing";
@@ -56,6 +57,7 @@ const AppContent = () => {
 
   return (
     <>
+      <PerformanceOptimizer />
       <LoadingBar />
       <ScrollToTop />
       <Routes>

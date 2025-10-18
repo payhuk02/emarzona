@@ -33,7 +33,7 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
   };
 
   return (
-    <Card className="group overflow-hidden hover:shadow-large transition-all duration-300 hover:-translate-y-1 border border-border bg-card touch-manipulation">
+    <Card className="group overflow-hidden hover:shadow-large transition-all duration-300 hover:-translate-y-1 border border-border bg-card touch-manipulation touch-friendly">
       <Link to={`/stores/${storeSlug}/products/${product.slug}`} className="block">
         <div className="aspect-square overflow-hidden bg-muted relative">
           {product.image_url ? (
@@ -42,6 +42,8 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
               alt={product.name}
               className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
               loading="lazy"
+              decoding="async"
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             />
           ) : (
             <div className="h-full w-full flex items-center justify-center text-muted-foreground">
@@ -75,7 +77,7 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
       
       <CardFooter className="p-3 sm:p-4 pt-0">
         <Button 
-          className="w-full gradient-primary hover:opacity-90 transition-opacity font-semibold touch-manipulation active:scale-95 transition-transform" 
+          className="w-full gradient-primary hover:opacity-90 transition-opacity font-semibold touch-manipulation active:scale-95 transition-transform touch-target" 
           size="sm"
         >
           <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
