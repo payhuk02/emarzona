@@ -35,37 +35,121 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
 
-  // État du formulaire
+  // État du formulaire complet avec toutes les fonctionnalités avancées
   const [formData, setFormData] = useState({
+    // Informations de base
     name: initialData?.name || "",
     slug: initialData?.slug || "",
     category: initialData?.category || "",
+    product_type: initialData?.product_type || "digital",
     pricing_model: initialData?.pricing_model || "one-time",
     price: initialData?.price || 0,
     promotional_price: initialData?.promotional_price || null,
     currency: initialData?.currency || "XOF",
+    
+    // Description et contenu
     description: initialData?.description || "",
+    short_description: initialData?.short_description || "",
+    features: initialData?.features || [],
+    specifications: initialData?.specifications || [],
+    
+    // Images et médias
     image_url: initialData?.image_url || "",
     images: initialData?.images || [],
+    video_url: initialData?.video_url || "",
+    gallery_images: initialData?.gallery_images || [],
+    
+    // Fichiers et téléchargements
     downloadable_files: initialData?.downloadable_files || [],
+    file_access_type: initialData?.file_access_type || "immediate",
+    download_limit: initialData?.download_limit || null,
+    download_expiry_days: initialData?.download_expiry_days || null,
+    
+    // Champs personnalisés
     custom_fields: initialData?.custom_fields || [],
+    
+    // FAQ
     faqs: initialData?.faqs || [],
+    
+    // SEO et métadonnées
+    meta_title: initialData?.meta_title || "",
+    meta_description: initialData?.meta_description || "",
+    meta_keywords: initialData?.meta_keywords || "",
+    og_image: initialData?.og_image || "",
+    og_title: initialData?.og_title || "",
+    og_description: initialData?.og_description || "",
+    structured_data: initialData?.structured_data || {},
+    
+    // Analytics et tracking
+    analytics_enabled: initialData?.analytics_enabled || false,
+    track_views: initialData?.track_views || false,
+    track_clicks: initialData?.track_clicks || false,
+    track_purchases: initialData?.track_purchases || false,
+    track_time_spent: initialData?.track_time_spent || false,
+    google_analytics_id: initialData?.google_analytics_id || "",
+    facebook_pixel_id: initialData?.facebook_pixel_id || "",
+    google_tag_manager_id: initialData?.google_tag_manager_id || "",
+    tiktok_pixel_id: initialData?.tiktok_pixel_id || "",
+    pinterest_pixel_id: initialData?.pinterest_pixel_id || "",
+    advanced_tracking: initialData?.advanced_tracking || false,
+    custom_events: initialData?.custom_events || [],
+    
+    // Pixels de tracking
+    pixels_config: initialData?.pixels_config || {
+      facebook: { enabled: false, events: [] },
+      google: { enabled: false, events: [] },
+      tiktok: { enabled: false, events: [] },
+      pinterest: { enabled: false, events: [] }
+    },
+    
+    // Variantes de produits
+    variants: initialData?.variants || [],
+    attributes: initialData?.attributes || [],
+    inventory_tracking: initialData?.inventory_tracking || false,
+    stock_quantity: initialData?.stock_quantity || null,
+    low_stock_threshold: initialData?.low_stock_threshold || null,
+    
+    // Promotions et réductions
     automatic_discount_enabled: initialData?.automatic_discount_enabled || false,
     discount_trigger: initialData?.discount_trigger || "",
     sale_start_date: initialData?.sale_start_date || null,
     sale_end_date: initialData?.sale_end_date || null,
-    post_purchase_guide_url: initialData?.post_purchase_guide_url || "",
+    promotions: initialData?.promotions || [],
+    
+    // Sécurité et accès
     password_protected: initialData?.password_protected || false,
     product_password: initialData?.product_password || "",
     watermark_enabled: initialData?.watermark_enabled || false,
     purchase_limit: initialData?.purchase_limit || null,
+    access_control: initialData?.access_control || "public",
+    
+    // Visibilité et affichage
     hide_from_store: initialData?.hide_from_store || false,
     hide_purchase_count: initialData?.hide_purchase_count || false,
+    featured: initialData?.featured || false,
+    sort_order: initialData?.sort_order || 0,
+    
+    // Livraison et expédition
     collect_shipping_address: initialData?.collect_shipping_address || false,
-    meta_title: initialData?.meta_title || "",
-    meta_description: initialData?.meta_description || "",
-    og_image: initialData?.og_image || "",
+    shipping_required: initialData?.shipping_required || false,
+    shipping_cost: initialData?.shipping_cost || 0,
+    free_shipping_threshold: initialData?.free_shipping_threshold || null,
+    
+    // Support et guides
+    post_purchase_guide_url: initialData?.post_purchase_guide_url || "",
+    support_email: initialData?.support_email || "",
+    documentation_url: initialData?.documentation_url || "",
+    
+    // État et statut
     is_draft: initialData?.is_draft !== undefined ? initialData.is_draft : true,
+    is_active: initialData?.is_active || false,
+    is_featured: initialData?.is_featured || false,
+    status: initialData?.status || "draft",
+    
+    // Métadonnées techniques
+    created_at: initialData?.created_at || new Date().toISOString(),
+    updated_at: initialData?.updated_at || new Date().toISOString(),
+    version: initialData?.version || 1,
   });
 
   const updateFormData = (field: string, value: any) => {
@@ -101,31 +185,12 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
     
     setLoading(true);
     try {
-      // Validation
-      if (!formData.name.trim()) {
+      // Validation complète
+      const validationErrors = validateProductData(formData);
+      if (validationErrors.length > 0) {
         toast({
-          title: "Erreur",
-          description: "Le nom du produit est obligatoire",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      if (!formData.slug.trim()) {
-        toast({
-          title: "Erreur",
-          description: "L'URL du produit est obligatoire",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      if (formData.price < 0) {
-        toast({
-          title: "Erreur",
-          description: "Le prix ne peut pas être négatif",
+          title: "Erreurs de validation",
+          description: validationErrors.join(", "),
           variant: "destructive",
         });
         setLoading(false);
@@ -144,24 +209,33 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
         return;
       }
 
+      // Préparer les données du produit
       const productData = {
         ...formData,
         is_draft: !publish,
         is_active: publish,
+        status: publish ? "published" : "draft",
         meta_title: formData.meta_title || formData.name,
         meta_description: formData.meta_description || formData.description?.substring(0, 160),
         slug: formData.slug.trim().toLowerCase(),
         name: formData.name.trim(),
+        updated_at: new Date().toISOString(),
+        version: (formData.version || 1) + 1,
       };
+
+      let savedProduct;
 
       if (productId) {
         // Update existing product
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("products")
           .update(productData)
-          .eq("id", productId);
+          .eq("id", productId)
+          .select()
+          .single();
 
         if (error) throw error;
+        savedProduct = data;
       } else {
         // Create new product
         const { data, error } = await supabase
@@ -169,33 +243,25 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
           .insert({
             ...productData,
             store_id: storeId,
+            created_at: new Date().toISOString(),
           })
           .select()
           .single();
 
         if (error) throw error;
-        
-        if (data) {
-          toast({
-            title: "Succès",
-            description: publish ? "Produit publié avec succès" : "Produit enregistré en brouillon",
-          });
-
-          // Redirect to edit page with the new product ID
-          if (onSuccess) {
-            onSuccess();
-          } else {
-            navigate("/dashboard/products");
-          }
-        }
+        savedProduct = data;
       }
 
-      if (productId) {
+      if (savedProduct) {
+        // Sauvegarder les données associées
+        await saveRelatedData(savedProduct.id);
+
         toast({
           title: "Succès",
-          description: publish ? "Produit publié avec succès" : "Produit mis à jour",
+          description: publish ? "Produit publié avec succès" : productId ? "Produit mis à jour" : "Produit enregistré en brouillon",
         });
 
+        // Redirect to edit page with the new product ID
         if (onSuccess) {
           onSuccess();
         } else {
@@ -211,6 +277,120 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fonction de validation complète
+  const validateProductData = (data: any): string[] => {
+    const errors: string[] = [];
+
+    if (!data.name?.trim()) {
+      errors.push("Le nom du produit est obligatoire");
+    }
+
+    if (!data.slug?.trim()) {
+      errors.push("L'URL du produit est obligatoire");
+    }
+
+    if (data.price < 0) {
+      errors.push("Le prix ne peut pas être négatif");
+    }
+
+    if (data.product_type === "digital" && data.downloadable_files?.length === 0) {
+      errors.push("Un produit numérique doit avoir au moins un fichier téléchargeable");
+    }
+
+    if (data.password_protected && !data.product_password?.trim()) {
+      errors.push("Un mot de passe est requis pour les produits protégés");
+    }
+
+    if (data.purchase_limit && data.purchase_limit < 1) {
+      errors.push("La limite d'achat doit être supérieure à 0");
+    }
+
+    if (data.sale_start_date && data.sale_end_date && new Date(data.sale_start_date) > new Date(data.sale_end_date)) {
+      errors.push("La date de début de promotion doit être antérieure à la date de fin");
+    }
+
+    return errors;
+  };
+
+  // Sauvegarder les données associées
+  const saveRelatedData = async (productId: string) => {
+    try {
+      // Sauvegarder les FAQ
+      if (formData.faqs?.length > 0) {
+        const { error: faqError } = await supabase
+          .from("product_faqs")
+          .upsert(
+            formData.faqs.map((faq: any) => ({
+              ...faq,
+              product_id: productId,
+            })),
+            { onConflict: "id" }
+          );
+        if (faqError) throw faqError;
+      }
+
+      // Sauvegarder les champs personnalisés
+      if (formData.custom_fields?.length > 0) {
+        const { error: fieldsError } = await supabase
+          .from("product_custom_fields")
+          .upsert(
+            formData.custom_fields.map((field: any) => ({
+              ...field,
+              product_id: productId,
+            })),
+            { onConflict: "id" }
+          );
+        if (fieldsError) throw fieldsError;
+      }
+
+      // Sauvegarder les variantes
+      if (formData.variants?.length > 0) {
+        const { error: variantsError } = await supabase
+          .from("product_variants")
+          .upsert(
+            formData.variants.map((variant: any) => ({
+              ...variant,
+              product_id: productId,
+            })),
+            { onConflict: "id" }
+          );
+        if (variantsError) throw variantsError;
+      }
+
+      // Sauvegarder les promotions
+      if (formData.promotions?.length > 0) {
+        const { error: promotionsError } = await supabase
+          .from("product_promotions")
+          .upsert(
+            formData.promotions.map((promotion: any) => ({
+              ...promotion,
+              product_id: productId,
+            })),
+            { onConflict: "id" }
+          );
+        if (promotionsError) throw promotionsError;
+      }
+
+      // Sauvegarder les fichiers téléchargeables
+      if (formData.downloadable_files?.length > 0) {
+        const { error: filesError } = await supabase
+          .from("product_files")
+          .upsert(
+            formData.downloadable_files.map((file: any) => ({
+              ...file,
+              product_id: productId,
+            })),
+            { onConflict: "id" }
+          );
+        if (filesError) throw filesError;
+      }
+
+    } catch (error) {
+      console.error("Error saving related data:", error);
+      throw error;
     }
   };
 
