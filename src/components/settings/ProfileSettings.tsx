@@ -98,10 +98,11 @@ export const ProfileSettings = () => {
         first_name: firstName,
         last_name: lastName,
         display_name: displayName,
-        bio,
-        phone,
-        location,
-        website,
+        // Temporarily disabled until database migration is applied
+        // bio,
+        // phone,
+        // location,
+        // website,
       });
 
       if (success) {

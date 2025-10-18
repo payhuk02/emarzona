@@ -10,10 +10,10 @@ interface Profile {
   display_name: string | null;
   first_name: string | null;
   last_name: string | null;
-  bio: string | null;
-  phone: string | null;
-  location: string | null;
-  website: string | null;
+  bio?: string | null;
+  phone?: string | null;
+  location?: string | null;
+  website?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -41,9 +41,10 @@ export const useProfile = () => {
       setLoading(true);
       console.log('🔄 Fetching profile for user:', user.id);
       
+      // First try to get existing profile with basic fields
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, user_id, avatar_url, display_name, first_name, last_name, created_at, updated_at')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -63,13 +64,9 @@ export const useProfile = () => {
               display_name: user.email,
               first_name: null,
               last_name: null,
-              bio: null,
-              phone: null,
-              location: null,
-              website: null,
             },
           ])
-          .select()
+          .select('id, user_id, avatar_url, display_name, first_name, last_name, created_at, updated_at')
           .single();
 
         if (createError) {
@@ -259,14 +256,27 @@ export const useProfile = () => {
     if (!user) return false;
 
     try {
+      // Only update fields that exist in the database
+      const safeUpdates: any = {};
+      
+      if (updates.first_name !== undefined) safeUpdates.first_name = updates.first_name;
+      if (updates.last_name !== undefined) safeUpdates.last_name = updates.last_name;
+      if (updates.display_name !== undefined) safeUpdates.display_name = updates.display_name;
+      
+      // Only include new fields if they exist (we'll add them later)
+      // if (updates.bio !== undefined) safeUpdates.bio = updates.bio;
+      // if (updates.phone !== undefined) safeUpdates.phone = updates.phone;
+      // if (updates.location !== undefined) safeUpdates.location = updates.location;
+      // if (updates.website !== undefined) safeUpdates.website = updates.website;
+
       const { error } = await supabase
         .from('profiles')
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update({ ...safeUpdates, updated_at: new Date().toISOString() })
         .eq('user_id', user.id);
 
       if (error) throw error;
 
-      setProfile((prev) => prev ? { ...prev, ...updates } : null);
+      setProfile((prev) => prev ? { ...prev, ...safeUpdates } : null);
 
       toast({
         title: 'Succès',

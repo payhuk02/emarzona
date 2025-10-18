@@ -9,6 +9,7 @@ import { NotificationSettings } from "@/components/settings/NotificationSettings
 import { DomainSettings } from "@/components/settings/DomainSettings";
 import { ProfileDebug } from "@/components/debug/ProfileDebug";
 import { ProfileTest } from "@/components/debug/ProfileTest";
+import { DatabaseMigrationInstructions } from "@/components/debug/DatabaseMigrationInstructions";
 
 const Settings = () => {
   return (
@@ -182,7 +183,10 @@ const Settings = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
-                      <ProfileTest />
+                      <DatabaseMigrationInstructions />
+                      <div className="mt-6">
+                        <ProfileTest />
+                      </div>
                     </CardContent>
                   </Card>
                 </TabsContent>
