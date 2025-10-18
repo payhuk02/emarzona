@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarIcon, CheckCircle2, XCircle, Package, Smartphone, Wrench, Info, Zap, Shield, Clock, Users, Target, Globe, Eye, ShoppingCart } from "lucide-react";
+import { CalendarIcon, CheckCircle2, XCircle, Package, Smartphone, Wrench, Info, Zap, Shield, Clock, Users, Target, Globe, Eye, ShoppingCart, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { generateSlug } from "@/lib/store-utils";
@@ -21,9 +21,45 @@ interface ProductInfoTabProps {
   storeId: string;
   storeSlug: string;
   checkSlugAvailability: (slug: string) => Promise<boolean>;
+  validationErrors?: Record<string, string>;
 }
 
-export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugAvailability }: ProductInfoTabProps) => {
+// Constantes pour les choix dynamiques
+const PRODUCT_TYPES = [
+  { value: "digital", label: "Produit Digital", icon: Smartphone, description: "Ebooks, formations, logiciels, templates, fichiers téléchargeables" },
+  { value: "physical", label: "Produit Physique", icon: Package, description: "Vêtements, accessoires, objets artisanaux, produits manufacturés" },
+  { value: "service", label: "Service", icon: Wrench, description: "Consultations, coaching, design, développement, maintenance" },
+];
+
+const DIGITAL_CATEGORIES = [
+  "Formation", "Ebook", "Template", "Logiciel", "Cours en ligne", 
+  "Guide", "Checklist", "Fichier audio", "Vidéo", "Application mobile"
+];
+
+const PHYSICAL_CATEGORIES = [
+  "Vêtements", "Accessoires", "Artisanat", "Électronique", "Maison & Jardin",
+  "Sport", "Beauté", "Livres", "Jouets", "Alimentation"
+];
+
+const SERVICE_CATEGORIES = [
+  "Consultation", "Coaching", "Design", "Développement", "Marketing",
+  "Rédaction", "Traduction", "Maintenance", "Formation", "Conseil"
+];
+
+const PRICING_MODELS = [
+  { value: "one-time", label: "Paiement unique", description: "Les clients paient une seule fois" },
+  { value: "subscription", label: "Abonnement", description: "Paiement récurrent mensuel/annuel" },
+  { value: "pay-what-you-want", label: "Prix libre", description: "Le client choisit le montant" },
+  { value: "free", label: "Gratuit", description: "Produit gratuit" },
+];
+
+const ACCESS_CONTROLS = [
+  { value: "public", label: "Public", description: "Tout le monde peut voir et acheter" },
+  { value: "logged_in", label: "Utilisateurs connectés", description: "Seuls les utilisateurs connectés" },
+  { value: "purchasers", label: "Acheteurs uniquement", description: "Seuls les acheteurs précédents" },
+];
+
+export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugAvailability, validationErrors = {} }: ProductInfoTabProps) => {
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const [checkingSlug, setCheckingSlug] = useState(false);
 
@@ -42,397 +78,455 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
 
   const productUrl = `${window.location.origin}/${storeSlug}/${formData.slug}`;
 
+  // Obtenir les catégories selon le type de produit
+  const getCategories = () => {
+    switch (formData.product_type) {
+      case "digital": return DIGITAL_CATEGORIES;
+      case "physical": return PHYSICAL_CATEGORIES;
+      case "service": return SERVICE_CATEGORIES;
+      default: return [];
+    }
+  };
+
   return (
-    <div className="saas-space-y-6">
+    <div className="theme-space-y-6">
       {/* Sélecteur de type de produit */}
-      <div className="saas-section-card">
+      <div className="theme-section-card">
         <div className="flex items-center gap-2 mb-3">
-          <Package className="h-5 w-5 text-blue-600" />
-          <h3 className="saas-section-title">Type de produit</h3>
+          <Package className="h-5 w-5 text-blue-400" />
+          <h3 className="theme-section-title">Type de produit</h3>
         </div>
-        <p className="saas-section-description">
+        <p className="theme-section-description">
           Choisissez le type de produit que vous souhaitez vendre
         </p>
         
-        <div className="saas-grid saas-grid-cols-3">
-          <div
-            className={cn(
-              "p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md",
-              formData.product_type === "digital" 
-                ? "border-blue-500 bg-blue-50" 
-                : "border-gray-200 hover:border-blue-300"
-            )}
-            onClick={() => updateFormData("product_type", "digital")}
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <Smartphone className="h-6 w-6 text-blue-600" />
-              <h3 className="font-semibold saas-text-primary">Produit Digital</h3>
-            </div>
-            <p className="saas-label-description mb-3">
-              Ebooks, formations, logiciels, templates, fichiers téléchargeables
-            </p>
-            <div className="flex flex-wrap gap-1">
-              <span className="saas-badge">Téléchargement instantané</span>
-              <span className="saas-badge">Pas de stock</span>
-              <span className="saas-badge">Livraison automatique</span>
-            </div>
-          </div>
-
-          <div
-            className={cn(
-              "p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md",
-              formData.product_type === "physical" 
-                ? "border-blue-500 bg-blue-50" 
-                : "border-gray-200 hover:border-blue-300"
-            )}
-            onClick={() => updateFormData("product_type", "physical")}
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <Package className="h-6 w-6 text-blue-600" />
-              <h3 className="font-semibold saas-text-primary">Produit Physique</h3>
-            </div>
-            <p className="saas-label-description mb-3">
-              Vêtements, accessoires, objets artisanaux, produits manufacturés
-            </p>
-            <div className="flex flex-wrap gap-1">
-              <span className="saas-badge">Livraison requise</span>
-              <span className="saas-badge">Gestion stock</span>
-              <span className="saas-badge">Adresse client</span>
-            </div>
-          </div>
-
-          <div
-            className={cn(
-              "p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md",
-              formData.product_type === "service" 
-                ? "border-blue-500 bg-blue-50" 
-                : "border-gray-200 hover:border-blue-300"
-            )}
-            onClick={() => updateFormData("product_type", "service")}
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <Wrench className="h-6 w-6 text-blue-600" />
-              <h3 className="font-semibold saas-text-primary">Service</h3>
-            </div>
-            <p className="saas-label-description mb-3">
-              Consultations, coaching, design, développement, maintenance
-            </p>
-            <div className="flex flex-wrap gap-1">
-              <span className="saas-badge">Rendez-vous</span>
-              <span className="saas-badge">Prestation</span>
-              <span className="saas-badge">Sur mesure</span>
-            </div>
-          </div>
+        <div className="theme-grid theme-grid-cols-3">
+          {PRODUCT_TYPES.map((type) => {
+            const Icon = type.icon;
+            return (
+              <div
+                key={type.value}
+                className={cn(
+                  "p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md",
+                  formData.product_type === type.value 
+                    ? "border-blue-400 bg-blue-400/10" 
+                    : "border-gray-600 hover:border-blue-400"
+                )}
+                onClick={() => updateFormData("product_type", type.value)}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Icon className="h-6 w-6 text-blue-400" />
+                  <h3 className="font-semibold text-white">{type.label}</h3>
+                </div>
+                <p className="text-sm text-gray-400 mb-3">
+                  {type.description}
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {type.value === "digital" && (
+                    <>
+                      <span className="theme-badge">Téléchargement instantané</span>
+                      <span className="theme-badge">Pas de stock</span>
+                      <span className="theme-badge">Livraison automatique</span>
+                    </>
+                  )}
+                  {type.value === "physical" && (
+                    <>
+                      <span className="theme-badge">Livraison requise</span>
+                      <span className="theme-badge">Gestion stock</span>
+                      <span className="theme-badge">Adresse client</span>
+                    </>
+                  )}
+                  {type.value === "service" && (
+                    <>
+                      <span className="theme-badge">Rendez-vous</span>
+                      <span className="theme-badge">Prestation</span>
+                      <span className="theme-badge">Sur mesure</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
+        
+        {validationErrors.product_type && (
+          <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
+            <AlertCircle className="h-4 w-4" />
+            {validationErrors.product_type}
+          </p>
+        )}
       </div>
 
       {/* Informations de base */}
-      <div className="saas-section-card">
+      <div className="theme-section-card">
         <div className="flex items-center gap-2 mb-3">
-          <Info className="h-5 w-5 text-gray-600" />
-          <h3 className="saas-section-title">Informations de base</h3>
+          <Info className="h-5 w-5 text-gray-400" />
+          <h3 className="theme-section-title">Informations de base</h3>
         </div>
-        <p className="saas-section-description">
+        <p className="theme-section-description">
           Renseignez les informations essentielles de votre produit
         </p>
         
-        <div className="saas-space-y-4">
+        <div className="theme-space-y-4">
           <div>
-            <label className="saas-label">Nom du produit *</label>
+            <label className="theme-label">Nom du produit *</label>
             <Input
               value={formData.name}
               onChange={(e) => updateFormData("name", e.target.value)}
               placeholder="Ex: Guide complet Facebook Ads 2025"
-              className="saas-input"
+              className={cn("theme-input", validationErrors.name && "border-red-500")}
             />
+            {validationErrors.name && (
+              <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
+                <AlertCircle className="h-4 w-4" />
+                {validationErrors.name}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="saas-label">URL du produit *</label>
-            <div className="saas-space-y-2">
+            <label className="theme-label">URL du produit *</label>
+            <div className="theme-space-y-2">
               <div className="flex gap-2">
                 <Input
                   value={formData.slug}
                   onChange={(e) => updateFormData("slug", generateSlug(e.target.value))}
                   placeholder="guide-facebook-ads-2025"
-                  className="saas-input flex-1"
+                  className={cn("theme-input flex-1", validationErrors.slug && "border-red-500")}
                 />
                 {checkingSlug ? (
-                  <div className="flex items-center text-gray-500">
-                    <span className="text-sm">Vérification...</span>
+                  <div className="flex items-center text-gray-400">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
                   </div>
                 ) : slugAvailable === true ? (
-                  <div className="flex items-center text-green-600">
+                  <div className="flex items-center text-green-400">
                     <CheckCircle2 className="h-5 w-5" />
                   </div>
                 ) : slugAvailable === false ? (
-                  <div className="flex items-center text-red-600">
+                  <div className="flex items-center text-red-400">
                     <XCircle className="h-5 w-5" />
                   </div>
                 ) : null}
               </div>
-              <p className="text-sm saas-text-secondary break-all">{productUrl}</p>
+              <p className="text-sm text-gray-400 break-all">
+                URL complète : <span className="font-mono bg-gray-700 px-2 py-1 rounded text-xs">{productUrl}</span>
+              </p>
+              {validationErrors.slug && (
+                <p className="text-red-400 text-sm flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4" />
+                  {validationErrors.slug}
+                </p>
+              )}
             </div>
           </div>
 
-          <div className="saas-grid saas-grid-cols-2">
+          <div className="theme-grid theme-grid-cols-2">
             <div>
-              <label className="saas-label">Catégorie *</label>
-              <Select value={formData.category} onValueChange={(value) => updateFormData("category", value)}>
-                <SelectTrigger className="saas-input">
+              <label className="theme-label">Catégorie *</label>
+              <Select 
+                value={formData.category} 
+                onValueChange={(value) => updateFormData("category", value)}
+              >
+                <SelectTrigger className={cn("theme-input", validationErrors.category && "border-red-500")}>
                   <SelectValue placeholder="Sélectionnez une catégorie" />
                 </SelectTrigger>
-                <SelectContent>
-                  {formData.product_type === "digital" && (
-                    <>
-                      <SelectItem value="Formation">Formation</SelectItem>
-                      <SelectItem value="Ebook">Ebook</SelectItem>
-                      <SelectItem value="Template">Template</SelectItem>
-                      <SelectItem value="Logiciel">Logiciel</SelectItem>
-                      <SelectItem value="Cours en ligne">Cours en ligne</SelectItem>
-                      <SelectItem value="Guide">Guide</SelectItem>
-                      <SelectItem value="Checklist">Checklist</SelectItem>
-                      <SelectItem value="Fichier audio">Fichier audio</SelectItem>
-                      <SelectItem value="Vidéo">Vidéo</SelectItem>
-                    </>
-                  )}
-                  {formData.product_type === "physical" && (
-                    <>
-                      <SelectItem value="Vêtements">Vêtements</SelectItem>
-                      <SelectItem value="Accessoires">Accessoires</SelectItem>
-                      <SelectItem value="Artisanat">Artisanat</SelectItem>
-                      <SelectItem value="Électronique">Électronique</SelectItem>
-                      <SelectItem value="Maison & Jardin">Maison & Jardin</SelectItem>
-                      <SelectItem value="Sport">Sport</SelectItem>
-                      <SelectItem value="Beauté">Beauté</SelectItem>
-                      <SelectItem value="Livres">Livres</SelectItem>
-                      <SelectItem value="Jouets">Jouets</SelectItem>
-                    </>
-                  )}
-                  {formData.product_type === "service" && (
-                    <>
-                      <SelectItem value="Consultation">Consultation</SelectItem>
-                      <SelectItem value="Coaching">Coaching</SelectItem>
-                      <SelectItem value="Design">Design</SelectItem>
-                      <SelectItem value="Développement">Développement</SelectItem>
-                      <SelectItem value="Marketing">Marketing</SelectItem>
-                      <SelectItem value="Rédaction">Rédaction</SelectItem>
-                      <SelectItem value="Traduction">Traduction</SelectItem>
-                      <SelectItem value="Maintenance">Maintenance</SelectItem>
-                      <SelectItem value="Formation">Formation</SelectItem>
-                    </>
-                  )}
+                <SelectContent className="bg-gray-800 border-gray-600">
+                  {getCategories().map((category) => (
+                    <SelectItem key={category} value={category} className="text-white hover:bg-gray-700">
+                      {category}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              {validationErrors.category && (
+                <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4" />
+                  {validationErrors.category}
+                </p>
+              )}
             </div>
             <div>
-              <label className="saas-label">Modèle de tarification *</label>
-              <Select value={formData.pricing_model} onValueChange={(value) => updateFormData("pricing_model", value)}>
-                <SelectTrigger className="saas-input">
+              <label className="theme-label">Modèle de tarification *</label>
+              <Select 
+                value={formData.pricing_model} 
+                onValueChange={(value) => updateFormData("pricing_model", value)}
+              >
+                <SelectTrigger className={cn("theme-input", validationErrors.pricing_model && "border-red-500")}>
                   <SelectValue placeholder="Sélectionnez un modèle" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="one-time">Paiement unique</SelectItem>
-                  <SelectItem value="subscription">Abonnement</SelectItem>
-                  <SelectItem value="pay-what-you-want">Prix libre</SelectItem>
-                  <SelectItem value="free">Gratuit</SelectItem>
+                <SelectContent className="bg-gray-800 border-gray-600">
+                  {PRICING_MODELS.map((model) => (
+                    <SelectItem key={model.value} value={model.value} className="text-white hover:bg-gray-700">
+                      <div>
+                        <div className="font-medium">{model.label}</div>
+                        <div className="text-xs text-gray-400">{model.description}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              {validationErrors.pricing_model && (
+                <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4" />
+                  {validationErrors.pricing_model}
+                </p>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Prix et tarification */}
-      <div className="saas-section-card">
+      <div className="theme-section-card">
         <div className="flex items-center gap-2 mb-3">
-          <Zap className="h-5 w-5 text-gray-600" />
-          <h3 className="saas-section-title">Prix et tarification</h3>
+          <Zap className="h-5 w-5 text-gray-400" />
+          <h3 className="theme-section-title">Prix et tarification</h3>
         </div>
-        <p className="saas-section-description">
+        <p className="theme-section-description">
           Configurez le prix et le modèle de tarification de votre produit
         </p>
         
-        <div className="saas-space-y-4">
-          <div className="saas-grid saas-grid-cols-2">
+        <div className="theme-space-y-4">
+          <div className="theme-grid theme-grid-cols-2">
             <div>
-              <label className="saas-label">Prix *</label>
+              <label className="theme-label">Prix *</label>
               <Input
                 type="number"
                 value={formData.price}
                 onChange={(e) => updateFormData("price", parseFloat(e.target.value) || 0)}
                 placeholder="0"
-                className="saas-input"
+                className={cn("theme-input", validationErrors.price && "border-red-500")}
               />
+              {validationErrors.price && (
+                <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4" />
+                  {validationErrors.price}
+                </p>
+              )}
             </div>
             <div>
-              <label className="saas-label">Devise *</label>
+              <label className="theme-label">Devise *</label>
               <CurrencySelect
                 value={formData.currency}
                 onValueChange={(value) => updateFormData("currency", value)}
-                className="saas-input"
+                className="theme-input"
               />
             </div>
           </div>
 
           <div>
-            <label className="saas-label">Prix promotionnel</label>
+            <label className="theme-label">Prix promotionnel</label>
             <Input
               type="number"
               value={formData.promotional_price || ""}
               onChange={(e) => updateFormData("promotional_price", e.target.value ? parseFloat(e.target.value) : null)}
               placeholder="0"
-              className="saas-input"
+              className={cn("theme-input", validationErrors.promotional_price && "border-red-500")}
             />
+            {validationErrors.promotional_price && (
+              <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
+                <AlertCircle className="h-4 w-4" />
+                {validationErrors.promotional_price}
+              </p>
+            )}
           </div>
         </div>
       </div>
 
       {/* Visibilité et accès */}
-      <div className="saas-section-card">
+      <div className="theme-section-card">
         <div className="flex items-center gap-2 mb-3">
-          <Eye className="h-5 w-5 text-gray-600" />
-          <h3 className="saas-section-title">Visibilité et accès</h3>
+          <Eye className="h-5 w-5 text-gray-400" />
+          <h3 className="theme-section-title">Visibilité et accès</h3>
         </div>
-        <p className="saas-section-description">
+        <p className="theme-section-description">
           Contrôlez qui peut voir et acheter votre produit
         </p>
         
-        <div className="saas-space-y-4">
+        <div className="theme-space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <label className="saas-label">Produit actif</label>
-              <p className="saas-label-description">Rendre le produit visible et achetable</p>
+              <label className="theme-label">Produit actif</label>
+              <p className="theme-label-description">Rendre le produit visible et achetable</p>
             </div>
             <Switch
               checked={formData.is_active}
               onCheckedChange={(checked) => updateFormData("is_active", checked)}
-              className="saas-switch"
+              className="theme-switch"
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <label className="saas-label">Mettre en avant</label>
-              <p className="saas-label-description">Afficher ce produit sur la page d'accueil</p>
+              <label className="theme-label">Mettre en avant</label>
+              <p className="theme-label-description">Afficher ce produit sur la page d'accueil</p>
             </div>
             <Switch
               checked={formData.is_featured}
               onCheckedChange={(checked) => updateFormData("is_featured", checked)}
-              className="saas-switch"
+              className="theme-switch"
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <label className="saas-label">Masquer de la boutique</label>
-              <p className="saas-label-description">Le produit ne sera pas listé publiquement</p>
+              <label className="theme-label">Masquer de la boutique</label>
+              <p className="theme-label-description">Le produit ne sera pas listé publiquement</p>
             </div>
             <Switch
               checked={formData.hide_from_store}
               onCheckedChange={(checked) => updateFormData("hide_from_store", checked)}
-              className="saas-switch"
+              className="theme-switch"
             />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <label className="theme-label">Protéger par mot de passe</label>
+              <p className="theme-label-description">Un mot de passe sera requis pour accéder au produit</p>
+            </div>
+            <Switch
+              checked={formData.password_protected}
+              onCheckedChange={(checked) => updateFormData("password_protected", checked)}
+              className="theme-switch"
+            />
+          </div>
+          
+          {formData.password_protected && (
+            <div>
+              <label className="theme-label">Mot de passe du produit</label>
+              <Input
+                type="password"
+                value={formData.product_password}
+                onChange={(e) => updateFormData("product_password", e.target.value)}
+                placeholder="Mot de passe sécurisé"
+                className="theme-input"
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="theme-label">Contrôle d'accès</label>
+            <Select 
+              value={formData.access_control} 
+              onValueChange={(value) => updateFormData("access_control", value)}
+            >
+              <SelectTrigger className="theme-input">
+                <SelectValue placeholder="Sélectionner le contrôle d'accès" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-600">
+                {ACCESS_CONTROLS.map((control) => (
+                  <SelectItem key={control.value} value={control.value} className="text-white hover:bg-gray-700">
+                    <div>
+                      <div className="font-medium">{control.label}</div>
+                      <div className="text-xs text-gray-400">{control.description}</div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
 
       {/* Options d'achat */}
-      <div className="saas-section-card">
+      <div className="theme-section-card">
         <div className="flex items-center gap-2 mb-3">
-          <ShoppingCart className="h-5 w-5 text-gray-600" />
-          <h3 className="saas-section-title">Options d'achat</h3>
+          <ShoppingCart className="h-5 w-5 text-gray-400" />
+          <h3 className="theme-section-title">Options d'achat</h3>
         </div>
-        <p className="saas-section-description">
+        <p className="theme-section-description">
           Configurez les règles d'achat pour ce produit
         </p>
         
-        <div className="saas-space-y-4">
+        <div className="theme-space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <label className="saas-label">Limite d'achat par client</label>
-              <p className="saas-label-description">Nombre maximum d'achats par client</p>
+              <label className="theme-label">Limite d'achat par client</label>
+              <p className="theme-label-description">Nombre maximum d'achats par client</p>
             </div>
             <Input
               type="number"
               value={formData.purchase_limit || ""}
               onChange={(e) => updateFormData("purchase_limit", parseInt(e.target.value) || null)}
               placeholder="0 = illimité"
-              className="saas-input w-24"
+              className="theme-input w-24"
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <label className="saas-label">Masquer le nombre d'achats</label>
-              <p className="saas-label-description">Ne pas afficher le nombre d'achats</p>
+              <label className="theme-label">Masquer le nombre d'achats</label>
+              <p className="theme-label-description">Ne pas afficher le nombre d'achats</p>
             </div>
             <Switch
               checked={formData.hide_purchase_count}
               onCheckedChange={(checked) => updateFormData("hide_purchase_count", checked)}
-              className="saas-switch"
+              className="theme-switch"
             />
           </div>
         </div>
       </div>
 
       {/* Dates de vente */}
-      <div className="saas-section-card">
+      <div className="theme-section-card">
         <div className="flex items-center gap-2 mb-3">
-          <CalendarIcon className="h-5 w-5 text-gray-600" />
-          <h3 className="saas-section-title">Dates de vente</h3>
+          <CalendarIcon className="h-5 w-5 text-gray-400" />
+          <h3 className="theme-section-title">Dates de vente</h3>
         </div>
-        <p className="saas-section-description">
+        <p className="theme-section-description">
           Définissez des périodes spécifiques pour la vente
         </p>
         
-        <div className="saas-grid saas-grid-cols-2">
+        <div className="theme-grid theme-grid-cols-2">
           <div>
-            <label className="saas-label">Date de début de vente</label>
+            <label className="theme-label">Date de début de vente</label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
                   className={cn(
-                    "w-full justify-start text-left font-normal saas-input",
-                    !formData.sale_start_date && "text-muted-foreground"
+                    "w-full justify-start text-left font-normal theme-input",
+                    !formData.sale_start_date && "text-gray-400"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {formData.sale_start_date ? format(new Date(formData.sale_start_date), "PPP") : <span>Sélectionner une date</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 saas-popover">
+              <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-600">
                 <Calendar
                   mode="single"
                   selected={formData.sale_start_date ? new Date(formData.sale_start_date) : undefined}
                   onSelect={(date) => updateFormData("sale_start_date", date?.toISOString() || null)}
                   initialFocus
+                  className="bg-gray-800 text-white"
                 />
               </PopoverContent>
             </Popover>
           </div>
           <div>
-            <label className="saas-label">Date de fin de vente</label>
+            <label className="theme-label">Date de fin de vente</label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
                   className={cn(
-                    "w-full justify-start text-left font-normal saas-input",
-                    !formData.sale_end_date && "text-muted-foreground"
+                    "w-full justify-start text-left font-normal theme-input",
+                    !formData.sale_end_date && "text-gray-400"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {formData.sale_end_date ? format(new Date(formData.sale_end_date), "PPP") : <span>Sélectionner une date</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 saas-popover">
+              <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-600">
                 <Calendar
                   mode="single"
                   selected={formData.sale_end_date ? new Date(formData.sale_end_date) : undefined}
                   onSelect={(date) => updateFormData("sale_end_date", date?.toISOString() || null)}
                   initialFocus
+                  className="bg-gray-800 text-white"
                 />
               </PopoverContent>
             </Popover>
@@ -441,46 +535,46 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
       </div>
 
       {/* Métadonnées techniques */}
-      <div className="saas-section-card">
+      <div className="theme-section-card">
         <div className="flex items-center gap-2 mb-3">
-          <Globe className="h-5 w-5 text-gray-600" />
-          <h3 className="saas-section-title">Métadonnées techniques</h3>
+          <Globe className="h-5 w-5 text-gray-400" />
+          <h3 className="theme-section-title">Métadonnées techniques</h3>
         </div>
-        <p className="saas-section-description">
+        <p className="theme-section-description">
           Informations système sur le produit
         </p>
         
-        <div className="saas-grid saas-grid-cols-2">
+        <div className="theme-grid theme-grid-cols-2">
           <div>
-            <label className="saas-label">Créé le</label>
+            <label className="theme-label">Créé le</label>
             <Input 
               value={formData.created_at ? format(new Date(formData.created_at), "PPP p") : "N/A"} 
               readOnly 
-              className="saas-input" 
+              className="theme-input bg-gray-700" 
             />
           </div>
           <div>
-            <label className="saas-label">Dernière mise à jour</label>
+            <label className="theme-label">Dernière mise à jour</label>
             <Input 
               value={formData.updated_at ? format(new Date(formData.updated_at), "PPP p") : "N/A"} 
               readOnly 
-              className="saas-input" 
+              className="theme-input bg-gray-700" 
             />
           </div>
           <div>
-            <label className="saas-label">Version</label>
+            <label className="theme-label">Version</label>
             <Input 
               value={formData.version || "1.0.0"} 
               readOnly 
-              className="saas-input" 
+              className="theme-input bg-gray-700" 
             />
           </div>
           <div>
-            <label className="saas-label">Statut</label>
+            <label className="theme-label">Statut</label>
             <Input 
               value={formData.status || "Brouillon"} 
               readOnly 
-              className="saas-input" 
+              className="theme-input bg-gray-700" 
             />
           </div>
         </div>
