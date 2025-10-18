@@ -37,7 +37,7 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
             {/* Logo */}
             <div className="flex-shrink-0 -mt-12 sm:-mt-16">
               {store.logo_url ? (
-                <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-full overflow-hidden border-4 border-background shadow-large bg-card">
+                <div className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 rounded-full overflow-hidden border-3 sm:border-4 border-background shadow-large bg-card">
                   <img
                     src={store.logo_url}
                     alt={store.name}
@@ -45,8 +45,8 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
                   />
                 </div>
               ) : (
-                <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-full border-4 border-background shadow-large bg-muted flex items-center justify-center">
-                  <Users className="h-12 w-12 text-muted-foreground" />
+                <div className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 rounded-full border-3 sm:border-4 border-background shadow-large bg-muted flex items-center justify-center">
+                  <Users className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-muted-foreground" />
                 </div>
               )}
             </div>

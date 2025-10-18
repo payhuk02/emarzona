@@ -241,11 +241,11 @@ export const ProfileSettings = () => {
             {/* Profile Picture */}
             <div className="space-y-4">
               <Label>Photo de profil</Label>
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <Avatar className="h-20 w-20 cursor-pointer" onClick={handleAvatarClick}>
-                    <AvatarImage src={profile.avatar_url || undefined} alt="Profile" />
-                    <AvatarFallback className="text-lg font-semibold">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                <div className="relative group">
+                  <Avatar className="h-20 w-20 sm:h-24 sm:w-24 cursor-pointer ring-2 ring-border transition-all duration-300 group-hover:ring-primary" onClick={handleAvatarClick}>
+                    <AvatarImage src={profile.avatar_url || undefined} alt="Profile" className="object-cover" />
+                    <AvatarFallback className="text-lg sm:text-xl font-semibold bg-gradient-to-br from-primary/20 to-primary/5 text-primary">
                       {getInitials()}
                     </AvatarFallback>
                   </Avatar>
@@ -253,20 +253,20 @@ export const ProfileSettings = () => {
                     <Button
                       variant="destructive"
                       size="sm"
-                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                      className="absolute -top-2 -right-2 h-6 w-6 sm:h-7 sm:w-7 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                       onClick={handleRemoveAvatar}
                     >
-                      <X className="h-3 w-3" />
+                      <X className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                   )}
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 w-full sm:w-auto">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={handleAvatarClick}
                     disabled={uploading}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 w-full sm:w-auto"
                   >
                     {uploading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -275,7 +275,7 @@ export const ProfileSettings = () => {
                     )}
                     {uploading ? "Téléchargement..." : "Télécharger"}
                   </Button>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     JPG, PNG ou WEBP. Maximum 5 Mo.
                   </p>
                 </div>

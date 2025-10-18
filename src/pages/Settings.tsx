@@ -10,6 +10,7 @@ import { DomainSettings } from "@/components/settings/DomainSettings";
 import { ProfileDebug } from "@/components/debug/ProfileDebug";
 import { ProfileTest } from "@/components/debug/ProfileTest";
 import { DatabaseMigrationInstructions } from "@/components/debug/DatabaseMigrationInstructions";
+import { MobileResponsiveTest } from "@/components/debug/MobileResponsiveTest";
 
 const Settings = () => {
   return (
@@ -182,12 +183,15 @@ const Settings = () => {
                         Testez la connexion et la structure de la base de données
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
-                      <DatabaseMigrationInstructions />
-                      <div className="mt-6">
-                        <ProfileTest />
-                      </div>
-                    </CardContent>
+                            <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
+                              <DatabaseMigrationInstructions />
+                              <div className="mt-6">
+                                <ProfileTest />
+                              </div>
+                              <div className="mt-6">
+                                <MobileResponsiveTest />
+                              </div>
+                            </CardContent>
                   </Card>
                 </TabsContent>
               </Tabs>

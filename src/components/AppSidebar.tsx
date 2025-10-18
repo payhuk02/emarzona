@@ -199,11 +199,15 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r">
       <SidebarContent>
         {/* Logo */}
-        <div className="p-4 border-b">
+        <div className="p-3 sm:p-4 border-b">
           <div className="flex items-center gap-2">
-            <img src={payhukLogo} alt="Payhuk" className="h-8 w-8 flex-shrink-0" />
+            <img 
+              src={payhukLogo} 
+              alt="Payhuk" 
+              className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 object-contain" 
+            />
             {!isCollapsed && (
-              <span className="text-lg font-bold text-black dark:text-white">
+              <span className="text-base sm:text-lg font-bold text-black dark:text-white truncate">
                 Payhuk
               </span>
             )}

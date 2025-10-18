@@ -84,7 +84,7 @@ export const AvatarUpload = ({
           {value ? (
             <AvatarImage src={value} alt="Avatar" className="object-cover" />
           ) : (
-            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-xl sm:text-2xl font-semibold text-primary">
+            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-lg sm:text-xl font-semibold text-primary">
               {getInitials(displayName)}
             </AvatarFallback>
           )}
@@ -94,11 +94,11 @@ export const AvatarUpload = ({
             type="button"
             variant="destructive"
             size="icon"
-            className="absolute -top-2 -right-2 h-7 w-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+            className="absolute -top-2 -right-2 h-6 w-6 sm:h-7 sm:w-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
             onClick={handleRemove}
             disabled={uploading}
           >
-            <X className="h-4 w-4" />
+            <X className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
         )}
       </div>
