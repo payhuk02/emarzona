@@ -29,7 +29,7 @@ export const useProducts = (storeId?: string) => {
   const fetchProducts = async () => {
     try {
       let query = supabase
-        .from('products' as any)
+        .from('products')
         .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
@@ -41,7 +41,7 @@ export const useProducts = (storeId?: string) => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setProducts((data as any) || []);
+      setProducts(data || []);
     } catch (error: any) {
       toast({
         title: "Erreur",

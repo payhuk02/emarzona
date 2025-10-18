@@ -1,6 +1,32 @@
 import { useEffect } from 'react';
 import { usePixels } from '@/hooks/usePixels';
 
+// Interfaces pour les APIs de tracking
+interface FacebookPixel {
+  (action: string, event: string, data?: any): void;
+}
+
+interface GoogleTag {
+  (command: string, targetId: string, config?: any): void;
+}
+
+interface TikTokPixel {
+  track: (event: string, data?: any) => void;
+}
+
+interface PinterestPixel {
+  track: (event: string, data?: any) => void;
+}
+
+declare global {
+  interface Window {
+    fbq?: FacebookPixel;
+    gtag?: GoogleTag;
+    ttq?: TikTokPixel;
+    pintrk?: PinterestPixel;
+  }
+}
+
 interface PixelInjectorProps {
   storeUserId?: string;
   productId?: string;
@@ -66,7 +92,7 @@ const injectFacebookPixel = (pixelId: string) => {
   if (typeof window === 'undefined') return;
   
   // Check if already injected
-  if ((window as any).fbq) return;
+  if (window.fbq) return;
 
   const script = document.createElement('script');
   script.innerHTML = `
@@ -94,7 +120,7 @@ const injectGooglePixel = (pixelId: string) => {
   if (typeof window === 'undefined') return;
   
   // Check if already injected
-  if ((window as any).gtag) return;
+  if (window.gtag) return;
 
   const script1 = document.createElement('script');
   script1.async = true;
@@ -116,7 +142,7 @@ const injectTikTokPixel = (pixelId: string) => {
   if (typeof window === 'undefined') return;
   
   // Check if already injected
-  if ((window as any).ttq) return;
+  if (window.ttq) return;
 
   const script = document.createElement('script');
   script.innerHTML = `
@@ -134,7 +160,7 @@ const injectPinterestPixel = (pixelId: string) => {
   if (typeof window === 'undefined') return;
   
   // Check if already injected
-  if ((window as any).pintrk) return;
+  if (window.pintrk) return;
 
   const script = document.createElement('script');
   script.innerHTML = `
@@ -167,8 +193,8 @@ const injectCustomCode = (code: string) => {
 export const trackAddToCart = (pixelId: string, pixelType: string, data: any) => {
   switch (pixelType) {
     case 'facebook':
-      if ((window as any).fbq) {
-        (window as any).fbq('track', 'AddToCart', {
+      if (window.fbq) {
+        window.fbq('track', 'AddToCart', {
           content_ids: [data.product_id],
           content_name: data.product_name,
           value: data.amount,
@@ -177,8 +203,8 @@ export const trackAddToCart = (pixelId: string, pixelType: string, data: any) =>
       }
       break;
     case 'google':
-      if ((window as any).gtag) {
-        (window as any).gtag('event', 'add_to_cart', {
+      if (window.gtag) {
+        window.gtag('event', 'add_to_cart', {
           items: [{
             id: data.product_id,
             name: data.product_name,
@@ -188,8 +214,8 @@ export const trackAddToCart = (pixelId: string, pixelType: string, data: any) =>
       }
       break;
     case 'tiktok':
-      if ((window as any).ttq) {
-        (window as any).ttq.track('AddToCart', {
+      if (window.ttq) {
+        window.ttq.track('AddToCart', {
           content_id: data.product_id,
           content_name: data.product_name,
           value: data.amount,
@@ -203,8 +229,8 @@ export const trackAddToCart = (pixelId: string, pixelType: string, data: any) =>
 export const trackPurchase = (pixelId: string, pixelType: string, data: any) => {
   switch (pixelType) {
     case 'facebook':
-      if ((window as any).fbq) {
-        (window as any).fbq('track', 'Purchase', {
+      if (window.fbq) {
+        window.fbq('track', 'Purchase', {
           content_ids: [data.product_id],
           content_name: data.product_name,
           value: data.amount,
@@ -213,8 +239,8 @@ export const trackPurchase = (pixelId: string, pixelType: string, data: any) => 
       }
       break;
     case 'google':
-      if ((window as any).gtag) {
-        (window as any).gtag('event', 'purchase', {
+      if (window.gtag) {
+        window.gtag('event', 'purchase', {
           transaction_id: data.order_id,
           value: data.amount,
           currency: 'XOF',
@@ -227,8 +253,8 @@ export const trackPurchase = (pixelId: string, pixelType: string, data: any) => 
       }
       break;
     case 'tiktok':
-      if ((window as any).ttq) {
-        (window as any).ttq.track('CompletePayment', {
+      if (window.ttq) {
+        window.ttq.track('CompletePayment', {
           content_id: data.product_id,
           content_name: data.product_name,
           value: data.amount,

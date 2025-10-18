@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { monerooClient, MonerooCheckoutData } from "./moneroo-client";
+import { logger } from './logger';
 
 export interface PaymentOptions {
   storeId: string;
@@ -54,11 +55,11 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
       .single();
 
     if (transactionError) {
-      console.error("Error creating transaction:", transactionError);
+      logger.error("Error creating transaction:", transactionError);
       throw new Error("Impossible de créer la transaction");
     }
 
-    console.log("Transaction created:", transaction.id);
+    logger.log("Transaction created:", transaction.id);
 
     // 2. Log de création de transaction
     await supabase.from("transaction_logs").insert([{
@@ -84,11 +85,11 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
       },
     };
 
-    console.log("Initiating Moneroo checkout:", checkoutData);
+    logger.log("Initiating Moneroo checkout:", checkoutData);
 
     const monerooResponse = await monerooClient.createCheckout(checkoutData);
 
-    console.log("Moneroo response:", monerooResponse);
+    logger.log("Moneroo response:", monerooResponse);
 
     // 4. Mettre à jour la transaction avec les infos Moneroo
     const { error: updateError } = await supabase
@@ -102,7 +103,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
       .eq("id", transaction.id);
 
     if (updateError) {
-      console.error("Error updating transaction:", updateError);
+      logger.error("Error updating transaction:", updateError);
     }
 
     // 5. Log du paiement initié
@@ -121,7 +122,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
       moneroo_transaction_id: monerooResponse.transaction_id || monerooResponse.id,
     };
   } catch (error: any) {
-    console.error("Payment initiation error:", error);
+    logger.error("Payment initiation error:", error);
     throw error;
   }
 };

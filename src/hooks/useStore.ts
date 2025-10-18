@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from '@/lib/logger';
 
 export interface Store {
   id: string;
@@ -37,7 +38,7 @@ export const useStore = () => {
 
   const checkSlugAvailability = async (slug: string, excludeStoreId?: string): Promise<boolean> => {
     try {
-      const { data, error } = await supabase.rpc('is_store_slug_available' as any, {
+      const { data, error } = await supabase.rpc('is_store_slug_available', {
         check_slug: slug,
         exclude_store_id: excludeStoreId || null
       });
@@ -45,7 +46,7 @@ export const useStore = () => {
       if (error) throw error;
       return data as boolean;
     } catch (error) {
-      console.error('Error checking slug availability:', error);
+      logger.error('Error checking slug availability:', error);
       return false;
     }
   };
@@ -99,15 +100,15 @@ export const useStore = () => {
       }
 
       const { data, error } = await supabase
-        .from('stores' as any)
+        .from('stores')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (error) throw error;
-      setStore(data as any);
+      setStore(data);
     } catch (error) {
-      console.error('Error fetching store:', error);
+      logger.error('Error fetching store:', error);
       toast({
         title: "Erreur",
         description: "Impossible de charger votre boutique",
@@ -137,7 +138,7 @@ export const useStore = () => {
       }
 
       const { data, error } = await supabase
-        .from('stores' as any)
+        .from('stores')
         .insert({
           user_id: user.id,
           name,
@@ -149,14 +150,14 @@ export const useStore = () => {
 
       if (error) throw error;
 
-      setStore(data as any);
+      setStore(data);
       toast({
         title: "Boutique créée !",
         description: `Votre boutique "${name}" est maintenant en ligne.`
       });
       return true;
     } catch (error) {
-      console.error('Error creating store:', error);
+      logger.error('Error creating store:', error);
       toast({
         title: "Erreur",
         description: "Impossible de créer votre boutique",
@@ -190,7 +191,7 @@ export const useStore = () => {
       }
 
       const { data, error } = await supabase
-        .from('stores' as any)
+        .from('stores')
         .update(updateData)
         .eq('id', store.id)
         .select()
@@ -198,14 +199,14 @@ export const useStore = () => {
 
       if (error) throw error;
 
-      setStore(data as any);
+      setStore(data);
       toast({
         title: "Boutique mise à jour",
         description: "Les modifications ont été enregistrées."
       });
       return true;
     } catch (error) {
-      console.error('Error updating store:', error);
+      logger.error('Error updating store:', error);
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour votre boutique",

@@ -11,8 +11,18 @@ import { useToast } from "@/hooks/use-toast";
 import StoreSlugEditor from "./StoreSlugEditor";
 import StoreImageUpload from "./StoreImageUpload";
 
+interface ExtendedStore extends Store {
+  about?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  facebook_url?: string | null;
+  instagram_url?: string | null;
+  twitter_url?: string | null;
+  linkedin_url?: string | null;
+}
+
 interface StoreDetailsProps {
-  store: Store;
+  store: ExtendedStore;
 }
 
 const StoreDetails = ({ store }: StoreDetailsProps) => {
@@ -21,13 +31,13 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
   const [description, setDescription] = useState(store.description || "");
   const [logoUrl, setLogoUrl] = useState(store.logo_url || "");
   const [bannerUrl, setBannerUrl] = useState(store.banner_url || "");
-  const [about, setAbout] = useState((store as any).about || "");
-  const [contactEmail, setContactEmail] = useState((store as any).contact_email || "");
-  const [contactPhone, setContactPhone] = useState((store as any).contact_phone || "");
-  const [facebookUrl, setFacebookUrl] = useState((store as any).facebook_url || "");
-  const [instagramUrl, setInstagramUrl] = useState((store as any).instagram_url || "");
-  const [twitterUrl, setTwitterUrl] = useState((store as any).twitter_url || "");
-  const [linkedinUrl, setLinkedinUrl] = useState((store as any).linkedin_url || "");
+  const [about, setAbout] = useState(store.about || "");
+  const [contactEmail, setContactEmail] = useState(store.contact_email || "");
+  const [contactPhone, setContactPhone] = useState(store.contact_phone || "");
+  const [facebookUrl, setFacebookUrl] = useState(store.facebook_url || "");
+  const [instagramUrl, setInstagramUrl] = useState(store.instagram_url || "");
+  const [twitterUrl, setTwitterUrl] = useState(store.twitter_url || "");
+  const [linkedinUrl, setLinkedinUrl] = useState(store.linkedin_url || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { updateStore, getStoreUrl, checkSlugAvailability } = useStore();
   const { toast } = useToast();
@@ -81,13 +91,13 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
     setDescription(store.description || "");
     setLogoUrl(store.logo_url || "");
     setBannerUrl(store.banner_url || "");
-    setAbout((store as any).about || "");
-    setContactEmail((store as any).contact_email || "");
-    setContactPhone((store as any).contact_phone || "");
-    setFacebookUrl((store as any).facebook_url || "");
-    setInstagramUrl((store as any).instagram_url || "");
-    setTwitterUrl((store as any).twitter_url || "");
-    setLinkedinUrl((store as any).linkedin_url || "");
+    setAbout(store.about || "");
+    setContactEmail(store.contact_email || "");
+    setContactPhone(store.contact_phone || "");
+    setFacebookUrl(store.facebook_url || "");
+    setInstagramUrl(store.instagram_url || "");
+    setTwitterUrl(store.twitter_url || "");
+    setLinkedinUrl(store.linkedin_url || "");
     setIsEditing(false);
   };
 
@@ -334,37 +344,37 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                 </div>
               )}
 
-              {((store as any).contact_email || (store as any).contact_phone) && (
+              {(store.contact_email || store.contact_phone) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {(store as any).contact_email && (
+                  {store.contact_email && (
                     <div>
                       <p className="text-sm text-muted-foreground">Email</p>
-                      <p className="text-sm">{(store as any).contact_email}</p>
+                      <p className="text-sm">{store.contact_email}</p>
                     </div>
                   )}
-                  {(store as any).contact_phone && (
+                  {store.contact_phone && (
                     <div>
                       <p className="text-sm text-muted-foreground">Téléphone</p>
-                      <p className="text-sm">{(store as any).contact_phone}</p>
+                      <p className="text-sm">{store.contact_phone}</p>
                     </div>
                   )}
                 </div>
               )}
 
-              {(store as any).about && (
+              {store.about && (
                 <div>
                   <p className="text-sm text-muted-foreground">À propos</p>
-                  <p className="text-sm whitespace-pre-wrap">{(store as any).about}</p>
+                  <p className="text-sm whitespace-pre-wrap">{store.about}</p>
                 </div>
               )}
 
-              {((store as any).facebook_url || (store as any).instagram_url || (store as any).twitter_url || (store as any).linkedin_url) && (
+              {(store.facebook_url || store.instagram_url || store.twitter_url || store.linkedin_url) && (
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">Réseaux sociaux</p>
                   <div className="flex flex-wrap gap-2">
-                    {(store as any).facebook_url && (
+                    {store.facebook_url && (
                       <a 
-                        href={(store as any).facebook_url} 
+                        href={store.facebook_url} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="text-sm text-primary hover:underline"
@@ -372,9 +382,9 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                         Facebook
                       </a>
                     )}
-                    {(store as any).instagram_url && (
+                    {store.instagram_url && (
                       <a 
-                        href={(store as any).instagram_url} 
+                        href={store.instagram_url} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="text-sm text-primary hover:underline"
@@ -382,9 +392,9 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                         Instagram
                       </a>
                     )}
-                    {(store as any).twitter_url && (
+                    {store.twitter_url && (
                       <a 
-                        href={(store as any).twitter_url} 
+                        href={store.twitter_url} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="text-sm text-primary hover:underline"
@@ -392,9 +402,9 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                         Twitter
                       </a>
                     )}
-                    {(store as any).linkedin_url && (
+                    {store.linkedin_url && (
                       <a 
-                        href={(store as any).linkedin_url} 
+                        href={store.linkedin_url} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="text-sm text-primary hover:underline"

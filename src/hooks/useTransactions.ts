@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from '@/lib/logger';
 
 export interface Transaction {
   id: string;
@@ -33,7 +34,7 @@ export const useTransactions = (storeId?: string, status?: string) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     if (!storeId) {
       setLoading(false);
       return;
@@ -55,6 +56,7 @@ export const useTransactions = (storeId?: string, status?: string) => {
       if (error) throw error;
       setTransactions(data || []);
     } catch (error: any) {
+      logger.error("Error fetching transactions:", error);
       toast({
         title: "Erreur",
         description: error.message,
@@ -63,7 +65,7 @@ export const useTransactions = (storeId?: string, status?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [storeId, status, toast]);
 
   const createTransaction = async (transactionData: Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'retry_count'>) => {
     try {
@@ -133,7 +135,7 @@ export const useTransactions = (storeId?: string, status?: string) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [storeId, status]);
+  }, [fetchTransactions]);
 
   return { 
     transactions, 

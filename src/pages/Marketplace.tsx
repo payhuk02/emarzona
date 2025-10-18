@@ -9,6 +9,7 @@ import MarketplaceHeader from "@/components/marketplace/MarketplaceHeader";
 import MarketplaceFilters from "@/components/marketplace/MarketplaceFilters";
 import MarketplaceFooter from "@/components/marketplace/MarketplaceFooter";
 import ProductCard from "@/components/marketplace/ProductCard";
+import { logger } from '@/lib/logger';
 
 interface Product {
   id: string;
@@ -79,7 +80,7 @@ const Marketplace = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from("products" as any)
+        .from("products")
         .select(
           `
           *,
@@ -94,9 +95,9 @@ const Marketplace = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setProducts((data as any) || []);
+      setProducts(data || []);
     } catch (error) {
-      console.error("❌ Erreur lors du chargement des produits :", error);
+      logger.error("❌ Erreur lors du chargement des produits :", error);
     } finally {
       setLoading(false);
     }

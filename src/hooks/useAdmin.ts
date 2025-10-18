@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 export const useAdmin = () => {
   const { data: isAdmin, isLoading } = useQuery({
@@ -16,7 +17,7 @@ export const useAdmin = () => {
         .maybeSingle();
 
       if (error) {
-        console.error('Error checking admin status:', error);
+        logger.error('Error checking admin status:', error);
         return false;
       }
 

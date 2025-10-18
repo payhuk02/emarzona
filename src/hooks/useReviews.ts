@@ -53,7 +53,7 @@ export const useReviews = (storeId?: string) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setReviews((data as any) || []);
+      setReviews(data || []);
     } catch (error: any) {
       toast({
         title: "Erreur",
