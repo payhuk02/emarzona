@@ -25,40 +25,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-
-interface Product {
-  id: string;
-  store_id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  short_description?: string | null;
-  price: number;
-  promotional_price?: number | null;
-  currency: string;
-  image_url: string | null;
-  images?: string[];
-  category: string | null;
-  product_type: string | null;
-  rating: number;
-  reviews_count: number;
-  sales_count?: number;
-  is_active: boolean;
-  is_featured?: boolean;
-  created_at: string;
-  updated_at: string;
-  tags?: string[];
-  specifications?: Record<string, any>;
-  stores?: {
-    name: string;
-    slug: string;
-    logo_url: string | null;
-    verified: boolean;
-    rating: number;
-    total_products: number;
-    joined_at: string;
-  } | null;
-}
+import { Product } from "@/types/marketplace";
 
 interface ProductComparisonProps {
   products: Product[];

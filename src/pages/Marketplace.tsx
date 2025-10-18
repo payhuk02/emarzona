@@ -43,56 +43,7 @@ import AdvancedFilters from "@/components/marketplace/AdvancedFilters";
 import ProductComparison from "@/components/marketplace/ProductComparison";
 import FavoritesManager from "@/components/marketplace/FavoritesManager";
 import { logger } from '@/lib/logger';
-
-// Types pour les données
-interface Product {
-  id: string;
-  store_id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  price: number;
-  promotional_price?: number | null;
-  currency: string;
-  image_url: string | null;
-  images?: any; // Json field
-  category: string | null;
-  product_type: string | null;
-  rating: number | null;
-  reviews_count: number | null;
-  is_active: boolean;
-  is_draft: boolean | null;
-  created_at: string;
-  updated_at: string;
-  stores?: {
-    id: string;
-    name: string;
-    slug: string;
-    logo_url: string | null;
-    created_at: string;
-  } | null;
-}
-
-interface FilterState {
-  search: string;
-  category: string;
-  productType: string;
-  priceRange: string;
-  rating: string;
-  sortBy: string;
-  sortOrder: 'asc' | 'desc';
-  viewMode: 'grid' | 'list';
-  tags: string[];
-  verifiedOnly: boolean;
-  featuredOnly: boolean;
-  inStock: boolean;
-}
-
-interface PaginationState {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-}
+import { Product, FilterState, PaginationState } from '@/types/marketplace';
 
 const Marketplace = () => {
   const { toast } = useToast();
