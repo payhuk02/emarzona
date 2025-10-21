@@ -43,6 +43,37 @@ const Dashboard = () => {
     }
   ], []);
 
+  // Objectifs simulés
+  const goals = useMemo(() => [
+    {
+      id: '1',
+      title: 'Revenus mensuels',
+      target: 500000,
+      current: stats.totalRevenue,
+      unit: 'FCFA',
+      deadline: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+      color: 'primary'
+    },
+    {
+      id: '2',
+      title: 'Nouveaux clients',
+      target: 50,
+      current: stats.totalCustomers,
+      unit: 'clients',
+      deadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+      color: 'green'
+    },
+    {
+      id: '3',
+      title: 'Produits vendus',
+      target: 100,
+      current: stats.totalOrders,
+      unit: 'commandes',
+      deadline: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+      color: 'blue'
+    }
+  ], [stats.totalRevenue, stats.totalCustomers, stats.totalOrders]);
+
   const handleRefresh = async () => {
     await refetch();
     setLastUpdated(new Date().toISOString());

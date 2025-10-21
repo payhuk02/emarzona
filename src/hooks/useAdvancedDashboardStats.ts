@@ -159,7 +159,10 @@ export const useAdvancedDashboardStats = () => {
         .order("created_at", { ascending: false })
         .limit(10);
 
-      if (recentOrdersError) throw recentOrdersError;
+      if (recentOrdersError) {
+        logger.error('Error fetching recent orders:', recentOrdersError);
+        // Continue without throwing - this is not critical
+      }
 
       // 5. Top produits par nombre de commandes et revenus
       const { data: orderItems, error: orderItemsError } = await supabase
@@ -174,7 +177,10 @@ export const useAdvancedDashboardStats = () => {
         `)
         .eq("orders.store_id", store.id);
 
-      if (orderItemsError) throw orderItemsError;
+      if (orderItemsError) {
+        logger.error('Error fetching order items:', orderItemsError);
+        // Continue without throwing - this is not critical
+      }
 
       // Calculer les statistiques des produits
       const productStats = (orderItems || []).reduce((acc: any, item: any) => {
@@ -206,13 +212,16 @@ export const useAdvancedDashboardStats = () => {
           .select("id, name, price, image_url")
           .in("id", topProductIds);
 
-        if (topProductsError) throw topProductsError;
-
-        topProducts = (topProductsData || []).map((product: any) => ({
-          ...product,
-          orderCount: productStats[product.id]?.orderCount || 0,
-          revenue: productStats[product.id]?.revenue || 0,
-        }));
+        if (topProductsError) {
+          logger.error('Error fetching top products:', topProductsError);
+          // Continue without throwing - this is not critical
+        } else {
+          topProducts = (topProductsData || []).map((product: any) => ({
+            ...product,
+            orderCount: productStats[product.id]?.orderCount || 0,
+            revenue: productStats[product.id]?.revenue || 0,
+          }));
+        }
       }
 
       // 6. Revenus par mois (derniers 12 mois)
@@ -225,7 +234,10 @@ export const useAdvancedDashboardStats = () => {
         .eq("store_id", store.id)
         .gte("created_at", twelveMonthsAgo.toISOString());
 
-      if (revenueError) throw revenueError;
+      if (revenueError) {
+        logger.error('Error fetching revenue data:', revenueError);
+        // Continue without throwing - this is not critical
+      }
 
       // Calculer les revenus par mois
       const revenueByMonth = (ordersForRevenue || []).reduce((acc: any, order: any) => {
