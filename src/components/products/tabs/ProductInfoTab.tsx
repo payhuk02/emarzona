@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -226,15 +226,17 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
     }
   }, [formData.name, formData.slug, updateFormData]);
 
+  // URL du produit
+  const productUrl = `${window.location.origin}/${storeSlug}/${formData.slug}`;
+  
   // Copie de l'URL du produit
   const copyProductUrl = useCallback(() => {
-    const productUrl = `${window.location.origin}/${storeSlug}/${formData.slug}`;
     navigator.clipboard.writeText(productUrl);
     toast({
       title: "URL copiée",
       description: "L'URL du produit a été copiée dans le presse-papiers",
     });
-  }, [storeSlug, formData.slug, toast]);
+  }, [productUrl, toast]);
 
   // Génération d'un nouveau slug
   const regenerateSlug = useCallback(() => {
