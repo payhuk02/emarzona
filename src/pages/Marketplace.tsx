@@ -1202,7 +1202,6 @@ const ProductCardAdvanced = ({
               Voir rapidement
             </Button>
           </div>
-        </div>
 
         {/* Contenu */}
         <div className="p-4">
