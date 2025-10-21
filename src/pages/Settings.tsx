@@ -3,6 +3,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileSettings } from "@/components/settings/ProfileSettings";
+import { AdvancedProfileSettings } from "@/components/settings/AdvancedProfileSettings";
 import { StoreSettings } from "@/components/settings/StoreSettings";
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
@@ -117,7 +118,7 @@ const Settings = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
-                      <ProfileSettings />
+                      <AdvancedProfileSettings />
                     </CardContent>
                   </Card>
                 </TabsContent>
