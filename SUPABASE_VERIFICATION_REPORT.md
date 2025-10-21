@@ -1,4 +1,4 @@
-# 📊 Rapport de Vérification Supabase - Payhula
+# 📊 Rapport de Vérification Supabase - Payhuk
 
 ## ✅ État Général : FONCTIONNEL
 
@@ -111,7 +111,7 @@ function generateReferralCode() {
 
 ## 🎯 Conclusion
 
-**Supabase Payhula est PRÊT pour la production !**
+**Supabase Payhuk est PRÊT pour la production !**
 
 - ✅ Toutes les tables et données sont créées
 - ✅ Toutes les fonctionnalités principales fonctionnent
@@ -123,4 +123,4 @@ function generateReferralCode() {
 
 ---
 
-*Rapport généré le 21/01/2025 - Payhula Supabase Verification*
+*Rapport généré le 21/01/2025 - Payhuk Supabase Verification*

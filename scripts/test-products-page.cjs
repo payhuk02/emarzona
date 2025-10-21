@@ -319,7 +319,7 @@ async function runProductsPageTest() {
   console.log('✅ Actions en lot et export');
   console.log('✅ Filtres et recherche avancés');
   console.log('✅ Statistiques en temps réel');
-  console.log('\n🔗 Vérifiez maintenant: https://payhula.vercel.app/dashboard/products');
+  console.log('\n🔗 Vérifiez maintenant: https://payhuk.vercel.app/dashboard/products');
   console.log('📝 La page Produits devrait maintenant être totalement fonctionnelle !');
 }
 

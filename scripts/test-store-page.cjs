@@ -240,7 +240,7 @@ async function testStorePage() {
   console.log('✅ Toutes les erreurs JSON corrigées');
   console.log('✅ Fonctionnalités avancées implémentées');
   console.log('✅ Interface utilisateur moderne et responsive');
-  console.log('\n🔗 Vérifiez maintenant: https://payhula.vercel.app/dashboard/store');
+      console.log('\n🔗 Vérifiez maintenant: https://payhuk.vercel.app/dashboard/store');
   console.log('📝 La page Boutique devrait maintenant fonctionner parfaitement !');
 }
 

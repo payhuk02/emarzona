@@ -156,7 +156,7 @@ async function finalVerification() {
       console.log('🎉 Le tableau de bord devrait fonctionner parfaitement');
     }
 
-    console.log('\n🔗 Vérifiez maintenant: https://payhula.vercel.app/dashboard');
+    console.log('\n🔗 Vérifiez maintenant: https://payhuk.vercel.app/dashboard');
     console.log('📝 Si l\'erreur persiste, vérifiez le cache du navigateur (Ctrl+F5)');
 
   } catch (error) {

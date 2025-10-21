@@ -59,7 +59,7 @@ async function createTestProfile() {
 }
 
 async function comprehensiveTest() {
-  console.log('🚀 Test complet de Supabase Payhula...\n');
+  console.log('🚀 Test complet de Supabase Payhuk...\n');
   
   // 1. Test des fonctions principales
   console.log('1️⃣ Test des fonctions:');
@@ -126,7 +126,7 @@ async function comprehensiveTest() {
   const overallOK = functionsOK && tablesOK && codes.length > 0 && profile;
   
   if (overallOK) {
-    console.log('\n🎉 Supabase Payhula est fonctionnel !');
+    console.log('\n🎉 Supabase Payhuk est fonctionnel !');
     console.log('📝 Note: La fonction generate_referral_code a un problème mineur');
     console.log('💡 Solution: Utiliser la génération côté client comme workaround');
     console.log('\n🔗 Prochaines étapes:');

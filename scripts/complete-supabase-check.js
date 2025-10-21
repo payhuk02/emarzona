@@ -167,7 +167,7 @@ async function checkDataIntegrity() {
 }
 
 async function main() {
-  console.log('🚀 Vérification complète de Supabase Payhula...\n');
+  console.log('🚀 Vérification complète de Supabase Payhuk...\n');
   
   // 1. Vérifier l'intégrité des tables
   const tablesOK = await verifyDatabaseIntegrity();

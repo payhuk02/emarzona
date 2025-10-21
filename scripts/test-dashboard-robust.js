@@ -163,7 +163,7 @@ async function testDashboardQueries() {
 
     console.log('\n🎉 Test du tableau de bord terminé !');
     console.log('📝 Le tableau de bord devrait maintenant fonctionner sans erreurs.');
-    console.log('🔗 Vérifiez https://payhula.vercel.app/dashboard');
+    console.log('🔗 Vérifiez https://payhuk.vercel.app/dashboard');
 
   } catch (error) {
     console.error('❌ Erreur générale:', error);
