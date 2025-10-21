@@ -1,11 +1,90 @@
-name: Payhuk AI Workspace
-version: 1.0.0
-default_model: gpt-4o
+# ============================================================
+# Cursor Project Configuration - Payhula SaaS Platform
+# Auteur : Intelli (payhuk02)
+# Objectif : Configuration avancée pour Cursor sur un projet SaaS professionnel
+# ============================================================
+
+project:
+  name: Payhula
+  description: >
+    Application web SaaS haut de gamme pour la gestion des paiements,
+    des transactions et des utilisateurs, avec intégration Supabase, Stripe/PayDunya,
+    et un design professionnel, fluide et réactif.
+  tech_stack:
+    - Vite + React + TypeScript
+    - Supabase
+    - TailwindCSS + ShadCN UI
+    - Node.js / API
+    - Vercel (déploiement)
+
 context:
-  - type: current_file
-    max_lines: 300
-  - type: git
-    max_files: 40
-    max_chars: 80000
-  - type: workspace
-    max_chars: 400000
+  include:
+    - src/
+    - public/
+    - index.html
+    - vite.config.ts
+    - tailwind.config.js
+    - package.json
+    - tsconfig.json
+  exclude:
+    - node_modules/
+    - dist/
+    - build/
+    - .vercel/
+    - .next/
+    - coverage/
+    - tests/
+    - README.md
+
+goals:
+  - Analyser et auditer l’ensemble du code, page par page et composant par composant.
+  - Identifier les erreurs, incohérences, mauvaises pratiques et duplications.
+  - Optimiser la structure, la performance et la sécurité du projet.
+  - Garantir la responsivité totale et la fluidité UX/UI.
+  - Vérifier l’intégrité et la cohérence de la base de données Supabase.
+  - Renforcer les validations d’environnement et la configuration du déploiement.
+
+rules:
+  - Toujours générer du code propre, typé, modulaire et réutilisable.
+  - Suivre les bonnes pratiques React et TypeScript.
+  - Utiliser TailwindCSS avec une hiérarchie cohérente (mobile-first).
+  - Prioriser les composants ShadCN pour la cohérence visuelle.
+  - Toujours documenter les fonctions et composants importants.
+  - Ne jamais exposer de clés API en clair.
+  - Vérifier systématiquement les variables d’environnement avant utilisation.
+  - Séparer la logique, la vue et la donnée (architecture claire).
+  - Utiliser des hooks personnalisés pour la logique récurrente.
+  - Tester les composants critiques (auth, paiement, etc.).
+
+performance_checks:
+  - Lighthouse score minimal de 90 sur Performance et Accessibilité.
+  - Audit du bundle Vite (analyser poids JS/CSS).
+  - Vérifier l’absence de rendering bloquant.
+  - Optimiser lazy loading et caching.
+
+responsivity:
+  - Tester le rendu sur 3 tailles principales : mobile (≤640px), tablette (768px), desktop (≥1024px).
+  - Toujours utiliser des classes Tailwind responsives (`sm:`, `md:`, `lg:`).
+  - Éviter les overflow et layout shifts.
+
+security:
+  - Activer RLS sur toutes les tables Supabase contenant des données utilisateur.
+  - Utiliser des validations strictes côté client et serveur.
+  - Éviter les injections dans les champs dynamiques.
+  - Chiffrer les données sensibles avant stockage.
+
+collaboration:
+  commit_message_format: >
+    [type]: message clair (ex: fix: corrige bug de login)
+  branch_naming_convention: >
+    feature/, fix/, hotfix/, refactor/
+  code_review_required: true
+  pull_request_guidelines:
+    - PRs doivent être concises (<300 lignes)
+    - Inclure une description et le contexte
+
+output_preferences:
+  language: fr
+  format: markdown
+  style: explicatif + structuré (étape par étape)
+  tone: professionnel, clair, pédagogique
