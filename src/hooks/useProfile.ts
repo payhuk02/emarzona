@@ -46,7 +46,7 @@ export const useProfile = () => {
         .from('profiles')
         .select('id, user_id, avatar_url, display_name, first_name, last_name, created_at, updated_at')
         .eq('user_id', user.id)
-        .maybeSingle();
+        .limit(1);
 
       if (error) {
         console.error('❌ Profile fetch error:', error);
@@ -54,7 +54,7 @@ export const useProfile = () => {
       }
 
       // Create profile if it doesn't exist
-      if (!data) {
+      if (!data || data.length === 0) {
         console.log('ℹ️  No profile found, creating new one...');
         const { data: newProfile, error: createError } = await supabase
           .from('profiles')
@@ -67,7 +67,7 @@ export const useProfile = () => {
             },
           ])
           .select('id, user_id, avatar_url, display_name, first_name, last_name, created_at, updated_at')
-          .single();
+          .limit(1);
 
         if (createError) {
           console.error('❌ Profile creation error:', createError);
@@ -75,10 +75,10 @@ export const useProfile = () => {
         }
         
         console.log('✅ Profile created:', newProfile);
-        setProfile(newProfile);
+        setProfile(newProfile && newProfile.length > 0 ? newProfile[0] : null);
       } else {
         console.log('✅ Profile found:', data);
-        setProfile(data);
+        setProfile(data[0]);
       }
     } catch (error: any) {
       console.error('❌ Error fetching profile:', error);

@@ -24,13 +24,21 @@ export const useReferral = () => {
       }
 
       // Récupérer le profil avec le code de parrainage
-      const { data: profile, error: profileError } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('referral_code, total_referral_earnings')
         .eq('user_id', user.id)
-        .single();
+        .limit(1);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        throw profileError;
+      }
+
+      const profile = profileData && profileData.length > 0 ? profileData[0] : null;
+      if (!profile) {
+        throw new Error('Profil non trouvé');
+      }
 
       // Récupérer le nombre de filleuls
       const { data: referrals, error: referralsError } = await supabase

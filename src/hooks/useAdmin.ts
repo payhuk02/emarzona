@@ -14,14 +14,14 @@ export const useAdmin = () => {
         .select('role')
         .eq('user_id', user.id)
         .eq('role', 'admin')
-        .maybeSingle();
+        .limit(1);
 
       if (error) {
         logger.error('Error checking admin status:', error);
         return false;
       }
 
-      return !!data;
+      return !!(data && data.length > 0);
     },
   });
 

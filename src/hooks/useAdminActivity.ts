@@ -31,15 +31,15 @@ export const useAdminActivity = () => {
       // Récupérer les noms des admins
       const actionsWithNames = await Promise.all(
         (data || []).map(async (action) => {
-          const { data: profile } = await supabase
+          const { data: profileData } = await supabase
             .from('profiles')
             .select('display_name')
             .eq('user_id', action.admin_id)
-            .single();
+            .limit(1);
 
           return {
             ...action,
-            admin_name: profile?.display_name || 'Admin',
+            admin_name: profileData && profileData.length > 0 ? profileData[0].display_name || 'Admin' : 'Admin',
           };
         })
       );

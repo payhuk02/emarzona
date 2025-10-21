@@ -41,14 +41,14 @@ export const useKYC = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      const { data, error } = await supabase
+      const { data: submissionData, error } = await supabase
         .from('kyc_submissions')
         .select('*')
         .eq('user_id', user.id)
-        .maybeSingle();
+        .limit(1);
 
       if (error) throw error;
-      return data as KYCSubmission | null;
+      return submissionData && submissionData.length > 0 ? submissionData[0] as KYCSubmission : null;
     },
   });
 

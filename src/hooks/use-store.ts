@@ -36,10 +36,16 @@ export const useStore = () => {
         .from('stores')
         .select('*')
         .eq('user_id', user.id)
-        .maybeSingle();
+        .limit(1);
 
-      if (error) throw error;
-      setStore(data);
+      if (error) {
+        console.error('Error fetching store:', error);
+        setStore(null);
+        return;
+      }
+      
+      // Prendre le premier résultat s'il y en a un
+      setStore(data && data.length > 0 ? data[0] : null);
     } catch (error: any) {
       toast({
         title: "Erreur",

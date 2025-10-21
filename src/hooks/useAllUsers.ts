@@ -36,7 +36,7 @@ export const useAllUsers = () => {
             .from('user_roles')
             .select('role')
             .eq('user_id', profile.user_id)
-            .maybeSingle();
+            .limit(1);
 
           return {
             id: profile.id,
@@ -47,7 +47,7 @@ export const useAllUsers = () => {
             last_name: profile.last_name,
             avatar_url: profile.avatar_url,
             created_at: profile.created_at,
-            role: roleData?.role || 'user',
+            role: roleData && roleData.length > 0 ? roleData[0].role : 'user',
             is_suspended: profile.is_suspended || false,
             suspension_reason: profile.suspension_reason,
           };
