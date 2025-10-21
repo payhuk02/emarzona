@@ -14,7 +14,7 @@ rules:
     note: "Fonctions Edge Supabase"
   - match: "src/pages/admin/**/*.tsx"
     ai_context: true
-    note: "Interface administrateur Payhuk"
+    note: "Interface administrateur Payhula"
   - match: "src/pages/**/*.tsx"
     ai_context: true
     note: "Pages principales (boutique, marketplace, etc.)"
