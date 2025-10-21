@@ -45,6 +45,9 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useProductAnalytics, useAnalyticsTracking, useAnalyticsHistory } from "@/hooks/useProductAnalytics";
+import { AnalyticsChart, TrafficSourceChart, RealtimeMetrics } from "@/components/analytics/AnalyticsCharts";
+import { ReportsSection } from "@/components/analytics/ReportsSection";
 
 interface ProductAnalyticsTabProps {
   formData: any;
@@ -184,6 +187,75 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
     });
   }, [isRealTimeActive, toast]);
 
+export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyticsTabProps) => {
+  const { toast } = useToast();
+  const [selectedPeriod, setSelectedPeriod] = useState<"7d" | "30d" | "90d">("7d");
+  const [selectedChart, setSelectedChart] = useState<"line" | "area" | "bar">("line");
+
+  // Utiliser les hooks d'analytics réels
+  const {
+    analytics,
+    loading: analyticsLoading,
+    error: analyticsError,
+    isRealTimeActive,
+    setIsRealTimeActive,
+    updateAnalytics,
+    changePercentages
+  } = useProductAnalytics(formData.id);
+
+  const { trackView, trackClick, trackConversion, trackCustomEvent } = useAnalyticsTracking();
+  
+  const { dailyData, loading: historyLoading } = useAnalyticsHistory(formData.id, 
+    selectedPeriod === "7d" ? 7 : selectedPeriod === "30d" ? 30 : 90
+  );
+
+  // Fonctions utilitaires
+  const getChangeIcon = (change: number) => {
+    return change >= 0 ? (
+      <ArrowUpRight className="h-4 w-4 text-green-500" />
+    ) : (
+      <ArrowDownRight className="h-4 w-4 text-red-500" />
+    );
+  };
+
+  const getChangeColor = (change: number) => {
+    return change >= 0 ? "text-green-500" : "text-red-500";
+  };
+
+  const toggleRealTime = useCallback(() => {
+    setIsRealTimeActive(!isRealTimeActive);
+    toast({
+      title: isRealTimeActive ? "Temps réel désactivé" : "Temps réel activé",
+      description: isRealTimeActive 
+        ? "Les données ne sont plus mises à jour en temps réel." 
+        : "Les données sont maintenant mises à jour en temps réel.",
+    });
+  }, [isRealTimeActive, setIsRealTimeActive, toast]);
+
+  // Simuler des données de sources de trafic (en attendant l'implémentation réelle)
+  const trafficSourceData = useMemo(() => {
+    if (!analytics || analytics.total_views === 0) return [];
+    
+    return [
+      { name: "Recherche organique", value: 45, color: "#3b82f6" },
+      { name: "Réseaux sociaux", value: 30, color: "#10b981" },
+      { name: "Direct", value: 15, color: "#8b5cf6" },
+      { name: "Référencement", value: 10, color: "#f59e0b" }
+    ];
+  }, [analytics]);
+
+  // Métriques secondaires calculées
+  const secondaryMetrics = useMemo(() => {
+    if (!analytics) return null;
+
+    return {
+      revenue: analytics.total_revenue,
+      bounceRate: analytics.bounce_rate,
+      avgSessionDuration: analytics.avg_session_duration,
+      returningVisitors: analytics.returning_visitors
+    };
+  }, [analytics]);
+
   return (
     <TooltipProvider>
       <div className="space-y-6">
@@ -243,135 +315,81 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
           </CardHeader>
         </Card>
 
-        {/* Métriques principales */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-gray-400">Vues</p>
-                  <p className="text-2xl font-bold text-white">{analyticsData.views.toLocaleString()}</p>
-                  <div className="flex items-center gap-1">
-                    {getChangeIcon(12)}
-                    <span className={cn("text-sm font-medium", getChangeColor(12))}>+12%</span>
-                    <span className="text-xs text-gray-500">vs hier</span>
-                  </div>
-                </div>
-                <div className="p-3 rounded-lg bg-blue-500/20">
-                  <Eye className="h-6 w-6 text-blue-400" />
-                </div>
+        {/* Affichage des erreurs */}
+        {analyticsError && (
+          <Card className="border-2 border-red-500 bg-red-500/10 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-red-400">
+                <AlertCircle className="h-5 w-5" />
+                <span className="font-medium">Erreur de chargement des analytics</span>
               </div>
+              <p className="text-sm text-red-300 mt-1">{analyticsError}</p>
             </CardContent>
           </Card>
+        )}
 
-          <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-gray-400">Clics</p>
-                  <p className="text-2xl font-bold text-white">{analyticsData.clicks.toLocaleString()}</p>
-                  <div className="flex items-center gap-1">
-                    {getChangeIcon(8)}
-                    <span className={cn("text-sm font-medium", getChangeColor(8))}>+8%</span>
-                    <span className="text-xs text-gray-500">vs hier</span>
-                  </div>
-                </div>
-                <div className="p-3 rounded-lg bg-green-500/20">
-                  <MousePointer className="h-6 w-6 text-green-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-gray-400">Conversions</p>
-                  <p className="text-2xl font-bold text-white">{analyticsData.conversions.toLocaleString()}</p>
-                  <div className="flex items-center gap-1">
-                    {getChangeIcon(15)}
-                    <span className={cn("text-sm font-medium", getChangeColor(15))}>+15%</span>
-                    <span className="text-xs text-gray-500">vs hier</span>
-                  </div>
-                </div>
-                <div className="p-3 rounded-lg bg-purple-500/20">
-                  <Target className="h-6 w-6 text-purple-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-gray-400">Taux de conversion</p>
-                  <p className="text-2xl font-bold text-white">{analyticsData.conversionRate.toFixed(1)}%</p>
-                  <div className="flex items-center gap-1">
-                    {getChangeIcon(3)}
-                    <span className={cn("text-sm font-medium", getChangeColor(3))}>+3%</span>
-                    <span className="text-xs text-gray-500">vs hier</span>
-                  </div>
-                </div>
-                <div className="p-3 rounded-lg bg-orange-500/20">
-                  <BarChart3 className="h-6 w-6 text-orange-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Métriques principales avec données réelles */}
+        <RealtimeMetrics
+          analytics={analytics}
+          changePercentages={changePercentages}
+          isRealTimeActive={isRealTimeActive}
+          onToggleRealTime={toggleRealTime}
+        />
 
         {/* Métriques secondaires */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-400">Revenus</p>
-                  <p className="text-lg font-semibold text-white">{analyticsData.revenue.toLocaleString()} XOF</p>
+        {secondaryMetrics && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-400">Revenus</p>
+                    <p className="text-lg font-semibold text-white">{secondaryMetrics.revenue.toLocaleString()} XOF</p>
+                  </div>
+                  <DollarSign className="h-5 w-5 text-green-400" />
                 </div>
-                <DollarSign className="h-5 w-5 text-green-400" />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-400">Taux de rebond</p>
-                  <p className="text-lg font-semibold text-white">{analyticsData.bounceRate.toFixed(1)}%</p>
+            <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-400">Taux de rebond</p>
+                    <p className="text-lg font-semibold text-white">{secondaryMetrics.bounceRate.toFixed(1)}%</p>
+                  </div>
+                  <TrendingUp className="h-5 w-5 text-red-400" />
                 </div>
-                <TrendingUp className="h-5 w-5 text-red-400" />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-400">Durée moyenne</p>
-                  <p className="text-lg font-semibold text-white">{Math.floor(analyticsData.avgSessionDuration / 60)}m {analyticsData.avgSessionDuration % 60}s</p>
+            <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-400">Durée moyenne</p>
+                    <p className="text-lg font-semibold text-white">
+                      {Math.floor(secondaryMetrics.avgSessionDuration / 60)}m {secondaryMetrics.avgSessionDuration % 60}s
+                    </p>
+                  </div>
+                  <Clock className="h-5 w-5 text-blue-400" />
                 </div>
-                <Clock className="h-5 w-5 text-blue-400" />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-400">Visiteurs récurrents</p>
-                  <p className="text-lg font-semibold text-white">{analyticsData.returningVisitors}</p>
+            <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-400">Visiteurs récurrents</p>
+                    <p className="text-lg font-semibold text-white">{secondaryMetrics.returningVisitors}</p>
+                  </div>
+                  <Users className="h-5 w-5 text-purple-400" />
                 </div>
-                <Users className="h-5 w-5 text-purple-400" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Onglets pour les différentes sections */}
         <Tabs defaultValue="overview" className="w-full">
@@ -387,112 +405,22 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
           <TabsContent value="overview" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Graphique des performances */}
-              <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-indigo-500/20">
-                        <LineChart className="h-5 w-5 text-indigo-400" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg font-semibold text-white">Performances</CardTitle>
-                        <CardDescription className="text-gray-400">
-                          Évolution des métriques sur la période sélectionnée
-                        </CardDescription>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Select value={selectedChart} onValueChange={setSelectedChart}>
-                        <SelectTrigger className="w-32 bg-gray-700 border-gray-600 text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-gray-800 border-gray-600">
-                          <SelectItem value="line" className="text-white hover:bg-gray-700">
-                            <LineChart className="h-4 w-4 mr-2" />
-                            Ligne
-                          </SelectItem>
-                          <SelectItem value="area" className="text-white hover:bg-gray-700">
-                            <AreaChart className="h-4 w-4 mr-2" />
-                            Zone
-                          </SelectItem>
-                          <SelectItem value="bar" className="text-white hover:bg-gray-700">
-                            <BarChart3 className="h-4 w-4 mr-2" />
-                            Barre
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                        <SelectTrigger className="w-24 bg-gray-700 border-gray-600 text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-gray-800 border-gray-600">
-                          <SelectItem value="7d" className="text-white hover:bg-gray-700">7j</SelectItem>
-                          <SelectItem value="30d" className="text-white hover:bg-gray-700">30j</SelectItem>
-                          <SelectItem value="90d" className="text-white hover:bg-gray-700">90j</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 flex items-center justify-center bg-gray-900/50 rounded-lg border border-gray-700">
-                    <div className="text-center">
-                      <BarChart3 className="h-12 w-12 text-gray-500 mx-auto mb-2" />
-                      <p className="text-gray-400">Graphique des performances</p>
-                      <p className="text-sm text-gray-500">Données simulées pour la démonstration</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <AnalyticsChart
+                data={dailyData}
+                chartType={selectedChart}
+                onChartTypeChange={setSelectedChart}
+                period={selectedPeriod}
+                onPeriodChange={setSelectedPeriod}
+                title="Performances"
+                description="Évolution des métriques sur la période sélectionnée"
+                loading={historyLoading}
+              />
 
               {/* Répartition des sources */}
-              <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-pink-500/20">
-                      <PieChart className="h-5 w-5 text-pink-400" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg font-semibold text-white">Sources de trafic</CardTitle>
-                      <CardDescription className="text-gray-400">
-                        Répartition des visiteurs par source
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                        <span className="text-sm text-gray-300">Recherche organique</span>
-                      </div>
-                      <span className="text-sm font-medium text-white">45%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                        <span className="text-sm text-gray-300">Réseaux sociaux</span>
-                      </div>
-                      <span className="text-sm font-medium text-white">30%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                        <span className="text-sm text-gray-300">Direct</span>
-                      </div>
-                      <span className="text-sm font-medium text-white">15%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                        <span className="text-sm text-gray-300">Référencement</span>
-                      </div>
-                      <span className="text-sm font-medium text-white">10%</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <TrafficSourceChart
+                data={trafficSourceData}
+                loading={analyticsLoading}
+              />
             </div>
           </TabsContent>
 
@@ -530,8 +458,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       <p className="text-xs text-gray-400">Enregistrer les événements personnalisés</p>
                     </div>
                     <Switch
-                      checked={formData.analytics_enabled || false}
-                      onCheckedChange={(checked) => updateFormData("analytics_enabled", checked)}
+                      checked={analytics?.tracking_enabled || false}
+                      onCheckedChange={(checked) => updateAnalytics({ tracking_enabled: checked })}
                     />
                   </div>
 
@@ -551,8 +479,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       <p className="text-xs text-gray-400">Enregistrer chaque vue de produit</p>
                     </div>
                     <Switch
-                      checked={formData.track_views || false}
-                      onCheckedChange={(checked) => updateFormData("track_views", checked)}
+                      checked={analytics?.track_views || false}
+                      onCheckedChange={(checked) => updateAnalytics({ track_views: checked })}
                     />
                   </div>
 
@@ -572,8 +500,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       <p className="text-xs text-gray-400">Enregistrer les clics sur les boutons et liens</p>
                     </div>
                     <Switch
-                      checked={formData.track_clicks || false}
-                      onCheckedChange={(checked) => updateFormData("track_clicks", checked)}
+                      checked={analytics?.track_clicks || false}
+                      onCheckedChange={(checked) => updateAnalytics({ track_clicks: checked })}
                     />
                   </div>
 
@@ -593,8 +521,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       <p className="text-xs text-gray-400">Enregistrer les conversions et revenus</p>
                     </div>
                     <Switch
-                      checked={formData.track_purchases || false}
-                      onCheckedChange={(checked) => updateFormData("track_purchases", checked)}
+                      checked={analytics?.track_conversions || false}
+                      onCheckedChange={(checked) => updateAnalytics({ track_conversions: checked })}
                     />
                   </div>
 
@@ -614,8 +542,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       <p className="text-xs text-gray-400">Mesurer l'engagement des utilisateurs</p>
                     </div>
                     <Switch
-                      checked={formData.track_time_spent || false}
-                      onCheckedChange={(checked) => updateFormData("track_time_spent", checked)}
+                      checked={analytics?.track_time_spent || false}
+                      onCheckedChange={(checked) => updateAnalytics({ track_time_spent: checked })}
                     />
                   </div>
 
@@ -635,8 +563,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       <p className="text-xs text-gray-400">Enregistrer les erreurs JavaScript</p>
                     </div>
                     <Switch
-                      checked={formData.track_errors || false}
-                      onCheckedChange={(checked) => updateFormData("track_errors", checked)}
+                      checked={analytics?.track_errors || false}
+                      onCheckedChange={(checked) => updateAnalytics({ track_errors: checked })}
                     />
                   </div>
                 </div>
@@ -660,18 +588,20 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <p className="text-xs text-gray-400">Événements personnalisés et configurations spécifiques</p>
                   </div>
                   <Switch
-                    checked={formData.advanced_tracking || false}
-                    onCheckedChange={(checked) => updateFormData("advanced_tracking", checked)}
+                    checked={analytics?.advanced_tracking || false}
+                    onCheckedChange={(checked) => updateAnalytics({ advanced_tracking: checked })}
                   />
                 </div>
                 
-                {formData.advanced_tracking && (
+                {analytics?.advanced_tracking && (
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-white">Événements personnalisés</Label>
                       <Input
-                        value={formData.custom_events?.join(",") || ""}
-                        onChange={(e) => updateFormData("custom_events", e.target.value.split(",").map(s => s.trim()).filter(s => s))}
+                        value={analytics?.custom_events?.join(",") || ""}
+                        onChange={(e) => updateAnalytics({ 
+                          custom_events: e.target.value.split(",").map(s => s.trim()).filter(s => s) 
+                        })}
                         placeholder="event1,event2,event3"
                         className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
                       />
@@ -714,8 +644,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       </Tooltip>
                     </Label>
                     <Input
-                      value={formData.google_analytics_id || ""}
-                      onChange={(e) => updateFormData("google_analytics_id", e.target.value)}
+                      value={analytics?.google_analytics_id || ""}
+                      onChange={(e) => updateAnalytics({ google_analytics_id: e.target.value })}
                       placeholder="UA-XXXXXXXXX-X ou G-XXXXXXXXXX"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
                     />
@@ -734,8 +664,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       </Tooltip>
                     </Label>
                     <Input
-                      value={formData.facebook_pixel_id || ""}
-                      onChange={(e) => updateFormData("facebook_pixel_id", e.target.value)}
+                      value={analytics?.facebook_pixel_id || ""}
+                      onChange={(e) => updateAnalytics({ facebook_pixel_id: e.target.value })}
                       placeholder="123456789012345"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
                     />
@@ -754,8 +684,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       </Tooltip>
                     </Label>
                     <Input
-                      value={formData.google_tag_manager_id || ""}
-                      onChange={(e) => updateFormData("google_tag_manager_id", e.target.value)}
+                      value={analytics?.google_tag_manager_id || ""}
+                      onChange={(e) => updateAnalytics({ google_tag_manager_id: e.target.value })}
                       placeholder="GTM-XXXXXXX"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
                     />
@@ -774,8 +704,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       </Tooltip>
                     </Label>
                     <Input
-                      value={formData.tiktok_pixel_id || ""}
-                      onChange={(e) => updateFormData("tiktok_pixel_id", e.target.value)}
+                      value={analytics?.tiktok_pixel_id || ""}
+                      onChange={(e) => updateAnalytics({ tiktok_pixel_id: e.target.value })}
                       placeholder="CXXXXXXXXXXXXXXX"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
                     />
@@ -794,8 +724,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       </Tooltip>
                     </Label>
                     <Input
-                      value={formData.pinterest_pixel_id || ""}
-                      onChange={(e) => updateFormData("pinterest_pixel_id", e.target.value)}
+                      value={analytics?.pinterest_pixel_id || ""}
+                      onChange={(e) => updateAnalytics({ pinterest_pixel_id: e.target.value })}
                       placeholder="123456789012345"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
                     />
@@ -814,8 +744,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       </Tooltip>
                     </Label>
                     <Input
-                      value={formData.linkedin_insight_tag || ""}
-                      onChange={(e) => updateFormData("linkedin_insight_tag", e.target.value)}
+                      value={analytics?.linkedin_insight_tag || ""}
+                      onChange={(e) => updateAnalytics({ linkedin_insight_tag: e.target.value })}
                       placeholder="1234567"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
                     />
@@ -847,8 +777,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <Label className="text-sm font-medium text-white">Objectif vues (mensuel)</Label>
                     <Input
                       type="number"
-                      value={formData.goal_views || ""}
-                      onChange={(e) => updateFormData("goal_views", parseInt(e.target.value) || null)}
+                      value={analytics?.goal_views || ""}
+                      onChange={(e) => updateAnalytics({ goal_views: parseInt(e.target.value) || null })}
                       placeholder="1000"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
                     />
@@ -858,8 +788,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <Label className="text-sm font-medium text-white">Objectif revenus (mensuel)</Label>
                     <Input
                       type="number"
-                      value={formData.goal_revenue || ""}
-                      onChange={(e) => updateFormData("goal_revenue", parseFloat(e.target.value) || null)}
+                      value={analytics?.goal_revenue || ""}
+                      onChange={(e) => updateAnalytics({ goal_revenue: parseFloat(e.target.value) || null })}
                       placeholder="5000"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
                     />
@@ -869,8 +799,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <Label className="text-sm font-medium text-white">Objectif conversions (mensuel)</Label>
                     <Input
                       type="number"
-                      value={formData.goal_conversions || ""}
-                      onChange={(e) => updateFormData("goal_conversions", parseInt(e.target.value) || null)}
+                      value={analytics?.goal_conversions || ""}
+                      onChange={(e) => updateAnalytics({ goal_conversions: parseInt(e.target.value) || null })}
                       placeholder="50"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
                     />
@@ -881,8 +811,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <Input
                       type="number"
                       step="0.1"
-                      value={formData.goal_conversion_rate || ""}
-                      onChange={(e) => updateFormData("goal_conversion_rate", parseFloat(e.target.value) || null)}
+                      value={analytics?.goal_conversion_rate || ""}
+                      onChange={(e) => updateAnalytics({ goal_conversion_rate: parseFloat(e.target.value) || null })}
                       placeholder="5.0"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
                     />
@@ -907,8 +837,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <p className="text-xs text-gray-400">Recevez des notifications automatiques en cas de dépassement ou de non-atteinte des objectifs</p>
                   </div>
                   <Switch
-                    checked={formData.email_alerts || false}
-                    onCheckedChange={(checked) => updateFormData("email_alerts", checked)}
+                    checked={analytics?.email_alerts || false}
+                    onCheckedChange={(checked) => updateAnalytics({ email_alerts: checked })}
                   />
                 </div>
               </CardContent>
@@ -917,186 +847,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
 
           {/* Rapports et export */}
           <TabsContent value="reports" className="space-y-6 mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-blue-500/20">
-                      <Calendar className="h-5 w-5 text-blue-400" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg font-semibold text-white">Rapport quotidien</CardTitle>
-                      <CardDescription className="text-gray-400">
-                        Résumé des performances du jour
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    variant="outline" 
-                    className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
-                    onClick={() => generateReport("quotidien")}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Génération...
-                      </>
-                    ) : (
-                      <>
-                        <Download className="h-4 w-4 mr-2" />
-                        Générer
-                      </>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-green-500/20">
-                      <BarChart3 className="h-5 w-5 text-green-400" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg font-semibold text-white">Rapport mensuel</CardTitle>
-                      <CardDescription className="text-gray-400">
-                        Analyse complète du mois
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    variant="outline" 
-                    className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
-                    onClick={() => generateReport("mensuel")}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Génération...
-                      </>
-                    ) : (
-                      <>
-                        <Download className="h-4 w-4 mr-2" />
-                        Générer
-                      </>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-purple-500/20">
-                      <Download className="h-5 w-5 text-purple-400" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg font-semibold text-white">Export CSV</CardTitle>
-                      <CardDescription className="text-gray-400">
-                        Données brutes pour analyse approfondie
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    variant="outline" 
-                    className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
-                    onClick={() => exportData("csv")}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Export...
-                      </>
-                    ) : (
-                      <>
-                        <Download className="h-4 w-4 mr-2" />
-                        Exporter
-                      </>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Options d'export avancées */}
-            <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-orange-500/20">
-                    <Settings className="h-5 w-5 text-orange-400" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg font-semibold text-white">Options d'export avancées</CardTitle>
-                    <CardDescription className="text-gray-400">
-                      Personnalisez vos exports selon vos besoins
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-white">Période d'export</Label>
-                    <Select defaultValue="30d">
-                      <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-gray-800 border-gray-600">
-                        <SelectItem value="7d" className="text-white hover:bg-gray-700">7 derniers jours</SelectItem>
-                        <SelectItem value="30d" className="text-white hover:bg-gray-700">30 derniers jours</SelectItem>
-                        <SelectItem value="90d" className="text-white hover:bg-gray-700">90 derniers jours</SelectItem>
-                        <SelectItem value="custom" className="text-white hover:bg-gray-700">Période personnalisée</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-white">Format d'export</Label>
-                    <Select defaultValue="csv">
-                      <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-gray-800 border-gray-600">
-                        <SelectItem value="csv" className="text-white hover:bg-gray-700">CSV</SelectItem>
-                        <SelectItem value="xlsx" className="text-white hover:bg-gray-700">Excel</SelectItem>
-                        <SelectItem value="json" className="text-white hover:bg-gray-700">JSON</SelectItem>
-                        <SelectItem value="pdf" className="text-white hover:bg-gray-700">PDF</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Label className="text-sm font-medium text-white">Inclure les graphiques</Label>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <HelpCircle className="h-3 w-3 text-gray-400" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Inclure les graphiques dans l'export PDF</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <p className="text-xs text-gray-400">Inclure les graphiques dans l'export PDF</p>
-                  </div>
-                  <Switch
-                    checked={formData.include_charts || false}
-                    onCheckedChange={(checked) => updateFormData("include_charts", checked)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <ReportsSection productId={formData.id} />
           </TabsContent>
         </Tabs>
       </div>
