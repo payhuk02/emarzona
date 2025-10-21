@@ -4,13 +4,17 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Package, Plus, RefreshCw, Download, Upload } from "lucide-react";
 import { useStore } from "@/hooks/useStore";
 import { useProducts } from "@/hooks/useProducts";
 import { useProductManagement } from "@/hooks/useProductManagement";
 import EditProductDialog from "@/components/products/EditProductDialog";
 import ProductCardDashboard from "@/components/products/ProductCardDashboard";
+import ProductListView from "@/components/products/ProductListView";
 import ProductFiltersDashboard from "@/components/products/ProductFiltersDashboard";
+import ProductStats from "@/components/products/ProductStats";
+import ProductBulkActions from "@/components/products/ProductBulkActions";
 import { Product } from "@/hooks/useProducts";
 import {
   AlertDialog,
@@ -22,15 +26,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 const Products = () => {
   const navigate = useNavigate();
   const { store, loading: storeLoading } = useStore();
   const { products, loading: productsLoading, refetch } = useProducts(store?.id);
-  const { deleteProduct } = useProductManagement(store?.id || "");
+  const { deleteProduct, updateProduct } = useProductManagement(store?.id || "");
+  const { toast } = useToast();
   
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
+  const [deletingProductIds, setDeletingProductIds] = useState<string[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   
   // Filters state
   const [searchQuery, setSearchQuery] = useState("");
@@ -94,6 +103,8 @@ const Products = () => {
           return b.price - a.price;
         case "popular":
           return (b.reviews_count || 0) - (a.reviews_count || 0);
+        case "rating":
+          return b.rating - a.rating;
         default:
           return 0;
       }
@@ -102,13 +113,72 @@ const Products = () => {
     return filtered;
   }, [products, searchQuery, category, productType, status, sortBy]);
 
+  const activeProducts = products.filter(p => p.is_active).length;
+
+  const handleDelete = async () => {
+    if (deletingProductId) {
+      await deleteProduct(deletingProductId);
+      setDeletingProductId(null);
+      refetch();
+    }
+  };
+
+  const handleBulkDelete = async (productIds: string[]) => {
+    try {
+      await Promise.all(productIds.map(id => deleteProduct(id)));
+      setDeletingProductIds([]);
+      setSelectedProducts([]);
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer tous les produits",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleBulkAction = async (action: string, productIds: string[]) => {
+    try {
+      const updates = action === 'activate' ? { is_active: true } : { is_active: false };
+      await Promise.all(productIds.map(id => updateProduct(id, updates)));
+      setSelectedProducts([]);
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: `Impossible de ${action === 'activate' ? 'activer' : 'désactiver'} les produits`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleToggleStatus = async (productId: string) => {
+    const product = products.find(p => p.id === productId);
+    if (product) {
+      await updateProduct(productId, { is_active: !product.is_active });
+      refetch();
+    }
+  };
+
+  const handleRefresh = () => {
+    refetch();
+    toast({
+      title: "Actualisation",
+      description: "Liste des produits mise à jour",
+    });
+  };
+
   if (storeLoading) {
     return (
       <SidebarProvider>
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-muted-foreground">Chargement...</p>
+            <div className="text-center">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+              <p className="mt-2 text-muted-foreground">Chargement des produits...</p>
+            </div>
           </div>
         </div>
       </SidebarProvider>
@@ -121,11 +191,22 @@ const Products = () => {
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <div className="flex-1 flex items-center justify-center">
-            <Card>
-              <CardContent className="py-12 px-8 text-center">
-                <p className="text-muted-foreground">
-                  Vous devez d'abord créer une boutique avant d'ajouter des produits
-                </p>
+            <Card className="max-w-md">
+              <CardHeader className="text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                    <Package className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                </div>
+                <CardTitle>Créez votre boutique d'abord</CardTitle>
+                <CardDescription>
+                  Vous devez créer une boutique avant de pouvoir ajouter des produits
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-center">
+                <Button onClick={() => navigate("/dashboard/store")}>
+                  Créer ma boutique
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -133,14 +214,6 @@ const Products = () => {
       </SidebarProvider>
     );
   }
-
-  const handleDelete = async () => {
-    if (deletingProductId) {
-      await deleteProduct(deletingProductId);
-      setDeletingProductId(null);
-      refetch();
-    }
-  };
 
   return (
     <SidebarProvider>
@@ -154,9 +227,16 @@ const Products = () => {
               <div className="flex-1">
                 <h1 className="text-xl sm:text-2xl font-bold">Produits</h1>
               </div>
-              <Button onClick={() => navigate("/dashboard/products/new")}>
-                Nouveau produit
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={handleRefresh}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Actualiser
+                </Button>
+                <Button onClick={() => navigate("/dashboard/products/new")}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouveau produit
+                </Button>
+              </div>
             </div>
           </header>
 
@@ -165,7 +245,8 @@ const Products = () => {
               {productsLoading ? (
                 <Card className="shadow-medium">
                   <CardContent className="py-12 text-center">
-                    <p className="text-muted-foreground">Chargement des produits...</p>
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+                    <p className="mt-2 text-muted-foreground">Chargement des produits...</p>
                   </CardContent>
                 </Card>
               ) : products.length === 0 ? (
@@ -182,13 +263,38 @@ const Products = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="text-center pb-12">
-                    <Button onClick={() => navigate("/dashboard/products/new")}>
-                      Créer mon premier produit
-                    </Button>
+                    <div className="space-y-4">
+                      <Button onClick={() => navigate("/dashboard/products/new")} size="lg">
+                        <Plus className="h-5 w-5 mr-2" />
+                        Créer mon premier produit
+                      </Button>
+                      <div className="text-sm text-muted-foreground">
+                        <p>Ou importez vos produits depuis un fichier CSV</p>
+                        <Button variant="outline" size="sm" className="mt-2">
+                          <Upload className="h-4 w-4 mr-2" />
+                          Importer CSV
+                        </Button>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               ) : (
                 <>
+                  {/* Statistiques */}
+                  <ProductStats products={products} filteredProducts={filteredProducts} />
+
+                  {/* Actions en lot */}
+                  {selectedProducts.length > 0 && (
+                    <ProductBulkActions
+                      selectedProducts={selectedProducts}
+                      products={products}
+                      onSelectionChange={setSelectedProducts}
+                      onBulkAction={handleBulkAction}
+                      onDelete={handleBulkDelete}
+                    />
+                  )}
+
+                  {/* Filtres */}
                   <ProductFiltersDashboard
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
@@ -202,35 +308,78 @@ const Products = () => {
                     onSortByChange={setSortBy}
                     categories={categories}
                     productTypes={productTypes}
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
+                    totalProducts={products.length}
+                    activeProducts={activeProducts}
                   />
 
                   {filteredProducts.length === 0 ? (
                     <Card className="shadow-medium">
                       <CardContent className="py-12 text-center">
-                        <p className="text-muted-foreground">
+                        <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold mb-2">Aucun produit trouvé</h3>
+                        <p className="text-muted-foreground mb-4">
                           Aucun produit ne correspond à vos critères de recherche
                         </p>
+                        <Button variant="outline" onClick={() => {
+                          setSearchQuery("");
+                          setCategory("all");
+                          setProductType("all");
+                          setStatus("all");
+                        }}>
+                          Effacer les filtres
+                        </Button>
                       </CardContent>
                     </Card>
                   ) : (
                     <>
                       <div className="flex items-center justify-between">
-                        <p className="text-sm text-muted-foreground">
-                          {filteredProducts.length} produit{filteredProducts.length > 1 ? "s" : ""} trouvé{filteredProducts.length > 1 ? "s" : ""}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-muted-foreground">
+                            {filteredProducts.length} produit{filteredProducts.length > 1 ? "s" : ""} trouvé{filteredProducts.length > 1 ? "s" : ""}
+                          </p>
+                          {selectedProducts.length > 0 && (
+                            <Badge variant="secondary">
+                              {selectedProducts.length} sélectionné{selectedProducts.length > 1 ? "s" : ""}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm">
+                            <Download className="h-4 w-4 mr-2" />
+                            Exporter
+                          </Button>
+                        </div>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                        {filteredProducts.map((product) => (
-                          <ProductCardDashboard
-                            key={product.id}
-                            product={product}
-                            storeSlug={store.slug}
-                            onEdit={() => setEditingProduct(product)}
-                            onDelete={() => setDeletingProductId(product.id)}
-                          />
-                        ))}
-                      </div>
+                      {viewMode === "grid" ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                          {filteredProducts.map((product) => (
+                            <ProductCardDashboard
+                              key={product.id}
+                              product={product}
+                              storeSlug={store.slug}
+                              onEdit={() => setEditingProduct(product)}
+                              onDelete={() => setDeletingProductId(product.id)}
+                              onToggleStatus={() => handleToggleStatus(product.id)}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {filteredProducts.map((product) => (
+                            <ProductListView
+                              key={product.id}
+                              product={product}
+                              storeSlug={store.slug}
+                              onEdit={() => setEditingProduct(product)}
+                              onDelete={() => setDeletingProductId(product.id)}
+                              onToggleStatus={() => handleToggleStatus(product.id)}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </>
                   )}
                 </>

@@ -31,7 +31,6 @@ export const useProducts = (storeId?: string) => {
       let query = supabase
         .from('products')
         .select('*')
-        .eq('is_active', true)
         .order('created_at', { ascending: false });
 
       if (storeId) {

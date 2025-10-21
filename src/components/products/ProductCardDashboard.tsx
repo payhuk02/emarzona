@@ -1,14 +1,37 @@
 import { Product } from "@/hooks/useProducts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Copy, ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Edit, 
+  Trash2, 
+  Copy, 
+  ExternalLink, 
+  Eye, 
+  EyeOff, 
+  Star,
+  TrendingUp,
+  Calendar,
+  DollarSign,
+  Package,
+  MoreVertical
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useState } from "react";
 
 interface ProductCardDashboardProps {
   product: Product;
   storeSlug: string;
   onEdit: () => void;
   onDelete: () => void;
+  onToggleStatus?: () => void;
 }
 
 const ProductCardDashboard = ({
@@ -16,8 +39,10 @@ const ProductCardDashboard = ({
   storeSlug,
   onEdit,
   onDelete,
+  onToggleStatus,
 }: ProductCardDashboardProps) => {
   const { toast } = useToast();
+  const [imageError, setImageError] = useState(false);
 
   const productUrl = `${window.location.origin}/stores/${storeSlug}/products/${product.slug}`;
 
@@ -26,7 +51,7 @@ const ProductCardDashboard = ({
       await navigator.clipboard.writeText(productUrl);
       toast({
         title: "Lien copié",
-        description: "Le lien du produit a été copié",
+        description: "Le lien du produit a été copié dans le presse-papiers",
       });
     } catch (error) {
       toast({
@@ -41,68 +66,125 @@ const ProductCardDashboard = ({
     window.open(productUrl, "_blank");
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const getCategoryColor = (category: string | null) => {
+    const colors: Record<string, string> = {
+      'Formation': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
+      'Digital': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
+      'Service': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100',
+      'Ebook': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100',
+      'Logiciel': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-100',
+    };
+    return colors[category || ''] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
+  };
+
   return (
-    <Card className="shadow-medium hover:shadow-lg transition-shadow">
-      <CardHeader className="p-0">
-        {product.image_url ? (
-          <div className="aspect-square rounded-t-lg overflow-hidden bg-muted">
+    <Card className="group shadow-medium hover:shadow-lg transition-all duration-200 border-border/50 hover:border-primary/20">
+      <CardHeader className="p-0 relative">
+        {product.image_url && !imageError ? (
+          <div className="aspect-square rounded-t-lg overflow-hidden bg-muted relative">
             <img
               src={product.image_url}
               alt={product.name}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200"
+              onError={() => setImageError(true)}
             />
+            <div className="absolute top-2 right-2 flex gap-1">
+              <Badge 
+                variant={product.is_active ? "default" : "secondary"}
+                className="text-xs"
+              >
+                {product.is_active ? "Actif" : "Inactif"}
+              </Badge>
+            </div>
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
           </div>
         ) : (
-          <div className="aspect-square rounded-t-lg bg-muted flex items-center justify-center">
-            <span className="text-muted-foreground text-sm">Pas d'image</span>
+          <div className="aspect-square rounded-t-lg bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center relative">
+            <div className="text-center">
+              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+              <span className="text-muted-foreground text-sm">Pas d'image</span>
+            </div>
+            <div className="absolute top-2 right-2">
+              <Badge 
+                variant={product.is_active ? "default" : "secondary"}
+                className="text-xs"
+              >
+                {product.is_active ? "Actif" : "Inactif"}
+              </Badge>
+            </div>
           </div>
         )}
       </CardHeader>
+      
       <CardContent className="p-4 space-y-3">
-        <div>
-          <CardTitle className="line-clamp-2 text-lg">{product.name}</CardTitle>
+        <div className="space-y-2">
+          <CardTitle className="line-clamp-2 text-lg leading-tight group-hover:text-primary transition-colors">
+            {product.name}
+          </CardTitle>
           {product.description && (
-            <CardDescription className="line-clamp-2 mt-1">
-              {product.description}
+            <CardDescription className="line-clamp-2 text-sm leading-relaxed">
+              {product.description.replace(/<[^>]*>/g, '')}
             </CardDescription>
           )}
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-xl font-bold">
-            {product.price.toLocaleString()} {product.currency}
-          </span>
-          <div
-            className={`px-2 py-1 rounded text-xs font-medium ${
-              product.is_active
-                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
-                : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100"
-            }`}
-          >
-            {product.is_active ? "Actif" : "Inactif"}
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-green-600" />
+            <span className="text-xl font-bold text-green-600">
+              {product.price.toLocaleString()} {product.currency}
+            </span>
+          </div>
+          {product.rating > 0 && (
+            <div className="flex items-center gap-1">
+              <Star className="h-4 w-4 text-yellow-500 fill-current" />
+              <span className="text-sm font-medium">{product.rating.toFixed(1)}</span>
+              <span className="text-xs text-muted-foreground">({product.reviews_count})</span>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          {product.category && (
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className={`text-xs ${getCategoryColor(product.category)}`}>
+                {product.category}
+              </Badge>
+              {product.product_type && (
+                <Badge variant="outline" className="text-xs">
+                  {product.product_type}
+                </Badge>
+              )}
+            </div>
+          )}
+          
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span>{formatDate(product.created_at)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" />
+              <span>0 ventes</span>
+            </div>
           </div>
         </div>
 
         <div className="space-y-1 text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <span className="font-medium">Lien:</span>
-            <code className="flex-1 truncate">{product.slug}</code>
+            <code className="flex-1 truncate bg-muted px-1 rounded text-xs">
+              {product.slug}
+            </code>
           </div>
-          {product.category && (
-            <div>
-              <span className="font-medium">Catégorie:</span> {product.category}
-            </div>
-          )}
-          {product.product_type && (
-            <div>
-              <span className="font-medium">Type:</span> {product.product_type}
-            </div>
-          )}
-          {product.rating > 0 && (
-            <div>
-              <span className="font-medium">Note:</span> {product.rating.toFixed(1)}/5 ({product.reviews_count} avis)
-            </div>
-          )}
         </div>
 
         <div className="flex gap-2 pt-2">
@@ -115,30 +197,44 @@ const ProductCardDashboard = ({
             <Edit className="h-4 w-4 mr-1" />
             Modifier
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCopyLink}
-            title="Copier le lien"
-          >
-            <Copy className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePreview}
-            title="Prévisualiser"
-          >
-            <ExternalLink className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onDelete}
-            title="Supprimer"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={handleCopyLink}>
+                <Copy className="h-4 w-4 mr-2" />
+                Copier le lien
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handlePreview}>
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Prévisualiser
+              </DropdownMenuItem>
+              {onToggleStatus && (
+                <DropdownMenuItem onClick={onToggleStatus}>
+                  {product.is_active ? (
+                    <>
+                      <EyeOff className="h-4 w-4 mr-2" />
+                      Désactiver
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="h-4 w-4 mr-2" />
+                      Activer
+                    </>
+                  )}
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Supprimer
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </CardContent>
     </Card>
