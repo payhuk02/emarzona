@@ -78,7 +78,7 @@ export const ProfileDebug = () => {
               },
             ])
             .select()
-            .single();
+            .limit(1);
           
           if (error) throw error;
           return { message: 'Profil créé', profile: data };

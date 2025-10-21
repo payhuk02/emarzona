@@ -103,10 +103,16 @@ export const useStore = () => {
         .from('stores')
         .select('*')
         .eq('user_id', user.id)
-        .maybeSingle();
+        .limit(1);
 
-      if (error) throw error;
-      setStore(data);
+      if (error) {
+        logger.error('Error fetching store:', error);
+        setStore(null);
+        return;
+      }
+      
+      // Prendre le premier résultat s'il y en a un
+      setStore(data && data.length > 0 ? data[0] : null);
     } catch (error) {
       logger.error('Error fetching store:', error);
       toast({
@@ -146,11 +152,11 @@ export const useStore = () => {
           description: description || null
         })
         .select()
-        .single();
+        .limit(1);
 
       if (error) throw error;
 
-      setStore(data);
+      setStore(data && data.length > 0 ? data[0] : null);
       toast({
         title: "Boutique créée !",
         description: `Votre boutique "${name}" est maintenant en ligne.`
@@ -195,11 +201,11 @@ export const useStore = () => {
         .update(updateData)
         .eq('id', store.id)
         .select()
-        .single();
+        .limit(1);
 
       if (error) throw error;
 
-      setStore(data);
+      setStore(data && data.length > 0 ? data[0] : store);
       toast({
         title: "Boutique mise à jour",
         description: "Les modifications ont été enregistrées."

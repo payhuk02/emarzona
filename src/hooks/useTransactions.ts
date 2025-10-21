@@ -73,12 +73,12 @@ export const useTransactions = (storeId?: string, status?: string) => {
         .from("transactions")
         .insert([transactionData])
         .select()
-        .single();
+        .limit(1);
 
       if (error) throw error;
       
       await fetchTransactions();
-      return data;
+      return data && data.length > 0 ? data[0] : null;
     } catch (error: any) {
       toast({
         title: "Erreur",
@@ -96,12 +96,12 @@ export const useTransactions = (storeId?: string, status?: string) => {
         .update(updates)
         .eq("id", id)
         .select()
-        .single();
+        .limit(1);
 
       if (error) throw error;
       
       await fetchTransactions();
-      return data;
+      return data && data.length > 0 ? data[0] : null;
     } catch (error: any) {
       toast({
         title: "Erreur",

@@ -100,10 +100,10 @@ export const useKYC = () => {
           status: 'pending',
         })
         .select()
-        .single();
+        .limit(1);
 
       if (error) throw error;
-      return data;
+      return data && data.length > 0 ? data[0] : null;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['kyc-submission'] });
@@ -168,10 +168,10 @@ export const useAdminKYC = () => {
         })
         .eq('id', submissionId)
         .select()
-        .single();
+        .limit(1);
 
       if (error) throw error;
-      return data;
+      return data && data.length > 0 ? data[0] : null;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-kyc-submissions'] });

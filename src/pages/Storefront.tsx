@@ -34,10 +34,10 @@ const Storefront = () => {
           .from("stores")
           .select("*")
           .eq("slug", slug)
-          .single();
+          .limit(1);
 
         if (error) throw error;
-        setStore(data);
+        setStore(data && data.length > 0 ? data[0] : null);
       } catch (error) {
         console.error("Error fetching store:", error);
       } finally {

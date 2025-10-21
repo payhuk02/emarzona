@@ -403,20 +403,20 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
           .update(productData)
           .eq('id', productId)
           .select()
-          .single();
+          .limit(1);
         
         if (error) throw error;
-        result = data;
+        result = data && data.length > 0 ? data[0] : null;
       } else {
         // Création
         const { data, error } = await supabase
           .from('products')
           .insert([{ ...productData, store_id: storeId }])
           .select()
-          .single();
+          .limit(1);
         
         if (error) throw error;
-        result = data;
+        result = data && data.length > 0 ? data[0] : null;
       }
 
       toast({

@@ -29,22 +29,22 @@ const ProductDetails = () => {
           .from("stores")
           .select("*")
           .eq("slug", slug)
-          .single();
+          .limit(1);
 
         if (storeError) throw storeError;
-        setStore(storeData);
+        setStore(storeData && storeData.length > 0 ? storeData[0] : null);
 
         // Fetch product
         const { data: productData, error: productError } = await supabase
           .from("products")
           .select("*")
           .eq("slug", productSlug)
-          .eq("store_id", storeData.id)
+          .eq("store_id", storeData && storeData.length > 0 ? storeData[0].id : "")
           .eq("is_active", true)
-          .single();
+          .limit(1);
 
         if (productError) throw productError;
-        setProduct(productData);
+        setProduct(productData && productData.length > 0 ? productData[0] : null);
       } catch (error) {
         console.error("Erreur de chargement :", error);
       } finally {

@@ -63,7 +63,7 @@ export async function testProfileConnection() {
           },
         ])
         .select()
-        .single();
+        .limit(1);
       
       if (createError) {
         console.error('❌ Create profile error:', createError.message);

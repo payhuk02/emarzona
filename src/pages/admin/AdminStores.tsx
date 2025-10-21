@@ -51,11 +51,11 @@ const AdminStores = () => {
 
       const storesWithDetails = await Promise.all(
         (data || []).map(async (store) => {
-          const { data: profile } = await supabase
+          const { data: profileData } = await supabase
             .from('profiles')
             .select('display_name')
             .eq('user_id', store.user_id)
-            .single();
+            .limit(1);
 
           const { count } = await supabase
             .from('products')
@@ -64,7 +64,7 @@ const AdminStores = () => {
 
           return {
             ...store,
-            owner_name: profile?.display_name || 'Inconnu',
+            owner_name: profileData && profileData.length > 0 ? profileData[0].display_name || 'Inconnu' : 'Inconnu',
             products_count: count || 0,
           };
         })

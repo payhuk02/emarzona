@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Upload, X, Image as ImageIcon, AlertCircle, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface StoreImageUploadProps {
@@ -10,155 +11,229 @@ interface StoreImageUploadProps {
   value: string;
   onChange: (url: string) => void;
   disabled?: boolean;
-  aspectRatio?: "square" | "banner";
+  aspectRatio?: "square" | "banner" | "free";
   description?: string;
+  maxSize?: number; // en MB
+  acceptedFormats?: string[];
 }
 
-const StoreImageUpload = ({ 
-  label, 
-  value, 
-  onChange, 
+const StoreImageUpload = ({
+  label,
+  value,
+  onChange,
   disabled = false,
-  aspectRatio = "square",
-  description
+  aspectRatio = "free",
+  description,
+  maxSize = 5,
+  acceptedFormats = ["image/jpeg", "image/png", "image/webp", "image/gif"]
 }: StoreImageUploadProps) => {
-  const [uploading, setUploading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      const file = event.target.files?.[0];
-      if (!file) return;
-
-      if (!file.type.startsWith("image/")) {
-        toast({
-          title: "Erreur",
-          description: "Veuillez sélectionner une image",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Erreur",
-          description: "L'image ne doit pas dépasser 5MB",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setUploading(true);
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
-
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-
-      const { data, error } = await supabase.storage
-        .from("product-images")
-        .upload(fileName, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("product-images")
-        .getPublicUrl(data.path);
-
-      onChange(publicUrl);
-
-      toast({
-        title: "Succès",
-        description: "Image téléchargée avec succès",
-      });
-    } catch (error: any) {
-      console.error("Error uploading image:", error);
-      toast({
-        title: "Erreur",
-        description: error.message || "Impossible de télécharger l'image",
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
+  const getAspectRatioClass = () => {
+    switch (aspectRatio) {
+      case "square":
+        return "aspect-square";
+      case "banner":
+        return "aspect-[3/1]";
+      default:
+        return "aspect-auto";
     }
   };
 
-  const handleRemove = () => {
+  const validateFile = (file: File): string | null => {
+    if (!acceptedFormats.includes(file.type)) {
+      return `Format non supporté. Formats acceptés : ${acceptedFormats.map(f => f.split('/')[1]).join(', ')}`;
+    }
+    
+    if (file.size > maxSize * 1024 * 1024) {
+      return `Fichier trop volumineux. Taille maximale : ${maxSize}MB`;
+    }
+    
+    return null;
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    // Simulation d'upload - remplacer par votre logique d'upload réelle
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // Ici vous devriez uploader vers votre service de stockage (Supabase Storage, Cloudinary, etc.)
+        // Pour l'instant, on utilise l'URL data pour la démo
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileSelect = async (file: File) => {
+    setError(null);
+    
+    const validationError = validateFile(file);
+    if (validationError) {
+      setError(validationError);
+      toast({
+        title: "Erreur de fichier",
+        description: validationError,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const url = await uploadImage(file);
+      onChange(url);
+      toast({
+        title: "Image uploadée",
+        description: "L'image a été uploadée avec succès."
+      });
+    } catch (error) {
+      console.error("Upload error:", error);
+      setError("Erreur lors de l'upload de l'image");
+      toast({
+        title: "Erreur d'upload",
+        description: "Impossible d'uploader l'image. Réessayez.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    
+    if (disabled || isUploading) return;
+    
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (!disabled && !isUploading) {
+      setDragOver(true);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOver(false);
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  };
+
+  const removeImage = () => {
     onChange("");
+    setError(null);
   };
 
   return (
-    <div className="space-y-2">
-      <Label>{label}</Label>
-      {description && (
-        <p className="text-xs text-muted-foreground">{description}</p>
-      )}
-
+    <div className="space-y-3">
+      <Label className="text-sm font-medium">{label}</Label>
+      
       {value ? (
-        <div className={`relative w-full rounded-lg overflow-hidden bg-muted ${
-          aspectRatio === "banner" ? "aspect-[3/1]" : "aspect-square max-w-xs"
-        }`}>
-          <img
-            src={value}
-            alt={label}
-            className="h-full w-full object-cover"
-          />
-          <Button
-            type="button"
-            variant="destructive"
-            size="icon"
-            className="absolute top-2 right-2"
-            onClick={handleRemove}
-            disabled={disabled}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+        <Card className="overflow-hidden">
+          <CardContent className="p-0">
+            <div className="relative group">
+              <div className={`${getAspectRatioClass()} overflow-hidden`}>
+                <img
+                  src={value}
+                  alt={label}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="flex gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={disabled || isUploading}
+                  >
+                    <Upload className="h-4 w-4 mr-1" />
+                    Remplacer
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={removeImage}
+                    disabled={disabled || isUploading}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Supprimer
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
-        <div className={`border-2 border-dashed rounded-lg p-8 text-center ${
-          aspectRatio === "banner" ? "aspect-[3/1]" : "aspect-square max-w-xs"
-        }`}>
-          <div className="flex flex-col items-center justify-center h-full gap-2">
-            <ImageIcon className="h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">{label}</p>
-            <p className="text-xs text-muted-foreground">PNG, JPG, WEBP (max 5MB)</p>
+        <div
+          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+            dragOver
+              ? "border-primary bg-primary/5"
+              : "border-muted-foreground/25 hover:border-muted-foreground/50"
+          } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onClick={() => !disabled && !isUploading && fileInputRef.current?.click()}
+        >
+          <div className="flex flex-col items-center gap-3">
+            {isUploading ? (
+              <>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p className="text-sm text-muted-foreground">Upload en cours...</p>
+              </>
+            ) : (
+              <>
+                <div className="p-3 rounded-full bg-muted">
+                  <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Cliquez ou glissez-déposez une image</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Formats acceptés : JPG, PNG, WebP, GIF (max {maxSize}MB)
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
 
-      <div>
-        <input
-          id={`image-upload-${label}`}
-          type="file"
-          accept="image/*"
-          onChange={handleUpload}
-          disabled={uploading || disabled}
-          className="hidden"
-        />
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => document.getElementById(`image-upload-${label}`)?.click()}
-          disabled={uploading || disabled}
-          className="w-full"
-        >
-          {uploading ? (
-            <>
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent mr-2" />
-              Téléchargement...
-            </>
-          ) : (
-            <>
-              <Upload className="h-4 w-4 mr-2" />
-              {value ? "Changer l'image" : "Télécharger une image"}
-            </>
-          )}
-        </Button>
-      </div>
+      {error && (
+        <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <AlertCircle className="h-4 w-4 text-destructive mt-0.5" />
+          <p className="text-sm text-destructive">{error}</p>
+        </div>
+      )}
+
+      {description && (
+        <p className="text-xs text-muted-foreground">{description}</p>
+      )}
+
+      <Input
+        ref={fileInputRef}
+        type="file"
+        accept={acceptedFormats.join(",")}
+        onChange={handleFileInputChange}
+        className="hidden"
+        disabled={disabled || isUploading}
+      />
     </div>
   );
 };
