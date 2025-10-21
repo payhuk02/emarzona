@@ -139,13 +139,13 @@ const Storefront = () => {
                   />
 
                   {productsLoading ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                    <div className="products-grid-mobile sm:products-grid-tablet lg:products-grid-desktop gap-3 sm:gap-4 lg:gap-6">
                       {[1, 2, 3, 4, 5, 6].map((i) => (
                         <Skeleton key={i} className="h-72 sm:h-80 lg:h-96" />
                       ))}
                     </div>
                   ) : filteredProducts.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                    <div className="products-grid-mobile sm:products-grid-tablet lg:products-grid-desktop gap-3 sm:gap-4 lg:gap-6">
                       {filteredProducts.map((product, index) => (
                         <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
                           <ProductCard

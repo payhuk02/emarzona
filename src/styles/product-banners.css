@@ -1,0 +1,276 @@
+/* ============================================================
+   OPTIMISATION DES BANNIÈRES PRODUITS - PAYHUK
+   ============================================================ */
+
+/* Variables CSS pour la cohérence */
+:root {
+  --product-banner-aspect-ratio: 16/9;
+  --mobile-margin: 0.5rem;
+  --desktop-margin: 1rem;
+  --border-radius: 0.75rem;
+  --transition-duration: 300ms;
+}
+
+/* Container principal pour les cartes produits */
+.product-card-container {
+  @apply w-full;
+}
+
+/* Bannière produit avec ratio 16:9 */
+.product-banner {
+  @apply relative w-full overflow-hidden;
+  aspect-ratio: var(--product-banner-aspect-ratio);
+}
+
+/* Image optimisée avec lazy loading */
+.product-banner img {
+  @apply w-full h-full object-cover transition-transform duration-500;
+  will-change: transform;
+}
+
+/* Effet hover sur les cartes */
+.product-card:hover .product-banner img {
+  @apply scale-105;
+}
+
+/* Overlay gradient pour les effets visuels */
+.product-banner-overlay {
+  @apply absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent;
+  @apply opacity-0 transition-opacity duration-300;
+}
+
+.product-card:hover .product-banner-overlay {
+  @apply opacity-100;
+}
+
+/* Badges de promotion */
+.product-badge {
+  @apply absolute top-3 right-3 flex flex-col gap-2 z-10;
+}
+
+/* Actions hover */
+.product-actions {
+  @apply absolute top-3 right-3 flex flex-col gap-2;
+  @apply opacity-0 transition-all duration-300 transform translate-x-2;
+}
+
+.product-card:hover .product-actions {
+  @apply opacity-100 translate-x-0;
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN - MOBILE FIRST
+   ============================================================ */
+
+/* Mobile (< 640px) - Affichage immersif */
+@media (max-width: 639px) {
+  .product-card-container {
+    @apply mx-1; /* Marges minimales */
+  }
+  
+  .product-banner {
+    @apply rounded-lg; /* Coins arrondis réduits */
+  }
+  
+  /* Grille mobile optimisée */
+  .products-grid-mobile {
+    @apply grid grid-cols-1 gap-3;
+    @apply px-2; /* Padding horizontal minimal */
+  }
+  
+  /* Cartes produits mobile */
+  .product-card-mobile {
+    @apply w-full mx-0; /* Largeur complète */
+    @apply shadow-lg; /* Ombre plus prononcée */
+  }
+  
+  /* Contenu des cartes mobile */
+  .product-card-content-mobile {
+    @apply p-3; /* Padding réduit */
+  }
+  
+  /* Boutons mobile */
+  .product-button-mobile {
+    @apply w-full text-sm py-2; /* Boutons pleine largeur */
+  }
+}
+
+/* Tablet (640px - 1024px) */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .product-card-container {
+    @apply mx-2;
+  }
+  
+  .products-grid-tablet {
+    @apply grid grid-cols-2 gap-4;
+    @apply px-4;
+  }
+  
+  .product-banner {
+    @apply rounded-xl;
+  }
+}
+
+/* Desktop (> 1024px) - Ratio 16:9 professionnel */
+@media (min-width: 1024px) {
+  .product-card-container {
+    @apply mx-3;
+  }
+  
+  .products-grid-desktop {
+    @apply grid grid-cols-3 xl:grid-cols-4 gap-6;
+    @apply px-6;
+  }
+  
+  .product-banner {
+    @apply rounded-2xl;
+  }
+  
+  /* Effets hover avancés pour desktop */
+  .product-card-desktop:hover {
+    @apply -translate-y-2 shadow-2xl;
+  }
+}
+
+/* ============================================================
+   OPTIMISATIONS PERFORMANCE
+   ============================================================ */
+
+/* Prévention du CLS (Cumulative Layout Shift) */
+.product-banner {
+  contain: layout;
+}
+
+/* Lazy loading optimisé */
+.product-banner img[loading="lazy"] {
+  @apply opacity-0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.product-banner img[loading="lazy"].loaded {
+  @apply opacity-100;
+}
+
+/* Placeholder de chargement */
+.product-banner-loading {
+  @apply absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-800;
+  @apply animate-pulse flex items-center justify-center;
+}
+
+/* ============================================================
+   COMPATIBILITÉ NAVIGATEURS
+   ============================================================ */
+
+/* Fallback pour les navigateurs sans support aspect-ratio */
+@supports not (aspect-ratio: 16/9) {
+  .product-banner {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 ratio */
+  }
+  
+  .product-banner img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITÉ
+   ============================================================ */
+
+/* Focus visible pour l'accessibilité */
+.product-card:focus-visible {
+  @apply outline-2 outline-blue-500 outline-offset-2;
+}
+
+/* Contraste amélioré pour les badges */
+.product-badge .badge {
+  @apply text-white font-semibold;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================================
+   ANIMATIONS FLUIDES
+   ============================================================ */
+
+/* Animation d'entrée pour les cartes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.product-card {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Animation de chargement */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.product-banner-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================================
+   MODE SOMBRE OPTIMISÉ
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .product-card {
+    @apply bg-slate-800/80 border-slate-600;
+  }
+  
+  .product-card:hover {
+    @apply border-slate-500;
+  }
+  
+  .product-banner-loading {
+    @apply bg-gradient-to-br from-slate-700 to-slate-800;
+  }
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+
+@media print {
+  .product-card {
+    @apply break-inside-avoid;
+  }
+  
+  .product-banner {
+    @apply aspect-square; /* Ratio carré pour l'impression */
+  }
+  
+  .product-actions {
+    @apply hidden; /* Masquer les actions pour l'impression */
+  }
+}

@@ -11,7 +11,7 @@ import { DomainSettings } from "@/components/settings/DomainSettings";
 import { ProfileDebug } from "@/components/debug/ProfileDebug";
 import { ProfileTest } from "@/components/debug/ProfileTest";
 import { DatabaseMigrationInstructions } from "@/components/debug/DatabaseMigrationInstructions";
-import { MobileResponsiveTest } from "@/components/debug/MobileResponsiveTest";
+import { ResponsiveDesignTest } from "@/components/debug/ResponsiveDesignTest";
 
 const Settings = () => {
   return (
@@ -189,9 +189,9 @@ const Settings = () => {
                               <div className="mt-6">
                                 <ProfileTest />
                               </div>
-                              <div className="mt-6">
-                                <MobileResponsiveTest />
-                              </div>
+                                  <div className="mt-6">
+                                    <ResponsiveDesignTest />
+                                  </div>
                             </CardContent>
                   </Card>
                 </TabsContent>

@@ -4,6 +4,7 @@ import { ShoppingCart, Star, Percent, Loader2 } from "lucide-react";
 import { initiateMonerooPayment } from "@/lib/moneroo-payment";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { ProductBanner } from "@/components/ui/ResponsiveProductImage";
 
 interface ProductCardProps {
   product: {
@@ -86,30 +87,27 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
   };
 
   return (
-    <div className="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-      {hasPromo && (
-        <div className="absolute top-3 left-3 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
-          <Percent className="h-3 w-3" /> -{discountPercent}%
-        </div>
-      )}
-
-      <div className="aspect-square overflow-hidden bg-muted relative">
-        {product.image_url ? (
-          <img
-            src={product.image_url}
-            alt={product.name}
-            width={1080}
-            height={1080}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        ) : (
-          <div className="h-full w-full flex items-center justify-center text-muted-foreground">
-            <ShoppingCart className="h-16 w-16 opacity-20" />
-          </div>
-        )}
+    <div className="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop">
+      {/* Bannière produit avec ratio 16:9 */}
+      <div className="product-card-container">
+        <ProductBanner
+          src={product.image_url}
+          alt={product.name}
+          className="w-full product-banner"
+          fallbackIcon={<ShoppingCart className="h-16 w-16 opacity-20" />}
+          badges={
+            hasPromo ? (
+              <div className="product-badge">
+                <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
+                  <Percent className="h-3 w-3" /> -{discountPercent}%
+                </div>
+              </div>
+            ) : undefined
+          }
+        />
       </div>
 
-      <div className="flex-1 flex flex-col p-4 space-y-2">
+      <div className="flex-1 flex flex-col p-4 space-y-2 product-card-content-mobile sm:product-card-content-tablet lg:product-card-content-desktop">
         {product.category && (
           <span className="text-xs font-medium text-primary uppercase tracking-wide">
             {product.category}
@@ -148,7 +146,7 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
 
         <div className="mt-3 flex gap-2">
           <Link to={`/stores/${storeSlug}/products/${product.slug}`} className="flex-1">
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full product-button-mobile">
               Voir le produit
             </Button>
           </Link>
@@ -156,7 +154,7 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
           <Button
             onClick={handleBuyNow}
             disabled={loading}
-            className="bg-primary text-primary-foreground flex items-center gap-1"
+            className="bg-primary text-primary-foreground flex items-center gap-1 product-button-mobile"
           >
             {loading ? (
               <>

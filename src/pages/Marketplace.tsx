@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { ProductBanner } from "@/components/ui/ResponsiveProductImage";
 import { 
   Search, 
   ShoppingCart, 
@@ -777,14 +778,14 @@ const Marketplace = () => {
       <section className="py-6 px-4">
         <div className="container mx-auto max-w-6xl">
           {loading ? (
-            <div className={`grid gap-6 ${filters.viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}>
+            <div className={`grid gap-6 ${filters.viewMode === "grid" ? "products-grid-mobile sm:products-grid-tablet lg:products-grid-desktop" : "grid-cols-1"}`}>
               {Array.from({ length: pagination.itemsPerPage }).map((_, i) => (
                 <Skeleton key={i} className={`rounded-lg ${filters.viewMode === "grid" ? "h-[480px]" : "h-[200px]"}`} />
               ))}
             </div>
           ) : paginatedProducts.length > 0 ? (
             <>
-              <div className={`grid gap-6 ${filters.viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}>
+              <div className={`grid gap-6 ${filters.viewMode === "grid" ? "products-grid-mobile sm:products-grid-tablet lg:products-grid-desktop" : "grid-cols-1"}`}>
                 {paginatedProducts.map((product) => (
                   <ProductCardAdvanced
                   key={product.id}
@@ -1118,39 +1119,35 @@ const ProductCardAdvanced = ({
 
   // Mode grille
   return (
-    <Card className="group relative bg-slate-800/80 backdrop-blur-sm border-slate-600 hover:border-slate-500 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl overflow-hidden">
-      <CardContent className="p-0">
-        {/* Image */}
-        <div className="relative aspect-square overflow-hidden cursor-pointer" onClick={handleCardClick}>
-          {product.image_url ? (
-            <img
-              src={product.image_url}
-              alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-800">
-              <ShoppingCart className="h-12 w-12 text-slate-400" />
-            </div>
-          )}
-          
-          {/* Overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          
-          {/* Badges */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2">
-            {hasPromo && (
-              <Badge className="bg-red-600 text-white animate-pulse">
-                -{discountPercent}%
-              </Badge>
-            )}
-            {hasPromo && (
-              <Badge className="bg-yellow-600 text-white">
-                <Crown className="h-3 w-3 mr-1" />
-                Promo
-              </Badge>
-            )}
-          </div>
+    <Card className="group relative bg-slate-800/80 backdrop-blur-sm border-slate-600 hover:border-slate-500 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl overflow-hidden product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop">
+      <CardContent className="p-0 product-card-container">
+        {/* Bannière produit avec ratio 16:9 */}
+        <div className="cursor-pointer" onClick={handleCardClick}>
+          <ProductBanner
+            src={product.image_url}
+            alt={product.name}
+            className="w-full"
+            fallbackIcon={<ShoppingCart className="h-12 w-12 text-slate-400" />}
+            overlay={
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            }
+            badges={
+              <>
+                {hasPromo && (
+                  <Badge className="bg-red-600 text-white animate-pulse">
+                    -{discountPercent}%
+                  </Badge>
+                )}
+                {hasPromo && (
+                  <Badge className="bg-yellow-600 text-white">
+                    <Crown className="h-3 w-3 mr-1" />
+                    Promo
+                  </Badge>
+                )}
+              </>
+            }
+          />
+        </div>
 
           {/* Actions hover */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">

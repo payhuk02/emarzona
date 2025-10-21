@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import "./styles/product-banners.css";
 
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
