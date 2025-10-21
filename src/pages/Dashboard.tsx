@@ -1,7 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Package, ShoppingCart, Users, DollarSign, Activity, Zap, Bell, Settings } from "lucide-react";
-import { useDashboardStats } from "@/hooks/useDashboardStatsFixed";
+import { useDashboardStats } from "@/hooks/useDashboardStatsRobust";
 import { useStore } from "@/hooks/use-store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,9 +11,10 @@ import { useState, useMemo } from "react";
 
 const Dashboard = () => {
   const { store, loading: storeLoading } = useStore();
-  const { stats, loading, refetch } = useDashboardStats();
+  const { stats, loading, error: hookError, refetch } = useDashboardStats();
   const navigate = useNavigate();
   const [lastUpdated, setLastUpdated] = useState(new Date().toISOString());
+  const [error, setError] = useState<string | null>(null);
 
   // Données simulées pour les notifications
   const notifications = useMemo(() => [
@@ -44,8 +45,13 @@ const Dashboard = () => {
   ], []);
 
   const handleRefresh = async () => {
-    await refetch();
-    setLastUpdated(new Date().toISOString());
+    try {
+      setError(null);
+      await refetch();
+      setLastUpdated(new Date().toISOString());
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors du chargement des données');
+    }
   };
 
   const handleCreateProduct = () => {
@@ -148,6 +154,23 @@ const Dashboard = () => {
 
           {/* Main Content */}
           <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 bg-gradient-hero overflow-x-hidden">
+            {(error || hookError) && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 bg-red-500 rounded-full"></div>
+                  <h3 className="font-medium text-red-800">Erreur de chargement</h3>
+                </div>
+                <p className="text-sm text-red-600 mt-1">{error || hookError}</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRefresh}
+                  className="mt-2"
+                >
+                  Réessayer
+                </Button>
+              </div>
+            )}
             <div className="w-full max-w-7xl mx-auto space-y-6 animate-fade-in">
               
               {/* Stats Grid */}
@@ -207,9 +230,9 @@ const Dashboard = () => {
                     </Badge>
                   </CardContent>
                 </Card>
-              </div>
+                </div>
 
-              {/* Quick Actions */}
+                {/* Quick Actions */}
               <Card className="shadow-soft">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2">
@@ -354,7 +377,7 @@ const Dashboard = () => {
                         <Settings className="h-4 w-4 mr-2" />
                         Configuration
                       </Button>
-                    </div>
+                </div>
                   </CardContent>
                 </Card>
               </div>
