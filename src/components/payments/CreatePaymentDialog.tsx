@@ -28,7 +28,7 @@ interface Customer {
   email: string | null;
 }
 
-export const CreatePaymentDialog = ({
+const CreatePaymentDialog = ({
   open,
   onOpenChange,
   storeId,
@@ -276,3 +276,5 @@ export const CreatePaymentDialog = ({
     </Dialog>
   );
 };
+
+export default CreatePaymentDialog;
