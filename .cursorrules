@@ -1,29 +1,75 @@
-version: 1
+# ============================================================
+# Cursor Rules - Configuration professionnelle pour app SaaS
+# Projet : Payhula
+# Auteur : Intelli / payhuk02
+# Objectif : Rendre le développement guidé, stable et intelligent
+# ============================================================
+
+project:
+  name: Payhula SaaS Platform
+  description: >
+    Application web SaaS haut de gamme pour la gestion des paiements,
+    des transactions et des utilisateurs, avec intégration Supabase, Stripe/PayDunya,
+    et un design professionnel fluide et réactif.
+  stack:
+    - Vite
+    - React / TypeScript
+    - Supabase
+    - TailwindCSS
+    - ShadCN UI
+    - Node.js (API backend)
+
 rules:
-  - match: "**/*.tsx"
-    ai_context: true
-    note: "Fichiers React TypeScript (composants et pages)"
-  - match: "**/*.ts"
-    ai_context: true
-    note: "Scripts TypeScript (hooks, utilitaires, intégrations Supabase)"
-  - match: "**/*.js"
-    ai_context: true
-    note: "Scripts JS divers (configurations, scripts Node)"
-  - match: "supabase/**/*.ts"
-    ai_context: true
-    note: "Fonctions Edge Supabase"
-  - match: "src/pages/admin/**/*.tsx"
-    ai_context: true
-    note: "Interface administrateur Payhula"
-  - match: "src/pages/**/*.tsx"
-    ai_context: true
-    note: "Pages principales (boutique, marketplace, etc.)"
-  - match: "src/components/**/*.tsx"
-    ai_context: true
-    note: "Composants réutilisables (UI et logiques)"
-  - match: "src/lib/**/*.ts"
-    ai_context: true
-    note: "Utilitaires et helpers globaux"
-  - match: ".env"
-    ai_context: false
-    note: "Ne pas analyser ce fichier (contient des clés sensibles)"
+  # === Ton de travail ===
+  - Always write clean, production-ready, scalable TypeScript and React code.
+  - Follow best practices for performance, accessibility, and security.
+  - Code must be modular, well-documented, and responsive.
+  - Always check for edge cases and handle errors gracefully.
+
+  # === Structure du code ===
+  - All components go in `src/components` with clear folder naming.
+  - Database-related files go in `src/lib` or `src/database`.
+  - Use hooks for reusable logic (`src/hooks`).
+  - Use environment variables securely with validators.
+  - Use interfaces and types consistently for clarity and safety.
+
+  # === Design & UI ===
+  - Use TailwindCSS and ShadCN UI components.
+  - Maintain a consistent spacing system (p-2, p-4, gap-4, etc.).
+  - Prioritize fluid, modern, and accessible UI.
+  - Always test on mobile and tablet (responsivity required).
+
+  # === Performances & Responsivité ===
+  - Ensure all pages are fully responsive (mobile-first).
+  - Optimize images and lazy-load heavy components.
+  - Avoid unnecessary re-renders with React.memo and useCallback.
+  - Lighthouse score must aim for 90+ on Performance and Accessibility.
+
+  # === Sécurité ===
+  - Never hardcode API keys or secrets in the source.
+  - Always use `import.meta.env` for configuration.
+  - Validate all user input and sanitize database writes.
+
+  # === Base de données ===
+  - All Supabase tables must have primary keys, timestamps, and indexes.
+  - Maintain consistent naming: snake_case for tables, camelCase for JS.
+  - Use RLS (Row Level Security) on all user data tables.
+
+  # === Collaboration & Code Review ===
+  - Commit messages must be clear and descriptive.
+  - Use branches for each feature (feature/, fix/, hotfix/).
+  - PRs should be small and reviewed before merge.
+
+cursor:
+  goals:
+    - Audit and improve all code, page by page.
+    - Detect inconsistencies, bad practices, or potential performance issues.
+    - Suggest UX/UI improvements.
+    - Ensure database models, relations, and configs are optimal.
+    - Guarantee full responsiveness and professional-grade polish.
+
+  exclude:
+    - node_modules
+    - dist
+    - .vercel
+    - build
