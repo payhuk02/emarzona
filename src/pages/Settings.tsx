@@ -21,8 +21,15 @@ const Settings = () => {
 
   useEffect(() => {
     const tab = searchParams.get('tab');
+    const action = searchParams.get('action');
+    
     if (tab) {
       setActiveTab(tab);
+    }
+    
+    // Si on vient de la page Boutique avec action=create, on passe l'info au composant StoreSettings
+    if (tab === 'boutique' && action === 'create') {
+      // L'action sera gérée par le composant StoreSettings
     }
   }, [searchParams]);
   return (
@@ -144,7 +151,7 @@ const Settings = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
-                      <StoreSettings />
+                      <StoreSettings action={searchParams.get('action')} />
                     </CardContent>
                   </Card>
                 </TabsContent>

@@ -22,7 +22,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 
-export const StoreSettings = () => {
+export const StoreSettings = ({ action }: { action?: string | null }) => {
   const { stores, loading: storesLoading, canCreateStore, getRemainingStores, createStore, updateStore, deleteStore } = useStores();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
@@ -41,6 +41,13 @@ export const StoreSettings = () => {
       setSelectedStore(stores[0].id);
     }
   }, [stores, selectedStore]);
+
+  // Gérer l'action "create" depuis l'URL
+  useEffect(() => {
+    if (action === 'create') {
+      setActiveTab('create');
+    }
+  }, [action]);
 
   const handleCreateStore = async () => {
     if (!newStoreData.name.trim()) {
@@ -153,7 +160,7 @@ export const StoreSettings = () => {
         {/* Liste des boutiques */}
         <TabsContent value="list" className="space-y-4">
           {stores.length === 0 ? (
-            <Card>
+        <Card>
               <CardContent className="py-12 text-center">
                 <Store className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Aucune boutique</h3>
@@ -166,13 +173,13 @@ export const StoreSettings = () => {
                     Créer ma première boutique
                   </Button>
                 )}
-              </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
           ) : (
             <div className="grid gap-4">
               {stores.map((store) => (
                 <Card key={store.id} className="relative">
-                  <CardHeader>
+          <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         {store.logo_url ? (
@@ -184,7 +191,7 @@ export const StoreSettings = () => {
                         ) : (
                           <div className="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center">
                             <Store className="h-6 w-6 text-primary" />
-                          </div>
+            </div>
                         )}
                         <div>
                           <CardTitle className="text-lg">{store.name}</CardTitle>
@@ -198,9 +205,9 @@ export const StoreSettings = () => {
                             <span className="text-xs text-muted-foreground">
                               {store.slug}
                             </span>
-                          </div>
-                        </div>
-                      </div>
+                </div>
+              </div>
+            </div>
                       <div className="flex items-center gap-2">
                         <Button
                           variant="outline"
@@ -224,8 +231,8 @@ export const StoreSettings = () => {
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                      </div>
-                    </div>
+                </div>
+              </div>
                   </CardHeader>
                 </Card>
               ))}
@@ -243,14 +250,14 @@ export const StoreSettings = () => {
               </AlertDescription>
             </Alert>
           ) : (
-            <Card>
-              <CardHeader>
+        <Card>
+          <CardHeader>
                 <CardTitle>Créer une nouvelle boutique</CardTitle>
-                <CardDescription>
+            <CardDescription>
                   Vous pouvez créer {getRemainingStores()} boutique(s) supplémentaire(s)
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Nom de la boutique *</Label>
                   <Input
@@ -271,7 +278,7 @@ export const StoreSettings = () => {
                   <Label htmlFor="slug">URL de la boutique</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">payhula.com/stores/</span>
-                    <Input
+                  <Input
                       id="slug"
                       value={newStoreData.slug}
                       onChange={(e) => setNewStoreData(prev => ({ ...prev, slug: e.target.value }))}
@@ -312,10 +319,10 @@ export const StoreSettings = () => {
                   >
                     Annuler
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
         </TabsContent>
       </Tabs>
     </div>

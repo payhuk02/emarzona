@@ -14,7 +14,7 @@ const Store = () => {
   const navigate = useNavigate();
 
   const handleCreateStoreRedirect = () => {
-    navigate('/dashboard/settings?tab=boutique');
+    navigate('/dashboard/settings?tab=boutique&action=create');
   };
 
   return (
