@@ -353,7 +353,12 @@ export const DomainSettings = () => {
   };
 
   const getDNSInstructions = () => {
-    if (!domainConfig.custom_domain) return null;
+    if (!domainConfig.custom_domain) return {
+      aRecord: { type: "A", name: "@", value: "", ttl: 3600 },
+      wwwRecord: { type: "A", name: "www", value: "", ttl: 3600 },
+      verificationRecord: { type: "TXT", name: "_payhula-verification", value: "", ttl: 3600 },
+      cnameRecord: { type: "CNAME", name: "shop", value: "", ttl: 3600 }
+    };
 
     return {
       aRecord: {
