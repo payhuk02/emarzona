@@ -60,10 +60,25 @@ export const DomainSettings = () => {
   const { stores, updateStore } = useStores();
   const { toast } = useToast();
   
-  const [loading, setLoading] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-  const [domainInput, setDomainInput] = useState("");
-  const [activeTab, setActiveTab] = useState("overview");
+  const [propagationStatus, setPropagationStatus] = useState<{
+    isChecking: boolean;
+    lastCheck: Date | null;
+    result: {
+      isPropagated: boolean;
+      propagationTime: number;
+      details: {
+        aRecord: boolean;
+        wwwRecord: boolean;
+        txtRecord: boolean;
+        cnameRecord: boolean;
+      };
+      errors: string[];
+    } | null;
+  }>({
+    isChecking: false,
+    lastCheck: null,
+    result: null
+  });
   const [domainConfig, setDomainConfig] = useState<DomainConfig>({
     custom_domain: null,
     domain_status: 'not_configured',
@@ -155,40 +170,58 @@ export const DomainSettings = () => {
     }
   };
 
-  const handleVerifyDomain = async () => {
-    if (!currentStore) return;
+  const handleCheckPropagation = async () => {
+    if (!domainConfig.custom_domain) return;
 
-    setVerifying(true);
+    setPropagationStatus(prev => ({ ...prev, isChecking: true }));
     try {
-      // Simulation de vérification DNS (en production, utiliser une API backend)
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Simulation de vérification de propagation DNS
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const isVerified = Math.random() > 0.2; // 80% de succès pour la démo
+      const propagationTime = Math.floor(Math.random() * 300) + 60; // 1-5 minutes
+      const isPropagated = Math.random() > 0.2; // 80% de succès pour la démo
       
-      const success = await updateStore(currentStore.id, {
-        domain_status: isVerified ? 'verified' : 'error',
-        domain_verified_at: isVerified ? new Date().toISOString() : null,
-        domain_error_message: isVerified ? null : "Les enregistrements DNS ne sont pas correctement configurés"
+      const details = {
+        aRecord: Math.random() > 0.1, // 90% de succès
+        wwwRecord: Math.random() > 0.15, // 85% de succès
+        txtRecord: Math.random() > 0.2, // 80% de succès
+        cnameRecord: Math.random() > 0.3 // 70% de succès
+      };
+      
+      const errors: string[] = [];
+      if (!details.aRecord) errors.push("Enregistrement A principal non propagé");
+      if (!details.wwwRecord) errors.push("Enregistrement A www non propagé");
+      if (!details.txtRecord) errors.push("Enregistrement TXT de vérification non propagé");
+      if (!details.cnameRecord) errors.push("Enregistrement CNAME non propagé");
+      
+      const result = {
+        isPropagated,
+        propagationTime,
+        details,
+        errors
+      };
+
+      setPropagationStatus({
+        isChecking: false,
+        lastCheck: new Date(),
+        result
       });
 
-    if (success) {
-        toast({
-          title: isVerified ? "Domaine vérifié" : "Vérification échouée",
-          description: isVerified 
-            ? "Votre domaine est maintenant actif !" 
-            : "Vérifiez vos enregistrements DNS et réessayez.",
-          variant: isVerified ? "default" : "destructive"
-        });
-      }
+      toast({
+        title: isPropagated ? "Propagation DNS complète" : "Propagation DNS incomplète",
+        description: isPropagated 
+          ? `Temps de propagation: ${Math.floor(propagationTime / 60)} minutes`
+          : `Erreurs détectées: ${errors.join(', ')}`,
+        variant: isPropagated ? "default" : "destructive"
+      });
     } catch (error) {
-      console.error('Error verifying domain:', error);
+      console.error('Error checking propagation:', error);
+      setPropagationStatus(prev => ({ ...prev, isChecking: false }));
       toast({
         title: "Erreur",
-        description: "Impossible de vérifier le domaine.",
+        description: "Impossible de vérifier la propagation DNS.",
         variant: "destructive"
       });
-    } finally {
-      setVerifying(false);
     }
   };
 
@@ -329,11 +362,11 @@ export const DomainSettings = () => {
             Nom de domaine personnalisé
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Connectez votre propre domaine à votre boutique
+                Connectez votre propre domaine à votre boutique
           </p>
-        </div>
+            </div>
         {domainConfig.custom_domain && getStatusBadge()}
-      </div>
+            </div>
 
       {/* Configuration du domaine */}
       <Card>
@@ -645,6 +678,109 @@ export const DomainSettings = () => {
                 </div>
               </div>
             </div>
+
+                    {/* Section de vérification de propagation */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-semibold text-sm">Vérification de propagation DNS</h4>
+                          <p className="text-xs text-muted-foreground">
+                            Vérifiez si vos enregistrements DNS sont propagés
+                          </p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleCheckPropagation}
+                          disabled={propagationStatus.isChecking || !domainConfig.custom_domain}
+                        >
+                          {propagationStatus.isChecking ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4" />
+                          )}
+                          Vérifier
+                        </Button>
+                      </div>
+
+                      {propagationStatus.result && (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            {propagationStatus.result.isPropagated ? (
+                              <CheckCircle2 className="h-5 w-5 text-green-500" />
+                            ) : (
+                              <XCircle className="h-5 w-5 text-red-500" />
+                            )}
+                            <span className="font-medium">
+                              {propagationStatus.result.isPropagated ? "Propagation complète" : "Propagation incomplète"}
+                            </span>
+                            <span className="text-sm text-muted-foreground">
+                              (Dernière vérification: {propagationStatus.lastCheck?.toLocaleTimeString()})
+                            </span>
+                          </div>
+
+                          <div className="grid gap-2 md:grid-cols-2">
+                            <div className="flex items-center gap-2">
+                              {propagationStatus.result.details.aRecord ? (
+                                <Check className="h-4 w-4 text-green-500" />
+                              ) : (
+                                <XCircle className="h-4 w-4 text-red-500" />
+                              )}
+                              <span className="text-sm">Enregistrement A principal</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {propagationStatus.result.details.wwwRecord ? (
+                                <Check className="h-4 w-4 text-green-500" />
+                              ) : (
+                                <XCircle className="h-4 w-4 text-red-500" />
+                              )}
+                              <span className="text-sm">Enregistrement A www</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {propagationStatus.result.details.txtRecord ? (
+                                <Check className="h-4 w-4 text-green-500" />
+                              ) : (
+                                <XCircle className="h-4 w-4 text-red-500" />
+                              )}
+                              <span className="text-sm">Enregistrement TXT</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {propagationStatus.result.details.cnameRecord ? (
+                                <Check className="h-4 w-4 text-green-500" />
+                              ) : (
+                                <XCircle className="h-4 w-4 text-red-500" />
+                              )}
+                              <span className="text-sm">Enregistrement CNAME</span>
+                            </div>
+                          </div>
+
+                          {propagationStatus.result.errors.length > 0 && (
+                            <Alert variant="destructive">
+                              <AlertCircle className="h-4 w-4" />
+                              <AlertDescription>
+                                <strong>Erreurs détectées :</strong>
+                                <ul className="mt-1 list-disc list-inside">
+                                  {propagationStatus.result.errors.map((error, index) => (
+                                    <li key={index} className="text-sm">{error}</li>
+                                  ))}
+                                </ul>
+                              </AlertDescription>
+                            </Alert>
+                          )}
+
+                          {propagationStatus.result.isPropagated && (
+                            <Alert>
+                              <CheckCircle2 className="h-4 w-4" />
+                              <AlertDescription>
+                                <strong>Excellent !</strong> Tous les enregistrements DNS sont propagés. 
+                                Temps de propagation : {Math.floor(propagationStatus.result.propagationTime / 60)} minutes.
+                                Vous pouvez maintenant vérifier votre domaine.
+                              </AlertDescription>
+                            </Alert>
+                          )}
+                        </div>
+                      )}
+                    </div>
 
                     <Alert>
                       <Info className="h-4 w-4" />

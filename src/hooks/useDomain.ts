@@ -109,36 +109,85 @@ export const useDomain = (storeId: string | null) => {
 
     setVerifying(true);
     try {
-      // Simulation de vérification DNS (en production, utiliser une API backend)
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Vérification de propagation DNS d'abord
+      const { data: storeData } = await supabase
+        .from('stores')
+        .select('custom_domain')
+        .eq('id', storeId)
+        .single();
       
-      const isVerified = Math.random() > 0.2; // 80% de succès pour la démo
+      if (!storeData?.custom_domain) {
+        throw new Error('Aucun domaine configuré');
+      }
       
+      const propagationResult = await checkDNSPropagation(storeData.custom_domain);
+      
+      if (!propagationResult.isPropagated) {
+        const { error } = await supabase
+          .from('stores')
+          .update({
+            domain_status: 'error',
+            domain_error_message: `Propagation DNS incomplète: ${propagationResult.errors.join(', ')}`
+          })
+          .eq('id', storeId);
+
+        if (error) throw error;
+
+        toast({
+          title: "Propagation DNS incomplète",
+          description: `Temps de propagation: ${Math.floor(propagationResult.propagationTime / 60)} minutes. ${propagationResult.errors.join(', ')}`,
+          variant: "destructive"
+        });
+
+        return false;
+      }
+
+      // Si la propagation est OK, vérifier la configuration DNS
+      const dnsValidation = await validateDNSConfiguration(storeData.custom_domain);
+      
+      if (!dnsValidation.isValid) {
+        const { error } = await supabase
+          .from('stores')
+          .update({
+            domain_status: 'error',
+            domain_error_message: `Configuration DNS invalide: ${dnsValidation.errors.join(', ')}`
+          })
+          .eq('id', storeId);
+
+        if (error) throw error;
+
+        toast({
+          title: "Configuration DNS invalide",
+          description: dnsValidation.errors.join(', '),
+          variant: "destructive"
+        });
+
+        return false;
+      }
+
+      // Si tout est OK, marquer comme vérifié
       const { error } = await supabase
         .from('stores')
         .update({
-          domain_status: isVerified ? 'verified' : 'error',
-          domain_verified_at: isVerified ? new Date().toISOString() : null,
-          domain_error_message: isVerified ? null : "Les enregistrements DNS ne sont pas correctement configurés",
-          ssl_enabled: isVerified
+          domain_status: 'verified',
+          domain_verified_at: new Date().toISOString(),
+          domain_error_message: null,
+          ssl_enabled: true
         })
         .eq('id', storeId);
 
       if (error) throw error;
 
       toast({
-        title: isVerified ? "Domaine vérifié" : "Vérification échouée",
-        description: isVerified 
-          ? "Votre domaine est maintenant actif !" 
-          : "Vérifiez vos enregistrements DNS et réessayez.",
-        variant: isVerified ? "default" : "destructive"
+        title: "Domaine vérifié avec succès",
+        description: `Propagation DNS complète en ${Math.floor(propagationResult.propagationTime / 60)} minutes. SSL activé automatiquement.`
       });
 
-      return isVerified;
+      return true;
     } catch (error: any) {
       console.error('Error verifying domain:', error);
       toast({
-        title: "Erreur",
+        title: "Erreur de vérification",
         description: "Impossible de vérifier le domaine.",
         variant: "destructive"
       });
@@ -146,7 +195,7 @@ export const useDomain = (storeId: string | null) => {
     } finally {
       setVerifying(false);
     }
-  }, [storeId, toast]);
+  }, [storeId, checkDNSPropagation, validateDNSConfiguration, toast]);
 
   const disconnectDomain = useCallback(async (): Promise<boolean> => {
     if (!storeId) return false;
@@ -278,14 +327,56 @@ export const useDomain = (storeId: string | null) => {
     };
   }, []);
 
-  const checkDNSPropagation = useCallback(async (domain: string): Promise<boolean> => {
+  const checkDNSPropagation = useCallback(async (domain: string): Promise<{
+    isPropagated: boolean;
+    propagationTime: number;
+    details: {
+      aRecord: boolean;
+      wwwRecord: boolean;
+      txtRecord: boolean;
+      cnameRecord: boolean;
+    };
+    errors: string[];
+  }> => {
     try {
-      // Simulation de vérification DNS (en production, utiliser une API DNS)
+      // Simulation de vérification DNS (en production, utiliser une API DNS comme Cloudflare, Google DNS, etc.)
       await new Promise(resolve => setTimeout(resolve, 2000));
-      return Math.random() > 0.3; // 70% de succès pour la démo
+      
+      const propagationTime = Math.floor(Math.random() * 300) + 60; // 1-5 minutes
+      const isPropagated = Math.random() > 0.2; // 80% de succès pour la démo
+      
+      const details = {
+        aRecord: Math.random() > 0.1, // 90% de succès
+        wwwRecord: Math.random() > 0.15, // 85% de succès
+        txtRecord: Math.random() > 0.2, // 80% de succès
+        cnameRecord: Math.random() > 0.3 // 70% de succès
+      };
+      
+      const errors: string[] = [];
+      if (!details.aRecord) errors.push("Enregistrement A principal non propagé");
+      if (!details.wwwRecord) errors.push("Enregistrement A www non propagé");
+      if (!details.txtRecord) errors.push("Enregistrement TXT de vérification non propagé");
+      if (!details.cnameRecord) errors.push("Enregistrement CNAME non propagé");
+      
+      return {
+        isPropagated,
+        propagationTime,
+        details,
+        errors
+      };
     } catch (error) {
       console.error('Error checking DNS propagation:', error);
-      return false;
+      return {
+        isPropagated: false,
+        propagationTime: 0,
+        details: {
+          aRecord: false,
+          wwwRecord: false,
+          txtRecord: false,
+          cnameRecord: false
+        },
+        errors: ["Erreur lors de la vérification de propagation DNS"]
+      };
     }
   }, []);
 
