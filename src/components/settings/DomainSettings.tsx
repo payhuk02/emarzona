@@ -40,6 +40,8 @@ import {
 } from "lucide-react";
 import { DomainMonitoringSimple } from "./DomainMonitoringSimple";
 
+// Force refresh pour Vercel
+
 interface DomainConfig {
   custom_domain: string | null;
   domain_status: 'not_configured' | 'pending' | 'verified' | 'error';
