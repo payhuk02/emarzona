@@ -87,17 +87,22 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
   };
 
   return (
-    <div className="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop">
+    <article 
+      className="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop"
+      role="article"
+      aria-labelledby={`product-title-${product.id}`}
+      aria-describedby={`product-description-${product.id}`}
+    >
       {/* Bannière produit avec ratio 16:9 */}
       <div className="product-card-container">
         <ProductBanner
           src={product.image_url}
-          alt={product.name}
+          alt={`Image du produit ${product.name}`}
           className="w-full product-banner"
           fallbackIcon={<ShoppingCart className="h-16 w-16 opacity-20" />}
           badges={
             hasPromo ? (
-              <div className="product-badge">
+              <div className="product-badge" role="img" aria-label={`Réduction de ${discountPercent}%`}>
                 <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
                   <Percent className="h-3 w-3" /> -{discountPercent}%
                 </div>
@@ -110,45 +115,52 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
       <div className="product-card-content">
         <div className="flex-1">
           {product.category && (
-            <span className="text-xs font-medium text-primary uppercase tracking-wide mb-2 block">
+            <span className="text-xs font-medium text-primary uppercase tracking-wide mb-2 block" aria-label={`Catégorie: ${product.category}`}>
               {product.category}
             </span>
           )}
 
-          <h3 className="product-title group-hover:text-primary transition-colors mb-2">
+          <h3 
+            id={`product-title-${product.id}`}
+            className="product-title group-hover:text-primary transition-colors mb-2"
+          >
             {product.name}
           </h3>
 
           {product.rating ? (
-            <div className="product-rating mb-3">
+            <div className="product-rating mb-3" role="img" aria-label={`Note: ${product.rating} sur 5 étoiles`}>
               {renderStars(product.rating)}
-              <span className="ml-1 text-xs">({product.reviews_count ?? 0})</span>
+              <span className="ml-1 text-xs" aria-label={`${product.reviews_count ?? 0} avis`}>({product.reviews_count ?? 0})</span>
             </div>
           ) : (
             <div className="h-5 mb-3" />
           )}
 
-          <div className="flex items-baseline gap-2 mb-4">
+          <div className="flex items-baseline gap-2 mb-4" aria-label="Prix du produit">
             {hasPromo && (
-              <span className="text-sm text-muted-foreground line-through">
+              <span className="text-sm text-muted-foreground line-through" aria-label="Prix original">
                 {product.price.toLocaleString()} {product.currency ?? "FCFA"}
               </span>
             )}
-            <span className="product-price">
+            <span className="product-price" aria-label="Prix actuel">
               {price.toLocaleString()} {product.currency ?? "FCFA"}
             </span>
           </div>
 
-          <span className="text-xs text-muted-foreground mb-4 block">
+          <span className="text-xs text-muted-foreground mb-4 block" aria-label="Nombre de ventes">
             {product.purchases_count
               ? `${product.purchases_count} ventes`
               : "Aucune vente"}
           </span>
         </div>
 
-        <div className="product-actions">
+        <div className="product-actions" role="group" aria-label="Actions du produit">
           <Link to={`/stores/${storeSlug}/products/${product.slug}`} className="flex-1">
-            <Button variant="outline" className="product-button product-button-secondary">
+            <Button 
+              variant="outline" 
+              className="product-button product-button-secondary"
+              aria-label={`Voir les détails du produit ${product.name}`}
+            >
               Voir le produit
             </Button>
           </Link>
@@ -157,22 +169,23 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
             onClick={handleBuyNow}
             disabled={loading}
             className="product-button product-button-primary"
+            aria-label={`Acheter le produit ${product.name} pour ${price.toLocaleString()} ${product.currency ?? "FCFA"}`}
           >
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 <span>Paiement...</span>
               </>
             ) : (
               <>
-                <ShoppingCart className="h-4 w-4" />
+                <ShoppingCart className="h-4 w-4" aria-hidden="true" />
                 <span>Acheter</span>
               </>
             )}
           </Button>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 

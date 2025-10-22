@@ -21,8 +21,10 @@
 /* Container principal pour les cartes produits - Optimisé pour toutes les plateformes */
 .product-card-container {
   @apply w-full;
-  /* Prévention du CLS */
-  contain: layout;
+  /* Prévention du CLS et optimisation GPU */
+  contain: layout style;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* Container de bannière avec optimisations avancées */
@@ -40,6 +42,9 @@
   /* Qualité d'affichage optimisée */
   image-rendering: high-quality;
   -webkit-image-rendering: high-quality;
+  /* Optimisation GPU */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* Image optimisée avec lazy loading et rendu professionnel */
@@ -53,12 +58,16 @@
   /* Qualité d'affichage */
   image-rendering: high-quality;
   -webkit-image-rendering: high-quality;
+  /* Prévention du CLS */
+  contain: layout;
 }
 
 /* Effet hover professionnel inspiré des grandes plateformes */
 .product-card:hover .product-banner img {
   @apply scale-105;
   filter: brightness(1.05) contrast(1.02);
+  /* Optimisation GPU pour les animations */
+  transform: translateZ(0) scale(1.05);
 }
 
 /* Overlay gradient pour les effets visuels */
@@ -74,16 +83,23 @@
 /* Badges de promotion */
 .product-badge {
   @apply absolute top-3 right-3 flex flex-col gap-2 z-10;
+  /* Optimisation GPU */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* Actions hover */
 .product-actions {
   @apply absolute top-3 right-3 flex flex-col gap-2;
   @apply opacity-0 transition-all duration-300 transform translate-x-2;
+  /* Optimisation GPU */
+  transform: translateZ(0) translateX(8px);
+  will-change: transform, opacity;
 }
 
 .product-card:hover .product-actions {
-  @apply opacity-100 translate-x-0;
+  @apply opacity-100;
+  transform: translateZ(0) translateX(0);
 }
 
 /* ============================================================
@@ -109,6 +125,9 @@
     @apply grid grid-cols-1 gap-6;
     padding-left: var(--mobile-margin);
     padding-right: var(--mobile-margin);
+    /* Optimisation GPU */
+    transform: translateZ(0);
+    will-change: transform;
   }
   
   /* Cartes produits mobile - Design professionnel */
@@ -118,6 +137,7 @@
     border-radius: var(--border-radius-mobile);
     /* Effet de profondeur */
     transform: translateZ(0);
+    will-change: transform;
     /* Hauteur uniforme */
     min-height: 400px;
   }
@@ -132,6 +152,9 @@
     @apply w-full text-sm py-3 px-4;
     border-radius: var(--border-radius-mobile);
     font-weight: 600;
+    /* Optimisation GPU */
+    transform: translateZ(0);
+    will-change: transform;
   }
 }
 
@@ -151,6 +174,9 @@
     @apply grid grid-cols-2 gap-8;
     padding-left: var(--tablet-margin);
     padding-right: var(--tablet-margin);
+    /* Optimisation GPU */
+    transform: translateZ(0);
+    will-change: transform;
   }
   
   /* Cartes produits tablette */
@@ -160,11 +186,14 @@
     /* Hauteur uniforme */
     min-height: 450px;
     transition: all var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
+    /* Optimisation GPU */
+    transform: translateZ(0);
+    will-change: transform;
   }
   
   /* Effet hover tablette */
   .product-card-tablet:hover {
-    transform: translateY(-4px) scale(1.01);
+    transform: translateZ(0) translateY(-4px) scale(1.01);
     box-shadow: var(--shadow-hover);
   }
 }
@@ -188,6 +217,9 @@
     @apply grid grid-cols-3 gap-8;
     padding-left: var(--desktop-margin);
     padding-right: var(--desktop-margin);
+    /* Optimisation GPU */
+    transform: translateZ(0);
+    will-change: transform;
   }
   
   /* Effets hover avancés pour desktop - Style professionnel */
@@ -197,10 +229,13 @@
     transition: all var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
     /* Hauteur uniforme */
     min-height: 500px;
+    /* Optimisation GPU */
+    transform: translateZ(0);
+    will-change: transform;
   }
   
   .product-card-desktop:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateZ(0) translateY(-8px) scale(1.02);
     box-shadow: var(--shadow-hover);
   }
   
@@ -224,6 +259,9 @@
   @apply flex flex-col;
   /* Hauteur minimale pour éviter les décalages */
   min-height: 400px;
+  /* Optimisation GPU */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* Contenu des cartes - Espacement uniforme */
@@ -254,6 +292,9 @@
 
 .product-button {
   @apply flex-1 text-center py-2 px-4 rounded-lg font-medium transition-all duration-200;
+  /* Optimisation GPU */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .product-button-primary {
@@ -285,7 +326,7 @@
 
 /* Prévention du CLS (Cumulative Layout Shift) */
 .product-banner {
-  contain: layout;
+  contain: layout style;
 }
 
 /* Lazy loading optimisé */
@@ -419,5 +460,48 @@
   
   .product-actions {
     @apply hidden; /* Masquer les actions pour l'impression */
+  }
+}
+
+/* ============================================================
+   OPTIMISATIONS PERFORMANCE AVANCÉES
+   ============================================================ */
+
+/* Utilisation de contain pour l'isolation des layouts */
+.product-card {
+  contain: layout style;
+}
+
+/* Optimisation des animations avec will-change */
+.product-card:hover {
+  will-change: transform;
+}
+
+.product-card:not(:hover) {
+  will-change: auto;
+}
+
+/* Préchargement des images critiques */
+.product-banner img[data-priority="true"] {
+  @apply opacity-100;
+}
+
+/* Optimisation des transitions */
+.product-card * {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Réduction des animations sur les appareils lents */
+@media (prefers-reduced-motion: reduce) {
+  .product-card {
+    animation: none;
+  }
+  
+  .product-card:hover {
+    transform: none;
+  }
+  
+  .product-banner img {
+    transition: none;
   }
 }

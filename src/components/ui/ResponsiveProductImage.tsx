@@ -73,7 +73,12 @@ export const ResponsiveProductImage = ({
   }
 
   return (
-    <div ref={elementRef} className={cn("relative w-full h-full", className)}>
+    <div 
+      ref={elementRef} 
+      className={cn("relative w-full h-full", className)}
+      role="img"
+      aria-label={alt}
+    >
       {/* Placeholder de chargement avec blur */}
       {!isLoaded && blurPlaceholder && (
         <img
@@ -86,9 +91,13 @@ export const ResponsiveProductImage = ({
       
       {/* Placeholder de chargement animé */}
       {!isLoaded && !blurPlaceholder && (
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 animate-pulse">
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 animate-pulse"
+          role="status"
+          aria-label="Chargement de l'image"
+        >
           <div className="w-full h-full flex items-center justify-center">
-            <div className="h-8 w-8 text-slate-400 animate-spin">
+            <div className="h-8 w-8 text-slate-400 animate-spin" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>

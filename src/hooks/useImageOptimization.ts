@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 // Hook pour l'optimisation avancée des images
 export const useImageOptimization = () => {
