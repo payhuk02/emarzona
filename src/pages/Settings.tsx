@@ -12,8 +12,19 @@ import { ProfileDebug } from "@/components/debug/ProfileDebug";
 import { ProfileTest } from "@/components/debug/ProfileTest";
 import { DatabaseMigrationInstructions } from "@/components/debug/DatabaseMigrationInstructions";
 import { ResponsiveDesignTest } from "@/components/debug/ResponsiveDesignTest";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const Settings = () => {
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState("profile");
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -32,7 +43,7 @@ const Settings = () => {
               </div>
 
               {/* Tabs - Fully Responsive */}
-              <Tabs defaultValue="profile" className="space-y-4 sm:space-y-6">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
                 {/* Mobile: Dropdown, Tablet+: Horizontal tabs */}
                 <div className="w-full">
                   {/* Mobile View (< 640px) */}
