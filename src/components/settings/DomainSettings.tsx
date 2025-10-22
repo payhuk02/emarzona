@@ -57,7 +57,7 @@ interface DNSRecord {
 }
 
 export const DomainSettings = () => {
-  const { stores, updateStore } = useStores();
+  const { stores, updateStore, loading: storesLoading } = useStores();
   const { toast } = useToast();
   
   const [propagationStatus, setPropagationStatus] = useState<{
@@ -385,6 +385,27 @@ export const DomainSettings = () => {
 
   const dnsInstructions = getDNSInstructions();
 
+  // Gestion du chargement
+  if (storesLoading) {
+    return (
+      <Card className="border-none shadow-lg">
+        <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
+          <CardTitle className="text-lg sm:text-xl">Gestion du domaine</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
+            Configurez votre domaine personnalisé
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span className="ml-2">Chargement...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Gestion du cas sans boutique
   if (!currentStore) {
     return (
       <Card className="border-none shadow-lg">
