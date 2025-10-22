@@ -20,7 +20,6 @@ import {
   Users,
   Eye
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 interface MonitoringData {
   uptime: {
