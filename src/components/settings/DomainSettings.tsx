@@ -64,6 +64,8 @@ export const DomainSettings = () => {
   const { stores, updateStore, loading: storesLoading } = useStores();
   const { toast } = useToast();
   
+  const [verifying, setVerifying] = useState<boolean>(false);
+  
   const [propagationStatus, setPropagationStatus] = useState<{
     isChecking: boolean;
     lastCheck: Date | null;
@@ -120,6 +122,34 @@ export const DomainSettings = () => {
 
   const generateVerificationToken = () => {
     return `payhula-verify-${Math.random().toString(36).substring(2, 15)}`;
+  };
+
+  const validateDomain = (domain: string): boolean => {
+    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.([a-zA-Z]{2,}|[a-zA-Z]{2,}\.[a-zA-Z]{2,})$/;
+    return domainRegex.test(domain);
+  };
+
+  const getDNSInstructions = (domain: string, token: string) => {
+    return {
+      aRecord: {
+        type: 'A',
+        name: domain,
+        value: '185.158.133.1',
+        ttl: 3600
+      },
+      wwwRecord: {
+        type: 'A',
+        name: `www.${domain}`,
+        value: '185.158.133.1',
+        ttl: 3600
+      },
+      verificationRecord: {
+        type: 'TXT',
+        name: `_payhula-verification.${domain}`,
+        value: token,
+        ttl: 3600
+      }
+    };
   };
 
   const handleConnectDomain = async () => {
