@@ -215,9 +215,9 @@ const ProductCardProfessional = ({ product, storeSlug }: ProductCardProfessional
               </span>
             </>
           ) : (
-            <div className="flex items-center gap-1 text-gray-400">
-              <Star className="h-4 w-4" />
-              <span className="text-sm">Nouveau</span>
+            <div className="flex items-center gap-1 text-green-600">
+              <CheckCircle className="h-4 w-4" />
+              <span className="text-sm">Vérifié</span>
             </div>
           )}
         </div>
