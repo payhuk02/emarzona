@@ -134,16 +134,13 @@ const ProductCardProfessional = ({ product, storeSlug }: ProductCardProfessional
           fallbackIcon={<ShoppingCart className="h-16 w-16 opacity-20" />}
         />
         
-        {/* Overlay avec texte promotionnel */}
+        {/* Overlay avec badge promotionnel seulement */}
         {hasPromo && (
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
             <div className="absolute bottom-4 left-4 right-4">
-              <div className="bg-yellow-500 text-white font-bold text-sm px-3 py-1 rounded-full inline-block mb-2">
+              <div className="bg-yellow-500 text-white font-bold text-sm px-3 py-1 rounded-full inline-block">
                 -{discountPercent}% OFF
               </div>
-              <h3 className="text-white font-bold text-lg leading-tight">
-                {product.name.toUpperCase()}
-              </h3>
             </div>
           </div>
         )}
