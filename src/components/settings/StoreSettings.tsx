@@ -139,15 +139,6 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
             Vous avez {stores.length} boutique(s) sur {3} maximum
           </p>
         </div>
-        {canCreateStore() && (
-          <Button
-            onClick={() => setIsCreating(true)}
-            className="gradient-primary"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Créer une boutique
-          </Button>
-        )}
       </div>
 
       {/* Onglets */}
