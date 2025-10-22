@@ -55,11 +55,15 @@
   transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  /* Qualité d'affichage */
+  /* Qualité d'affichage optimisée - Images nettes */
   image-rendering: high-quality;
   -webkit-image-rendering: high-quality;
+  /* Centrage parfait de l'image */
+  object-position: center;
   /* Prévention du CLS */
   contain: layout;
+  /* Coins arrondis pour l'image */
+  border-radius: inherit;
 }
 
 /* Effet hover professionnel inspiré des grandes plateformes */
@@ -106,7 +110,7 @@
    RESPONSIVE DESIGN - MOBILE FIRST
    ============================================================ */
 
-/* Mobile (< 640px) - 1 produit par ligne, quasi-plein écran - Style ComeUp */
+/* Mobile (< 640px) - 1 produit par ligne - Affichage exact */
 @media (max-width: 639px) {
   .product-card-container {
     margin-left: var(--mobile-margin);
@@ -120,7 +124,7 @@
     margin: 0 auto;
   }
   
-  /* Grille mobile - 1 produit par ligne */
+  /* Grille mobile - EXACTEMENT 1 produit par ligne */
   .products-grid-mobile {
     @apply grid grid-cols-1 gap-6;
     padding-left: var(--mobile-margin);
@@ -138,8 +142,10 @@
     /* Effet de profondeur */
     transform: translateZ(0);
     will-change: transform;
-    /* Hauteur uniforme */
-    min-height: 400px;
+    /* Hauteur uniforme exacte */
+    height: 480px;
+    min-height: 480px;
+    max-height: 480px;
   }
   
   /* Contenu des cartes mobile */
@@ -158,7 +164,7 @@
   }
 }
 
-/* Tablet (640px - 1024px) - 2 produits par ligne - Style ComeUp */
+/* Tablet (640px - 1024px) - EXACTEMENT 2 produits par ligne */
 @media (min-width: 640px) and (max-width: 1023px) {
   .product-card-container {
     margin-left: var(--tablet-margin);
@@ -169,7 +175,7 @@
     border-radius: var(--border-radius-tablet);
   }
   
-  /* Grille tablette - 2 produits par ligne */
+  /* Grille tablette - EXACTEMENT 2 produits par ligne */
   .products-grid-tablet {
     @apply grid grid-cols-2 gap-8;
     padding-left: var(--tablet-margin);
@@ -183,22 +189,24 @@
   .product-card-tablet {
     box-shadow: var(--shadow-desktop);
     border-radius: var(--border-radius-tablet);
-    /* Hauteur uniforme */
-    min-height: 450px;
+    /* Hauteur uniforme exacte */
+    height: 520px;
+    min-height: 520px;
+    max-height: 520px;
     transition: all var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
     /* Optimisation GPU */
     transform: translateZ(0);
     will-change: transform;
   }
   
-  /* Effet hover tablette */
+  /* Effet hover tablette avec shadow-xl et scale-105 */
   .product-card-tablet:hover {
-    transform: translateZ(0) translateY(-4px) scale(1.01);
-    box-shadow: var(--shadow-hover);
+    transform: translateZ(0) translateY(-8px) scale(1.05);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
 }
 
-/* Desktop (> 1024px) - 3 produits par ligne, format 16:9 - Style ComeUp/Fiverr */
+/* Desktop (> 1024px) - EXACTEMENT 3 produits par ligne */
 @media (min-width: 1024px) {
   .product-card-container {
     margin-left: var(--desktop-margin);
@@ -212,7 +220,7 @@
     height: auto;
   }
   
-  /* Grille desktop - 3 produits par ligne */
+  /* Grille desktop - EXACTEMENT 3 produits par ligne */
   .products-grid-desktop {
     @apply grid grid-cols-3 gap-8;
     padding-left: var(--desktop-margin);
@@ -227,19 +235,22 @@
     box-shadow: var(--shadow-desktop);
     border-radius: var(--border-radius-desktop);
     transition: all var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
-    /* Hauteur uniforme */
-    min-height: 500px;
+    /* Hauteur uniforme exacte */
+    height: 560px;
+    min-height: 560px;
+    max-height: 560px;
     /* Optimisation GPU */
     transform: translateZ(0);
     will-change: transform;
   }
   
+  /* Effet hover desktop avec shadow-xl et scale-105 */
   .product-card-desktop:hover {
-    transform: translateZ(0) translateY(-8px) scale(1.02);
-    box-shadow: var(--shadow-hover);
+    transform: translateZ(0) translateY(-12px) scale(1.05);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
   
-  /* Optimisation pour les écrans ultra-larges - Maintenir 3 colonnes */
+  /* Optimisation pour les écrans ultra-larges - Maintenir EXACTEMENT 3 colonnes */
   @media (min-width: 1920px) {
     .products-grid-desktop {
       @apply grid-cols-3;
@@ -254,14 +265,16 @@
    STYLES UNIFORMES POUR LES CARTES PRODUITS
    ============================================================ */
 
-/* Hauteur uniforme pour toutes les cartes */
+/* Hauteur uniforme pour toutes les cartes - Garantie exacte */
 .product-card {
   @apply flex flex-col;
   /* Hauteur minimale pour éviter les décalages */
-  min-height: 400px;
+  min-height: 480px;
   /* Optimisation GPU */
   transform: translateZ(0);
   will-change: transform;
+  /* Transition fluide pour tous les effets */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Contenu des cartes - Espacement uniforme */
@@ -315,9 +328,11 @@
   @apply absolute top-3 right-3 z-10;
 }
 
-/* Effet de survol global */
+/* Effet de survol global avec shadow-xl et scale-105 */
 .product-card:hover {
-  @apply shadow-lg;
+  @apply shadow-xl;
+  transform: translateZ(0) translateY(-8px) scale(1.05);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 .product-card:hover .product-title {

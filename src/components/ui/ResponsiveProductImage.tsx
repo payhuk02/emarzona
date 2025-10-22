@@ -131,8 +131,12 @@ export const ResponsiveProductImage = ({
             // Optimisation GPU pour les performances
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
-            // Qualité d'affichage optimisée
-            imageRendering: 'high-quality'
+            // Qualité d'affichage optimisée - Images nettes et centrées
+            imageRendering: 'high-quality',
+            // Centrage parfait de l'image
+            objectPosition: 'center',
+            // Coins arrondis hérités du parent
+            borderRadius: 'inherit'
           }}
         />
       )}
