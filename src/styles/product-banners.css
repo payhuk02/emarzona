@@ -1,36 +1,63 @@
 /* ============================================================
    OPTIMISATION DES BANNIÈRES PRODUITS - PAYHUK
+   Version Professionnelle - Inspirée des grandes plateformes
    ============================================================ */
 
-/* Variables CSS pour la cohérence */
+/* Variables CSS pour la cohérence et la performance */
 :root {
   --product-banner-aspect-ratio: 16/9;
-  --mobile-margin: 0.5rem;
-  --desktop-margin: 1rem;
-  --border-radius: 0.75rem;
+  --mobile-margin: 0.25rem;
+  --tablet-margin: 0.5rem;
+  --desktop-margin: 0.75rem;
+  --border-radius-mobile: 0.5rem;
+  --border-radius-tablet: 0.75rem;
+  --border-radius-desktop: 1rem;
   --transition-duration: 300ms;
+  --shadow-mobile: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-desktop: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-/* Container principal pour les cartes produits */
+/* Container principal pour les cartes produits - Optimisé pour toutes les plateformes */
 .product-card-container {
   @apply w-full;
+  /* Prévention du CLS */
+  contain: layout;
 }
 
-/* Bannière produit avec ratio 16:9 */
-.product-banner {
-  @apply relative w-full overflow-hidden;
-  aspect-ratio: var(--product-banner-aspect-ratio);
-}
-
-/* Image optimisée avec lazy loading */
-.product-banner img {
-  @apply w-full h-full object-cover transition-transform duration-500;
+/* Container de bannière avec optimisations avancées */
+.product-banner-container {
+  @apply relative w-full;
+  /* Optimisation GPU */
+  transform: translateZ(0);
   will-change: transform;
 }
 
-/* Effet hover sur les cartes */
+/* Bannière produit avec ratio 16:9 professionnel */
+.product-banner {
+  @apply relative w-full overflow-hidden;
+  aspect-ratio: var(--product-banner-aspect-ratio);
+  /* Qualité d'affichage optimisée */
+  image-rendering: high-quality;
+  -webkit-image-rendering: high-quality;
+}
+
+/* Image optimisée avec lazy loading et rendu professionnel */
+.product-banner img {
+  @apply w-full h-full object-cover transition-all duration-700 ease-out;
+  will-change: transform, opacity;
+  /* Optimisation GPU */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* Qualité d'affichage */
+  image-rendering: high-quality;
+  -webkit-image-rendering: high-quality;
+}
+
+/* Effet hover professionnel inspiré des grandes plateformes */
 .product-card:hover .product-banner img {
   @apply scale-105;
+  filter: brightness(1.05) contrast(1.02);
 }
 
 /* Overlay gradient pour les effets visuels */
@@ -62,73 +89,110 @@
    RESPONSIVE DESIGN - MOBILE FIRST
    ============================================================ */
 
-/* Mobile (< 640px) - Affichage immersif */
+/* Mobile (< 640px) - Affichage immersif inspiré des apps modernes */
 @media (max-width: 639px) {
   .product-card-container {
-    @apply mx-1; /* Marges minimales */
+    margin-left: var(--mobile-margin);
+    margin-right: var(--mobile-margin);
   }
   
   .product-banner {
-    @apply rounded-lg; /* Coins arrondis réduits */
+    border-radius: var(--border-radius-mobile);
+    /* Largeur quasi-pleine avec marges cohérentes */
+    width: calc(100% - 2 * var(--mobile-margin));
+    margin: 0 auto;
   }
   
-  /* Grille mobile optimisée */
+  /* Grille mobile optimisée - Style Amazon/Fiverr */
   .products-grid-mobile {
-    @apply grid grid-cols-1 gap-3;
-    @apply px-2; /* Padding horizontal minimal */
+    @apply grid grid-cols-1 gap-4;
+    padding-left: var(--mobile-margin);
+    padding-right: var(--mobile-margin);
   }
   
-  /* Cartes produits mobile */
+  /* Cartes produits mobile - Design professionnel */
   .product-card-mobile {
-    @apply w-full mx-0; /* Largeur complète */
-    @apply shadow-lg; /* Ombre plus prononcée */
+    @apply w-full mx-0;
+    box-shadow: var(--shadow-mobile);
+    border-radius: var(--border-radius-mobile);
+    /* Effet de profondeur */
+    transform: translateZ(0);
   }
   
   /* Contenu des cartes mobile */
   .product-card-content-mobile {
-    @apply p-3; /* Padding réduit */
+    @apply p-4;
   }
   
-  /* Boutons mobile */
+  /* Boutons mobile - Style moderne */
   .product-button-mobile {
-    @apply w-full text-sm py-2; /* Boutons pleine largeur */
+    @apply w-full text-sm py-3 px-4;
+    border-radius: var(--border-radius-mobile);
+    font-weight: 600;
   }
 }
 
-/* Tablet (640px - 1024px) */
+/* Tablet (640px - 1024px) - Équilibre optimal */
 @media (min-width: 640px) and (max-width: 1023px) {
   .product-card-container {
-    @apply mx-2;
+    margin-left: var(--tablet-margin);
+    margin-right: var(--tablet-margin);
+  }
+  
+  .product-banner {
+    border-radius: var(--border-radius-tablet);
   }
   
   .products-grid-tablet {
-    @apply grid grid-cols-2 gap-4;
-    @apply px-4;
+    @apply grid grid-cols-2 gap-6;
+    padding-left: var(--tablet-margin);
+    padding-right: var(--tablet-margin);
   }
   
-  .product-banner {
-    @apply rounded-xl;
+  .product-card-tablet {
+    box-shadow: var(--shadow-desktop);
+    border-radius: var(--border-radius-tablet);
   }
 }
 
-/* Desktop (> 1024px) - Ratio 16:9 professionnel */
+/* Desktop (> 1024px) - Ratio 16:9 professionnel - Style ComeUp/Fiverr */
 @media (min-width: 1024px) {
   .product-card-container {
-    @apply mx-3;
-  }
-  
-  .products-grid-desktop {
-    @apply grid grid-cols-3 xl:grid-cols-4 gap-6;
-    @apply px-6;
+    margin-left: var(--desktop-margin);
+    margin-right: var(--desktop-margin);
   }
   
   .product-banner {
-    @apply rounded-2xl;
+    border-radius: var(--border-radius-desktop);
+    /* Optimisation pour le ratio 1920x1080 */
+    max-width: 100%;
+    height: auto;
   }
   
-  /* Effets hover avancés pour desktop */
+  .products-grid-desktop {
+    @apply grid grid-cols-3 xl:grid-cols-4 gap-8;
+    padding-left: var(--desktop-margin);
+    padding-right: var(--desktop-margin);
+  }
+  
+  /* Effets hover avancés pour desktop - Style professionnel */
+  .product-card-desktop {
+    box-shadow: var(--shadow-desktop);
+    border-radius: var(--border-radius-desktop);
+    transition: all var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
   .product-card-desktop:hover {
-    @apply -translate-y-2 shadow-2xl;
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  /* Optimisation pour les écrans ultra-larges */
+  @media (min-width: 1920px) {
+    .products-grid-desktop {
+      @apply grid-cols-4 xl:grid-cols-5;
+      gap: 1.5rem;
+    }
   }
 }
 

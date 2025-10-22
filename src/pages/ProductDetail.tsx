@@ -9,6 +9,7 @@ import ProductCard from "@/components/marketplace/ProductCard";
 import StoreFooter from "@/components/storefront/StoreFooter";
 import { useProducts } from "@/hooks/useProducts";
 import DOMPurify from "dompurify";
+import { ProductImageGallery } from "@/components/ui/ProductImageGallery";
 
 const ProductDetails = () => {
   const { slug, productSlug } = useParams<{ slug: string; productSlug: string }>();
@@ -143,19 +144,16 @@ const ProductDetails = () => {
         <main className="flex-1">
           <div className="max-w-6xl mx-auto px-4 py-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-              {/* Image */}
-              <div className="aspect-square overflow-hidden rounded-lg bg-muted">
-                {product.image_url ? (
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center text-muted-foreground">
-                    <ShoppingCart className="h-16 w-16 opacity-20" />
-                  </div>
-                )}
+              {/* Galerie d'images optimisée */}
+              <div className="space-y-4">
+                <ProductImageGallery
+                  images={product.image_url ? [product.image_url] : []}
+                  alt={product.name}
+                  context="detail"
+                  priority={true}
+                  showZoom={true}
+                  showThumbnails={false}
+                />
               </div>
 
               {/* Infos produit */}

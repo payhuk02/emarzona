@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ShoppingCart, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ProductBanner } from "@/components/ui/ResponsiveProductImage";
 
 interface ProductCardProps {
   product: Product;
@@ -33,28 +34,22 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
   };
 
   return (
-    <Card className="group overflow-hidden hover:shadow-large transition-all duration-300 hover:-translate-y-1 border border-border bg-card touch-manipulation touch-friendly">
+    <Card className="group overflow-hidden hover:shadow-large transition-all duration-300 hover:-translate-y-1 border border-border bg-card touch-manipulation touch-friendly product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop">
       <Link to={`/stores/${storeSlug}/products/${product.slug}`} className="block">
-        <div className="aspect-square overflow-hidden bg-muted relative">
-          {product.image_url ? (
-            <img
-              src={product.image_url}
-              alt={product.name}
-              className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
-              loading="lazy"
-              decoding="async"
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-            />
-          ) : (
-            <div className="h-full w-full flex items-center justify-center text-muted-foreground">
-              <ShoppingCart className="h-12 w-12 sm:h-16 sm:w-16 opacity-30" />
-            </div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="product-card-container">
+          <ProductBanner
+            src={product.image_url}
+            alt={product.name}
+            className="w-full product-banner"
+            fallbackIcon={<ShoppingCart className="h-16 w-16 opacity-20" />}
+            overlay={
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            }
+          />
         </div>
       </Link>
       
-      <CardContent className="p-3 sm:p-4">
+      <CardContent className="p-3 sm:p-4 product-card-content-mobile sm:product-card-content-tablet lg:product-card-content-desktop">
         <Link to={`/stores/${storeSlug}/products/${product.slug}`}>
           <h3 className="font-semibold line-clamp-2 hover:text-primary transition-colors mb-2 text-sm sm:text-base min-h-[2.5rem] sm:min-h-[3rem]">
             {product.name}
@@ -77,7 +72,7 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
       
       <CardFooter className="p-3 sm:p-4 pt-0">
         <Button 
-          className="w-full gradient-primary hover:opacity-90 transition-opacity font-semibold touch-manipulation active:scale-95 transition-transform touch-target" 
+          className="w-full gradient-primary hover:opacity-90 transition-opacity font-semibold touch-manipulation active:scale-95 transition-transform touch-target product-button-mobile" 
           size="sm"
         >
           <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
