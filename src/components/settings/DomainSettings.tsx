@@ -387,12 +387,22 @@ export const DomainSettings = () => {
 
   if (!currentStore) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Vous devez d'abord créer une boutique pour configurer un domaine personnalisé.
-        </AlertDescription>
-      </Alert>
+      <Card className="border-none shadow-lg">
+        <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
+          <CardTitle className="text-lg sm:text-xl">Gestion du domaine</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
+            Configurez votre domaine personnalisé
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Vous devez d'abord créer une boutique pour configurer un domaine personnalisé.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
     );
   }
 
