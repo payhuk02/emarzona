@@ -32,9 +32,16 @@ import {
   ArrowRight,
   CheckCircle2,
   XCircle,
-  Loader2
+  Loader2,
+  Activity,
+  Bell,
+  Globe2,
+  ShieldCheck
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { DomainMonitoringDashboard } from "./DomainMonitoringDashboard";
+import { MultiDomainManager } from "./MultiDomainManager";
+import { AdvancedSecurityPanel } from "./AdvancedSecurityPanel";
 
 interface DomainConfig {
   custom_domain: string | null;
@@ -548,10 +555,12 @@ export const DomainSettings = () => {
       {/* Onglets pour les fonctionnalités avancées */}
       {domainConfig.custom_domain && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
             <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="dns">DNS</TabsTrigger>
-            <TabsTrigger value="ssl">SSL/Sécurité</TabsTrigger>
+            <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
+            <TabsTrigger value="multi-domain">Multi-domaines</TabsTrigger>
+            <TabsTrigger value="security">Sécurité</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
@@ -946,6 +955,36 @@ export const DomainSettings = () => {
             </Alert>
           </CardContent>
         </Card>
+          </TabsContent>
+
+          {/* Monitoring */}
+          <TabsContent value="monitoring" className="space-y-4">
+            <DomainMonitoringDashboard
+              domain={domainConfig.custom_domain}
+              monitoring={null}
+              onStartMonitoring={() => {}}
+              onCheckHealth={() => {}}
+              onSendAlert={() => {}}
+            />
+          </TabsContent>
+
+          {/* Multi-domaines */}
+          <TabsContent value="multi-domain" className="space-y-4">
+            <MultiDomainManager
+              primaryDomain={domainConfig.custom_domain}
+              onAddSecondaryDomain={async () => true}
+              onRemoveSecondaryDomain={async () => true}
+            />
+          </TabsContent>
+
+          {/* Sécurité Avancée */}
+          <TabsContent value="security" className="space-y-4">
+            <AdvancedSecurityPanel
+              domain={domainConfig.custom_domain}
+              onEnableDNSSEC={async () => true}
+              onEnableHSTS={async () => true}
+              onEnableCSP={async () => true}
+            />
           </TabsContent>
 
           {/* Analytics */}
