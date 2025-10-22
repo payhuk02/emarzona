@@ -90,6 +90,7 @@ export const DomainSettings = () => {
     redirect_https: true,
     dns_records: []
   });
+  const [domainInput, setDomainInput] = useState<string>("");
 
   // Utiliser la première boutique disponible
   const currentStore = stores.length > 0 ? stores[0] : null;
