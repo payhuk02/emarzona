@@ -1,0 +1,202 @@
+/* Dashboard Responsive Styles */
+.dashboard-card {
+  @apply transition-all duration-300 ease-out;
+  @apply hover:shadow-lg hover:-translate-y-1;
+  @apply touch-manipulation;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px) scale(1.01);
+}
+
+.dashboard-stats-grid {
+  @apply grid gap-3 sm:gap-4;
+  @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-4;
+}
+
+.dashboard-actions-grid {
+  @apply grid gap-3 sm:gap-4;
+  @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.dashboard-bottom-grid {
+  @apply grid gap-4 sm:gap-6;
+  @apply grid-cols-1 lg:grid-cols-3;
+}
+
+.dashboard-card-content {
+  @apply p-3 sm:p-4 lg:p-6;
+}
+
+.dashboard-card-header {
+  @apply pb-3 p-3 sm:p-4 lg:p-6;
+}
+
+.dashboard-icon-container {
+  @apply p-2 rounded-lg transition-colors duration-300;
+}
+
+.dashboard-icon-container:hover {
+  @apply scale-110;
+}
+
+.dashboard-notification-item {
+  @apply flex items-start gap-3 p-3 rounded-lg;
+  @apply hover:bg-muted/50 transition-colors;
+  @apply touch-manipulation min-h-[60px];
+}
+
+.dashboard-activity-item {
+  @apply flex items-start gap-3 p-3 rounded-lg;
+  @apply hover:bg-muted/50 transition-colors;
+  @apply touch-manipulation min-h-[60px];
+}
+
+.dashboard-button {
+  @apply touch-manipulation min-h-[44px];
+  @apply transition-all duration-300;
+  @apply hover:bg-muted/50;
+}
+
+.dashboard-header {
+  @apply sticky top-0 z-10 border-b;
+  @apply bg-card/95 backdrop-blur-sm shadow-soft;
+}
+
+.dashboard-main {
+  @apply flex-1 p-3 sm:p-4 md:p-6 lg:p-8;
+  @apply bg-background overflow-x-hidden;
+}
+
+/* Responsive Typography */
+.dashboard-title {
+  @apply text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate;
+}
+
+.dashboard-card-title {
+  @apply text-xs sm:text-sm font-medium text-muted-foreground;
+}
+
+.dashboard-stat-value {
+  @apply text-xl sm:text-2xl font-bold mb-1;
+}
+
+.dashboard-stat-description {
+  @apply text-xs text-muted-foreground mb-2;
+}
+
+.dashboard-action-title {
+  @apply font-semibold text-sm sm:text-base mb-1;
+}
+
+.dashboard-action-description {
+  @apply text-xs sm:text-sm text-muted-foreground;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  .dashboard-card {
+    @apply min-h-[120px];
+  }
+  
+  .dashboard-stats-grid {
+    @apply gap-3;
+  }
+  
+  .dashboard-actions-grid {
+    @apply gap-3;
+  }
+  
+  .dashboard-bottom-grid {
+    @apply gap-4;
+  }
+}
+
+/* Tablet Optimizations */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .dashboard-card {
+    @apply min-h-[140px];
+  }
+  
+  .dashboard-stats-grid {
+    @apply gap-4;
+  }
+  
+  .dashboard-actions-grid {
+    @apply gap-4;
+  }
+}
+
+/* Desktop Optimizations */
+@media (min-width: 1024px) {
+  .dashboard-card {
+    @apply min-h-[160px];
+  }
+  
+  .dashboard-stats-grid {
+    @apply gap-6;
+  }
+  
+  .dashboard-actions-grid {
+    @apply gap-6;
+  }
+  
+  .dashboard-bottom-grid {
+    @apply gap-8;
+  }
+}
+
+/* Animation Classes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-fade-in-delayed {
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+/* Focus States for Accessibility */
+.dashboard-card:focus-visible {
+  @apply ring-2 ring-primary ring-offset-2;
+}
+
+.dashboard-button:focus-visible {
+  @apply ring-2 ring-primary ring-offset-2;
+}
+
+/* Dark Mode Optimizations */
+@media (prefers-color-scheme: dark) {
+  .dashboard-card {
+    @apply bg-card border-border;
+  }
+  
+  .dashboard-header {
+    @apply bg-card/95;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-card {
+    @apply transition-none;
+  }
+  
+  .dashboard-card:hover {
+    transform: none;
+  }
+  
+  .animate-fade-in {
+    animation: none;
+  }
+}

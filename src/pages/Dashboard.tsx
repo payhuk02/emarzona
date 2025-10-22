@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
+import "@/styles/dashboard-responsive.css";
 
 const Dashboard = () => {
   const { store, loading: storeLoading } = useStore();
@@ -131,21 +132,27 @@ const Dashboard = () => {
         <AppSidebar />
         
         <div className="flex-1 flex flex-col">
-          {/* Header */}
-          <header className="sticky top-0 z-10 border-b bg-card shadow-soft">
+          {/* Header - Responsive et Professionnel */}
+          <header className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur-sm shadow-soft">
             <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 px-3 sm:px-4 md:px-6">
-              <SidebarTrigger />
+              <SidebarTrigger className="touch-manipulation min-h-[44px] min-w-[44px]" />
               <div className="flex-1 min-w-0">
-                <h1 className="text-lg sm:text-xl md:text-2xl font-bold truncate">
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate">
                   Tableau de bord - {store.name}
                 </h1>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs px-2 py-1 hidden sm:flex">
                   <Activity className="h-3 w-3 mr-1" />
                   En ligne
                 </Badge>
-                <Button variant="ghost" size="sm" onClick={handleRefresh}>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleRefresh}
+                  className="touch-manipulation min-h-[44px] min-w-[44px]"
+                  aria-label="Actualiser les données"
+                >
                   <Activity className="h-4 w-4" />
                 </Button>
               </div>
@@ -155,130 +162,140 @@ const Dashboard = () => {
           {/* Main Content */}
           <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 bg-gradient-hero overflow-x-hidden">
             {(error || hookError) && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mb-4 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 bg-red-500 rounded-full"></div>
-                  <h3 className="font-medium text-red-800">Erreur de chargement</h3>
+                  <h3 className="font-medium text-red-800 dark:text-red-200">Erreur de chargement</h3>
                 </div>
-                <p className="text-sm text-red-600 mt-1">{error || hookError}</p>
+                <p className="text-sm text-red-600 dark:text-red-300 mt-1">{error || hookError}</p>
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={handleRefresh}
-                  className="mt-2"
+                  className="mt-2 touch-manipulation min-h-[44px]"
                 >
                   Réessayer
                 </Button>
               </div>
             )}
-            <div className="w-full max-w-7xl mx-auto space-y-6 animate-fade-in">
+            <div className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
               
-              {/* Stats Grid */}
-              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="shadow-soft hover:shadow-medium transition-smooth">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2 p-4">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Produits</CardTitle>
-                    <Package className="h-4 w-4 text-green-500" />
+              {/* Stats Grid - Responsive et Professionnel */}
+              <div className="dashboard-stats-grid">
+                <Card className="dashboard-card group">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 dashboard-card-header">
+                    <CardTitle className="dashboard-card-title">Produits</CardTitle>
+                    <div className="dashboard-icon-container bg-green-500/10 group-hover:bg-green-500/20">
+                      <Package className="h-4 w-4 text-green-500" />
+                    </div>
                   </CardHeader>
-                  <CardContent className="p-4 pt-0">
-                    <div className="text-2xl font-bold mb-1">{stats.totalProducts}</div>
-                    <p className="text-xs text-muted-foreground mb-2">{stats.activeProducts} actifs</p>
-                    <Badge variant="default" className="text-xs">
+                  <CardContent className="dashboard-card-content pt-0">
+                    <div className="dashboard-stat-value">{stats.totalProducts}</div>
+                    <p className="dashboard-stat-description">{stats.activeProducts} actifs</p>
+                    <Badge variant="default" className="text-xs px-2 py-1">
                       +{stats.trends.productGrowth}%
                     </Badge>
                   </CardContent>
                 </Card>
 
-                <Card className="shadow-soft hover:shadow-medium transition-smooth">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2 p-4">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Commandes</CardTitle>
-                    <ShoppingCart className="h-4 w-4 text-blue-500" />
+                <Card className="dashboard-card group">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 dashboard-card-header">
+                    <CardTitle className="dashboard-card-title">Commandes</CardTitle>
+                    <div className="dashboard-icon-container bg-blue-500/10 group-hover:bg-blue-500/20">
+                      <ShoppingCart className="h-4 w-4 text-blue-500" />
+                    </div>
                   </CardHeader>
-                  <CardContent className="p-4 pt-0">
-                    <div className="text-2xl font-bold mb-1">{stats.totalOrders}</div>
-                    <p className="text-xs text-muted-foreground mb-2">{stats.pendingOrders} en attente</p>
-                    <Badge variant="default" className="text-xs">
+                  <CardContent className="dashboard-card-content pt-0">
+                    <div className="dashboard-stat-value">{stats.totalOrders}</div>
+                    <p className="dashboard-stat-description">{stats.pendingOrders} en attente</p>
+                    <Badge variant="default" className="text-xs px-2 py-1">
                       +{stats.trends.orderGrowth}%
                     </Badge>
                   </CardContent>
                 </Card>
 
-                <Card className="shadow-soft hover:shadow-medium transition-smooth">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2 p-4">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Clients</CardTitle>
-                    <Users className="h-4 w-4 text-purple-500" />
+                <Card className="dashboard-card group">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 dashboard-card-header">
+                    <CardTitle className="dashboard-card-title">Clients</CardTitle>
+                    <div className="dashboard-icon-container bg-purple-500/10 group-hover:bg-purple-500/20">
+                      <Users className="h-4 w-4 text-purple-500" />
+                    </div>
                   </CardHeader>
-                  <CardContent className="p-4 pt-0">
-                    <div className="text-2xl font-bold mb-1">{stats.totalCustomers}</div>
-                    <p className="text-xs text-muted-foreground mb-2">Clients enregistrés</p>
-                    <Badge variant="default" className="text-xs">
+                  <CardContent className="dashboard-card-content pt-0">
+                    <div className="dashboard-stat-value">{stats.totalCustomers}</div>
+                    <p className="dashboard-stat-description">Clients enregistrés</p>
+                    <Badge variant="default" className="text-xs px-2 py-1">
                       +{stats.trends.customerGrowth}%
                     </Badge>
                   </CardContent>
                 </Card>
 
-                <Card className="shadow-soft hover:shadow-medium transition-smooth">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2 p-4">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Revenus</CardTitle>
-                    <DollarSign className="h-4 w-4 text-yellow-500" />
+                <Card className="dashboard-card group">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 dashboard-card-header">
+                    <CardTitle className="dashboard-card-title">Revenus</CardTitle>
+                    <div className="dashboard-icon-container bg-yellow-500/10 group-hover:bg-yellow-500/20">
+                      <DollarSign className="h-4 w-4 text-yellow-500" />
+                    </div>
                   </CardHeader>
-                  <CardContent className="p-4 pt-0">
-                    <div className="text-2xl font-bold mb-1">{stats.totalRevenue.toLocaleString()} FCFA</div>
-                    <p className="text-xs text-muted-foreground mb-2">Total des ventes</p>
-                    <Badge variant="default" className="text-xs">
+                  <CardContent className="dashboard-card-content pt-0">
+                    <div className="dashboard-stat-value">{stats.totalRevenue.toLocaleString()} FCFA</div>
+                    <p className="dashboard-stat-description">Total des ventes</p>
+                    <Badge variant="default" className="text-xs px-2 py-1">
                       +{stats.trends.revenueGrowth}%
                     </Badge>
                   </CardContent>
                 </Card>
                 </div>
 
-                {/* Quick Actions */}
-              <Card className="shadow-soft">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-primary" />
+                {/* Quick Actions - Responsive et Professionnel */}
+              <Card className="shadow-soft hover:shadow-lg transition-all duration-300">
+                <CardHeader className="pb-3 p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Zap className="h-5 w-5 text-primary" />
+                    </div>
                     Actions Rapides
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                    <Card className="cursor-pointer shadow-soft hover:shadow-medium transition-smooth hover-scale group" onClick={handleCreateProduct}>
-                      <CardContent className="p-4">
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="dashboard-actions-grid">
+                    <Card className="cursor-pointer shadow-soft hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:scale-105 group touch-manipulation min-h-[120px] sm:min-h-[140px]">
+                      <CardContent className="p-4 sm:p-6 h-full flex flex-col justify-center">
                         <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-lg bg-green-500/10 group-hover:bg-green-500/20 transition-colors">
-                            <Package className="h-5 w-5 text-green-500" />
+                          <div className="p-3 rounded-xl bg-green-500/10 group-hover:bg-green-500/20 transition-colors">
+                            <Package className="h-6 w-6 text-green-500" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-sm">Nouveau Produit</h3>
-                            <p className="text-xs text-muted-foreground mt-1">Ajouter un produit à votre boutique</p>
+                            <h3 className="font-semibold text-sm sm:text-base mb-1">Nouveau Produit</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground">Ajouter un produit à votre boutique</p>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
 
-                    <Card className="cursor-pointer shadow-soft hover:shadow-medium transition-smooth hover-scale group" onClick={handleCreateOrder}>
-                      <CardContent className="p-4">
+                    <Card className="cursor-pointer shadow-soft hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:scale-105 group touch-manipulation min-h-[120px] sm:min-h-[140px]" onClick={handleCreateOrder}>
+                      <CardContent className="p-4 sm:p-6 h-full flex flex-col justify-center">
                         <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-lg bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
-                            <ShoppingCart className="h-5 w-5 text-blue-500" />
+                          <div className="p-3 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
+                            <ShoppingCart className="h-6 w-6 text-blue-500" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-sm">Nouvelle Commande</h3>
-                            <p className="text-xs text-muted-foreground mt-1">Créer une commande manuelle</p>
+                            <h3 className="font-semibold text-sm sm:text-base mb-1">Nouvelle Commande</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground">Créer une commande manuelle</p>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
 
-                    <Card className="cursor-pointer shadow-soft hover:shadow-medium transition-smooth hover-scale group" onClick={handleViewAnalytics}>
-                      <CardContent className="p-4">
+                    <Card className="cursor-pointer shadow-soft hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:scale-105 group touch-manipulation min-h-[120px] sm:min-h-[140px]" onClick={handleViewAnalytics}>
+                      <CardContent className="p-4 sm:p-6 h-full flex flex-col justify-center">
                         <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-lg bg-purple-500/10 group-hover:bg-purple-500/20 transition-colors">
-                            <Activity className="h-5 w-5 text-purple-500" />
+                          <div className="p-3 rounded-xl bg-purple-500/10 group-hover:bg-purple-500/20 transition-colors">
+                            <Activity className="h-6 w-6 text-purple-500" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-sm">Analytics</h3>
-                            <p className="text-xs text-muted-foreground mt-1">Voir les statistiques détaillées</p>
+                            <h3 className="font-semibold text-sm sm:text-base mb-1">Analytics</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground">Voir les statistiques détaillées</p>
                           </div>
                         </div>
                       </CardContent>
@@ -287,31 +304,41 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              {/* Bottom Row */}
-              <div className="grid gap-6 lg:grid-cols-3">
-                <Card className="shadow-soft">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2">
-                      <Bell className="h-5 w-5 text-primary" />
+              {/* Bottom Row - Responsive et Professionnel */}
+              <div className="dashboard-bottom-grid">
+                <Card className="shadow-soft hover:shadow-lg transition-all duration-300">
+                  <CardHeader className="pb-3 p-4 sm:p-6">
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                      <div className="p-2 rounded-lg bg-blue-500/10">
+                        <Bell className="h-5 w-5 text-blue-500" />
+                      </div>
                       Notifications
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-4 sm:p-6 pt-0">
                     <div className="space-y-3">
                       {notifications.map((notification) => (
-                        <div key={notification.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                        <div key={notification.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors touch-manipulation">
                           <div className="flex-shrink-0 mt-0.5">
-                            <Bell className="h-4 w-4 text-blue-500" />
+                            <div className="p-1.5 rounded-full bg-blue-500/10">
+                              <Bell className="h-3 w-3 text-blue-500" />
+                            </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-medium">{notification.title}</h4>
-                            <p className="text-xs text-muted-foreground mt-1">{notification.message}</p>
-                            <div className="flex items-center gap-2 mt-2">
+                            <h4 className="text-sm font-medium mb-1">{notification.title}</h4>
+                            <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{notification.message}</p>
+                            <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground">
-                                {new Date(notification.timestamp).toLocaleString('fr-FR')}
+                                {new Date(notification.timestamp).toLocaleString('fr-FR', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
                               </span>
                               {!notification.read && (
-                                <Badge variant="secondary" className="text-xs">
+                                <Badge variant="secondary" className="text-xs px-2 py-0.5">
                                   Nouveau
                                 </Badge>
                               )}
@@ -323,28 +350,38 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="shadow-soft">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2">
-                      <Activity className="h-5 w-5 text-primary" />
+                <Card className="shadow-soft hover:shadow-lg transition-all duration-300">
+                  <CardHeader className="pb-3 p-4 sm:p-6">
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                      <div className="p-2 rounded-lg bg-green-500/10">
+                        <Activity className="h-5 w-5 text-green-500" />
+                      </div>
                       Activité Récente
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
+                  <CardContent className="p-4 sm:p-6 pt-0">
+                    <div className="space-y-3">
                       {stats.recentActivity.map((activity) => (
-                        <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                        <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors touch-manipulation">
                           <div className="flex-shrink-0 mt-0.5">
-                            <Activity className="h-4 w-4 text-blue-500" />
+                            <div className="p-1.5 rounded-full bg-green-500/10">
+                              <Activity className="h-3 w-3 text-green-500" />
+                            </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-medium">{activity.message}</h4>
-                            <div className="flex items-center gap-2 mt-2">
+                            <h4 className="text-sm font-medium mb-1 line-clamp-2">{activity.message}</h4>
+                            <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground">
-                                {new Date(activity.timestamp).toLocaleString('fr-FR')}
+                                {new Date(activity.timestamp).toLocaleString('fr-FR', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
                               </span>
                               {activity.status && (
-                                <Badge variant="outline" className="text-xs">
+                                <Badge variant="outline" className="text-xs px-2 py-0.5">
                                   {activity.status}
                                 </Badge>
                               )}
@@ -356,28 +393,42 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="shadow-soft">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2">
-                      <Settings className="h-5 w-5 text-primary" />
+                <Card className="shadow-soft hover:shadow-lg transition-all duration-300">
+                  <CardHeader className="pb-3 p-4 sm:p-6">
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                      <div className="p-2 rounded-lg bg-gray-500/10">
+                        <Settings className="h-5 w-5 text-gray-500" />
+                      </div>
                       Paramètres Rapides
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-4 sm:p-6 pt-0">
                     <div className="space-y-3">
-                      <Button variant="outline" className="w-full justify-start" onClick={handleViewStore}>
-                        <Settings className="h-4 w-4 mr-2" />
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start h-12 text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors" 
+                        onClick={handleViewStore}
+                      >
+                        <Settings className="h-4 w-4 mr-3" />
                         Paramètres Boutique
                       </Button>
-                      <Button variant="outline" className="w-full justify-start" onClick={handleManageCustomers}>
-                        <Users className="h-4 w-4 mr-2" />
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start h-12 text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors" 
+                        onClick={handleManageCustomers}
+                      >
+                        <Users className="h-4 w-4 mr-3" />
                         Gérer les Clients
                       </Button>
-                      <Button variant="outline" className="w-full justify-start" onClick={handleSettings}>
-                        <Settings className="h-4 w-4 mr-2" />
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start h-12 text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors" 
+                        onClick={handleSettings}
+                      >
+                        <Settings className="h-4 w-4 mr-3" />
                         Configuration
                       </Button>
-                </div>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
