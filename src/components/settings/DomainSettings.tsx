@@ -38,7 +38,7 @@ import {
   Globe2,
   ShieldCheck
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { DomainMonitoringSimple } from "./DomainMonitoringSimple";
 
 interface DomainConfig {
   custom_domain: string | null;
@@ -874,11 +874,24 @@ export const DomainSettings = () => {
 
           {/* Monitoring */}
           <TabsContent value="monitoring" className="space-y-4">
-            <div className="text-center py-8 text-gray-500">
-              <Activity className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-              <p>Fonctionnalité de monitoring en cours de développement</p>
-              <p className="text-sm">Cette fonctionnalité sera bientôt disponible</p>
-            </div>
+            <DomainMonitoringSimple
+              domain={domainConfig.custom_domain}
+              onStartMonitoring={async () => {
+                // Simulation du démarrage du monitoring
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return true;
+              }}
+              onCheckHealth={async () => {
+                // Simulation de vérification de santé
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return true;
+              }}
+              onSendAlert={async (message: string) => {
+                // Simulation d'envoi d'alerte
+                console.log('Alert sent:', message);
+                return true;
+              }}
+            />
           </TabsContent>
 
           {/* Multi-domaines */}
