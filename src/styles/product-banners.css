@@ -3,18 +3,19 @@
    Version Professionnelle - Inspirée des grandes plateformes
    ============================================================ */
 
-/* Variables CSS pour la cohérence et la performance */
+/* Variables CSS pour la cohérence et la performance - Style ComeUp/Fiverr */
 :root {
   --product-banner-aspect-ratio: 16/9;
-  --mobile-margin: 0.25rem;
-  --tablet-margin: 0.5rem;
-  --desktop-margin: 0.75rem;
-  --border-radius-mobile: 0.5rem;
-  --border-radius-tablet: 0.75rem;
-  --border-radius-desktop: 1rem;
+  --mobile-margin: 0.5rem;
+  --tablet-margin: 1rem;
+  --desktop-margin: 1.5rem;
+  --border-radius-mobile: 0.75rem;
+  --border-radius-tablet: 1rem;
+  --border-radius-desktop: 1.25rem;
   --transition-duration: 300ms;
   --shadow-mobile: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-desktop: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* Container principal pour les cartes produits - Optimisé pour toutes les plateformes */
@@ -89,7 +90,7 @@
    RESPONSIVE DESIGN - MOBILE FIRST
    ============================================================ */
 
-/* Mobile (< 640px) - Affichage immersif inspiré des apps modernes */
+/* Mobile (< 640px) - 1 produit par ligne, quasi-plein écran - Style ComeUp */
 @media (max-width: 639px) {
   .product-card-container {
     margin-left: var(--mobile-margin);
@@ -103,9 +104,9 @@
     margin: 0 auto;
   }
   
-  /* Grille mobile optimisée - Style Amazon/Fiverr */
+  /* Grille mobile - 1 produit par ligne */
   .products-grid-mobile {
-    @apply grid grid-cols-1 gap-4;
+    @apply grid grid-cols-1 gap-6;
     padding-left: var(--mobile-margin);
     padding-right: var(--mobile-margin);
   }
@@ -117,6 +118,8 @@
     border-radius: var(--border-radius-mobile);
     /* Effet de profondeur */
     transform: translateZ(0);
+    /* Hauteur uniforme */
+    min-height: 400px;
   }
   
   /* Contenu des cartes mobile */
@@ -132,7 +135,7 @@
   }
 }
 
-/* Tablet (640px - 1024px) - Équilibre optimal */
+/* Tablet (640px - 1024px) - 2 produits par ligne - Style ComeUp */
 @media (min-width: 640px) and (max-width: 1023px) {
   .product-card-container {
     margin-left: var(--tablet-margin);
@@ -143,19 +146,30 @@
     border-radius: var(--border-radius-tablet);
   }
   
+  /* Grille tablette - 2 produits par ligne */
   .products-grid-tablet {
-    @apply grid grid-cols-2 gap-6;
+    @apply grid grid-cols-2 gap-8;
     padding-left: var(--tablet-margin);
     padding-right: var(--tablet-margin);
   }
   
+  /* Cartes produits tablette */
   .product-card-tablet {
     box-shadow: var(--shadow-desktop);
     border-radius: var(--border-radius-tablet);
+    /* Hauteur uniforme */
+    min-height: 450px;
+    transition: all var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Effet hover tablette */
+  .product-card-tablet:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: var(--shadow-hover);
   }
 }
 
-/* Desktop (> 1024px) - Ratio 16:9 professionnel - Style ComeUp/Fiverr */
+/* Desktop (> 1024px) - 3 produits par ligne, format 16:9 - Style ComeUp/Fiverr */
 @media (min-width: 1024px) {
   .product-card-container {
     margin-left: var(--desktop-margin);
@@ -169,8 +183,9 @@
     height: auto;
   }
   
+  /* Grille desktop - 3 produits par ligne */
   .products-grid-desktop {
-    @apply grid grid-cols-3 xl:grid-cols-4 gap-8;
+    @apply grid grid-cols-3 gap-8;
     padding-left: var(--desktop-margin);
     padding-right: var(--desktop-margin);
   }
@@ -180,25 +195,93 @@
     box-shadow: var(--shadow-desktop);
     border-radius: var(--border-radius-desktop);
     transition: all var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
+    /* Hauteur uniforme */
+    min-height: 500px;
   }
   
   .product-card-desktop:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-hover);
   }
   
-  /* Optimisation pour les écrans ultra-larges */
+  /* Optimisation pour les écrans ultra-larges - Maintenir 3 colonnes */
   @media (min-width: 1920px) {
     .products-grid-desktop {
-      @apply grid-cols-4 xl:grid-cols-5;
-      gap: 1.5rem;
+      @apply grid-cols-3;
+      gap: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
     }
   }
 }
 
 /* ============================================================
-   OPTIMISATIONS PERFORMANCE
+   STYLES UNIFORMES POUR LES CARTES PRODUITS
    ============================================================ */
+
+/* Hauteur uniforme pour toutes les cartes */
+.product-card {
+  @apply flex flex-col;
+  /* Hauteur minimale pour éviter les décalages */
+  min-height: 400px;
+}
+
+/* Contenu des cartes - Espacement uniforme */
+.product-card-content {
+  @apply flex-1 flex flex-col justify-between;
+  padding: 1rem;
+}
+
+/* Titres de produits - Style professionnel */
+.product-title {
+  @apply font-semibold text-base leading-tight line-clamp-2;
+  min-height: 2.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Prix - Style moderne */
+.product-price {
+  @apply text-lg font-bold text-primary;
+}
+
+/* Boutons d'action - Centrés et uniformes */
+.product-actions {
+  @apply flex gap-2 mt-4;
+}
+
+.product-button {
+  @apply flex-1 text-center py-2 px-4 rounded-lg font-medium transition-all duration-200;
+}
+
+.product-button-primary {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90;
+}
+
+.product-button-secondary {
+  @apply bg-secondary text-secondary-foreground hover:bg-secondary/90;
+}
+
+/* Étoiles de notation */
+.product-rating {
+  @apply flex items-center gap-1 text-sm text-muted-foreground;
+}
+
+/* Badges de promotion */
+.product-badge {
+  @apply absolute top-3 right-3 z-10;
+}
+
+/* Effet de survol global */
+.product-card:hover {
+  @apply shadow-lg;
+}
+
+.product-card:hover .product-title {
+  @apply text-primary;
+}
 
 /* Prévention du CLS (Cumulative Layout Shift) */
 .product-banner {

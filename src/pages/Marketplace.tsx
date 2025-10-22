@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProductBanner } from "@/components/ui/ResponsiveProductImage";
+import { ProductGrid } from "@/components/ui/ProductGrid";
 import { 
   Search, 
   ShoppingCart, 
@@ -778,18 +779,14 @@ const Marketplace = () => {
       <section className="py-6 px-4">
         <div className="container mx-auto max-w-6xl">
           {loading ? (
-            <div className={`grid gap-6 ${filters.viewMode === "grid" ? "products-grid-mobile sm:products-grid-tablet lg:products-grid-desktop" : "grid-cols-1"}`}>
-              {Array.from({ length: pagination.itemsPerPage }).map((_, i) => (
-                <Skeleton key={i} className={`rounded-lg ${filters.viewMode === "grid" ? "h-[480px]" : "h-[200px]"}`} />
-              ))}
-            </div>
+            <ProductGrid loading={true} skeletonCount={pagination.itemsPerPage} />
           ) : paginatedProducts.length > 0 ? (
             <>
-              <div className={`grid gap-6 ${filters.viewMode === "grid" ? "products-grid-mobile sm:products-grid-tablet lg:products-grid-desktop" : "grid-cols-1"}`}>
+              <ProductGrid>
                 {paginatedProducts.map((product) => (
                   <ProductCardAdvanced
-                  key={product.id}
-                  product={product}
+                    key={product.id}
+                    product={product}
                     viewMode={filters.viewMode}
                     isFavorite={favorites.has(product.id)}
                     isPurchasing={purchasing.has(product.id)}
@@ -798,9 +795,9 @@ const Marketplace = () => {
                     onShare={() => handleShare(product)}
                     onAddToComparison={() => addToComparison(product)}
                     isInComparison={comparisonProducts.some(p => p.id === product.id)}
-                />
-              ))}
-            </div>
+                  />
+                ))}
+              </ProductGrid>
 
               {/* Pagination */}
               {totalPages > 1 && (

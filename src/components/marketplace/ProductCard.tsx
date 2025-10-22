@@ -107,46 +107,48 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
         />
       </div>
 
-      <div className="flex-1 flex flex-col p-4 space-y-2 product-card-content-mobile sm:product-card-content-tablet lg:product-card-content-desktop">
-        {product.category && (
-          <span className="text-xs font-medium text-primary uppercase tracking-wide">
-            {product.category}
-          </span>
-        )}
-
-        <h3 className="text-base font-semibold leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-          {product.name}
-        </h3>
-
-        {product.rating ? (
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            {renderStars(product.rating)}
-            <span className="ml-1 text-xs">({product.reviews_count ?? 0})</span>
-          </div>
-        ) : (
-          <div className="h-5" />
-        )}
-
-        <div className="flex items-baseline gap-2 mt-1">
-          {hasPromo && (
-            <span className="text-sm text-muted-foreground line-through">
-              {product.price.toLocaleString()} {product.currency ?? "FCFA"}
+      <div className="product-card-content">
+        <div className="flex-1">
+          {product.category && (
+            <span className="text-xs font-medium text-primary uppercase tracking-wide mb-2 block">
+              {product.category}
             </span>
           )}
-          <span className="text-lg font-bold text-primary">
-            {price.toLocaleString()} {product.currency ?? "FCFA"}
+
+          <h3 className="product-title group-hover:text-primary transition-colors mb-2">
+            {product.name}
+          </h3>
+
+          {product.rating ? (
+            <div className="product-rating mb-3">
+              {renderStars(product.rating)}
+              <span className="ml-1 text-xs">({product.reviews_count ?? 0})</span>
+            </div>
+          ) : (
+            <div className="h-5 mb-3" />
+          )}
+
+          <div className="flex items-baseline gap-2 mb-4">
+            {hasPromo && (
+              <span className="text-sm text-muted-foreground line-through">
+                {product.price.toLocaleString()} {product.currency ?? "FCFA"}
+              </span>
+            )}
+            <span className="product-price">
+              {price.toLocaleString()} {product.currency ?? "FCFA"}
+            </span>
+          </div>
+
+          <span className="text-xs text-muted-foreground mb-4 block">
+            {product.purchases_count
+              ? `${product.purchases_count} ventes`
+              : "Aucune vente"}
           </span>
         </div>
 
-        <span className="text-xs text-muted-foreground">
-          {product.purchases_count
-            ? `${product.purchases_count} ventes`
-            : "Aucune vente"}
-        </span>
-
-        <div className="mt-3 flex gap-2">
+        <div className="product-actions">
           <Link to={`/stores/${storeSlug}/products/${product.slug}`} className="flex-1">
-            <Button variant="outline" className="w-full product-button-mobile">
+            <Button variant="outline" className="product-button product-button-secondary">
               Voir le produit
             </Button>
           </Link>
@@ -154,7 +156,7 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
           <Button
             onClick={handleBuyNow}
             disabled={loading}
-            className="bg-primary text-primary-foreground flex items-center gap-1 product-button-mobile"
+            className="product-button product-button-primary"
           >
             {loading ? (
               <>

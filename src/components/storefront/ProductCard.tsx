@@ -49,36 +49,38 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
         </div>
       </Link>
       
-      <CardContent className="p-3 sm:p-4 product-card-content-mobile sm:product-card-content-tablet lg:product-card-content-desktop">
-        <Link to={`/stores/${storeSlug}/products/${product.slug}`}>
-          <h3 className="font-semibold line-clamp-2 hover:text-primary transition-colors mb-2 text-sm sm:text-base min-h-[2.5rem] sm:min-h-[3rem]">
-            {product.name}
-          </h3>
-        </Link>
+      <CardContent className="product-card-content">
+        <div className="flex-1">
+          <Link to={`/stores/${storeSlug}/products/${product.slug}`}>
+            <h3 className="product-title hover:text-primary transition-colors mb-2">
+              {product.name}
+            </h3>
+          </Link>
+          
+          {product.rating > 0 && (
+            <div className="product-rating mb-3">{renderStars(product.rating)}</div>
+          )}
+          
+          <div className="flex items-baseline gap-2 mb-4">
+            <span className="product-price">
+              {product.price.toLocaleString()}
+            </span>
+            <span className="text-sm text-muted-foreground font-medium">
+              {product.currency}
+            </span>
+          </div>
+        </div>
         
-        {product.rating > 0 && (
-          <div className="mt-2 mb-2 sm:mb-3">{renderStars(product.rating)}</div>
-        )}
-        
-        <div className="mt-2 sm:mt-3 flex items-baseline gap-1 sm:gap-2">
-          <span className="text-xl sm:text-2xl font-bold text-foreground">
-            {product.price.toLocaleString()}
-          </span>
-          <span className="text-xs sm:text-sm text-muted-foreground font-medium">
-            {product.currency}
-          </span>
+        <div className="product-actions">
+          <Button 
+            className="product-button product-button-primary" 
+            size="sm"
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            <span>Acheter</span>
+          </Button>
         </div>
       </CardContent>
-      
-      <CardFooter className="p-3 sm:p-4 pt-0">
-        <Button 
-          className="w-full gradient-primary hover:opacity-90 transition-opacity font-semibold touch-manipulation active:scale-95 transition-transform touch-target product-button-mobile" 
-          size="sm"
-        >
-          <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-          <span className="text-xs sm:text-sm">ACHETER</span>
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

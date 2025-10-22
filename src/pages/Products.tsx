@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { ProductGrid } from "@/components/ui/ProductGrid";
 
 const Products = () => {
   const navigate = useNavigate();
@@ -354,7 +355,7 @@ const Products = () => {
                       </div>
 
                       {viewMode === "grid" ? (
-                        <div className="products-grid-mobile sm:products-grid-tablet lg:products-grid-desktop gap-4 sm:gap-6">
+                        <ProductGrid>
                           {filteredProducts.map((product) => (
                             <ProductCardDashboard
                               key={product.id}
@@ -365,7 +366,7 @@ const Products = () => {
                               onToggleStatus={() => handleToggleStatus(product.id)}
                             />
                           ))}
-                        </div>
+                        </ProductGrid>
                       ) : (
                         <div className="space-y-3">
                           {filteredProducts.map((product) => (

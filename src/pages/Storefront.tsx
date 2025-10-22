@@ -13,6 +13,7 @@ import ContactForm from "@/components/storefront/ContactForm";
 import ReviewsList from "@/components/storefront/ReviewsList";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShoppingCart } from "lucide-react";
+import { ProductGrid } from "@/components/ui/ProductGrid";
 
 const Storefront = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -139,13 +140,9 @@ const Storefront = () => {
                   />
 
                   {productsLoading ? (
-                    <div className="products-grid-mobile sm:products-grid-tablet lg:products-grid-desktop gap-3 sm:gap-4 lg:gap-6">
-                      {[1, 2, 3, 4, 5, 6].map((i) => (
-                        <Skeleton key={i} className="h-72 sm:h-80 lg:h-96" />
-                      ))}
-                    </div>
+                    <ProductGrid loading={true} skeletonCount={6} />
                   ) : filteredProducts.length > 0 ? (
-                    <div className="products-grid-mobile sm:products-grid-tablet lg:products-grid-desktop gap-3 sm:gap-4 lg:gap-6">
+                    <ProductGrid>
                       {filteredProducts.map((product, index) => (
                         <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
                           <ProductCard
@@ -154,7 +151,7 @@ const Storefront = () => {
                           />
                         </div>
                       ))}
-                    </div>
+                    </ProductGrid>
                   ) : (
                     <div className="text-center py-12 sm:py-16 px-4 animate-fade-in">
                       <div className="max-w-md mx-auto">
