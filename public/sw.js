@@ -33,14 +33,29 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - Network first, fallback to cache
 self.addEventListener('fetch', (event) => {
+  // Ne pas intercepter les requêtes POST, PUT, DELETE, HEAD, OPTIONS
+  if (event.request.method !== 'GET') {
+    return;
+  }
+  
+  // Ne pas intercepter les requêtes vers des APIs externes
+  if (event.request.url.includes('/api/') || 
+      event.request.url.includes('supabase.co') ||
+      event.request.url.includes('moneroo.com')) {
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Clone the response
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
+        // Vérifier que la réponse est valide et cacheable
+        if (response.status === 200 && response.type === 'basic') {
+          // Clone the response
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
         return response;
       })
       .catch(() => {

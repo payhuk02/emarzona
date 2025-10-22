@@ -21,43 +21,50 @@ export default defineConfig(({ mode }) => ({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Configuration simplifiée pour éviter les erreurs de contexte React
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-alert-dialog',
-            '@radix-ui/react-aspect-ratio',
-            '@radix-ui/react-avatar',
-            '@radix-ui/react-checkbox',
-            '@radix-ui/react-collapsible',
-            '@radix-ui/react-context-menu',
-            '@radix-ui/react-hover-card',
-            '@radix-ui/react-label',
-            '@radix-ui/react-menubar',
-            '@radix-ui/react-navigation-menu',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-progress',
-            '@radix-ui/react-radio-group',
-            '@radix-ui/react-scroll-area',
-            '@radix-ui/react-select',
-            '@radix-ui/react-separator',
-            '@radix-ui/react-slider',
-            '@radix-ui/react-slot',
-            '@radix-ui/react-switch',
-            '@radix-ui/react-toast',
-            '@radix-ui/react-toggle',
-            '@radix-ui/react-toggle-group',
-            '@radix-ui/react-tooltip'
-          ],
-          'supabase': ['@supabase/supabase-js'],
-          'query': ['@tanstack/react-query', '@tanstack/react-table'],
-          'editor': ['@tiptap/react', '@tiptap/starter-kit', '@tiptap/extension-color', '@tiptap/extension-link', '@tiptap/extension-text-align', '@tiptap/extension-text-style', '@tiptap/extension-underline'],
-          'icons': ['lucide-react'],
-          'utils': ['clsx', 'tailwind-merge', 'class-variance-authority', '@hookform/resolvers']
+        manualChunks: (id) => {
+          // Configuration plus robuste pour éviter les erreurs React
+          if (id.includes('node_modules')) {
+            // React core - doit être dans le même chunk
+            if (id.includes('react/') || id.includes('react-dom/') || id.includes('react-router')) {
+              return 'react-vendor';
+            }
+            // Radix UI - séparé mais après React
+            if (id.includes('@radix-ui')) {
+              return 'ui-vendor';
+            }
+            // Autres dépendances importantes
+            if (id.includes('@supabase')) {
+              return 'supabase';
+            }
+            if (id.includes('@tanstack')) {
+              return 'query';
+            }
+            if (id.includes('@tiptap')) {
+              return 'editor';
+            }
+            if (id.includes('lucide-react')) {
+              return 'icons';
+            }
+            if (id.includes('clsx') || id.includes('tailwind-merge') || id.includes('class-variance-authority') || id.includes('@hookform')) {
+              return 'utils';
+            }
+            // Autres dépendances
+            return 'vendor';
+          }
+          
+          // Code de l'application
+          if (id.includes('/src/pages/')) {
+            return 'pages';
+          }
+          if (id.includes('/src/components/')) {
+            return 'components';
+          }
+          if (id.includes('/src/hooks/')) {
+            return 'hooks';
+          }
+          if (id.includes('/src/lib/')) {
+            return 'lib';
+          }
         }
       }
     },
@@ -77,8 +84,10 @@ export default defineConfig(({ mode }) => ({
     include: [
       'react',
       'react-dom',
-      'react-router-dom'
+      'react-router-dom',
+      'react/jsx-runtime'
     ],
-    exclude: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs']
+    exclude: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
+    force: true
   },
 }));
