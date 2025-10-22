@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Globe, 
   Check, 
@@ -65,6 +66,7 @@ export const DomainSettings = () => {
   const { stores, updateStore, loading: storesLoading } = useStores();
   
   const [verifying, setVerifying] = useState<boolean>(false);
+  const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
   
   const [propagationStatus, setPropagationStatus] = useState<{
     isChecking: boolean;
@@ -100,8 +102,17 @@ export const DomainSettings = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("overview");
 
-  // Utiliser la première boutique disponible
-  const currentStore = stores.length > 0 ? stores[0] : null;
+  // Utiliser la boutique sélectionnée ou la première disponible
+  const currentStore = selectedStoreId 
+    ? stores.find(store => store.id === selectedStoreId) 
+    : stores.length > 0 ? stores[0] : null;
+
+  // Initialiser la sélection avec la première boutique
+  useEffect(() => {
+    if (stores.length > 0 && !selectedStoreId) {
+      setSelectedStoreId(stores[0].id);
+    }
+  }, [stores, selectedStoreId]);
 
   useEffect(() => {
     if (currentStore) {
@@ -540,11 +551,53 @@ export const DomainSettings = () => {
             Nom de domaine personnalisé
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground">
-                Connectez votre propre domaine à votre boutique
+                Connectez votre propre domaine à vos boutiques
           </p>
             </div>
         {domainConfig.custom_domain && getStatusBadge()}
             </div>
+
+      {/* Sélecteur de boutique */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Sélectionner une boutique
+          </CardTitle>
+          <CardDescription>
+            Choisissez la boutique pour laquelle vous voulez configurer un domaine
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <Select value={selectedStoreId || ""} onValueChange={setSelectedStoreId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choisir une boutique" />
+              </SelectTrigger>
+              <SelectContent>
+                {stores.map((store) => (
+                  <SelectItem key={store.id} value={store.id}>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium">{store.name}</span>
+                        <span className="text-sm text-gray-500">({store.slug})</span>
+                      </div>
+                      <Badge variant={store.is_active ? "default" : "secondary"} className="ml-2">
+                        {store.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="text-sm text-gray-600">
+              <p>• Vous pouvez configurer un domaine personnalisé pour chacune de vos boutiques</p>
+              <p>• Maximum 3 boutiques par compte utilisateur</p>
+              <p>• Chaque boutique peut avoir son propre domaine (ex: boutique1.com, boutique2.com)</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Configuration du domaine */}
       <Card>
@@ -554,14 +607,26 @@ export const DomainSettings = () => {
             Configuration du domaine
           </CardTitle>
           <CardDescription>
-            {domainConfig.custom_domain 
-              ? `Domaine actuel : ${domainConfig.custom_domain}`
-              : "Aucun domaine personnalisé configuré"
+            {currentStore 
+              ? `Configuration pour la boutique "${currentStore.name}"`
+              : "Aucune boutique sélectionnée"
             }
+            {domainConfig.custom_domain && (
+              <span className="block mt-1">
+                Domaine actuel : {domainConfig.custom_domain}
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 sm:space-y-6 px-4 pb-4 sm:px-6 sm:pb-6">
-          {!domainConfig.custom_domain ? (
+          {!currentStore ? (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Veuillez sélectionner une boutique pour configurer son domaine.
+              </AlertDescription>
+            </Alert>
+          ) : !domainConfig.custom_domain ? (
             <div className="space-y-4 sm:space-y-6">
               <div className="space-y-2 sm:space-y-3">
                 <label className="text-sm sm:text-base font-medium" htmlFor="domain-input">Nom de domaine</label>
