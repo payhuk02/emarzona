@@ -1,0 +1,351 @@
+/* Store Page Responsive Styles */
+.store-page {
+  @apply min-h-screen bg-background;
+}
+
+.store-header {
+  @apply sticky top-0 z-10 border-b;
+  @apply bg-card/95 backdrop-blur-sm shadow-soft;
+}
+
+.store-main {
+  @apply flex-1 p-3 sm:p-4 md:p-6 lg:p-8;
+  @apply bg-background overflow-x-hidden;
+}
+
+.store-container {
+  @apply max-w-6xl mx-auto w-full;
+  @apply animate-fade-in;
+}
+
+.store-tabs {
+  @apply w-full;
+}
+
+.store-tabs-list {
+  @apply grid w-full gap-1 sm:gap-2 mb-4 sm:mb-6;
+  @apply grid-cols-2 sm:grid-cols-4;
+}
+
+.store-tabs-trigger {
+  @apply flex items-center gap-1 sm:gap-2;
+  @apply text-xs sm:text-sm touch-manipulation;
+  @apply min-h-[44px] transition-all duration-300;
+  @apply hover:bg-muted/50;
+}
+
+.store-tabs-trigger[data-state="active"] {
+  @apply bg-primary text-primary-foreground;
+  @apply shadow-sm;
+}
+
+.store-card {
+  @apply shadow-soft hover:shadow-lg;
+  @apply transition-all duration-300;
+  @apply border-border;
+}
+
+.store-card:hover {
+  @apply transform -translate-y-1;
+}
+
+.store-card-header {
+  @apply p-4 sm:p-6;
+}
+
+.store-card-content {
+  @apply p-4 sm:p-6 pt-0;
+}
+
+.store-form {
+  @apply space-y-4 sm:space-y-6;
+}
+
+.store-form-group {
+  @apply space-y-2;
+}
+
+.store-form-label {
+  @apply text-sm font-medium;
+  @apply text-foreground;
+}
+
+.store-form-input {
+  @apply w-full touch-manipulation;
+  @apply min-h-[44px];
+  @apply transition-all duration-300;
+  @apply focus:ring-2 focus:ring-primary;
+}
+
+.store-form-textarea {
+  @apply w-full touch-manipulation;
+  @apply min-h-[100px];
+  @apply transition-all duration-300;
+  @apply focus:ring-2 focus:ring-primary;
+}
+
+.store-button {
+  @apply touch-manipulation;
+  @apply min-h-[44px];
+  @apply transition-all duration-300;
+  @apply hover:scale-105;
+}
+
+.store-button-primary {
+  @apply bg-primary text-primary-foreground;
+  @apply hover:bg-primary/90;
+  @apply shadow-sm hover:shadow-md;
+}
+
+.store-button-secondary {
+  @apply bg-secondary text-secondary-foreground;
+  @apply hover:bg-secondary/80;
+  @apply border border-border;
+}
+
+.store-url-section {
+  @apply space-y-4 sm:space-y-6;
+}
+
+.store-url-card {
+  @apply bg-gradient-to-br from-muted/30 to-muted/10;
+  @apply border border-border/50;
+  @apply rounded-xl p-4 sm:p-6;
+}
+
+.store-url-display {
+  @apply flex items-center gap-2;
+  @apply p-3 bg-background rounded-lg;
+  @apply border border-border;
+  @apply font-mono text-sm;
+}
+
+.store-social-links {
+  @apply flex flex-wrap gap-2 sm:gap-3;
+}
+
+.store-social-link {
+  @apply inline-flex items-center gap-2;
+  @apply px-3 py-2 rounded-lg;
+  @apply bg-muted hover:bg-muted/80;
+  @apply text-sm font-medium;
+  @apply transition-all duration-300;
+  @apply touch-manipulation;
+}
+
+.store-analytics-grid {
+  @apply grid gap-4 sm:gap-6;
+  @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.store-analytics-card {
+  @apply p-4 sm:p-6;
+  @apply bg-gradient-to-br from-primary/5 to-primary/10;
+  @apply border border-primary/20;
+  @apply rounded-xl;
+}
+
+.store-analytics-value {
+  @apply text-2xl sm:text-3xl font-bold;
+  @apply text-primary;
+}
+
+.store-analytics-label {
+  @apply text-sm text-muted-foreground;
+  @apply mt-1;
+}
+
+.store-image-upload {
+  @apply space-y-4 sm:space-y-6;
+}
+
+.store-image-preview {
+  @apply relative rounded-xl overflow-hidden;
+  @apply border border-border shadow-soft;
+}
+
+.store-image-preview:hover {
+  @apply shadow-lg;
+}
+
+.store-image-overlay {
+  @apply absolute inset-0;
+  @apply bg-black/50 opacity-0 group-hover:opacity-100;
+  @apply transition-opacity duration-300;
+  @apply flex items-center justify-center;
+}
+
+.store-loading {
+  @apply flex flex-col items-center gap-4;
+  @apply py-12 sm:py-16 lg:py-20;
+}
+
+.store-loading-spinner {
+  @apply h-8 w-8 animate-spin;
+  @apply rounded-full border-2 border-primary border-t-transparent;
+}
+
+.store-empty-state {
+  @apply text-center py-8 sm:py-12 lg:py-16;
+}
+
+.store-empty-icon {
+  @apply h-20 w-20 sm:h-24 sm:w-24;
+  @apply rounded-full bg-gradient-to-br from-primary/20 to-primary/10;
+  @apply flex items-center justify-center;
+  @apply shadow-lg mx-auto mb-6 sm:mb-8;
+}
+
+.store-empty-title {
+  @apply text-2xl sm:text-3xl lg:text-4xl;
+  @apply font-bold mb-4;
+}
+
+.store-empty-description {
+  @apply text-base sm:text-lg;
+  @apply text-muted-foreground;
+  @apply max-w-2xl mx-auto;
+  @apply leading-relaxed;
+}
+
+.store-features-list {
+  @apply space-y-3 sm:space-y-4;
+}
+
+.store-feature-item {
+  @apply flex items-start gap-3;
+}
+
+.store-feature-icon {
+  @apply text-primary font-bold text-lg;
+  @apply flex-shrink-0;
+}
+
+.store-feature-text {
+  @apply text-sm sm:text-base;
+  @apply text-muted-foreground;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  .store-tabs-list {
+    @apply grid-cols-2 gap-1;
+  }
+  
+  .store-tabs-trigger {
+    @apply text-xs px-2;
+  }
+  
+  .store-card-header {
+    @apply p-4;
+  }
+  
+  .store-card-content {
+    @apply p-4;
+  }
+  
+  .store-analytics-grid {
+    @apply grid-cols-1 gap-4;
+  }
+  
+  .store-social-links {
+    @apply flex-col gap-2;
+  }
+  
+  .store-social-link {
+    @apply justify-center;
+  }
+}
+
+/* Tablet Optimizations */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .store-tabs-list {
+    @apply grid-cols-4 gap-2;
+  }
+  
+  .store-analytics-grid {
+    @apply grid-cols-2 gap-6;
+  }
+}
+
+/* Desktop Optimizations */
+@media (min-width: 1024px) {
+  .store-tabs-list {
+    @apply grid-cols-4 gap-2;
+  }
+  
+  .store-analytics-grid {
+    @apply grid-cols-3 gap-6;
+  }
+  
+  .store-card:hover {
+    @apply transform -translate-y-2;
+  }
+}
+
+/* Focus States for Accessibility */
+.store-tabs-trigger:focus-visible {
+  @apply ring-2 ring-primary ring-offset-2;
+}
+
+.store-button:focus-visible {
+  @apply ring-2 ring-primary ring-offset-2;
+}
+
+.store-form-input:focus-visible {
+  @apply ring-2 ring-primary ring-offset-2;
+}
+
+.store-form-textarea:focus-visible {
+  @apply ring-2 ring-primary ring-offset-2;
+}
+
+/* Dark Mode Optimizations */
+@media (prefers-color-scheme: dark) {
+  .store-card {
+    @apply bg-card border-border;
+  }
+  
+  .store-header {
+    @apply bg-card/95;
+  }
+  
+  .store-url-card {
+    @apply from-muted/20 to-muted/5;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .store-card {
+    @apply transition-none;
+  }
+  
+  .store-card:hover {
+    @apply transform-none;
+  }
+  
+  .store-button:hover {
+    @apply scale-100;
+  }
+  
+  .animate-fade-in {
+    animation: none;
+  }
+}
+
+/* Animation Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.6s ease-out;
+}

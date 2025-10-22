@@ -2,84 +2,93 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Store as StoreIcon } from "lucide-react";
+import { Store as StoreIcon, ExternalLink } from "lucide-react";
 import { useStore } from "@/hooks/useStore";
 import { CreateStoreDialog } from "@/components/store/CreateStoreDialog";
 import StoreDetails from "@/components/store/StoreDetails";
+import "@/styles/store-responsive.css";
 
 const Store = () => {
   const { store, loading } = useStore();
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="store-page">
         <AppSidebar />
         
         <div className="flex-1 flex flex-col">
-          <header className="sticky top-0 z-10 border-b bg-card shadow-soft backdrop-blur supports-[backdrop-filter]:bg-card/95">
-            <div className="flex h-14 sm:h-16 items-center gap-3 sm:gap-4 px-4 sm:px-6">
-              <SidebarTrigger className="touch-manipulation" />
+          {/* Header - Responsive et Professionnel */}
+          <header className="store-header">
+            <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 px-3 sm:px-4 md:px-6">
+              <SidebarTrigger className="touch-manipulation min-h-[44px] min-w-[44px]" />
               <div className="flex-1 min-w-0">
-                <h1 className="text-lg sm:text-2xl font-bold truncate">Boutique</h1>
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate">Boutique</h1>
               </div>
               {!loading && store && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => window.open(`/stores/${store.slug}`, '_blank')}
-                  className="touch-manipulation whitespace-nowrap text-xs sm:text-sm"
+                  className="store-button whitespace-nowrap text-xs sm:text-sm hover:bg-primary hover:text-primary-foreground transition-colors"
+                  aria-label="Ouvrir ma boutique dans un nouvel onglet"
                 >
-                  Voir ma boutique
+                  <ExternalLink className="h-3 w-3 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Voir ma boutique</span>
+                  <span className="sm:hidden">Voir</span>
                 </Button>
               )}
               {!loading && !store && <CreateStoreDialog />}
             </div>
           </header>
 
-          <main className="flex-1 p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8 bg-gradient-hero overflow-x-hidden">
-            <div className="max-w-4xl mx-auto w-full animate-fade-in">
+          {/* Main Content - Responsive et Professionnel */}
+          <main className="store-main">
+            <div className="store-container">
               {loading ? (
-                <Card className="shadow-medium border-border">
-                  <CardContent className="py-8 sm:py-10 lg:py-12 text-center">
-                    <p className="text-sm sm:text-base text-muted-foreground">Chargement...</p>
+                <Card className="store-card">
+                  <CardContent className="store-loading">
+                    <div className="store-loading-spinner"></div>
+                    <p className="text-sm sm:text-base text-muted-foreground">Chargement de votre boutique...</p>
                   </CardContent>
                 </Card>
               ) : store ? (
                 <StoreDetails store={store} />
               ) : (
-                <Card className="shadow-medium border-border">
-                  <CardHeader className="text-center py-8 sm:py-10 lg:py-12 px-4 sm:px-6">
-                    <div className="flex justify-center mb-4 sm:mb-6">
-                      <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-muted flex items-center justify-center shadow-soft">
-                        <StoreIcon className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
-                      </div>
+                <Card className="store-card">
+                  <CardHeader className="store-empty-state">
+                    <div className="store-empty-icon">
+                      <StoreIcon className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
                     </div>
-                    <CardTitle className="text-xl sm:text-2xl lg:text-3xl">Créez votre boutique en ligne</CardTitle>
-                    <CardDescription className="mt-2 sm:mt-3 max-w-md mx-auto text-sm sm:text-base leading-relaxed px-2">
-                      Configurez votre boutique pour commencer à vendre vos produits digitaux et services en Afrique
+                    <CardTitle className="store-empty-title">Créez votre boutique en ligne</CardTitle>
+                    <CardDescription className="store-empty-description">
+                      Configurez votre boutique pour commencer à vendre vos produits digitaux et services en Afrique avec des fonctionnalités avancées
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="text-center pb-8 sm:pb-10 lg:pb-12 px-4 sm:px-6">
-                    <div className="space-y-4 sm:space-y-6">
+                  <CardContent className="text-center pb-8 sm:pb-12 lg:pb-16 px-4 sm:px-6">
+                    <div className="space-y-6 sm:space-y-8">
                       <CreateStoreDialog />
-                      <div className="mt-4 sm:mt-6 p-4 sm:p-5 lg:p-6 bg-muted/50 rounded-lg sm:rounded-xl text-left max-w-md mx-auto border border-border/50 shadow-soft">
-                        <p className="text-sm sm:text-base font-semibold mb-2 sm:mb-3 text-foreground">Qu'est-ce qu'une boutique ?</p>
-                        <ul className="text-xs sm:text-sm text-muted-foreground space-y-1.5 sm:space-y-2">
-                          <li className="flex items-start gap-2">
-                            <span className="text-primary font-bold">✓</span>
-                            <span>Un lien unique pour votre activité</span>
+                      <div className="mt-6 sm:mt-8 p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl sm:rounded-2xl text-left max-w-2xl mx-auto border border-border/50 shadow-soft">
+                        <p className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-foreground">Qu'est-ce qu'une boutique Payhula ?</p>
+                        <ul className="store-features-list">
+                          <li className="store-feature-item">
+                            <span className="store-feature-icon">✓</span>
+                            <span className="store-feature-text">Un lien unique et personnalisable pour votre activité</span>
                           </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-primary font-bold">✓</span>
-                            <span>Vendez plusieurs produits et services</span>
+                          <li className="store-feature-item">
+                            <span className="store-feature-icon">✓</span>
+                            <span className="store-feature-text">Vendez plusieurs produits et services avec des fonctionnalités avancées</span>
                           </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-primary font-bold">✓</span>
-                            <span>Acceptez les paiements en FCFA et autres devises</span>
+                          <li className="store-feature-item">
+                            <span className="store-feature-icon">✓</span>
+                            <span className="store-feature-text">Acceptez les paiements en FCFA et autres devises africaines</span>
                           </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-primary font-bold">✓</span>
-                            <span>Gérez tout depuis votre tableau de bord</span>
+                          <li className="store-feature-item">
+                            <span className="store-feature-icon">✓</span>
+                            <span className="store-feature-text">Gérez tout depuis votre tableau de bord professionnel</span>
+                          </li>
+                          <li className="store-feature-item">
+                            <span className="store-feature-icon">✓</span>
+                            <span className="store-feature-text">Analytics avancées et statistiques détaillées</span>
                           </li>
                         </ul>
                       </div>

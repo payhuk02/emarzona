@@ -105,22 +105,26 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
   return (
     <div className="space-y-4 sm:space-y-6">
       <Tabs defaultValue="settings" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-2 mb-4 sm:mb-6">
+          <TabsTrigger value="settings" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
+            <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Paramètres</span>
+            <span className="sm:hidden">Config</span>
           </TabsTrigger>
-          <TabsTrigger value="appearance" className="flex items-center gap-2">
-            <Palette className="h-4 w-4" />
+          <TabsTrigger value="appearance" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
+            <Palette className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Apparence</span>
+            <span className="sm:hidden">Style</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
+          <TabsTrigger value="analytics" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
+            <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Analytics</span>
+            <span className="sm:hidden">Stats</span>
           </TabsTrigger>
-          <TabsTrigger value="url" className="flex items-center gap-2">
-            <Globe className="h-4 w-4" />
+          <TabsTrigger value="url" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
+            <Globe className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">URL</span>
+            <span className="sm:hidden">Lien</span>
           </TabsTrigger>
         </TabsList>
 
