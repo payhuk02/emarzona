@@ -324,16 +324,16 @@ export const DomainSettings = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-            <Globe className="h-5 w-5 sm:h-6 sm:w-6" />
+          <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2" role="heading" aria-level="2">
+            <Globe className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
             Nom de domaine personnalisé
           </h2>
-          <p className="text-sm text-muted-foreground">
-                Connectez votre propre domaine à votre boutique
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Connectez votre propre domaine à votre boutique
           </p>
-            </div>
+        </div>
         {domainConfig.custom_domain && getStatusBadge()}
-            </div>
+      </div>
 
       {/* Configuration du domaine */}
       <Card>
@@ -349,28 +349,32 @@ export const DomainSettings = () => {
             }
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 sm:space-y-6 px-4 pb-4 sm:px-6 sm:pb-6">
           {!domainConfig.custom_domain ? (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Nom de domaine</label>
-                <div className="flex gap-2">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="space-y-2 sm:space-y-3">
+                <label className="text-sm sm:text-base font-medium" htmlFor="domain-input">Nom de domaine</label>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <Input
+                    id="domain-input"
                     value={domainInput}
-                    onChange={(e) => setDomainInput(e.target.value)}
+                    onChange={(e) => setDomainInput(e.target.value.trim())}
                     placeholder="maboutique.com"
                     className="flex-1"
+                    aria-label="Nom de domaine personnalisé"
+                    aria-describedby="domain-help"
                   />
                   <Button 
                     onClick={handleConnectDomain}
                     disabled={loading || !domainInput.trim()}
-                    className="gradient-primary"
+                    className="gradient-primary w-full sm:w-auto"
+                    aria-label="Connecter le domaine personnalisé"
                   >
-                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Plus className="h-4 w-4" aria-hidden="true" />}
                     Connecter
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p id="domain-help" className="text-xs sm:text-sm text-muted-foreground">
                   Entrez votre nom de domaine (ex: maboutique.com ou boutique.monsite.com)
                 </p>
               </div>

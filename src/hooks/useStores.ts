@@ -20,6 +20,16 @@ export interface Store {
   instagram_url?: string | null;
   twitter_url?: string | null;
   linkedin_url?: string | null;
+  // Domain management fields
+  custom_domain?: string | null;
+  domain_status?: 'not_configured' | 'pending' | 'verified' | 'error';
+  domain_verification_token?: string | null;
+  domain_verified_at?: string | null;
+  domain_error_message?: string | null;
+  ssl_enabled?: boolean;
+  redirect_www?: boolean;
+  redirect_https?: boolean;
+  dns_records?: any[];
 }
 
 export const useStores = () => {
