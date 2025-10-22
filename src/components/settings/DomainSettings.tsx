@@ -39,11 +39,6 @@ import {
   ShieldCheck
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useDomain } from "@/hooks/useDomain";
-import { DomainMonitoringDashboard } from "./DomainMonitoringDashboard";
-import { MultiDomainManager } from "./MultiDomainManager";
-import { AdvancedSecurityPanel } from "./AdvancedSecurityPanel";
-import { SSLCertificateManager } from "./SSLCertificateManager";
 
 interface DomainConfig {
   custom_domain: string | null;
@@ -68,44 +63,6 @@ interface DNSRecord {
 export const DomainSettings = () => {
   const { stores, updateStore, loading: storesLoading } = useStores();
   const { toast } = useToast();
-  
-  // Hook useDomain pour les fonctionnalités avancées
-  const {
-    loading: domainLoading,
-    verifying,
-    analytics,
-    monitoring,
-    sslConfiguration,
-    connectDomain,
-    verifyDomain,
-    disconnectDomain,
-    updateSSL,
-    updateRedirects,
-    getDNSInstructions,
-    checkDNSPropagation,
-    getDomainAnalytics,
-    exportDNSConfig,
-    validateDNSConfiguration,
-    validateDomain,
-    // New monitoring functions
-    startDomainMonitoring,
-    checkDomainHealth,
-    sendAlert,
-    // Multi-domain functions
-    addSecondaryDomain,
-    removeSecondaryDomain,
-    // Security functions
-    enableDNSSEC,
-    enableHSTS,
-    enableCSP,
-    // Advanced SSL functions
-    getSSLCertificates,
-    uploadCustomCertificate,
-    renewSSLCertificate,
-    deleteSSLCertificate,
-    getSSLGrade,
-    updateSSLConfiguration
-  } = useDomain(currentStore?.id || null);
   
   const [propagationStatus, setPropagationStatus] = useState<{
     isChecking: boolean;
@@ -555,10 +512,9 @@ export const DomainSettings = () => {
       {/* Onglets pour les fonctionnalités avancées */}
       {domainConfig.custom_domain && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-7">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
           <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="dns">DNS</TabsTrigger>
-          <TabsTrigger value="ssl">SSL</TabsTrigger>
           <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
           <TabsTrigger value="multi-domain">Multi-domaines</TabsTrigger>
           <TabsTrigger value="security">Sécurité</TabsTrigger>
@@ -886,48 +842,31 @@ export const DomainSettings = () => {
             </Card>
           </TabsContent>
 
-          {/* SSL et Sécurité */}
-          <TabsContent value="ssl" className="space-y-4">
-            <SSLCertificateManager
-              domain={domainConfig.custom_domain}
-              sslConfiguration={sslConfiguration}
-              onGetSSLCertificates={getSSLCertificates}
-              onUploadCustomCertificate={uploadCustomCertificate}
-              onRenewSSLCertificate={renewSSLCertificate}
-              onDeleteSSLCertificate={deleteSSLCertificate}
-              onGetSSLGrade={getSSLGrade}
-              onUpdateSSLConfiguration={updateSSLConfiguration}
-            />
-          </TabsContent>
-
           {/* Monitoring */}
           <TabsContent value="monitoring" className="space-y-4">
-            <DomainMonitoringDashboard
-              domain={domainConfig.custom_domain}
-              monitoring={null}
-              onStartMonitoring={() => {}}
-              onCheckHealth={() => {}}
-              onSendAlert={() => {}}
-            />
+            <div className="text-center py-8 text-gray-500">
+              <Activity className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <p>Fonctionnalité de monitoring en cours de développement</p>
+              <p className="text-sm">Cette fonctionnalité sera bientôt disponible</p>
+            </div>
           </TabsContent>
 
           {/* Multi-domaines */}
           <TabsContent value="multi-domain" className="space-y-4">
-            <MultiDomainManager
-              primaryDomain={domainConfig.custom_domain}
-              onAddSecondaryDomain={async () => true}
-              onRemoveSecondaryDomain={async () => true}
-            />
+            <div className="text-center py-8 text-gray-500">
+              <Globe2 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <p>Fonctionnalité multi-domaines en cours de développement</p>
+              <p className="text-sm">Cette fonctionnalité sera bientôt disponible</p>
+            </div>
           </TabsContent>
 
           {/* Sécurité Avancée */}
           <TabsContent value="security" className="space-y-4">
-            <AdvancedSecurityPanel
-              domain={domainConfig.custom_domain}
-              onEnableDNSSEC={async () => true}
-              onEnableHSTS={async () => true}
-              onEnableCSP={async () => true}
-            />
+            <div className="text-center py-8 text-gray-500">
+              <ShieldCheck className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <p>Fonctionnalité de sécurité avancée en cours de développement</p>
+              <p className="text-sm">Cette fonctionnalité sera bientôt disponible</p>
+            </div>
           </TabsContent>
 
           {/* Analytics */}
