@@ -22,15 +22,11 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Vendor chunks
+          // Vendor chunks - React doit être dans le même chunk pour éviter les erreurs de contexte
           if (id.includes('node_modules')) {
-            // React core
-            if (id.includes('react') || id.includes('react-dom')) {
+            // React et React-DOM ensemble pour éviter les erreurs de contexte
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
               return 'react-vendor';
-            }
-            // React Router
-            if (id.includes('react-router')) {
-              return 'router';
             }
             // Radix UI components
             if (id.includes('@radix-ui')) {
@@ -103,5 +99,6 @@ export default defineConfig(({ mode }) => ({
       '@tanstack/react-query',
       'lucide-react'
     ],
+    force: true, // Force la pré-optimisation
   },
 }));
