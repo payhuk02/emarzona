@@ -1,0 +1,454 @@
+/* ============================================================
+   DESIGN PROFESSIONNEL MARKETPLACE - INSPIRÉ DE COMEUP.COM
+   Version Premium - Interface moderne et élégante
+   ============================================================ */
+
+/* Variables CSS pour la cohérence */
+:root {
+  --comeup-primary: #2563eb;
+  --comeup-secondary: #64748b;
+  --comeup-success: #10b981;
+  --comeup-warning: #f59e0b;
+  --comeup-danger: #ef4444;
+  --comeup-gray-50: #f8fafc;
+  --comeup-gray-100: #f1f5f9;
+  --comeup-gray-200: #e2e8f0;
+  --comeup-gray-300: #cbd5e1;
+  --comeup-gray-400: #94a3b8;
+  --comeup-gray-500: #64748b;
+  --comeup-gray-600: #475569;
+  --comeup-gray-700: #334155;
+  --comeup-gray-800: #1e293b;
+  --comeup-gray-900: #0f172a;
+  
+  --comeup-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --comeup-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --comeup-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --comeup-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  --comeup-radius-sm: 0.375rem;
+  --comeup-radius-md: 0.5rem;
+  --comeup-radius-lg: 0.75rem;
+  --comeup-radius-xl: 1rem;
+  
+  --comeup-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================
+   CARTES PRODUITS PROFESSIONNELLES
+   ============================================================ */
+
+.product-card-professional {
+  @apply relative overflow-hidden bg-white border border-gray-200;
+  border-radius: var(--comeup-radius-lg);
+  box-shadow: var(--comeup-shadow-sm);
+  transition: var(--comeup-transition);
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.product-card-professional:hover {
+  border-color: var(--comeup-gray-300);
+  box-shadow: var(--comeup-shadow-xl);
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* Image container avec overlay */
+.product-image-container {
+  @apply relative overflow-hidden;
+  height: 12rem; /* 192px */
+  background: linear-gradient(135deg, var(--comeup-gray-100) 0%, var(--comeup-gray-200) 100%);
+}
+
+.product-image-container img {
+  @apply w-full h-full object-cover transition-transform duration-500;
+  transform: translateZ(0);
+}
+
+.product-card-professional:hover .product-image-container img {
+  transform: scale(1.05);
+}
+
+/* Overlay avec gradient */
+.product-overlay {
+  @apply absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.product-card-professional:hover .product-overlay {
+  opacity: 1;
+}
+
+/* Badges et éléments flottants */
+.product-badge-container {
+  @apply absolute top-3 left-3 right-3 flex justify-between items-start;
+  z-index: 10;
+}
+
+.product-category-badge {
+  @apply px-2 py-1 rounded-full text-xs font-semibold;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.product-favorite-button {
+  @apply p-2 rounded-full transition-colors;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.product-favorite-button:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+/* Bouton d'action rapide */
+.product-quick-action {
+  @apply absolute bottom-3 left-3 right-3;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: var(--comeup-transition);
+  z-index: 10;
+}
+
+.product-card-professional:hover .product-quick-action {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.product-quick-action button {
+  @apply w-full py-2 px-4 rounded-lg font-medium transition-colors;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--comeup-gray-800);
+}
+
+.product-quick-action button:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+}
+
+/* Contenu de la carte */
+.product-content {
+  @apply p-4 space-y-3;
+}
+
+/* Informations du vendeur */
+.product-seller-info {
+  @apply flex items-center gap-2;
+}
+
+.product-seller-avatar {
+  @apply w-6 h-6 rounded-full object-cover;
+  border: 2px solid var(--comeup-gray-200);
+}
+
+.product-seller-name {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.product-verified-badge {
+  @apply h-4 w-4 text-green-500;
+}
+
+/* Titre du produit */
+.product-title {
+  @apply font-semibold text-gray-900 leading-tight;
+  font-size: 1rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Description */
+.product-description {
+  @apply text-sm text-gray-600 leading-relaxed;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Rating et avis */
+.product-rating-container {
+  @apply flex items-center gap-2;
+}
+
+.product-stars {
+  @apply flex items-center gap-0.5;
+}
+
+.product-star {
+  @apply h-4 w-4;
+}
+
+.product-star.filled {
+  @apply fill-yellow-400 text-yellow-400;
+}
+
+.product-star.empty {
+  @apply text-gray-300;
+}
+
+.product-rating-text {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.product-reviews-count {
+  @apply text-sm text-gray-500;
+}
+
+/* Tags */
+.product-tags {
+  @apply flex flex-wrap gap-1;
+}
+
+.product-tag {
+  @apply px-2 py-1 rounded-md text-xs font-medium;
+  background: var(--comeup-gray-100);
+  color: var(--comeup-gray-700);
+  border: 1px solid var(--comeup-gray-200);
+}
+
+/* Prix et statistiques */
+.product-price-container {
+  @apply flex items-center justify-between;
+}
+
+.product-price-info {
+  @apply flex flex-col;
+}
+
+.product-price-original {
+  @apply text-sm text-gray-500 line-through;
+}
+
+.product-price-current {
+  @apply text-lg font-bold text-gray-900;
+}
+
+.product-sales-info {
+  @apply flex items-center gap-1 text-sm text-gray-500;
+}
+
+/* Boutons d'action */
+.product-actions {
+  @apply flex gap-2 mt-4;
+}
+
+.product-action-button {
+  @apply flex-1 py-2 px-4 rounded-lg font-medium transition-colors;
+  border-radius: var(--comeup-radius-md);
+}
+
+.product-action-button.primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white;
+}
+
+.product-action-button.secondary {
+  @apply bg-white hover:bg-gray-50 text-gray-700 border border-gray-300;
+}
+
+.product-action-button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* ============================================================
+   GRILLE RESPONSIVE PROFESSIONNELLE
+   ============================================================ */
+
+/* Mobile (< 640px) - 1 colonne */
+@media (max-width: 639px) {
+  .products-grid-professional {
+    @apply grid grid-cols-1 gap-6;
+    padding: 1rem;
+  }
+  
+  .product-card-professional {
+    height: auto;
+    min-height: 420px;
+  }
+  
+  .product-image-container {
+    height: 10rem; /* 160px */
+  }
+}
+
+/* Tablet (640px - 1024px) - 2 colonnes */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .products-grid-professional {
+    @apply grid grid-cols-2 gap-6;
+    padding: 1.5rem;
+  }
+  
+  .product-card-professional {
+    height: auto;
+    min-height: 480px;
+  }
+  
+  .product-image-container {
+    height: 11rem; /* 176px */
+  }
+}
+
+/* Desktop (> 1024px) - 3 colonnes */
+@media (min-width: 1024px) {
+  .products-grid-professional {
+    @apply grid grid-cols-3 gap-8;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .product-card-professional {
+    height: auto;
+    min-height: 520px;
+  }
+  
+  .product-image-container {
+    height: 12rem; /* 192px */
+  }
+}
+
+/* Ultra-wide (> 1920px) - 4 colonnes */
+@media (min-width: 1920px) {
+  .products-grid-professional {
+    @apply grid-cols-4;
+    gap: 2rem;
+    max-width: 1600px;
+  }
+}
+
+/* ============================================================
+   ANIMATIONS ET EFFETS
+   ============================================================ */
+
+/* Animation d'entrée */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.product-card-professional {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Animation de chargement */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.product-loading {
+  @apply relative overflow-hidden;
+  background: linear-gradient(
+    90deg,
+    var(--comeup-gray-200) 0%,
+    var(--comeup-gray-100) 50%,
+    var(--comeup-gray-200) 100%
+  );
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================================
+   MODE SOMBRE
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .product-card-professional {
+    @apply bg-gray-800 border-gray-700;
+  }
+  
+  .product-card-professional:hover {
+    @apply border-gray-600;
+  }
+  
+  .product-title {
+    @apply text-gray-100;
+  }
+  
+  .product-description {
+    @apply text-gray-300;
+  }
+  
+  .product-seller-name {
+    @apply text-gray-300;
+  }
+  
+  .product-price-current {
+    @apply text-gray-100;
+  }
+  
+  .product-action-button.secondary {
+    @apply bg-gray-700 hover:bg-gray-600 text-gray-200 border-gray-600;
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITÉ
+   ============================================================ */
+
+.product-card-professional:focus-visible {
+  @apply outline-2 outline-blue-500 outline-offset-2;
+}
+
+.product-card-professional[aria-pressed="true"] {
+  @apply ring-2 ring-blue-500;
+}
+
+/* Contraste amélioré pour les badges */
+.product-category-badge {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================================
+   OPTIMISATIONS PERFORMANCE
+   ============================================================ */
+
+.product-card-professional {
+  contain: layout style;
+}
+
+.product-image-container img {
+  will-change: transform;
+}
+
+.product-card-professional:hover {
+  will-change: transform;
+}
+
+.product-card-professional:not(:hover) {
+  will-change: auto;
+}
+
+/* Réduction des animations sur les appareils lents */
+@media (prefers-reduced-motion: reduce) {
+  .product-card-professional {
+    animation: none;
+    transition: none;
+  }
+  
+  .product-card-professional:hover {
+    transform: none;
+  }
+  
+  .product-image-container img {
+    transition: none;
+  }
+}

@@ -44,8 +44,10 @@ import MarketplaceFooter from "@/components/marketplace/MarketplaceFooter";
 import AdvancedFilters from "@/components/marketplace/AdvancedFilters";
 import ProductComparison from "@/components/marketplace/ProductComparison";
 import FavoritesManager from "@/components/marketplace/FavoritesManager";
+import ProductCardProfessional from "@/components/marketplace/ProductCardProfessional";
 import { logger } from '@/lib/logger';
 import { Product, FilterState, PaginationState } from '@/types/marketplace';
+import '@/styles/marketplace-professional.css';
 
 const Marketplace = () => {
   const { toast } = useToast();
@@ -784,17 +786,10 @@ const Marketplace = () => {
             <>
               <ProductGrid>
                 {paginatedProducts.map((product) => (
-                  <ProductCardAdvanced
+                  <ProductCardProfessional
                     key={product.id}
                     product={product}
-                    viewMode={filters.viewMode}
-                    isFavorite={favorites.has(product.id)}
-                    isPurchasing={purchasing.has(product.id)}
-                    onToggleFavorite={() => toggleFavorite(product.id)}
-                    onPurchase={() => handlePurchase(product)}
-                    onShare={() => handleShare(product)}
-                    onAddToComparison={() => addToComparison(product)}
-                    isInComparison={comparisonProducts.some(p => p.id === product.id)}
+                    storeSlug={product.stores?.slug || 'default'}
                   />
                 ))}
               </ProductGrid>
