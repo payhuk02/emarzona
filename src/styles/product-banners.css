@@ -6,7 +6,7 @@
 /* Variables CSS pour la cohérence et la performance - Style ComeUp/Fiverr */
 :root {
   --product-banner-aspect-ratio: 16/9;
-  --mobile-margin: 0.5rem;
+  --mobile-margin: 0.125rem;
   --tablet-margin: 1rem;
   --desktop-margin: 1.5rem;
   --border-radius-mobile: 0.75rem;
@@ -113,22 +113,23 @@
 /* Mobile (< 640px) - 1 produit par ligne - Affichage exact */
 @media (max-width: 639px) {
   .product-card-container {
-    margin-left: var(--mobile-margin);
-    margin-right: var(--mobile-margin);
+    width: 96%;
+    margin-left: auto;
+    margin-right: auto;
   }
   
   .product-banner {
     border-radius: var(--border-radius-mobile);
-    /* Largeur quasi-pleine avec marges cohérentes */
-    width: calc(100% - 2 * var(--mobile-margin));
+    /* Largeur 96% pour une meilleure utilisation de l'espace mobile */
+    width: 96%;
     margin: 0 auto;
   }
   
   /* Grille mobile - EXACTEMENT 1 produit par ligne */
   .products-grid-mobile {
     @apply grid grid-cols-1 gap-6;
-    padding-left: var(--mobile-margin);
-    padding-right: var(--mobile-margin);
+    padding-left: 2%;
+    padding-right: 2%;
     /* Optimisation GPU */
     transform: translateZ(0);
     will-change: transform;
@@ -136,7 +137,10 @@
   
   /* Cartes produits mobile - Design professionnel */
   .product-card-mobile {
-    @apply w-full mx-0;
+    @apply mx-0;
+    width: 96%;
+    margin-left: auto;
+    margin-right: auto;
     box-shadow: var(--shadow-mobile);
     border-radius: var(--border-radius-mobile);
     /* Effet de profondeur */
