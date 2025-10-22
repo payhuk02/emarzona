@@ -157,7 +157,7 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
               return (
                 <div
                   key={product.id}
-                  className="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop"
+                  className="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:-translate-y-1 product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop"
                 >
                   {/* Bannière produit avec ratio 16:9 */}
                   <div className="product-card-container">

@@ -124,7 +124,7 @@ const ProductCardProfessional = ({ product, storeSlug }: ProductCardProfessional
   };
 
   return (
-    <Card className="group relative overflow-hidden bg-white border border-gray-200 hover:border-gray-300 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+    <Card className="group relative overflow-hidden bg-white border border-gray-200 hover:border-gray-300 transition-all duration-300 hover:-translate-y-1">
       {/* Image avec overlay et badges */}
       <div className="relative">
         <ProductBanner

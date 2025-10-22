@@ -34,7 +34,7 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
   };
 
   return (
-    <Card className="group overflow-hidden hover:shadow-large transition-all duration-300 hover:-translate-y-1 border border-border bg-card touch-manipulation touch-friendly product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop">
+    <Card className="group overflow-hidden transition-all duration-300 hover:-translate-y-1 border border-border bg-card touch-manipulation touch-friendly product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop">
       <Link to={`/stores/${storeSlug}/products/${product.slug}`} className="block">
         <div className="product-card-container">
           <ProductBanner

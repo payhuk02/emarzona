@@ -980,7 +980,7 @@ const ProductCardAdvanced = ({
 
   if (viewMode === "list") {
     return (
-      <Card className="group relative bg-slate-800/80 backdrop-blur-sm border-slate-600 hover:border-slate-500 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+      <Card className="group relative bg-slate-800/80 backdrop-blur-sm border-slate-600 hover:border-slate-500 transition-all duration-300 hover:-translate-y-1">
         <CardContent className="p-6">
           <div className="flex gap-6">
             {/* Image */}
@@ -1111,7 +1111,7 @@ const ProductCardAdvanced = ({
 
   // Mode grille
   return (
-    <Card className="group relative bg-slate-800/80 backdrop-blur-sm border-slate-600 hover:border-slate-500 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl overflow-hidden product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop">
+    <Card className="group relative bg-slate-800/80 backdrop-blur-sm border-slate-600 hover:border-slate-500 transition-all duration-300 hover:-translate-y-2 overflow-hidden product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop">
       <CardContent className="p-0 product-card-container">
         {/* Bannière produit avec ratio 16:9 */}
         <div className="cursor-pointer" onClick={handleCardClick}>
