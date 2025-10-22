@@ -103,38 +103,86 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in">
+      {/* Header avec informations de la boutique */}
+      <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl p-4 sm:p-6 border border-primary/20">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            {store.logo_url ? (
+              <img 
+                src={store.logo_url} 
+                alt={`Logo ${store.name}`}
+                className="h-12 w-12 sm:h-16 sm:w-16 rounded-lg object-cover border border-border shadow-sm"
+              />
+            ) : (
+              <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30">
+                <Settings className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+              </div>
+            )}
+            <div>
+              <h2 className="text-lg sm:text-xl font-bold text-foreground">{store.name}</h2>
+              <p className="text-sm text-muted-foreground">Boutique en ligne</p>
+              {store.description && (
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">{store.description}</p>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open(`/stores/${store.slug}`, '_blank')}
+              className="store-button text-xs sm:text-sm"
+            >
+              <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              Voir la boutique
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyUrl}
+              className="store-button text-xs sm:text-sm"
+            >
+              <Copy className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              Copier le lien
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <Tabs defaultValue="settings" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-2 mb-4 sm:mb-6">
-          <TabsTrigger value="settings" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
+        <TabsList className="store-tabs-list">
+          <TabsTrigger value="settings" className="store-tabs-trigger">
             <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Paramètres</span>
             <span className="sm:hidden">Config</span>
           </TabsTrigger>
-          <TabsTrigger value="appearance" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
+          <TabsTrigger value="appearance" className="store-tabs-trigger">
             <Palette className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Apparence</span>
             <span className="sm:hidden">Style</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
+          <TabsTrigger value="analytics" className="store-tabs-trigger">
             <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Analytics</span>
             <span className="sm:hidden">Stats</span>
           </TabsTrigger>
-          <TabsTrigger value="url" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
+          <TabsTrigger value="url" className="store-tabs-trigger">
             <Globe className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">URL</span>
             <span className="sm:hidden">Lien</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="settings" className="space-y-6">
-          <Card className="shadow-medium">
-            <CardHeader>
+        <TabsContent value="settings" className="space-y-4 sm:space-y-6">
+          <Card className="store-card">
+            <CardHeader className="store-card-header">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                  <CardTitle className="text-lg sm:text-xl">Paramètres de la boutique</CardTitle>
-                  <CardDescription className="text-sm">Gérez tous les détails de votre boutique en ligne</CardDescription>
+                  <CardTitle className="text-lg sm:text-xl font-semibold">Paramètres de la boutique</CardTitle>
+                  <CardDescription className="text-sm sm:text-base mt-1">
+                    Gérez tous les détails de votre boutique en ligne
+                  </CardDescription>
                 </div>
                 <div className="flex flex-wrap gap-2 self-end sm:self-auto">
                   {isEditing ? (
@@ -143,7 +191,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                         size="sm" 
                         onClick={handleSubmit}
                         disabled={isSubmitting}
-                        className="gradient-primary touch-manipulation text-xs sm:text-sm shrink-0 min-w-[100px] sm:min-w-[120px]"
+                        className="store-button-primary text-xs sm:text-sm shrink-0 min-w-[100px] sm:min-w-[120px]"
                       >
                         <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                         {isSubmitting ? "..." : "Enregistrer"}
@@ -153,7 +201,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                         size="sm" 
                         onClick={handleCancel}
                         disabled={isSubmitting}
-                        className="touch-manipulation text-xs sm:text-sm shrink-0 min-w-[90px] sm:min-w-[100px]"
+                        className="store-button-secondary text-xs sm:text-sm shrink-0 min-w-[90px] sm:min-w-[100px]"
                       >
                         <X className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                         Annuler
@@ -164,15 +212,16 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                       variant="outline" 
                       size="sm" 
                       onClick={() => setIsEditing(true)}
-                      className="touch-manipulation text-xs sm:text-sm shrink-0 min-w-[90px] sm:min-w-[100px]"
+                      className="store-button-secondary text-xs sm:text-sm shrink-0 min-w-[90px] sm:min-w-[100px]"
                     >
+                      <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                       Modifier
                     </Button>
                   )}
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="px-4 sm:px-6">
+            <CardContent className="store-card-content">
               {isEditing ? (
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -343,8 +392,18 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-6">
-          <StoreAnalytics storeId={store.id} />
+        <TabsContent value="analytics" className="space-y-4 sm:space-y-6">
+          <Card className="store-card">
+            <CardHeader className="store-card-header">
+              <CardTitle className="text-lg sm:text-xl font-semibold">Analytics de votre boutique</CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                Suivez les performances de votre boutique avec des statistiques détaillées
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="store-card-content">
+              <StoreAnalytics storeId={store.id} />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="url" className="space-y-6">
