@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-// import { useStores } from "@/hooks/useStores";
+import { useStores } from "@/hooks/useStores";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -62,7 +62,7 @@ interface DNSRecord {
 }
 
 export const DomainSettings = () => {
-  // const { stores, updateStore, loading: storesLoading } = useStores();
+  const { stores, updateStore, loading: storesLoading } = useStores();
   
   const [verifying, setVerifying] = useState<boolean>(false);
   
@@ -101,8 +101,7 @@ export const DomainSettings = () => {
   const [activeTab, setActiveTab] = useState<string>("overview");
 
   // Utiliser la première boutique disponible
-  // const currentStore = stores.length > 0 ? stores[0] : null;
-  const currentStore = null; // Temporairement désactivé
+  const currentStore = stores.length > 0 ? stores[0] : null;
 
   useEffect(() => {
     if (currentStore) {
@@ -155,20 +154,12 @@ export const DomainSettings = () => {
 
   const handleConnectDomain = async () => {
     if (!currentStore) {
-      // toast({
-      //   title: "Erreur",
-      //   description: "Aucune boutique trouvée",
-      //   variant: "destructive"
-      // });
+      alert("Erreur: Aucune boutique trouvée");
       return;
     }
 
     if (!validateDomain(domainInput)) {
-      // toast({
-      //   title: "Domaine invalide",
-      //   description: "Veuillez entrer un nom de domaine valide (ex: maboutique.com)",
-      //   variant: "destructive"
-      // });
+      alert("Domaine invalide: Veuillez entrer un nom de domaine valide (ex: maboutique.com)");
       return;
     }
 
@@ -363,9 +354,7 @@ export const DomainSettings = () => {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    // toast({
-    //   description: "Copié dans le presse-papiers"
-    // });
+    alert("Copié dans le presse-papiers");
   };
 
   const getStatusBadge = () => {
@@ -387,8 +376,7 @@ export const DomainSettings = () => {
     : null;
 
   // Gestion du chargement
-  // if (storesLoading) {
-  if (false) { // Temporairement désactivé
+  if (storesLoading) {
     return (
       <Card className="border-none shadow-lg">
         <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
