@@ -93,6 +93,7 @@ export const DomainSettings = () => {
   const [domainInput, setDomainInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [verifying, setVerifying] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>("overview");
 
   // Utiliser la première boutique disponible
   const currentStore = stores.length > 0 ? stores[0] : null;
