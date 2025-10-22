@@ -59,7 +59,8 @@ const MarketplaceHeader = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="touch-manipulation"
+                  className="h-10 w-10 touch-manipulation min-h-[44px] min-w-[44px]"
+                  aria-label="Ouvrir le menu"
                 >
                   <Menu className="h-5 w-5" />
                 </Button>
@@ -76,7 +77,8 @@ const MarketplaceHeader = () => {
                       variant="ghost"
                       size="icon"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="touch-manipulation"
+                      className="h-10 w-10 touch-manipulation min-h-[44px] min-w-[44px]"
+                      aria-label="Fermer le menu"
                     >
                       <X className="h-5 w-5" />
                     </Button>
@@ -85,7 +87,7 @@ const MarketplaceHeader = () => {
                   {/* Navigation */}
                   <nav className="flex flex-col gap-2 flex-1">
                     <Link to="/marketplace" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start h-12 text-base touch-manipulation hover:translate-x-1 transition-transform">
+                      <Button variant="ghost" className="w-full justify-start h-12 text-base touch-manipulation min-h-[44px] hover:translate-x-1 transition-transform focus-visible:ring-2 focus-visible:ring-primary">
                         <ShoppingBag className="h-5 w-5 mr-3" />
                         Marketplace
                       </Button>

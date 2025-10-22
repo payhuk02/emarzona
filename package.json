@@ -9,7 +9,22 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "vercel-build": "vite build"
+    "vercel-build": "vite build",
+    "test:responsive": "playwright test --project=chromium --project=\"Mobile Chrome\" --project=\"Tablet Chrome\"",
+    "test:responsive:all": "playwright test",
+    "test:responsive:mobile": "playwright test --project=\"Mobile Chrome\" --project=\"Mobile Safari\"",
+    "test:responsive:desktop": "playwright test --project=chromium --project=firefox --project=webkit",
+    "test:responsive:visual": "playwright test --grep \"Régression visuelle\"",
+    "audit:responsive": "node scripts/responsivity-audit.js",
+    "audit:lighthouse": "node scripts/lighthouse-test.js",
+    "audit:all": "npm run audit:responsive && npm run audit:lighthouse",
+    "report:csv": "node scripts/generate-csv-report.js",
+    "report:playwright": "node scripts/generate-playwright-tests.js",
+    "report:all": "npm run report:csv && npm run report:playwright",
+    "dev:responsive": "npm run dev & npm run test:responsive:mobile",
+    "build:responsive": "npm run build && npm run test:responsive",
+    "verify:responsive": "node scripts/verify-product-display.js",
+    "verify:all": "npm run verify:responsive && npm run audit:responsive"
   },
   "vercel": {
     "buildCommand": "npm run build",

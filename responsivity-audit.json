@@ -1,0 +1,942 @@
+{
+  "timestamp": "2025-10-22T11:25:30.104Z",
+  "summary": {
+    "totalPages": 15,
+    "totalComponents": 6,
+    "criticalIssues": 1,
+    "highIssues": 32,
+    "mediumIssues": 70,
+    "lowIssues": 0
+  },
+  "pages": [
+    {
+      "page": "Landing",
+      "file": "src/pages/Landing.tsx",
+      "priority": "High",
+      "type": "Public",
+      "issues": [
+        {
+          "id": "landing-hasTouchTargets",
+          "description": "Manque de touchtargets",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+        },
+        {
+          "id": "landing-hasFocusStates",
+          "description": "Manque de focusstates",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus pour l'accessibilité"
+        }
+      ],
+      "lines": 1047,
+      "size": 54038
+    },
+    {
+      "page": "Marketplace",
+      "file": "src/pages/Marketplace.tsx",
+      "priority": "Critical",
+      "type": "Public",
+      "issues": [
+        {
+          "id": "marketplace-hasMobileMenu",
+          "description": "Manque de mobilemenu",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Implémenter un menu mobile avec hamburger"
+        },
+        {
+          "id": "marketplace-hasTouchTargets",
+          "description": "Manque de touchtargets",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+        }
+      ],
+      "lines": 1264,
+      "size": 49604
+    },
+    {
+      "page": "Storefront",
+      "file": "src/pages/Storefront.tsx",
+      "priority": "Critical",
+      "type": "Public",
+      "issues": [
+        {
+          "id": "storefront-hasMobileMenu",
+          "description": "Manque de mobilemenu",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Implémenter un menu mobile avec hamburger"
+        },
+        {
+          "id": "storefront-hasTouchTargets",
+          "description": "Manque de touchtargets",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+        },
+        {
+          "id": "storefront-hasImageOptimization",
+          "description": "Manque de imageoptimization",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter object-cover et aspect-ratio pour les images"
+        },
+        {
+          "id": "storefront-hasHoverEffects",
+          "description": "Manque de hovereffects",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Implémenter des effets hover avec group-hover"
+        },
+        {
+          "id": "storefront-hasFocusStates",
+          "description": "Manque de focusstates",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus pour l'accessibilité"
+        },
+        {
+          "id": "storefront-grid-layout",
+          "description": "Grille de produits non responsive",
+          "breakpoint": "all",
+          "severity": "Critical",
+          "fix": "Implémenter grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        }
+      ],
+      "lines": 208,
+      "size": 7922
+    },
+    {
+      "page": "ProductDetail",
+      "file": "src/pages/ProductDetail.tsx",
+      "priority": "Critical",
+      "type": "Public",
+      "issues": [
+        {
+          "id": "productdetail-hasMobileMenu",
+          "description": "Manque de mobilemenu",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Implémenter un menu mobile avec hamburger"
+        },
+        {
+          "id": "productdetail-hasTouchTargets",
+          "description": "Manque de touchtargets",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+        },
+        {
+          "id": "productdetail-hasImageOptimization",
+          "description": "Manque de imageoptimization",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter object-cover et aspect-ratio pour les images"
+        },
+        {
+          "id": "productdetail-hasFocusStates",
+          "description": "Manque de focusstates",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus pour l'accessibilité"
+        },
+        {
+          "id": "productdetail-hasOverflowControl",
+          "description": "Manque de overflowcontrol",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Contrôler le débordement avec overflow-hidden"
+        },
+        {
+          "id": "product-detail-image",
+          "description": "Images produit non optimisées",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter aspect-ratio et object-cover"
+        }
+      ],
+      "lines": 243,
+      "size": 8404
+    },
+    {
+      "page": "Auth",
+      "file": "src/pages/Auth.tsx",
+      "priority": "High",
+      "type": "Public",
+      "issues": [
+        {
+          "id": "auth-hasResponsiveClasses",
+          "description": "Manque de responsiveclasses",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des classes Tailwind responsive (sm:, md:, lg:, xl:)"
+        },
+        {
+          "id": "auth-hasMobileMenu",
+          "description": "Manque de mobilemenu",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Implémenter un menu mobile avec hamburger"
+        },
+        {
+          "id": "auth-hasTouchTargets",
+          "description": "Manque de touchtargets",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+        },
+        {
+          "id": "auth-hasImageOptimization",
+          "description": "Manque de imageoptimization",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter object-cover et aspect-ratio pour les images"
+        },
+        {
+          "id": "auth-hasHoverEffects",
+          "description": "Manque de hovereffects",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Implémenter des effets hover avec group-hover"
+        },
+        {
+          "id": "auth-hasFocusStates",
+          "description": "Manque de focusstates",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus pour l'accessibilité"
+        },
+        {
+          "id": "auth-hasOverflowControl",
+          "description": "Manque de overflowcontrol",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Contrôler le débordement avec overflow-hidden"
+        }
+      ],
+      "lines": 253,
+      "size": 8395
+    },
+    {
+      "page": "Dashboard",
+      "file": "src/pages/Dashboard.tsx",
+      "priority": "High",
+      "type": "Private",
+      "issues": [
+        {
+          "id": "dashboard-hasMobileMenu",
+          "description": "Manque de mobilemenu",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Implémenter un menu mobile avec hamburger"
+        },
+        {
+          "id": "dashboard-hasTouchTargets",
+          "description": "Manque de touchtargets",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+        },
+        {
+          "id": "dashboard-hasImageOptimization",
+          "description": "Manque de imageoptimization",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter object-cover et aspect-ratio pour les images"
+        },
+        {
+          "id": "dashboard-hasFocusStates",
+          "description": "Manque de focusstates",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus pour l'accessibilité"
+        }
+      ],
+      "lines": 392,
+      "size": 17981
+    },
+    {
+      "page": "Products",
+      "file": "src/pages/Products.tsx",
+      "priority": "High",
+      "type": "Private",
+      "issues": [
+        {
+          "id": "products-hasMobileMenu",
+          "description": "Manque de mobilemenu",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Implémenter un menu mobile avec hamburger"
+        },
+        {
+          "id": "products-hasTouchTargets",
+          "description": "Manque de touchtargets",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+        },
+        {
+          "id": "products-hasImageOptimization",
+          "description": "Manque de imageoptimization",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter object-cover et aspect-ratio pour les images"
+        },
+        {
+          "id": "products-hasHoverEffects",
+          "description": "Manque de hovereffects",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Implémenter des effets hover avec group-hover"
+        },
+        {
+          "id": "products-hasFocusStates",
+          "description": "Manque de focusstates",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus pour l'accessibilité"
+        },
+        {
+          "id": "products-hasOverflowControl",
+          "description": "Manque de overflowcontrol",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Contrôler le débordement avec overflow-hidden"
+        }
+      ],
+      "lines": 423,
+      "size": 16984
+    },
+    {
+      "page": "Store",
+      "file": "src/pages/Store.tsx",
+      "priority": "High",
+      "type": "Private",
+      "issues": [
+        {
+          "id": "store-hasMobileMenu",
+          "description": "Manque de mobilemenu",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Implémenter un menu mobile avec hamburger"
+        },
+        {
+          "id": "store-hasImageOptimization",
+          "description": "Manque de imageoptimization",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter object-cover et aspect-ratio pour les images"
+        },
+        {
+          "id": "store-hasHoverEffects",
+          "description": "Manque de hovereffects",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Implémenter des effets hover avec group-hover"
+        },
+        {
+          "id": "store-hasFocusStates",
+          "description": "Manque de focusstates",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus pour l'accessibilité"
+        }
+      ],
+      "lines": 99,
+      "size": 5116
+    },
+    {
+      "page": "Settings",
+      "file": "src/pages/Settings.tsx",
+      "priority": "Medium",
+      "type": "Private",
+      "issues": [
+        {
+          "id": "settings-hasMobileMenu",
+          "description": "Manque de mobilemenu",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Implémenter un menu mobile avec hamburger"
+        },
+        {
+          "id": "settings-hasTouchTargets",
+          "description": "Manque de touchtargets",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+        },
+        {
+          "id": "settings-hasImageOptimization",
+          "description": "Manque de imageoptimization",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter object-cover et aspect-ratio pour les images"
+        },
+        {
+          "id": "settings-hasHoverEffects",
+          "description": "Manque de hovereffects",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Implémenter des effets hover avec group-hover"
+        },
+        {
+          "id": "settings-hasFocusStates",
+          "description": "Manque de focusstates",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus pour l'accessibilité"
+        }
+      ],
+      "lines": 208,
+      "size": 10136
+    },
+    {
+      "page": "Payments",
+      "file": "src/pages/Payments.tsx",
+      "priority": "High",
+      "type": "Private",
+      "issues": [
+        {
+          "id": "payments-hasMobileMenu",
+          "description": "Manque de mobilemenu",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Implémenter un menu mobile avec hamburger"
+        },
+        {
+          "id": "payments-hasTouchTargets",
+          "description": "Manque de touchtargets",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+        },
+        {
+          "id": "payments-hasImageOptimization",
+          "description": "Manque de imageoptimization",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter object-cover et aspect-ratio pour les images"
+        },
+        {
+          "id": "payments-hasHoverEffects",
+          "description": "Manque de hovereffects",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Implémenter des effets hover avec group-hover"
+        },
+        {
+          "id": "payments-hasFocusStates",
+          "description": "Manque de focusstates",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus pour l'accessibilité"
+        },
+        {
+          "id": "payments-hasOverflowControl",
+          "description": "Manque de overflowcontrol",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Contrôler le débordement avec overflow-hidden"
+        }
+      ],
+      "lines": 484,
+      "size": 18515
+    },
+    {
+      "page": "Orders",
+      "file": "src/pages/Orders.tsx",
+      "priority": "Medium",
+      "type": "Private",
+      "issues": [
+        {
+          "id": "orders-hasMobileMenu",
+          "description": "Manque de mobilemenu",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Implémenter un menu mobile avec hamburger"
+        },
+        {
+          "id": "orders-hasTouchTargets",
+          "description": "Manque de touchtargets",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+        },
+        {
+          "id": "orders-hasImageOptimization",
+          "description": "Manque de imageoptimization",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter object-cover et aspect-ratio pour les images"
+        },
+        {
+          "id": "orders-hasHoverEffects",
+          "description": "Manque de hovereffects",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Implémenter des effets hover avec group-hover"
+        },
+        {
+          "id": "orders-hasFocusStates",
+          "description": "Manque de focusstates",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus pour l'accessibilité"
+        },
+        {
+          "id": "orders-hasOverflowControl",
+          "description": "Manque de overflowcontrol",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Contrôler le débordement avec overflow-hidden"
+        }
+      ],
+      "lines": 139,
+      "size": 5356
+    },
+    {
+      "page": "Customers",
+      "file": "src/pages/Customers.tsx",
+      "priority": "Medium",
+      "type": "Private",
+      "issues": [
+        {
+          "id": "customers-hasMobileMenu",
+          "description": "Manque de mobilemenu",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Implémenter un menu mobile avec hamburger"
+        },
+        {
+          "id": "customers-hasTouchTargets",
+          "description": "Manque de touchtargets",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+        },
+        {
+          "id": "customers-hasImageOptimization",
+          "description": "Manque de imageoptimization",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter object-cover et aspect-ratio pour les images"
+        },
+        {
+          "id": "customers-hasHoverEffects",
+          "description": "Manque de hovereffects",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Implémenter des effets hover avec group-hover"
+        },
+        {
+          "id": "customers-hasFocusStates",
+          "description": "Manque de focusstates",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus pour l'accessibilité"
+        },
+        {
+          "id": "customers-hasOverflowControl",
+          "description": "Manque de overflowcontrol",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Contrôler le débordement avec overflow-hidden"
+        }
+      ],
+      "lines": 203,
+      "size": 6694
+    },
+    {
+      "page": "Analytics",
+      "file": "src/pages/Analytics.tsx",
+      "priority": "Medium",
+      "type": "Private",
+      "issues": [
+        {
+          "id": "analytics-hasMobileMenu",
+          "description": "Manque de mobilemenu",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Implémenter un menu mobile avec hamburger"
+        },
+        {
+          "id": "analytics-hasTouchTargets",
+          "description": "Manque de touchtargets",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+        },
+        {
+          "id": "analytics-hasImageOptimization",
+          "description": "Manque de imageoptimization",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter object-cover et aspect-ratio pour les images"
+        },
+        {
+          "id": "analytics-hasHoverEffects",
+          "description": "Manque de hovereffects",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Implémenter des effets hover avec group-hover"
+        },
+        {
+          "id": "analytics-hasFocusStates",
+          "description": "Manque de focusstates",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus pour l'accessibilité"
+        },
+        {
+          "id": "analytics-hasOverflowControl",
+          "description": "Manque de overflowcontrol",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Contrôler le débordement avec overflow-hidden"
+        }
+      ],
+      "lines": 170,
+      "size": 6575
+    },
+    {
+      "page": "CreateProduct",
+      "file": "src/pages/CreateProduct.tsx",
+      "priority": "High",
+      "type": "Private",
+      "issues": [
+        {
+          "id": "createproduct-hasResponsiveClasses",
+          "description": "Manque de responsiveclasses",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des classes Tailwind responsive (sm:, md:, lg:, xl:)"
+        },
+        {
+          "id": "createproduct-hasMobileMenu",
+          "description": "Manque de mobilemenu",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Implémenter un menu mobile avec hamburger"
+        },
+        {
+          "id": "createproduct-hasTouchTargets",
+          "description": "Manque de touchtargets",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+        },
+        {
+          "id": "createproduct-hasImageOptimization",
+          "description": "Manque de imageoptimization",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter object-cover et aspect-ratio pour les images"
+        },
+        {
+          "id": "createproduct-hasHoverEffects",
+          "description": "Manque de hovereffects",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Implémenter des effets hover avec group-hover"
+        },
+        {
+          "id": "createproduct-hasFocusStates",
+          "description": "Manque de focusstates",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus pour l'accessibilité"
+        },
+        {
+          "id": "createproduct-hasResponsiveText",
+          "description": "Manque de responsivetext",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Utiliser des tailles de texte responsive"
+        },
+        {
+          "id": "createproduct-hasResponsiveSpacing",
+          "description": "Manque de responsivespacing",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Utiliser des espacements responsive"
+        }
+      ],
+      "lines": 44,
+      "size": 1252
+    },
+    {
+      "page": "EditProduct",
+      "file": "src/pages/EditProduct.tsx",
+      "priority": "High",
+      "type": "Private",
+      "issues": [
+        {
+          "id": "editproduct-hasResponsiveClasses",
+          "description": "Manque de responsiveclasses",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des classes Tailwind responsive (sm:, md:, lg:, xl:)"
+        },
+        {
+          "id": "editproduct-hasMobileMenu",
+          "description": "Manque de mobilemenu",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Implémenter un menu mobile avec hamburger"
+        },
+        {
+          "id": "editproduct-hasTouchTargets",
+          "description": "Manque de touchtargets",
+          "breakpoint": "all",
+          "severity": "High",
+          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+        },
+        {
+          "id": "editproduct-hasImageOptimization",
+          "description": "Manque de imageoptimization",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter object-cover et aspect-ratio pour les images"
+        },
+        {
+          "id": "editproduct-hasHoverEffects",
+          "description": "Manque de hovereffects",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Implémenter des effets hover avec group-hover"
+        },
+        {
+          "id": "editproduct-hasFocusStates",
+          "description": "Manque de focusstates",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus pour l'accessibilité"
+        },
+        {
+          "id": "editproduct-hasOverflowControl",
+          "description": "Manque de overflowcontrol",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Contrôler le débordement avec overflow-hidden"
+        },
+        {
+          "id": "editproduct-hasResponsiveText",
+          "description": "Manque de responsivetext",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Utiliser des tailles de texte responsive"
+        },
+        {
+          "id": "editproduct-hasResponsiveSpacing",
+          "description": "Manque de responsivespacing",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Utiliser des espacements responsive"
+        }
+      ],
+      "lines": 96,
+      "size": 2567
+    }
+  ],
+  "components": [
+    {
+      "component": "ProductCard",
+      "file": "src/components/marketplace/ProductCard.tsx",
+      "type": "Product Display",
+      "issues": [
+        {
+          "id": "productcard-hasTouchSupport",
+          "description": "Composant ProductCard manque touchsupport",
+          "severity": "Medium",
+          "fix": "Implémenter le support tactile"
+        },
+        {
+          "id": "productcard-hasFocusStates",
+          "description": "Composant ProductCard manque focusstates",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus"
+        }
+      ]
+    },
+    {
+      "component": "ProductGrid",
+      "file": "src/components/ui/ProductGrid.tsx",
+      "type": "Layout",
+      "issues": [
+        {
+          "id": "productgrid-hasAccessibility",
+          "description": "Composant ProductGrid manque accessibility",
+          "severity": "High",
+          "fix": "Ajouter des attributs ARIA et role"
+        },
+        {
+          "id": "productgrid-hasTouchSupport",
+          "description": "Composant ProductGrid manque touchsupport",
+          "severity": "Medium",
+          "fix": "Implémenter le support tactile"
+        },
+        {
+          "id": "productgrid-hasHoverStates",
+          "description": "Composant ProductGrid manque hoverstates",
+          "severity": "Medium",
+          "fix": "Ajouter des états hover"
+        },
+        {
+          "id": "productgrid-hasFocusStates",
+          "description": "Composant ProductGrid manque focusstates",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus"
+        },
+        {
+          "id": "productgrid-hasErrorHandling",
+          "description": "Composant ProductGrid manque errorhandling",
+          "severity": "Medium",
+          "fix": "Ajouter la gestion d'erreur"
+        }
+      ]
+    },
+    {
+      "component": "ResponsiveProductImage",
+      "file": "src/components/ui/ResponsiveProductImage.tsx",
+      "type": "Image",
+      "issues": [
+        {
+          "id": "responsiveproductimage-hasTouchSupport",
+          "description": "Composant ResponsiveProductImage manque touchsupport",
+          "severity": "Medium",
+          "fix": "Implémenter le support tactile"
+        },
+        {
+          "id": "responsiveproductimage-hasFocusStates",
+          "description": "Composant ResponsiveProductImage manque focusstates",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus"
+        }
+      ]
+    },
+    {
+      "component": "AppSidebar",
+      "file": "src/components/AppSidebar.tsx",
+      "type": "Navigation",
+      "issues": [
+        {
+          "id": "appsidebar-hasAccessibility",
+          "description": "Composant AppSidebar manque accessibility",
+          "severity": "High",
+          "fix": "Ajouter des attributs ARIA et role"
+        },
+        {
+          "id": "appsidebar-hasTouchSupport",
+          "description": "Composant AppSidebar manque touchsupport",
+          "severity": "Medium",
+          "fix": "Implémenter le support tactile"
+        },
+        {
+          "id": "appsidebar-hasFocusStates",
+          "description": "Composant AppSidebar manque focusstates",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus"
+        },
+        {
+          "id": "appsidebar-hasLoadingStates",
+          "description": "Composant AppSidebar manque loadingstates",
+          "severity": "Medium",
+          "fix": "Implémenter des états de chargement"
+        }
+      ]
+    },
+    {
+      "component": "MarketplaceHeader",
+      "file": "src/components/marketplace/MarketplaceHeader.tsx",
+      "type": "Header",
+      "issues": [
+        {
+          "id": "marketplaceheader-hasAccessibility",
+          "description": "Composant MarketplaceHeader manque accessibility",
+          "severity": "High",
+          "fix": "Ajouter des attributs ARIA et role"
+        },
+        {
+          "id": "marketplaceheader-hasFocusStates",
+          "description": "Composant MarketplaceHeader manque focusstates",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus"
+        },
+        {
+          "id": "marketplaceheader-hasLoadingStates",
+          "description": "Composant MarketplaceHeader manque loadingstates",
+          "severity": "Medium",
+          "fix": "Implémenter des états de chargement"
+        },
+        {
+          "id": "marketplaceheader-hasErrorHandling",
+          "description": "Composant MarketplaceHeader manque errorhandling",
+          "severity": "Medium",
+          "fix": "Ajouter la gestion d'erreur"
+        }
+      ]
+    },
+    {
+      "component": "MarketplaceFooter",
+      "file": "src/components/marketplace/MarketplaceFooter.tsx",
+      "type": "Footer",
+      "issues": [
+        {
+          "id": "marketplacefooter-hasFocusStates",
+          "description": "Composant MarketplaceFooter manque focusstates",
+          "severity": "Medium",
+          "fix": "Ajouter des états focus"
+        },
+        {
+          "id": "marketplacefooter-hasLoadingStates",
+          "description": "Composant MarketplaceFooter manque loadingstates",
+          "severity": "Medium",
+          "fix": "Implémenter des états de chargement"
+        },
+        {
+          "id": "marketplacefooter-hasErrorHandling",
+          "description": "Composant MarketplaceFooter manque errorhandling",
+          "severity": "Medium",
+          "fix": "Ajouter la gestion d'erreur"
+        }
+      ]
+    }
+  ],
+  "breakpoints": {
+    "mobile": {
+      "min": 0,
+      "max": 640,
+      "name": "Mobile"
+    },
+    "tablet": {
+      "min": 641,
+      "max": 1023,
+      "name": "Tablette"
+    },
+    "desktop": {
+      "min": 1024,
+      "max": 9999,
+      "name": "Desktop"
+    }
+  },
+  "recommendations": {
+    "priority1": [
+      "Marketplace",
+      "Storefront",
+      "ProductDetail"
+    ],
+    "priority2": [
+      "Landing",
+      "Auth",
+      "Dashboard"
+    ],
+    "priority3": [
+      "Settings",
+      "Payments",
+      "Orders"
+    ]
+  }
+}

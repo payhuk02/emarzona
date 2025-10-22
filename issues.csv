@@ -1,0 +1,13 @@
+ID,Page,Component,Description,Breakpoint,Severity,Impact,Fix,Priority,Estimation
+"marketplace-grid-layout","Marketplace","ProductGrid","Grille de produits non responsive","all","Critical","UX dégradée sur mobile/tablette","Implémenter grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",1,"2h"
+"marketplace-mobile-menu","Marketplace","MarketplaceHeader","Menu mobile manquant ou mal optimisé","mobile","High","Navigation impossible sur mobile","Ajouter hamburger menu avec Sheet component",2,"3h"
+"marketplace-touch-targets","Marketplace","ProductCard","Boutons trop petits pour touch targets","mobile","High","Difficulté d'interaction sur mobile","Ajouter min-h-[44px] et touch-manipulation",3,"1h"
+"storefront-image-optimization","Storefront","ProductBanner","Images non optimisées pour responsive","all","High","Images déformées ou coupées","Ajouter aspect-ratio et object-cover",2,"2h"
+"storefront-hover-effects","Storefront","ProductCard","Effets hover manquants ou mal implémentés","desktop","Medium","Expérience utilisateur moins engageante","Implémenter hover:translateY(-6px) scale(1.02)",4,"1h"
+"product-detail-layout-shift","ProductDetail","ProductImageGallery","Layout shifts causés par les images","all","High","CLS élevé, mauvaise UX","Ajouter aspect-ratio et placeholder",2,"2h"
+"landing-touch-targets","Landing","CTA Buttons","Boutons CTA trop petits sur mobile","mobile","High","Conversion réduite sur mobile","Augmenter taille des boutons CTA",3,"1h"
+"landing-focus-states","Landing","Navigation","États focus manquants pour accessibilité","all","Medium","Accessibilité dégradée","Ajouter focus-visible:ring-2",5,"1h"
+"auth-form-responsive","Auth","AuthForm","Formulaire non optimisé pour mobile","mobile","High","Difficulté de saisie sur mobile","Optimiser les champs et boutons",3,"2h"
+"dashboard-sidebar-mobile","Dashboard","AppSidebar","Sidebar non optimisée pour mobile","mobile","High","Navigation difficile sur mobile","Implémenter sidebar mobile avec Sheet",3,"3h"
+"general-responsive-classes","All","Multiple","Classes responsive manquantes","all","Medium","Affichage non adaptatif","Ajouter sm:, md:, lg:, xl: classes",4,"4h"
+"general-image-srcset","All","Images","Images sans srcset pour responsive","all","Medium","Performance dégradée","Implémenter srcset et picture elements",5,"3h"

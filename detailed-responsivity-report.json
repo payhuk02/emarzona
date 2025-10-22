@@ -1,0 +1,334 @@
+{
+  "timestamp": "2025-10-22T11:36:05.721Z",
+  "summary": {
+    "totalIssues": 12,
+    "criticalIssues": 1,
+    "highIssues": 7,
+    "mediumIssues": 4,
+    "totalEstimation": 25
+  },
+  "issues": [
+    {
+      "id": "marketplace-grid-layout",
+      "page": "Marketplace",
+      "component": "ProductGrid",
+      "description": "Grille de produits non responsive",
+      "breakpoint": "all",
+      "severity": "Critical",
+      "impact": "UX dégradée sur mobile/tablette",
+      "fix": "Implémenter grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+      "priority": 1,
+      "estimation": "2h"
+    },
+    {
+      "id": "marketplace-mobile-menu",
+      "page": "Marketplace",
+      "component": "MarketplaceHeader",
+      "description": "Menu mobile manquant ou mal optimisé",
+      "breakpoint": "mobile",
+      "severity": "High",
+      "impact": "Navigation impossible sur mobile",
+      "fix": "Ajouter hamburger menu avec Sheet component",
+      "priority": 2,
+      "estimation": "3h"
+    },
+    {
+      "id": "marketplace-touch-targets",
+      "page": "Marketplace",
+      "component": "ProductCard",
+      "description": "Boutons trop petits pour touch targets",
+      "breakpoint": "mobile",
+      "severity": "High",
+      "impact": "Difficulté d'interaction sur mobile",
+      "fix": "Ajouter min-h-[44px] et touch-manipulation",
+      "priority": 3,
+      "estimation": "1h"
+    },
+    {
+      "id": "storefront-image-optimization",
+      "page": "Storefront",
+      "component": "ProductBanner",
+      "description": "Images non optimisées pour responsive",
+      "breakpoint": "all",
+      "severity": "High",
+      "impact": "Images déformées ou coupées",
+      "fix": "Ajouter aspect-ratio et object-cover",
+      "priority": 2,
+      "estimation": "2h"
+    },
+    {
+      "id": "storefront-hover-effects",
+      "page": "Storefront",
+      "component": "ProductCard",
+      "description": "Effets hover manquants ou mal implémentés",
+      "breakpoint": "desktop",
+      "severity": "Medium",
+      "impact": "Expérience utilisateur moins engageante",
+      "fix": "Implémenter hover:translateY(-6px) scale(1.02)",
+      "priority": 4,
+      "estimation": "1h"
+    },
+    {
+      "id": "product-detail-layout-shift",
+      "page": "ProductDetail",
+      "component": "ProductImageGallery",
+      "description": "Layout shifts causés par les images",
+      "breakpoint": "all",
+      "severity": "High",
+      "impact": "CLS élevé, mauvaise UX",
+      "fix": "Ajouter aspect-ratio et placeholder",
+      "priority": 2,
+      "estimation": "2h"
+    },
+    {
+      "id": "landing-touch-targets",
+      "page": "Landing",
+      "component": "CTA Buttons",
+      "description": "Boutons CTA trop petits sur mobile",
+      "breakpoint": "mobile",
+      "severity": "High",
+      "impact": "Conversion réduite sur mobile",
+      "fix": "Augmenter taille des boutons CTA",
+      "priority": 3,
+      "estimation": "1h"
+    },
+    {
+      "id": "landing-focus-states",
+      "page": "Landing",
+      "component": "Navigation",
+      "description": "États focus manquants pour accessibilité",
+      "breakpoint": "all",
+      "severity": "Medium",
+      "impact": "Accessibilité dégradée",
+      "fix": "Ajouter focus-visible:ring-2",
+      "priority": 5,
+      "estimation": "1h"
+    },
+    {
+      "id": "auth-form-responsive",
+      "page": "Auth",
+      "component": "AuthForm",
+      "description": "Formulaire non optimisé pour mobile",
+      "breakpoint": "mobile",
+      "severity": "High",
+      "impact": "Difficulté de saisie sur mobile",
+      "fix": "Optimiser les champs et boutons",
+      "priority": 3,
+      "estimation": "2h"
+    },
+    {
+      "id": "dashboard-sidebar-mobile",
+      "page": "Dashboard",
+      "component": "AppSidebar",
+      "description": "Sidebar non optimisée pour mobile",
+      "breakpoint": "mobile",
+      "severity": "High",
+      "impact": "Navigation difficile sur mobile",
+      "fix": "Implémenter sidebar mobile avec Sheet",
+      "priority": 3,
+      "estimation": "3h"
+    },
+    {
+      "id": "general-responsive-classes",
+      "page": "All",
+      "component": "Multiple",
+      "description": "Classes responsive manquantes",
+      "breakpoint": "all",
+      "severity": "Medium",
+      "impact": "Affichage non adaptatif",
+      "fix": "Ajouter sm:, md:, lg:, xl: classes",
+      "priority": 4,
+      "estimation": "4h"
+    },
+    {
+      "id": "general-image-srcset",
+      "page": "All",
+      "component": "Images",
+      "description": "Images sans srcset pour responsive",
+      "breakpoint": "all",
+      "severity": "Medium",
+      "impact": "Performance dégradée",
+      "fix": "Implémenter srcset et picture elements",
+      "priority": 5,
+      "estimation": "3h"
+    }
+  ],
+  "recommendations": {
+    "phase1": [
+      {
+        "id": "marketplace-grid-layout",
+        "page": "Marketplace",
+        "component": "ProductGrid",
+        "description": "Grille de produits non responsive",
+        "breakpoint": "all",
+        "severity": "Critical",
+        "impact": "UX dégradée sur mobile/tablette",
+        "fix": "Implémenter grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+        "priority": 1,
+        "estimation": "2h"
+      },
+      {
+        "id": "marketplace-mobile-menu",
+        "page": "Marketplace",
+        "component": "MarketplaceHeader",
+        "description": "Menu mobile manquant ou mal optimisé",
+        "breakpoint": "mobile",
+        "severity": "High",
+        "impact": "Navigation impossible sur mobile",
+        "fix": "Ajouter hamburger menu avec Sheet component",
+        "priority": 2,
+        "estimation": "3h"
+      },
+      {
+        "id": "storefront-image-optimization",
+        "page": "Storefront",
+        "component": "ProductBanner",
+        "description": "Images non optimisées pour responsive",
+        "breakpoint": "all",
+        "severity": "High",
+        "impact": "Images déformées ou coupées",
+        "fix": "Ajouter aspect-ratio et object-cover",
+        "priority": 2,
+        "estimation": "2h"
+      },
+      {
+        "id": "product-detail-layout-shift",
+        "page": "ProductDetail",
+        "component": "ProductImageGallery",
+        "description": "Layout shifts causés par les images",
+        "breakpoint": "all",
+        "severity": "High",
+        "impact": "CLS élevé, mauvaise UX",
+        "fix": "Ajouter aspect-ratio et placeholder",
+        "priority": 2,
+        "estimation": "2h"
+      }
+    ],
+    "phase2": [
+      {
+        "id": "marketplace-touch-targets",
+        "page": "Marketplace",
+        "component": "ProductCard",
+        "description": "Boutons trop petits pour touch targets",
+        "breakpoint": "mobile",
+        "severity": "High",
+        "impact": "Difficulté d'interaction sur mobile",
+        "fix": "Ajouter min-h-[44px] et touch-manipulation",
+        "priority": 3,
+        "estimation": "1h"
+      },
+      {
+        "id": "landing-touch-targets",
+        "page": "Landing",
+        "component": "CTA Buttons",
+        "description": "Boutons CTA trop petits sur mobile",
+        "breakpoint": "mobile",
+        "severity": "High",
+        "impact": "Conversion réduite sur mobile",
+        "fix": "Augmenter taille des boutons CTA",
+        "priority": 3,
+        "estimation": "1h"
+      },
+      {
+        "id": "auth-form-responsive",
+        "page": "Auth",
+        "component": "AuthForm",
+        "description": "Formulaire non optimisé pour mobile",
+        "breakpoint": "mobile",
+        "severity": "High",
+        "impact": "Difficulté de saisie sur mobile",
+        "fix": "Optimiser les champs et boutons",
+        "priority": 3,
+        "estimation": "2h"
+      },
+      {
+        "id": "dashboard-sidebar-mobile",
+        "page": "Dashboard",
+        "component": "AppSidebar",
+        "description": "Sidebar non optimisée pour mobile",
+        "breakpoint": "mobile",
+        "severity": "High",
+        "impact": "Navigation difficile sur mobile",
+        "fix": "Implémenter sidebar mobile avec Sheet",
+        "priority": 3,
+        "estimation": "3h"
+      }
+    ],
+    "phase3": [
+      {
+        "id": "storefront-hover-effects",
+        "page": "Storefront",
+        "component": "ProductCard",
+        "description": "Effets hover manquants ou mal implémentés",
+        "breakpoint": "desktop",
+        "severity": "Medium",
+        "impact": "Expérience utilisateur moins engageante",
+        "fix": "Implémenter hover:translateY(-6px) scale(1.02)",
+        "priority": 4,
+        "estimation": "1h"
+      },
+      {
+        "id": "landing-focus-states",
+        "page": "Landing",
+        "component": "Navigation",
+        "description": "États focus manquants pour accessibilité",
+        "breakpoint": "all",
+        "severity": "Medium",
+        "impact": "Accessibilité dégradée",
+        "fix": "Ajouter focus-visible:ring-2",
+        "priority": 5,
+        "estimation": "1h"
+      },
+      {
+        "id": "general-responsive-classes",
+        "page": "All",
+        "component": "Multiple",
+        "description": "Classes responsive manquantes",
+        "breakpoint": "all",
+        "severity": "Medium",
+        "impact": "Affichage non adaptatif",
+        "fix": "Ajouter sm:, md:, lg:, xl: classes",
+        "priority": 4,
+        "estimation": "4h"
+      },
+      {
+        "id": "general-image-srcset",
+        "page": "All",
+        "component": "Images",
+        "description": "Images sans srcset pour responsive",
+        "breakpoint": "all",
+        "severity": "Medium",
+        "impact": "Performance dégradée",
+        "fix": "Implémenter srcset et picture elements",
+        "priority": 5,
+        "estimation": "3h"
+      }
+    ]
+  },
+  "comeupSpecifications": {
+    "desktop": {
+      "gridColumns": 3,
+      "gap": "24px",
+      "cardHeight": "560px",
+      "borderRadius": "12px",
+      "shadow": "shadow-md",
+      "hoverEffect": "translateY(-6px) scale(1.02) + shadow-xl"
+    },
+    "tablet": {
+      "gridColumns": 2,
+      "gap": "20px",
+      "cardHeight": "520px",
+      "borderRadius": "10px",
+      "shadow": "shadow-md",
+      "hoverEffect": "translateY(-4px) scale(1.01) + shadow-lg"
+    },
+    "mobile": {
+      "gridColumns": 1,
+      "width": "94-98%",
+      "cardHeight": "480px",
+      "borderRadius": "8px",
+      "shadow": "shadow-sm",
+      "touchTargets": "44x44px minimum"
+    }
+  }
+}
