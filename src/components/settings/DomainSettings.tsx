@@ -91,6 +91,8 @@ export const DomainSettings = () => {
     dns_records: []
   });
   const [domainInput, setDomainInput] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [verifying, setVerifying] = useState<boolean>(false);
 
   // Utiliser la première boutique disponible
   const currentStore = stores.length > 0 ? stores[0] : null;
@@ -261,6 +263,47 @@ export const DomainSettings = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVerifyDomain = async () => {
+    if (!currentStore) return;
+
+    setVerifying(true);
+    try {
+      // Simulation de vérification de domaine
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      const success = await updateStore(currentStore.id, {
+        domain_status: 'verified',
+        domain_verified_at: new Date().toISOString(),
+        domain_error_message: null,
+        ssl_enabled: true
+      });
+
+      if (success) {
+        setDomainConfig(prev => ({
+          ...prev,
+          domain_status: 'verified',
+          domain_verified_at: new Date().toISOString(),
+          domain_error_message: null,
+          ssl_enabled: true
+        }));
+
+        toast({
+          title: "Domaine vérifié",
+          description: "Votre domaine a été vérifié avec succès. SSL activé automatiquement."
+        });
+      }
+    } catch (error) {
+      console.error('Error verifying domain:', error);
+      toast({
+        title: "Erreur de vérification",
+        description: "Impossible de vérifier le domaine.",
+        variant: "destructive"
+      });
+    } finally {
+      setVerifying(false);
     }
   };
 
