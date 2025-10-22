@@ -103,7 +103,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 animate-fade-in">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header avec informations de la boutique */}
       <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl p-4 sm:p-6 border border-primary/20">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -132,7 +132,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
               variant="outline"
               size="sm"
               onClick={() => window.open(`/stores/${store.slug}`, '_blank')}
-              className="store-button text-xs sm:text-sm"
+              className="touch-manipulation text-xs sm:text-sm"
             >
               <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Voir la boutique
@@ -141,7 +141,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
               variant="outline"
               size="sm"
               onClick={handleCopyUrl}
-              className="store-button text-xs sm:text-sm"
+              className="touch-manipulation text-xs sm:text-sm"
             >
               <Copy className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Copier le lien
@@ -151,23 +151,23 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
       </div>
 
       <Tabs defaultValue="settings" className="w-full">
-        <TabsList className="store-tabs-list">
-          <TabsTrigger value="settings" className="store-tabs-trigger">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-2 mb-4 sm:mb-6">
+          <TabsTrigger value="settings" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
             <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Paramètres</span>
             <span className="sm:hidden">Config</span>
           </TabsTrigger>
-          <TabsTrigger value="appearance" className="store-tabs-trigger">
+          <TabsTrigger value="appearance" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
             <Palette className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Apparence</span>
             <span className="sm:hidden">Style</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="store-tabs-trigger">
+          <TabsTrigger value="analytics" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
             <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Analytics</span>
             <span className="sm:hidden">Stats</span>
           </TabsTrigger>
-          <TabsTrigger value="url" className="store-tabs-trigger">
+          <TabsTrigger value="url" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
             <Globe className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">URL</span>
             <span className="sm:hidden">Lien</span>

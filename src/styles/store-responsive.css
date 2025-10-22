@@ -1,21 +1,34 @@
 /* Store Page Responsive Styles */
 .store-page {
   @apply min-h-screen bg-background;
+  /* Debug: Ensure proper layout */
+  display: flex;
+  flex-direction: row;
 }
 
 .store-header {
   @apply sticky top-0 z-10 border-b;
   @apply bg-card/95 backdrop-blur-sm shadow-soft;
+  /* Debug: Ensure header is visible */
+  position: relative;
+  z-index: 10;
 }
 
 .store-main {
   @apply flex-1 p-3 sm:p-4 md:p-6 lg:p-8;
   @apply bg-background overflow-x-hidden;
+  /* Debug: Ensure main content is visible */
+  position: relative;
+  z-index: 1;
+  background-color: hsl(var(--background));
 }
 
 .store-container {
   @apply max-w-6xl mx-auto w-full;
   @apply animate-fade-in;
+  /* Debug: Ensure container is visible */
+  position: relative;
+  z-index: 1;
 }
 
 .store-tabs {
