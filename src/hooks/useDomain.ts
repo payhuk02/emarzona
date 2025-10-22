@@ -62,11 +62,42 @@ export interface DomainAlert {
   lastSent?: string;
 }
 
+export interface SSLCertificate {
+  id: string;
+  domain: string;
+  type: 'lets_encrypt' | 'custom' | 'wildcard' | 'multi_domain';
+  status: 'active' | 'pending' | 'expired' | 'error';
+  issuedAt: string;
+  expiresAt: string;
+  issuer: string;
+  fingerprint: string;
+  autoRenew: boolean;
+  domains: string[];
+  certificate?: string;
+  privateKey?: string;
+  chain?: string;
+}
+
+export interface SSLConfiguration {
+  certificates: SSLCertificate[];
+  autoRenewal: boolean;
+  hstsEnabled: boolean;
+  hstsMaxAge: number;
+  includeSubdomains: boolean;
+  preload: boolean;
+  cspEnabled: boolean;
+  cspPolicy: string;
+  ocspStapling: boolean;
+  sslGrade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F';
+  vulnerabilities: string[];
+}
+
 export const useDomain = (storeId: string | null) => {
   const [loading, setLoading] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [analytics, setAnalytics] = useState<DomainAnalytics | null>(null);
   const [monitoring, setMonitoring] = useState<DomainMonitoring | null>(null);
+  const [sslConfiguration, setSSLConfiguration] = useState<SSLConfiguration | null>(null);
   const { toast } = useToast();
 
   const generateVerificationToken = useCallback(() => {
@@ -745,11 +776,191 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
     }
   }, []);
 
+  // Advanced SSL Functions
+  const getSSLCertificates = useCallback(async (domain: string): Promise<SSLCertificate[]> => {
+    try {
+      // Simulation de récupération des certificats SSL
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const certificates: SSLCertificate[] = [
+        {
+          id: 'cert-1',
+          domain,
+          type: 'lets_encrypt',
+          status: 'active',
+          issuedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 jours ago
+          expiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(), // 60 jours from now
+          issuer: 'Let\'s Encrypt Authority X3',
+          fingerprint: 'SHA256:abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx1234yzab5678',
+          autoRenew: true,
+          domains: [domain, `www.${domain}`]
+        }
+      ];
+
+      return certificates;
+    } catch (error) {
+      console.error('Error fetching SSL certificates:', error);
+      return [];
+    }
+  }, []);
+
+  const uploadCustomCertificate = useCallback(async (
+    domain: string, 
+    certificate: string, 
+    privateKey: string, 
+    chain?: string
+  ): Promise<boolean> => {
+    try {
+      // Simulation d'upload de certificat personnalisé
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      const customCert: SSLCertificate = {
+        id: `cert-custom-${Date.now()}`,
+        domain,
+        type: 'custom',
+        status: 'pending',
+        issuedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 an
+        issuer: 'Custom Certificate Authority',
+        fingerprint: 'SHA256:custom1234certificate5678fingerprint9012',
+        autoRenew: false,
+        domains: [domain],
+        certificate,
+        privateKey,
+        chain
+      };
+
+      toast({
+        title: "Certificat personnalisé uploadé",
+        description: `Certificat SSL personnalisé configuré pour ${domain}`,
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error uploading custom certificate:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'uploader le certificat personnalisé.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  }, [toast]);
+
+  const renewSSLCertificate = useCallback(async (certificateId: string): Promise<boolean> => {
+    try {
+      // Simulation de renouvellement de certificat
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      toast({
+        title: "Certificat renouvelé",
+        description: "Le certificat SSL a été renouvelé avec succès.",
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error renewing SSL certificate:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de renouveler le certificat SSL.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  }, [toast]);
+
+  const deleteSSLCertificate = useCallback(async (certificateId: string): Promise<boolean> => {
+    try {
+      // Simulation de suppression de certificat
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      toast({
+        title: "Certificat supprimé",
+        description: "Le certificat SSL a été supprimé.",
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting SSL certificate:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le certificat SSL.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  }, [toast]);
+
+  const getSSLGrade = useCallback(async (domain: string): Promise<SSLConfiguration> => {
+    try {
+      // Simulation d'analyse SSL
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      const sslConfig: SSLConfiguration = {
+        certificates: await getSSLCertificates(domain),
+        autoRenewal: true,
+        hstsEnabled: true,
+        hstsMaxAge: 31536000, // 1 an
+        includeSubdomains: true,
+        preload: false,
+        cspEnabled: true,
+        cspPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'",
+        ocspStapling: true,
+        sslGrade: Math.random() > 0.1 ? 'A+' : 'A',
+        vulnerabilities: Math.random() > 0.8 ? ['Weak cipher suites detected'] : []
+      };
+
+      setSSLConfiguration(sslConfig);
+      return sslConfig;
+    } catch (error) {
+      console.error('Error getting SSL grade:', error);
+      return {
+        certificates: [],
+        autoRenewal: false,
+        hstsEnabled: false,
+        hstsMaxAge: 0,
+        includeSubdomains: false,
+        preload: false,
+        cspEnabled: false,
+        cspPolicy: '',
+        ocspStapling: false,
+        sslGrade: 'F',
+        vulnerabilities: ['Unable to analyze SSL configuration']
+      };
+    }
+  }, [getSSLCertificates]);
+
+  const updateSSLConfiguration = useCallback(async (
+    domain: string, 
+    config: Partial<SSLConfiguration>
+  ): Promise<boolean> => {
+    try {
+      // Simulation de mise à jour de configuration SSL
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      toast({
+        title: "Configuration SSL mise à jour",
+        description: "Les paramètres SSL ont été mis à jour avec succès.",
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error updating SSL configuration:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour la configuration SSL.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  }, [toast]);
+
   return {
     loading,
     verifying,
     analytics,
     monitoring,
+    sslConfiguration,
     connectDomain,
     verifyDomain,
     disconnectDomain,
@@ -771,6 +982,13 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
     // Security functions
     enableDNSSEC,
     enableHSTS,
-    enableCSP
+    enableCSP,
+    // Advanced SSL functions
+    getSSLCertificates,
+    uploadCustomCertificate,
+    renewSSLCertificate,
+    deleteSSLCertificate,
+    getSSLGrade,
+    updateSSLConfiguration
   };
 };

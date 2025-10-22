@@ -39,9 +39,11 @@ import {
   ShieldCheck
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useDomain } from "@/hooks/useDomain";
 import { DomainMonitoringDashboard } from "./DomainMonitoringDashboard";
 import { MultiDomainManager } from "./MultiDomainManager";
 import { AdvancedSecurityPanel } from "./AdvancedSecurityPanel";
+import { SSLCertificateManager } from "./SSLCertificateManager";
 
 interface DomainConfig {
   custom_domain: string | null;
@@ -66,6 +68,44 @@ interface DNSRecord {
 export const DomainSettings = () => {
   const { stores, updateStore, loading: storesLoading } = useStores();
   const { toast } = useToast();
+  
+  // Hook useDomain pour les fonctionnalités avancées
+  const {
+    loading: domainLoading,
+    verifying,
+    analytics,
+    monitoring,
+    sslConfiguration,
+    connectDomain,
+    verifyDomain,
+    disconnectDomain,
+    updateSSL,
+    updateRedirects,
+    getDNSInstructions,
+    checkDNSPropagation,
+    getDomainAnalytics,
+    exportDNSConfig,
+    validateDNSConfiguration,
+    validateDomain,
+    // New monitoring functions
+    startDomainMonitoring,
+    checkDomainHealth,
+    sendAlert,
+    // Multi-domain functions
+    addSecondaryDomain,
+    removeSecondaryDomain,
+    // Security functions
+    enableDNSSEC,
+    enableHSTS,
+    enableCSP,
+    // Advanced SSL functions
+    getSSLCertificates,
+    uploadCustomCertificate,
+    renewSSLCertificate,
+    deleteSSLCertificate,
+    getSSLGrade,
+    updateSSLConfiguration
+  } = useDomain(currentStore?.id || null);
   
   const [propagationStatus, setPropagationStatus] = useState<{
     isChecking: boolean;
@@ -99,7 +139,6 @@ export const DomainSettings = () => {
   });
   const [domainInput, setDomainInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [verifying, setVerifying] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("overview");
 
   // Utiliser la première boutique disponible
@@ -121,11 +160,6 @@ export const DomainSettings = () => {
       setDomainInput(currentStore.custom_domain || "");
     }
   }, [currentStore]);
-
-  const validateDomain = (domain: string): boolean => {
-    const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/i;
-    return domainRegex.test(domain);
-  };
 
   const generateVerificationToken = () => {
     return `payhula-verify-${Math.random().toString(36).substring(2, 15)}`;
@@ -360,43 +394,9 @@ export const DomainSettings = () => {
     }
   };
 
-  const getDNSInstructions = () => {
-    if (!domainConfig.custom_domain) return {
-      aRecord: { type: "A", name: "@", value: "", ttl: 3600 },
-      wwwRecord: { type: "A", name: "www", value: "", ttl: 3600 },
-      verificationRecord: { type: "TXT", name: "_payhula-verification", value: "", ttl: 3600 },
-      cnameRecord: { type: "CNAME", name: "shop", value: "", ttl: 3600 }
-    };
-
-    return {
-      aRecord: {
-        type: "A",
-        name: "@",
-        value: "185.158.133.1",
-        ttl: 3600
-      },
-      wwwRecord: {
-        type: "A",
-        name: "www",
-        value: "185.158.133.1",
-        ttl: 3600
-      },
-      verificationRecord: {
-        type: "TXT",
-        name: "_payhula-verification",
-        value: domainConfig.domain_verification_token || "",
-        ttl: 3600
-      },
-      cnameRecord: {
-        type: "CNAME",
-        name: "shop",
-        value: "payhula.com",
-        ttl: 3600
-      }
-    };
-  };
-
-  const dnsInstructions = getDNSInstructions();
+  const dnsInstructions = domainConfig.custom_domain && domainConfig.domain_verification_token 
+    ? getDNSInstructions(domainConfig.custom_domain, domainConfig.domain_verification_token)
+    : null;
 
   // Gestion du chargement
   if (storesLoading) {
@@ -555,14 +555,15 @@ export const DomainSettings = () => {
       {/* Onglets pour les fonctionnalités avancées */}
       {domainConfig.custom_domain && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
-            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="dns">DNS</TabsTrigger>
-            <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
-            <TabsTrigger value="multi-domain">Multi-domaines</TabsTrigger>
-            <TabsTrigger value="security">Sécurité</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          </TabsList>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-7">
+          <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+          <TabsTrigger value="dns">DNS</TabsTrigger>
+          <TabsTrigger value="ssl">SSL</TabsTrigger>
+          <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
+          <TabsTrigger value="multi-domain">Multi-domaines</TabsTrigger>
+          <TabsTrigger value="security">Sécurité</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        </TabsList>
 
           {/* Vue d'ensemble */}
           <TabsContent value="overview" className="space-y-4">
@@ -887,74 +888,16 @@ export const DomainSettings = () => {
 
           {/* SSL et Sécurité */}
           <TabsContent value="ssl" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Lock className="h-4 w-4" />
-                  Configuration SSL/TLS
-                </CardTitle>
-                <CardDescription>
-                  Gérez les paramètres de sécurité pour votre domaine
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="space-y-1">
-                      <p className="font-medium">Certificat SSL/TLS</p>
-                      <p className="text-sm text-muted-foreground">
-                        Certificat automatique Let's Encrypt
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={domainConfig.ssl_enabled ? "default" : "secondary"}>
-                        {domainConfig.ssl_enabled ? "Actif" : "Inactif"}
-                      </Badge>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleToggleSSL}
-                        disabled={loading}
-                      >
-                        {domainConfig.ssl_enabled ? "Désactiver" : "Activer"}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="space-y-1">
-                      <p className="font-medium">Redirection HTTPS forcée</p>
-                      <p className="text-sm text-muted-foreground">
-                        Redirige automatiquement HTTP vers HTTPS
-                      </p>
-                    </div>
-                    <Badge variant={domainConfig.redirect_https ? "default" : "secondary"}>
-                      {domainConfig.redirect_https ? "Activée" : "Désactivée"}
-                    </Badge>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="space-y-1">
-                      <p className="font-medium">Redirection WWW</p>
-                      <p className="text-sm text-muted-foreground">
-                        Redirige www vers le domaine principal
-                      </p>
-                    </div>
-                    <Badge variant={domainConfig.redirect_www ? "default" : "secondary"}>
-                      {domainConfig.redirect_www ? "Activée" : "Désactivée"}
-                    </Badge>
-                  </div>
-                </div>
-
-                <Alert>
-                  <Shield className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Sécurité renforcée :</strong> Tous les certificats SSL sont automatiquement 
-                    renouvelés et gérés par notre infrastructure sécurisée.
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
+            <SSLCertificateManager
+              domain={domainConfig.custom_domain}
+              sslConfiguration={sslConfiguration}
+              onGetSSLCertificates={getSSLCertificates}
+              onUploadCustomCertificate={uploadCustomCertificate}
+              onRenewSSLCertificate={renewSSLCertificate}
+              onDeleteSSLCertificate={deleteSSLCertificate}
+              onGetSSLGrade={getSSLGrade}
+              onUpdateSSLConfiguration={updateSSLConfiguration}
+            />
           </TabsContent>
 
           {/* Monitoring */}
