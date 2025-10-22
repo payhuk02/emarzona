@@ -242,7 +242,7 @@ const ProductCardProfessional = ({ product, storeSlug }: ProductCardProfessional
               </span>
             )}
             <span className="text-lg font-bold text-gray-900">
-              À partir de {formatPrice(price)} {product.currency || 'FCFA'}
+              Prix Promo : {formatPrice(price)} {product.currency || 'FCFA'}
             </span>
           </div>
           
