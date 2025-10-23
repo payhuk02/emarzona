@@ -1,4 +1,4 @@
-import { onCLS, onFID, onLCP, onFCP, onTTFB, Metric } from 'web-vitals';
+import { onCLS, onINP, onLCP, onFCP, onTTFB, Metric } from 'web-vitals';
 import * as Sentry from '@sentry/react';
 
 /**
@@ -74,9 +74,9 @@ export const initWebVitals = () => {
   // Bon: < 0.1, Needs improvement: 0.1-0.25, Poor: > 0.25
   onCLS(handleMetric);
   
-  // FID - First Input Delay (Interactivité)
-  // Bon: < 100ms, Needs improvement: 100-300ms, Poor: > 300ms
-  onFID(handleMetric);
+  // INP - Interaction to Next Paint (Interactivité - remplace FID)
+  // Bon: < 200ms, Needs improvement: 200-500ms, Poor: > 500ms
+  onINP(handleMetric);
   
   // LCP - Largest Contentful Paint (Performance de chargement)
   // Bon: < 2.5s, Needs improvement: 2.5-4s, Poor: > 4s
@@ -99,7 +99,7 @@ export const initWebVitals = () => {
 export const getVitalsRating = (value: number, metricName: string): 'good' | 'needs-improvement' | 'poor' => {
   const thresholds: Record<string, [number, number]> = {
     CLS: [0.1, 0.25],
-    FID: [100, 300],
+    INP: [200, 500],
     LCP: [2500, 4000],
     FCP: [1800, 3000],
     TTFB: [800, 1800],
