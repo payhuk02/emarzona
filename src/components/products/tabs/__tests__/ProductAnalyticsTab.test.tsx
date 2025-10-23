@@ -319,18 +319,21 @@ describe('ProductAnalyticsTab', () => {
   });
 
   it('affiche les onglets Statistiques et Rapports', () => {
-    const { container } = renderWithTooltip(<ProductAnalyticsTab formData={defaultFormData} updateFormData={updateFormData} />);
+    renderWithTooltip(<ProductAnalyticsTab formData={defaultFormData} updateFormData={updateFormData} />);
     
-    // Vérifier que des onglets sont présents
-    const buttons = container.querySelectorAll('button');
-    expect(buttons.length).toBeGreaterThan(0);
+    // Le composant affiche "Vue d'ensemble" et "Rapports"
+    expect(screen.getByText('Vue d\'ensemble')).toBeInTheDocument();
+    expect(screen.getByText('Rapports')).toBeInTheDocument();
   });
 
   it('change d\'onglet quand on clique sur Rapports', () => {
-    const { container } = renderWithTooltip(<ProductAnalyticsTab formData={defaultFormData} updateFormData={updateFormData} />);
+    renderWithTooltip(<ProductAnalyticsTab formData={defaultFormData} updateFormData={updateFormData} />);
     
-    // Vérifier que le composant se rend
-    expect(container.querySelector('.bg-gray-800\\/50')).toBeInTheDocument();
+    const rapportsTab = screen.getByText('Rapports');
+    fireEvent.click(rapportsTab);
+    
+    // Vérifier que le composant mocké des rapports est affiché
+    expect(screen.getByTestId('reports-section')).toBeInTheDocument();
   });
 });
 
