@@ -295,6 +295,8 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [isDirty, setIsDirty] = useState(false);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
 
   // État du formulaire avec données vides par défaut
   const [formData, setFormData] = useState<ProductFormData>(() => {
@@ -306,6 +308,7 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
 
   const updateFormData = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setIsDirty(true);
     
     // Auto-generate slug from name
     if (field === "name" && !productId) {
@@ -374,17 +377,24 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
   };
 
   // Sauvegarde du produit
-  const saveProduct = async (status: 'draft' | 'published' = 'draft') => {
+  const saveProduct = async (
+    status: 'draft' | 'published' = 'draft',
+    options?: { silent?: boolean; stay?: boolean }
+  ) => {
     if (!validateForm()) {
-      toast({
-        title: "Erreur de validation",
-        description: "Veuillez corriger les erreurs dans le formulaire",
-        variant: "destructive",
-      });
+      if (!options?.silent) {
+        toast({
+          title: "Erreur de validation",
+          description: "Veuillez corriger les erreurs dans le formulaire",
+          variant: "destructive",
+        });
+      }
       return;
     }
 
-    setLoading(true);
+    if (!options?.silent) setLoading(true);
+    const setBusy = options?.silent ? setIsAutoSaving : setLoading;
+    setBusy(true);
     
     try {
       const productData = {
@@ -419,30 +429,60 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
         result = data && data.length > 0 ? data[0] : null;
       }
 
-      toast({
-        title: status === 'published' ? "Produit publié" : "Produit sauvegardé",
-        description: `Le produit "${formData.name}" a été ${status === 'published' ? 'publié' : 'sauvegardé'} avec succès`,
-      });
+      if (!options?.silent) {
+        toast({
+          title: status === 'published' ? "Produit publié" : "Produit sauvegardé",
+          description: `Le produit "${formData.name}" a été ${status === 'published' ? 'publié' : 'sauvegardé'} avec succès`,
+        });
+      }
+      setIsDirty(false);
 
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        navigate(`/admin/products/${result.id}`);
+      if (!options?.stay) {
+        if (onSuccess) {
+          onSuccess();
+        } else if (result?.id) {
+          navigate(`/admin/products/${result.id}`);
+        }
       }
     } catch (error) {
       console.error('Error saving product:', error);
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la sauvegarde",
-        variant: "destructive",
-      });
+      if (!options?.silent) {
+        toast({
+          title: "Erreur",
+          description: "Une erreur est survenue lors de la sauvegarde",
+          variant: "destructive",
+        });
+      }
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   };
 
   const handleSave = () => saveProduct('draft');
   const handlePublish = () => saveProduct('published');
+
+  // Debounced autosave: only update existing products to avoid creating records unexpectedly
+  useEffect(() => {
+    if (!productId) return; // skip autosave for brand-new until manual save
+    if (!isDirty) return;
+    if (loading || isAutoSaving) return;
+
+    const timer = setTimeout(() => {
+      saveProduct('draft', { silent: true, stay: true });
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [formData, isDirty]);
+
+  // Warn on page unload if there are unsaved changes
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!isDirty) return;
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDirty]);
 
   return (
     <div className="product-form-container">
