@@ -1,15 +1,15 @@
 # ============================================================
 # Cursor Rules - Configuration professionnelle pour app SaaS
-# Projet : Payhula
+# Projet : Payhuk
 # Auteur : Intelli / payhuk02
 # Objectif : Rendre le développement guidé, stable et intelligent
 # ============================================================
 
 project:
-  name: Payhula SaaS Platform
+  name: Payhuk SaaS Platform
   description: >
-    Application web SaaS haut de gamme pour la gestion des paiements,
-    des transactions et des utilisateurs, avec intégration Supabase, Stripe/PayDunya,
+    Application web SaaS haut de gamme de E-commerce de Produits digitaux, physiques et services et aussi pour la gestion des paiements,
+    des transactions et des utilisateurs, avec intégration Supabase, Moneroo/PayDunya,
     et un design professionnel fluide et réactif.
   stack:
     - Vite

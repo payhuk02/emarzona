@@ -1,14 +1,14 @@
 # ============================================================
-# Cursor Project Configuration - Payhula SaaS Platform
+# Cursor Project Configuration - Payhuk SaaS Platform
 # Auteur : Intelli (payhuk02)
 # Objectif : Configuration avancée pour Cursor sur un projet SaaS professionnel
 # ============================================================
 
 project:
-  name: Payhula
+  name: Payhuk
   description: >
-    Application web SaaS haut de gamme pour la gestion des paiements,
-    des transactions et des utilisateurs, avec intégration Supabase, Stripe/PayDunya,
+    Application web SaaS haut de gamme de E-commerce de produits digitaux, physiques et services et aussi pour la gestion des paiements,
+    des transactions et des utilisateurs, avec intégration Supabase, Moneroo/PayDunya,
     et un design professionnel, fluide et réactif.
   tech_stack:
     - Vite + React + TypeScript

@@ -202,7 +202,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
   const [showTypeChangeDialog, setShowTypeChangeDialog] = useState(false);
   const [pendingTypeChange, setPendingTypeChange] = useState<string | null>(null);
   const { toast } = useToast();
-  
+
   // Hook personnalisé pour la vérification de slug
   const { slugAvailable, checkingSlug } = useSlugAvailability(
     formData.slug,
@@ -521,8 +521,8 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                     aria-invalid={!!validationErrors.category}
                     className={cn(
                       "bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]",
-                      validationErrors.category && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                    )}>
+                    validationErrors.category && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                  )}>
                     <SelectValue placeholder="Sélectionnez une catégorie" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
@@ -574,8 +574,8 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                     aria-invalid={!!validationErrors.pricing_model}
                     className={cn(
                       "bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]",
-                      validationErrors.pricing_model && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                    )}>
+                    validationErrors.pricing_model && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                  )}>
                     <SelectValue placeholder="Sélectionnez un modèle" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
