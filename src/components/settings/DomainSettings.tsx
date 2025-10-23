@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useStores } from "@/hooks/useStores";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,7 @@ interface DNSRecord {
 
 export const DomainSettings = () => {
   const { stores, updateStore, loading: storesLoading } = useStores();
+  const { toast } = useToast();
   
   const [verifying, setVerifying] = useState<boolean>(false);
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
