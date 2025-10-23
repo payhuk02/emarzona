@@ -17,6 +17,11 @@ export interface Product {
   reviews_count: number;
   is_active: boolean;
   digital_file_url: string | null;
+  stock_quantity?: number | null;
+  stock_status?: 'in_stock' | 'low_stock' | 'out_of_stock' | null;
+  sku?: string | null;
+  track_inventory?: boolean;
+  low_stock_threshold?: number | null;
   created_at: string;
   updated_at: string;
 }

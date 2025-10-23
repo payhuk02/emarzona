@@ -16,7 +16,9 @@ import {
   DollarSign,
   Package,
   MoreVertical,
-  FileStack
+  FileStack,
+  PackageCheck,
+  AlertTriangle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -27,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { getStockInfo, formatStockQuantity } from "@/lib/stockUtils";
 
 interface ProductCardDashboardProps {
   product: Product;
@@ -55,6 +58,13 @@ const ProductCardDashboard = ({
   const [imageError, setImageError] = useState(false);
 
   const productUrl = `${window.location.origin}/stores/${storeSlug}/products/${product.slug}`;
+  
+  // Calculer les informations de stock
+  const stockInfo = getStockInfo(
+    product.stock_quantity,
+    product.low_stock_threshold,
+    product.track_inventory ?? (product.product_type !== 'digital')
+  );
 
   const handleCopyLink = async () => {
     try {
@@ -116,13 +126,27 @@ const ProductCardDashboard = ({
                 />
               )}
             </div>
-            <div className="absolute top-2 right-2 flex gap-1">
+            <div className="absolute top-2 right-2 flex flex-col gap-1">
               <Badge 
                 variant={product.is_active ? "default" : "secondary"}
                 className="text-xs"
               >
                 {product.is_active ? "Actif" : "Inactif"}
               </Badge>
+              {product.track_inventory !== false && product.product_type !== 'digital' && (
+                <Badge 
+                  variant="outline"
+                  className={`text-xs ${stockInfo.status === 'out_of_stock' ? 'bg-red-500/20 text-red-400 border-red-500/30' : stockInfo.status === 'low_stock' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' : 'bg-green-500/20 text-green-400 border-green-500/30'}`}
+                >
+                  {stockInfo.status === 'out_of_stock' ? (
+                    <><AlertTriangle className="h-3 w-3 mr-1" /> Rupture</>
+                  ) : stockInfo.status === 'low_stock' ? (
+                    <><AlertTriangle className="h-3 w-3 mr-1" /> {product.stock_quantity}</>
+                  ) : (
+                    <><PackageCheck className="h-3 w-3 mr-1" /> {product.stock_quantity}</>
+                  )}
+                </Badge>
+              )}
             </div>
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
           </div>
@@ -142,13 +166,27 @@ const ProductCardDashboard = ({
                 />
               )}
             </div>
-            <div className="absolute top-2 right-2">
+            <div className="absolute top-2 right-2 flex flex-col gap-1">
               <Badge 
                 variant={product.is_active ? "default" : "secondary"}
                 className="text-xs"
               >
                 {product.is_active ? "Actif" : "Inactif"}
               </Badge>
+              {product.track_inventory !== false && product.product_type !== 'digital' && (
+                <Badge 
+                  variant="outline"
+                  className={`text-xs ${stockInfo.status === 'out_of_stock' ? 'bg-red-500/20 text-red-400 border-red-500/30' : stockInfo.status === 'low_stock' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' : 'bg-green-500/20 text-green-400 border-green-500/30'}`}
+                >
+                  {stockInfo.status === 'out_of_stock' ? (
+                    <><AlertTriangle className="h-3 w-3 mr-1" /> Rupture</>
+                  ) : stockInfo.status === 'low_stock' ? (
+                    <><AlertTriangle className="h-3 w-3 mr-1" /> {product.stock_quantity}</>
+                  ) : (
+                    <><PackageCheck className="h-3 w-3 mr-1" /> {product.stock_quantity}</>
+                  )}
+                </Badge>
+              )}
             </div>
           </div>
         )}
@@ -206,6 +244,21 @@ const ProductCardDashboard = ({
               <span>0 ventes</span>
             </div>
           </div>
+
+          {/* Information de stock pour les produits physiques */}
+          {product.track_inventory !== false && product.product_type !== 'digital' && (
+            <div className="flex items-center gap-2 text-xs">
+              <PackageCheck className={`h-3 w-3 ${stockInfo.color}`} />
+              <span className={`font-medium ${stockInfo.color}`}>
+                {stockInfo.label}: {formatStockQuantity(product.stock_quantity, product.track_inventory)}
+              </span>
+              {stockInfo.status === 'low_stock' && product.low_stock_threshold && (
+                <span className="text-muted-foreground">
+                  (Seuil: {product.low_stock_threshold})
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="space-y-1 text-xs text-muted-foreground">

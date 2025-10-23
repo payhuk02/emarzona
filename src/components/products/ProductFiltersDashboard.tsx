@@ -27,6 +27,8 @@ interface ProductFiltersDashboardProps {
   onProductTypeChange: (value: string) => void;
   status: string;
   onStatusChange: (value: string) => void;
+  stockStatus?: string;
+  onStockStatusChange?: (value: string) => void;
   sortBy: string;
   onSortByChange: (value: string) => void;
   categories: string[];
@@ -46,6 +48,8 @@ const ProductFiltersDashboard = ({
   onProductTypeChange,
   status,
   onStatusChange,
+  stockStatus = "all",
+  onStockStatusChange,
   sortBy,
   onSortByChange,
   categories,
@@ -57,12 +61,13 @@ const ProductFiltersDashboard = ({
 }: ProductFiltersDashboardProps) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   
-  const hasFilters = category !== "all" || productType !== "all" || status !== "all" || searchQuery;
+  const hasFilters = category !== "all" || productType !== "all" || status !== "all" || stockStatus !== "all" || searchQuery;
 
   const clearFilters = () => {
     onCategoryChange("all");
     onProductTypeChange("all");
     onStatusChange("all");
+    onStockStatusChange?.("all");
     onSearchChange("");
   };
 
@@ -71,6 +76,7 @@ const ProductFiltersDashboard = ({
     if (category !== "all") count++;
     if (productType !== "all") count++;
     if (status !== "all") count++;
+    if (stockStatus !== "all") count++;
     if (searchQuery) count++;
     return count;
   };
@@ -231,6 +237,24 @@ const ProductFiltersDashboard = ({
                     </SelectContent>
                   </Select>
                 </div>
+
+                {onStockStatusChange && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">État du stock</Label>
+                    <Select value={stockStatus} onValueChange={onStockStatusChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Tous les stocks" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les stocks</SelectItem>
+                        <SelectItem value="in_stock">En stock</SelectItem>
+                        <SelectItem value="low_stock">Stock faible</SelectItem>
+                        <SelectItem value="out_of_stock">Rupture de stock</SelectItem>
+                        <SelectItem value="needs_restock">Nécessite réapprovisionnement</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
               {hasFilters && (
@@ -285,6 +309,24 @@ const ProductFiltersDashboard = ({
                             variant="ghost"
                             size="sm"
                             onClick={() => onStatusChange("all")}
+                            className="ml-1 h-4 w-4 p-0"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </Badge>
+                      )}
+                      {stockStatus !== "all" && onStockStatusChange && (
+                        <Badge variant="secondary" className="text-xs">
+                          Stock: {
+                            stockStatus === "in_stock" ? "En stock" :
+                            stockStatus === "low_stock" ? "Faible" :
+                            stockStatus === "out_of_stock" ? "Rupture" :
+                            "Réappro."
+                          }
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onStockStatusChange("all")}
                             className="ml-1 h-4 w-4 p-0"
                           >
                             <X className="h-3 w-3" />

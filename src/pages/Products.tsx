@@ -31,6 +31,7 @@ import ProductStats from "@/components/products/ProductStats";
 import ProductBulkActions from "@/components/products/ProductBulkActions";
 import { ImportCSVDialog } from "@/components/products/ImportCSVDialog";
 import { Product } from "@/hooks/useProducts";
+import { calculateStockStatus, needsRestock } from "@/lib/stockUtils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -87,6 +88,7 @@ const Products = () => {
   const [category, setCategory] = useState("all");
   const [productType, setProductType] = useState("all");
   const [status, setStatus] = useState("all");
+  const [stockStatus, setStockStatus] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]);
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
@@ -130,6 +132,32 @@ const Products = () => {
       filtered = filtered.filter((product) => !product.is_active);
     }
 
+    // Stock status filter
+    if (stockStatus !== "all") {
+      filtered = filtered.filter((product) => {
+        // Ne filtrer que les produits qui trackent l'inventaire
+        if (product.track_inventory === false || product.product_type === 'digital') {
+          return stockStatus === "in_stock"; // Produits digitaux = toujours en stock
+        }
+
+        const status = calculateStockStatus(
+          product.stock_quantity,
+          product.low_stock_threshold,
+          product.track_inventory ?? true
+        );
+
+        if (stockStatus === "needs_restock") {
+          return needsRestock(
+            product.stock_quantity,
+            product.low_stock_threshold,
+            product.track_inventory ?? true
+          );
+        }
+
+        return status === stockStatus;
+      });
+    }
+
     // Price range filter
     filtered = filtered.filter((product) => 
       product.price >= priceRange[0] && product.price <= priceRange[1]
@@ -168,7 +196,7 @@ const Products = () => {
     });
 
     return filtered;
-  }, [products, searchQuery, category, productType, status, sortBy, priceRange, dateRange]);
+  }, [products, searchQuery, category, productType, status, stockStatus, sortBy, priceRange, dateRange]);
 
   // Pagination
   const paginatedProducts = useMemo(() => {
@@ -518,6 +546,8 @@ const Products = () => {
                     onProductTypeChange={setProductType}
                     status={status}
                     onStatusChange={setStatus}
+                    stockStatus={stockStatus}
+                    onStockStatusChange={setStockStatus}
                     sortBy={sortBy}
                     onSortByChange={setSortBy}
                     categories={categories}

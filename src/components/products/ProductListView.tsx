@@ -16,9 +16,12 @@ import {
   DollarSign,
   Package,
   MoreVertical,
-  FileStack
+  FileStack,
+  PackageCheck,
+  AlertTriangle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getStockInfo, formatStockQuantity } from "@/lib/stockUtils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,6 +58,13 @@ const ProductListView = ({
   const [imageError, setImageError] = useState(false);
 
   const productUrl = `${window.location.origin}/stores/${storeSlug}/products/${product.slug}`;
+  
+  // Calculer les informations de stock
+  const stockInfo = getStockInfo(
+    product.stock_quantity,
+    product.low_stock_threshold,
+    product.track_inventory ?? (product.product_type !== 'digital')
+  );
 
   const handleCopyLink = async () => {
     try {
@@ -159,6 +169,21 @@ const ProductListView = ({
               {product.product_type && (
                 <Badge variant="outline" className="text-xs">
                   {product.product_type}
+                </Badge>
+              )}
+              {/* Badge de stock pour produits physiques */}
+              {product.track_inventory !== false && product.product_type !== 'digital' && (
+                <Badge 
+                  variant="outline"
+                  className={`text-xs flex items-center gap-1 ${stockInfo.status === 'out_of_stock' ? 'bg-red-500/20 text-red-400 border-red-500/30' : stockInfo.status === 'low_stock' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' : 'bg-green-500/20 text-green-400 border-green-500/30'}`}
+                >
+                  {stockInfo.status === 'out_of_stock' ? (
+                    <><AlertTriangle className="h-3 w-3" /> Rupture de stock</>
+                  ) : stockInfo.status === 'low_stock' ? (
+                    <><AlertTriangle className="h-3 w-3" /> Stock faible ({product.stock_quantity})</>
+                  ) : (
+                    <><PackageCheck className="h-3 w-3" /> En stock ({formatStockQuantity(product.stock_quantity, product.track_inventory)})</>
+                  )}
                 </Badge>
               )}
             </div>
