@@ -1,45 +1,68 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
+  Plus, 
   Percent, 
-  Calendar as CalendarIcon, 
-  Clock, 
   Target, 
-  Users, 
   Gift,
+  Users,
   Zap,
   Settings,
   TrendingUp,
-  Star,
-  Crown,
-  Sparkles
+  HelpCircle
 } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { PromotionCard, Promotion } from "./ProductPromotionsTab/PromotionCard";
+
+/**
+ * Interface stricte pour les données du formulaire produit
+ */
+interface ProductFormData {
+  promotions?: Promotion[];
+  
+  // Réductions
+  launch_discount?: boolean;
+  seasonal_discount?: boolean;
+  clearance_discount?: boolean;
+  
+  // Offres spéciales
+  buy_2_get_1?: boolean;
+  family_pack?: boolean;
+  flash_offer?: boolean;
+  
+  // Promotions clients
+  first_order_discount?: boolean;
+  loyalty_discount?: boolean;
+  birthday_discount?: boolean;
+  
+  // Configuration avancée
+  stackable_promotions?: boolean;
+  automatic_promotions?: boolean;
+  promotion_notifications?: boolean;
+  geo_promotions?: boolean;
+}
 
 interface ProductPromotionsTabProps {
-  formData: any;
-  updateFormData: (field: string, value: any) => void;
+  formData: ProductFormData;
+  updateFormData: <K extends keyof ProductFormData>(
+    field: K,
+    value: ProductFormData[K]
+  ) => void;
 }
 
 export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromotionsTabProps) => {
-  const [promotions, setPromotions] = useState(formData.promotions || []);
+  const [promotions, setPromotions] = useState<Promotion[]>(formData.promotions || []);
   const [editingPromotion, setEditingPromotion] = useState<number | null>(null);
 
   const addPromotion = () => {
-    const newPromotion = {
+    const newPromotion: Promotion = {
       id: Date.now().toString(),
       name: "",
-      type: "percentage", // percentage, fixed, buy_x_get_y
+      type: "percentage",
       value: 0,
       start_date: null,
       end_date: null,
@@ -55,7 +78,7 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
     setEditingPromotion(updatedPromotions.length - 1);
   };
 
-  const updatePromotion = (index: number, field: string, value: any) => {
+  const updatePromotion = (index: number, field: keyof Promotion, value: any) => {
     const updatedPromotions = [...promotions];
     updatedPromotions[index] = { ...updatedPromotions[index], [field]: value };
     setPromotions(updatedPromotions);
@@ -68,355 +91,264 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
     updateFormData("promotions", updatedPromotions);
   };
 
+  const activePromotionsCount = promotions.filter(p => p.is_active).length;
+  const percentageCount = promotions.filter(p => p.type === "percentage").length;
+  const fixedCount = promotions.filter(p => p.type === "fixed").length;
+
   return (
     <div className="space-y-6">
-      {/* Configuration des promotions */}
-      <Card className="border-blue-200 bg-blue-50/50">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Percent className="h-5 w-5 text-blue-600" />
-            Gestion des promotions
-          </CardTitle>
-          <CardDescription>
-            Créez des promotions et réductions pour booster vos ventes
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-semibold">Promotions actives</h3>
-              <p className="text-sm text-muted-foreground">
-                {promotions.length} promotion{promotions.length > 1 ? 's' : ''} configurée{promotions.length > 1 ? 's' : ''}
-              </p>
+      {/* En-tête */}
+      <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+        <CardHeader className="pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-500/20">
+                <Percent className="h-6 w-6 text-blue-400" />
+              </div>
+              <div>
+                <CardTitle className="text-xl font-semibold text-white">Gestion des promotions</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Créez des promotions et réductions pour booster vos ventes
+                </CardDescription>
+              </div>
             </div>
-            <Button onClick={addPromotion} size="sm">
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Configuration des promotions */}
+      <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+        <CardHeader className="pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <CardTitle className="text-lg font-semibold text-white">Promotions actives</CardTitle>
+              <CardDescription className="text-gray-400">
+                {promotions.length} promotion{promotions.length > 1 ? 's' : ''} configurée{promotions.length > 1 ? 's' : ''}
+              </CardDescription>
+            </div>
+            <Button 
+              onClick={addPromotion} 
+              className="bg-blue-600 hover:bg-blue-700 text-white min-h-[44px]"
+            >
               <Gift className="h-4 w-4 mr-2" />
               Ajouter une promotion
             </Button>
           </div>
-
+        </CardHeader>
+        <CardContent>
           {promotions.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Gift className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Aucune promotion configurée</p>
-              <p className="text-sm">Cliquez sur "Ajouter une promotion" pour commencer</p>
+            <div className="text-center py-12 text-gray-400">
+              <Gift className="h-16 w-16 mx-auto mb-4 opacity-30" />
+              <p className="text-lg font-medium mb-2">Aucune promotion configurée</p>
+              <p className="text-sm mb-4">Créez des promotions pour attirer plus de clients</p>
+              <Button onClick={addPromotion} className="bg-blue-600 hover:bg-blue-700 text-white min-h-[44px]">
+                <Gift className="h-4 w-4 mr-2" />
+                Créer la première promotion
+              </Button>
             </div>
           ) : (
             <div className="space-y-4">
-              {promotions.map((promotion: any, index: number) => (
-                <Card key={promotion.id} className="border-gray-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <CardTitle className="text-base">
-                          {promotion.name || `Promotion ${index + 1}`}
-                        </CardTitle>
-                        <Badge variant={promotion.is_active ? "default" : "secondary"}>
-                          {promotion.is_active ? "Active" : "Inactive"}
-                        </Badge>
-                        <Badge variant="outline">
-                          {promotion.type === "percentage" ? "Pourcentage" : 
-                           promotion.type === "fixed" ? "Montant fixe" : 
-                           "Acheter X obtenir Y"}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={promotion.is_active}
-                          onCheckedChange={(checked) => updatePromotion(index, "is_active", checked)}
-                        />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditingPromotion(editingPromotion === index ? null : index)}
-                        >
-                          <Settings className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => removePromotion(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  {editingPromotion === index && (
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <div>
-                          <Label htmlFor={`promotion-name-${index}`}>Nom de la promotion</Label>
-                          <Input
-                            id={`promotion-name-${index}`}
-                            value={promotion.name}
-                            onChange={(e) => updatePromotion(index, "name", e.target.value)}
-                            placeholder="Ex: Réduction de lancement"
-                            className="touch-target"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`promotion-type-${index}`}>Type de promotion</Label>
-                          <Select value={promotion.type} onValueChange={(value) => updatePromotion(index, "type", value)}>
-                            <SelectTrigger className="touch-target">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="percentage">Pourcentage</SelectItem>
-                              <SelectItem value="fixed">Montant fixe</SelectItem>
-                              <SelectItem value="buy_x_get_y">Acheter X obtenir Y</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <div>
-                          <Label htmlFor={`promotion-value-${index}`}>
-                            {promotion.type === "percentage" ? "Pourcentage (%)" : 
-                             promotion.type === "fixed" ? "Montant fixe" : "Valeur"}
-                          </Label>
-                          <Input
-                            id={`promotion-value-${index}`}
-                            type="number"
-                            value={promotion.value}
-                            onChange={(e) => updatePromotion(index, "value", parseFloat(e.target.value) || 0)}
-                            placeholder="0"
-                            className="touch-target"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`promotion-min-quantity-${index}`}>Quantité minimum</Label>
-                          <Input
-                            id={`promotion-min-quantity-${index}`}
-                            type="number"
-                            value={promotion.min_quantity}
-                            onChange={(e) => updatePromotion(index, "min_quantity", parseInt(e.target.value) || 1)}
-                            placeholder="1"
-                            className="touch-target"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <div>
-                          <Label htmlFor={`promotion-max-uses-${index}`}>Utilisations max</Label>
-                          <Input
-                            id={`promotion-max-uses-${index}`}
-                            type="number"
-                            value={promotion.max_uses || ""}
-                            onChange={(e) => updatePromotion(index, "max_uses", parseInt(e.target.value) || null)}
-                            placeholder="Illimité"
-                            className="touch-target"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`promotion-customer-limit-${index}`}>Limite par client</Label>
-                          <Input
-                            id={`promotion-customer-limit-${index}`}
-                            type="number"
-                            value={promotion.customer_limit || ""}
-                            onChange={(e) => updatePromotion(index, "customer_limit", parseInt(e.target.value) || null)}
-                            placeholder="Illimité"
-                            className="touch-target"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <div>
-                          <Label>Date de début</Label>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full justify-start text-left font-normal",
-                                  !promotion.start_date && "text-muted-foreground"
-                                )}
-                              >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                <span className="truncate">{promotion.start_date ? format(promotion.start_date, "PPP") : "Sélectionner"}</span>
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                              <Calendar
-                                mode="single"
-                                selected={promotion.start_date}
-                                onSelect={(date) => updatePromotion(index, "start_date", date)}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                        <div>
-                          <Label>Date de fin</Label>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full justify-start text-left font-normal",
-                                  !promotion.end_date && "text-muted-foreground"
-                                )}
-                              >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                <span className="truncate">{promotion.end_date ? format(promotion.end_date, "PPP") : "Sélectionner"}</span>
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                              <Calendar
-                                mode="single"
-                                selected={promotion.end_date}
-                                onSelect={(date) => updatePromotion(index, "end_date", date)}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                      </div>
-                    </CardContent>
-                  )}
-                </Card>
+              {promotions.map((promotion, index) => (
+                <PromotionCard
+                  key={promotion.id}
+                  promotion={promotion}
+                  index={index}
+                  isEditing={editingPromotion === index}
+                  onEdit={() => setEditingPromotion(editingPromotion === index ? null : index)}
+                  onDelete={() => removePromotion(index)}
+                  onToggleActive={() => updatePromotion(index, "is_active", !promotion.is_active)}
+                  onUpdate={(field, value) => updatePromotion(index, field, value)}
+                />
               ))}
             </div>
           )}
         </CardContent>
       </Card>
 
+      <Separator className="bg-gray-700" />
+
       {/* Types de promotions */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Target className="h-5 w-5 text-primary" />
-          Types de promotions
-        </h3>
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-purple-500/20">
+            <Target className="h-5 w-5 text-purple-400" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-white">Types de promotions</h3>
+            <p className="text-sm text-gray-400">Activez différents types de promotions pour votre boutique</p>
+          </div>
+        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          <Card className="border-green-200 bg-green-50/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Percent className="h-4 w-4 text-green-600" />
-                Réductions
-              </CardTitle>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Réductions */}
+          <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-500/20">
+                  <Percent className="h-5 w-5 text-green-400" />
+                </div>
+                <CardTitle className="text-base font-semibold text-white">Réductions</CardTitle>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Réduction de lancement</Label>
-                  <p className="text-sm text-muted-foreground">Promotion pour nouveaux produits</p>
+              <div className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg border border-gray-600">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="launch_discount" className="text-sm font-medium text-white">
+                    Réduction de lancement
+                  </Label>
+                  <p className="text-xs text-gray-400">Promotion pour nouveaux produits</p>
                 </div>
                 <Switch
+                  id="launch_discount"
                   checked={formData.launch_discount || false}
                   onCheckedChange={(checked) => updateFormData("launch_discount", checked)}
+                  className="touch-manipulation"
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Réduction saisonnière</Label>
-                  <p className="text-sm text-muted-foreground">Promotions selon les saisons</p>
+              <div className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg border border-gray-600">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="seasonal_discount" className="text-sm font-medium text-white">
+                    Réduction saisonnière
+                  </Label>
+                  <p className="text-xs text-gray-400">Promotions selon les saisons</p>
                 </div>
                 <Switch
+                  id="seasonal_discount"
                   checked={formData.seasonal_discount || false}
                   onCheckedChange={(checked) => updateFormData("seasonal_discount", checked)}
+                  className="touch-manipulation"
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Réduction de stock</Label>
-                  <p className="text-sm text-muted-foreground">Liquidation des stocks</p>
+              <div className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg border border-gray-600">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="clearance_discount" className="text-sm font-medium text-white">
+                    Réduction de stock
+                  </Label>
+                  <p className="text-xs text-gray-400">Liquidation des stocks</p>
                 </div>
                 <Switch
+                  id="clearance_discount"
                   checked={formData.clearance_discount || false}
                   onCheckedChange={(checked) => updateFormData("clearance_discount", checked)}
+                  className="touch-manipulation"
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-purple-200 bg-purple-50/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Gift className="h-4 w-4 text-purple-600" />
-                Offres spéciales
-              </CardTitle>
+          {/* Offres spéciales */}
+          <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-indigo-500/20">
+                  <Gift className="h-5 w-5 text-indigo-400" />
+                </div>
+                <CardTitle className="text-base font-semibold text-white">Offres spéciales</CardTitle>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Acheter 2, obtenir 1 gratuit</Label>
-                  <p className="text-sm text-muted-foreground">Offre B2G1</p>
+              <div className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg border border-gray-600">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="buy_2_get_1" className="text-sm font-medium text-white">
+                    Acheter 2, obtenir 1 gratuit
+                  </Label>
+                  <p className="text-xs text-gray-400">Offre B2G1</p>
                 </div>
                 <Switch
+                  id="buy_2_get_1"
                   checked={formData.buy_2_get_1 || false}
                   onCheckedChange={(checked) => updateFormData("buy_2_get_1", checked)}
+                  className="touch-manipulation"
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Pack famille</Label>
-                  <p className="text-sm text-muted-foreground">Réduction sur les packs</p>
+              <div className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg border border-gray-600">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="family_pack" className="text-sm font-medium text-white">
+                    Pack famille
+                  </Label>
+                  <p className="text-xs text-gray-400">Réduction sur les packs</p>
                 </div>
                 <Switch
+                  id="family_pack"
                   checked={formData.family_pack || false}
                   onCheckedChange={(checked) => updateFormData("family_pack", checked)}
+                  className="touch-manipulation"
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Offre flash</Label>
-                  <p className="text-sm text-muted-foreground">Promotions limitées dans le temps</p>
+              <div className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg border border-gray-600">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="flash_offer" className="text-sm font-medium text-white">
+                    Offre flash
+                  </Label>
+                  <p className="text-xs text-gray-400">Promotions limitées dans le temps</p>
                 </div>
                 <Switch
+                  id="flash_offer"
                   checked={formData.flash_offer || false}
                   onCheckedChange={(checked) => updateFormData("flash_offer", checked)}
+                  className="touch-manipulation"
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-orange-200 bg-orange-50/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Users className="h-4 w-4 text-orange-600" />
-                Promotions clients
-              </CardTitle>
+          {/* Promotions clients */}
+          <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-orange-500/20">
+                  <Users className="h-5 w-5 text-orange-400" />
+                </div>
+                <CardTitle className="text-base font-semibold text-white">Promotions clients</CardTitle>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Première commande</Label>
-                  <p className="text-sm text-muted-foreground">Réduction pour nouveaux clients</p>
+              <div className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg border border-gray-600">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="first_order_discount" className="text-sm font-medium text-white">
+                    Première commande
+                  </Label>
+                  <p className="text-xs text-gray-400">Réduction pour nouveaux clients</p>
                 </div>
                 <Switch
+                  id="first_order_discount"
                   checked={formData.first_order_discount || false}
                   onCheckedChange={(checked) => updateFormData("first_order_discount", checked)}
+                  className="touch-manipulation"
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Fidélité</Label>
-                  <p className="text-sm text-muted-foreground">Réduction pour clients fidèles</p>
+              <div className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg border border-gray-600">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="loyalty_discount" className="text-sm font-medium text-white">
+                    Fidélité
+                  </Label>
+                  <p className="text-xs text-gray-400">Réduction pour clients fidèles</p>
                 </div>
                 <Switch
+                  id="loyalty_discount"
                   checked={formData.loyalty_discount || false}
                   onCheckedChange={(checked) => updateFormData("loyalty_discount", checked)}
+                  className="touch-manipulation"
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Anniversaire</Label>
-                  <p className="text-sm text-muted-foreground">Promotion d'anniversaire</p>
+              <div className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg border border-gray-600">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="birthday_discount" className="text-sm font-medium text-white">
+                    Anniversaire
+                  </Label>
+                  <p className="text-xs text-gray-400">Promotion d'anniversaire</p>
                 </div>
                 <Switch
+                  id="birthday_discount"
                   checked={formData.birthday_discount || false}
                   onCheckedChange={(checked) => updateFormData("birthday_discount", checked)}
+                  className="touch-manipulation"
                 />
               </div>
             </CardContent>
@@ -424,104 +356,125 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
         </div>
       </div>
 
-      <Separator />
+      <Separator className="bg-gray-700" />
 
       {/* Configuration avancée */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Zap className="h-5 w-5 text-primary" />
-          Configuration avancée
-        </h3>
-
-        <Card className="border-blue-200 bg-blue-50/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Settings className="h-4 w-4 text-blue-600" />
-              Options avancées
-            </CardTitle>
-            <CardDescription>
-              Personnalisation avancée des promotions
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Promotions cumulables</Label>
-                <p className="text-sm text-muted-foreground">Permettre plusieurs promotions simultanées</p>
-              </div>
-              <Switch
-                checked={formData.stackable_promotions || false}
-                onCheckedChange={(checked) => updateFormData("stackable_promotions", checked)}
-              />
+      <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-yellow-500/20">
+              <Zap className="h-5 w-5 text-yellow-400" />
             </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Promotions automatiques</Label>
-                <p className="text-sm text-muted-foreground">Activation automatique selon les conditions</p>
-              </div>
-              <Switch
-                checked={formData.automatic_promotions || false}
-                onCheckedChange={(checked) => updateFormData("automatic_promotions", checked)}
-              />
+            <div>
+              <CardTitle className="text-lg font-semibold text-white">Configuration avancée</CardTitle>
+              <CardDescription className="text-gray-400">
+                Personnalisation avancée des promotions
+              </CardDescription>
             </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Notifications de promotion</Label>
-                <p className="text-sm text-muted-foreground">Alertes par email pour les promotions</p>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+            <div className="space-y-0.5 flex-1">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="stackable_promotions" className="text-sm font-medium text-white">
+                  Promotions cumulables
+                </Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-3 w-3 text-gray-400" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Permettre plusieurs promotions simultanées</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
-              <Switch
-                checked={formData.promotion_notifications || false}
-                onCheckedChange={(checked) => updateFormData("promotion_notifications", checked)}
-              />
+              <p className="text-sm text-gray-400">Permettre plusieurs promotions simultanées</p>
             </div>
+            <Switch
+              id="stackable_promotions"
+              checked={formData.stackable_promotions || false}
+              onCheckedChange={(checked) => updateFormData("stackable_promotions", checked)}
+              className="touch-manipulation"
+            />
+          </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Promotions géolocalisées</Label>
-                <p className="text-sm text-muted-foreground">Promotions selon la localisation</p>
-              </div>
-              <Switch
-                checked={formData.geo_promotions || false}
-                onCheckedChange={(checked) => updateFormData("geo_promotions", checked)}
-              />
+          <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+            <div className="space-y-0.5 flex-1">
+              <Label htmlFor="automatic_promotions" className="text-sm font-medium text-white">
+                Promotions automatiques
+              </Label>
+              <p className="text-sm text-gray-400">Activation automatique selon les conditions</p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <Switch
+              id="automatic_promotions"
+              checked={formData.automatic_promotions || false}
+              onCheckedChange={(checked) => updateFormData("automatic_promotions", checked)}
+              className="touch-manipulation"
+            />
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+            <div className="space-y-0.5 flex-1">
+              <Label htmlFor="promotion_notifications" className="text-sm font-medium text-white">
+                Notifications de promotion
+              </Label>
+              <p className="text-sm text-gray-400">Alertes par email pour les promotions</p>
+            </div>
+            <Switch
+              id="promotion_notifications"
+              checked={formData.promotion_notifications || false}
+              onCheckedChange={(checked) => updateFormData("promotion_notifications", checked)}
+              className="touch-manipulation"
+            />
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+            <div className="space-y-0.5 flex-1">
+              <Label htmlFor="geo_promotions" className="text-sm font-medium text-white">
+                Promotions géolocalisées
+              </Label>
+              <p className="text-sm text-gray-400">Promotions selon la localisation</p>
+            </div>
+            <Switch
+              id="geo_promotions"
+              checked={formData.geo_promotions || false}
+              onCheckedChange={(checked) => updateFormData("geo_promotions", checked)}
+              className="touch-manipulation"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Résumé des promotions */}
-      <Card className="border-green-200 bg-green-50/50">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-green-600" />
-            Résumé des promotions
-          </CardTitle>
+      <Card className="border-2 border-gray-700 bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-green-500/20">
+              <TrendingUp className="h-5 w-5 text-green-400" />
+            </div>
+            <div>
+              <CardTitle className="text-base font-semibold text-white">Résumé des promotions</CardTitle>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{promotions.length}</div>
-              <div className="text-sm text-muted-foreground">Promotions configurées</div>
+              <div className="text-2xl font-bold text-green-400">{promotions.length}</div>
+              <div className="text-sm text-gray-400 mt-1">Promotions configurées</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {promotions.filter((p: any) => p.is_active).length}
-              </div>
-              <div className="text-sm text-muted-foreground">Promotions actives</div>
+              <div className="text-2xl font-bold text-blue-400">{activePromotionsCount}</div>
+              <div className="text-sm text-gray-400 mt-1">Promotions actives</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
-                {promotions.filter((p: any) => p.type === "percentage").length}
-              </div>
-              <div className="text-sm text-muted-foreground">Réductions %</div>
+              <div className="text-2xl font-bold text-purple-400">{percentageCount}</div>
+              <div className="text-sm text-gray-400 mt-1">Réductions %</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">
-                {promotions.filter((p: any) => p.type === "fixed").length}
-              </div>
-              <div className="text-sm text-muted-foreground">Réductions fixes</div>
+              <div className="text-2xl font-bold text-orange-400">{fixedCount}</div>
+              <div className="text-sm text-gray-400 mt-1">Réductions fixes</div>
             </div>
           </div>
         </CardContent>
