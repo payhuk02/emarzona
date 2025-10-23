@@ -35,6 +35,22 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
   const [seoScore, setSeoScore] = useState(0);
   const [readability, setReadability] = useState<number | null>(null);
   const [missingAltCount, setMissingAltCount] = useState<number>(0);
+  const [keywordAnalysis, setKeywordAnalysis] = useState<{
+    primaryKeywords: string[];
+    density: Record<string, number>;
+    suggestions: string[];
+  }>({ primaryKeywords: [], density: {}, suggestions: [] });
+  const [contentStructure, setContentStructure] = useState<{
+    headings: { level: number; text: string }[];
+    hasTableOfContents: boolean;
+    suggestions: string[];
+  }>({ headings: [], hasTableOfContents: false, suggestions: [] });
+  const [duplicateWarnings, setDuplicateWarnings] = useState<string[]>([]);
+  const [ctaAnalysis, setCtaAnalysis] = useState<{
+    hasCta: boolean;
+    ctaCount: number;
+    suggestions: string[];
+  }>({ hasCta: false, ctaCount: 0, suggestions: [] });
 
   // Helpers for short description UX
   const sanitizeShortDescription = (text: string) => {
@@ -106,6 +122,173 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
     const doc = parser.parseFromString(html, "text/html");
     const imgs = Array.from(doc.querySelectorAll("img"));
     return imgs.filter(img => !img.getAttribute("alt") || img.getAttribute("alt") === "").length;
+  };
+
+  // --- Keyword Analysis ---
+  const extractKeywords = (text: string) => {
+    if (!text) return [];
+    const words = text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[^a-zàâäéèêëîïôöûüùœç\s]/g, " ")
+      .split(/\s+/)
+      .filter(word => word.length > 3 && !["avec", "pour", "dans", "sur", "sous", "avec", "sans", "plus", "tout", "tous", "toute", "toutes"].includes(word));
+    
+    const wordCount: Record<string, number> = {};
+    words.forEach(word => {
+      wordCount[word] = (wordCount[word] || 0) + 1;
+    });
+    
+    return Object.entries(wordCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 10)
+      .map(([word, count]) => ({ word, count }));
+  };
+
+  const analyzeKeywordDensity = (text: string, metaKeywords: string) => {
+    const totalWords = text.split(/\s+/).length;
+    const keywords = metaKeywords ? metaKeywords.split(",").map(k => k.trim().toLowerCase()) : [];
+    const density: Record<string, number> = {};
+    const suggestions: string[] = [];
+    
+    keywords.forEach(keyword => {
+      const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+      const matches = (text.match(regex) || []).length;
+      const percentage = totalWords > 0 ? (matches / totalWords) * 100 : 0;
+      density[keyword] = Math.round(percentage * 100) / 100;
+      
+      if (percentage < 0.5) {
+        suggestions.push(`Augmenter l'utilisation de "${keyword}" (actuellement ${percentage.toFixed(1)}%)`);
+      } else if (percentage > 3) {
+        suggestions.push(`Réduire l'utilisation de "${keyword}" (actuellement ${percentage.toFixed(1)}%)`);
+      }
+    });
+    
+    return { density, suggestions };
+  };
+
+  // --- Content Structure Analysis ---
+  const analyzeContentStructure = (html: string) => {
+    if (!html) return { headings: [], hasTableOfContents: false, suggestions: [] };
+    
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    const headings = Array.from(doc.querySelectorAll("h1, h2, h3, h4, h5, h6"))
+      .map(h => ({
+        level: parseInt(h.tagName.charAt(1)),
+        text: h.textContent?.trim() || ""
+      }))
+      .filter(h => h.text.length > 0);
+    
+    const suggestions: string[] = [];
+    
+    // Check for proper heading hierarchy
+    if (headings.length > 0) {
+      const hasH1 = headings.some(h => h.level === 1);
+      const hasH2 = headings.some(h => h.level === 2);
+      
+      if (!hasH1) suggestions.push("Ajouter un titre H1 principal");
+      if (!hasH2 && headings.length > 1) suggestions.push("Utiliser des titres H2 pour structurer le contenu");
+      
+      // Check for heading order
+      for (let i = 1; i < headings.length; i++) {
+        if (headings[i].level > headings[i-1].level + 1) {
+          suggestions.push("Éviter de sauter des niveaux de titres (ex: H1 → H3)");
+          break;
+        }
+      }
+    } else {
+      suggestions.push("Ajouter des titres pour structurer le contenu");
+    }
+    
+    return {
+      headings,
+      hasTableOfContents: headings.length >= 3,
+      suggestions
+    };
+  };
+
+  // --- Duplicate Content Detection ---
+  const detectDuplicateContent = (text: string, metaTitle: string, metaDescription: string) => {
+    const warnings: string[] = [];
+    
+    if (!text) return warnings;
+    
+    // Check for repeated sentences
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
+    const sentenceCount: Record<string, number> = {};
+    
+    sentences.forEach(sentence => {
+      const normalized = sentence.trim().toLowerCase();
+      sentenceCount[normalized] = (sentenceCount[normalized] || 0) + 1;
+    });
+    
+    Object.entries(sentenceCount).forEach(([sentence, count]) => {
+      if (count > 2) {
+        warnings.push(`Phrase répétée ${count} fois: "${sentence.slice(0, 50)}..."`);
+      }
+    });
+    
+    // Check for meta duplication
+    if (metaTitle && text.toLowerCase().includes(metaTitle.toLowerCase())) {
+      warnings.push("Le titre SEO est répété dans le contenu");
+    }
+    
+    if (metaDescription && text.toLowerCase().includes(metaDescription.toLowerCase())) {
+      warnings.push("La description SEO est répétée dans le contenu");
+    }
+    
+    return warnings;
+  };
+
+  // --- CTA Analysis ---
+  const analyzeCTA = (html: string) => {
+    if (!html) return { hasCta: false, ctaCount: 0, suggestions: [] };
+    
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    
+    // Common CTA patterns
+    const ctaPatterns = [
+      /acheter|commander|réserver|télécharger|obtenir|découvrir|essayer|tester|démarrer|commencer/gi,
+      /cliquez ici|en savoir plus|découvrir|voir plus|lire la suite/gi,
+      /gratuit|sans engagement|essai gratuit|démo/gi
+    ];
+    
+    const text = doc.textContent || "";
+    let ctaCount = 0;
+    const suggestions: string[] = [];
+    
+    ctaPatterns.forEach(pattern => {
+      const matches = text.match(pattern);
+      if (matches) ctaCount += matches.length;
+    });
+    
+    // Check for buttons and links
+    const buttons = doc.querySelectorAll("button, a[href], input[type='button'], input[type='submit']");
+    ctaCount += buttons.length;
+    
+    if (ctaCount === 0) {
+      suggestions.push("Ajouter un call-to-action pour encourager l'achat");
+    } else if (ctaCount === 1) {
+      suggestions.push("Considérer ajouter un CTA secondaire (ex: 'En savoir plus')");
+    } else if (ctaCount > 3) {
+      suggestions.push("Réduire le nombre de CTA pour éviter la confusion");
+    }
+    
+    // Check CTA placement
+    const textLength = text.length;
+    const firstCtaIndex = text.search(/acheter|commander|télécharger|obtenir/gi);
+    
+    if (firstCtaIndex > textLength * 0.7) {
+      suggestions.push("Placer le premier CTA plus tôt dans le contenu");
+    }
+    
+    return {
+      hasCta: ctaCount > 0,
+      ctaCount,
+      suggestions
+    };
   };
 
   // SERP preview helpers
@@ -216,6 +399,27 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
     const plain = htmlToPlainText(formData.description || "");
     setReadability(computeReadability(plain));
     setMissingAltCount(checkMissingAlt(formData.description || ""));
+    
+    // Keyword analysis
+    const keywords = extractKeywords(plain);
+    const analysis = analyzeKeywordDensity(plain, formData.meta_keywords || "");
+    setKeywordAnalysis({
+      primaryKeywords: keywords.slice(0, 5).map(k => k.word),
+      density: analysis.density,
+      suggestions: analysis.suggestions
+    });
+    
+    // Content structure analysis
+    const structure = analyzeContentStructure(formData.description || "");
+    setContentStructure(structure);
+    
+    // Duplicate content detection
+    const duplicates = detectDuplicateContent(plain, formData.meta_title || "", formData.meta_description || "");
+    setDuplicateWarnings(duplicates);
+    
+    // CTA analysis
+    const cta = analyzeCTA(formData.description || "");
+    setCtaAnalysis(cta);
   }, [formData.meta_title, formData.meta_description, formData.meta_keywords, formData.description, formData.og_image, formData.og_title]);
 
   const getSeoScoreColor = (score: number) => {
@@ -422,10 +626,98 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                   {missingAltCount === 0 ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <AlertCircle className="h-4 w-4 text-red-500" />}
                   <span>Images avec alt {missingAltCount > 0 ? `(manquants: ${missingAltCount})` : ''}</span>
                 </div>
+                
+                {/* Keyword Analysis */}
+                {keywordAnalysis.primaryKeywords.length > 0 && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <h4 className="text-sm font-medium mb-2">Mots-clés principaux</h4>
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {keywordAnalysis.primaryKeywords.map((keyword, index) => (
+                        <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
+                    {keywordAnalysis.suggestions.length > 0 && (
+                      <div className="text-xs text-orange-600">
+                        <strong>Suggestions:</strong>
+                        <ul className="mt-1 space-y-1">
+                          {keywordAnalysis.suggestions.map((suggestion, index) => (
+                            <li key={index}>• {suggestion}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Content Structure */}
+                {contentStructure.headings.length > 0 && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <h4 className="text-sm font-medium mb-2">Structure du contenu</h4>
+                    <div className="space-y-1 mb-2">
+                      {contentStructure.headings.map((heading, index) => (
+                        <div key={index} className="flex items-center gap-2 text-xs">
+                          <span className="px-1 py-0.5 bg-gray-200 rounded text-xs">
+                            H{heading.level}
+                          </span>
+                          <span className="truncate">{heading.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {contentStructure.suggestions.length > 0 && (
+                      <div className="text-xs text-orange-600">
+                        <strong>Améliorations:</strong>
+                        <ul className="mt-1 space-y-1">
+                          {contentStructure.suggestions.map((suggestion, index) => (
+                            <li key={index}>• {suggestion}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Duplicate Content Warnings */}
+                {duplicateWarnings.length > 0 && (
+                  <div className="mt-4 p-3 bg-red-50 rounded-lg border border-red-200">
+                    <h4 className="text-sm font-medium mb-2 text-red-800">⚠️ Contenu dupliqué détecté</h4>
+                    <ul className="text-xs text-red-700 space-y-1">
+                      {duplicateWarnings.map((warning, index) => (
+                        <li key={index}>• {warning}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* CTA Analysis */}
+                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                  <h4 className="text-sm font-medium mb-2">Call-to-Action</h4>
+                  <div className="flex items-center gap-2 mb-2">
+                    {ctaAnalysis.hasCta ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-red-500" />
+                    )}
+                    <span className="text-xs">
+                      {ctaAnalysis.ctaCount} CTA détecté{ctaAnalysis.ctaCount > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  {ctaAnalysis.suggestions.length > 0 && (
+                    <div className="text-xs text-orange-600">
+                      <strong>Optimisations:</strong>
+                      <ul className="mt-1 space-y-1">
+                        {ctaAnalysis.suggestions.map((suggestion, index) => (
+                          <li key={index}>• {suggestion}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
           {/* Aperçu SERP */}
           <Card>
