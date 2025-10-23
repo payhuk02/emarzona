@@ -2,6 +2,7 @@ import { Product } from "@/hooks/useProducts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Edit, 
   Trash2, 
@@ -14,7 +15,8 @@ import {
   Calendar,
   DollarSign,
   Package,
-  MoreVertical
+  MoreVertical,
+  FileStack
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -32,6 +34,10 @@ interface ProductCardDashboardProps {
   onEdit: () => void;
   onDelete: () => void;
   onToggleStatus?: () => void;
+  onDuplicate?: () => void;
+  onQuickView?: () => void;
+  isSelected?: boolean;
+  onSelect?: (selected: boolean) => void;
 }
 
 const ProductCardDashboard = ({
@@ -40,6 +46,10 @@ const ProductCardDashboard = ({
   onEdit,
   onDelete,
   onToggleStatus,
+  onDuplicate,
+  onQuickView,
+  isSelected = false,
+  onSelect,
 }: ProductCardDashboardProps) => {
   const { toast } = useToast();
   const [imageError, setImageError] = useState(false);
@@ -86,7 +96,7 @@ const ProductCardDashboard = ({
   };
 
   return (
-    <Card className="group shadow-medium hover:shadow-lg transition-all duration-200 border-border/50 hover:border-primary/20">
+    <Card className={`group shadow-medium hover:shadow-lg transition-all duration-200 border-border/50 hover:border-primary/20 ${isSelected ? 'ring-2 ring-primary' : ''}`}>
       <CardHeader className="p-0 relative">
         {product.image_url && !imageError ? (
           <div className="aspect-square rounded-t-lg overflow-hidden bg-muted relative">
@@ -96,6 +106,16 @@ const ProductCardDashboard = ({
               className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200"
               onError={() => setImageError(true)}
             />
+            <div className="absolute top-2 left-2">
+              {onSelect && (
+                <Checkbox
+                  checked={isSelected}
+                  onCheckedChange={onSelect}
+                  className="bg-white shadow-lg"
+                  aria-label="Sélectionner ce produit"
+                />
+              )}
+            </div>
             <div className="absolute top-2 right-2 flex gap-1">
               <Badge 
                 variant={product.is_active ? "default" : "secondary"}
@@ -111,6 +131,16 @@ const ProductCardDashboard = ({
             <div className="text-center">
               <Package className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
               <span className="text-muted-foreground text-sm">Pas d'image</span>
+            </div>
+            <div className="absolute top-2 left-2">
+              {onSelect && (
+                <Checkbox
+                  checked={isSelected}
+                  onCheckedChange={onSelect}
+                  className="bg-white shadow-lg"
+                  aria-label="Sélectionner ce produit"
+                />
+              )}
             </div>
             <div className="absolute top-2 right-2">
               <Badge 
@@ -205,6 +235,12 @@ const ProductCardDashboard = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
+              {onQuickView && (
+                <DropdownMenuItem onClick={onQuickView}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Aperçu rapide
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={handleCopyLink}>
                 <Copy className="h-4 w-4 mr-2" />
                 Copier le lien
@@ -213,6 +249,12 @@ const ProductCardDashboard = ({
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Prévisualiser
               </DropdownMenuItem>
+              {onDuplicate && (
+                <DropdownMenuItem onClick={onDuplicate}>
+                  <FileStack className="h-4 w-4 mr-2" />
+                  Dupliquer
+                </DropdownMenuItem>
+              )}
               {onToggleStatus && (
                 <DropdownMenuItem onClick={onToggleStatus}>
                   {product.is_active ? (

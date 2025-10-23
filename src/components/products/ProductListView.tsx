@@ -2,6 +2,7 @@ import { Product } from "@/hooks/useProducts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Edit, 
   Trash2, 
@@ -14,7 +15,8 @@ import {
   Calendar,
   DollarSign,
   Package,
-  MoreVertical
+  MoreVertical,
+  FileStack
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -32,6 +34,10 @@ interface ProductListViewProps {
   onEdit: () => void;
   onDelete: () => void;
   onToggleStatus?: () => void;
+  onDuplicate?: () => void;
+  onQuickView?: () => void;
+  isSelected?: boolean;
+  onSelect?: (selected: boolean) => void;
 }
 
 const ProductListView = ({
@@ -40,6 +46,10 @@ const ProductListView = ({
   onEdit,
   onDelete,
   onToggleStatus,
+  onDuplicate,
+  onQuickView,
+  isSelected = false,
+  onSelect,
 }: ProductListViewProps) => {
   const { toast } = useToast();
   const [imageError, setImageError] = useState(false);
@@ -86,9 +96,20 @@ const ProductListView = ({
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow border-border/50">
+    <Card className={`hover:shadow-md transition-all border-border/50 ${isSelected ? 'ring-2 ring-primary' : ''}`}>
       <CardContent className="p-4">
         <div className="flex items-center gap-4">
+          {/* Checkbox de sélection */}
+          {onSelect && (
+            <div className="flex-shrink-0">
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={onSelect}
+                aria-label="Sélectionner ce produit"
+              />
+            </div>
+          )}
+          
           {/* Image */}
           <div className="flex-shrink-0">
             {product.image_url && !imageError ? (
@@ -107,107 +128,126 @@ const ProductListView = ({
             )}
           </div>
 
-          {/* Contenu principal */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between">
+          {/* Informations principales */}
+          <div className="flex-1 min-w-0 space-y-2">
+            <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-lg truncate hover:text-primary transition-colors">
-                    {product.name}
-                  </h3>
-                  <Badge 
-                    variant={product.is_active ? "default" : "secondary"}
-                    className="text-xs flex-shrink-0"
-                  >
-                    {product.is_active ? "Actif" : "Inactif"}
-                  </Badge>
-                </div>
-                
+                <h3 className="font-semibold text-base truncate hover:text-primary transition-colors">
+                  {product.name}
+                </h3>
                 {product.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-1 mb-2">
+                  <p className="text-sm text-muted-foreground line-clamp-1">
                     {product.description.replace(/<[^>]*>/g, '')}
                   </p>
                 )}
-
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <DollarSign className="h-3 w-3 text-green-600" />
-                    <span className="font-semibold text-green-600">
-                      {product.price.toLocaleString()} {product.currency}
-                    </span>
-                  </div>
-                  
-                  {product.category && (
-                    <Badge variant="outline" className={`text-xs ${getCategoryColor(product.category)}`}>
-                      {product.category}
-                    </Badge>
-                  )}
-                  
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    <span>{formatDate(product.created_at)}</span>
-                  </div>
-                  
-                  {product.rating > 0 && (
-                    <div className="flex items-center gap-1">
-                      <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                      <span>{product.rating.toFixed(1)}</span>
-                      <span>({product.reviews_count})</span>
-                    </div>
-                  )}
-                </div>
               </div>
+              
+              <Badge 
+                variant={product.is_active ? "default" : "secondary"}
+                className="flex-shrink-0 text-xs"
+              >
+                {product.is_active ? "Actif" : "Inactif"}
+              </Badge>
+            </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-2 ml-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onEdit}
-                >
-                  <Edit className="h-4 w-4 mr-1" />
-                  Modifier
-                </Button>
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={handleCopyLink}>
-                      <Copy className="h-4 w-4 mr-2" />
-                      Copier le lien
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handlePreview}>
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Prévisualiser
-                    </DropdownMenuItem>
-                    {onToggleStatus && (
-                      <DropdownMenuItem onClick={onToggleStatus}>
-                        {product.is_active ? (
-                          <>
-                            <EyeOff className="h-4 w-4 mr-2" />
-                            Désactiver
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Activer
-                          </>
-                        )}
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={onDelete} className="text-destructive">
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Supprimer
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+            <div className="flex flex-wrap items-center gap-2">
+              {product.category && (
+                <Badge variant="outline" className={`text-xs ${getCategoryColor(product.category)}`}>
+                  {product.category}
+                </Badge>
+              )}
+              {product.product_type && (
+                <Badge variant="outline" className="text-xs">
+                  {product.product_type}
+                </Badge>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <DollarSign className="h-3 w-3 text-green-600" />
+                <span className="font-semibold text-green-600">
+                  {product.price.toLocaleString()} {product.currency}
+                </span>
+              </div>
+              {product.rating > 0 && (
+                <div className="flex items-center gap-1">
+                  <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                  <span>{product.rating.toFixed(1)}</span>
+                  <span className="text-muted-foreground">({product.reviews_count})</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                <span>{formatDate(product.created_at)}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
+                <span>0 ventes</span>
               </div>
             </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex-shrink-0 flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onEdit}
+            >
+              <Edit className="h-4 w-4 mr-1" />
+              <span className="hidden lg:inline">Modifier</span>
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {onQuickView && (
+                  <DropdownMenuItem onClick={onQuickView}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    Aperçu rapide
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={handleCopyLink}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copier le lien
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handlePreview}>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Prévisualiser
+                </DropdownMenuItem>
+                {onDuplicate && (
+                  <DropdownMenuItem onClick={onDuplicate}>
+                    <FileStack className="h-4 w-4 mr-2" />
+                    Dupliquer
+                  </DropdownMenuItem>
+                )}
+                {onToggleStatus && (
+                  <DropdownMenuItem onClick={onToggleStatus}>
+                    {product.is_active ? (
+                      <>
+                        <EyeOff className="h-4 w-4 mr-2" />
+                        Désactiver
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="h-4 w-4 mr-2" />
+                        Activer
+                      </>
+                    )}
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Supprimer
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </CardContent>
