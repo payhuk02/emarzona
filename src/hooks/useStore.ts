@@ -93,19 +93,25 @@ export const useStore = () => {
 
   const fetchStore = useCallback(async () => {
     try {
+      console.log('🔍 [useStore] fetchStore appelé', { authLoading, user: user?.id });
+      
       // Attendre que l'authentification soit chargée
       if (authLoading) {
+        console.log('⏳ [useStore] En attente de l\'auth...');
         return;
       }
 
       setLoading(true);
+      console.log('🔄 [useStore] setLoading(true)');
       
       if (!user) {
+        console.log('❌ [useStore] Pas d\'utilisateur, setStore(null)');
         setStore(null);
         setLoading(false);
         return;
       }
 
+      console.log('📡 [useStore] Récupération du store pour user:', user.id);
       const { data, error } = await supabase
         .from('stores')
         .select('*')
@@ -113,14 +119,18 @@ export const useStore = () => {
         .limit(1);
 
       if (error) {
+        console.error('❌ [useStore] Erreur:', error);
         logger.error('Error fetching store:', error);
         setStore(null);
         return;
       }
       
       // Prendre le premier résultat s'il y en a un
-      setStore(data && data.length > 0 ? data[0] : null);
+      const storeData = data && data.length > 0 ? data[0] : null;
+      console.log('✅ [useStore] Store récupéré:', storeData?.id || 'null');
+      setStore(storeData);
     } catch (error) {
+      console.error('💥 [useStore] Exception:', error);
       logger.error('Error fetching store:', error);
       toast({
         title: "Erreur",
@@ -129,6 +139,7 @@ export const useStore = () => {
       });
     } finally {
       setLoading(false);
+      console.log('✅ [useStore] setLoading(false)');
     }
   }, [user, authLoading, toast]);
 

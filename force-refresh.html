@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Force Refresh - Payhula</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 { margin-bottom: 20px; }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+        .info {
+            margin-top: 30px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .step {
+            text-align: left;
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Forcer le rechargement de Payhula</h1>
+        <p>Cliquez sur le bouton ci-dessous pour vider le cache et recharger l'application</p>
+        
+        <button class="btn" onclick="forceRefresh()">
+            🚀 Vider le cache et recharger
+        </button>
+        
+        <div class="info">
+            <h3>OU suivez ces étapes manuellement :</h3>
+            <div class="step">1. Appuyez sur <strong>Ctrl + Shift + Delete</strong></div>
+            <div class="step">2. Sélectionnez "Images et fichiers en cache"</div>
+            <div class="step">3. Cliquez sur "Effacer les données"</div>
+            <div class="step">4. Appuyez sur <strong>Ctrl + Shift + R</strong></div>
+        </div>
+    </div>
+
+    <script>
+        function forceRefresh() {
+            // Vider tous les caches
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                    });
+                });
+            }
+            
+            // Vider le localStorage
+            localStorage.clear();
+            
+            // Vider le sessionStorage
+            sessionStorage.clear();
+            
+            // Rediriger vers la page produits avec un timestamp pour forcer le rechargement
+            const timestamp = new Date().getTime();
+            window.location.href = `http://localhost:8080/dashboard/products?refresh=${timestamp}`;
+        }
+    </script>
+</body>
+</html>
+
