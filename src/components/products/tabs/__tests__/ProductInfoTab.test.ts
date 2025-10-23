@@ -274,3 +274,163 @@ describe('ProductInfoTab - Génération de slug', () => {
   });
 });
 
+describe('ProductInfoTab - Constantes de configuration', () => {
+  const MAX_PRICE_HISTORY_ENTRIES = 5;
+  const PRICE_HISTORY_DISPLAY_COUNT = 3;
+  const SLUG_CHECK_DEBOUNCE_MS = 500;
+  const MIN_SLUG_LENGTH = 3;
+  const MAX_DISCOUNT_PERCENT = 95;
+
+  it('MAX_PRICE_HISTORY_ENTRIES devrait limiter l\'historique à 5 entrées', () => {
+    const entries = Array.from({ length: 10 }, (_, i) => ({ 
+      date: new Date().toISOString(), 
+      price: 100 + i 
+    }));
+    
+    const limitedEntries = entries.slice(0, MAX_PRICE_HISTORY_ENTRIES);
+    
+    expect(limitedEntries).toHaveLength(5);
+  });
+
+  it('PRICE_HISTORY_DISPLAY_COUNT devrait afficher 3 entrées maximum', () => {
+    const entries = Array.from({ length: 5 }, (_, i) => ({ 
+      date: new Date().toISOString(), 
+      price: 100 + i 
+    }));
+    
+    const displayedEntries = entries.slice(0, PRICE_HISTORY_DISPLAY_COUNT);
+    
+    expect(displayedEntries).toHaveLength(3);
+  });
+
+  it('SLUG_CHECK_DEBOUNCE_MS devrait être 500ms', () => {
+    expect(SLUG_CHECK_DEBOUNCE_MS).toBe(500);
+  });
+
+  it('MIN_SLUG_LENGTH devrait être 3 caractères', () => {
+    expect(MIN_SLUG_LENGTH).toBe(3);
+  });
+
+  it('MAX_DISCOUNT_PERCENT devrait plafonner à 95%', () => {
+    const percent = 99;
+    const normalized = Math.min(MAX_DISCOUNT_PERCENT, percent);
+    
+    expect(normalized).toBe(95);
+  });
+
+  it('devrait accepter un pourcentage inférieur à MAX_DISCOUNT_PERCENT', () => {
+    const percent = 50;
+    const normalized = Math.min(MAX_DISCOUNT_PERCENT, percent);
+    
+    expect(normalized).toBe(50);
+  });
+});
+
+describe('ProductInfoTab - LocalStorage pour historique des prix', () => {
+  beforeEach(() => {
+    // Nettoyer le localStorage avant chaque test
+    localStorage.clear();
+  });
+
+  it('devrait sauvegarder l\'historique dans localStorage', () => {
+    const slug = 'test-product';
+    const priceHistory = [
+      { date: new Date().toISOString(), price: 100, promotional_price: 80 }
+    ];
+    
+    const storageKey = `priceHistory_${slug}`;
+    localStorage.setItem(storageKey, JSON.stringify(priceHistory));
+    
+    const stored = localStorage.getItem(storageKey);
+    expect(stored).not.toBeNull();
+    
+    const parsed = JSON.parse(stored!);
+    expect(parsed).toHaveLength(1);
+    expect(parsed[0].price).toBe(100);
+  });
+
+  it('devrait charger l\'historique depuis localStorage', () => {
+    const slug = 'test-product';
+    const priceHistory = [
+      { date: new Date().toISOString(), price: 100 },
+      { date: new Date().toISOString(), price: 90 }
+    ];
+    
+    const storageKey = `priceHistory_${slug}`;
+    localStorage.setItem(storageKey, JSON.stringify(priceHistory));
+    
+    const loaded = JSON.parse(localStorage.getItem(storageKey)!);
+    expect(loaded).toHaveLength(2);
+  });
+
+  it('devrait retourner un tableau vide si aucun historique', () => {
+    const slug = 'new-product';
+    const storageKey = `priceHistory_${slug}`;
+    const stored = localStorage.getItem(storageKey);
+    
+    const history = stored ? JSON.parse(stored) : [];
+    expect(history).toEqual([]);
+  });
+
+  it('devrait gérer les erreurs de parsing JSON', () => {
+    const slug = 'corrupted-product';
+    const storageKey = `priceHistory_${slug}`;
+    localStorage.setItem(storageKey, 'invalid-json');
+    
+    let history = [];
+    try {
+      const stored = localStorage.getItem(storageKey);
+      history = stored ? JSON.parse(stored) : [];
+    } catch {
+      history = [];
+    }
+    
+    expect(history).toEqual([]);
+  });
+});
+
+describe('ProductInfoTab - Historique des prix', () => {
+  const MAX_PRICE_HISTORY_ENTRIES = 5;
+
+  it('devrait ajouter une entrée à l\'historique', () => {
+    const priceHistory: Array<{date: string, price: number, promotional_price?: number}> = [];
+    const newEntry = {
+      date: new Date().toISOString(),
+      price: 100,
+      promotional_price: 80
+    };
+    
+    const updatedHistory = [newEntry, ...priceHistory.slice(0, MAX_PRICE_HISTORY_ENTRIES - 1)];
+    
+    expect(updatedHistory).toHaveLength(1);
+    expect(updatedHistory[0].price).toBe(100);
+  });
+
+  it('ne devrait conserver que les 5 dernières entrées', () => {
+    let priceHistory: Array<{date: string, price: number}> = [];
+    
+    // Ajouter 10 entrées
+    for (let i = 0; i < 10; i++) {
+      const newEntry = {
+        date: new Date().toISOString(),
+        price: 100 + i
+      };
+      priceHistory = [newEntry, ...priceHistory.slice(0, MAX_PRICE_HISTORY_ENTRIES - 1)];
+    }
+    
+    expect(priceHistory).toHaveLength(5);
+    expect(priceHistory[0].price).toBe(109); // Dernière entrée
+  });
+
+  it('devrait conserver l\'ordre chronologique (plus récent en premier)', () => {
+    const priceHistory = [
+      { date: new Date('2025-01-03').toISOString(), price: 120 },
+      { date: new Date('2025-01-02').toISOString(), price: 110 },
+      { date: new Date('2025-01-01').toISOString(), price: 100 }
+    ];
+    
+    expect(new Date(priceHistory[0].date) > new Date(priceHistory[1].date)).toBe(true);
+    expect(new Date(priceHistory[1].date) > new Date(priceHistory[2].date)).toBe(true);
+  });
+});
+

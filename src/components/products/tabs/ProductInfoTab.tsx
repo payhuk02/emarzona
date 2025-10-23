@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CURRENCIES, getCurrencySymbol, type Currency } from "@/lib/currencies";
 import { 
   CalendarIcon, 
@@ -50,6 +52,9 @@ import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { generateSlug } from "@/lib/store-utils";
 import { useToast } from "@/hooks/use-toast";
+import { useProductPricing } from "@/hooks/useProductPricing";
+import { useSlugAvailability } from "@/hooks/useSlugAvailability";
+import { ProductTypeSelector } from "./ProductInfoTab/ProductTypeSelector";
 
 /**
  * Interface pour les données du formulaire de produit
@@ -95,36 +100,6 @@ interface ProductInfoTabProps {
 }
 
 // Constantes pour les choix dynamiques
-const PRODUCT_TYPES = [
-  { 
-    value: "digital", 
-    label: "Produit Digital", 
-    icon: Smartphone, 
-    description: "Ebooks, formations, logiciels, templates, fichiers téléchargeables",
-    features: ["Téléchargement instantané", "Pas de stock", "Livraison automatique"],
-    color: "blue",
-    popular: true
-  },
-  { 
-    value: "physical", 
-    label: "Produit Physique", 
-    icon: Package, 
-    description: "Vêtements, accessoires, objets artisanaux, produits manufacturés",
-    features: ["Livraison requise", "Gestion stock", "Adresse client"],
-    color: "green",
-    popular: false
-  },
-  { 
-    value: "service", 
-    label: "Service", 
-    icon: Wrench, 
-    description: "Consultations, coaching, design, développement, maintenance",
-    features: ["Rendez-vous", "Prestation", "Sur mesure"],
-    color: "purple",
-    popular: false
-  },
-];
-
 const DIGITAL_CATEGORIES = [
   { value: "formation", label: "Formation", icon: Users },
   { value: "ebook", label: "Ebook", icon: Package },
@@ -219,35 +194,33 @@ const ACCESS_CONTROLS = [
   },
 ];
 
+// Configuration constantes
+const PRICE_HISTORY_DISPLAY_COUNT = 3; // Nombre d'entrées affichées dans l'UI
+const MAX_DISCOUNT_PERCENT = 95; // Pourcentage de réduction maximum autorisé
+
 // CURRENCIES importé depuis @/lib/currencies pour éviter la duplication
 
 export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugAvailability, validationErrors = {}, storeCurrency }: ProductInfoTabProps) => {
-  const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
-  const [checkingSlug, setCheckingSlug] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
-  const [priceHistory, setPriceHistory] = useState<Array<{date: string, price: number, promotional_price?: number}>>([]);
   const [lastType, setLastType] = useState<string | null>(formData.product_type || null);
+  const [showTypeChangeDialog, setShowTypeChangeDialog] = useState(false);
+  const [pendingTypeChange, setPendingTypeChange] = useState<string | null>(null);
   const { toast } = useToast();
-
-  // Vérification de disponibilité du slug avec debounce
-  useEffect(() => {
-    const checkSlug = async () => {
-      if (formData.slug && formData.slug.length > 2) {
-        setCheckingSlug(true);
-        try {
-          const available = await checkSlugAvailability(formData.slug);
-          setSlugAvailable(available);
-        } catch (error) {
-          console.error('Erreur lors de la vérification du slug:', error);
-          setSlugAvailable(null);
-        } finally {
-          setCheckingSlug(false);
-        }
-      }
-    };
-    const timeout = setTimeout(checkSlug, 500);
-    return () => clearTimeout(timeout);
-  }, [formData.slug, checkSlugAvailability]);
+  
+  // Hooks personnalisés pour la logique métier
+  const {
+    priceHistory,
+    getDiscountPercentage,
+    setDiscountFromPercent,
+    addPriceToHistory,
+    calculateMargin,
+    calculateSavings,
+  } = useProductPricing(formData, updateFormData);
+  
+  const { slugAvailable, checkingSlug } = useSlugAvailability(
+    formData.slug,
+    checkSlugAvailability
+  );
 
   /**
    * Génère automatiquement le slug à partir du nom du produit
@@ -279,44 +252,6 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
     updateFormData("slug", newSlug);
   }, [formData.name, updateFormData]);
 
-  /**
-   * Ajoute une entrée à l'historique des prix
-   * Conserve les 5 dernières modifications pour le suivi
-   * @param price - Prix principal du produit
-   * @param promotionalPrice - Prix promotionnel optionnel
-   */
-  const addPriceToHistory = useCallback((price: number, promotionalPrice?: number) => {
-    const newEntry = {
-      date: new Date().toISOString(),
-      price,
-      promotional_price: promotionalPrice
-    };
-    setPriceHistory(prev => [newEntry, ...prev.slice(0, 4)]); // Garder seulement les 5 dernières entrées
-  }, []);
-
-  /**
-   * Calcule le pourcentage de réduction entre le prix normal et le prix promotionnel
-   * @returns Pourcentage de réduction (0-100) ou 0 si pas de réduction
-   */
-  const getDiscountPercentage = useCallback(() => {
-    if (formData.price && formData.promotional_price && formData.promotional_price < formData.price) {
-      return Math.round(((formData.price - formData.promotional_price) / formData.price) * 100);
-    }
-    return 0;
-  }, [formData.price, formData.promotional_price]);
-
-  /**
-   * Calcule et applique le prix promotionnel à partir d'un pourcentage de réduction
-   * Le pourcentage est plafonné entre 0% et 95%
-   * @param percent - Pourcentage de réduction souhaité (0-95)
-   */
-  const setDiscountFromPercent = useCallback((percent: number) => {
-    const normalized = Math.max(0, Math.min(95, percent || 0));
-    if (!formData.price || formData.price <= 0) return;
-    const newPromo = Number((formData.price * (1 - normalized / 100)).toFixed(2));
-    updateFormData("promotional_price", normalized > 0 ? newPromo : null);
-    addPriceToHistory(formData.price, normalized > 0 ? newPromo : undefined);
-  }, [formData.price, updateFormData, addPriceToHistory]);
 
   /**
    * Valide que la date de fin de vente est postérieure à la date de début
@@ -364,124 +299,49 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
     return category?.icon || Package;
   }, [categories]);
 
+  /**
+   * Gère la demande de changement de type de produit
+   * Affiche un dialog de confirmation si un type existe déjà
+   */
+  const handleTypeChangeRequest = useCallback((newType: string) => {
+    if (lastType && lastType !== newType) {
+      setPendingTypeChange(newType);
+      setShowTypeChangeDialog(true);
+    } else {
+      setLastType(newType);
+      updateFormData("product_type", newType);
+    }
+  }, [lastType, updateFormData]);
+
+  /**
+   * Confirme le changement de type de produit
+   */
+  const confirmTypeChange = useCallback(() => {
+    if (pendingTypeChange) {
+      setLastType(pendingTypeChange);
+      updateFormData("product_type", pendingTypeChange);
+      setPendingTypeChange(null);
+    }
+    setShowTypeChangeDialog(false);
+  }, [pendingTypeChange, updateFormData]);
+
+  /**
+   * Annule le changement de type de produit
+   */
+  const cancelTypeChange = useCallback(() => {
+    setPendingTypeChange(null);
+    setShowTypeChangeDialog(false);
+  }, []);
+
   return (
     <TooltipProvider>
       <div className="space-y-6">
         {/* Sélecteur de type de produit */}
-        <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/20">
-                  <Package className="h-5 w-5 text-blue-400" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg font-semibold text-white">Type de produit</CardTitle>
-                  <CardDescription className="text-gray-400">
-                    Choisissez le type de produit que vous souhaitez vendre
-                  </CardDescription>
-                </div>
-              </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                    <HelpCircle className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Le type de produit détermine les fonctionnalités disponibles</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {PRODUCT_TYPES.map((type) => {
-                const Icon = type.icon;
-                const isSelected = formData.product_type === type.value;
-                const colorClasses = {
-                  blue: isSelected ? "border-blue-400 bg-blue-400/10" : "border-gray-600 hover:border-blue-400",
-                  green: isSelected ? "border-green-400 bg-green-400/10" : "border-gray-600 hover:border-green-400",
-                  purple: isSelected ? "border-purple-400 bg-purple-400/10" : "border-gray-600 hover:border-purple-400",
-                };
-                const iconColorClasses = {
-                  blue: "text-blue-400",
-                  green: "text-green-400", 
-                  purple: "text-purple-400",
-                };
-                
-                return (
-                  <Card
-                    key={type.value}
-                    className={cn(
-                      "cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-2 touch-manipulation min-h-[140px] sm:min-h-[160px]",
-                      colorClasses[type.color as keyof typeof colorClasses]
-                    )}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Sélectionner le type de produit ${type.label}`}
-                    aria-pressed={formData.product_type === type.value}
-                    onClick={() => {
-                      if (lastType && lastType !== type.value) {
-                        const confirmChange = window.confirm("Changer le type peut réinitialiser certains champs incompatibles. Continuer ?");
-                        if (!confirmChange) return;
-                      }
-                      setLastType(type.value);
-                      updateFormData("product_type", type.value);
-                    }}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className={cn("p-2 rounded-lg", isSelected ? "bg-current/20" : "bg-gray-700")}>
-                            <Icon className={cn("h-6 w-6", iconColorClasses[type.color as keyof typeof iconColorClasses])} />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-white text-base">{type.label}</h3>
-                            {type.popular && (
-                              <Badge variant="secondary" className="mt-1 text-xs">
-                                <Star className="h-3 w-3 mr-1" />
-                                Populaire
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                        {isSelected && (
-                          <CheckCircle2 className="h-5 w-5 text-green-400" />
-                        )}
-                      </div>
-                      
-                      <p className="text-sm text-gray-400 mb-4 leading-relaxed">
-                        {type.description}
-                      </p>
-                      
-                      <div className="flex flex-wrap gap-2">
-                        {type.features.map((feature, index) => (
-                          <Badge 
-                            key={index} 
-                            variant="outline" 
-                            className="text-xs bg-gray-700/50 border-gray-600 text-gray-300"
-                          >
-                            {feature}
-                          </Badge>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-            
-            {validationErrors.product_type && (
-              <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                <p className="text-red-400 text-sm flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4" />
-                  {validationErrors.product_type}
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <ProductTypeSelector
+          selectedType={formData.product_type}
+          onTypeChange={handleTypeChangeRequest}
+          validationError={validationErrors.product_type}
+        />
 
         {/* Informations de base */}
         <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
@@ -957,10 +817,10 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   <Input
                     type="number"
                     value={getDiscountPercentage() || ""}
-                    onChange={(e) => setDiscountFromPercent(parseFloat(e.target.value))}
+                    onChange={(e) => setDiscountFromPercent(parseFloat(e.target.value), MAX_DISCOUNT_PERCENT)}
                     placeholder="0"
                     min="0"
-                    max="95"
+                    max={MAX_DISCOUNT_PERCENT}
                     step="1"
                     className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 pr-8"
                   />
@@ -973,7 +833,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                 <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
                   <TrendingUp className="h-4 w-4 text-green-400" />
                   <span className="text-sm text-green-400">
-                    Réduction de {getDiscountPercentage()}% - Économie de {((formData.price - formData.promotional_price) || 0).toLocaleString()} {getCurrencySymbol(formData.currency)}
+                    Réduction de {getDiscountPercentage()}% - Économie de {calculateSavings().toLocaleString()} {getCurrencySymbol(formData.currency)}
                   </span>
                 </div>
               )}
@@ -982,8 +842,8 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                 <div className="flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                   <TrendingUp className="h-4 w-4 text-blue-400" />
                   <span className="text-sm text-blue-300">
-                    Marge estimée: {Math.max(0, ((formData.promotional_price ?? formData.price) - (formData.cost_price || 0))).toLocaleString()} {getCurrencySymbol(formData.currency)}
-                    {formData.cost_price ? ` (${Math.max(0, Math.round((((formData.promotional_price ?? formData.price) - formData.cost_price) / Math.max(1, (formData.promotional_price ?? formData.price))) * 100))}%)` : ""}
+                    Marge estimée: {calculateMargin().marginValue.toLocaleString()} {getCurrencySymbol(formData.currency)}
+                    {formData.cost_price ? ` (${calculateMargin().marginPercent}%)` : ""}
                   </span>
                 </div>
               )}
@@ -1001,7 +861,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-white">Historique des prix</Label>
                 <div className="space-y-2">
-                  {priceHistory.slice(0, 3).map((entry, index) => (
+                  {priceHistory.slice(0, PRICE_HISTORY_DISPLAY_COUNT).map((entry, index) => (
                     <div key={index} className="flex items-center justify-between p-2 bg-gray-700/30 rounded border border-gray-600">
                       <div className="flex items-center gap-2">
                         <Clock className="h-3 w-3 text-gray-400" />
@@ -1435,6 +1295,33 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
             </div>
           </CardContent>
         </Card>
+
+        {/* Dialog de confirmation de changement de type */}
+        <AlertDialog open={showTypeChangeDialog} onOpenChange={setShowTypeChangeDialog}>
+          <AlertDialogContent className="bg-gray-800 border-gray-700">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-white">Confirmer le changement de type</AlertDialogTitle>
+              <AlertDialogDescription className="text-gray-400">
+                Changer le type de produit peut réinitialiser certains champs incompatibles (comme la catégorie). 
+                Êtes-vous sûr de vouloir continuer ?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel 
+                onClick={cancelTypeChange}
+                className="bg-gray-700 text-white hover:bg-gray-600 border-gray-600"
+              >
+                Annuler
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={confirmTypeChange}
+                className="bg-primary text-white hover:bg-primary/90"
+              >
+                Confirmer
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </TooltipProvider>
   );
