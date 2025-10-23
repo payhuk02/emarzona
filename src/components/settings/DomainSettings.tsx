@@ -6,6 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle 
+} from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
@@ -69,6 +79,16 @@ export const DomainSettings = () => {
   
   const [verifying, setVerifying] = useState<boolean>(false);
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
+  
+  // États pour les dialogues
+  const [showInvalidDomainDialog, setShowInvalidDomainDialog] = useState(false);
+  const [showNoStoreDialog, setShowNoStoreDialog] = useState(false);
+  const [showDisconnectConfirmDialog, setShowDisconnectConfirmDialog] = useState(false);
+  const [verificationResult, setVerificationResult] = useState<{
+    success: boolean;
+    domain: string;
+    message: string;
+  } | null>(null);
   
   const [propagationStatus, setPropagationStatus] = useState<{
     isChecking: boolean;
@@ -167,12 +187,12 @@ export const DomainSettings = () => {
 
   const handleConnectDomain = async () => {
     if (!currentStore) {
-      alert("Erreur: Aucune boutique trouvée");
+      setShowNoStoreDialog(true);
       return;
     }
 
     if (!validateDomain(domainInput)) {
-      alert("Domaine invalide: Veuillez entrer un nom de domaine valide (ex: maboutique.com)");
+      setShowInvalidDomainDialog(true);
       return;
     }
 
@@ -262,12 +282,13 @@ export const DomainSettings = () => {
     }
   };
 
-  const handleDisconnectDomain = async () => {
+  const handleDisconnectDomain = () => {
     if (!currentStore) return;
+    setShowDisconnectConfirmDialog(true);
+  };
 
-    if (!confirm("Êtes-vous sûr de vouloir déconnecter ce domaine ? Cette action est irréversible.")) {
-      return;
-    }
+  const confirmDisconnectDomain = async () => {
+    if (!currentStore) return;
 
     setLoading(true);
     try {
@@ -297,6 +318,7 @@ export const DomainSettings = () => {
       });
     } finally {
       setLoading(false);
+      setShowDisconnectConfirmDialog(false);
     }
   };
 
@@ -377,7 +399,11 @@ export const DomainSettings = () => {
       // Vérification DNS réelle
       const domain = domainConfig.custom_domain;
       if (!domain) {
-        alert("Aucun domaine configuré");
+        toast({
+          title: "Erreur",
+          description: "Aucun domaine configuré",
+          variant: "destructive"
+        });
         return;
       }
 
@@ -408,7 +434,11 @@ export const DomainSettings = () => {
             ssl_enabled: true
           }));
           
-          alert(`✅ Domaine ${domain} vérifié avec succès !\n\nPropagation DNS complète en ${Math.floor(propagationCheck.propagationTime / 60)} minutes.\n\nSSL activé automatiquement.`);
+          setVerificationResult({
+            success: true,
+            domain,
+            message: `Propagation DNS complète en ${Math.floor(propagationCheck.propagationTime / 60)} minutes. SSL activé automatiquement.`
+          });
         }
       } else {
         // Erreurs de propagation DNS
@@ -428,7 +458,11 @@ export const DomainSettings = () => {
           }));
         }
         
-        alert(`❌ Erreur de vérification du domaine ${domain}:\n\n${errorMessages}\n\nVeuillez vérifier vos enregistrements DNS et réessayer.`);
+        setVerificationResult({
+          success: false,
+          domain,
+          message: `${errorMessages}\n\nVeuillez vérifier vos enregistrements DNS et réessayer.`
+        });
       }
     } catch (error) {
       console.error('Erreur lors de la vérification:', error);
@@ -448,7 +482,11 @@ export const DomainSettings = () => {
         }));
       }
       
-      alert("❌ Erreur lors de la vérification du domaine. Veuillez réessayer.");
+      setVerificationResult({
+        success: false,
+        domain: domainConfig.custom_domain || '',
+        message: "Erreur lors de la vérification du domaine. Veuillez réessayer."
+      });
     } finally {
       setVerifying(false);
     }
@@ -1131,6 +1169,122 @@ export const DomainSettings = () => {
           </TabsContent>
         </Tabs>
       )}
+
+      {/* Dialog: Domaine invalide */}
+      <AlertDialog open={showInvalidDomainDialog} onOpenChange={setShowInvalidDomainDialog}>
+        <AlertDialogContent className="bg-gray-800 border-gray-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-400" />
+              Domaine invalide
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400">
+              Veuillez entrer un nom de domaine valide (ex: maboutique.com ou boutique.monsite.com).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction 
+              onClick={() => setShowInvalidDomainDialog(false)}
+              className="bg-primary text-white hover:bg-primary/90"
+            >
+              Compris
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Dialog: Aucune boutique trouvée */}
+      <AlertDialog open={showNoStoreDialog} onOpenChange={setShowNoStoreDialog}>
+        <AlertDialogContent className="bg-gray-800 border-gray-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-400" />
+              Erreur
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400">
+              Aucune boutique trouvée. Veuillez créer une boutique avant de configurer un domaine.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction 
+              onClick={() => setShowNoStoreDialog(false)}
+              className="bg-primary text-white hover:bg-primary/90"
+            >
+              Compris
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Dialog: Confirmation déconnexion */}
+      <AlertDialog open={showDisconnectConfirmDialog} onOpenChange={setShowDisconnectConfirmDialog}>
+        <AlertDialogContent className="bg-gray-800 border-gray-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Déconnecter le domaine ?</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400">
+              Êtes-vous sûr de vouloir déconnecter ce domaine ? Cette action est irréversible et votre domaine sera immédiatement déconnecté de cette boutique.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => setShowDisconnectConfirmDialog(false)}
+              className="bg-gray-700 text-white hover:bg-gray-600 border-gray-600"
+            >
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDisconnectDomain}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              Déconnecter
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Dialog: Résultat de vérification */}
+      <AlertDialog open={!!verificationResult} onOpenChange={(open) => !open && setVerificationResult(null)}>
+        <AlertDialogContent className="bg-gray-800 border-gray-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white flex items-center gap-2">
+              {verificationResult?.success ? (
+                <>
+                  <CheckCircle2 className="h-5 w-5 text-green-400" />
+                  Domaine vérifié avec succès !
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-5 w-5 text-red-400" />
+                  Erreur de vérification
+                </>
+              )}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400 whitespace-pre-line">
+              {verificationResult?.success ? (
+                <>
+                  <strong className="text-white">Domaine : {verificationResult.domain}</strong>
+                  <br /><br />
+                  {verificationResult.message}
+                </>
+              ) : (
+                <>
+                  <strong className="text-white">Domaine : {verificationResult?.domain}</strong>
+                  <br /><br />
+                  {verificationResult?.message}
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction 
+              onClick={() => setVerificationResult(null)}
+              className="bg-primary text-white hover:bg-primary/90"
+            >
+              Fermer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
