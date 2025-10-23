@@ -20,6 +20,8 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { 
   Globe, 
   Check, 
@@ -232,30 +234,14 @@ export const DomainSettings = () => {
 
     setPropagationStatus(prev => ({ ...prev, isChecking: true }));
     try {
-      // Simulation de vérification de propagation DNS
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const propagationTime = Math.floor(Math.random() * 300) + 60; // 1-5 minutes
-      const isPropagated = Math.random() > 0.2; // 80% de succès pour la démo
-      
-      const details = {
-        aRecord: Math.random() > 0.1, // 90% de succès
-        wwwRecord: Math.random() > 0.15, // 85% de succès
-        txtRecord: Math.random() > 0.2, // 80% de succès
-        cnameRecord: Math.random() > 0.3 // 70% de succès
-      };
-      
-      const errors: string[] = [];
-      if (!details.aRecord) errors.push("Enregistrement A principal non propagé");
-      if (!details.wwwRecord) errors.push("Enregistrement A www non propagé");
-      if (!details.txtRecord) errors.push("Enregistrement TXT de vérification non propagé");
-      if (!details.cnameRecord) errors.push("Enregistrement CNAME non propagé");
+      // Vraie vérification DNS via Google DNS over HTTPS
+      const propagationCheck = await checkDNSPropagation(domainConfig.custom_domain);
       
       const result = {
-        isPropagated,
-        propagationTime,
-        details,
-        errors
+        isPropagated: propagationCheck.isPropagated,
+        propagationTime: propagationCheck.propagationTime,
+        details: propagationCheck.details,
+        errors: propagationCheck.errors
       };
 
       setPropagationStatus({
@@ -265,11 +251,11 @@ export const DomainSettings = () => {
       });
 
       toast({
-        title: isPropagated ? "Propagation DNS complète" : "Propagation DNS incomplète",
-        description: isPropagated 
-          ? `Temps de propagation: ${Math.floor(propagationTime / 60)} minutes`
-          : `Erreurs détectées: ${errors.join(', ')}`,
-        variant: isPropagated ? "default" : "destructive"
+        title: propagationCheck.isPropagated ? "Propagation DNS complète" : "Propagation DNS incomplète",
+        description: propagationCheck.isPropagated 
+          ? `Vérification réussie en ${Math.floor(propagationCheck.propagationTime / 1000)} secondes`
+          : `Erreurs détectées: ${propagationCheck.errors.slice(0, 2).join(', ')}${propagationCheck.errors.length > 2 ? '...' : ''}`,
+        variant: propagationCheck.isPropagated ? "default" : "destructive"
       });
     } catch (error) {
       console.error('Error checking propagation:', error);
@@ -323,49 +309,78 @@ export const DomainSettings = () => {
   };
 
   const checkDNSPropagation = async (domain: string) => {
+    const startTime = Date.now();
+    const errors: string[] = [];
+    const details = {
+      aRecord: false,
+      wwwRecord: false,
+      txtRecord: false,
+      cnameRecord: false
+    };
+
     try {
-      // Simulation de vérification DNS réelle
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Simulation de vérification des enregistrements DNS
-      const errors: string[] = [];
-      const details = {
-        aRecord: false,
-        wwwRecord: false,
-        txtRecord: false,
-        cnameRecord: false
-      };
-      
-      // Simulation de vérification A record
-      const aRecordCheck = Math.random() > 0.3; // 70% de chance de succès
-      details.aRecord = aRecordCheck;
-      if (!aRecordCheck) {
-        errors.push("Enregistrement A manquant ou incorrect");
+      // Vérifier enregistrement A principal
+      try {
+        const aResponse = await fetch(`https://dns.google/resolve?name=${domain}&type=A`);
+        const aData = await aResponse.json();
+        
+        if (aData.Answer && aData.Answer.length > 0) {
+          const targetIP = '185.158.133.1';
+          details.aRecord = aData.Answer.some((answer: any) => answer.data === targetIP);
+          if (!details.aRecord) {
+            errors.push(`Enregistrement A incorrect: pointetoward ${aData.Answer[0].data} au lieu de ${targetIP}`);
+          }
+        } else {
+          errors.push("Enregistrement A manquant");
+        }
+      } catch (e) {
+        errors.push("Erreur lors de la vérification de l'enregistrement A");
       }
-      
-      // Simulation de vérification WWW record
-      const wwwRecordCheck = Math.random() > 0.2; // 80% de chance de succès
-      details.wwwRecord = wwwRecordCheck;
-      if (!wwwRecordCheck) {
-        errors.push("Enregistrement WWW manquant ou incorrect");
+
+      // Vérifier enregistrement A www
+      try {
+        const wwwResponse = await fetch(`https://dns.google/resolve?name=www.${domain}&type=A`);
+        const wwwData = await wwwResponse.json();
+        
+        if (wwwData.Answer && wwwData.Answer.length > 0) {
+          const targetIP = '185.158.133.1';
+          details.wwwRecord = wwwData.Answer.some((answer: any) => answer.data === targetIP);
+          if (!details.wwwRecord) {
+            errors.push(`Enregistrement WWW incorrect: pointe vers ${wwwData.Answer[0].data} au lieu de ${targetIP}`);
+          }
+        } else {
+          errors.push("Enregistrement WWW manquant");
+        }
+      } catch (e) {
+        errors.push("Erreur lors de la vérification de l'enregistrement WWW");
       }
-      
-      // Simulation de vérification TXT record (vérification)
-      const txtRecordCheck = Math.random() > 0.4; // 60% de chance de succès
-      details.txtRecord = txtRecordCheck;
-      if (!txtRecordCheck) {
-        errors.push("Enregistrement TXT de vérification manquant ou incorrect");
+
+      // Vérifier enregistrement TXT de vérification
+      try {
+        const txtResponse = await fetch(`https://dns.google/resolve?name=_payhula-verification.${domain}&type=TXT`);
+        const txtData = await txtResponse.json();
+        
+        if (txtData.Answer && txtData.Answer.length > 0) {
+          const expectedToken = domainConfig.domain_verification_token || '';
+          details.txtRecord = txtData.Answer.some((answer: any) => 
+            answer.data && answer.data.replace(/"/g, '') === expectedToken
+          );
+          if (!details.txtRecord) {
+            errors.push("Token de vérification TXT incorrect ou manquant");
+          }
+        } else {
+          errors.push("Enregistrement TXT de vérification manquant");
+        }
+      } catch (e) {
+        errors.push("Erreur lors de la vérification de l'enregistrement TXT");
       }
-      
-      // Simulation de vérification CNAME record
-      const cnameRecordCheck = Math.random() > 0.5; // 50% de chance de succès
-      details.cnameRecord = cnameRecordCheck;
-      if (!cnameRecordCheck) {
-        errors.push("Enregistrement CNAME manquant ou incorrect");
-      }
-      
-      const isPropagated = aRecordCheck && wwwRecordCheck && txtRecordCheck;
-      const propagationTime = Math.floor(Math.random() * 300) + 60; // 1-5 minutes
+
+      // Note: CNAME n'est généralement pas utilisé avec des domaines apex, 
+      // donc nous le marquons comme optionnel
+      details.cnameRecord = true;
+
+      const isPropagated = details.aRecord && details.wwwRecord && details.txtRecord;
+      const propagationTime = Date.now() - startTime;
       
       return {
         isPropagated,
@@ -384,7 +399,7 @@ export const DomainSettings = () => {
           txtRecord: false,
           cnameRecord: false
         },
-        errors: ["Erreur lors de la vérification DNS"],
+        errors: ["Erreur générale lors de la vérification DNS"],
         propagationTime: 0,
         lastCheck: new Date()
       };
@@ -501,6 +516,10 @@ export const DomainSettings = () => {
       });
 
       if (success) {
+        setDomainConfig(prev => ({
+          ...prev,
+          ssl_enabled: !prev.ssl_enabled
+        }));
         toast({
           title: "SSL mis à jour",
           description: `SSL ${!domainConfig.ssl_enabled ? 'activé' : 'désactivé'} pour votre domaine.`
@@ -516,9 +535,68 @@ export const DomainSettings = () => {
     }
   };
 
+  const handleToggleRedirectHTTPS = async () => {
+    if (!currentStore) return;
+
+    try {
+      const success = await updateStore(currentStore.id, {
+        redirect_https: !domainConfig.redirect_https
+      });
+
+      if (success) {
+        setDomainConfig(prev => ({
+          ...prev,
+          redirect_https: !prev.redirect_https
+        }));
+        toast({
+          title: "Redirection HTTPS mise à jour",
+          description: `Redirection HTTPS ${!domainConfig.redirect_https ? 'activée' : 'désactivée'}.`
+        });
+      }
+    } catch (error) {
+      console.error('Error updating redirect HTTPS:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour la redirection HTTPS.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleToggleRedirectWWW = async () => {
+    if (!currentStore) return;
+
+    try {
+      const success = await updateStore(currentStore.id, {
+        redirect_www: !domainConfig.redirect_www
+      });
+
+      if (success) {
+        setDomainConfig(prev => ({
+          ...prev,
+          redirect_www: !prev.redirect_www
+        }));
+        toast({
+          title: "Redirection WWW mise à jour",
+          description: `Redirection WWW ${!domainConfig.redirect_www ? 'activée' : 'désactivée'}.`
+        });
+      }
+    } catch (error) {
+      console.error('Error updating redirect WWW:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour la redirection WWW.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    alert("Copié dans le presse-papiers");
+    toast({
+      title: "Copié !",
+      description: "La valeur a été copiée dans le presse-papiers"
+    });
   };
 
   const getStatusBadge = () => {
@@ -769,24 +847,51 @@ export const DomainSettings = () => {
                     Sécurité
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">SSL/TLS</span>
-                    <Badge variant={domainConfig.ssl_enabled ? "default" : "secondary"}>
-                      {domainConfig.ssl_enabled ? "Actif" : "Inactif"}
-                    </Badge>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="ssl-enabled" className="text-sm font-medium">SSL/TLS</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Active le certificat SSL pour sécuriser votre domaine
+                      </p>
+                    </div>
+                    <Switch
+                      id="ssl-enabled"
+                      checked={domainConfig.ssl_enabled}
+                      onCheckedChange={handleToggleSSL}
+                      disabled={domainConfig.domain_status !== 'verified' || loading}
+                      className="touch-manipulation"
+                    />
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Redirection HTTPS</span>
-                    <Badge variant={domainConfig.redirect_https ? "default" : "secondary"}>
-                      {domainConfig.redirect_https ? "Activée" : "Désactivée"}
-                    </Badge>
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="redirect-https" className="text-sm font-medium">Redirection HTTPS</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Force la redirection vers HTTPS automatiquement
+                      </p>
+                    </div>
+                    <Switch
+                      id="redirect-https"
+                      checked={domainConfig.redirect_https}
+                      onCheckedChange={handleToggleRedirectHTTPS}
+                      disabled={!domainConfig.ssl_enabled || loading}
+                      className="touch-manipulation"
+                    />
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Redirection WWW</span>
-                    <Badge variant={domainConfig.redirect_www ? "default" : "secondary"}>
-                      {domainConfig.redirect_www ? "Activée" : "Désactivée"}
-                    </Badge>
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="redirect-www" className="text-sm font-medium">Redirection WWW</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Redirige www.votredomaine.com vers votredomaine.com
+                      </p>
+                    </div>
+                    <Switch
+                      id="redirect-www"
+                      checked={domainConfig.redirect_www}
+                      onCheckedChange={handleToggleRedirectWWW}
+                      disabled={loading}
+                      className="touch-manipulation"
+                    />
                   </div>
                 </CardContent>
               </Card>
