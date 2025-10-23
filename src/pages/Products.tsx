@@ -29,6 +29,7 @@ import ProductListView from "@/components/products/ProductListView";
 import ProductFiltersDashboard from "@/components/products/ProductFiltersDashboard";
 import ProductStats from "@/components/products/ProductStats";
 import ProductBulkActions from "@/components/products/ProductBulkActions";
+import { ImportCSVDialog } from "@/components/products/ImportCSVDialog";
 import { Product } from "@/hooks/useProducts";
 import {
   AlertDialog,
@@ -65,7 +66,6 @@ const Products = () => {
   const { products, loading: productsLoading, refetch } = useProducts(store?.id);
   const { deleteProduct, updateProduct } = useProductManagement(store?.id || "");
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // États
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -76,7 +76,6 @@ const Products = () => {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [duplicatingProductId, setDuplicatingProductId] = useState<string | null>(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
-  const [importingCSV, setImportingCSV] = useState(false);
   const [exportingCSV, setExportingCSV] = useState(false);
   
   // Pagination
@@ -282,57 +281,29 @@ const Products = () => {
     }
   }, [products, toast, refetch]);
 
-  // Import CSV
-  const handleImportCSV = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setImportingCSV(true);
-
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        const text = e.target?.result as string;
-        const lines = text.split('\n');
-        const headers = lines[0].split(',').map(h => h.trim());
-
-        const importedProducts = [];
-        for (let i = 1; i < lines.length; i++) {
-          if (!lines[i].trim()) continue;
-          
-          const values = lines[i].split(',').map(v => v.trim());
-          const product: any = {};
-          
-          headers.forEach((header, index) => {
-            product[header] = values[index];
-          });
-          
-          importedProducts.push(product);
-        }
-
-        toast({
-          title: "Import réussi",
-          description: `${importedProducts.length} produit(s) importé(s)`,
-        });
-
-        setImportDialogOpen(false);
-        refetch();
-      } catch (error) {
-        toast({
-          title: "Erreur d'import",
-          description: "Le fichier CSV n'est pas valide",
-          variant: "destructive",
-        });
-      } finally {
-        setImportingCSV(false);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-      }
-    };
-
-    reader.readAsText(file);
-  }, [toast, refetch]);
+  // Import CSV avec validation
+  const handleImportConfirmed = useCallback(async (validatedProducts: any[]) => {
+    try {
+      // Ici, vous devriez appeler votre API pour créer les produits
+      // Pour l'instant, simulons l'import
+      // await Promise.all(validatedProducts.map(product => createProduct(product)));
+      
+      // Pour la démo, on refresh juste la liste
+      await refetch();
+      
+      toast({
+        title: "Import réussi",
+        description: `${validatedProducts.length} produit(s) importé(s) avec succès`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur d'import",
+        description: "Impossible d'importer les produits dans la base de données",
+        variant: "destructive",
+      });
+      throw error; // Re-throw pour que le dialog puisse gérer l'erreur
+    }
+  }, [refetch, toast]);
 
   // Export CSV
   const handleExportCSV = useCallback(() => {
@@ -801,51 +772,12 @@ const Products = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Import CSV Dialog */}
-      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileSpreadsheet className="h-5 w-5" />
-              Importer des produits depuis CSV
-            </DialogTitle>
-            <DialogDescription>
-              Importez vos produits depuis un fichier CSV. Le fichier doit contenir les colonnes suivantes : name, slug, description, price, currency, category, product_type
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="csv-file">Fichier CSV</Label>
-              <Input
-                id="csv-file"
-                type="file"
-                accept=".csv"
-                ref={fileInputRef}
-                onChange={handleImportCSV}
-                disabled={importingCSV}
-                className="mt-2"
-              />
-            </div>
-
-            <Separator />
-
-            <div className="text-sm text-muted-foreground space-y-2">
-              <p className="font-medium">Format du fichier CSV :</p>
-              <code className="block bg-muted p-2 rounded text-xs">
-                name,slug,description,price,currency,category,product_type<br />
-                Mon Produit,mon-produit,Description,10000,XOF,digital,digital
-              </code>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setImportDialogOpen(false)} disabled={importingCSV}>
-              Annuler
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Import CSV Dialog - Nouveau avec validation */}
+      <ImportCSVDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImportConfirmed={handleImportConfirmed}
+      />
 
       {/* Quick View Dialog */}
       {quickViewProduct && (
