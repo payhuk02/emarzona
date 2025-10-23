@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -91,7 +91,7 @@ export const useStore = () => {
     return `${window.location.origin}/stores/${slug}/products/${productSlug}`;
   };
 
-  const fetchStore = async () => {
+  const fetchStore = useCallback(async () => {
     try {
       // Attendre que l'authentification soit chargée
       if (authLoading) {
@@ -130,7 +130,7 @@ export const useStore = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, authLoading, toast]);
 
   const createStore = async (name: string, description?: string) => {
     try {
@@ -232,7 +232,7 @@ export const useStore = () => {
     if (!authLoading) {
       fetchStore();
     }
-  }, [user, authLoading]);
+  }, [authLoading, fetchStore]);
 
   return {
     store,
