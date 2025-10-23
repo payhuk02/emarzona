@@ -31,8 +31,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
+/**
+ * Form data interface pour ProductFilesTab
+ */
+interface ProductFormData {
+  downloadable_files?: FileItem[];
+  file_access_type?: 'immediate' | 'email' | 'manual';
+  download_limit?: number | null;
+  download_expiry_days?: number | null;
+}
+
 interface ProductFilesTabProps {
-  formData: any;
+  formData: ProductFormData;
   updateFormData: (field: string, value: any) => void;
   storeId: string;
 }
@@ -142,6 +152,9 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
     updateFormData("downloadable_files", files);
   };
 
+  /**
+   * Formate la taille d'un fichier en octets vers une unité lisible
+   */
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -164,8 +177,8 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
     <div className="space-y-6">
       {/* En-tête */}
       <div>
-        <h2 className="text-2xl font-bold">Fichiers et Téléchargements</h2>
-        <p className="text-gray-600">Gérez les fichiers téléchargeables de votre produit</p>
+        <h2 className="text-xl sm:text-2xl font-bold">Fichiers et Téléchargements</h2>
+        <p className="text-sm sm:text-base text-gray-600">Gérez les fichiers téléchargeables de votre produit</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -194,7 +207,7 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
             <CardContent className="p-6">
               <div className="text-center space-y-4">
                 <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                  <Upload className="h-6 w-6 text-gray-600" />
+                  <Upload className="h-6 w-6 text-gray-600" aria-hidden="true" />
                 </div>
                 
                 <div>
@@ -217,9 +230,10 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
                       input.click();
                     }}
                     disabled={uploading}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 touch-manipulation min-h-[44px]"
+                    aria-label="Sélectionner des fichiers à télécharger"
                   >
-                    <Upload className="h-4 w-4" />
+                    <Upload className="h-4 w-4" aria-hidden="true" />
                     {uploading ? "Téléchargement..." : "Sélectionner des fichiers"}
                   </Button>
                 </div>
@@ -232,11 +246,15 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
 
               {/* Barre de progression */}
               {uploading && (
-                <div className="mt-4">
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="mt-4" role="status" aria-live="polite">
+                  <div className="w-full bg-gray-200 rounded-full h-2" aria-label="Progression du téléchargement">
                     <div 
                       className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${uploadProgress}%` }}
+                      role="progressbar"
+                      aria-valuenow={Math.round(uploadProgress)}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
                     />
                   </div>
                   <p className="text-sm text-center mt-2">
@@ -283,8 +301,9 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
                             
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
                               <div>
-                                <Label className="text-xs">Limite de téléchargements</Label>
+                                <Label htmlFor={`download-limit-${index}`} className="text-xs">Limite de téléchargements</Label>
                                 <Input
+                                  id={`download-limit-${index}`}
                                   type="number"
                                   value={file.downloadLimit || ""}
                                   onChange={(e) => updateFileSettings(index, { 
@@ -292,28 +311,33 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
                                   })}
                                   placeholder="Illimité"
                                   className="h-8"
+                                  aria-label={`Limite de téléchargements pour ${file.name}`}
                                 />
                               </div>
                               
                               <div>
-                                <Label className="text-xs">Date d'expiration</Label>
+                                <Label htmlFor={`expiry-date-${index}`} className="text-xs">Date d'expiration</Label>
                                 <Input
+                                  id={`expiry-date-${index}`}
                                   type="date"
                                   value={file.expiryDate ? file.expiryDate.toISOString().split('T')[0] : ""}
                                   onChange={(e) => updateFileSettings(index, { 
                                     expiryDate: e.target.value ? new Date(e.target.value) : null 
                                   })}
                                   className="h-8"
+                                  aria-label={`Date d'expiration pour ${file.name}`}
                                 />
                               </div>
                             </div>
                             
                             <div className="flex items-center gap-2 mt-3">
                               <Switch
+                                id={`protect-${index}`}
                                 checked={file.isProtected || false}
                                 onCheckedChange={(checked) => updateFileSettings(index, { isProtected: checked })}
+                                aria-label={`Protéger le fichier ${file.name}`}
                               />
-                              <Label className="text-sm">Protéger ce fichier</Label>
+                              <Label htmlFor={`protect-${index}`} className="text-sm">Protéger ce fichier</Label>
                             </div>
                           </div>
                           
@@ -322,22 +346,28 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
                               variant="outline"
                               size="sm"
                               onClick={() => window.open(file.url, '_blank')}
+                              className="touch-manipulation min-h-[44px] min-w-[44px]"
+                              aria-label={`Prévisualiser ${file.name}`}
                             >
-                              <Eye className="h-4 w-4" />
+                              <Eye className="h-4 w-4" aria-hidden="true" />
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => window.open(file.url, '_blank')}
+                              className="touch-manipulation min-h-[44px] min-w-[44px]"
+                              aria-label={`Télécharger ${file.name}`}
                             >
-                              <Download className="h-4 w-4" />
+                              <Download className="h-4 w-4" aria-hidden="true" />
                             </Button>
                             <Button
                               variant="destructive"
                               size="sm"
                               onClick={() => removeFile(index)}
+                              className="touch-manipulation min-h-[44px] min-w-[44px]"
+                              aria-label={`Supprimer ${file.name}`}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" aria-hidden="true" />
                             </Button>
                           </div>
                         </div>
@@ -367,7 +397,10 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
                   value={formData.file_access_type || "immediate"} 
                   onValueChange={(value) => updateFormData("file_access_type", value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger 
+                    id="file_access_type"
+                    aria-label="Type d'accès aux fichiers"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -376,7 +409,7 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
                     <SelectItem value="manual">Manuel</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-gray-500 mt-1">
+                <p id="file-access-hint" className="text-xs text-gray-500 mt-1">
                   Comment les clients accèdent aux fichiers
                 </p>
               </div>
@@ -389,8 +422,10 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
                   value={formData.download_limit || ""}
                   onChange={(e) => updateFormData("download_limit", e.target.value ? parseInt(e.target.value) : null)}
                   placeholder="Illimité"
+                  aria-label="Limite globale de téléchargements"
+                  aria-describedby="download-limit-hint"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p id="download-limit-hint" className="text-xs text-gray-500 mt-1">
                   Limite par client (laisser vide pour illimité)
                 </p>
               </div>
@@ -403,8 +438,10 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
                   value={formData.download_expiry_days || ""}
                   onChange={(e) => updateFormData("download_expiry_days", e.target.value ? parseInt(e.target.value) : null)}
                   placeholder="Illimité"
+                  aria-label="Nombre de jours avant expiration"
+                  aria-describedby="expiry-days-hint"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p id="expiry-days-hint" className="text-xs text-gray-500 mt-1">
                   Nombre de jours avant expiration des liens
                 </p>
               </div>
@@ -464,19 +501,19 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
             <CardContent>
               <div className="space-y-3 text-sm text-gray-600">
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <span>Les fichiers sont automatiquement sécurisés</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <span>Les téléchargements sont tracés</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <span>Support des liens d'expiration</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                  <AlertCircle className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <span>Limite de 100MB par fichier</span>
                 </div>
               </div>

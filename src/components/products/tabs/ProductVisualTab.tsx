@@ -29,8 +29,26 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/**
+ * Form data interface pour ProductVisualTab
+ */
+interface ProductFormData {
+  name?: string;
+  price?: number;
+  currency?: string;
+  promotional_price?: number;
+  short_description?: string;
+  description?: string;
+  image_url?: string;
+  gallery_images?: string[];
+  video_url?: string;
+  featured?: boolean;
+  hide_from_store?: boolean;
+  hide_purchase_count?: boolean;
+}
+
 interface ProductVisualTabProps {
-  formData: any;
+  formData: ProductFormData;
   updateFormData: (field: string, value: any) => void;
   storeId: string;
 }
@@ -74,32 +92,41 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
   return (
     <div className="space-y-6">
       {/* En-tête */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Visuel & Design</h2>
-          <p className="text-gray-600">Configurez l'apparence visuelle de votre produit</p>
+          <h2 className="text-xl sm:text-2xl font-bold">Visuel & Design</h2>
+          <p className="text-sm sm:text-base text-gray-600">Configurez l'apparence visuelle de votre produit</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" role="group" aria-label="Sélecteur de mode d'aperçu">
           <Button
             variant={activePreview === 'desktop' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setActivePreview('desktop')}
+            className="touch-manipulation min-h-[44px] min-w-[44px]"
+            aria-label="Aperçu desktop"
+            aria-pressed={activePreview === 'desktop'}
           >
-            <Monitor className="h-4 w-4" />
+            <Monitor className="h-4 w-4" aria-hidden="true" />
           </Button>
           <Button
             variant={activePreview === 'tablet' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setActivePreview('tablet')}
+            className="touch-manipulation min-h-[44px] min-w-[44px]"
+            aria-label="Aperçu tablette"
+            aria-pressed={activePreview === 'tablet'}
           >
-            <Tablet className="h-4 w-4" />
+            <Tablet className="h-4 w-4" aria-hidden="true" />
           </Button>
           <Button
             variant={activePreview === 'mobile' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setActivePreview('mobile')}
+            className="touch-manipulation min-h-[44px] min-w-[44px]"
+            aria-label="Aperçu mobile"
+            aria-pressed={activePreview === 'mobile'}
           >
-            <Smartphone className="h-4 w-4" />
+            <Smartphone className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
       </div>
@@ -135,20 +162,24 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                       variant="outline"
                       size="sm"
                       onClick={() => window.open(formData.image_url, '_blank')}
+                      className="touch-manipulation min-h-[44px]"
+                      aria-label="Voir l'image principale en grand"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-4 w-4" aria-hidden="true" />
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => updateFormData("image_url", "")}
+                      className="touch-manipulation min-h-[44px]"
+                      aria-label="Supprimer l'image principale"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
                     </Button>
                   </div>
                   <img
                     src={formData.image_url}
-                    alt="Image principale"
+                    alt="Image principale du produit"
                     className="w-full h-48 object-cover rounded-lg"
                   />
                 </div>
@@ -184,8 +215,8 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                       <div key={index} className="relative group">
                         <img
                           src={url}
-                          alt={`Galerie ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-lg"
+                          alt={`Image ${index + 1} de la galerie`}
+                          className="w-full h-24 sm:h-28 object-cover rounded-lg"
                         />
                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
                           <div className="flex gap-1">
@@ -193,22 +224,24 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                               size="sm"
                               variant="secondary"
                               onClick={() => window.open(url, '_blank')}
-                              className="h-6 w-6 p-0"
+                              className="h-10 w-10 p-0 touch-manipulation"
+                              aria-label={`Voir l'image ${index + 1} en grand`}
                             >
-                              <Eye className="h-3 w-3" />
+                              <Eye className="h-4 w-4" aria-hidden="true" />
                             </Button>
                             <Button
                               size="sm"
                               variant="destructive"
                               onClick={() => removeImage(index, 'gallery')}
-                              className="h-6 w-6 p-0"
+                              className="h-10 w-10 p-0 touch-manipulation"
+                              aria-label={`Supprimer l'image ${index + 1}`}
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Trash2 className="h-4 w-4" aria-hidden="true" />
                             </Button>
                           </div>
                         </div>
                         <div className="absolute top-1 left-1">
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="secondary" className="text-xs" aria-hidden="true">
                             {index + 1}
                           </Badge>
                         </div>
@@ -239,8 +272,10 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                   value={formData.video_url || ""}
                   onChange={(e) => updateFormData("video_url", e.target.value)}
                   placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..."
+                  aria-label="URL de la vidéo du produit"
+                  aria-describedby="video-url-hint"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p id="video-url-hint" className="text-xs text-gray-500 mt-1">
                   Supporte YouTube, Vimeo et autres plateformes
                 </p>
               </div>
@@ -255,7 +290,8 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                         variant="outline"
                         size="sm"
                         onClick={() => window.open(formData.video_url, '_blank')}
-                        className="mt-2"
+                        className="mt-2 touch-manipulation min-h-[44px]"
+                        aria-label="Ouvrir la vidéo dans un nouvel onglet"
                       >
                         Ouvrir la vidéo
                       </Button>
@@ -275,36 +311,42 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Image en vedette</Label>
+              <div className="flex items-center justify-between gap-4 min-h-[60px]">
+                <div className="flex-1">
+                  <Label htmlFor="featured-switch">Image en vedette</Label>
                   <p className="text-sm text-gray-600">Mettre en avant ce produit</p>
                 </div>
                 <Switch
+                  id="featured-switch"
                   checked={formData.featured || false}
                   onCheckedChange={(checked) => updateFormData("featured", checked)}
+                  aria-label="Mettre ce produit en vedette"
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Masquer du magasin</Label>
+              <div className="flex items-center justify-between gap-4 min-h-[60px]">
+                <div className="flex-1">
+                  <Label htmlFor="hide-store-switch">Masquer du magasin</Label>
                   <p className="text-sm text-gray-600">Cacher ce produit de la boutique</p>
                 </div>
                 <Switch
+                  id="hide-store-switch"
                   checked={formData.hide_from_store || false}
                   onCheckedChange={(checked) => updateFormData("hide_from_store", checked)}
+                  aria-label="Masquer ce produit du magasin"
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Masquer le compteur d'achats</Label>
+              <div className="flex items-center justify-between gap-4 min-h-[60px]">
+                <div className="flex-1">
+                  <Label htmlFor="hide-count-switch">Masquer le compteur d'achats</Label>
                   <p className="text-sm text-gray-600">Ne pas afficher le nombre d'achats</p>
                 </div>
                 <Switch
+                  id="hide-count-switch"
                   checked={formData.hide_purchase_count || false}
                   onCheckedChange={(checked) => updateFormData("hide_purchase_count", checked)}
+                  aria-label="Masquer le compteur d'achats"
                 />
               </div>
             </CardContent>
@@ -330,12 +372,12 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                   {formData.image_url ? (
                     <img
                       src={formData.image_url}
-                      alt="Aperçu produit"
+                      alt={`Aperçu du produit ${formData.name || ''}`}
                       className="w-full h-full object-cover"
                     />
                   ) : (
                     <div className="text-center text-gray-400">
-                      <ImageIcon className="h-12 w-12 mx-auto mb-2" />
+                      <ImageIcon className="h-12 w-12 mx-auto mb-2" aria-hidden="true" />
                       <p className="text-sm">Aucune image</p>
                     </div>
                   )}
@@ -364,7 +406,7 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                     </div>
                     
                     {formData.featured && (
-                      <Badge variant="secondary">Vedette</Badge>
+                      <Badge variant="secondary" aria-label="Produit en vedette">Vedette</Badge>
                     )}
                   </div>
 
@@ -375,7 +417,7 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                         <img
                           key={index}
                           src={url}
-                          alt={`Miniature ${index + 1}`}
+                          alt={`Miniature ${index + 1} de la galerie`}
                           className="w-12 h-12 object-cover rounded border"
                         />
                       ))}

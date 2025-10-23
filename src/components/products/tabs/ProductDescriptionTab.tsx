@@ -25,8 +25,26 @@ import { cn } from "@/lib/utils";
 import { sanitizeString } from "@/lib/validation";
 import React from "react";
 
+/**
+ * Form data interface pour ProductDescriptionTab
+ */
+interface ProductFormData {
+  name?: string;
+  slug?: string;
+  store_slug?: string;
+  short_description?: string;
+  description?: string;
+  features?: string[];
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+  og_title?: string;
+  og_description?: string;
+  og_image?: string;
+}
+
 interface ProductDescriptionTabProps {
-  formData: any;
+  formData: ProductFormData;
   updateFormData: (field: string, value: any) => void;
 }
 
@@ -52,7 +70,10 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
     suggestions: string[];
   }>({ hasCta: false, ctaCount: 0, suggestions: [] });
 
-  // Helpers for short description UX
+  /**
+   * Nettoie et limite la description courte
+   * Supprime le HTML, normalise les espaces et limite à 160 caractères
+   */
   const sanitizeShortDescription = (text: string) => {
     // Remove HTML and dangerous chars, collapse spaces, and hard-limit
     const cleaned = sanitizeString(
@@ -73,7 +94,9 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
     return "text-red-600";
   };
 
-  // --- Readability (Flesch FR) ---
+  /**
+   * Convertit du HTML en texte brut
+   */
   const htmlToPlainText = (html: string) => {
     const container = document.createElement("div");
     container.innerHTML = html;
@@ -90,6 +113,10 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
     return Math.max(1, syllables);
   };
 
+  /**
+   * Calcule le score de lisibilité Flesch (adapté FR)
+   * @returns Score entre 0-100, null si pas de texte
+   */
   const computeReadability = (text: string) => {
     if (!text) return null;
     const sentences = Math.max(1, (text.match(/[\.\!\?]+/g) || []).length);
@@ -308,7 +335,9 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
     return `${origin}/stores/${storeSlug}/products/${productSlug}`;
   })();
 
-  // Scroll to field from checklist
+  /**
+   * Scroll vers un champ et le met en surbrillance temporairement
+   */
   const scrollToField = (elementId: string) => {
     const el = document.getElementById(elementId);
     if (!el) return;
@@ -438,12 +467,12 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
   return (
     <div className="space-y-6">
       {/* En-tête avec score SEO */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Description et SEO</h2>
-          <p className="text-gray-600">Créez une description attrayante et optimisez votre référencement</p>
+          <h2 className="text-xl sm:text-2xl font-bold">Description et SEO</h2>
+          <p className="text-sm sm:text-base text-gray-600">Créez une description attrayante et optimisez votre référencement</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
           <div className="text-right">
             <div className={cn("px-3 py-1 rounded-full text-sm font-medium", getSeoScoreColor(seoScore))}>
               Score SEO: {seoScore}/100
@@ -453,10 +482,12 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
           <Button
             variant="outline"
             onClick={() => setPreviewMode(!previewMode)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 touch-manipulation min-h-[44px]"
+            aria-label={previewMode ? "Passer en mode édition" : "Afficher l'aperçu"}
           >
             <Eye className="h-4 w-4" />
-            {previewMode ? "Éditer" : "Aperçu"}
+            <span className="hidden sm:inline">{previewMode ? "Éditer" : "Aperçu"}</span>
+            <span className="sm:hidden">{previewMode ? "Édit" : "Prev"}</span>
           </Button>
         </div>
       </div>
@@ -484,16 +515,35 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                 rows={3}
                 maxLength={160}
                 className="resize-none"
+                aria-label="Description courte du produit"
+                aria-describedby="short-desc-counter"
               />
-              <div className="mt-2 flex items-center justify-between">
-                <p className={cn("text-xs", getCounterColorClass((formData.short_description || "").length))}>
+              <div className="mt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <p 
+                  id="short-desc-counter"
+                  className={cn("text-xs", getCounterColorClass((formData.short_description || "").length))}
+                  aria-live="polite"
+                >
                   {(formData.short_description || "").length}/160 caractères
                 </p>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={generateFromLongDescription}>
-                    Générer depuis la description
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={generateFromLongDescription}
+                    className="touch-manipulation min-h-[44px] flex-1 sm:flex-initial"
+                    aria-label="Générer la description courte depuis la description complète"
+                  >
+                    <span className="hidden sm:inline">Générer depuis la description</span>
+                    <span className="sm:hidden">Générer</span>
                   </Button>
-                  <Button variant="secondary" size="sm" onClick={paraphraseShortDescription}>
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    onClick={paraphraseShortDescription}
+                    className="touch-manipulation min-h-[44px]"
+                    aria-label="Paraphraser la description courte"
+                  >
                     Paraphraser
                   </Button>
                 </div>
@@ -606,24 +656,44 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
               </div>
                 
                 <div className="space-y-2 text-sm">
-                  <button type="button" onClick={() => scrollToField("meta_title")} className="w-full flex items-center gap-2 text-left px-2 py-1 rounded hover:bg-muted">
-                    {formData.meta_title ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <AlertCircle className="h-4 w-4 text-red-500" />}
+                  <button 
+                    type="button" 
+                    onClick={() => scrollToField("meta_title")} 
+                    className="w-full flex items-center gap-2 text-left px-2 py-1 rounded hover:bg-muted touch-manipulation min-h-[44px]"
+                    aria-label="Aller au champ Titre SEO"
+                  >
+                    {formData.meta_title ? <CheckCircle2 className="h-4 w-4 text-green-500" aria-hidden="true" /> : <AlertCircle className="h-4 w-4 text-red-500" aria-hidden="true" />}
                     <span>Titre SEO</span>
                   </button>
-                  <button type="button" onClick={() => scrollToField("meta_description")} className="w-full flex items-center gap-2 text-left px-2 py-1 rounded hover:bg-muted">
-                    {formData.meta_description ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <AlertCircle className="h-4 w-4 text-red-500" />}
+                  <button 
+                    type="button" 
+                    onClick={() => scrollToField("meta_description")} 
+                    className="w-full flex items-center gap-2 text-left px-2 py-1 rounded hover:bg-muted touch-manipulation min-h-[44px]"
+                    aria-label="Aller au champ Description SEO"
+                  >
+                    {formData.meta_description ? <CheckCircle2 className="h-4 w-4 text-green-500" aria-hidden="true" /> : <AlertCircle className="h-4 w-4 text-red-500" aria-hidden="true" />}
                     <span>Description SEO</span>
                   </button>
-                  <button type="button" onClick={() => scrollToField("meta_keywords")} className="w-full flex items-center gap-2 text-left px-2 py-1 rounded hover:bg-muted">
-                    {formData.meta_keywords ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <AlertCircle className="h-4 w-4 text-red-500" />}
+                  <button 
+                    type="button" 
+                    onClick={() => scrollToField("meta_keywords")} 
+                    className="w-full flex items-center gap-2 text-left px-2 py-1 rounded hover:bg-muted touch-manipulation min-h-[44px]"
+                    aria-label="Aller au champ Mots-clés"
+                  >
+                    {formData.meta_keywords ? <CheckCircle2 className="h-4 w-4 text-green-500" aria-hidden="true" /> : <AlertCircle className="h-4 w-4 text-red-500" aria-hidden="true" />}
                     <span>Mots-clés</span>
                   </button>
-                  <button type="button" onClick={() => scrollToField("description_section")} className="w-full flex items-center gap-2 text-left px-2 py-1 rounded hover:bg-muted">
-                    {formData.description && formData.description.length >= 200 ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <AlertCircle className="h-4 w-4 text-red-500" />}
+                  <button 
+                    type="button" 
+                    onClick={() => scrollToField("description_section")} 
+                    className="w-full flex items-center gap-2 text-left px-2 py-1 rounded hover:bg-muted touch-manipulation min-h-[44px]"
+                    aria-label="Aller au champ Description détaillée"
+                  >
+                    {formData.description && formData.description.length >= 200 ? <CheckCircle2 className="h-4 w-4 text-green-500" aria-hidden="true" /> : <AlertCircle className="h-4 w-4 text-red-500" aria-hidden="true" />}
                     <span>Description détaillée</span>
                   </button>
-                <div className="flex items-center gap-2 px-2 py-1">
-                  {missingAltCount === 0 ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <AlertCircle className="h-4 w-4 text-red-500" />}
+                <div className="flex items-center gap-2 px-2 py-1 min-h-[44px]">
+                  {missingAltCount === 0 ? <CheckCircle2 className="h-4 w-4 text-green-500" aria-hidden="true" /> : <AlertCircle className="h-4 w-4 text-red-500" aria-hidden="true" />}
                   <span>Images avec alt {missingAltCount > 0 ? `(manquants: ${missingAltCount})` : ''}</span>
                 </div>
                 
@@ -760,8 +830,10 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                   onChange={(e) => updateFormData("meta_title", e.target.value)}
                   placeholder={formData.name || "Titre pour les moteurs de recherche"}
                   maxLength={60}
+                  aria-label="Titre SEO"
+                  aria-describedby="meta-title-counter"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p id="meta-title-counter" className="text-xs text-gray-500 mt-1" aria-live="polite">
                   {(formData.meta_title || "").length}/60 caractères
                 </p>
               </div>
@@ -775,8 +847,10 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                   placeholder="Description pour les moteurs de recherche..."
                   rows={3}
                   maxLength={160}
+                  aria-label="Description SEO"
+                  aria-describedby="meta-desc-counter"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p id="meta-desc-counter" className="text-xs text-gray-500 mt-1" aria-live="polite">
                   {(formData.meta_description || "").length}/160 caractères
                 </p>
               </div>
@@ -788,8 +862,10 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                   value={formData.meta_keywords || ""}
                   onChange={(e) => updateFormData("meta_keywords", e.target.value)}
                   placeholder="mot-clé1, mot-clé2, mot-clé3"
+                  aria-label="Mots-clés SEO"
+                  aria-describedby="meta-keywords-hint"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p id="meta-keywords-hint" className="text-xs text-gray-500 mt-1">
                   Séparez les mots-clés par des virgules
                 </p>
               </div>
