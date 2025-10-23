@@ -57,6 +57,7 @@ interface ProductInfoTabProps {
   storeSlug: string;
   checkSlugAvailability: (slug: string) => Promise<boolean>;
   validationErrors?: Record<string, string>;
+  storeCurrency?: string;
 }
 
 // Constantes pour les choix dynamiques
@@ -191,11 +192,12 @@ const CURRENCIES = [
   { value: "GBP", label: "Livre Sterling (GBP)", symbol: "£", flag: "🇬🇧" },
 ];
 
-export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugAvailability, validationErrors = {} }: ProductInfoTabProps) => {
+export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugAvailability, validationErrors = {}, storeCurrency }: ProductInfoTabProps) => {
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const [checkingSlug, setCheckingSlug] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [priceHistory, setPriceHistory] = useState<Array<{date: string, price: number, promotional_price?: number}>>([]);
+  const [lastType, setLastType] = useState<string | null>(formData.product_type || null);
   const { toast } = useToast();
 
   // Vérification de disponibilité du slug avec debounce
@@ -261,6 +263,15 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
     }
     return 0;
   }, [formData.price, formData.promotional_price]);
+
+  // Met à jour le prix promo à partir d'un pourcentage
+  const setDiscountFromPercent = useCallback((percent: number) => {
+    const normalized = Math.max(0, Math.min(95, percent || 0));
+    if (!formData.price || formData.price <= 0) return;
+    const newPromo = Number((formData.price * (1 - normalized / 100)).toFixed(2));
+    updateFormData("promotional_price", normalized > 0 ? newPromo : null);
+    addPriceToHistory(formData.price, normalized > 0 ? newPromo : undefined);
+  }, [formData.price, updateFormData, addPriceToHistory]);
 
   // Validation des dates de vente
   const validateSaleDates = useCallback(() => {
@@ -348,7 +359,14 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                       "cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-2",
                       colorClasses[type.color as keyof typeof colorClasses]
                     )}
-                    onClick={() => updateFormData("product_type", type.value)}
+                    onClick={() => {
+                      if (lastType && lastType !== type.value) {
+                        const confirmChange = window.confirm("Changer le type peut réinitialiser certains champs incompatibles. Continuer ?");
+                        if (!confirmChange) return;
+                      }
+                      setLastType(type.value);
+                      updateFormData("product_type", type.value);
+                    }}
                   >
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">
@@ -421,6 +439,14 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
+            {storeCurrency && formData.currency && storeCurrency !== formData.currency && (
+              <div className="flex items-center gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                <AlertCircle className="h-4 w-4 text-yellow-400" />
+                <span className="text-sm text-yellow-400">
+                  La devise du produit ({formData.currency}) diffère de celle de la boutique ({storeCurrency}). Vérifiez la cohérence des prix.
+                </span>
+              </div>
+            )}
             {/* Nom du produit */}
             <div className="space-y-2">
               <Label className="text-sm font-medium text-white flex items-center gap-2">
@@ -502,6 +528,17 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   </TooltipContent>
                 </Tooltip>
               </div>
+
+              {/* Indicateur lisible de disponibilité */}
+              {slugAvailable !== null && (
+                <div className="flex items-center gap-2">
+                  {slugAvailable ? (
+                    <Badge variant="secondary" className="text-xs bg-green-500/20 text-green-300 border-green-500/30">Disponible</Badge>
+                  ) : (
+                    <Badge variant="destructive" className="text-xs">Déjà utilisé</Badge>
+                  )}
+                </div>
+              )}
               
               <div className="flex items-center gap-2 p-3 bg-gray-700/30 rounded-lg border border-gray-600">
                 <ExternalLink className="h-4 w-4 text-gray-400" />
@@ -749,6 +786,34 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   </SelectContent>
                 </Select>
               </div>
+              {/* Coût d'achat pour marge */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-white flex items-center gap-2">
+                  Coût d'achat (optionnel)
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3 w-3 text-gray-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Utilisé pour estimer la marge brute</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </Label>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    value={formData.cost_price || ""}
+                    onChange={(e) => updateFormData("cost_price", e.target.value ? parseFloat(e.target.value) : null)}
+                    placeholder="0"
+                    min="0"
+                    step="0.01"
+                    className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                    {CURRENCIES.find(c => c.value === formData.currency)?.symbol || "FCFA"}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Prix promotionnel */}
@@ -787,6 +852,24 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   {CURRENCIES.find(c => c.value === formData.currency)?.symbol || "FCFA"}
                 </div>
               </div>
+
+              {/* Lien pourcentage <-> prix promo */}
+              <div className="flex items-center gap-3">
+                <Label className="text-xs text-gray-400">Ou définir une remise (%)</Label>
+                <div className="relative w-28">
+                  <Input
+                    type="number"
+                    value={getDiscountPercentage() || ""}
+                    onChange={(e) => setDiscountFromPercent(parseFloat(e.target.value))}
+                    placeholder="0"
+                    min="0"
+                    max="95"
+                    step="1"
+                    className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 pr-8"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
+                </div>
+              </div>
               
               {/* Affichage de la réduction */}
               {getDiscountPercentage() > 0 && (
@@ -794,6 +877,16 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   <TrendingUp className="h-4 w-4 text-green-400" />
                   <span className="text-sm text-green-400">
                     Réduction de {getDiscountPercentage()}% - Économie de {((formData.price - formData.promotional_price) || 0).toLocaleString()} {CURRENCIES.find(c => c.value === formData.currency)?.symbol || "FCFA"}
+                  </span>
+                </div>
+              )}
+
+              {formData.price && (formData.cost_price || formData.cost_price === 0) && (
+                <div className="flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                  <TrendingUp className="h-4 w-4 text-blue-400" />
+                  <span className="text-sm text-blue-300">
+                    Marge estimée: {Math.max(0, ((formData.promotional_price ?? formData.price) - (formData.cost_price || 0))).toLocaleString()} {CURRENCIES.find(c => c.value === formData.currency)?.symbol || "FCFA"}
+                    {formData.cost_price ? ` (${Math.max(0, Math.round((((formData.promotional_price ?? formData.price) - formData.cost_price) / Math.max(1, (formData.promotional_price ?? formData.price))) * 100))}%)` : ""}
                   </span>
                 </div>
               )}
