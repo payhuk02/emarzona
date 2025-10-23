@@ -1,10 +1,1 @@
-{
-  "orgId": "payhuk02",
-  "projectId": "payhuk",
-  "settings": {
-    "buildCommand": "npm run build",
-    "outputDirectory": "dist",
-    "installCommand": "npm install",
-    "framework": "vite"
-  }
-}
+{"projectId":"prj_FghvIwjADRdbA7CX0ePjsR9mSu7Y","orgId":"team_CGCIGCnkjTwHAWdypKMeEP2L","projectName":"payhula"}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { logger } from '@/lib/logger';
 
 export interface Store {
@@ -24,6 +25,7 @@ export interface Store {
 export const useStore = () => {
   const [store, setStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
   const generateSlug = (name: string): string => {
@@ -91,11 +93,16 @@ export const useStore = () => {
 
   const fetchStore = async () => {
     try {
+      // Attendre que l'authentification soit chargée
+      if (authLoading) {
+        return;
+      }
+
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
         setStore(null);
+        setLoading(false);
         return;
       }
 
@@ -127,7 +134,6 @@ export const useStore = () => {
 
   const createStore = async (name: string, description?: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
       const slug = generateSlug(name);
@@ -223,12 +229,14 @@ export const useStore = () => {
   };
 
   useEffect(() => {
-    fetchStore();
-  }, []);
+    if (!authLoading) {
+      fetchStore();
+    }
+  }, [user, authLoading]);
 
   return {
     store,
-    loading,
+    loading: loading || authLoading, // Attendre que l'auth ET le store soient chargés
     createStore,
     updateStore,
     refreshStore: fetchStore,
