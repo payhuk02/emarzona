@@ -33,6 +33,8 @@ export const useProducts = (storeId?: string) => {
 
   const fetchProducts = async () => {
     try {
+      console.log('🔍 Fetching products for store:', storeId);
+      
       let query = supabase
         .from('products')
         .select('*')
@@ -44,9 +46,16 @@ export const useProducts = (storeId?: string) => {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error fetching products:', error);
+        throw error;
+      }
+      
+      console.log('✅ Products fetched:', data?.length || 0, 'products');
+      console.log('📦 Products data:', data);
       setProducts(data || []);
     } catch (error: any) {
+      console.error('💥 Exception in fetchProducts:', error);
       toast({
         title: "Erreur",
         description: error.message,
