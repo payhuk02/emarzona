@@ -16,8 +16,12 @@ vi.mock('@/hooks/useProductAnalytics', () => ({
       clicks: 567,
       conversions: 89,
       revenue: 125000,
+      total_revenue: 125000,
       conversion_rate: 7.2,
-      avg_time_on_page: 180
+      avg_time_on_page: 180,
+      bounce_rate: 32.5,
+      avg_session_duration: 245,
+      avg_pages_per_session: 3.8
     },
     loading: false,
     error: null,
