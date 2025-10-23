@@ -1279,7 +1279,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
         </Card>
 
         {/* Dates de vente */}
-        <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+        <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm overflow-visible">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-indigo-500/20">
@@ -1293,7 +1293,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 overflow-visible">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-white flex items-center gap-2">
@@ -1320,7 +1320,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                       {formData.sale_start_date ? format(new Date(formData.sale_start_date), "PPP", { locale: fr }) : <span>Sélectionner une date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-600" align="start">
+                  <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-600 z-50" align="start" sideOffset={5}>
                     <Calendar
                       mode="single"
                       selected={formData.sale_start_date ? new Date(formData.sale_start_date) : undefined}
@@ -1356,7 +1356,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                       {formData.sale_end_date ? format(new Date(formData.sale_end_date), "PPP", { locale: fr }) : <span>Sélectionner une date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-600" align="start">
+                  <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-600 z-50" align="start" sideOffset={5}>
                     <Calendar
                       mode="single"
                       selected={formData.sale_end_date ? new Date(formData.sale_end_date) : undefined}
