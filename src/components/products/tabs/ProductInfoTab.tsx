@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { CURRENCIES, getCurrencySymbol, type Currency } from "@/lib/currencies";
 import { 
   CalendarIcon, 
   CheckCircle2, 
@@ -50,8 +51,41 @@ import { cn } from "@/lib/utils";
 import { generateSlug } from "@/lib/store-utils";
 import { useToast } from "@/hooks/use-toast";
 
+/**
+ * Interface pour les données du formulaire de produit
+ */
+interface ProductFormData {
+  name: string;
+  slug: string;
+  category: string;
+  product_type: 'digital' | 'physical' | 'service' | '';
+  pricing_model: 'one-time' | 'subscription' | 'pay-what-you-want' | 'free' | '';
+  price: number;
+  promotional_price: number | null;
+  currency: string;
+  cost_price?: number | null;
+  is_active?: boolean;
+  is_featured?: boolean;
+  hide_from_store?: boolean;
+  password_protected?: boolean;
+  product_password?: string;
+  access_control?: 'public' | 'logged_in' | 'purchasers';
+  purchase_limit?: number | null;
+  hide_purchase_count?: boolean;
+  sale_start_date?: string | null;
+  sale_end_date?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  version?: string;
+  status?: string;
+  [key: string]: any; // Pour les champs additionnels
+}
+
+/**
+ * Props pour le composant ProductInfoTab
+ */
 interface ProductInfoTabProps {
-  formData: any;
+  formData: ProductFormData;
   updateFormData: (field: string, value: any) => void;
   storeId: string;
   storeSlug: string;
@@ -185,12 +219,7 @@ const ACCESS_CONTROLS = [
   },
 ];
 
-const CURRENCIES = [
-  { value: "XOF", label: "Franc CFA (XOF)", symbol: "FCFA", flag: "🇧🇫" },
-  { value: "EUR", label: "Euro (EUR)", symbol: "€", flag: "🇪🇺" },
-  { value: "USD", label: "Dollar US (USD)", symbol: "$", flag: "🇺🇸" },
-  { value: "GBP", label: "Livre Sterling (GBP)", symbol: "£", flag: "🇬🇧" },
-];
+// CURRENCIES importé depuis @/lib/currencies pour éviter la duplication
 
 export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugAvailability, validationErrors = {}, storeCurrency }: ProductInfoTabProps) => {
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
@@ -220,7 +249,11 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
     return () => clearTimeout(timeout);
   }, [formData.slug, checkSlugAvailability]);
 
-  // Génération automatique du slug à partir du nom
+  /**
+   * Génère automatiquement le slug à partir du nom du produit
+   * Le slug est auto-généré uniquement s'il n'a pas été modifié manuellement
+   * @param name - Nouveau nom du produit
+   */
   const handleNameChange = useCallback((name: string) => {
     updateFormData("name", name);
     if (!formData.slug || formData.slug === generateSlug(formData.name)) {
@@ -246,7 +279,12 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
     updateFormData("slug", newSlug);
   }, [formData.name, updateFormData]);
 
-  // Historique des prix
+  /**
+   * Ajoute une entrée à l'historique des prix
+   * Conserve les 5 dernières modifications pour le suivi
+   * @param price - Prix principal du produit
+   * @param promotionalPrice - Prix promotionnel optionnel
+   */
   const addPriceToHistory = useCallback((price: number, promotionalPrice?: number) => {
     const newEntry = {
       date: new Date().toISOString(),
@@ -256,7 +294,10 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
     setPriceHistory(prev => [newEntry, ...prev.slice(0, 4)]); // Garder seulement les 5 dernières entrées
   }, []);
 
-  // Calcul du pourcentage de réduction
+  /**
+   * Calcule le pourcentage de réduction entre le prix normal et le prix promotionnel
+   * @returns Pourcentage de réduction (0-100) ou 0 si pas de réduction
+   */
   const getDiscountPercentage = useCallback(() => {
     if (formData.price && formData.promotional_price && formData.promotional_price < formData.price) {
       return Math.round(((formData.price - formData.promotional_price) / formData.price) * 100);
@@ -264,7 +305,11 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
     return 0;
   }, [formData.price, formData.promotional_price]);
 
-  // Met à jour le prix promo à partir d'un pourcentage
+  /**
+   * Calcule et applique le prix promotionnel à partir d'un pourcentage de réduction
+   * Le pourcentage est plafonné entre 0% et 95%
+   * @param percent - Pourcentage de réduction souhaité (0-95)
+   */
   const setDiscountFromPercent = useCallback((percent: number) => {
     const normalized = Math.max(0, Math.min(95, percent || 0));
     if (!formData.price || formData.price <= 0) return;
@@ -273,7 +318,10 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
     addPriceToHistory(formData.price, normalized > 0 ? newPromo : undefined);
   }, [formData.price, updateFormData, addPriceToHistory]);
 
-  // Validation des dates de vente
+  /**
+   * Valide que la date de fin de vente est postérieure à la date de début
+   * @returns true si les dates sont valides ou non définies, false sinon
+   */
   const validateSaleDates = useCallback(() => {
     if (formData.sale_start_date && formData.sale_end_date) {
       const startDate = new Date(formData.sale_start_date);
@@ -283,28 +331,38 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
     return true;
   }, [formData.sale_start_date, formData.sale_end_date]);
 
-  // Obtenir les catégories selon le type de produit
-  const getCategories = () => {
+  /**
+   * Obtenir les catégories selon le type de produit
+   * Mémorisé pour éviter les recalculs inutiles
+   */
+  const categories = useMemo(() => {
     switch (formData.product_type) {
       case "digital": return DIGITAL_CATEGORIES;
       case "physical": return PHYSICAL_CATEGORIES;
       case "service": return SERVICE_CATEGORIES;
       default: return [];
     }
-  };
+  }, [formData.product_type]);
 
-  // Obtenir la couleur du type de produit
+  /**
+   * Retourne la couleur associée au type de produit
+   * @param type - Type de produit (digital, physical, service)
+   * @returns Couleur theme ('blue', 'green', 'purple') ou 'blue' par défaut
+   */
   const getProductTypeColor = (type: string) => {
     const productType = PRODUCT_TYPES.find(t => t.value === type);
     return productType?.color || 'blue';
   };
 
-  // Obtenir l'icône de la catégorie
-  const getCategoryIcon = (categoryValue: string) => {
-    const categories = getCategories();
+  /**
+   * Obtenir l'icône de la catégorie
+   * @param categoryValue - Valeur de la catégorie
+   * @returns Icône correspondante
+   */
+  const getCategoryIcon = useCallback((categoryValue: string) => {
     const category = categories.find(c => c.value === categoryValue);
     return category?.icon || Package;
-  };
+  }, [categories]);
 
   return (
     <TooltipProvider>
@@ -337,7 +395,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {PRODUCT_TYPES.map((type) => {
                 const Icon = type.icon;
                 const isSelected = formData.product_type === type.value;
@@ -356,9 +414,13 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   <Card
                     key={type.value}
                     className={cn(
-                      "cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-2",
+                      "cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-2 touch-manipulation min-h-[140px] sm:min-h-[160px]",
                       colorClasses[type.color as keyof typeof colorClasses]
                     )}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Sélectionner le type de produit ${type.label}`}
+                    aria-pressed={formData.product_type === type.value}
                     onClick={() => {
                       if (lastType && lastType !== type.value) {
                         const confirmChange = window.confirm("Changer le type peut réinitialiser certains champs incompatibles. Continuer ?");
@@ -461,17 +523,22 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                 </Tooltip>
               </Label>
               <Input
+                id="product-name"
                 value={formData.name}
                 onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="Ex: Guide complet Facebook Ads 2025"
+                aria-label="Nom du produit"
+                aria-required="true"
+                aria-invalid={!!validationErrors.name}
+                aria-describedby={validationErrors.name ? "name-error" : undefined}
                 className={cn(
-                  "bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20",
+                  "bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]",
                   validationErrors.name && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
                 )}
               />
               {validationErrors.name && (
-                <div className="flex items-center gap-2 text-red-400 text-sm">
-                  <AlertCircle className="h-4 w-4" />
+                <div id="name-error" className="flex items-center gap-2 text-red-400 text-sm" role="alert">
+                  <AlertCircle className="h-4 w-4" aria-hidden="true" />
                   {validationErrors.name}
                 </div>
               )}
@@ -494,11 +561,16 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
               <div className="flex gap-2">
                 <div className="flex-1 relative">
                   <Input
+                    id="product-slug"
                     value={formData.slug}
                     onChange={(e) => updateFormData("slug", generateSlug(e.target.value))}
                     placeholder="guide-facebook-ads-2025"
+                    aria-label="URL du produit (slug)"
+                    aria-required="true"
+                    aria-invalid={!!validationErrors.slug}
+                    aria-describedby={validationErrors.slug ? "slug-error" : "slug-status"}
                     className={cn(
-                      "bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 pr-10",
+                      "bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 pr-10 min-h-[44px]",
                       validationErrors.slug && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
                     )}
                   />
@@ -531,11 +603,17 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
 
               {/* Indicateur lisible de disponibilité */}
               {slugAvailable !== null && (
-                <div className="flex items-center gap-2">
+                <div id="slug-status" className="flex items-center gap-2" role="status" aria-live="polite">
                   {slugAvailable ? (
-                    <Badge variant="secondary" className="text-xs bg-green-500/20 text-green-300 border-green-500/30">Disponible</Badge>
+                    <Badge variant="secondary" className="text-xs bg-green-500/20 text-green-300 border-green-500/30">
+                      <CheckCircle2 className="h-3 w-3 mr-1" aria-hidden="true" />
+                      Disponible
+                    </Badge>
                   ) : (
-                    <Badge variant="destructive" className="text-xs">Déjà utilisé</Badge>
+                    <Badge variant="destructive" className="text-xs">
+                      <XCircle className="h-3 w-3 mr-1" aria-hidden="true" />
+                      Déjà utilisé
+                    </Badge>
                   )}
                 </div>
               )}
@@ -572,7 +650,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
             </div>
 
             {/* Catégorie et modèle de tarification */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-white flex items-center gap-2">
                   Catégorie <span className="text-red-400">*</span>
@@ -589,14 +667,19 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   value={formData.category} 
                   onValueChange={(value) => updateFormData("category", value)}
                 >
-                  <SelectTrigger className={cn(
-                    "bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20",
-                    validationErrors.category && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                  )}>
+                  <SelectTrigger 
+                    id="product-category"
+                    aria-label="Catégorie du produit"
+                    aria-required="true"
+                    aria-invalid={!!validationErrors.category}
+                    className={cn(
+                      "bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]",
+                      validationErrors.category && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                    )}>
                     <SelectValue placeholder="Sélectionnez une catégorie" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
-                    {getCategories().map((category) => {
+                    {categories.map((category) => {
                       const Icon = category.icon;
                       return (
                         <SelectItem 
@@ -637,10 +720,15 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   value={formData.pricing_model} 
                   onValueChange={(value) => updateFormData("pricing_model", value)}
                 >
-                  <SelectTrigger className={cn(
-                    "bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20",
-                    validationErrors.pricing_model && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                  )}>
+                  <SelectTrigger 
+                    id="pricing-model"
+                    aria-label="Modèle de tarification"
+                    aria-required="true"
+                    aria-invalid={!!validationErrors.pricing_model}
+                    className={cn(
+                      "bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]",
+                      validationErrors.pricing_model && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                    )}>
                     <SelectValue placeholder="Sélectionnez un modèle" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
@@ -708,7 +796,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Prix principal et devise */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-white flex items-center gap-2">
                   Prix <span className="text-red-400">*</span>
@@ -723,6 +811,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                 </Label>
                 <div className="relative">
                   <Input
+                    id="product-price"
                     type="number"
                     value={formData.price || ""}
                     onChange={(e) => {
@@ -733,18 +822,22 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                     placeholder="0"
                     min="0"
                     step="0.01"
+                    aria-label="Prix du produit"
+                    aria-required="true"
+                    aria-invalid={!!validationErrors.price}
+                    aria-describedby={validationErrors.price ? "price-error" : undefined}
                     className={cn(
-                      "bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20",
+                      "bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px] pr-20",
                       validationErrors.price && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
                     )}
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                    {CURRENCIES.find(c => c.value === formData.currency)?.symbol || "FCFA"}
+                    {getCurrencySymbol(formData.currency)}
                   </div>
                 </div>
                 {validationErrors.price && (
-                  <div className="flex items-center gap-2 text-red-400 text-sm">
-                    <AlertCircle className="h-4 w-4" />
+                  <div id="price-error" className="flex items-center gap-2 text-red-400 text-sm" role="alert">
+                    <AlertCircle className="h-4 w-4" aria-hidden="true" />
                     {validationErrors.price}
                   </div>
                 )}
@@ -766,19 +859,23 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   value={formData.currency || "XOF"} 
                   onValueChange={(value) => updateFormData("currency", value)}
                 >
-                  <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20">
+                  <SelectTrigger 
+                    id="product-currency"
+                    aria-label="Devise du produit"
+                    aria-required="true"
+                    className="bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]">
                     <SelectValue placeholder="Sélectionnez une devise" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
                     {CURRENCIES.map((currency) => (
                       <SelectItem 
-                        key={currency.value} 
-                        value={currency.value} 
+                        key={currency.code} 
+                        value={currency.code} 
                         className="text-white hover:bg-gray-700 focus:bg-gray-700"
                       >
                         <div className="flex items-center gap-2">
                           <span>{currency.flag}</span>
-                          <span>{currency.label}</span>
+                          <span>{currency.name}</span>
                           <span className="text-gray-400">({currency.symbol})</span>
                         </div>
                       </SelectItem>
@@ -810,7 +907,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                     className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                    {CURRENCIES.find(c => c.value === formData.currency)?.symbol || "FCFA"}
+                    {getCurrencySymbol(formData.currency)}
                   </div>
                 </div>
               </div>
@@ -849,7 +946,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   )}
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                  {CURRENCIES.find(c => c.value === formData.currency)?.symbol || "FCFA"}
+                  {getCurrencySymbol(formData.currency)}
                 </div>
               </div>
 
@@ -876,7 +973,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                 <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
                   <TrendingUp className="h-4 w-4 text-green-400" />
                   <span className="text-sm text-green-400">
-                    Réduction de {getDiscountPercentage()}% - Économie de {((formData.price - formData.promotional_price) || 0).toLocaleString()} {CURRENCIES.find(c => c.value === formData.currency)?.symbol || "FCFA"}
+                    Réduction de {getDiscountPercentage()}% - Économie de {((formData.price - formData.promotional_price) || 0).toLocaleString()} {getCurrencySymbol(formData.currency)}
                   </span>
                 </div>
               )}
@@ -885,7 +982,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                 <div className="flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                   <TrendingUp className="h-4 w-4 text-blue-400" />
                   <span className="text-sm text-blue-300">
-                    Marge estimée: {Math.max(0, ((formData.promotional_price ?? formData.price) - (formData.cost_price || 0))).toLocaleString()} {CURRENCIES.find(c => c.value === formData.currency)?.symbol || "FCFA"}
+                    Marge estimée: {Math.max(0, ((formData.promotional_price ?? formData.price) - (formData.cost_price || 0))).toLocaleString()} {getCurrencySymbol(formData.currency)}
                     {formData.cost_price ? ` (${Math.max(0, Math.round((((formData.promotional_price ?? formData.price) - formData.cost_price) / Math.max(1, (formData.promotional_price ?? formData.price))) * 100))}%)` : ""}
                   </span>
                 </div>
@@ -914,11 +1011,11 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-white">
-                          {entry.price.toLocaleString()} {CURRENCIES.find(c => c.value === formData.currency)?.symbol || "FCFA"}
+                          {entry.price.toLocaleString()} {getCurrencySymbol(formData.currency)}
                         </span>
                         {entry.promotional_price && (
                           <span className="text-sm text-green-400">
-                            → {entry.promotional_price.toLocaleString()} {CURRENCIES.find(c => c.value === formData.currency)?.symbol || "FCFA"}
+                            → {entry.promotional_price.toLocaleString()} {getCurrencySymbol(formData.currency)}
                           </span>
                         )}
                       </div>
