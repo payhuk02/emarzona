@@ -46,15 +46,15 @@ describe('ProductVariantsTab', () => {
   it('affiche le titre et la description', () => {
     renderWithTooltip(<ProductVariantsTab formData={defaultFormData} updateFormData={updateFormData} />);
     
-    expect(screen.getByText('Variantes de Produit')).toBeInTheDocument();
-    expect(screen.getByText(/Créez différentes versions de votre produit/)).toBeInTheDocument();
+    expect(screen.getByText('Gestion des variantes')).toBeInTheDocument();
+    expect(screen.getByText('Créez différentes versions de votre produit (couleurs, tailles, etc.)')).toBeInTheDocument();
   });
 
   it('affiche "Aucune variante" quand la liste est vide', () => {
     renderWithTooltip(<ProductVariantsTab formData={defaultFormData} updateFormData={updateFormData} />);
     
-    expect(screen.getByText('Aucune variante')).toBeInTheDocument();
-    expect(screen.getByText(/Cliquez sur "Ajouter une variante" pour commencer/)).toBeInTheDocument();
+    expect(screen.getByText('Aucune variante configurée')).toBeInTheDocument();
+    expect(screen.getByText('Créez des variantes pour proposer différentes options (tailles, couleurs, etc.)')).toBeInTheDocument();
   });
 
   it('affiche le bouton "Ajouter une variante"', () => {
@@ -149,7 +149,7 @@ describe('ProductVariantsTab', () => {
   it('appelle updateFormData quand color_variants est activé', () => {
     renderWithTooltip(<ProductVariantsTab formData={defaultFormData} updateFormData={updateFormData} />);
     
-    const colorSwitch = screen.getByLabelText('Activer les couleurs disponibles');
+    const colorSwitch = screen.getByLabelText('Activer les variantes de couleurs');
     fireEvent.click(colorSwitch);
     
     expect(updateFormData).toHaveBeenCalledWith('color_variants', true);
@@ -158,7 +158,7 @@ describe('ProductVariantsTab', () => {
   it('appelle updateFormData quand size_variants est activé', () => {
     renderWithTooltip(<ProductVariantsTab formData={defaultFormData} updateFormData={updateFormData} />);
     
-    const sizeSwitch = screen.getByLabelText('Activer les tailles disponibles');
+    const sizeSwitch = screen.getByLabelText('Activer les variantes de tailles');
     fireEvent.click(sizeSwitch);
     
     expect(updateFormData).toHaveBeenCalledWith('size_variants', true);
@@ -249,11 +249,11 @@ describe('ProductVariantsTab', () => {
   it('a les attributs ARIA corrects pour l\'accessibilité', () => {
     renderWithTooltip(<ProductVariantsTab formData={defaultFormData} updateFormData={updateFormData} />);
     
-    const colorSwitch = screen.getByLabelText('Activer les couleurs disponibles');
-    expect(colorSwitch).toHaveAttribute('aria-label', 'Activer les couleurs disponibles');
+    const colorSwitch = screen.getByLabelText('Activer les variantes de couleurs');
+    expect(colorSwitch).toHaveAttribute('aria-label', 'Activer les variantes de couleurs');
     
-    const addButton = screen.getByLabelText('Ajouter une nouvelle variante de produit');
-    expect(addButton).toHaveAttribute('aria-label', 'Ajouter une nouvelle variante de produit');
+    const addButton = screen.getByLabelText('Ajouter une nouvelle variante');
+    expect(addButton).toHaveAttribute('aria-label', 'Ajouter une nouvelle variante');
   });
 
   it('affiche les icônes correctes pour chaque section', () => {
