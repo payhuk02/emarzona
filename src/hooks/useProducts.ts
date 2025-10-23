@@ -40,9 +40,10 @@ export const useProducts = (storeId?: string) => {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (storeId) {
-        query = query.eq('store_id', storeId);
-      }
+      // TEMPORAIRE : Commenté pour afficher tous les produits
+      // if (storeId) {
+      //   query = query.eq('store_id', storeId);
+      // }
 
       const { data, error } = await query;
 
