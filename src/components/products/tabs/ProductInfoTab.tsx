@@ -1320,13 +1320,42 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                       {formData.sale_start_date ? format(new Date(formData.sale_start_date), "PPP", { locale: fr }) : <span>Sélectionner une date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-600">
+                  <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-600" align="start">
                     <Calendar
                       mode="single"
                       selected={formData.sale_start_date ? new Date(formData.sale_start_date) : undefined}
                       onSelect={(date) => updateFormData("sale_start_date", date?.toISOString() || null)}
                       initialFocus
-                      className="bg-gray-800 text-white"
+                      className="rounded-md border border-gray-700"
+                      classNames={{
+                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                        month: "space-y-4",
+                        caption: "flex justify-center pt-1 relative items-center text-white",
+                        caption_label: "text-sm font-medium text-white",
+                        nav: "space-x-1 flex items-center",
+                        nav_button: cn(
+                          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-white hover:bg-gray-700 rounded-md"
+                        ),
+                        nav_button_previous: "absolute left-1",
+                        nav_button_next: "absolute right-1",
+                        table: "w-full border-collapse space-y-1",
+                        head_row: "flex",
+                        head_cell: "text-gray-400 rounded-md w-9 font-normal text-[0.8rem]",
+                        row: "flex w-full mt-2",
+                        cell: cn(
+                          "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-gray-700 [&:has([aria-selected].day-outside)]:bg-gray-700/50 [&:has([aria-selected].day-range-end)]:rounded-r-md",
+                          "first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md"
+                        ),
+                        day: cn(
+                          "h-9 w-9 p-0 font-normal text-white hover:bg-gray-700 hover:text-white rounded-md aria-selected:opacity-100"
+                        ),
+                        day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                        day_today: "bg-gray-700 text-white",
+                        day_outside: "text-gray-500 opacity-50",
+                        day_disabled: "text-gray-600 opacity-50",
+                        day_range_middle: "aria-selected:bg-gray-700 aria-selected:text-white",
+                        day_hidden: "invisible",
+                      }}
                     />
                   </PopoverContent>
                 </Popover>
@@ -1357,13 +1386,42 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                       {formData.sale_end_date ? format(new Date(formData.sale_end_date), "PPP", { locale: fr }) : <span>Sélectionner une date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-600">
+                  <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-600" align="start">
                     <Calendar
                       mode="single"
                       selected={formData.sale_end_date ? new Date(formData.sale_end_date) : undefined}
                       onSelect={(date) => updateFormData("sale_end_date", date?.toISOString() || null)}
                       initialFocus
-                      className="bg-gray-800 text-white"
+                      className="rounded-md border border-gray-700"
+                      classNames={{
+                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                        month: "space-y-4",
+                        caption: "flex justify-center pt-1 relative items-center text-white",
+                        caption_label: "text-sm font-medium text-white",
+                        nav: "space-x-1 flex items-center",
+                        nav_button: cn(
+                          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-white hover:bg-gray-700 rounded-md"
+                        ),
+                        nav_button_previous: "absolute left-1",
+                        nav_button_next: "absolute right-1",
+                        table: "w-full border-collapse space-y-1",
+                        head_row: "flex",
+                        head_cell: "text-gray-400 rounded-md w-9 font-normal text-[0.8rem]",
+                        row: "flex w-full mt-2",
+                        cell: cn(
+                          "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-gray-700 [&:has([aria-selected].day-outside)]:bg-gray-700/50 [&:has([aria-selected].day-range-end)]:rounded-r-md",
+                          "first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md"
+                        ),
+                        day: cn(
+                          "h-9 w-9 p-0 font-normal text-white hover:bg-gray-700 hover:text-white rounded-md aria-selected:opacity-100"
+                        ),
+                        day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                        day_today: "bg-gray-700 text-white",
+                        day_outside: "text-gray-500 opacity-50",
+                        day_disabled: "text-gray-600 opacity-50",
+                        day_range_middle: "aria-selected:bg-gray-700 aria-selected:text-white",
+                        day_hidden: "invisible",
+                      }}
                     />
                   </PopoverContent>
                 </Popover>
