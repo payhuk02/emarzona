@@ -107,6 +107,7 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDisputeDialog, setShowDisputeDialog] = useState(false);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<AdvancedPayment | null>(null);
   const [disputeReason, setDisputeReason] = useState("");
   const [disputeDescription, setDisputeDescription] = useState("");
@@ -488,7 +489,10 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {/* TODO: Voir les détails */}}
+                      onClick={() => {
+                        setSelectedPayment(payment);
+                        setShowDetailsDialog(true);
+                      }}
                     >
                       <Eye className="h-4 w-4 mr-1" />
                       Voir
@@ -531,6 +535,241 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
           ))
         )}
       </div>
+
+      {/* Dialog de détails du paiement */}
+      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              Détails du paiement
+            </DialogTitle>
+            <DialogDescription>
+              Informations complètes sur le paiement sélectionné
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedPayment && (
+            <div className="space-y-6">
+              {/* Statut et Type */}
+              <div className="flex items-center gap-3">
+                {getStatusBadge(selectedPayment.status)}
+                {getPaymentTypeBadge(selectedPayment.payment_type)}
+                {selectedPayment.is_held && (
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Shield className="h-3 w-3" />
+                    Fonds retenus
+                  </Badge>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Informations principales */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <CreditCard className="h-4 w-4" />
+                    Informations de paiement
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">ID Transaction:</span>
+                      <span className="font-mono">
+                        {selectedPayment.transaction_id || 'N/A'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Montant:</span>
+                      <span className="font-semibold text-green-600">
+                        {selectedPayment.amount.toLocaleString()} {selectedPayment.currency}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Méthode:</span>
+                      <span className="font-medium">{getMethodLabel(selectedPayment.payment_method)}</span>
+                    </div>
+                    {selectedPayment.payment_type === 'percentage' && (
+                      <>
+                        <Separator />
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Taux:</span>
+                          <span>{selectedPayment.percentage_rate}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Montant partiel:</span>
+                          <span className="text-green-600">
+                            {selectedPayment.percentage_amount?.toLocaleString() || 0} {selectedPayment.currency}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Montant restant:</span>
+                          <span className="text-orange-600">
+                            {selectedPayment.remaining_amount?.toLocaleString() || 0} {selectedPayment.currency}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Dates et délais
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Créé:</span>
+                      <span>{formatDate(selectedPayment.created_at)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Mis à jour:</span>
+                      <span>{formatDate(selectedPayment.updated_at)}</span>
+                    </div>
+                    {selectedPayment.held_until && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Retenu jusqu'au:</span>
+                        <span className="text-orange-600">
+                          {new Date(selectedPayment.held_until).toLocaleDateString('fr-FR')}
+                        </span>
+                      </div>
+                    )}
+                    {selectedPayment.delivery_confirmed_at && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Livraison confirmée:</span>
+                        <span className="text-green-600">
+                          {formatDate(selectedPayment.delivery_confirmed_at)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Informations sur la rétention */}
+              {selectedPayment.is_held && (
+                <>
+                  <Separator />
+                  <div className="space-y-3">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-orange-600" />
+                      Informations de rétention
+                    </h3>
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2 text-orange-600 font-medium">
+                          <AlertCircle className="h-4 w-4" />
+                          Les fonds sont actuellement retenus
+                        </div>
+                        {selectedPayment.release_conditions && (
+                          <div className="mt-2">
+                            <span className="text-muted-foreground">Conditions de libération:</span>
+                            <ul className="mt-1 ml-4 space-y-1">
+                              {Object.entries(selectedPayment.release_conditions as Record<string, boolean>).map(([key, value]) => (
+                                <li key={key} className="flex items-center gap-2">
+                                  {value ? (
+                                    <CheckCircle className="h-3 w-3 text-green-600" />
+                                  ) : (
+                                    <XCircle className="h-3 w-3 text-gray-400" />
+                                  )}
+                                  <span>{key.replace(/_/g, ' ')}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Litiges */}
+              {(selectedPayment.dispute_opened_at || selectedPayment.status === 'disputed') && (
+                <>
+                  <Separator />
+                  <div className="space-y-3">
+                    <h3 className="font-semibold flex items-center gap-2 text-red-600">
+                      <AlertTriangle className="h-4 w-4" />
+                      Litige en cours
+                    </h3>
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div className="space-y-2 text-sm">
+                        {selectedPayment.dispute_opened_at && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Ouvert le:</span>
+                            <span>{formatDate(selectedPayment.dispute_opened_at)}</span>
+                          </div>
+                        )}
+                        {selectedPayment.dispute_resolved_at && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Résolu le:</span>
+                            <span className="text-green-600">
+                              {formatDate(selectedPayment.dispute_resolved_at)}
+                            </span>
+                          </div>
+                        )}
+                        {selectedPayment.dispute_resolution && (
+                          <div className="mt-2">
+                            <span className="text-muted-foreground block mb-1">Résolution:</span>
+                            <p className="text-sm">{selectedPayment.dispute_resolution}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Notes */}
+              {selectedPayment.notes && (
+                <>
+                  <Separator />
+                  <div className="space-y-2">
+                    <h3 className="font-semibold">Notes</h3>
+                    <p className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
+                      {selectedPayment.notes}
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {/* Actions rapides */}
+              <Separator />
+              <div className="flex items-center justify-end gap-2">
+                {selectedPayment.is_held && selectedPayment.status === 'held' && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      handleReleasePayment(selectedPayment);
+                      setShowDetailsDialog(false);
+                    }}
+                  >
+                    <Unlock className="h-4 w-4 mr-2" />
+                    Libérer le paiement
+                  </Button>
+                )}
+                {selectedPayment.status !== 'disputed' && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowDetailsDialog(false);
+                      setShowDisputeDialog(true);
+                    }}
+                  >
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Ouvrir un litige
+                  </Button>
+                )}
+                <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
+                  Fermer
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog de litige */}
       <AlertDialog open={showDisputeDialog} onOpenChange={setShowDisputeDialog}>

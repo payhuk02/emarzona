@@ -4,6 +4,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   CreditCard,
@@ -18,8 +19,16 @@ import {
 import { useStore, Store } from "@/hooks/use-store";
 import { useAdvancedPayments } from "@/hooks/useAdvancedPayments";
 import { useMessaging } from "@/hooks/useMessaging";
+import { useOrders } from "@/hooks/useOrders";
 import AdvancedPaymentsComponent from "@/components/payments/AdvancedPaymentsComponent";
 import ConversationComponent from "@/components/messaging/ConversationComponent";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Composant séparé pour éviter les erreurs de hooks conditionnels
 const AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
@@ -29,6 +38,9 @@ const AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
   const {
     stats: paymentStats,
   } = useAdvancedPayments(store.id);
+
+  // Récupérer les commandes pour le sélecteur
+  const { orders, loading: ordersLoading } = useOrders(store.id, { pageSize: 100 });
 
   // Ne pas appeler useMessaging ici pour éviter les problèmes de WebSocket
   // Les stats de conversation seront chargées directement dans l'onglet Messagerie si nécessaire
@@ -207,19 +219,45 @@ const AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="mb-4">
-                    <label className="text-sm font-medium mb-2 block">
-                      Sélectionner une commande pour voir les conversations
-                    </label>
+                  <div className="mb-4 space-y-3">
+                    <Label htmlFor="order-select">Sélectionner une commande pour voir les conversations</Label>
                     <div className="flex gap-2">
-                      <Button
-                        variant={!selectedOrderId ? "default" : "outline"}
-                        onClick={() => setSelectedOrderId(undefined)}
-                        size="sm"
+                      <Select
+                        value={selectedOrderId || "all"}
+                        onValueChange={(value) => setSelectedOrderId(value === "all" ? undefined : value)}
                       >
-                        Toutes les commandes
-                      </Button>
-                      {/* TODO: Ajouter une liste déroulante des commandes */}
+                        <SelectTrigger id="order-select" className="w-full">
+                          <SelectValue placeholder="Sélectionnez une commande" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">
+                            <div className="flex items-center gap-2">
+                              <Package className="h-4 w-4" />
+                              Toutes les commandes
+                            </div>
+                          </SelectItem>
+                          {ordersLoading ? (
+                            <SelectItem value="loading" disabled>
+                              Chargement...
+                            </SelectItem>
+                          ) : orders.length === 0 ? (
+                            <SelectItem value="empty" disabled>
+                              Aucune commande disponible
+                            </SelectItem>
+                          ) : (
+                            orders.map((order) => (
+                              <SelectItem key={order.id} value={order.id}>
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-medium">#{order.order_number}</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {order.customers?.name || 'Client inconnu'} • {order.total_amount.toFixed(0)} FCFA
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   
