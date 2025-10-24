@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Star, Heart, Eye, CheckCircle, Clock, TrendingUp, Loader2 } from "lucide-react";
+import { ShoppingCart, Star, Heart, Eye, CheckCircle, Clock, TrendingUp, Loader2, BarChart3 } from "lucide-react";
 import { initiateMonerooPayment } from "@/lib/moneroo-payment";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,9 +38,16 @@ interface ProductCardProfessionalProps {
     created_at?: string;
   };
   storeSlug: string;
+  onAddToComparison?: () => void;
+  isInComparison?: boolean;
 }
 
-const ProductCardProfessional = ({ product, storeSlug }: ProductCardProfessionalProps) => {
+const ProductCardProfessional = ({ 
+  product, 
+  storeSlug,
+  onAddToComparison,
+  isInComparison = false
+}: ProductCardProfessionalProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   
@@ -200,6 +207,32 @@ const ProductCardProfessional = ({ product, storeSlug }: ProductCardProfessional
             aria-hidden="true"
           />
         </button>
+
+        {/* Bouton comparer */}
+        {onAddToComparison && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onAddToComparison();
+            }}
+            disabled={isInComparison}
+            className={`absolute top-3 right-14 p-2 backdrop-blur-sm rounded-full transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none ${
+              isInComparison 
+                ? 'bg-blue-500/90 cursor-not-allowed' 
+                : 'bg-white/90 hover:bg-white'
+            }`}
+            aria-label={isInComparison ? `${product.name} déjà dans la comparaison` : `Ajouter ${product.name} à la comparaison`}
+            aria-pressed={isInComparison}
+          >
+            <BarChart3 
+              className={`h-5 w-5 ${
+                isInComparison ? 'text-white' : 'text-gray-600'
+              }`} 
+              aria-hidden="true"
+            />
+          </button>
+        )}
 
         {/* Badge de catégorie */}
         {product.category && (

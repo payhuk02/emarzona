@@ -7,6 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProductBanner } from "@/components/ui/ResponsiveProductImage";
 import { ProductGrid } from "@/components/ui/ProductGrid";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { 
   Search, 
   ShoppingCart, 
@@ -540,6 +548,27 @@ const Marketplace = () => {
       
       <MarketplaceHeader />
 
+      {/* Breadcrumb Navigation */}
+      <div className="container mx-auto max-w-6xl px-4 pt-6 pb-2">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/" className="text-slate-300 hover:text-white transition-colors">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="text-slate-500" />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="text-white font-medium">
+                Marketplace
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+
       {/* Hero Section */}
       <section 
         className="relative py-16 px-4 overflow-hidden" 
@@ -619,6 +648,89 @@ const Marketplace = () => {
                 </div>
               )}
           </div>
+
+            {/* Filtres actifs (tags) */}
+            {(filters.category !== "all" || filters.productType !== "all" || filters.priceRange !== "all" || filters.tags.length > 0 || filters.verifiedOnly || filters.featuredOnly) && (
+              <div className="flex flex-wrap gap-2 items-center justify-center mb-4">
+                <span className="text-sm text-slate-300 font-medium">Filtres actifs:</span>
+                
+                {filters.category !== "all" && (
+                  <Badge variant="secondary" className="bg-slate-700 text-white hover:bg-slate-600 transition-colors flex items-center gap-1">
+                    Catégorie: {filters.category}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-red-400" 
+                      onClick={() => updateFilter({ category: "all" })}
+                      aria-label={`Retirer le filtre catégorie ${filters.category}`}
+                    />
+                  </Badge>
+                )}
+                
+                {filters.productType !== "all" && (
+                  <Badge variant="secondary" className="bg-slate-700 text-white hover:bg-slate-600 transition-colors flex items-center gap-1">
+                    Type: {filters.productType}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-red-400" 
+                      onClick={() => updateFilter({ productType: "all" })}
+                      aria-label={`Retirer le filtre type ${filters.productType}`}
+                    />
+                  </Badge>
+                )}
+                
+                {filters.priceRange !== "all" && (
+                  <Badge variant="secondary" className="bg-slate-700 text-white hover:bg-slate-600 transition-colors flex items-center gap-1">
+                    {PRICE_RANGES.find(r => r.value === filters.priceRange)?.label}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-red-400" 
+                      onClick={() => updateFilter({ priceRange: "all" })}
+                      aria-label="Retirer le filtre prix"
+                    />
+                  </Badge>
+                )}
+                
+                {filters.verifiedOnly && (
+                  <Badge variant="secondary" className="bg-green-700 text-white hover:bg-green-600 transition-colors flex items-center gap-1">
+                    ✓ Vérifiés uniquement
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-red-400" 
+                      onClick={() => updateFilter({ verifiedOnly: false })}
+                      aria-label="Retirer le filtre vérifiés"
+                    />
+                  </Badge>
+                )}
+                
+                {filters.featuredOnly && (
+                  <Badge variant="secondary" className="bg-yellow-700 text-white hover:bg-yellow-600 transition-colors flex items-center gap-1">
+                    ⭐ Vedettes uniquement
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-red-400" 
+                      onClick={() => updateFilter({ featuredOnly: false })}
+                      aria-label="Retirer le filtre vedettes"
+                    />
+                  </Badge>
+                )}
+                
+                {filters.tags.map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="bg-purple-700 text-white hover:bg-purple-600 transition-colors flex items-center gap-1">
+                    #{tag}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-red-400" 
+                      onClick={() => updateFilter({ tags: filters.tags.filter(t => t !== tag) })}
+                      aria-label={`Retirer le tag ${tag}`}
+                    />
+                  </Badge>
+                ))}
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                  aria-label="Effacer tous les filtres actifs"
+                >
+                  Tout effacer
+                </Button>
+              </div>
+            )}
 
             {/* Filtres rapides */}
             <div className="flex flex-wrap gap-3 justify-center" role="toolbar" aria-label="Actions du marketplace">
@@ -923,6 +1035,8 @@ const Marketplace = () => {
                     key={product.id}
                     product={product}
                     storeSlug={product.stores?.slug || 'default'}
+                    onAddToComparison={() => addToComparison(product)}
+                    isInComparison={!!comparisonProducts.find(p => p.id === product.id)}
                   />
                 ))}
               </ProductGrid>
