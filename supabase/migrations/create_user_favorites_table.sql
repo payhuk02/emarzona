@@ -108,6 +108,8 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ================================================================
 -- Vue pour les produits favoris avec détails
 -- ================================================================
+-- Note: Cette vue n'inclut que les colonnes essentielles qui existent
+-- dans toutes les versions de la table products
 
 CREATE OR REPLACE VIEW public.user_favorites_with_details AS
 SELECT 
@@ -119,12 +121,11 @@ SELECT
   p.name AS product_name,
   p.slug AS product_slug,
   p.price,
-  p.promotional_price,
   p.currency,
   p.image_url,
   p.category,
-  p.rating,
-  p.reviews_count,
+  p.product_type,
+  p.is_active,
   s.id AS store_id,
   s.name AS store_name,
   s.slug AS store_slug,
@@ -132,7 +133,7 @@ SELECT
 FROM public.user_favorites uf
 INNER JOIN public.products p ON uf.product_id = p.id
 INNER JOIN public.stores s ON p.store_id = s.id
-WHERE p.is_active = true AND p.is_draft = false;
+WHERE p.is_active = true;
 
 -- RLS pour la vue (hérite des permissions de la table)
 ALTER VIEW public.user_favorites_with_details SET (security_invoker = true);
