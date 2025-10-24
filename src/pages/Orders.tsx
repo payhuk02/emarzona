@@ -7,7 +7,7 @@ import { Plus, Package, Download } from "lucide-react";
 import { useStore } from "@/hooks/use-store";
 import { useOrders, SortColumn, SortDirection } from "@/hooks/useOrders";
 import { CreateOrderDialog } from "@/components/orders/CreateOrderDialog";
-import { OrdersTable } from "@/components/orders/OrdersTable";
+import { OrdersList } from "@/components/orders/OrdersList";
 import { OrderFilters } from "@/components/orders/OrderFilters";
 import { OrdersPagination } from "@/components/orders/OrdersPagination";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -180,7 +180,7 @@ const Orders = () => {
               </Card>
             ) : filteredOrders && filteredOrders.length > 0 ? (
               <>
-                <OrdersTable 
+                <OrdersList 
                   orders={filteredOrders} 
                   onUpdate={refetch} 
                   storeId={store.id}
