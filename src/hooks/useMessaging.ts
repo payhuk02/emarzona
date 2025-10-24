@@ -79,7 +79,8 @@ export const useMessaging = (
     } finally {
       setLoading(false);
     }
-  }, [orderId, conversationFilters, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderId, conversationFilters]);
 
   // Récupérer les messages d'une conversation
   const fetchMessages = useCallback(async (conversationId: string) => {
@@ -120,7 +121,8 @@ export const useMessaging = (
     } finally {
       setMessagesLoading(false);
     }
-  }, [messageFilters, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messageFilters]);
 
   // Récupérer les statistiques
   const fetchStats = useCallback(async () => {
@@ -509,12 +511,16 @@ export const useMessaging = (
         supabase.removeChannel(channelRef.current);
       }
     };
-  }, [orderId, currentConversation?.id, fetchConversations, fetchStats]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderId, currentConversation?.id]);
 
   useEffect(() => {
     fetchConversations();
+  }, [orderId, conversationFilters]);
+
+  useEffect(() => {
     fetchStats();
-  }, [fetchConversations, fetchStats]);
+  }, [orderId, currentConversation?.id]);
 
   return {
     conversations,
