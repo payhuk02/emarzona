@@ -290,7 +290,8 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                   <SelectContent>
                     <SelectItem value="all">Tous</SelectItem>
                     <SelectItem value="customer">Client</SelectItem>
-                    <SelectItem value="store">Vendeur</SelectItem>
+                    <SelectItem value="seller">Vendeur</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -432,8 +433,8 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
             <DialogDescription>
               {selectedDispute && (
                 <div className="mt-2 space-y-2">
-                  <p><strong>Commande :</strong> {selectedDispute.order?.order_number}</p>
-                  <p><strong>Raison :</strong> {selectedDispute.reason}</p>
+                  <p><strong>Commande :</strong> {selectedDispute.order_id.substring(0, 13)}...</p>
+                  <p><strong>Sujet :</strong> {selectedDispute.subject}</p>
                   <p><strong>Description :</strong> {selectedDispute.description}</p>
                 </div>
               )}

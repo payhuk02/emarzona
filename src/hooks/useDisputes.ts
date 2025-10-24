@@ -73,33 +73,31 @@ export const useDisputes = (filters?: DisputesFilters) => {
     }
   }, [filters, toast]);
 
-  // Récupérer les statistiques
+  // Récupérer les statistiques (OPTIMISÉ: 1 seule requête au lieu de 6)
   const fetchStats = useCallback(async () => {
     try {
-      const [totalResult, openResult, investigatingResult, resolvedResult, closedResult, unassignedResult] = await Promise.allSettled([
-        supabase.from("disputes").select("*", { count: "exact", head: true }),
-        supabase.from("disputes").select("*", { count: "exact", head: true }).eq("status", "open"),
-        supabase.from("disputes").select("*", { count: "exact", head: true }).eq("status", "investigating"),
-        supabase.from("disputes").select("*", { count: "exact", head: true }).eq("status", "resolved"),
-        supabase.from("disputes").select("*", { count: "exact", head: true }).eq("status", "closed"),
-        supabase.from("disputes").select("*", { count: "exact", head: true }).is("assigned_admin_id", null),
-      ]);
+      // Une seule requête pour récupérer tous les disputes
+      const { data: allDisputes, error } = await supabase
+        .from("disputes")
+        .select("status, assigned_admin_id, created_at, resolved_at");
 
-      const total = totalResult.status === 'fulfilled' && totalResult.value.count !== null ? totalResult.value.count : 0;
-      const open = openResult.status === 'fulfilled' && openResult.value.count !== null ? openResult.value.count : 0;
-      const investigating = investigatingResult.status === 'fulfilled' && investigatingResult.value.count !== null ? investigatingResult.value.count : 0;
-      const resolved = resolvedResult.status === 'fulfilled' && resolvedResult.value.count !== null ? resolvedResult.value.count : 0;
-      const closed = closedResult.status === 'fulfilled' && closedResult.value.count !== null ? closedResult.value.count : 0;
-      const unassigned = unassignedResult.status === 'fulfilled' && unassignedResult.value.count !== null ? unassignedResult.value.count : 0;
+      if (error) throw error;
+
+      // Calculs côté client (beaucoup plus rapide)
+      const disputes = allDisputes || [];
+      
+      const total = disputes.length;
+      const open = disputes.filter(d => d.status === 'open').length;
+      const investigating = disputes.filter(d => d.status === 'investigating').length;
+      const resolved = disputes.filter(d => d.status === 'resolved').length;
+      const closed = disputes.filter(d => d.status === 'closed').length;
+      const unassigned = disputes.filter(d => !d.assigned_admin_id).length;
 
       // Calculer le temps moyen de résolution
-      const { data: resolvedDisputes } = await supabase
-        .from("disputes")
-        .select("created_at, resolved_at")
-        .not("resolved_at", "is", null);
-
+      const resolvedDisputes = disputes.filter(d => d.resolved_at);
       let avgResolutionTime: number | undefined;
-      if (resolvedDisputes && resolvedDisputes.length > 0) {
+      
+      if (resolvedDisputes.length > 0) {
         const totalHours = resolvedDisputes.reduce((sum, dispute) => {
           const created = new Date(dispute.created_at);
           const resolved = new Date(dispute.resolved_at!);
