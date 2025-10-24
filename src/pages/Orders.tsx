@@ -3,7 +3,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Package } from "lucide-react";
+import { Plus, Package, Download } from "lucide-react";
 import { useStore } from "@/hooks/use-store";
 import { useOrders } from "@/hooks/useOrders";
 import { CreateOrderDialog } from "@/components/orders/CreateOrderDialog";
@@ -11,9 +11,12 @@ import { OrdersTable } from "@/components/orders/OrdersTable";
 import { OrderFilters } from "@/components/orders/OrderFilters";
 import { OrdersPagination } from "@/components/orders/OrdersPagination";
 import { Skeleton } from "@/components/ui/skeleton";
+import { exportOrdersToCSV } from "@/lib/export-utils";
+import { useToast } from "@/hooks/use-toast";
 
 const Orders = () => {
   const { store, loading: storeLoading } = useStore();
+  const { toast } = useToast();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const { orders, loading: ordersLoading, totalCount, refetch } = useOrders(store?.id, { page, pageSize });
@@ -23,6 +26,31 @@ const Orders = () => {
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<string>("all");
 
   const totalPages = Math.ceil(totalCount / pageSize);
+
+  const handleExportCSV = () => {
+    try {
+      if (!filteredOrders || filteredOrders.length === 0) {
+        toast({
+          title: "Attention",
+          description: "Aucune commande à exporter",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      exportOrdersToCSV(filteredOrders);
+      toast({
+        title: "Succès",
+        description: `${filteredOrders.length} commande(s) exportée(s)`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const filteredOrders = orders?.filter((order) => {
     const matchesSearch = 
@@ -82,10 +110,16 @@ const Orders = () => {
                   Gérez toutes vos commandes
                 </p>
               </div>
-              <Button onClick={() => setIsCreateDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nouvelle commande
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={handleExportCSV} disabled={!orders || orders.length === 0}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Exporter CSV
+                </Button>
+                <Button onClick={() => setIsCreateDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouvelle commande
+                </Button>
+              </div>
             </div>
 
             {/* Filters */}
@@ -107,7 +141,7 @@ const Orders = () => {
               </Card>
             ) : filteredOrders && filteredOrders.length > 0 ? (
               <>
-                <OrdersTable orders={filteredOrders} onUpdate={refetch} />
+                <OrdersTable orders={filteredOrders} onUpdate={refetch} storeId={store.id} />
                 {totalCount > 10 && (
                   <OrdersPagination
                     currentPage={page}

@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Eye, Trash2 } from "lucide-react";
+import { MoreHorizontal, Eye, Trash2, Edit } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -13,17 +13,20 @@ import { Order } from "@/hooks/useOrders";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { OrderDetailDialog } from "./OrderDetailDialog";
+import { OrderEditDialog } from "./OrderEditDialog";
 
 interface OrdersTableProps {
   orders: Order[];
   onUpdate: () => void;
+  storeId: string;
 }
 
-export const OrdersTable = ({ orders, onUpdate }: OrdersTableProps) => {
+export const OrdersTable = ({ orders, onUpdate, storeId }: OrdersTableProps) => {
   const { toast } = useToast();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
@@ -227,6 +230,15 @@ export const OrdersTable = ({ orders, onUpdate }: OrdersTableProps) => {
                           Voir détails
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedOrder(order);
+                            setEditDialogOpen(true);
+                          }}
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Modifier
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
                           onClick={() => setDeleteId(order.id)}
                           className="text-destructive"
                         >
@@ -247,6 +259,14 @@ export const OrdersTable = ({ orders, onUpdate }: OrdersTableProps) => {
         open={detailDialogOpen}
         onOpenChange={setDetailDialogOpen}
         order={selectedOrder}
+      />
+
+      <OrderEditDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        order={selectedOrder}
+        onSuccess={onUpdate}
+        storeId={storeId}
       />
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
