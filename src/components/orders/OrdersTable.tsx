@@ -5,12 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Eye, Trash2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Order } from "@/hooks/useOrders";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { OrderDetailDialog } from "./OrderDetailDialog";
 
 interface OrdersTableProps {
   orders: Order[];
@@ -20,7 +22,57 @@ interface OrdersTableProps {
 export const OrdersTable = ({ orders, onUpdate }: OrdersTableProps) => {
   const { toast } = useToast();
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Succès",
+        description: "Statut mis à jour",
+      });
+
+      onUpdate();
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePaymentStatusChange = async (orderId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ payment_status: newStatus })
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Succès",
+        description: "Statut de paiement mis à jour",
+      });
+
+      onUpdate();
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -118,10 +170,42 @@ export const OrdersTable = ({ orders, onUpdate }: OrdersTableProps) => {
                     {order.customers?.name || "Client non spécifié"}
                   </TableCell>
                   <TableCell>
-                    {order.total_amount.toLocaleString()} {order.currency}
+                    {order.total_amount.toLocaleString('fr-FR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })} {order.currency}
                   </TableCell>
-                  <TableCell>{getStatusBadge(order.status)}</TableCell>
-                  <TableCell>{getPaymentBadge(order.payment_status)}</TableCell>
+                  <TableCell>
+                    <Select
+                      value={order.status}
+                      onValueChange={(value) => handleStatusChange(order.id, value)}
+                    >
+                      <SelectTrigger className="w-[130px] h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">En attente</SelectItem>
+                        <SelectItem value="processing">En cours</SelectItem>
+                        <SelectItem value="completed">Terminée</SelectItem>
+                        <SelectItem value="cancelled">Annulée</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={order.payment_status}
+                      onValueChange={(value) => handlePaymentStatusChange(order.id, value)}
+                    >
+                      <SelectTrigger className="w-[120px] h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">En attente</SelectItem>
+                        <SelectItem value="paid">Payée</SelectItem>
+                        <SelectItem value="failed">Échouée</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
                   <TableCell>
                     {format(new Date(order.created_at), "dd MMM yyyy", { locale: fr })}
                   </TableCell>
@@ -133,7 +217,12 @@ export const OrdersTable = ({ orders, onUpdate }: OrdersTableProps) => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedOrder(order);
+                            setDetailDialogOpen(true);
+                          }}
+                        >
                           <Eye className="h-4 w-4 mr-2" />
                           Voir détails
                         </DropdownMenuItem>
@@ -153,6 +242,12 @@ export const OrdersTable = ({ orders, onUpdate }: OrdersTableProps) => {
           </Table>
         </div>
       </Card>
+
+      <OrderDetailDialog
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
+        order={selectedOrder}
+      />
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>

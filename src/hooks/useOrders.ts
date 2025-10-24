@@ -22,8 +22,15 @@ export interface Order {
   } | null;
 }
 
-export const useOrders = (storeId?: string) => {
+interface UseOrdersOptions {
+  page?: number;
+  pageSize?: number;
+}
+
+export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
+  const { page = 0, pageSize = 25 } = options;
   const [orders, setOrders] = useState<Order[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -34,7 +41,10 @@ export const useOrders = (storeId?: string) => {
     }
 
     try {
-      const { data, error } = await supabase
+      const from = page * pageSize;
+      const to = from + pageSize - 1;
+
+      const { data, error, count } = await supabase
         .from('orders')
         .select(`
           *,
@@ -43,12 +53,14 @@ export const useOrders = (storeId?: string) => {
             email,
             phone
           )
-        `)
+        `, { count: 'exact' })
         .eq('store_id', storeId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       if (error) throw error;
       setOrders(data || []);
+      setTotalCount(count || 0);
     } catch (error: any) {
       toast({
         title: "Erreur",
@@ -62,7 +74,12 @@ export const useOrders = (storeId?: string) => {
 
   useEffect(() => {
     fetchOrders();
-  }, [storeId]);
+  }, [storeId, page, pageSize]);
 
-  return { orders, loading, refetch: fetchOrders };
+  return { 
+    orders, 
+    loading, 
+    totalCount,
+    refetch: fetchOrders 
+  };
 };

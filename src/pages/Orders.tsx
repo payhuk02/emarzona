@@ -9,15 +9,20 @@ import { useOrders } from "@/hooks/useOrders";
 import { CreateOrderDialog } from "@/components/orders/CreateOrderDialog";
 import { OrdersTable } from "@/components/orders/OrdersTable";
 import { OrderFilters } from "@/components/orders/OrderFilters";
+import { OrdersPagination } from "@/components/orders/OrdersPagination";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Orders = () => {
   const { store, loading: storeLoading } = useStore();
-  const { orders, loading: ordersLoading, refetch } = useOrders(store?.id);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const { orders, loading: ordersLoading, totalCount, refetch } = useOrders(store?.id, { page, pageSize });
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<string>("all");
+
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   const filteredOrders = orders?.filter((order) => {
     const matchesSearch = 
@@ -101,7 +106,22 @@ const Orders = () => {
                 </CardContent>
               </Card>
             ) : filteredOrders && filteredOrders.length > 0 ? (
-              <OrdersTable orders={filteredOrders} onUpdate={refetch} />
+              <>
+                <OrdersTable orders={filteredOrders} onUpdate={refetch} />
+                {totalCount > 10 && (
+                  <OrdersPagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    pageSize={pageSize}
+                    totalItems={totalCount}
+                    onPageChange={setPage}
+                    onPageSizeChange={(newSize) => {
+                      setPageSize(newSize);
+                      setPage(0);
+                    }}
+                  />
+                )}
+              </>
             ) : (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">

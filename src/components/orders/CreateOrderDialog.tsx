@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useProducts } from "@/hooks/useProducts";
+import { Plus, Trash2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface CreateOrderDialogProps {
   open: boolean;
@@ -17,26 +19,98 @@ interface CreateOrderDialogProps {
   storeId: string;
 }
 
+interface OrderItem {
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  currency: string;
+}
+
 export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: CreateOrderDialogProps) => {
   const { toast } = useToast();
   const { customers } = useCustomers(storeId);
   const { products } = useProducts(storeId);
   const [loading, setLoading] = useState(false);
   const [customerId, setCustomerId] = useState<string>("");
-  const [productId, setProductId] = useState<string>("");
-  const [quantity, setQuantity] = useState<number>(1);
+  const [items, setItems] = useState<OrderItem[]>([]);
   const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
 
+  const handleAddItem = () => {
+    if (!products || products.length === 0) {
+      toast({
+        title: "Attention",
+        description: "Aucun produit disponible",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const firstActiveProduct = products.find(p => p.is_active);
+    if (!firstActiveProduct) {
+      toast({
+        title: "Attention",
+        description: "Aucun produit actif disponible",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setItems([
+      ...items,
+      {
+        productId: firstActiveProduct.id,
+        productName: firstActiveProduct.name,
+        quantity: 1,
+        unitPrice: Number(firstActiveProduct.price),
+        currency: firstActiveProduct.currency || 'FCFA',
+      },
+    ]);
+  };
+
+  const handleRemoveItem = (index: number) => {
+    setItems(items.filter((_, i) => i !== index));
+  };
+
+  const handleItemChange = (index: number, field: keyof OrderItem, value: any) => {
+    const newItems = [...items];
+    newItems[index] = { ...newItems[index], [field]: value };
+
+    // Si on change le produit, mettre à jour le prix et le nom
+    if (field === 'productId') {
+      const selectedProduct = products?.find(p => p.id === value);
+      if (selectedProduct) {
+        newItems[index].productName = selectedProduct.name;
+        newItems[index].unitPrice = Number(selectedProduct.price);
+        newItems[index].currency = selectedProduct.currency || 'FCFA';
+      }
+    }
+
+    setItems(newItems);
+  };
+
+  const calculateTotal = () => {
+    return items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (items.length === 0) {
+      toast({
+        title: "Erreur",
+        description: "Ajoutez au moins un produit à la commande",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const selectedProduct = products?.find(p => p.id === productId);
-      if (!selectedProduct) throw new Error("Produit non trouvé");
-
-      const totalAmount = Number(selectedProduct.price) * quantity;
+      const totalAmount = calculateTotal();
+      const currency = items[0]?.currency || 'FCFA';
 
       // Generate order number
       const { data: orderNumberData } = await supabase.rpc('generate_order_number');
@@ -50,7 +124,10 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
           customer_id: customerId || null,
           order_number: orderNumber,
           total_amount: totalAmount,
+          currency: currency,
           payment_method: paymentMethod,
+          payment_status: 'pending',
+          status: 'pending',
           notes,
         })
         .select()
@@ -58,23 +135,25 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
 
       if (orderError) throw orderError;
 
-      // Create order item
-      const { error: itemError } = await supabase
-        .from('order_items')
-        .insert({
-          order_id: order.id,
-          product_id: productId,
-          product_name: selectedProduct.name,
-          quantity,
-          unit_price: Number(selectedProduct.price),
-          total_price: totalAmount,
-        });
+      // Create order items
+      const orderItems = items.map(item => ({
+        order_id: order.id,
+        product_id: item.productId,
+        product_name: item.productName,
+        quantity: item.quantity,
+        unit_price: item.unitPrice,
+        total_price: item.quantity * item.unitPrice,
+      }));
 
-      if (itemError) throw itemError;
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
 
       toast({
         title: "Succès",
-        description: "Commande créée avec succès",
+        description: `Commande ${orderNumber} créée avec succès`,
       });
 
       onSuccess();
@@ -93,15 +172,21 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
 
   const resetForm = () => {
     setCustomerId("");
-    setProductId("");
-    setQuantity(1);
+    setItems([]);
     setNotes("");
     setPaymentMethod("cash");
   };
 
+  const formatPrice = (price: number) => {
+    return price.toLocaleString('fr-FR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nouvelle commande</DialogTitle>
           <DialogDescription>
@@ -109,7 +194,8 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Client */}
           <div className="space-y-2">
             <Label htmlFor="customer">Client (optionnel)</Label>
             <Select value={customerId} onValueChange={setCustomerId}>
@@ -126,34 +212,115 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="product">Produit *</Label>
-            <Select value={productId} onValueChange={setProductId} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un produit" />
-              </SelectTrigger>
-              <SelectContent>
-                {products?.filter(p => p.is_active).map((product) => (
-                  <SelectItem key={product.id} value={product.id}>
-                    {product.name} - {product.price} {product.currency}
-                  </SelectItem>
+          {/* Produits */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Produits *</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddItem}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Ajouter un produit
+              </Button>
+            </div>
+
+            {items.length === 0 ? (
+              <Card className="p-8 text-center border-dashed">
+                <p className="text-muted-foreground">
+                  Aucun produit ajouté. Cliquez sur "Ajouter un produit" pour commencer.
+                </p>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {items.map((item, index) => (
+                  <Card key={index} className="p-4">
+                    <div className="grid grid-cols-12 gap-3 items-start">
+                      {/* Produit */}
+                      <div className="col-span-12 md:col-span-5">
+                        <Label className="text-xs">Produit</Label>
+                        <Select
+                          value={item.productId}
+                          onValueChange={(value) => handleItemChange(index, 'productId', value)}
+                        >
+                          <SelectTrigger className="h-9">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {products?.filter(p => p.is_active).map((product) => (
+                              <SelectItem key={product.id} value={product.id}>
+                                {product.name} - {formatPrice(Number(product.price))} {product.currency}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Quantité */}
+                      <div className="col-span-6 md:col-span-2">
+                        <Label className="text-xs">Qté</Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          value={item.quantity}
+                          onChange={(e) => handleItemChange(index, 'quantity', Number(e.target.value))}
+                          className="h-9"
+                        />
+                      </div>
+
+                      {/* Prix unitaire */}
+                      <div className="col-span-6 md:col-span-2">
+                        <Label className="text-xs">Prix unit.</Label>
+                        <Input
+                          type="number"
+                          value={item.unitPrice}
+                          onChange={(e) => handleItemChange(index, 'unitPrice', Number(e.target.value))}
+                          className="h-9"
+                        />
+                      </div>
+
+                      {/* Total */}
+                      <div className="col-span-10 md:col-span-2">
+                        <Label className="text-xs">Total</Label>
+                        <div className="h-9 flex items-center font-semibold">
+                          {formatPrice(item.quantity * item.unitPrice)} {item.currency}
+                        </div>
+                      </div>
+
+                      {/* Supprimer */}
+                      <div className="col-span-2 md:col-span-1 flex items-end">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveItem(index)}
+                          className="h-9 w-9 text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="quantity">Quantité *</Label>
-            <Input
-              id="quantity"
-              type="number"
-              min="1"
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-              required
-            />
-          </div>
+          {/* Total commande */}
+          {items.length > 0 && (
+            <Card className="p-4 bg-muted/50">
+              <div className="flex justify-between items-center">
+                <span className="font-semibold">Total de la commande</span>
+                <span className="text-2xl font-bold">
+                  {formatPrice(calculateTotal())} {items[0]?.currency || 'FCFA'}
+                </span>
+              </div>
+            </Card>
+          )}
 
+          {/* Mode de paiement */}
           <div className="space-y-2">
             <Label htmlFor="payment">Mode de paiement</Label>
             <Select value={paymentMethod} onValueChange={setPaymentMethod}>
@@ -169,6 +336,7 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
             </Select>
           </div>
 
+          {/* Notes */}
           <div className="space-y-2">
             <Label htmlFor="notes">Notes</Label>
             <Textarea
@@ -176,9 +344,11 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Notes sur la commande..."
+              rows={3}
             />
           </div>
 
+          {/* Actions */}
           <div className="flex justify-end gap-2 pt-4">
             <Button
               type="button"
@@ -188,7 +358,7 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
             >
               Annuler
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || items.length === 0}>
               {loading ? "Création..." : "Créer la commande"}
             </Button>
           </div>
