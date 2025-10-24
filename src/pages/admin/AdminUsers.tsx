@@ -1,12 +1,20 @@
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { useAllUsers } from '@/hooks/useAllUsers';
+import { useAllUsers, type UserFilters } from '@/hooks/useAllUsers';
 import { useAdminActions } from '@/hooks/useAdminActions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,30 +40,65 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Users, Search, Download, Shield, User, Ban, CheckCircle, Trash2, AlertTriangle, FileDown } from 'lucide-react';
+import { Users, Search, Download, Shield, User, Ban, CheckCircle, Trash2, AlertTriangle, FileDown, ArrowUpDown, ArrowUp, ArrowDown, Filter } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 const AdminUsers = () => {
-  const { users, loading, refetch } = useAllUsers();
+  // États pour pagination, tri et filtres
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [sortBy, setSortBy] = useState<'created_at' | 'display_name'>('created_at');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [filters, setFilters] = useState<UserFilters>({
+    role: 'all',
+    status: 'all',
+    searchTerm: '',
+  });
+  
+  // Hook avec options avancées
+  const { users, totalCount, loading, refetch } = useAllUsers({
+    page,
+    pageSize,
+    sortBy,
+    sortDirection,
+    filters,
+  });
+  
   const { suspendUser, unsuspendUser, deleteUser } = useAdminActions();
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
   const [suspensionReason, setSuspensionReason] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const filteredUsers = users.filter(user =>
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.display_name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const { toast } = useToast();
+  
+  // Fonction pour gérer le tri
+  const handleSort = (column: typeof sortBy) => {
+    if (sortBy === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortDirection('desc');
+    }
+    setPage(1); // Reset à la page 1
+  };
+  
+  // Fonction pour gérer les filtres
+  const handleFilterChange = (key: keyof UserFilters, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setPage(1); // Reset à la page 1
+  };
+  
+  // Calculer pagination
+  const totalPages = Math.ceil(totalCount / pageSize);
+  const from = (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, totalCount);
 
   const exportToCSV = () => {
     const csvContent = [
       ['Email', 'Nom complet', 'Prénom', 'Nom', 'Rôle', 'Statut', 'Date d\'inscription'].join(','),
-      ...filteredUsers.map(user =>
+      ...users.map(user =>
         [
           user.email,
           user.display_name || '',
@@ -78,7 +121,7 @@ const AdminUsers = () => {
     
     toast({
       title: "Export réussi",
-      description: "Les données ont été exportées en CSV",
+      description: `${users.length} utilisateur(s) exporté(s) en CSV`,
     });
   };
 
@@ -110,7 +153,7 @@ const AdminUsers = () => {
           <div class="header">
             <h1>Liste des Utilisateurs</h1>
             <p class="date">Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
-            <p>Total: ${filteredUsers.length} utilisateur${filteredUsers.length > 1 ? 's' : ''}</p>
+            <p>Total: ${users.length} utilisateur${users.length > 1 ? 's' : ''}</p>
           </div>
           <table>
             <thead>
@@ -123,7 +166,7 @@ const AdminUsers = () => {
               </tr>
             </thead>
             <tbody>
-              ${filteredUsers.map(user => `
+              ${users.map(user => `
                 <tr>
                   <td>${user.email}</td>
                   <td>${user.first_name || user.last_name ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : user.display_name || 'N/A'}</td>
@@ -184,7 +227,7 @@ const AdminUsers = () => {
               Gestion des utilisateurs
             </h1>
             <p className="text-muted-foreground mt-2">
-              {users.length} utilisateur{users.length > 1 ? 's' : ''} inscrit{users.length > 1 ? 's' : ''}
+              {totalCount} utilisateur{totalCount > 1 ? 's' : ''} inscrit{totalCount > 1 ? 's' : ''}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -198,7 +241,7 @@ const AdminUsers = () => {
               <div>
                 <CardTitle>Liste des utilisateurs</CardTitle>
                 <CardDescription>
-                  Gérer tous les comptes utilisateurs
+                  Affichage de {from} à {to} sur {totalCount} utilisateur{totalCount > 1 ? 's' : ''}
                 </CardDescription>
               </div>
               <DropdownMenu>
@@ -211,39 +254,153 @@ const AdminUsers = () => {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={exportToCSV}>
                     <Download className="h-4 w-4 mr-2" />
-                    Exporter CSV
+                    Exporter CSV (page actuelle)
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={exportToPDF}>
                     <FileDown className="h-4 w-4 mr-2" />
-                    Exporter PDF
+                    Exporter PDF (page actuelle)
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <div className="relative mt-4">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher par email ou nom..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+            
+            {/* Filtres avancés */}
+            <div className="mt-4 space-y-4">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Filter className="h-4 w-4" />
+                Filtres
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Recherche */}
+                <div className="space-y-2">
+                  <Label htmlFor="search">Rechercher</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="search"
+                      placeholder="Email, nom, prénom..."
+                      value={filters.searchTerm || ''}
+                      onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                
+                {/* Filtre par rôle */}
+                <div className="space-y-2">
+                  <Label htmlFor="role-filter">Rôle</Label>
+                  <Select
+                    value={filters.role || 'all'}
+                    onValueChange={(value) => handleFilterChange('role', value)}
+                  >
+                    <SelectTrigger id="role-filter">
+                      <SelectValue placeholder="Tous les rôles" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous les rôles</SelectItem>
+                      <SelectItem value="admin">
+                        <div className="flex items-center gap-2">
+                          <Shield className="h-4 w-4" />
+                          Admin
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="user">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4" />
+                          Utilisateur
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Filtre par statut */}
+                <div className="space-y-2">
+                  <Label htmlFor="status-filter">Statut</Label>
+                  <Select
+                    value={filters.status || 'all'}
+                    onValueChange={(value) => handleFilterChange('status', value)}
+                  >
+                    <SelectTrigger id="status-filter">
+                      <SelectValue placeholder="Tous les statuts" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous les statuts</SelectItem>
+                      <SelectItem value="active">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          Actifs
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="suspended">
+                        <div className="flex items-center gap-2">
+                          <Ban className="h-4 w-4 text-red-600" />
+                          Suspendus
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
+                  {/* Email - non triable (dans auth.users) */}
                   <TableHead>Email</TableHead>
-                  <TableHead>Nom complet</TableHead>
+                  
+                  {/* Nom - triable */}
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 -ml-3"
+                      onClick={() => handleSort('display_name')}
+                    >
+                      Nom complet
+                      {sortBy === 'display_name' ? (
+                        sortDirection === 'asc' ? (
+                          <ArrowUp className="ml-2 h-4 w-4" />
+                        ) : (
+                          <ArrowDown className="ml-2 h-4 w-4" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+                      )}
+                    </Button>
+                  </TableHead>
+                  
                   <TableHead>Rôle</TableHead>
                   <TableHead>Statut</TableHead>
-                  <TableHead>Date d'inscription</TableHead>
+                  
+                  {/* Date d'inscription - triable */}
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 -ml-3"
+                      onClick={() => handleSort('created_at')}
+                    >
+                      Date d'inscription
+                      {sortBy === 'created_at' ? (
+                        sortDirection === 'asc' ? (
+                          <ArrowUp className="ml-2 h-4 w-4" />
+                        ) : (
+                          <ArrowDown className="ml-2 h-4 w-4" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+                      )}
+                    </Button>
+                  </TableHead>
+                  
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
+                {users.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.email}</TableCell>
                     <TableCell>
@@ -323,9 +480,99 @@ const AdminUsers = () => {
                 ))}
               </TableBody>
             </Table>
-            {filteredUsers.length === 0 && (
+            {users.length === 0 && !loading && (
               <div className="text-center py-12 text-muted-foreground">
-                Aucun utilisateur trouvé
+                <Users className="mx-auto h-12 w-12 opacity-50 mb-4" />
+                <p className="font-medium">Aucun utilisateur trouvé</p>
+                <p className="text-sm">Essayez de modifier vos filtres</p>
+              </div>
+            )}
+            
+            {/* Pagination */}
+            {totalCount > 0 && (
+              <div className="flex items-center justify-between px-2 py-4 border-t">
+                <div className="flex items-center gap-4">
+                  <p className="text-sm text-muted-foreground">
+                    Affichage de {from} à {to} sur {totalCount} résultat{totalCount > 1 ? 's' : ''}
+                  </p>
+                  <Select value={pageSize.toString()} onValueChange={(value) => {
+                    setPageSize(Number(value));
+                    setPage(1);
+                  }}>
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10 / page</SelectItem>
+                      <SelectItem value="20">20 / page</SelectItem>
+                      <SelectItem value="50">50 / page</SelectItem>
+                      <SelectItem value="100">100 / page</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(1)}
+                    disabled={page === 1}
+                  >
+                    Premier
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(page - 1)}
+                    disabled={page === 1}
+                  >
+                    Précédent
+                  </Button>
+                  
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (page <= 3) {
+                        pageNum = i + 1;
+                      } else if (page >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = page - 2 + i;
+                      }
+                      
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={page === pageNum ? 'default' : 'outline'}
+                          size="sm"
+                          className="w-8"
+                          onClick={() => setPage(pageNum)}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(page + 1)}
+                    disabled={page === totalPages}
+                  >
+                    Suivant
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(totalPages)}
+                    disabled={page === totalPages}
+                  >
+                    Dernier
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>

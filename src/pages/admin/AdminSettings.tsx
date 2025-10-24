@@ -1,16 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { Settings, Save, Info } from 'lucide-react';
+import { usePlatformSettings } from '@/hooks/usePlatformSettings';
+import { Settings, Save, Info, Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const AdminSettings = () => {
-  const { toast } = useToast();
-  const [settings, setSettings] = useState({
+  const { settings: dbSettings, loading, error, updateSettings } = usePlatformSettings();
+  
+  // État local pour le formulaire
+  const [localSettings, setLocalSettings] = useState({
     platformCommissionRate: 10,
     referralCommissionRate: 2,
     minWithdrawalAmount: 10000,
@@ -19,13 +22,66 @@ const AdminSettings = () => {
     smsNotifications: false,
   });
 
-  const handleSave = () => {
-    // Ici, vous pouvez sauvegarder les paramètres dans la base de données
-    toast({
-      title: 'Paramètres sauvegardés',
-      description: 'Les paramètres ont été mis à jour avec succès.',
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Synchroniser l'état local avec les paramètres chargés depuis la DB
+  useEffect(() => {
+    if (dbSettings) {
+      setLocalSettings({
+        platformCommissionRate: dbSettings.platform_commission_rate,
+        referralCommissionRate: dbSettings.referral_commission_rate,
+        minWithdrawalAmount: dbSettings.min_withdrawal_amount,
+        autoApproveWithdrawals: dbSettings.auto_approve_withdrawals,
+        emailNotifications: dbSettings.email_notifications,
+        smsNotifications: dbSettings.sms_notifications,
+      });
+    }
+  }, [dbSettings]);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    
+    const success = await updateSettings({
+      platform_commission_rate: localSettings.platformCommissionRate,
+      referral_commission_rate: localSettings.referralCommissionRate,
+      min_withdrawal_amount: localSettings.minWithdrawalAmount,
+      auto_approve_withdrawals: localSettings.autoApproveWithdrawals,
+      email_notifications: localSettings.emailNotifications,
+      sms_notifications: localSettings.smsNotifications,
     });
+    
+    setIsSaving(false);
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="container mx-auto p-6 space-y-6">
+          <Skeleton className="h-12 w-64" />
+          <Skeleton className="h-96" />
+          <Skeleton className="h-64" />
+          <Skeleton className="h-64" />
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="container mx-auto p-6 space-y-6 animate-fade-in">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Erreur de chargement :</strong> {error}
+            </AlertDescription>
+          </Alert>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -57,12 +113,13 @@ const AdminSettings = () => {
               <Input
                 id="platformCommission"
                 type="number"
-                value={settings.platformCommissionRate}
+                value={localSettings.platformCommissionRate}
                 onChange={(e) =>
-                  setSettings({ ...settings, platformCommissionRate: Number(e.target.value) })
+                  setLocalSettings({ ...localSettings, platformCommissionRate: Number(e.target.value) })
                 }
                 min="0"
                 max="100"
+                step="0.01"
               />
               <p className="text-sm text-muted-foreground">
                 Commission prélevée sur chaque vente
@@ -74,12 +131,13 @@ const AdminSettings = () => {
               <Input
                 id="referralCommission"
                 type="number"
-                value={settings.referralCommissionRate}
+                value={localSettings.referralCommissionRate}
                 onChange={(e) =>
-                  setSettings({ ...settings, referralCommissionRate: Number(e.target.value) })
+                  setLocalSettings({ ...localSettings, referralCommissionRate: Number(e.target.value) })
                 }
                 min="0"
                 max="100"
+                step="0.01"
               />
               <p className="text-sm text-muted-foreground">
                 Commission versée au parrain sur les ventes du filleul
@@ -109,11 +167,12 @@ const AdminSettings = () => {
               <Input
                 id="minWithdrawal"
                 type="number"
-                value={settings.minWithdrawalAmount}
+                value={localSettings.minWithdrawalAmount}
                 onChange={(e) =>
-                  setSettings({ ...settings, minWithdrawalAmount: Number(e.target.value) })
+                  setLocalSettings({ ...localSettings, minWithdrawalAmount: Number(e.target.value) })
                 }
                 min="0"
+                step="1"
               />
               <p className="text-sm text-muted-foreground">
                 Montant minimum requis pour effectuer un retrait
@@ -128,16 +187,16 @@ const AdminSettings = () => {
                 </p>
               </div>
               <Button
-                variant={settings.autoApproveWithdrawals ? 'default' : 'outline'}
+                variant={localSettings.autoApproveWithdrawals ? 'default' : 'outline'}
                 size="sm"
                 onClick={() =>
-                  setSettings({
-                    ...settings,
-                    autoApproveWithdrawals: !settings.autoApproveWithdrawals,
+                  setLocalSettings({
+                    ...localSettings,
+                    autoApproveWithdrawals: !localSettings.autoApproveWithdrawals,
                   })
                 }
               >
-                {settings.autoApproveWithdrawals ? 'Activé' : 'Désactivé'}
+                {localSettings.autoApproveWithdrawals ? 'Activé' : 'Désactivé'}
               </Button>
             </div>
           </CardContent>
@@ -160,16 +219,16 @@ const AdminSettings = () => {
                 </p>
               </div>
               <Button
-                variant={settings.emailNotifications ? 'default' : 'outline'}
+                variant={localSettings.emailNotifications ? 'default' : 'outline'}
                 size="sm"
                 onClick={() =>
-                  setSettings({
-                    ...settings,
-                    emailNotifications: !settings.emailNotifications,
+                  setLocalSettings({
+                    ...localSettings,
+                    emailNotifications: !localSettings.emailNotifications,
                   })
                 }
               >
-                {settings.emailNotifications ? 'Activé' : 'Désactivé'}
+                {localSettings.emailNotifications ? 'Activé' : 'Désactivé'}
               </Button>
             </div>
 
@@ -181,16 +240,16 @@ const AdminSettings = () => {
                 </p>
               </div>
               <Button
-                variant={settings.smsNotifications ? 'default' : 'outline'}
+                variant={localSettings.smsNotifications ? 'default' : 'outline'}
                 size="sm"
                 onClick={() =>
-                  setSettings({
-                    ...settings,
-                    smsNotifications: !settings.smsNotifications,
+                  setLocalSettings({
+                    ...localSettings,
+                    smsNotifications: !localSettings.smsNotifications,
                   })
                 }
               >
-                {settings.smsNotifications ? 'Activé' : 'Désactivé'}
+                {localSettings.smsNotifications ? 'Activé' : 'Désactivé'}
               </Button>
             </div>
           </CardContent>
@@ -198,9 +257,23 @@ const AdminSettings = () => {
 
         {/* Save Button */}
         <div className="flex justify-end">
-          <Button onClick={handleSave} size="lg" className="gap-2">
-            <Save className="h-4 w-4" />
-            Sauvegarder les paramètres
+          <Button 
+            onClick={handleSave} 
+            size="lg" 
+            className="gap-2"
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Sauvegarde en cours...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Sauvegarder les paramètres
+              </>
+            )}
           </Button>
         </div>
       </div>
