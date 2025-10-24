@@ -193,15 +193,15 @@ const ProductCardProfessional = ({
 
   return (
     <Card className="group relative overflow-hidden bg-white border border-gray-200 hover:border-gray-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 rounded-lg" role="article" aria-label={`Produit: ${product.name}`}>
-      {/* Image avec overlay et badges - OPTIMISÉE ET AGRANDIE */}
+      {/* Image avec overlay et badges - OPTIMISÉE ET EXTRA AGRANDIE */}
       <div className="relative">
         <ProductImage
           src={product.image_url}
           alt={product.name}
-          className="w-full h-64 object-cover"
+          className="w-full h-80 object-cover"
           showSkeleton={true}
           priority={false}
-          containerClassName="w-full h-64"
+          containerClassName="w-full h-80"
         />
         
         {/* Overlay avec badge promotionnel seulement */}
@@ -266,8 +266,8 @@ const ProductCardProfessional = ({
         )}
       </div>
 
-      {/* Contenu de la carte - PADDING AUGMENTÉ */}
-      <CardContent className="p-5">
+      {/* Contenu de la carte - PADDING EXTRA AUGMENTÉ */}
+      <CardContent className="p-6">
         {/* Informations du vendeur */}
         <div className="flex items-center gap-2 mb-4" role="group" aria-label="Informations du vendeur">
           {product.stores?.logo_url ? (
