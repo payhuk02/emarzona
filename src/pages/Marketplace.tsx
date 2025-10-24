@@ -48,6 +48,7 @@ import ProductCardProfessional from "@/components/marketplace/ProductCardProfess
 import { logger } from '@/lib/logger';
 import { Product, FilterState, PaginationState } from '@/types/marketplace';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
+import { useDebounce } from '@/hooks/useDebounce';
 import '@/styles/marketplace-professional.css';
 
 const Marketplace = () => {
@@ -83,6 +84,12 @@ const Marketplace = () => {
     featuredOnly: false,
     inStock: true
   });
+
+  // État local pour l'input de recherche (non debounced)
+  const [searchInput, setSearchInput] = useState("");
+  
+  // Valeur debounced pour éviter trop d'appels API
+  const debouncedSearch = useDebounce(searchInput, 500);
   
   // État de pagination
   const [pagination, setPagination] = useState<PaginationState>({
@@ -127,6 +134,11 @@ const Marketplace = () => {
     "Qualité premium", "Livraison rapide", "Support 24/7", "Garantie",
     "Formation incluse", "Mise à jour gratuite", "Communauté active"
   ];
+
+  // Synchroniser debouncedSearch avec filters.search
+  useEffect(() => {
+    setFilters(prev => ({ ...prev, search: debouncedSearch }));
+  }, [debouncedSearch]);
 
   // Chargement des produits
   const fetchProducts = useCallback(async () => {
@@ -537,14 +549,23 @@ const Marketplace = () => {
           {/* Barre de recherche */}
           <div className="max-w-4xl mx-auto">
             <div className="relative mb-6">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" aria-hidden="true" />
             <Input
-                type="text"
+                type="search"
                 placeholder="Rechercher un produit, une boutique ou une catégorie..."
-                value={filters.search}
-                onChange={(e) => updateFilter({ search: e.target.value })}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 className="pl-12 pr-4 py-4 text-lg bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 transition-all duration-300"
-            />
+                aria-label="Rechercher des produits dans le marketplace"
+              />
+              {searchInput && searchInput !== debouncedSearch && (
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    <span>Recherche...</span>
+                  </div>
+                </div>
+              )}
           </div>
 
             {/* Filtres rapides */}
