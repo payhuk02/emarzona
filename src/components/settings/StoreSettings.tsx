@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { DeleteStoreDialog } from "@/components/store/DeleteStoreDialog";
+import { deleteStoreWithDependencies, archiveStore } from "@/lib/store-delete-protection";
 import { 
   Store, 
   Settings, 
@@ -23,12 +25,14 @@ import {
 } from "lucide-react";
 
 export const StoreSettings = ({ action }: { action?: string | null }) => {
-  const { stores, loading: storesLoading, canCreateStore, getRemainingStores, createStore, updateStore, deleteStore } = useStores();
+  const { stores, loading: storesLoading, canCreateStore, getRemainingStores, createStore, updateStore, deleteStore, refetch } = useStores();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("list");
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [storeToDelete, setStoreToDelete] = useState<{ id: string; name: string } | null>(null);
   const [newStoreData, setNewStoreData] = useState({
     name: "",
     description: "",
@@ -79,24 +83,76 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
     }
   };
 
-  const handleDeleteStore = async (storeId: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cette boutique ? Cette action est irréversible.")) {
-      return;
-    }
+  const handleDeleteStore = (storeId: string, storeName: string) => {
+    setStoreToDelete({ id: storeId, name: storeName });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!storeToDelete) return;
 
     try {
-      setSaving(true);
-      await deleteStore(storeId);
+      const result = await deleteStoreWithDependencies(storeToDelete.id);
       
-      // Sélectionner une autre boutique si nécessaire
-      if (selectedStore === storeId) {
-        const remainingStores = stores.filter(s => s.id !== storeId);
-        setSelectedStore(remainingStores.length > 0 ? remainingStores[0].id : null);
+      if (result.success) {
+        toast({
+          title: "Boutique supprimée",
+          description: `La boutique "${storeToDelete.name}" a été supprimée avec succès.`
+        });
+        
+        // Rafraîchir la liste
+        await refetch();
+        
+        // Sélectionner une autre boutique si nécessaire
+        if (selectedStore === storeToDelete.id) {
+          const remainingStores = stores.filter(s => s.id !== storeToDelete.id);
+          setSelectedStore(remainingStores.length > 0 ? remainingStores[0].id : null);
+        }
+      } else {
+        toast({
+          title: "Erreur",
+          description: result.error || "Impossible de supprimer la boutique",
+          variant: "destructive"
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur lors de la suppression:', error);
-    } finally {
-      setSaving(false);
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleConfirmArchive = async () => {
+    if (!storeToDelete) return;
+
+    try {
+      const result = await archiveStore(storeToDelete.id);
+      
+      if (result.success) {
+        toast({
+          title: "Boutique archivée",
+          description: `La boutique "${storeToDelete.name}" a été archivée avec succès.`
+        });
+        
+        // Rafraîchir la liste
+        await refetch();
+      } else {
+        toast({
+          title: "Erreur",
+          description: result.error || "Impossible d'archiver la boutique",
+          variant: "destructive"
+        });
+      }
+    } catch (error: any) {
+      console.error('Erreur lors de l\'archivage:', error);
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue",
+        variant: "destructive"
+      });
     }
   };
 
@@ -217,7 +273,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDeleteStore(store.id)}
+                          onClick={() => handleDeleteStore(store.id, store.name)}
                           disabled={saving}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -316,6 +372,18 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
       )}
         </TabsContent>
       </Tabs>
+
+      {/* Dialog de suppression avec protection */}
+      {storeToDelete && (
+        <DeleteStoreDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          storeId={storeToDelete.id}
+          storeName={storeToDelete.name}
+          onConfirmDelete={handleConfirmDelete}
+          onConfirmArchive={handleConfirmArchive}
+        />
+      )}
     </div>
   );
 };

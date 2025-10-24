@@ -5,12 +5,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, ExternalLink, Save, X, BarChart3, Settings, Palette, Globe } from "lucide-react";
+import { Copy, ExternalLink, Save, X, BarChart3, Settings, Palette, Globe, AlertCircle } from "lucide-react";
 import { useStore, Store } from "@/hooks/useStore";
 import { useToast } from "@/hooks/use-toast";
 import StoreSlugEditor from "./StoreSlugEditor";
 import StoreImageUpload from "./StoreImageUpload";
 import StoreAnalytics from "./StoreAnalytics";
+import { validateStoreForm } from "@/lib/validation-utils";
 
 interface ExtendedStore extends Store {
   about?: string | null;
@@ -40,6 +41,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
   const [twitterUrl, setTwitterUrl] = useState(store.twitter_url || "");
   const [linkedinUrl, setLinkedinUrl] = useState(store.linkedin_url || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const { updateStore, getStoreUrl, checkSlugAvailability } = useStore();
   const { toast } = useToast();
 
@@ -59,6 +61,32 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationErrors({});
+    
+    // Validation du formulaire
+    const formData = {
+      name: name.trim(),
+      description: description.trim() || undefined,
+      contact_email: contactEmail.trim() || undefined,
+      contact_phone: contactPhone.trim() || undefined,
+      facebook_url: facebookUrl.trim() || undefined,
+      instagram_url: instagramUrl.trim() || undefined,
+      twitter_url: twitterUrl.trim() || undefined,
+      linkedin_url: linkedinUrl.trim() || undefined,
+    };
+
+    const validation = validateStoreForm(formData);
+
+    if (!validation.valid) {
+      setValidationErrors(validation.errors);
+      toast({
+        title: "Erreurs de validation",
+        description: "Veuillez corriger les erreurs avant de continuer.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     
     const updates: any = {
@@ -80,6 +108,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
 
     if (success) {
       setIsEditing(false);
+      setValidationErrors({});
       toast({
         title: "Boutique mise à jour",
         description: "Toutes les modifications ont été enregistrées."
@@ -99,6 +128,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
     setInstagramUrl(store.instagram_url || "");
     setTwitterUrl(store.twitter_url || "");
     setLinkedinUrl(store.linkedin_url || "");
+    setValidationErrors({});
     setIsEditing(false);
   };
 
@@ -133,8 +163,9 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
               size="sm"
               onClick={() => window.open(`/stores/${store.slug}`, '_blank')}
               className="touch-manipulation text-xs sm:text-sm"
+              aria-label={`Ouvrir la boutique ${store.name} dans un nouvel onglet`}
             >
-              <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" aria-hidden="true" />
               Voir la boutique
             </Button>
             <Button
@@ -142,8 +173,9 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
               size="sm"
               onClick={handleCopyUrl}
               className="touch-manipulation text-xs sm:text-sm"
+              aria-label={`Copier le lien de la boutique ${store.name}`}
             >
-              <Copy className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <Copy className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" aria-hidden="true" />
               Copier le lien
             </Button>
           </div>
@@ -253,28 +285,42 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="contact-email">Email de contact</Label>
-                      <Input
-                        id="contact-email"
-                        type="email"
-                        value={contactEmail}
-                        onChange={(e) => setContactEmail(e.target.value)}
-                        placeholder="contact@votreboutique.com"
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="contact-phone">Téléphone de contact</Label>
-                      <Input
-                        id="contact-phone"
-                        type="tel"
-                        value={contactPhone}
-                        onChange={(e) => setContactPhone(e.target.value)}
-                        placeholder="+225 XX XX XX XX"
-                        disabled={isSubmitting}
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="contact-email">Email de contact</Label>
+                    <Input
+                      id="contact-email"
+                      type="email"
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
+                      placeholder="contact@votreboutique.com"
+                      disabled={isSubmitting}
+                      className={validationErrors.contact_email ? "border-destructive" : ""}
+                    />
+                    {validationErrors.contact_email && (
+                      <div className="flex items-center gap-1 text-xs text-destructive">
+                        <AlertCircle className="h-3 w-3" />
+                        <span>{validationErrors.contact_email}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="contact-phone">Téléphone de contact</Label>
+                    <Input
+                      id="contact-phone"
+                      type="tel"
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
+                      placeholder="+225 XX XX XX XX"
+                      disabled={isSubmitting}
+                      className={validationErrors.contact_phone ? "border-destructive" : ""}
+                    />
+                    {validationErrors.contact_phone && (
+                      <div className="flex items-center gap-1 text-xs text-destructive">
+                        <AlertCircle className="h-3 w-3" />
+                        <span>{validationErrors.contact_phone}</span>
+                      </div>
+                    )}
+                  </div>
                   </div>
 
                   <div className="space-y-2">
@@ -351,6 +397,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                     disabled={isSubmitting}
                     aspectRatio="square"
                     description="Format carré recommandé (ex: 500x500px)"
+                    imageType="store-logo"
                   />
 
                   <StoreImageUpload
@@ -360,6 +407,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                     disabled={isSubmitting}
                     aspectRatio="banner"
                     description="Format paysage recommandé (ex: 1920x640px)"
+                    imageType="store-banner"
                   />
                 </div>
               ) : (

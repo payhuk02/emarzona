@@ -1,10 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, X, Image as ImageIcon, AlertCircle, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { uploadImage, validateImageFile, replaceImage, ImageType } from "@/lib/image-upload";
+import { supabase } from "@/integrations/supabase/client";
 
 interface StoreImageUploadProps {
   label: string;
@@ -15,6 +17,7 @@ interface StoreImageUploadProps {
   description?: string;
   maxSize?: number; // en MB
   acceptedFormats?: string[];
+  imageType?: ImageType; // Type d'image pour le storage
 }
 
 const StoreImageUpload = ({
@@ -25,13 +28,26 @@ const StoreImageUpload = ({
   aspectRatio = "free",
   description,
   maxSize = 5,
-  acceptedFormats = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+  acceptedFormats = ["image/jpeg", "image/png", "image/webp", "image/gif"],
+  imageType = "store-logo"
 }: StoreImageUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Récupérer l'ID utilisateur au montage
+  useEffect(() => {
+    const getUserId = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+    };
+    getUserId();
+  }, []);
 
   const getAspectRatioClass = () => {
     switch (aspectRatio) {
@@ -44,41 +60,57 @@ const StoreImageUpload = ({
     }
   };
 
-  const validateFile = (file: File): string | null => {
-    if (!acceptedFormats.includes(file.type)) {
-      return `Format non supporté. Formats acceptés : ${acceptedFormats.map(f => f.split('/')[1]).join(', ')}`;
+  const handleImageUpload = async (file: File): Promise<string | null> => {
+    if (!userId) {
+      throw new Error("Utilisateur non authentifié");
     }
-    
-    if (file.size > maxSize * 1024 * 1024) {
-      return `Fichier trop volumineux. Taille maximale : ${maxSize}MB`;
-    }
-    
-    return null;
-  };
 
-  const uploadImage = async (file: File): Promise<string> => {
-    // Simulation d'upload - remplacer par votre logique d'upload réelle
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        // Ici vous devriez uploader vers votre service de stockage (Supabase Storage, Cloudinary, etc.)
-        // Pour l'instant, on utilise l'URL data pour la démo
-        resolve(reader.result as string);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+    // Si une image existe déjà, on utilise replaceImage
+    if (value) {
+      const result = await replaceImage(value, file, imageType, userId);
+      if (!result.success) {
+        throw new Error(result.error || "Erreur lors de l'upload");
+      }
+      return result.url || null;
+    }
+
+    // Sinon, upload simple
+    const result = await uploadImage({
+      file,
+      type: imageType,
+      userId,
+      maxSizeMB: maxSize,
+      acceptedFormats
     });
+
+    if (!result.success) {
+      throw new Error(result.error || "Erreur lors de l'upload");
+    }
+
+    return result.url || null;
   };
 
   const handleFileSelect = async (file: File) => {
     setError(null);
     
-    const validationError = validateFile(file);
-    if (validationError) {
-      setError(validationError);
+    // Validation du fichier
+    const validation = validateImageFile(file, maxSize, acceptedFormats);
+    if (!validation.valid) {
+      setError(validation.error || "Fichier invalide");
       toast({
         title: "Erreur de fichier",
-        description: validationError,
+        description: validation.error,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Vérifier que l'utilisateur est authentifié
+    if (!userId) {
+      setError("Vous devez être connecté pour uploader une image");
+      toast({
+        title: "Authentification requise",
+        description: "Veuillez vous connecter pour uploader une image.",
         variant: "destructive"
       });
       return;
@@ -86,18 +118,21 @@ const StoreImageUpload = ({
 
     setIsUploading(true);
     try {
-      const url = await uploadImage(file);
-      onChange(url);
-      toast({
-        title: "Image uploadée",
-        description: "L'image a été uploadée avec succès."
-      });
-    } catch (error) {
+      const url = await handleImageUpload(file);
+      if (url) {
+        onChange(url);
+        toast({
+          title: "Image uploadée",
+          description: "L'image a été uploadée avec succès."
+        });
+      }
+    } catch (error: any) {
       console.error("Upload error:", error);
-      setError("Erreur lors de l'upload de l'image");
+      const errorMessage = error.message || "Impossible d'uploader l'image. Réessayez.";
+      setError(errorMessage);
       toast({
         title: "Erreur d'upload",
-        description: "Impossible d'uploader l'image. Réessayez.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -162,8 +197,9 @@ const StoreImageUpload = ({
                     size="sm"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={disabled || isUploading}
+                    aria-label={`Remplacer ${label.toLowerCase()}`}
                   >
-                    <Upload className="h-4 w-4 mr-1" />
+                    <Upload className="h-4 w-4 mr-1" aria-hidden="true" />
                     Remplacer
                   </Button>
                   <Button
@@ -171,8 +207,9 @@ const StoreImageUpload = ({
                     size="sm"
                     onClick={removeImage}
                     disabled={disabled || isUploading}
+                    aria-label={`Supprimer ${label.toLowerCase()}`}
                   >
-                    <X className="h-4 w-4 mr-1" />
+                    <X className="h-4 w-4 mr-1" aria-hidden="true" />
                     Supprimer
                   </Button>
                 </div>
@@ -191,6 +228,18 @@ const StoreImageUpload = ({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onClick={() => !disabled && !isUploading && fileInputRef.current?.click()}
+          role="button"
+          tabIndex={disabled || isUploading ? -1 : 0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              if (!disabled && !isUploading) {
+                fileInputRef.current?.click();
+              }
+            }
+          }}
+          aria-label={`Glissez-déposez ou cliquez pour uploader ${label.toLowerCase()}`}
+          aria-disabled={disabled || isUploading}
         >
           <div className="flex flex-col items-center gap-3">
             {isUploading ? (

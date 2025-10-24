@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Copy, ExternalLink, Edit, Check, X, Globe, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface StoreSlugEditorProps {
   currentSlug: string;
@@ -21,6 +22,9 @@ const StoreSlugEditor = ({ currentSlug, onSlugChange, onCheckAvailability, store
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
+  
+  // Debounce le slug pour éviter trop d'appels API
+  const debouncedSlug = useDebounce(newSlug, 500);
 
   const generateSlug = (text: string): string => {
     return text
@@ -32,15 +36,19 @@ const StoreSlugEditor = ({ currentSlug, onSlugChange, onCheckAvailability, store
       .replace(/^-+|-+$/g, '');
   };
 
-  const handleSlugChange = (value: string) => {
-    const slug = generateSlug(value);
-    setNewSlug(slug);
-    
-    if (slug !== currentSlug && slug.length > 0) {
-      checkAvailability(slug);
+  // Vérifier la disponibilité quand le slug debounced change
+  useEffect(() => {
+    if (debouncedSlug !== currentSlug && debouncedSlug.length > 0) {
+      checkAvailability(debouncedSlug);
     } else {
       setIsAvailable(null);
     }
+  }, [debouncedSlug]);
+
+  const handleSlugChange = (value: string) => {
+    const slug = generateSlug(value);
+    setNewSlug(slug);
+    // La vérification se fera automatiquement via useEffect + debounce
   };
 
   const checkAvailability = async (slug: string) => {

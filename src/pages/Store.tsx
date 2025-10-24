@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Store as StoreIcon, ExternalLink, Plus, Settings } from "lucide-react";
 import { useStores } from "@/hooks/useStores";
-import { CreateStoreDialog } from "@/components/store/CreateStoreDialog";
 import StoreDetails from "@/components/store/StoreDetails";
 import { useNavigate } from "react-router-dom";
 
@@ -36,9 +35,9 @@ const Store = () => {
                   size="sm"
                   onClick={() => window.open(`/stores/${stores[0].slug}`, '_blank')}
                   className="touch-manipulation min-h-[44px] whitespace-nowrap text-xs sm:text-sm"
-                  aria-label="Ouvrir ma boutique dans un nouvel onglet"
+                  aria-label={`Ouvrir la boutique ${stores[0].name} dans un nouvel onglet`}
                 >
-                  <ExternalLink className="h-3 w-3 mr-1 sm:mr-2" />
+                  <ExternalLink className="h-3 w-3 mr-1 sm:mr-2" aria-hidden="true" />
                   <span className="hidden sm:inline">Voir ma boutique</span>
                   <span className="sm:hidden">Voir</span>
                 </Button>
@@ -60,9 +59,9 @@ const Store = () => {
                 </Card>
               ) : stores.length > 0 ? (
                 <Tabs defaultValue="manage" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 gap-1 sm:gap-2 mb-6">
-                    <TabsTrigger value="manage" className="flex items-center gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
-                      <StoreIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <TabsList className="grid w-full grid-cols-2 gap-1 sm:gap-2 mb-6" role="tablist" aria-label="Navigation des boutiques">
+                    <TabsTrigger value="manage" className="flex items-center gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]" role="tab" aria-label="Gérer mes boutiques">
+                      <StoreIcon className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
                       <span className="hidden sm:inline">Gérer mes boutiques</span>
                       <span className="sm:hidden">Gérer</span>
                     </TabsTrigger>
@@ -70,8 +69,10 @@ const Store = () => {
                       value="create" 
                       className="flex items-center gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]"
                       onClick={handleCreateStoreRedirect}
+                      role="tab"
+                      aria-label="Créer une nouvelle boutique"
                     >
-                      <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <Plus className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
                       <span className="hidden sm:inline">Créer ma boutique</span>
                       <span className="sm:hidden">Créer</span>
                     </TabsTrigger>
