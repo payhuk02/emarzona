@@ -520,19 +520,34 @@ const Marketplace = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Skip to main content link for keyboard navigation */}
+      <a 
+        href="#main-content" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-md focus:shadow-lg"
+      >
+        Aller au contenu principal
+      </a>
+      
       <MarketplaceHeader />
 
       {/* Hero Section */}
-      <section className="relative py-16 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 animate-pulse"></div>
+      <section 
+        className="relative py-16 px-4 overflow-hidden" 
+        aria-labelledby="hero-title"
+        role="banner"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 animate-pulse" aria-hidden="true"></div>
         <div className="container mx-auto max-w-6xl relative z-10">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <Sparkles className="h-8 w-8 text-yellow-400 animate-pulse" />
-              <h1 className="text-4xl md:text-6xl font-bold text-white bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <Sparkles className="h-8 w-8 text-yellow-400 animate-pulse" aria-hidden="true" />
+              <h1 
+                id="hero-title" 
+                className="text-4xl md:text-6xl font-bold text-white bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+              >
             Marketplace Payhuk
           </h1>
-              <Sparkles className="h-8 w-8 text-yellow-400 animate-pulse" />
+              <Sparkles className="h-8 w-8 text-yellow-400 animate-pulse" aria-hidden="true" />
             </div>
             <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-4xl mx-auto leading-relaxed">
               Découvrez des milliers de produits digitaux : formations, ebooks, templates, logiciels et plus encore.
@@ -541,22 +556,34 @@ const Marketplace = () => {
             </p>
             
             {/* Statistiques */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mb-8">
+            <div 
+              className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mb-8" 
+              role="region" 
+              aria-label="Statistiques du marketplace"
+            >
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
-                <div className="text-2xl font-bold text-blue-400">{stats.totalProducts}</div>
-                <div className="text-sm text-slate-400">Produits</div>
+                <div className="text-2xl font-bold text-blue-400" aria-label={`${stats.totalProducts} produits disponibles`}>
+                  {stats.totalProducts}
+                </div>
+                <div className="text-sm text-slate-300">Produits</div>
               </div>
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
-                <div className="text-2xl font-bold text-green-400">{stats.totalStores}</div>
-                <div className="text-sm text-slate-400">Boutiques</div>
+                <div className="text-2xl font-bold text-green-400" aria-label={`${stats.totalStores} boutiques actives`}>
+                  {stats.totalStores}
+                </div>
+                <div className="text-sm text-slate-300">Boutiques</div>
               </div>
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
-                <div className="text-2xl font-bold text-yellow-400">{stats.averageRating.toFixed(1)}</div>
-                <div className="text-sm text-slate-400">Note moyenne</div>
+                <div className="text-2xl font-bold text-yellow-400" aria-label={`Note moyenne de ${stats.averageRating.toFixed(1)} sur 5`}>
+                  {stats.averageRating.toFixed(1)}
+                </div>
+                <div className="text-sm text-slate-300">Note moyenne</div>
               </div>
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
-                <div className="text-2xl font-bold text-purple-400">{stats.totalSales}</div>
-                <div className="text-sm text-slate-400">Ventes</div>
+                <div className="text-2xl font-bold text-purple-400" aria-label={`${stats.totalSales} ventes réalisées`}>
+                  {stats.totalSales}
+                </div>
+                <div className="text-sm text-slate-300">Ventes</div>
               </div>
             </div>
           </div>
@@ -584,16 +611,19 @@ const Marketplace = () => {
           </div>
 
             {/* Filtres rapides */}
-            <div className="flex flex-wrap gap-3 justify-center">
+            <div className="flex flex-wrap gap-3 justify-center" role="toolbar" aria-label="Actions du marketplace">
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
-                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+                aria-label={`${showFilters ? 'Masquer' : 'Afficher'} les filtres avancés`}
+                aria-expanded={showFilters}
+                aria-controls="advanced-filters"
               >
-                <Filter className="h-4 w-4 mr-2" />
+                <Filter className="h-4 w-4 mr-2" aria-hidden="true" />
                 Filtres avancés
                 {(filters.category !== "all" || filters.productType !== "all" || filters.priceRange !== "all" || filters.tags.length > 0) && (
-                  <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs animate-pulse">
+                  <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs animate-pulse" aria-label="Filtres actifs">
                     !
                   </Badge>
                 )}
@@ -602,22 +632,24 @@ const Marketplace = () => {
               <Button
                 variant="outline"
                 onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
-                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+                aria-label="Ouvrir la recherche intelligente"
+                aria-expanded={showAdvancedSearch}
               >
-                <Zap className="h-4 w-4 mr-2" />
+                <Zap className="h-4 w-4 mr-2" aria-hidden="true" />
                 Recherche intelligente
               </Button>
 
               <Button
                 variant="outline"
                 onClick={() => setShowFavorites(true)}
-                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
-                aria-label={`Voir mes favoris (${favoritesCount} produits)`}
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+                aria-label={`Voir mes favoris (${favoritesCount} produit${favoritesCount !== 1 ? 's' : ''})`}
               >
                 <Heart className="h-4 w-4 mr-2" aria-hidden="true" />
                 Mes favoris
                 {favoritesCount > 0 && (
-                  <Badge variant="secondary" className="ml-2 bg-red-600 text-white animate-bounce">
+                  <Badge variant="secondary" className="ml-2 bg-red-600 text-white animate-bounce" aria-label={`${favoritesCount} favoris`}>
                     {favoritesCount}
                   </Badge>
                 )}
@@ -626,12 +658,14 @@ const Marketplace = () => {
               <Button
                 variant="outline"
                 onClick={() => setShowComparison(true)}
-                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+                aria-label={`Comparer ${comparisonProducts.length} produit${comparisonProducts.length !== 1 ? 's' : ''}`}
+                aria-expanded={showComparison}
               >
-                <BarChart3 className="h-4 w-4 mr-2" />
+                <BarChart3 className="h-4 w-4 mr-2" aria-hidden="true" />
                 Comparer
                 {comparisonProducts.length > 0 && (
-                  <Badge variant="secondary" className="ml-2 bg-green-600 text-white animate-bounce">
+                  <Badge variant="secondary" className="ml-2 bg-green-600 text-white animate-bounce" aria-label={`${comparisonProducts.length} produits en comparaison`}>
                     {comparisonProducts.length}
                   </Badge>
                 )}
@@ -640,9 +674,10 @@ const Marketplace = () => {
               <Button
                 variant="outline"
                 onClick={clearFilters}
-                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+                aria-label="Effacer tous les filtres"
               >
-                <X className="h-4 w-4 mr-2" />
+                <X className="h-4 w-4 mr-2" aria-hidden="true" />
                 Effacer tout
               </Button>
             </div>
@@ -652,7 +687,12 @@ const Marketplace = () => {
 
       {/* Filtres avancés */}
       {showFilters && (
-        <section className="py-8 px-4 bg-slate-800/30 backdrop-blur-sm">
+        <section 
+          id="advanced-filters" 
+          className="py-8 px-4 bg-slate-800/30 backdrop-blur-sm" 
+          role="region" 
+          aria-label="Filtres avancés du marketplace"
+        >
           <div className="container mx-auto max-w-6xl">
             <Card className="bg-slate-800/80 backdrop-blur-sm border-slate-600">
               <CardContent className="p-6">
@@ -856,7 +896,12 @@ const Marketplace = () => {
       </section>
 
       {/* Liste des produits */}
-      <section className="py-6 px-4">
+      <section 
+        id="main-content" 
+        className="py-6 px-4" 
+        role="main" 
+        aria-label="Liste des produits"
+      >
         <div className="container mx-auto max-w-6xl">
           {loading ? (
             <ProductGrid loading={true} skeletonCount={pagination.itemsPerPage} />
@@ -874,14 +919,19 @@ const Marketplace = () => {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-12">
+                <nav 
+                  className="flex justify-center items-center gap-2 mt-12" 
+                  role="navigation" 
+                  aria-label="Pagination des produits"
+                >
                   <Button
                     variant="outline"
                     onClick={() => goToPage(pagination.currentPage - 1)}
                     disabled={!canGoPrevious}
-                    className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300"
+                    className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+                    aria-label="Page précédente"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                   </Button>
 
                   {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
@@ -903,7 +953,12 @@ const Marketplace = () => {
                         key={page}
                         variant={isActive ? "default" : "outline"}
                         onClick={() => goToPage(page)}
-                        className={isActive ? "bg-blue-600 text-white" : "bg-slate-800 border-slate-600 text-white hover:bg-slate-700 transition-all duration-300"}
+                        className={isActive 
+                          ? "bg-blue-600 text-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900" 
+                          : "bg-slate-800 border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+                        }
+                        aria-label={`Page ${page}`}
+                        aria-current={isActive ? "page" : undefined}
                       >
                         {page}
                       </Button>
@@ -914,11 +969,12 @@ const Marketplace = () => {
                     variant="outline"
                     onClick={() => goToPage(pagination.currentPage + 1)}
                     disabled={!canGoNext}
-                    className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300"
+                    className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+                    aria-label="Page suivante"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-4 w-4" aria-hidden="true" />
                   </Button>
-                </div>
+                </nav>
               )}
             </>
           ) : (
