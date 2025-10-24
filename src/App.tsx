@@ -74,6 +74,7 @@ const PlatformRevenue = lazy(() => import("./pages/PlatformRevenue"));
 const Referrals = lazy(() => import("./pages/Referrals"));
 const SEOAnalyzer = lazy(() => import("./pages/SEOAnalyzer"));
 const Pixels = lazy(() => import("./pages/Pixels"));
+const AdvancedOrderManagement = lazy(() => import("./pages/AdvancedOrderManagement"));
 
 // Pages Admin - Lazy loading
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -123,6 +124,7 @@ const AppContent = () => {
           <Route path="/dashboard/store" element={<ProtectedRoute><Store /></ProtectedRoute>} />
           <Route path="/dashboard/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
           <Route path="/dashboard/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+          <Route path="/dashboard/advanced-orders" element={<ProtectedRoute><AdvancedOrderManagement /></ProtectedRoute>} />
           <Route path="/dashboard/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
           <Route path="/dashboard/promotions" element={<ProtectedRoute><Promotions /></ProtectedRoute>} />
           <Route path="/dashboard/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />

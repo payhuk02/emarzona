@@ -17,6 +17,7 @@ import {
   Bell,
   Target,
   Search,
+  MessageSquare,
 } from "lucide-react";
 import payhukLogo from "@/assets/payhuk-logo.png";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -62,6 +63,11 @@ const menuItems = [
     title: "Commandes",
     url: "/dashboard/orders",
     icon: ShoppingCart,
+  },
+  {
+    title: "Commandes Avancées",
+    url: "/dashboard/advanced-orders",
+    icon: MessageSquare,
   },
   {
     title: "Clients",
