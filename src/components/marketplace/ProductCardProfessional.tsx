@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ProductBanner } from "@/components/ui/ResponsiveProductImage";
+import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 
 interface ProductCardProfessionalProps {
   product: {
@@ -73,21 +75,40 @@ const ProductCardProfessional = ({ product, storeSlug }: ProductCardProfessional
 
     try {
       setLoading(true);
+      
+      // Récupérer l'utilisateur authentifié
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user?.email) {
+        toast({
+          title: "Authentification requise",
+          description: "Veuillez vous connecter pour effectuer un achat",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       const result = await initiateMonerooPayment({
         storeId: product.store_id,
         productId: product.id,
         amount: price,
         currency: product.currency ?? "XOF",
         description: `Achat de ${product.name}`,
-        customerEmail: "client@example.com",
-        metadata: { productName: product.name, storeSlug },
+        customerEmail: user.email,
+        customerName: user.user_metadata?.full_name || user.email.split('@')[0],
+        metadata: { 
+          productName: product.name, 
+          storeSlug,
+          userId: user.id
+        },
       });
 
       if (result.checkout_url) {
         window.location.href = result.checkout_url;
       }
     } catch (error: any) {
-      console.error("Erreur Moneroo:", error);
+      logger.error("Erreur lors de l'achat:", error);
       toast({
         title: "Erreur de paiement",
         description: error.message || "Impossible d'initialiser le paiement",

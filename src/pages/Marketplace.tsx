@@ -167,11 +167,11 @@ const Marketplace = () => {
       const { data, error } = await query;
       
       if (error) {
-        console.error("Erreur Supabase:", error);
+        logger.error("Erreur Supabase lors du chargement des produits:", error);
         throw error;
       }
       
-      console.log("Produits chargés:", data);
+      logger.info(`${data?.length || 0} produits chargés avec succès`);
       setProducts((data || []) as unknown as Product[]);
       setPagination(prev => ({ ...prev, totalItems: data?.length || 0 }));
       
@@ -197,7 +197,7 @@ const Marketplace = () => {
         "postgres_changes",
         { event: "*", schema: "public", table: "products" },
         (payload) => {
-          console.log("🔁 Changement détecté sur products :", payload);
+          logger.debug("🔁 Changement temps réel détecté sur products:", payload.eventType);
 
           if (payload.eventType === "INSERT") {
             setProducts((prev) => [payload.new as Product, ...prev]);
@@ -378,6 +378,23 @@ const Marketplace = () => {
     try {
       setPurchasing(prev => new Set(prev).add(product.id));
 
+      // Récupérer l'utilisateur authentifié
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user?.email) {
+        toast({
+          title: "Authentification requise",
+          description: "Veuillez vous connecter pour effectuer un achat",
+          variant: "destructive",
+        });
+        setPurchasing(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(product.id);
+          return newSet;
+        });
+        return;
+      }
+
       const price = product.promotional_price || product.price;
       
       const result = await initiateMonerooPayment({
@@ -386,10 +403,12 @@ const Marketplace = () => {
         amount: price,
         currency: product.currency,
         description: `Achat de ${product.name}`,
-        customerEmail: "client@example.com",
+        customerEmail: user.email,
+        customerName: user.user_metadata?.full_name || user.email.split('@')[0],
         metadata: { 
           productName: product.name, 
-          storeSlug: product.stores?.slug || "" 
+          storeSlug: product.stores?.slug || "",
+          userId: user.id
         },
       });
 
@@ -397,7 +416,7 @@ const Marketplace = () => {
         window.location.href = result.checkout_url;
       }
     } catch (error: any) {
-      console.error("Erreur Moneroo:", error);
+      logger.error("Erreur lors de l'achat:", error);
       toast({
         title: "Erreur de paiement",
         description: error.message || "Impossible d'initialiser le paiement",
@@ -423,15 +442,35 @@ const Marketplace = () => {
           text: product.short_description || product.description || "",
           url: url,
         });
-      } catch (error) {
-        console.log("Partage annulé");
+        toast({
+          title: "Partagé avec succès",
+          description: "Le lien a été partagé",
+        });
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          logger.error("Erreur lors du partage:", error);
+          toast({
+            title: "Erreur de partage",
+            description: "Impossible de partager le lien",
+            variant: "destructive",
+          });
+        }
       }
     } else {
-      await navigator.clipboard.writeText(url);
-      toast({
-        title: "Lien copié",
-        description: "Le lien du produit a été copié dans le presse-papiers",
-      });
+      try {
+        await navigator.clipboard.writeText(url);
+        toast({
+          title: "Lien copié",
+          description: "Le lien du produit a été copié dans le presse-papiers",
+        });
+      } catch (error) {
+        logger.error("Erreur lors de la copie:", error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de copier le lien. Vérifiez les permissions.",
+          variant: "destructive",
+        });
+      }
     }
   }, [toast]);
 
@@ -924,335 +963,6 @@ const Marketplace = () => {
         onClose={() => setShowFavorites(false)}
       />
     </div>
-  );
-};
-
-// Composant ProductCard avancé
-interface ProductCardAdvancedProps {
-  product: Product;
-  viewMode: 'grid' | 'list';
-  isFavorite: boolean;
-  isPurchasing: boolean;
-  onToggleFavorite: () => void;
-  onPurchase: () => void;
-  onShare: () => void;
-  onAddToComparison: () => void;
-  isInComparison: boolean;
-}
-
-const ProductCardAdvanced = ({
-  product,
-  viewMode,
-  isFavorite,
-  isPurchasing,
-  onToggleFavorite,
-  onPurchase,
-  onShare,
-  onAddToComparison,
-  isInComparison
-}: ProductCardAdvancedProps) => {
-  const price = product.promotional_price || product.price;
-  const hasPromo = product.promotional_price && product.promotional_price < product.price;
-  const discountPercent = hasPromo
-    ? Math.round(((product.price - (product.promotional_price || 0)) / product.price) * 100)
-    : 0;
-
-  const renderStars = (rating: number | null) => {
-    const ratingValue = rating || 0;
-    return (
-      <div className="flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`h-4 w-4 ${
-              star <= ratingValue ? "fill-yellow-400 text-yellow-400" : "text-slate-400"
-            }`}
-          />
-        ))}
-        <span className="text-sm text-slate-400 ml-1">({ratingValue})</span>
-      </div>
-    );
-  };
-
-  const handleCardClick = () => {
-    window.open(`/${product.stores?.slug}/${product.slug}`, '_blank');
-  };
-
-  if (viewMode === "list") {
-    return (
-      <Card className="group relative bg-slate-800/80 backdrop-blur-sm border-slate-600 hover:border-slate-500 transition-all duration-300 hover:-translate-y-1">
-        <CardContent className="p-6">
-          <div className="flex gap-6">
-            {/* Image */}
-            <div className="flex-shrink-0">
-              <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-slate-700 cursor-pointer" onClick={handleCardClick}>
-                {product.image_url ? (
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <ShoppingCart className="h-8 w-8 text-slate-400" />
-                  </div>
-                )}
-                {hasPromo && (
-                  <Badge className="absolute top-2 left-2 bg-red-600 text-white animate-pulse">
-                    -{discountPercent}%
-                  </Badge>
-                )}
-                {hasPromo && (
-                  <Badge className="absolute top-2 right-2 bg-yellow-600 text-white">
-                    <Crown className="h-3 w-3 mr-1" />
-                    Promo
-                  </Badge>
-                )}
-              </div>
-            </div>
-
-            {/* Contenu */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    {product.category && (
-                      <Badge variant="secondary" className="bg-slate-700 text-slate-300">
-                        {product.category}
-                      </Badge>
-                    )}
-                  </div>
-                  <h3 className="text-lg font-semibold text-white mb-1 line-clamp-2 cursor-pointer hover:text-blue-400 transition-colors" onClick={handleCardClick}>
-                    {product.name}
-                  </h3>
-                  <p className="text-slate-400 text-sm mb-2 line-clamp-2">
-                    {product.description}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    {renderStars(product.rating)}
-                  </div>
-                  <div className="text-sm text-slate-400">
-                    {product.reviews_count || 0} avis
-                  </div>
-                  <div className="text-sm text-slate-400">
-                    Par {product.stores?.name}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <div className="text-right">
-                    {hasPromo && (
-                      <div className="text-sm text-slate-400 line-through">
-                        {product.price.toLocaleString()} {product.currency}
-                      </div>
-                    )}
-                    <div className="text-lg font-bold text-white">
-                      {price.toLocaleString()} {product.currency}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 mt-4">
-                <Button
-                  onClick={onPurchase}
-                  disabled={isPurchasing}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white transition-all duration-300 hover:scale-105"
-                >
-                  {isPurchasing ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Achat...
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      Acheter
-                    </>
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onToggleFavorite}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300"
-                >
-                  <Heart className={`h-4 w-4 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onShare}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300"
-                >
-                  <Share2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onAddToComparison}
-                  disabled={isInComparison}
-                  className={`bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300 ${isInComparison ? "opacity-50" : ""}`}
-                >
-                  <BarChart3 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Mode grille
-  return (
-    <Card className="group relative bg-slate-800/80 backdrop-blur-sm border-slate-600 hover:border-slate-500 transition-all duration-300 hover:-translate-y-2 overflow-hidden product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop">
-      <CardContent className="p-0 product-card-container">
-        {/* Bannière produit avec ratio 16:9 */}
-        <div className="cursor-pointer" onClick={handleCardClick}>
-          <ProductBanner
-            src={product.image_url}
-            alt={product.name}
-            className="w-full"
-            fallbackIcon={<ShoppingCart className="h-12 w-12 text-slate-400" />}
-            overlay={
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            }
-            badges={
-              <>
-                {hasPromo && (
-                  <Badge className="bg-red-600 text-white animate-pulse">
-                    -{discountPercent}%
-                  </Badge>
-                )}
-                {hasPromo && (
-                  <Badge className="bg-yellow-600 text-white">
-                    <Crown className="h-3 w-3 mr-1" />
-                    Promo
-                  </Badge>
-                )}
-              </>
-            }
-          />
-        </div>
-
-          {/* Actions hover */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleFavorite();
-              }}
-              className="bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-8 w-8 p-0 shadow-lg"
-            >
-              <Heart className={`h-4 w-4 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onShare();
-              }}
-              className="bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-8 w-8 p-0 shadow-lg"
-            >
-              <Share2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddToComparison();
-              }}
-              disabled={isInComparison}
-              className={`bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-8 w-8 p-0 shadow-lg ${isInComparison ? "opacity-50" : ""}`}
-            >
-              <BarChart3 className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Quick view button */}
-          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCardClick();
-              }}
-              className="w-full bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 shadow-lg"
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              Voir rapidement
-            </Button>
-          </div>
-
-        {/* Contenu */}
-        <div className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            {product.category && (
-              <Badge variant="secondary" className="bg-slate-700 text-slate-300 text-xs">
-                {product.category}
-              </Badge>
-            )}
-          </div>
-
-          <h3 className="font-semibold text-white mb-2 line-clamp-2 cursor-pointer hover:text-blue-400 transition-colors" onClick={handleCardClick}>
-            {product.name}
-          </h3>
-
-          <div className="flex items-center gap-1 mb-3">
-            {renderStars(product.rating)}
-          </div>
-
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-sm text-slate-400">
-              {product.reviews_count || 0} avis
-            </div>
-            <div className="text-right">
-              {hasPromo && (
-                <div className="text-xs text-slate-400 line-through">
-                  {product.price.toLocaleString()} {product.currency}
-                </div>
-              )}
-              <div className="font-bold text-white">
-                {price.toLocaleString()} {product.currency}
-              </div>
-            </div>
-          </div>
-
-          <div className="text-xs text-slate-400 mb-3">
-            Par {product.stores?.name}
-          </div>
-
-          <Button
-            onClick={onPurchase}
-            disabled={isPurchasing}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-300 hover:scale-105 shadow-lg"
-          >
-            {isPurchasing ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Achat...
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                Acheter maintenant
-              </>
-            )}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
   );
 };
 
