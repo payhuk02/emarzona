@@ -39,11 +39,6 @@ export const useDisputes = (filters?: DisputesFilters) => {
             total_amount,
             currency
           ),
-          conversation:conversations (
-            id,
-            status,
-            admin_intervention
-          ),
           initiator:profiles!disputes_initiator_id_fkey (
             name,
             email
@@ -215,15 +210,6 @@ export const useDisputes = (filters?: DisputesFilters) => {
         .eq("id", disputeId);
 
       if (error) throw error;
-
-      // Mettre à jour la conversation associée
-      const dispute = disputes.find(d => d.id === disputeId);
-      if (dispute?.conversation_id) {
-        await supabase
-          .from("conversations")
-          .update({ status: 'closed' })
-          .eq("id", dispute.conversation_id);
-      }
 
       toast({
         title: "Succès",
