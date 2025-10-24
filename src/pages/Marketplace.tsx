@@ -1024,7 +1024,7 @@ const Marketplace = () => {
         role="main" 
         aria-label="Liste des produits"
       >
-        <div className="w-[99%] sm:w-full mx-auto max-w-7xl px-0.5 sm:px-4">
+        <div className="w-full mx-auto max-w-7xl px-0 sm:px-4">
           {loading ? (
             <ProductGrid loading={true} skeletonCount={pagination.itemsPerPage} />
           ) : paginatedProducts.length > 0 ? (
