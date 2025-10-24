@@ -62,17 +62,36 @@ const ProductCardProfessional = ({
     ? Math.round(((product.price - product.promotional_price!) / product.price) * 100)
     : 0;
 
+  // Fonction pour nettoyer les balises HTML
+  const stripHtmlTags = (html: string): string => {
+    // Créer un élément temporaire pour parser le HTML
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    // Extraire le texte sans balises
+    return temp.textContent || temp.innerText || '';
+  };
+
   // Générer une description courte si manquante (fallback frontend)
   const getShortDescription = (): string | undefined => {
+    let rawText = '';
+    
     if (product.short_description && product.short_description.trim()) {
-      return product.short_description;
+      rawText = product.short_description;
+    } else if (product.description && product.description.trim()) {
+      rawText = product.description;
+    } else {
+      return undefined; // Pas de description du tout
     }
-    if (product.description && product.description.trim()) {
-      return product.description.length > 120 
-        ? product.description.substring(0, 117) + '...' 
-        : product.description;
+    
+    // Nettoyer les balises HTML
+    const cleanText = stripHtmlTags(rawText).trim();
+    
+    // Tronquer si trop long
+    if (cleanText.length > 120) {
+      return cleanText.substring(0, 117) + '...';
     }
-    return undefined; // Pas de description du tout
+    
+    return cleanText;
   };
   
   const shortDescription = getShortDescription();
@@ -332,37 +351,42 @@ const ProductCardProfessional = ({
           </div>
         </div>
 
-        {/* Boutons d'action */}
+        {/* Boutons d'action - OPTIMISÉS */}
         <div className="flex gap-2 mt-4" role="group" aria-label="Actions du produit">
           <Button
             variant="outline"
-            className="flex-1 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            size="default"
+            className="flex-1 border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             asChild
           >
             <Link 
               to={`/stores/${storeSlug}/products/${product.slug}`}
               aria-label={`Voir les détails de ${product.name}`}
+              className="flex items-center justify-center"
             >
-              <Eye className="h-4 w-4 mr-2" aria-hidden="true" />
-              Voir le produit
+              <Eye className="h-4 w-4 mr-2 flex-shrink-0" aria-hidden="true" />
+              <span className="hidden sm:inline">Voir le produit</span>
+              <span className="sm:hidden">Détails</span>
             </Link>
           </Button>
           
           <Button
             onClick={handleBuyNow}
             disabled={loading}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            size="default"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 shadow-sm hover:shadow-md"
             aria-label={loading ? `Traitement de l'achat de ${product.name} en cours` : `Acheter ${product.name} pour ${formatPrice(price)} ${product.currency || 'FCFA'}`}
           >
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" aria-hidden="true" />
-                Paiement...
+                <Loader2 className="h-4 w-4 animate-spin mr-2 flex-shrink-0" aria-hidden="true" />
+                <span className="hidden sm:inline">Paiement...</span>
+                <span className="sm:hidden">...</span>
               </>
             ) : (
               <>
-                <ShoppingCart className="h-4 w-4 mr-2" aria-hidden="true" />
-                Acheter
+                <ShoppingCart className="h-4 w-4 mr-2 flex-shrink-0" aria-hidden="true" />
+                <span>Acheter</span>
               </>
             )}
           </Button>
