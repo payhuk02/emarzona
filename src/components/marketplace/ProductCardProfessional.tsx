@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ProductBanner } from "@/components/ui/ResponsiveProductImage";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
+import { useMarketplaceFavorites } from "@/hooks/useMarketplaceFavorites";
 
 interface ProductCardProfessionalProps {
   product: {
@@ -41,14 +42,32 @@ interface ProductCardProfessionalProps {
 
 const ProductCardProfessional = ({ product, storeSlug }: ProductCardProfessionalProps) => {
   const [loading, setLoading] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
   const { toast } = useToast();
+  
+  // Hook centralisé pour favoris synchronisés
+  const { favorites, toggleFavorite } = useMarketplaceFavorites();
+  const isFavorite = favorites.has(product.id);
 
   const price = product.promotional_price ?? product.price;
   const hasPromo = product.promotional_price && product.promotional_price < product.price;
   const discountPercent = hasPromo
     ? Math.round(((product.price - product.promotional_price!) / product.price) * 100)
     : 0;
+
+  // Générer une description courte si manquante (fallback frontend)
+  const getShortDescription = (): string | undefined => {
+    if (product.short_description && product.short_description.trim()) {
+      return product.short_description;
+    }
+    if (product.description && product.description.trim()) {
+      return product.description.length > 120 
+        ? product.description.substring(0, 117) + '...' 
+        : product.description;
+    }
+    return undefined; // Pas de description du tout
+  };
+  
+  const shortDescription = getShortDescription();
 
   const renderStars = (rating: number) => (
     <div className="flex items-center gap-0.5" role="img" aria-label={`Note: ${rating.toFixed(1)} sur 5 étoiles`}>
@@ -120,10 +139,10 @@ const ProductCardProfessional = ({ product, storeSlug }: ProductCardProfessional
     }
   };
 
-  const handleFavorite = (e: React.MouseEvent) => {
+  const handleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorite(!isFavorite);
+    await toggleFavorite(product.id);
   };
 
   const formatPrice = (price: number) => {
@@ -221,9 +240,9 @@ const ProductCardProfessional = ({ product, storeSlug }: ProductCardProfessional
         </h3>
 
         {/* Description courte */}
-        {product.short_description && (
+        {shortDescription && (
           <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-            {product.short_description}
+            {shortDescription}
           </p>
         )}
 
@@ -267,7 +286,7 @@ const ProductCardProfessional = ({ product, storeSlug }: ProductCardProfessional
               </span>
             )}
             <span className="text-lg font-bold text-gray-900">
-              {hasPromo ? 'Prix Promo : ' : ''}{formatPrice(price)} {product.currency || 'FCFA'}
+              {formatPrice(price)} {product.currency || 'FCFA'}
             </span>
           </div>
           

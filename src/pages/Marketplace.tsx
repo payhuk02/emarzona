@@ -503,7 +503,17 @@ const Marketplace = () => {
   const goToPage = useCallback((page: number) => {
     if (page < 1 || page > totalPages) return;
     setPagination(prev => ({ ...prev, currentPage: page }));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Scroll vers le début de la liste de produits (au lieu du top de page)
+    setTimeout(() => {
+      const mainContent = document.getElementById('main-content');
+      if (mainContent) {
+        mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // Fallback si ID non trouvé
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 100); // Délai pour permettre le re-render
   }, [totalPages]);
 
   // Statistiques (basées sur le total réel, pas seulement la page actuelle)
