@@ -20,7 +20,7 @@ import {
   Clock,
   MoreHorizontal
 } from "lucide-react";
-import { useStore } from "@/hooks/useStore";
+import { useStore } from "@/hooks/use-store";
 import { useAdvancedPayments } from "@/hooks/useAdvancedPayments";
 import { useMessaging } from "@/hooks/useMessaging";
 import AdvancedPaymentsComponent from "@/components/payments/AdvancedPaymentsComponent";
