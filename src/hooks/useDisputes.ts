@@ -21,16 +21,23 @@ interface DisputeStats {
   avgResolutionTime?: number; // en heures
 }
 
+type SortColumn = 'created_at' | 'status' | 'subject' | 'order_id';
+type SortDirection = 'asc' | 'desc';
+
 interface UseDisputesOptions {
   filters?: DisputesFilters;
   page?: number;
   pageSize?: number;
+  sortBy?: SortColumn;
+  sortDirection?: SortDirection;
 }
 
 export const useDisputes = (options?: UseDisputesOptions) => {
   const filters = options?.filters;
   const page = options?.page || 1;
   const pageSize = options?.pageSize || 20;
+  const sortBy = options?.sortBy || 'created_at';
+  const sortDirection = options?.sortDirection || 'desc';
   
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [stats, setStats] = useState<DisputeStats | null>(null);
@@ -51,7 +58,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       let query = supabase
         .from("disputes")
         .select("*", { count: "exact" })
-        .order("created_at", { ascending: false });
+        .order(sortBy, { ascending: sortDirection === 'asc' });
 
       // Appliquer les filtres
       if (filters?.status) {
@@ -98,7 +105,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
     } finally {
       setLoading(false);
     }
-  }, [filters, page, pageSize, toast]);
+  }, [filters, page, pageSize, sortBy, sortDirection, toast]);
 
   // Récupérer les statistiques (OPTIMISÉ: 1 seule requête au lieu de 6)
   const fetchStats = useCallback(async () => {
@@ -330,6 +337,8 @@ export const useDisputes = (options?: UseDisputesOptions) => {
     totalCount,
     page,
     pageSize,
+    sortBy,
+    sortDirection,
     fetchDisputes,
     fetchStats,
     assignDispute,
@@ -341,5 +350,5 @@ export const useDisputes = (options?: UseDisputesOptions) => {
 };
 
 // Export types
-export type { DisputesFilters, DisputeStats, UseDisputesOptions };
+export type { DisputesFilters, DisputeStats, UseDisputesOptions, SortColumn, SortDirection };
 

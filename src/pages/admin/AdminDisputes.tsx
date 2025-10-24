@@ -10,13 +10,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { AlertTriangle, CheckCircle, Clock, XCircle, User, Store, Shield, Calendar, MessageSquare, Search, ChevronLeft, ChevronRight } from "lucide-react";
-import { useDisputes } from "@/hooks/useDisputes";
+import { AlertTriangle, CheckCircle, Clock, XCircle, User, Store, Shield, Calendar, MessageSquare, Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Download } from "lucide-react";
+import { useDisputes, SortColumn, SortDirection } from "@/hooks/useDisputes";
 import { Dispute, DisputeStatus, InitiatorType } from "@/types/advanced-features";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { exportDisputesToCSV } from "@/lib/export-utils";
 
 const AdminDisputes = () => {
   const { toast } = useToast();
@@ -24,6 +25,8 @@ const AdminDisputes = () => {
   const [initiatorFilter, setInitiatorFilter] = useState<InitiatorType | "all">("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
+  const [sortByColumn, setSortByColumn] = useState<SortColumn>('created_at');
+  const [sortDir, setSortDir] = useState<SortDirection>('desc');
   const pageSize = 20;
   
   const filters = {
@@ -43,7 +46,45 @@ const AdminDisputes = () => {
     resolveDispute,
     closeDispute,
     updateDisputeStatus,
-  } = useDisputes({ filters, page, pageSize });
+  } = useDisputes({ filters, page, pageSize, sortBy: sortByColumn, sortDirection: sortDir });
+
+  // Fonction pour gérer le tri
+  const handleSort = (column: SortColumn) => {
+    if (sortByColumn === column) {
+      // Toggle direction si même colonne
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Nouvelle colonne, tri descendant par défaut
+      setSortByColumn(column);
+      setSortDir('desc');
+    }
+    setPage(1); // Reset à la page 1 lors du tri
+  };
+
+  // Fonction pour exporter les litiges en CSV
+  const handleExportCSV = () => {
+    try {
+      if (disputes.length === 0) {
+        toast({
+          title: "Aucune donnée",
+          description: "Il n'y a aucun litige à exporter",
+          variant: "destructive",
+        });
+        return;
+      }
+      exportDisputesToCSV(disputes);
+      toast({
+        title: "Export réussi",
+        description: `${disputes.length} litige(s) exporté(s) en CSV`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur d'export",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -131,6 +172,24 @@ const AdminDisputes = () => {
     );
   };
 
+  // Composant pour les headers triables
+  const SortableHeader = ({ column, label }: { column: SortColumn; label: string }) => {
+    const isActive = sortByColumn === column;
+    const Icon = isActive ? (sortDir === 'asc' ? ArrowUp : ArrowDown) : ArrowUpDown;
+    
+    return (
+      <TableHead 
+        className="cursor-pointer hover:bg-muted/50 select-none" 
+        onClick={() => handleSort(column)}
+      >
+        <div className="flex items-center gap-1">
+          {label}
+          <Icon className={`h-3 w-3 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+        </div>
+      </TableHead>
+    );
+  };
+
   if (loading) {
     return (
       <SidebarProvider>
@@ -208,7 +267,7 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
         <main className="flex-1 p-4 md:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
                   <Shield className="h-8 w-8 text-primary" />
@@ -218,6 +277,15 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                   Gérez et résolvez les litiges entre clients et vendeurs
                 </p>
               </div>
+              <Button
+                onClick={handleExportCSV}
+                variant="outline"
+                className="w-full sm:w-auto"
+                disabled={disputes.length === 0}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Exporter CSV
+              </Button>
             </div>
 
             {/* Stats Cards */}
@@ -374,12 +442,12 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Commande</TableHead>
+                          <SortableHeader column="order_id" label="Commande" />
                           <TableHead>Initiateur</TableHead>
-                          <TableHead>Raison</TableHead>
-                          <TableHead>Statut</TableHead>
+                          <SortableHeader column="subject" label="Sujet" />
+                          <SortableHeader column="status" label="Statut" />
                           <TableHead>Assigné à</TableHead>
-                          <TableHead>Date</TableHead>
+                          <SortableHeader column="created_at" label="Date" />
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
