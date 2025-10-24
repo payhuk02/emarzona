@@ -8,6 +8,7 @@ interface DisputesFilters {
   status?: DisputeStatus;
   initiator_type?: InitiatorType;
   assigned_admin_id?: string;
+  search?: string;
 }
 
 interface DisputeStats {
@@ -20,11 +21,22 @@ interface DisputeStats {
   avgResolutionTime?: number; // en heures
 }
 
-export const useDisputes = (filters?: DisputesFilters) => {
+interface UseDisputesOptions {
+  filters?: DisputesFilters;
+  page?: number;
+  pageSize?: number;
+}
+
+export const useDisputes = (options?: UseDisputesOptions) => {
+  const filters = options?.filters;
+  const page = options?.page || 1;
+  const pageSize = options?.pageSize || 20;
+  
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [stats, setStats] = useState<DisputeStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
 
   // Récupérer les litiges
@@ -32,9 +44,13 @@ export const useDisputes = (filters?: DisputesFilters) => {
     setLoading(true);
     setError(null);
     try {
+      // Calculer l'offset pour la pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
       let query = supabase
         .from("disputes")
-        .select("*")
+        .select("*", { count: "exact" })
         .order("created_at", { ascending: false });
 
       // Appliquer les filtres
@@ -48,7 +64,16 @@ export const useDisputes = (filters?: DisputesFilters) => {
         query = query.eq("assigned_admin_id", filters.assigned_admin_id);
       }
 
-      const { data, error: queryError } = await query;
+      // Recherche textuelle (subject, description, order_id)
+      if (filters?.search && filters.search.trim()) {
+        const searchTerm = filters.search.trim();
+        query = query.or(`subject.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,order_id.ilike.%${searchTerm}%`);
+      }
+
+      // Appliquer la pagination
+      query = query.range(from, to);
+
+      const { data, error: queryError, count } = await query;
 
       if (queryError) {
         // Vérifier si c'est une erreur de table inexistante
@@ -59,7 +84,9 @@ export const useDisputes = (filters?: DisputesFilters) => {
         }
         throw queryError;
       }
+      
       setDisputes(data || []);
+      setTotalCount(count || 0);
     } catch (error: any) {
       logger.error("Error fetching disputes:", error);
       setError(error.message || "Erreur lors du chargement des litiges");
@@ -71,7 +98,7 @@ export const useDisputes = (filters?: DisputesFilters) => {
     } finally {
       setLoading(false);
     }
-  }, [filters, toast]);
+  }, [filters, page, pageSize, toast]);
 
   // Récupérer les statistiques (OPTIMISÉ: 1 seule requête au lieu de 6)
   const fetchStats = useCallback(async () => {
@@ -300,6 +327,9 @@ export const useDisputes = (filters?: DisputesFilters) => {
     stats,
     loading,
     error,
+    totalCount,
+    page,
+    pageSize,
     fetchDisputes,
     fetchStats,
     assignDispute,
@@ -309,4 +339,7 @@ export const useDisputes = (filters?: DisputesFilters) => {
     updateDisputeStatus,
   };
 };
+
+// Export types
+export type { DisputesFilters, DisputeStats, UseDisputesOptions };
 

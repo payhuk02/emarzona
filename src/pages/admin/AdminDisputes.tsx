@@ -5,11 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { AlertTriangle, CheckCircle, Clock, XCircle, User, Store, Shield, Calendar, MessageSquare } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, XCircle, User, Store, Shield, Calendar, MessageSquare, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { useDisputes } from "@/hooks/useDisputes";
 import { Dispute, DisputeStatus, InitiatorType } from "@/types/advanced-features";
 import { format } from "date-fns";
@@ -21,10 +22,14 @@ const AdminDisputes = () => {
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<DisputeStatus | "all">("all");
   const [initiatorFilter, setInitiatorFilter] = useState<InitiatorType | "all">("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
   
   const filters = {
     ...(statusFilter !== "all" && { status: statusFilter as DisputeStatus }),
     ...(initiatorFilter !== "all" && { initiator_type: initiatorFilter as InitiatorType }),
+    ...(searchTerm.trim() && { search: searchTerm }),
   };
 
   const {
@@ -32,12 +37,13 @@ const AdminDisputes = () => {
     stats,
     loading,
     error,
+    totalCount,
     assignDispute,
     updateAdminNotes,
     resolveDispute,
     closeDispute,
     updateDisputeStatus,
-  } = useDisputes(filters);
+  } = useDisputes({ filters, page, pageSize });
 
   const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -264,56 +270,100 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
               </div>
             )}
 
-            {/* Filters */}
+            {/* Filters & Search */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Filtres</CardTitle>
+                <CardTitle className="text-lg">Recherche et filtres</CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col sm:flex-row gap-4">
-                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as DisputeStatus | "all")}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder="Statut" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous les statuts</SelectItem>
-                    <SelectItem value="open">Ouvert</SelectItem>
-                    <SelectItem value="investigating">En investigation</SelectItem>
-                    <SelectItem value="resolved">Résolu</SelectItem>
-                    <SelectItem value="closed">Fermé</SelectItem>
-                  </SelectContent>
-                </Select>
+              <CardContent className="space-y-4">
+                {/* Search Bar */}
+                <div className="relative w-full">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Rechercher par sujet, description ou ID commande..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setPage(1); // Reset to page 1 on search
+                    }}
+                    className="pl-10 w-full"
+                  />
+                </div>
 
-                <Select value={initiatorFilter} onValueChange={(value) => setInitiatorFilter(value as InitiatorType | "all")}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder="Initiateur" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous</SelectItem>
-                    <SelectItem value="customer">Client</SelectItem>
-                    <SelectItem value="seller">Vendeur</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
+                {/* Filters Row */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Select value={statusFilter} onValueChange={(value) => {
+                    setStatusFilter(value as DisputeStatus | "all");
+                    setPage(1);
+                  }}>
+                    <SelectTrigger className="w-full sm:w-[200px]">
+                      <SelectValue placeholder="Statut" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous les statuts</SelectItem>
+                      <SelectItem value="open">Ouvert</SelectItem>
+                      <SelectItem value="investigating">En investigation</SelectItem>
+                      <SelectItem value="resolved">Résolu</SelectItem>
+                      <SelectItem value="closed">Fermé</SelectItem>
+                    </SelectContent>
+                  </Select>
 
-                {stats && stats.unassigned > 0 && (
-                  <Badge variant="destructive" className="h-10 flex items-center">
-                    {stats.unassigned} non assigné(s)
-                  </Badge>
-                )}
+                  <Select value={initiatorFilter} onValueChange={(value) => {
+                    setInitiatorFilter(value as InitiatorType | "all");
+                    setPage(1);
+                  }}>
+                    <SelectTrigger className="w-full sm:w-[200px]">
+                      <SelectValue placeholder="Initiateur" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous</SelectItem>
+                      <SelectItem value="customer">Client</SelectItem>
+                      <SelectItem value="seller">Vendeur</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {stats && stats.unassigned > 0 && (
+                    <Badge variant="destructive" className="h-10 flex items-center">
+                      {stats.unassigned} non assigné(s)
+                    </Badge>
+                  )}
+
+                  {/* Reset Filters Button */}
+                  {(statusFilter !== "all" || initiatorFilter !== "all" || searchTerm.trim()) && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setStatusFilter("all");
+                        setInitiatorFilter("all");
+                        setSearchTerm("");
+                        setPage(1);
+                      }}
+                    >
+                      Réinitialiser
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
             {/* Disputes Table */}
             <Card>
               <CardHeader>
-                <CardTitle>Liste des Litiges ({disputes.length})</CardTitle>
+                <CardTitle>Liste des Litiges ({totalCount} total)</CardTitle>
                 <CardDescription>
-                  {stats?.avgResolutionTime && (
-                    <span className="text-sm">Temps moyen de résolution : {stats.avgResolutionTime}h</span>
-                  )}
+                  <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                    <span className="text-sm">Affichage {disputes.length} résultat(s) sur {totalCount}</span>
+                    {stats?.avgResolutionTime && (
+                      <>
+                        <span className="hidden sm:inline text-muted-foreground">•</span>
+                        <span className="text-sm">Temps moyen de résolution : {stats.avgResolutionTime}h</span>
+                      </>
+                    )}
+                  </div>
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 {disputes.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Shield className="h-16 w-16 mx-auto mb-4 opacity-50" />
@@ -413,6 +463,57 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                         ))}
                       </TableBody>
                     </Table>
+                  </div>
+                )}
+
+                {/* Pagination */}
+                {totalCount > pageSize && (
+                  <div className="flex items-center justify-between border-t pt-4">
+                    <div className="text-sm text-muted-foreground">
+                      Page {page} sur {Math.ceil(totalCount / pageSize)}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        Précédent
+                      </Button>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.ceil(totalCount / pageSize) }, (_, i) => i + 1)
+                          .filter(p => {
+                            // Afficher 1-2-3...current-1-current-current+1...last-1-last
+                            return p === 1 || p === Math.ceil(totalCount / pageSize) || Math.abs(p - page) <= 1;
+                          })
+                          .map((p, idx, arr) => (
+                            <div key={p} className="flex items-center">
+                              {idx > 0 && arr[idx - 1] !== p - 1 && (
+                                <span className="px-2 text-muted-foreground">...</span>
+                              )}
+                              <Button
+                                variant={p === page ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setPage(p)}
+                                className="min-w-[2rem]"
+                              >
+                                {p}
+                              </Button>
+                            </div>
+                          ))}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage(p => Math.min(Math.ceil(totalCount / pageSize), p + 1))}
+                        disabled={page >= Math.ceil(totalCount / pageSize)}
+                      >
+                        Suivant
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    </div>
                   </div>
                 )}
               </CardContent>
