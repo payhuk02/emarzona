@@ -47,15 +47,25 @@ import FavoritesManager from "@/components/marketplace/FavoritesManager";
 import ProductCardProfessional from "@/components/marketplace/ProductCardProfessional";
 import { logger } from '@/lib/logger';
 import { Product, FilterState, PaginationState } from '@/types/marketplace';
+import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
 import '@/styles/marketplace-professional.css';
 
 const Marketplace = () => {
   const { toast } = useToast();
   
+  // Hook personnalisé pour favoris synchronisés
+  const {
+    favorites,
+    favoritesCount,
+    loading: favoritesLoading,
+    toggleFavorite,
+    clearAllFavorites,
+    isFavorite,
+  } = useMarketplaceFavorites();
+  
   // États principaux
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [purchasing, setPurchasing] = useState<Set<string>>(new Set());
   
   // États des filtres
@@ -86,7 +96,11 @@ const Marketplace = () => {
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
-  const [comparisonProducts, setComparisonProducts] = useState<Product[]>([]);
+  const [comparisonProducts, setComparisonProducts] = useState<Product[]>(() => {
+    // Charger la comparaison depuis localStorage
+    const saved = localStorage.getItem('marketplace-comparison');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
 
   // Constantes pour les filtres
@@ -291,37 +305,10 @@ const Marketplace = () => {
     setPagination(prev => ({ ...prev, currentPage: 1 }));
   }, []);
 
-  // Gestion des favoris avec persistance
-  const toggleFavorite = useCallback((productId: string) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(productId)) {
-        newFavorites.delete(productId);
-        toast({
-          title: "Retiré des favoris",
-          description: "Le produit a été retiré de vos favoris",
-        });
-      } else {
-        newFavorites.add(productId);
-        toast({
-          title: "Ajouté aux favoris",
-          description: "Le produit a été ajouté à vos favoris",
-        });
-      }
-      
-      // Persistance locale
-      localStorage.setItem('marketplace-favorites', JSON.stringify([...newFavorites]));
-      return newFavorites;
-    });
-  }, [toast]);
-
-  // Chargement des favoris depuis le localStorage
+  // Persister la comparaison dans localStorage
   useEffect(() => {
-    const savedFavorites = localStorage.getItem('marketplace-favorites');
-    if (savedFavorites) {
-      setFavorites(new Set(JSON.parse(savedFavorites)));
-    }
-  }, []);
+    localStorage.setItem('marketplace-comparison', JSON.stringify(comparisonProducts));
+  }, [comparisonProducts]);
 
   // Gestion de la comparaison
   const addToComparison = useCallback((product: Product) => {
@@ -352,17 +339,27 @@ const Marketplace = () => {
 
   const removeFromComparison = useCallback((productId: string) => {
     setComparisonProducts(prev => prev.filter(p => p.id !== productId));
-  }, []);
+    toast({
+      title: "Produit retiré",
+      description: "Le produit a été retiré de la comparaison",
+    });
+  }, [toast]);
 
   const clearComparison = useCallback(() => {
     setComparisonProducts([]);
-  }, []);
+    localStorage.removeItem('marketplace-comparison');
+    toast({
+      title: "Comparaison effacée",
+      description: "Tous les produits ont été retirés de la comparaison",
+    });
+  }, [toast]);
 
   // Obtenir les produits favoris
-  const favoriteProducts = useMemo(() => 
-    products.filter(p => favorites.has(p.id)), 
-    [products, favorites]
-  );
+  const favoriteProducts = useMemo(() => {
+    if (!favorites || favorites.size === 0) return [];
+    const favoriteIds = Array.from(favorites);
+    return products.filter(p => favoriteIds.includes(p.id));
+  }, [products, favorites]);
 
   // Fonction d'achat
   const handlePurchase = useCallback(async (product: Product) => {
@@ -579,12 +576,13 @@ const Marketplace = () => {
                 variant="outline"
                 onClick={() => setShowFavorites(true)}
                 className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
+                aria-label={`Voir mes favoris (${favoritesCount} produits)`}
               >
-                <Heart className="h-4 w-4 mr-2" />
+                <Heart className="h-4 w-4 mr-2" aria-hidden="true" />
                 Mes favoris
-                {favorites.size > 0 && (
+                {favoritesCount > 0 && (
                   <Badge variant="secondary" className="ml-2 bg-red-600 text-white animate-bounce">
-                    {favorites.size}
+                    {favoritesCount}
                   </Badge>
                 )}
               </Button>
@@ -959,7 +957,7 @@ const Marketplace = () => {
       <FavoritesManager
         favorites={favoriteProducts}
         onRemoveFavorite={(productId) => toggleFavorite(productId)}
-        onClearAll={() => setFavorites(new Set())}
+        onClearAll={clearAllFavorites}
         onClose={() => setShowFavorites(false)}
       />
     </div>
