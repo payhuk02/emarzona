@@ -163,6 +163,11 @@ const adminMenuItems = [
     icon: ShieldCheck,
   },
   {
+    title: "Litiges",
+    url: "/admin/disputes",
+    icon: Shield,
+  },
+  {
     title: "Paramètres",
     url: "/admin/settings",
     icon: Settings,

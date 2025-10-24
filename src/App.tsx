@@ -86,6 +86,7 @@ const AdminReferrals = lazy(() => import("./pages/admin/AdminReferrals"));
 const AdminActivity = lazy(() => import("./pages/admin/AdminActivity"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
+const AdminDisputes = lazy(() => import("./pages/admin/AdminDisputes"));
 
 // Pages Moneroo (paiement) - Lazy loading
 const PaymentSuccess = lazy(() => import("./pages/payments/PaymentSuccess"));
@@ -149,6 +150,7 @@ const AppContent = () => {
           <Route path="/admin/notifications" element={<ProtectedRoute><AdminNotifications /></ProtectedRoute>} />
           <Route path="/admin/revenue" element={<ProtectedRoute><PlatformRevenue /></ProtectedRoute>} />
           <Route path="/admin/kyc" element={<ProtectedRoute><AdminKYC /></ProtectedRoute>} />
+          <Route path="/admin/disputes" element={<ProtectedRoute><AdminDisputes /></ProtectedRoute>} />
 
           {/* --- Route de fallback --- */}
           <Route path="*" element={<NotFound />} />
