@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { AlertTriangle, CheckCircle, Clock, XCircle, User, Store, Shield, Calendar, MessageSquare, Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Download } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, XCircle, User, Store, Shield, Calendar, MessageSquare, Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Download, Eye, FileText } from "lucide-react";
 import { useDisputes, SortColumn, SortDirection } from "@/hooks/useDisputes";
 import { Dispute, DisputeStatus, InitiatorType } from "@/types/advanced-features";
 import { format } from "date-fns";
@@ -88,6 +88,7 @@ const AdminDisputes = () => {
 
   const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<"assign" | "notes" | "resolve" | null>(null);
   const [inputValue, setInputValue] = useState("");
 
@@ -492,6 +493,17 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setSelectedDispute(dispute);
+                                    setDetailsDialogOpen(true);
+                                  }}
+                                  title="Voir les détails"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
                                 {!dispute.assigned_admin_id && (
                                   <Button
                                     size="sm"
@@ -589,6 +601,174 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
           </div>
         </main>
       </div>
+
+      {/* Details Dialog */}
+      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Détails du litige
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedDispute && (
+            <div className="space-y-6">
+              {/* Statut et Badges */}
+              <div className="flex flex-wrap items-center gap-3">
+                {getStatusBadge(selectedDispute.status)}
+                {getInitiatorBadge(selectedDispute.initiator_type)}
+                {selectedDispute.assigned_admin_id && (
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Shield className="h-3 w-3" />
+                    Assigné
+                  </Badge>
+                )}
+              </div>
+
+              {/* Informations principales */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg">Informations générales</h3>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">ID Litige:</span>
+                      <p className="font-mono">{selectedDispute.id.substring(0, 13)}...</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">ID Commande:</span>
+                      <p className="font-mono">{selectedDispute.order_id ? selectedDispute.order_id.substring(0, 13) + '...' : 'N/A'}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Date de création:</span>
+                      <p>{format(new Date(selectedDispute.created_at), "dd MMMM yyyy 'à' HH:mm", { locale: fr })}</p>
+                    </div>
+                    {selectedDispute.resolved_at && (
+                      <div>
+                        <span className="text-muted-foreground">Date de résolution:</span>
+                        <p>{format(new Date(selectedDispute.resolved_at), "dd MMMM yyyy 'à' HH:mm", { locale: fr })}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg">Priorité et responsabilité</h3>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Priorité:</span>
+                      <p className="capitalize">{selectedDispute.priority || 'Normale'}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Initiateur:</span>
+                      <p className="capitalize">{selectedDispute.initiator_type}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Assigné à:</span>
+                      <p>{selectedDispute.assigned_admin_id ? 'Admin assigné' : 'Non assigné'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sujet et Description */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg">Sujet</h3>
+                <p className="text-base">{selectedDispute.subject}</p>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg">Description</h3>
+                <p className="text-sm whitespace-pre-wrap bg-muted p-4 rounded-lg">
+                  {selectedDispute.description}
+                </p>
+              </div>
+
+              {/* Résolution */}
+              {selectedDispute.resolution && (
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg text-green-600">Résolution</h3>
+                  <p className="text-sm whitespace-pre-wrap bg-green-50 border border-green-200 p-4 rounded-lg">
+                    {selectedDispute.resolution}
+                  </p>
+                </div>
+              )}
+
+              {/* Notes admin */}
+              {selectedDispute.admin_notes && (
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg">Notes administrateur</h3>
+                  <p className="text-sm whitespace-pre-wrap bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                    {selectedDispute.admin_notes}
+                  </p>
+                </div>
+              )}
+
+              {/* Actions rapides */}
+              <div className="flex flex-wrap items-center gap-2 pt-4 border-t">
+                {!selectedDispute.assigned_admin_id && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={async () => {
+                      const { data: { user } } = await supabase.auth.getUser();
+                      if (user) {
+                        await assignDispute(selectedDispute.id, user.id);
+                        setDetailsDialogOpen(false);
+                      }
+                    }}
+                  >
+                    <Shield className="h-4 w-4 mr-2" />
+                    M'assigner
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setDetailsDialogOpen(false);
+                    handleOpenDialog(selectedDispute, "notes");
+                  }}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Modifier notes
+                </Button>
+                {selectedDispute.status !== "resolved" && selectedDispute.status !== "closed" && (
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setDetailsDialogOpen(false);
+                      handleOpenDialog(selectedDispute, "resolve");
+                    }}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Résoudre
+                  </Button>
+                )}
+                {selectedDispute.status === "resolved" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={async () => {
+                      await closeDispute(selectedDispute.id);
+                      setDetailsDialogOpen(false);
+                    }}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Fermer
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Action Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
