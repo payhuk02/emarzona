@@ -192,16 +192,16 @@ const ProductCardProfessional = ({
   };
 
   return (
-    <Card className="group relative overflow-hidden bg-white border border-gray-200 hover:border-gray-300 transition-all duration-300 hover:-translate-y-1" role="article" aria-label={`Produit: ${product.name}`}>
-      {/* Image avec overlay et badges - OPTIMISÉE */}
+    <Card className="group relative overflow-hidden bg-white border border-gray-200 hover:border-gray-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 rounded-lg" role="article" aria-label={`Produit: ${product.name}`}>
+      {/* Image avec overlay et badges - OPTIMISÉE ET AGRANDIE */}
       <div className="relative">
         <ProductImage
           src={product.image_url}
           alt={product.name}
-          className="w-full h-48 object-cover"
+          className="w-full h-64 object-cover"
           showSkeleton={true}
           priority={false}
-          containerClassName="w-full h-48"
+          containerClassName="w-full h-64"
         />
         
         {/* Overlay avec badge promotionnel seulement */}
@@ -266,10 +266,10 @@ const ProductCardProfessional = ({
         )}
       </div>
 
-      {/* Contenu de la carte */}
-      <CardContent className="p-4">
+      {/* Contenu de la carte - PADDING AUGMENTÉ */}
+      <CardContent className="p-5">
         {/* Informations du vendeur */}
-        <div className="flex items-center gap-2 mb-3" role="group" aria-label="Informations du vendeur">
+        <div className="flex items-center gap-2 mb-4" role="group" aria-label="Informations du vendeur">
           {product.stores?.logo_url ? (
             <img 
               src={product.stores.logo_url} 
@@ -290,19 +290,19 @@ const ProductCardProfessional = ({
         </div>
 
         {/* Titre du produit */}
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 leading-tight" id={`product-title-${product.id}`}>
+        <h3 className="font-semibold text-lg text-gray-900 mb-3 line-clamp-2 leading-tight" id={`product-title-${product.id}`}>
           {product.name}
         </h3>
 
         {/* Description courte */}
         {shortDescription && (
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
             {shortDescription}
           </p>
         )}
 
         {/* Rating et avis */}
-        <div className="flex items-center gap-2 mb-3" role="group" aria-label="Évaluation du produit">
+        <div className="flex items-center gap-2 mb-4" role="group" aria-label="Évaluation du produit">
           {product.rating ? (
             <>
               {renderStars(product.rating)}
@@ -352,7 +352,7 @@ const ProductCardProfessional = ({
         </div>
 
         {/* Boutons d'action - OPTIMISÉS SANS DÉBORDEMENT */}
-        <div className="flex gap-2 mt-4" role="group" aria-label="Actions du produit">
+        <div className="flex gap-3 mt-5" role="group" aria-label="Actions du produit">
           <Button
             variant="outline"
             size="sm"
