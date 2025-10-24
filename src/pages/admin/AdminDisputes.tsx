@@ -296,10 +296,10 @@ const AdminDisputes = () => {
                             </TableCell>
                             <TableCell>{getStatusBadge(dispute.status)}</TableCell>
                             <TableCell>
-                              {dispute.assigned_admin?.name ? (
+                              {dispute.assigned_admin_id ? (
                                 <div className="flex items-center gap-1">
                                   <Shield className="h-3 w-3 text-primary" />
-                                  <span className="text-sm">{dispute.assigned_admin.name}</span>
+                                  <span className="text-sm">Admin assigné</span>
                                 </div>
                               ) : (
                                 <Badge variant="outline" className="text-xs">Non assigné</Badge>

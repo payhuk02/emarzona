@@ -38,14 +38,6 @@ export const useDisputes = (filters?: DisputesFilters) => {
             order_number,
             total_amount,
             currency
-          ),
-          initiator:profiles!disputes_initiator_id_fkey (
-            name,
-            email
-          ),
-          assigned_admin:profiles!disputes_assigned_admin_id_fkey (
-            name,
-            email
           )
         `)
         .order("created_at", { ascending: false });
