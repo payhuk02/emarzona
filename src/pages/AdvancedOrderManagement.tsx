@@ -30,9 +30,9 @@ const AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
     stats: paymentStats,
   } = useAdvancedPayments(store.id);
 
-  const {
-    stats: conversationStats,
-  } = useMessaging(selectedOrderId);
+  // Ne pas appeler useMessaging ici pour éviter les problèmes de WebSocket
+  // Les stats de conversation seront chargées directement dans l'onglet Messagerie si nécessaire
+  const conversationStats = null;
 
   return (
     <div className="flex-1 flex flex-col">
@@ -95,10 +95,10 @@ const AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {conversationStats?.total_conversations || 0}
+                  -
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {conversationStats?.active_conversations || 0} actives
+                  Sélectionnez une commande
                 </p>
               </CardContent>
             </Card>

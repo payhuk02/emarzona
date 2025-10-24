@@ -515,11 +515,17 @@ export const useMessaging = (
   }, [orderId, currentConversation?.id]);
 
   useEffect(() => {
-    fetchConversations();
+    if (orderId) {
+      fetchConversations();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId, conversationFilters]);
 
   useEffect(() => {
-    fetchStats();
+    if (orderId) {
+      fetchStats();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId, currentConversation?.id]);
 
   return {
