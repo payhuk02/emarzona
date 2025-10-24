@@ -283,11 +283,21 @@ const AdvancedOrderManagement = () => {
                         </div>
                       </div>
                       
-                      <ConversationComponent
-                        orderId={selectedOrderId || ""}
-                        storeId={store.id}
-                        className="min-h-[600px]"
-                      />
+                      {selectedOrderId ? (
+                        <ConversationComponent
+                          orderId={selectedOrderId}
+                          storeId={store.id}
+                          className="min-h-[600px]"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+                          <MessageSquare className="h-16 w-16 text-muted-foreground mb-4" />
+                          <h3 className="text-lg font-semibold mb-2">Aucune commande sélectionnée</h3>
+                          <p className="text-muted-foreground max-w-md">
+                            Sélectionnez une commande pour voir les conversations associées et communiquer avec le client
+                          </p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </TabsContent>
