@@ -1,6 +1,8 @@
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Search } from "lucide-react";
+import { DateRange } from "react-day-picker";
 
 interface OrderFiltersProps {
   searchQuery: string;
@@ -9,6 +11,8 @@ interface OrderFiltersProps {
   onStatusChange: (value: string) => void;
   paymentStatusFilter: string;
   onPaymentStatusChange: (value: string) => void;
+  dateRange?: DateRange;
+  onDateRangeChange: (range: DateRange | undefined) => void;
 }
 
 export const OrderFilters = ({
@@ -18,9 +22,12 @@ export const OrderFilters = ({
   onStatusChange,
   paymentStatusFilter,
   onPaymentStatusChange,
+  dateRange,
+  onDateRangeChange,
 }: OrderFiltersProps) => {
   return (
-    <div className="flex flex-col sm:flex-row gap-4">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col sm:flex-row gap-4">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
@@ -55,6 +62,12 @@ export const OrderFilters = ({
           <SelectItem value="failed">Échouée</SelectItem>
         </SelectContent>
       </Select>
+      </div>
+
+      <DateRangePicker
+        dateRange={dateRange}
+        onDateRangeChange={onDateRangeChange}
+      />
     </div>
   );
 };

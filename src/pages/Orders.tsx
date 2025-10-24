@@ -13,6 +13,8 @@ import { OrdersPagination } from "@/components/orders/OrdersPagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { exportOrdersToCSV } from "@/lib/export-utils";
 import { useToast } from "@/hooks/use-toast";
+import { DateRange } from "react-day-picker";
+import { isWithinInterval, startOfDay, endOfDay } from "date-fns";
 
 const Orders = () => {
   const { store, loading: storeLoading } = useStore();
@@ -31,6 +33,7 @@ const Orders = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -79,7 +82,21 @@ const Orders = () => {
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
     const matchesPayment = paymentStatusFilter === "all" || order.payment_status === paymentStatusFilter;
     
-    return matchesSearch && matchesStatus && matchesPayment;
+    // Date range filtering
+    let matchesDateRange = true;
+    if (dateRange?.from && dateRange?.to) {
+      const orderDate = new Date(order.created_at);
+      matchesDateRange = isWithinInterval(orderDate, {
+        start: startOfDay(dateRange.from),
+        end: endOfDay(dateRange.to),
+      });
+    } else if (dateRange?.from) {
+      // Only "from" date selected
+      const orderDate = new Date(order.created_at);
+      matchesDateRange = orderDate >= startOfDay(dateRange.from);
+    }
+    
+    return matchesSearch && matchesStatus && matchesPayment && matchesDateRange;
   });
 
   if (storeLoading) {
@@ -150,6 +167,8 @@ const Orders = () => {
               onStatusChange={setStatusFilter}
               paymentStatusFilter={paymentStatusFilter}
               onPaymentStatusChange={setPaymentStatusFilter}
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
             />
 
             {/* Orders Table */}
@@ -189,11 +208,11 @@ const Orders = () => {
                   <Package className="h-16 w-16 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Aucune commande</h3>
                   <p className="text-muted-foreground text-center mb-4">
-                    {searchQuery || statusFilter !== "all" || paymentStatusFilter !== "all"
+                    {searchQuery || statusFilter !== "all" || paymentStatusFilter !== "all" || dateRange?.from
                       ? "Aucune commande ne correspond à vos filtres"
                       : "Commencez par créer votre première commande"}
                   </p>
-                  {!searchQuery && statusFilter === "all" && paymentStatusFilter === "all" && (
+                  {!searchQuery && statusFilter === "all" && paymentStatusFilter === "all" && !dateRange?.from && (
                     <Button onClick={() => setIsCreateDialogOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
                       Créer une commande
