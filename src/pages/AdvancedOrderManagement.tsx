@@ -248,11 +248,13 @@ const AdvancedOrderManagement = () => {
                 </TabsList>
 
                 <TabsContent value="payments" className="space-y-4">
-                  <AdvancedPaymentsComponent
-                    storeId={store.id}
-                    orderId={selectedOrderId}
-                    className="min-h-[600px]"
-                  />
+                  {store?.id && (
+                    <AdvancedPaymentsComponent
+                      storeId={store.id}
+                      orderId={selectedOrderId}
+                      className="min-h-[600px]"
+                    />
+                  )}
                 </TabsContent>
 
                 <TabsContent value="messaging" className="space-y-4">
@@ -283,7 +285,7 @@ const AdvancedOrderManagement = () => {
                         </div>
                       </div>
                       
-                      {selectedOrderId ? (
+                      {selectedOrderId && store?.id ? (
                         <ConversationComponent
                           orderId={selectedOrderId}
                           storeId={store.id}

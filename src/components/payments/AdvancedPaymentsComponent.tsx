@@ -63,7 +63,7 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 
 interface AdvancedPaymentsComponentProps {
-  storeId: string;
+  storeId?: string;
   orderId?: string;
   customerId?: string;
   className?: string;
@@ -87,6 +87,22 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
     updatePayment,
     deletePayment,
   } = useAdvancedPayments(storeId);
+
+  if (!storeId) {
+    return (
+      <Card className={className}>
+        <CardContent className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Boutique non trouvée</h3>
+            <p className="text-muted-foreground">
+              Impossible de charger les paiements sans identifiant de boutique
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDisputeDialog, setShowDisputeDialog] = useState(false);
