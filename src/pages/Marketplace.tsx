@@ -140,10 +140,14 @@ const Marketplace = () => {
     setFilters(prev => ({ ...prev, search: debouncedSearch }));
   }, [debouncedSearch]);
 
-  // Chargement des produits
+  // Chargement des produits avec pagination côté serveur
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
+      
+      // Calculer les indices de pagination
+      const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
+      const endIndex = startIndex + pagination.itemsPerPage - 1;
       
       let query = supabase
         .from("products")
@@ -156,7 +160,7 @@ const Marketplace = () => {
             logo_url,
             created_at
           )
-        `)
+        `, { count: 'exact' }) // Obtenir le count total
         .eq("is_active", true)
         .eq("is_draft", false); // Seulement les produits publiés
 
@@ -190,16 +194,19 @@ const Marketplace = () => {
         query = query.order(filters.sortBy, { ascending: filters.sortOrder === "asc" });
       }
 
-      const { data, error } = await query;
+      // Appliquer la pagination côté serveur
+      query = query.range(startIndex, endIndex);
+
+      const { data, error, count } = await query;
       
       if (error) {
         logger.error("Erreur Supabase lors du chargement des produits:", error);
         throw error;
       }
       
-      logger.info(`${data?.length || 0} produits chargés avec succès`);
+      logger.info(`${data?.length || 0} produits chargés (page ${pagination.currentPage}/${Math.ceil((count || 0) / pagination.itemsPerPage)})`);
       setProducts((data || []) as unknown as Product[]);
-      setPagination(prev => ({ ...prev, totalItems: data?.length || 0 }));
+      setPagination(prev => ({ ...prev, totalItems: count || 0 }));
       
     } catch (error) {
       logger.error("❌ Erreur lors du chargement des produits :", error);
@@ -211,7 +218,7 @@ const Marketplace = () => {
     } finally {
       setLoading(false);
     }
-  }, [filters, toast]);
+  }, [filters, pagination.currentPage, pagination.itemsPerPage, toast]);
 
   // Abonnement temps réel
   useEffect(() => {
@@ -247,11 +254,12 @@ const Marketplace = () => {
     };
   }, [fetchProducts]);
 
-  // Filtrage des produits
+  // Filtrage des produits (côté client pour recherche textuelle et tags)
+  // Note: La pagination est maintenant gérée côté serveur
   const filteredProducts = useMemo(() => {
     let filtered = products;
 
-    // Recherche textuelle
+    // Recherche textuelle (côté client car nécessite full-text search)
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       filtered = filtered.filter(product => {
@@ -265,7 +273,7 @@ const Marketplace = () => {
       });
     }
 
-    // Filtrage par tags
+    // Filtrage par tags (côté client car complexe avec arrays)
     if (filters.tags.length > 0) {
       filtered = filtered.filter(product => 
         filters.tags.some(tag => product.tags?.includes(tag))
@@ -275,12 +283,16 @@ const Marketplace = () => {
     return filtered;
   }, [products, filters.search, filters.tags]);
 
-  // Pagination
+  // Les produits sont déjà paginés côté serveur, mais on applique
+  // le filtrage client (recherche textuelle et tags) si nécessaire
   const paginatedProducts = useMemo(() => {
-    const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
-    const endIndex = startIndex + pagination.itemsPerPage;
-    return filteredProducts.slice(startIndex, endIndex);
-  }, [filteredProducts, pagination]);
+    // Si recherche ou tags actifs, utiliser filteredProducts
+    // Sinon, utiliser directement products (déjà paginés par le serveur)
+    if (filters.search || filters.tags.length > 0) {
+      return filteredProducts;
+    }
+    return products;
+  }, [products, filteredProducts, filters.search, filters.tags]);
 
   // Catégories et types dynamiques
   const categories = useMemo(() => {
@@ -293,9 +305,9 @@ const Marketplace = () => {
     return types.sort();
   }, [products]);
 
-  // Gestion des filtres
-  const updateFilter = useCallback((filters: Partial<FilterState>) => {
-    setFilters(prev => ({ ...prev, ...filters }));
+  // Gestion des filtres (reset page à 1 quand filtres changent)
+  const updateFilter = useCallback((newFilters: Partial<FilterState>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
     setPagination(prev => ({ ...prev, currentPage: 1 }));
   }, []);
 
@@ -483,25 +495,28 @@ const Marketplace = () => {
     }
   }, [toast]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / pagination.itemsPerPage);
+  // Pagination (basée sur le total côté serveur)
+  const totalPages = Math.ceil(pagination.totalItems / pagination.itemsPerPage);
   const canGoPrevious = pagination.currentPage > 1;
   const canGoNext = pagination.currentPage < totalPages;
 
   const goToPage = useCallback((page: number) => {
+    if (page < 1 || page > totalPages) return;
     setPagination(prev => ({ ...prev, currentPage: page }));
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+  }, [totalPages]);
 
-  // Statistiques
+  // Statistiques (basées sur le total réel, pas seulement la page actuelle)
   const stats = useMemo(() => ({
-    totalProducts: products.length,
-    totalStores: new Set(products.map(p => p.store_id)).size,
-    averageRating: products.reduce((sum, p) => sum + (p.rating || 0), 0) / products.length || 0,
-    totalSales: products.reduce((sum, p) => sum + (p.reviews_count || 0), 0), // Approximation avec reviews_count
+    totalProducts: pagination.totalItems, // Total côté serveur
+    totalStores: new Set(products.map(p => p.store_id)).size, // Approximation sur page actuelle
+    averageRating: products.length > 0 
+      ? products.reduce((sum, p) => sum + (p.rating || 0), 0) / products.length 
+      : 0,
+    totalSales: products.reduce((sum, p) => sum + (p.reviews_count || 0), 0), // Approximation sur page actuelle
     categoriesCount: categories.length,
-    featuredProducts: products.filter(p => p.promotional_price && p.promotional_price < p.price).length // Produits en promo
-  }), [products, categories]);
+    featuredProducts: products.filter(p => p.promotional_price && p.promotional_price < p.price).length // Sur page actuelle
+  }), [products, categories, pagination.totalItems]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -784,8 +799,13 @@ const Marketplace = () => {
                 Tous les produits
               </h2>
               <Badge variant="secondary" className="bg-slate-700 text-slate-300">
-                {filteredProducts.length} produit{filteredProducts.length !== 1 ? "s" : ""}
+                {pagination.totalItems} produit{pagination.totalItems !== 1 ? "s" : ""}
               </Badge>
+              {filters.search || filters.tags.length > 0 ? (
+                <Badge variant="secondary" className="bg-blue-600 text-white">
+                  {paginatedProducts.length} résultat{paginatedProducts.length !== 1 ? "s" : ""} affiché{paginatedProducts.length !== 1 ? "s" : ""}
+                </Badge>
+              ) : null}
             </div>
 
             <div className="flex items-center gap-3">
