@@ -22,13 +22,18 @@ export interface Order {
   } | null;
 }
 
+export type SortColumn = 'order_number' | 'created_at' | 'total_amount' | 'status' | 'payment_status';
+export type SortDirection = 'asc' | 'desc';
+
 interface UseOrdersOptions {
   page?: number;
   pageSize?: number;
+  sortBy?: SortColumn;
+  sortDirection?: SortDirection;
 }
 
 export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
-  const { page = 0, pageSize = 25 } = options;
+  const { page = 0, pageSize = 25, sortBy = 'created_at', sortDirection = 'desc' } = options;
   const [orders, setOrders] = useState<Order[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -55,7 +60,7 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
           )
         `, { count: 'exact' })
         .eq('store_id', storeId)
-        .order('created_at', { ascending: false })
+        .order(sortBy, { ascending: sortDirection === 'asc' })
         .range(from, to);
 
       if (error) throw error;
@@ -74,7 +79,7 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
 
   useEffect(() => {
     fetchOrders();
-  }, [storeId, page, pageSize]);
+  }, [storeId, page, pageSize, sortBy, sortDirection]);
 
   return { 
     orders, 

@@ -3,13 +3,13 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Eye, Trash2, Edit } from "lucide-react";
+import { MoreHorizontal, Eye, Trash2, Edit, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Order } from "@/hooks/useOrders";
+import { Order, SortColumn, SortDirection } from "@/hooks/useOrders";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { OrderDetailDialog } from "./OrderDetailDialog";
@@ -19,15 +19,47 @@ interface OrdersTableProps {
   orders: Order[];
   onUpdate: () => void;
   storeId: string;
+  sortBy: SortColumn;
+  sortDirection: SortDirection;
+  onSort: (column: SortColumn) => void;
 }
 
-export const OrdersTable = ({ orders, onUpdate, storeId }: OrdersTableProps) => {
+export const OrdersTable = ({ orders, onUpdate, storeId, sortBy, sortDirection, onSort }: OrdersTableProps) => {
   const { toast } = useToast();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Helper component for sortable column headers
+  const SortableHeader = ({ column, children }: { column: SortColumn; children: React.ReactNode }) => {
+    const isActive = sortBy === column;
+    const Icon = isActive 
+      ? (sortDirection === 'asc' ? ArrowUp : ArrowDown)
+      : ArrowUpDown;
+    
+    return (
+      <TableHead 
+        className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
+        onClick={() => onSort(column)}
+        role="button"
+        aria-label={`Trier par ${children}${isActive ? ` (${sortDirection === 'asc' ? 'croissant' : 'décroissant'})` : ''}`}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSort(column);
+          }
+        }}
+      >
+        <div className="flex items-center gap-2">
+          {children}
+          <Icon className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} aria-hidden="true" />
+        </div>
+      </TableHead>
+    );
+  };
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
@@ -156,12 +188,12 @@ export const OrdersTable = ({ orders, onUpdate, storeId }: OrdersTableProps) => 
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>N° Commande</TableHead>
+                <SortableHeader column="order_number">N° Commande</SortableHeader>
                 <TableHead>Client</TableHead>
-                <TableHead>Montant</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Paiement</TableHead>
-                <TableHead>Date</TableHead>
+                <SortableHeader column="total_amount">Montant</SortableHeader>
+                <SortableHeader column="status">Statut</SortableHeader>
+                <SortableHeader column="payment_status">Paiement</SortableHeader>
+                <SortableHeader column="created_at">Date</SortableHeader>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>

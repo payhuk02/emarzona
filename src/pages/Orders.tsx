@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Plus, Package, Download } from "lucide-react";
 import { useStore } from "@/hooks/use-store";
-import { useOrders } from "@/hooks/useOrders";
+import { useOrders, SortColumn, SortDirection } from "@/hooks/useOrders";
 import { CreateOrderDialog } from "@/components/orders/CreateOrderDialog";
 import { OrdersTable } from "@/components/orders/OrdersTable";
 import { OrderFilters } from "@/components/orders/OrderFilters";
@@ -19,13 +19,33 @@ const Orders = () => {
   const { toast } = useToast();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const { orders, loading: ordersLoading, totalCount, refetch } = useOrders(store?.id, { page, pageSize });
+  const [sortBy, setSortBy] = useState<SortColumn>('created_at');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const { orders, loading: ordersLoading, totalCount, refetch } = useOrders(store?.id, { 
+    page, 
+    pageSize,
+    sortBy,
+    sortDirection 
+  });
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<string>("all");
 
   const totalPages = Math.ceil(totalCount / pageSize);
+
+  const handleSort = (column: SortColumn) => {
+    if (sortBy === column) {
+      // Toggle direction if clicking the same column
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // New column, default to descending
+      setSortBy(column);
+      setSortDirection('desc');
+    }
+    // Reset to first page when sorting changes
+    setPage(0);
+  };
 
   const handleExportCSV = () => {
     try {
@@ -141,7 +161,14 @@ const Orders = () => {
               </Card>
             ) : filteredOrders && filteredOrders.length > 0 ? (
               <>
-                <OrdersTable orders={filteredOrders} onUpdate={refetch} storeId={store.id} />
+                <OrdersTable 
+                  orders={filteredOrders} 
+                  onUpdate={refetch} 
+                  storeId={store.id}
+                  sortBy={sortBy}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
                 {totalCount > 10 && (
                   <OrdersPagination
                     currentPage={page}
