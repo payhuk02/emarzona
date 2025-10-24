@@ -89,9 +89,11 @@ const AdminDisputes = () => {
   };
 
   const getStatusBadge = (status: DisputeStatus) => {
-    const config = {
+    const config: Record<DisputeStatus, { color: string; icon: any; label: string }> = {
       open: { color: "bg-yellow-100 text-yellow-800 border-yellow-300", icon: AlertTriangle, label: "Ouvert" },
       investigating: { color: "bg-blue-100 text-blue-800 border-blue-300", icon: Clock, label: "En investigation" },
+      waiting_customer: { color: "bg-orange-100 text-orange-800 border-orange-300", icon: Clock, label: "Attente client" },
+      waiting_seller: { color: "bg-purple-100 text-purple-800 border-purple-300", icon: Clock, label: "Attente vendeur" },
       resolved: { color: "bg-green-100 text-green-800 border-green-300", icon: CheckCircle, label: "Résolu" },
       closed: { color: "bg-gray-100 text-gray-800 border-gray-300", icon: XCircle, label: "Fermé" },
     };
@@ -107,9 +109,10 @@ const AdminDisputes = () => {
   };
 
   const getInitiatorBadge = (type: InitiatorType) => {
-    const config = {
+    const config: Record<InitiatorType, { color: string; icon: any; label: string }> = {
       customer: { color: "bg-blue-50 text-blue-700 border-blue-200", icon: User, label: "Client" },
-      store: { color: "bg-green-50 text-green-700 border-green-200", icon: Store, label: "Vendeur" },
+      seller: { color: "bg-green-50 text-green-700 border-green-200", icon: Store, label: "Vendeur" },
+      admin: { color: "bg-red-50 text-red-700 border-red-200", icon: Shield, label: "Admin" },
     };
 
     const { color, icon: Icon, label } = config[type];
@@ -333,19 +336,19 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                         {disputes.map((dispute) => (
                           <TableRow key={dispute.id}>
                             <TableCell className="font-medium">
-                              {dispute.order?.order_number || "N/A"}
+                              {dispute.order_id ? dispute.order_id.substring(0, 8) : "N/A"}
                             </TableCell>
                             <TableCell>
                               <div className="flex flex-col gap-1">
                                 {getInitiatorBadge(dispute.initiator_type)}
                                 <span className="text-xs text-muted-foreground">
-                                  {dispute.initiator?.name || "N/A"}
+                                  {dispute.initiator_type}
                                 </span>
                               </div>
                             </TableCell>
                             <TableCell>
                               <div className="max-w-xs">
-                                <p className="font-medium text-sm">{dispute.reason}</p>
+                                <p className="font-medium text-sm">{dispute.subject}</p>
                                 <p className="text-xs text-muted-foreground truncate">
                                   {dispute.description}
                                 </p>

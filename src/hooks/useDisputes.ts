@@ -34,14 +34,7 @@ export const useDisputes = (filters?: DisputesFilters) => {
     try {
       let query = supabase
         .from("disputes")
-        .select(`
-          *,
-          order:orders (
-            order_number,
-            total_amount,
-            currency
-          )
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
       // Appliquer les filtres

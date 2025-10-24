@@ -7,8 +7,8 @@ export type DeliveryStatus = 'pending' | 'shipped' | 'delivered' | 'confirmed' |
 export type ConversationStatus = 'active' | 'closed' | 'disputed';
 export type SenderType = 'customer' | 'store' | 'admin';
 export type MessageType = 'text' | 'image' | 'video' | 'file' | 'system';
-export type DisputeStatus = 'open' | 'investigating' | 'resolved' | 'closed';
-export type InitiatorType = 'customer' | 'store';
+export type DisputeStatus = 'open' | 'investigating' | 'waiting_customer' | 'waiting_seller' | 'resolved' | 'closed';
+export type InitiatorType = 'customer' | 'seller' | 'admin';
 
 // ==============================================
 // TYPES POUR LES PAIEMENTS AVANCÉS
@@ -185,34 +185,18 @@ export interface MessageAttachment {
 export interface Dispute {
   id: string;
   order_id: string;
-  conversation_id?: string;
   initiator_id: string;
   initiator_type: InitiatorType;
-  reason: string;
+  subject: string;
   description: string;
   status: DisputeStatus;
+  priority?: string;
   resolution?: string;
   admin_notes?: string;
   assigned_admin_id?: string;
   created_at: string;
   updated_at: string;
   resolved_at?: string;
-  
-  // Relations
-  order?: {
-    order_number: string;
-    total_amount: number;
-    currency: string;
-  };
-  conversation?: Conversation;
-  initiator?: {
-    name: string;
-    email?: string;
-  };
-  assigned_admin?: {
-    name: string;
-    email?: string;
-  };
 }
 
 // ==============================================
@@ -244,7 +228,7 @@ export interface MessageFormData {
 }
 
 export interface DisputeFormData {
-  reason: string;
+  subject: string;
   description: string;
 }
 
