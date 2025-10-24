@@ -24,11 +24,13 @@ export const useDisputes = (filters?: DisputesFilters) => {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [stats, setStats] = useState<DisputeStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Récupérer les litiges
   const fetchDisputes = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       let query = supabase
         .from("disputes")
@@ -53,15 +55,24 @@ export const useDisputes = (filters?: DisputesFilters) => {
         query = query.eq("assigned_admin_id", filters.assigned_admin_id);
       }
 
-      const { data, error } = await query;
+      const { data, error: queryError } = await query;
 
-      if (error) throw error;
+      if (queryError) {
+        // Vérifier si c'est une erreur de table inexistante
+        if (queryError.message.includes('relation "public.disputes" does not exist')) {
+          const errorMsg = "La table 'disputes' n'existe pas. Veuillez exécuter la migration SQL.";
+          setError(errorMsg);
+          throw new Error(errorMsg);
+        }
+        throw queryError;
+      }
       setDisputes(data || []);
     } catch (error: any) {
       logger.error("Error fetching disputes:", error);
+      setError(error.message || "Erreur lors du chargement des litiges");
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error.message || "Erreur lors du chargement des litiges",
         variant: "destructive",
       });
     } finally {
@@ -297,6 +308,7 @@ export const useDisputes = (filters?: DisputesFilters) => {
     disputes,
     stats,
     loading,
+    error,
     fetchDisputes,
     fetchStats,
     assignDispute,

@@ -31,6 +31,7 @@ const AdminDisputes = () => {
     disputes,
     stats,
     loading,
+    error,
     assignDispute,
     updateAdminNotes,
     resolveDispute,
@@ -129,6 +130,62 @@ const AdminDisputes = () => {
           <main className="flex-1 p-6">
             <Skeleton className="h-8 w-64 mb-6" />
             <Skeleton className="h-96 w-full" />
+          </main>
+        </div>
+      </SidebarProvider>
+    );
+  }
+
+  if (error) {
+    return (
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full">
+          <AppSidebar />
+          <main className="flex-1 p-6">
+            <Card className="border-destructive">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-5 w-5" />
+                  Erreur de chargement
+                </CardTitle>
+                <CardDescription>{error}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Pour créer la table 'disputes', exécutez ce SQL dans Supabase SQL Editor :
+                  </p>
+                  <div className="bg-muted p-4 rounded-lg overflow-auto max-h-96">
+                    <code className="text-xs">
+                      {`-- Créer la table disputes
+CREATE TABLE IF NOT EXISTS disputes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  initiator_type TEXT NOT NULL CHECK (initiator_type IN ('customer', 'seller', 'admin')),
+  initiator_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  subject TEXT NOT NULL,
+  description TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'open',
+  priority TEXT DEFAULT 'normal',
+  assigned_admin_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  admin_notes TEXT,
+  resolution TEXT,
+  resolved_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
+
+-- Voir le fichier: supabase/migrations/20250124_disputes_system_complete.sql`}
+                    </code>
+                  </div>
+                  <Button onClick={() => window.location.reload()} className="w-full">
+                    Rafraîchir la page après migration
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </main>
         </div>
       </SidebarProvider>
