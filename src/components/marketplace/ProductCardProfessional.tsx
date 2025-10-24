@@ -351,44 +351,45 @@ const ProductCardProfessional = ({
           </div>
         </div>
 
-        {/* Boutons d'action - OPTIMISÉS */}
+        {/* Boutons d'action - OPTIMISÉS SANS DÉBORDEMENT */}
         <div className="flex gap-2 mt-4" role="group" aria-label="Actions du produit">
           <Button
             variant="outline"
-            size="default"
-            className="flex-1 border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            size="sm"
+            className="flex-1 h-10 px-3 text-sm border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             asChild
           >
             <Link 
               to={`/stores/${storeSlug}/products/${product.slug}`}
               aria-label={`Voir les détails de ${product.name}`}
-              className="flex items-center justify-center"
+              className="flex items-center justify-center gap-1.5 truncate"
             >
-              <Eye className="h-4 w-4 mr-2 flex-shrink-0" aria-hidden="true" />
-              <span className="hidden sm:inline">Voir le produit</span>
-              <span className="sm:hidden">Détails</span>
+              <Eye className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+              <span className="hidden lg:inline truncate">Voir</span>
+              <span className="lg:hidden truncate">Voir</span>
             </Link>
           </Button>
           
           <Button
             onClick={handleBuyNow}
             disabled={loading}
-            size="default"
-            className="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 shadow-sm hover:shadow-md"
+            size="sm"
+            className="flex-1 h-10 px-3 text-sm bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 shadow-sm hover:shadow-md"
             aria-label={loading ? `Traitement de l'achat de ${product.name} en cours` : `Acheter ${product.name} pour ${formatPrice(price)} ${product.currency || 'FCFA'}`}
           >
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2 flex-shrink-0" aria-hidden="true" />
-                <span className="hidden sm:inline">Paiement...</span>
-                <span className="sm:hidden">...</span>
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="h-4 w-4 mr-2 flex-shrink-0" aria-hidden="true" />
-                <span>Acheter</span>
-              </>
-            )}
+            <div className="flex items-center justify-center gap-1.5 truncate w-full">
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin flex-shrink-0" aria-hidden="true" />
+                  <span className="truncate">Paiement...</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                  <span className="truncate">Acheter</span>
+                </>
+              )}
+            </div>
           </Button>
         </div>
       </CardContent>
