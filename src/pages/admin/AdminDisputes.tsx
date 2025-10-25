@@ -527,13 +527,13 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                                 <p className="font-medium text-sm">{dispute.subject}</p>
                                 <TooltipProvider>
                                   <Tooltip>
-                                    <TooltipTrigger asChild>
+                                    <TooltipTrigger className="w-full text-left">
                                       <p className="text-xs text-muted-foreground truncate cursor-help">
                                         {dispute.description}
                                       </p>
                                     </TooltipTrigger>
                                     <TooltipContent side="bottom" className="max-w-md">
-                                      <p className="text-sm">{dispute.description}</p>
+                                      <p className="text-sm whitespace-normal">{dispute.description}</p>
                                     </TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>
