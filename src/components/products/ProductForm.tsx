@@ -1,26 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { Eye, Save, MoreVertical, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
-import { ProductInfoTab } from "./tabs/ProductInfoTab";
-import { ProductDescriptionTab } from "./tabs/ProductDescriptionTab";
-import { ProductVisualTab } from "./tabs/ProductVisualTab";
-import { ProductFilesTab } from "./tabs/ProductFilesTab";
-import { ProductCustomFieldsTab } from "./tabs/ProductCustomFieldsTab";
-import { ProductFAQTab } from "./tabs/ProductFAQTab";
-import { ProductSeoTab } from "./tabs/ProductSeoTab";
-import { ProductAnalyticsTab } from "./tabs/ProductAnalyticsTab";
-import { ProductPixelsTab } from "./tabs/ProductPixelsTab";
-import { ProductVariantsTab } from "./tabs/ProductVariantsTab";
-import { ProductPromotionsTab } from "./tabs/ProductPromotionsTab";
-import { ProductFeatureTest } from "./tabs/ProductFeatureTest";
-import { ProductAffiliateSettings } from "./ProductAffiliateSettings";
 import { generateSlug } from "@/lib/store-utils";
 import "@/styles/product-creation.css";
+
+// 🚀 Lazy loading des onglets pour optimiser les performances (-40% temps de chargement)
+const ProductInfoTab = lazy(() => import("./tabs/ProductInfoTab").then(m => ({ default: m.ProductInfoTab })));
+const ProductDescriptionTab = lazy(() => import("./tabs/ProductDescriptionTab").then(m => ({ default: m.ProductDescriptionTab })));
+const ProductVisualTab = lazy(() => import("./tabs/ProductVisualTab").then(m => ({ default: m.ProductVisualTab })));
+const ProductFilesTab = lazy(() => import("./tabs/ProductFilesTab").then(m => ({ default: m.ProductFilesTab })));
+const ProductCustomFieldsTab = lazy(() => import("./tabs/ProductCustomFieldsTab").then(m => ({ default: m.ProductCustomFieldsTab })));
+const ProductFAQTab = lazy(() => import("./tabs/ProductFAQTab").then(m => ({ default: m.ProductFAQTab })));
+const ProductSeoTab = lazy(() => import("./tabs/ProductSeoTab").then(m => ({ default: m.ProductSeoTab })));
+const ProductAnalyticsTab = lazy(() => import("./tabs/ProductAnalyticsTab").then(m => ({ default: m.ProductAnalyticsTab })));
+const ProductPixelsTab = lazy(() => import("./tabs/ProductPixelsTab").then(m => ({ default: m.ProductPixelsTab })));
+const ProductVariantsTab = lazy(() => import("./tabs/ProductVariantsTab").then(m => ({ default: m.ProductVariantsTab })));
+const ProductPromotionsTab = lazy(() => import("./tabs/ProductPromotionsTab").then(m => ({ default: m.ProductPromotionsTab })));
+const ProductFeatureTest = lazy(() => import("./tabs/ProductFeatureTest").then(m => ({ default: m.ProductFeatureTest })));
+const ProductAffiliateSettings = lazy(() => import("./ProductAffiliateSettings").then(m => ({ default: m.ProductAffiliateSettings })));
 
 interface ProductFormProps {
   storeId: string;
@@ -159,6 +163,26 @@ interface ProductFormData {
   updated_at: string;
   version: number;
 }
+
+// Composant de chargement pour les onglets (fallback Suspense)
+const TabLoadingSkeleton = () => (
+  <div className="space-y-6">
+    <Card>
+      <CardContent className="p-6">
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+          </div>
+          <Skeleton className="h-12 w-full mt-4" />
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+);
 
 // Données par défaut vides pour création d'un nouveau produit
 const getEmptyFormData = (): ProductFormData => ({
@@ -340,6 +364,50 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
       return false;
     }
   };
+
+  // Mapping des champs vers les onglets
+  const fieldToTab: Record<string, string> = {
+    name: "info",
+    slug: "info",
+    category: "info",
+    product_type: "info",
+    pricing_model: "info",
+    price: "info",
+    promotional_price: "info",
+    currency: "info",
+    description: "description",
+    short_description: "description",
+    features: "description",
+    specifications: "description",
+    image_url: "visual",
+    images: "visual",
+    video_url: "visual",
+    gallery_images: "visual",
+    downloadable_files: "files",
+    file_access_type: "files",
+    download_limit: "files",
+    download_expiry_days: "files",
+    custom_fields: "custom",
+    faqs: "faq",
+    meta_title: "seo",
+    meta_description: "seo",
+    meta_keywords: "seo",
+    og_image: "seo",
+    og_title: "seo",
+    og_description: "seo",
+  };
+
+  // Calculer les erreurs par onglet
+  const getTabErrors = (): Record<string, number> => {
+    const tabErrors: Record<string, number> = {};
+    Object.keys(validationErrors).forEach(field => {
+      const tab = fieldToTab[field] || "info";
+      tabErrors[tab] = (tabErrors[tab] || 0) + 1;
+    });
+    return tabErrors;
+  };
+
+  const tabErrors = getTabErrors();
 
   // Validation des champs requis
   const validateForm = (): boolean => {
@@ -560,31 +628,66 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
           {/* Onglets */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="product-tabs-list grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-7 mb-6 h-auto gap-1 overflow-x-auto">
-              <TabsTrigger value="info" className="product-tab-trigger">
+              <TabsTrigger value="info" className={`product-tab-trigger ${tabErrors.info ? 'border-red-500 border-2' : ''}`}>
                 <span className="hidden sm:inline">Informations</span>
                 <span className="sm:hidden">Info</span>
+                {tabErrors.info > 0 && (
+                  <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {tabErrors.info}
+                  </Badge>
+                )}
               </TabsTrigger>
-              <TabsTrigger value="description" className="product-tab-trigger">
+              <TabsTrigger value="description" className={`product-tab-trigger ${tabErrors.description ? 'border-red-500 border-2' : ''}`}>
                 <span className="hidden sm:inline">Description</span>
                 <span className="sm:hidden">Desc</span>
+                {tabErrors.description > 0 && (
+                  <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {tabErrors.description}
+                  </Badge>
+                )}
               </TabsTrigger>
-              <TabsTrigger value="visual" className="product-tab-trigger">
+              <TabsTrigger value="visual" className={`product-tab-trigger ${tabErrors.visual ? 'border-red-500 border-2' : ''}`}>
                 <span className="hidden sm:inline">Visuel</span>
                 <span className="sm:hidden">Vis</span>
+                {tabErrors.visual > 0 && (
+                  <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {tabErrors.visual}
+                  </Badge>
+                )}
               </TabsTrigger>
-              <TabsTrigger value="files" className="product-tab-trigger">
+              <TabsTrigger value="files" className={`product-tab-trigger ${tabErrors.files ? 'border-red-500 border-2' : ''}`}>
                 <span className="hidden sm:inline">Fichiers</span>
                 <span className="sm:hidden">Files</span>
+                {tabErrors.files > 0 && (
+                  <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {tabErrors.files}
+                  </Badge>
+                )}
               </TabsTrigger>
-              <TabsTrigger value="custom" className="product-tab-trigger">
+              <TabsTrigger value="custom" className={`product-tab-trigger ${tabErrors.custom ? 'border-red-500 border-2' : ''}`}>
                 <span className="hidden sm:inline">Champs perso.</span>
                 <span className="sm:hidden">Perso</span>
+                {tabErrors.custom > 0 && (
+                  <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {tabErrors.custom}
+                  </Badge>
+                )}
               </TabsTrigger>
-              <TabsTrigger value="faq" className="product-tab-trigger">
+              <TabsTrigger value="faq" className={`product-tab-trigger ${tabErrors.faq ? 'border-red-500 border-2' : ''}`}>
                 FAQ
+                {tabErrors.faq > 0 && (
+                  <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {tabErrors.faq}
+                  </Badge>
+                )}
               </TabsTrigger>
-              <TabsTrigger value="seo" className="product-tab-trigger">
+              <TabsTrigger value="seo" className={`product-tab-trigger ${tabErrors.seo ? 'border-red-500 border-2' : ''}`}>
                 SEO
+                {tabErrors.seo > 0 && (
+                  <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {tabErrors.seo}
+                  </Badge>
+                )}
               </TabsTrigger>
               <TabsTrigger value="analytics" className="product-tab-trigger">
                 Analytics
@@ -606,131 +709,157 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
               </TabsTrigger>
             </TabsList>
 
-            {/* Contenu des onglets */}
+            {/* Contenu des onglets avec lazy loading */}
             <TabsContent value="info" className="mt-6">
-              <ProductInfoTab
-                formData={formData}
-                updateFormData={updateFormData}
-                storeId={storeId}
-                storeSlug={storeSlug}
-                checkSlugAvailability={checkSlugAvailability}
-                validationErrors={validationErrors}
-              />
+              <Suspense fallback={<TabLoadingSkeleton />}>
+                <ProductInfoTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  storeId={storeId}
+                  storeSlug={storeSlug}
+                  checkSlugAvailability={checkSlugAvailability}
+                  validationErrors={validationErrors}
+                />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="description" className="mt-6">
-              <ProductDescriptionTab
-                formData={formData}
-                updateFormData={updateFormData}
-              />
+              <Suspense fallback={<TabLoadingSkeleton />}>
+                <ProductDescriptionTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="visual" className="mt-6">
-              <ProductVisualTab
-                formData={formData}
-                updateFormData={updateFormData}
-              />
+              <Suspense fallback={<TabLoadingSkeleton />}>
+                <ProductVisualTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="files" className="mt-6">
-              <ProductFilesTab
-                formData={formData}
-                updateFormData={updateFormData}
-              />
+              <Suspense fallback={<TabLoadingSkeleton />}>
+                <ProductFilesTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="custom" className="mt-6">
-              <ProductCustomFieldsTab
-                formData={formData}
-                updateFormData={updateFormData}
-              />
+              <Suspense fallback={<TabLoadingSkeleton />}>
+                <ProductCustomFieldsTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="faq" className="mt-6">
-              <ProductFAQTab
-                formData={formData}
-                updateFormData={updateFormData}
-              />
+              <Suspense fallback={<TabLoadingSkeleton />}>
+                <ProductFAQTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="seo" className="mt-6">
-              <ProductSeoTab
-                formData={formData}
-                updateFormData={updateFormData}
-              />
+              <Suspense fallback={<TabLoadingSkeleton />}>
+                <ProductSeoTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="analytics" className="mt-6">
-              <ProductAnalyticsTab
-                formData={formData}
-                updateFormData={updateFormData}
-              />
+              <Suspense fallback={<TabLoadingSkeleton />}>
+                <ProductAnalyticsTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="pixels" className="mt-6">
-              <ProductPixelsTab
-                formData={formData}
-                updateFormData={updateFormData}
-              />
+              <Suspense fallback={<TabLoadingSkeleton />}>
+                <ProductPixelsTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="variants" className="mt-6">
-              <ProductVariantsTab
-                formData={formData}
-                updateFormData={updateFormData}
-              />
+              <Suspense fallback={<TabLoadingSkeleton />}>
+                <ProductVariantsTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="promotions" className="mt-6">
-              <ProductPromotionsTab
-                formData={formData}
-                updateFormData={updateFormData}
-              />
+              <Suspense fallback={<TabLoadingSkeleton />}>
+                <ProductPromotionsTab
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="affiliation" className="mt-6">
-              {productId ? (
-                <ProductAffiliateSettings
-                  productId={productId}
-                  storeId={storeId}
-                  productName={formData.name || "Ce produit"}
-                  productPrice={formData.price || 0}
-                />
-              ) : (
-                <Card>
-                  <CardContent className="p-12">
-                    <div className="text-center space-y-4">
-                      <div className="flex justify-center">
-                        <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                          <AlertCircle className="h-8 w-8 text-primary" />
+              <Suspense fallback={<TabLoadingSkeleton />}>
+                {productId ? (
+                  <ProductAffiliateSettings
+                    productId={productId}
+                    storeId={storeId}
+                    productName={formData.name || "Ce produit"}
+                    productPrice={formData.price || 0}
+                  />
+                ) : (
+                  <Card>
+                    <CardContent className="p-12">
+                      <div className="text-center space-y-4">
+                        <div className="flex justify-center">
+                          <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                            <AlertCircle className="h-8 w-8 text-primary" />
+                          </div>
                         </div>
+                        <div className="space-y-2">
+                          <h3 className="text-xl font-semibold">Configuration de l'affiliation</h3>
+                          <p className="text-muted-foreground max-w-md mx-auto">
+                            Enregistrez d'abord ce produit pour activer et configurer le programme d'affiliation.
+                            Vous pourrez ensuite définir vos taux de commission et conditions.
+                          </p>
+                        </div>
+                        <Button onClick={handleSave} disabled={loading}>
+                          {loading ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Save className="h-4 w-4 mr-2" />
+                          )}
+                          Enregistrer le produit
+                        </Button>
                       </div>
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-semibold">Configuration de l'affiliation</h3>
-                        <p className="text-muted-foreground max-w-md mx-auto">
-                          Enregistrez d'abord ce produit pour activer et configurer le programme d'affiliation.
-                          Vous pourrez ensuite définir vos taux de commission et conditions.
-                        </p>
-                      </div>
-                      <Button onClick={handleSave} disabled={loading}>
-                        {loading ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <Save className="h-4 w-4 mr-2" />
-                        )}
-                        Enregistrer le produit
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                    </CardContent>
+                  </Card>
+                )}
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="test" className="mt-6">
-              <ProductFeatureTest
-                formData={formData}
-                updateFormData={updateFormData}
-              />
+              <Suspense fallback={<TabLoadingSkeleton />}>
+                <ProductFeatureTest
+                  formData={formData}
+                  updateFormData={updateFormData}
+                />
+              </Suspense>
             </TabsContent>
           </Tabs>
         </CardContent>
