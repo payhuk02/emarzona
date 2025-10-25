@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,13 +26,14 @@ export interface Product {
   updated_at: string;
 }
 
-export const useProducts = (storeId?: string) => {
+export const useProducts = (storeId?: string | null) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
+      setLoading(true);
       let query = supabase
         .from('products')
         .select('*')
@@ -56,14 +57,16 @@ export const useProducts = (storeId?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [storeId, toast]);
 
   useEffect(() => {
     if (storeId) {
       fetchProducts();
+    } else {
+      setLoading(false);
+      setProducts([]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storeId]); // ✅ 'fetchProducts' intentionnellement omis pour éviter re-renders infinis
+  }, [storeId, fetchProducts]);
 
   return { products, loading, refetch: fetchProducts };
 };

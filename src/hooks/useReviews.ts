@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,14 +17,17 @@ export interface Review {
   };
 }
 
-export const useReviews = (storeId?: string) => {
+export const useReviews = (storeId?: string | null) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
+      setLoading(true);
+      
       if (!storeId) {
+        setReviews([]);
         setLoading(false);
         return;
       }
@@ -63,11 +66,11 @@ export const useReviews = (storeId?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [storeId, toast]);
 
   useEffect(() => {
     fetchReviews();
-  }, [storeId]);
+  }, [fetchReviews]);
 
   return { reviews, loading, refetch: fetchReviews };
 };

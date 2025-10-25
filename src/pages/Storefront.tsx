@@ -23,8 +23,10 @@ const Storefront = () => {
   const [category, setCategory] = useState("all");
   const [productType, setProductType] = useState("all");
 
-  const { products, loading: productsLoading } = useProducts(store?.id);
-  const { reviews, loading: reviewsLoading } = useReviews(store?.id);
+  // Utiliser un ID stable pour éviter les violations des règles des hooks
+  const storeId = store?.id || null;
+  const { products, loading: productsLoading } = useProducts(storeId);
+  const { reviews, loading: reviewsLoading } = useReviews(storeId);
 
   useEffect(() => {
     const fetchStore = async () => {
