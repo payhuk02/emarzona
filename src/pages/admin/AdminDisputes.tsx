@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -228,24 +227,19 @@ const AdminDisputes = () => {
 
   if (loading) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full">
-          <AppSidebar />
-          <main className="flex-1 p-6">
-            <Skeleton className="h-8 w-64 mb-6" />
-            <Skeleton className="h-96 w-full" />
-          </main>
+      <AdminLayout>
+        <div className="space-y-6">
+          <Skeleton className="h-8 w-64 mb-6" />
+          <Skeleton className="h-96 w-full" />
         </div>
-      </SidebarProvider>
+      </AdminLayout>
     );
   }
 
   if (error) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full">
-          <AppSidebar />
-          <main className="flex-1 p-6">
+      <AdminLayout>
+        <div className="space-y-6">
             <Card className="border-destructive">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-destructive">
@@ -297,18 +291,14 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                 </div>
               </CardContent>
             </Card>
-          </main>
         </div>
-      </SidebarProvider>
+      </AdminLayout>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar />
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -743,8 +733,6 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
 
       {/* Details Dialog */}
       <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
@@ -982,7 +970,7 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </SidebarProvider>
+    </AdminLayout>
   );
 };
 
