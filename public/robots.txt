@@ -1,14 +1,105 @@
+# ========================================
+# Payhula - Robots Configuration
+# Updated: 2025-10-25
+# ========================================
+
+# ========================================
+# User Agents - Allowed Crawlers
+# ========================================
+
+# Google
 User-agent: Googlebot
 Allow: /
+Allow: /marketplace
+Allow: /stores/
+Crawl-delay: 1
 
-User-agent: Bingbot
+User-agent: Googlebot-Image
 Allow: /
 
+# Bing
+User-agent: Bingbot
+Allow: /
+Allow: /marketplace
+Allow: /stores/
+Crawl-delay: 2
+
+# Social Media Crawlers (pour partages)
 User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: Slackbot
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+# ========================================
+# User Agents - Restricted Areas
+# ========================================
+
 User-agent: *
 Allow: /
+Allow: /marketplace
+Allow: /stores/
+
+# Protected areas (authenticated only)
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /admin
+Disallow: /admin/
+Disallow: /auth
+Disallow: /auth/
+
+# Payment & API endpoints
+Disallow: /payment/
+Disallow: /api/
+
+# JSON files (avoid indexing data files)
+Disallow: /*.json$
+
+# Search results with parameters (avoid duplicate content)
+Disallow: /*?*search=
+Disallow: /*?*category=
+Disallow: /*?*sort=
+
+# ========================================
+# Bad Bots (SEO tools that consume bandwidth)
+# ========================================
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+# ========================================
+# Sitemaps
+# ========================================
+
+Sitemap: https://payhula.vercel.app/sitemap.xml
+
+# ========================================
+# Crawl Rate
+# ========================================
+
+# Google: Utilise Search Console pour ajuster
+# Bing: Crawl-delay défini ci-dessus

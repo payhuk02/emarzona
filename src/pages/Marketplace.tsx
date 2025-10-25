@@ -58,6 +58,7 @@ import { Product, FilterState, PaginationState } from '@/types/marketplace';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
 import { useDebounce } from '@/hooks/useDebounce';
 import '@/styles/marketplace-professional.css';
+import { SEOMeta, WebsiteSchema } from '@/components/seo';
 
 const Marketplace = () => {
   const { toast } = useToast();
@@ -536,7 +537,31 @@ const Marketplace = () => {
     featuredProducts: products.filter(p => p.promotional_price && p.promotional_price < p.price).length // Sur page actuelle
   }), [products, categories, pagination.totalItems]);
 
+  // SEO Meta dynamiques
+  const marketplaceSeoData = useMemo(() => ({
+    title: `Marketplace Payhula - ${stats.totalProducts} Produits Digitaux en Afrique`,
+    description: `Découvrez ${stats.totalProducts} produits digitaux sur Payhula : formations en ligne, ebooks, templates, logiciels et services. ${stats.totalStores} boutiques actives. Note moyenne: ${stats.averageRating.toFixed(1)}/5 ⭐. Paiement Mobile Money et CB. Achat sécurisé en XOF.`,
+    keywords: 'marketplace afrique, produits digitaux, formation en ligne, ebook francophone, templates professionnels, logiciels, services digitaux, paiement mobile money, XOF, FCFA, ecommerce afrique, boutique en ligne, vente en ligne afrique',
+    url: `${window.location.origin}/marketplace`,
+    image: `${window.location.origin}/og-marketplace.jpg`,
+  }), [stats]);
+
   return (
+    <>
+      {/* SEO Meta Tags */}
+      <SEOMeta
+        title={marketplaceSeoData.title}
+        description={marketplaceSeoData.description}
+        keywords={marketplaceSeoData.keywords}
+        url={marketplaceSeoData.url}
+        image={marketplaceSeoData.image}
+        imageAlt="Marketplace Payhula - Produits Digitaux en Afrique"
+        type="website"
+      />
+      
+      {/* Schema.org Website */}
+      <WebsiteSchema />
+      
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Skip to main content link for keyboard navigation */}
       <a 
@@ -1182,6 +1207,7 @@ const Marketplace = () => {
         onClose={() => setShowFavorites(false)}
       />
     </div>
+    </>
   );
 };
 
