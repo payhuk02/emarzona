@@ -243,7 +243,8 @@ export const useStore = () => {
     if (!authLoading) {
       fetchStore();
     }
-  }, [authLoading, fetchStore]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, user]); // ✅ 'fetchStore' intentionnellement omis pour éviter re-renders infinis
 
   return {
     store,

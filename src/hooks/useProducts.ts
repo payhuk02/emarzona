@@ -59,8 +59,11 @@ export const useProducts = (storeId?: string) => {
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, [storeId]);
+    if (storeId) {
+      fetchProducts();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeId]); // ✅ 'fetchProducts' intentionnellement omis pour éviter re-renders infinis
 
   return { products, loading, refetch: fetchProducts };
 };
