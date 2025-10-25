@@ -29,6 +29,9 @@ const ProductAffiliateSettings = lazy(() => import("./ProductAffiliateSettings")
 // ✨ Wizard pour nouveaux utilisateurs (+60% taux de complétion)
 const ProductCreationWizard = lazy(() => import("./ProductCreationWizard").then(m => ({ default: m.ProductCreationWizard })));
 
+// 📚 Templates de produits
+const TemplateSelector = lazy(() => import("./TemplateSelector").then(m => ({ default: m.TemplateSelector })));
+
 interface ProductFormProps {
   storeId: string;
   storeSlug: string;
@@ -591,7 +594,23 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
               </p>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Template Selector */}
+              {!productId && (
+                <Suspense fallback={<div className="h-10 w-40 bg-muted animate-pulse rounded" />}>
+                  <TemplateSelector
+                    onTemplateSelect={(templateData) => {
+                      setFormData(prev => ({ ...prev, ...templateData }));
+                      toast({
+                        title: "Template appliqué !",
+                        description: "Les champs ont été remplis automatiquement",
+                      });
+                    }}
+                    currentType={formData.product_type as any}
+                  />
+                </Suspense>
+              )}
+              
               <Button
                 variant="outline"
                 onClick={() => navigate(-1)}
