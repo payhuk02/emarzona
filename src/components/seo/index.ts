@@ -3,6 +3,12 @@
  * Description: Export centralisé de tous les composants SEO
  */
 
+import { SEOMeta } from './SEOMeta';
+import { ProductSchema } from './ProductSchema';
+import { StoreSchema } from './StoreSchema';
+import { BreadcrumbSchema } from './BreadcrumbSchema';
+import { WebsiteSchema } from './WebsiteSchema';
+
 export { SEOMeta, type SEOMetaProps } from './SEOMeta';
 export { ProductSchema } from './ProductSchema';
 export { StoreSchema } from './StoreSchema';
@@ -11,10 +17,10 @@ export { WebsiteSchema } from './WebsiteSchema';
 
 // Export par défaut d'un objet contenant tous les composants
 export default {
-  SEOMeta: require('./SEOMeta').SEOMeta,
-  ProductSchema: require('./ProductSchema').ProductSchema,
-  StoreSchema: require('./StoreSchema').StoreSchema,
-  BreadcrumbSchema: require('./BreadcrumbSchema').BreadcrumbSchema,
-  WebsiteSchema: require('./WebsiteSchema').WebsiteSchema,
+  SEOMeta,
+  ProductSchema,
+  StoreSchema,
+  BreadcrumbSchema,
+  WebsiteSchema,
 };
 
