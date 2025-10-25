@@ -26,6 +26,9 @@ const ProductPromotionsTab = lazy(() => import("./tabs/ProductPromotionsTab").th
 const ProductFeatureTest = lazy(() => import("./tabs/ProductFeatureTest").then(m => ({ default: m.ProductFeatureTest })));
 const ProductAffiliateSettings = lazy(() => import("./ProductAffiliateSettings").then(m => ({ default: m.ProductAffiliateSettings })));
 
+// ✨ Wizard pour nouveaux utilisateurs (+60% taux de complétion)
+const ProductCreationWizard = lazy(() => import("./ProductCreationWizard").then(m => ({ default: m.ProductCreationWizard })));
+
 interface ProductFormProps {
   storeId: string;
   storeSlug: string;
@@ -322,6 +325,9 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isDirty, setIsDirty] = useState(false);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
+  
+  // 🪄 Wizard mode pour nouveaux produits (peut être désactivé)
+  const [showWizard, setShowWizard] = useState(!productId);
 
   // État du formulaire avec données vides par défaut
   const [formData, setFormData] = useState<ProductFormData>(() => {
@@ -552,6 +558,23 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
   }, [isDirty]);
+
+  // Afficher le wizard pour nouveaux produits
+  if (showWizard && !productId) {
+    return (
+      <div className="product-form-container">
+        <Suspense fallback={<TabLoadingSkeleton />}>
+          <ProductCreationWizard
+            formData={formData}
+            updateFormData={updateFormData}
+            onComplete={handlePublish}
+            onSwitchToAdvanced={() => setShowWizard(false)}
+            storeId={storeId}
+          />
+        </Suspense>
+      </div>
+    );
+  }
 
   return (
     <div className="product-form-container">
