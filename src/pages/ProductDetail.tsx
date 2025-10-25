@@ -34,7 +34,9 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [selectedVariantPrice, setSelectedVariantPrice] = useState<number | null>(null);
 
-  const { products: similarProducts } = useProducts(store?.id);
+  // ID stable pour éviter les violations des règles des hooks
+  const storeId = store?.id || null;
+  const { products: similarProducts } = useProducts(storeId);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,6 +75,63 @@ const ProductDetails = () => {
     fetchData();
   }, [slug, productSlug]);
 
+  // Calculs et hooks AVANT les early returns
+  const productUrl = useMemo(() => 
+    product && store ? `${window.location.origin}/stores/${store.slug}/products/${product.slug}` : '',
+    [product, store]
+  );
+
+  const relatedProducts = useMemo(() => 
+    product ? similarProducts.filter((p) => p.id !== product.id).slice(0, 4) : [],
+    [product, similarProducts]
+  );
+
+  const safeDescription = useMemo(() => 
+    product?.description ? DOMPurify.sanitize(product.description) : "",
+    [product?.description]
+  );
+
+  // SEO Meta données
+  const seoData = useMemo(() => {
+    if (!product || !store || !productUrl) return null;
+    
+    const plainDescription = product.description?.replace(/<[^>]*>/g, "").trim() || "";
+    const truncatedDescription = plainDescription.length > 160 
+      ? plainDescription.substring(0, 157) + "..." 
+      : plainDescription;
+    
+    return {
+      title: String(product.name || 'Produit') + ' - ' + String(store.name || 'Boutique'),
+      description: truncatedDescription || `Acheter ${product.name} sur ${store.name}. ${product.category || 'Produit digital'} disponible sur Payhula. Paiement sécurisé en ${product.currency || 'XOF'}.`,
+      keywords: [
+        product.name,
+        product.category,
+        product.product_type,
+        store.name,
+        'achat en ligne',
+        'marketplace afrique',
+        product.currency === 'XOF' ? 'FCFA' : product.currency
+      ].filter(Boolean).map(k => String(k)).join(', '),
+      url: String(productUrl),
+      image: String(product.image_url || `${window.location.origin}/og-default.jpg`),
+      imageAlt: String(product.name || 'Produit') + ' - ' + String(store.name || 'Boutique'),
+      price: typeof product.price === 'number' ? product.price : undefined,
+      currency: product.currency ? String(product.currency) : undefined,
+      availability: product.is_active ? ('instock' as const) : ('outofstock' as const)
+    };
+  }, [product, store, productUrl]);
+
+  // Breadcrumb
+  const breadcrumbItems = useMemo(() => {
+    if (!product || !store || !productUrl) return [];
+    return [
+      { name: "Accueil", url: String(window.location.origin) },
+      { name: "Marketplace", url: String(`${window.location.origin}/marketplace`) },
+      { name: String(store.name || 'Boutique'), url: String(`${window.location.origin}/stores/${store.slug}`) },
+      { name: String(product.name || 'Produit'), url: String(productUrl) }
+    ];
+  }, [store, product, productUrl]);
+
   const renderStars = (rating: number) => (
     <div className="flex items-center gap-1">
       {[1, 2, 3, 4, 5].map((star) => (
@@ -86,6 +145,7 @@ const ProductDetails = () => {
     </div>
   );
 
+  // MAINTENANT les early returns APRÈS tous les hooks
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -119,68 +179,24 @@ const ProductDetails = () => {
     );
   }
 
-  const productUrl = `${window.location.origin}/stores/${store.slug}/products/${product.slug}`;
-  const relatedProducts = similarProducts
-    .filter((p) => p.id !== product.id)
-    .slice(0, 4);
-
-  // ✅ Nettoyage du HTML pour éviter les scripts dangereux
-  const safeDescription = product.description
-    ? DOMPurify.sanitize(product.description)
-    : "";
-
-  // SEO Meta données
-  const seoData = useMemo(() => {
-    const plainDescription = product.description?.replace(/<[^>]*>/g, "").trim() || "";
-    const truncatedDescription = plainDescription.length > 160 
-      ? plainDescription.substring(0, 157) + "..." 
-      : plainDescription;
-    
-    return {
-      title: `${product.name} - ${store.name}`,
-      description: truncatedDescription || `Acheter ${product.name} sur ${store.name}. ${product.category || 'Produit digital'} disponible sur Payhula. Paiement sécurisé en ${product.currency}.`,
-      keywords: [
-        product.name,
-        product.category,
-        product.product_type,
-        store.name,
-        'achat en ligne',
-        'marketplace afrique',
-        product.currency === 'XOF' ? 'FCFA' : product.currency
-      ].filter(Boolean).join(', '),
-      url: productUrl,
-      image: product.image_url || `${window.location.origin}/og-default.jpg`,
-      imageAlt: `${product.name} - ${store.name}`,
-      price: product.price,
-      currency: product.currency,
-      availability: product.is_active ? 'instock' : 'outofstock'
-    };
-  }, [product, store, productUrl]);
-
-  // Breadcrumb
-  const breadcrumbItems = useMemo(() => [
-    { name: "Accueil", url: window.location.origin },
-    { name: "Marketplace", url: `${window.location.origin}/marketplace` },
-    { name: store.name, url: `${window.location.origin}/stores/${store.slug}` },
-    { name: product.name, url: productUrl }
-  ], [store, product, productUrl]);
-
   return (
     <>
       {/* SEO Meta Tags */}
-      <SEOMeta
-        title={seoData.title}
-        description={seoData.description}
-        keywords={seoData.keywords}
-        url={seoData.url}
-        canonical={seoData.url}
-        image={seoData.image}
-        imageAlt={seoData.imageAlt}
-        type="product"
-        price={seoData.price}
-        currency={seoData.currency}
-        availability={seoData.availability}
-      />
+      {seoData && (
+        <SEOMeta
+          title={seoData.title}
+          description={seoData.description}
+          keywords={seoData.keywords}
+          url={seoData.url}
+          canonical={seoData.url}
+          image={seoData.image}
+          imageAlt={seoData.imageAlt}
+          type="product"
+          price={seoData.price}
+          currency={seoData.currency}
+          availability={seoData.availability}
+        />
+      )}
       
       {/* Schema.org Product */}
       <ProductSchema
@@ -194,7 +210,7 @@ const ProductDetails = () => {
       />
       
       {/* Breadcrumb Schema */}
-      <BreadcrumbSchema items={breadcrumbItems} />
+      {breadcrumbItems.length > 0 && <BreadcrumbSchema items={breadcrumbItems} />}
 
       <div className="min-h-screen flex flex-col bg-background">
         {/* Header */}

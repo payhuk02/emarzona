@@ -75,13 +75,26 @@ export const SEOMeta = ({
   twitterCreator = '@payhuk',
 }: SEOMetaProps) => {
   
+  // Conversion sécurisée en string
+  const safeString = (value: any, fallback: string = ''): string => {
+    if (value === null || value === undefined) return fallback;
+    if (typeof value === 'symbol') return fallback;
+    try {
+      return String(value);
+    } catch {
+      return fallback;
+    }
+  };
+  
   // Titre complet avec branding
-  const fullTitle = title.includes('Payhula') ? title : `${title} | Payhula`;
+  const safeTitle = safeString(title, 'Payhula');
+  const fullTitle = safeTitle.includes('Payhula') ? safeTitle : `${safeTitle} | Payhula`;
   
   // Description tronquée si trop longue
-  const truncatedDescription = description.length > 160 
-    ? description.substring(0, 157) + '...' 
-    : description;
+  const safeDescription = safeString(description, 'Marketplace Payhula');
+  const truncatedDescription = safeDescription.length > 160 
+    ? safeDescription.substring(0, 157) + '...' 
+    : safeDescription;
   
   // Configuration robots
   const robotsContent = [
@@ -97,59 +110,51 @@ export const SEOMeta = ({
       {/* Basic Meta Tags */}
       <title>{fullTitle}</title>
       <meta name="description" content={truncatedDescription} />
-      {keywords && <meta name="keywords" content={keywords} />}
-      <meta name="author" content={author} />
+      {keywords ? <meta name="keywords" content={safeString(keywords)} /> : null}
+      <meta name="author" content={safeString(author, 'Payhula')} />
       <meta name="robots" content={robotsContent} />
       
       {/* Canonical URL */}
-      <link rel="canonical" href={canonical || url} />
+      <link rel="canonical" href={safeString(canonical || url, window.location.origin)} />
       
       {/* Open Graph / Facebook */}
-      <meta property="og:type" content={type} />
+      <meta property="og:type" content={safeString(type, 'website')} />
       <meta property="og:site_name" content="Payhula" />
-      <meta property="og:title" content={title} />
+      <meta property="og:title" content={safeTitle} />
       <meta property="og:description" content={truncatedDescription} />
-      <meta property="og:url" content={url} />
-      <meta property="og:locale" content={locale} />
+      <meta property="og:url" content={safeString(url, window.location.origin)} />
+      <meta property="og:locale" content={safeString(locale, 'fr_FR')} />
       
       {/* Images OG */}
-      <meta property="og:image" content={image} />
-      {imageAlt && <meta property="og:image:alt" content={imageAlt} />}
-      <meta property="og:image:width" content={imageWidth} />
-      <meta property="og:image:height" content={imageHeight} />
+      <meta property="og:image" content={safeString(image, 'https://payhula.vercel.app/og-default.jpg')} />
+      {imageAlt ? <meta property="og:image:alt" content={safeString(imageAlt)} /> : null}
+      <meta property="og:image:width" content={safeString(imageWidth, '1200')} />
+      <meta property="og:image:height" content={safeString(imageHeight, '630')} />
       <meta property="og:image:type" content="image/jpeg" />
       
       {/* Article Meta (si type = article) */}
-      {type === 'article' && (
-        <>
-          {publishedTime && <meta property="article:published_time" content={publishedTime} />}
-          {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
-          {author && <meta property="article:author" content={author} />}
-          {section && <meta property="article:section" content={section} />}
-          {tags && tags.map(tag => (
-            <meta key={tag} property="article:tag" content={tag} />
-          ))}
-        </>
-      )}
+      {type === 'article' && publishedTime ? <meta property="article:published_time" content={safeString(publishedTime)} /> : null}
+      {type === 'article' && modifiedTime ? <meta property="article:modified_time" content={safeString(modifiedTime)} /> : null}
+      {type === 'article' && author ? <meta property="article:author" content={safeString(author)} /> : null}
+      {type === 'article' && section ? <meta property="article:section" content={safeString(section)} /> : null}
+      {type === 'article' && tags ? tags.map(tag => (
+        <meta key={safeString(tag)} property="article:tag" content={safeString(tag)} />
+      )) : null}
       
       {/* Product Meta (si type = product) */}
-      {type === 'product' && price && currency && (
-        <>
-          <meta property="product:price:amount" content={price.toString()} />
-          <meta property="product:price:currency" content={currency} />
-          {availability && <meta property="product:availability" content={availability} />}
-          <meta property="product:condition" content="new" />
-        </>
-      )}
+      {type === 'product' && price !== undefined && price !== null && currency ? <meta property="product:price:amount" content={safeString(price)} /> : null}
+      {type === 'product' && price !== undefined && price !== null && currency ? <meta property="product:price:currency" content={safeString(currency, 'XOF')} /> : null}
+      {type === 'product' && price !== undefined && price !== null && currency && availability ? <meta property="product:availability" content={safeString(availability)} /> : null}
+      {type === 'product' && price !== undefined && price !== null && currency ? <meta property="product:condition" content="new" /> : null}
       
       {/* Twitter Card */}
-      <meta name="twitter:card" content={twitterCard} />
-      <meta name="twitter:site" content={twitterSite} />
-      <meta name="twitter:creator" content={twitterCreator} />
-      <meta name="twitter:title" content={title} />
+      <meta name="twitter:card" content={safeString(twitterCard, 'summary_large_image')} />
+      <meta name="twitter:site" content={safeString(twitterSite, '@payhuk')} />
+      <meta name="twitter:creator" content={safeString(twitterCreator, '@payhuk')} />
+      <meta name="twitter:title" content={safeTitle} />
       <meta name="twitter:description" content={truncatedDescription} />
-      <meta name="twitter:image" content={image} />
-      {imageAlt && <meta name="twitter:image:alt" content={imageAlt} />}
+      <meta name="twitter:image" content={safeString(image, 'https://payhula.vercel.app/og-default.jpg')} />
+      {imageAlt ? <meta name="twitter:image:alt" content={safeString(imageAlt)} /> : null}
       
       {/* Additional Meta */}
       <meta name="theme-color" content="#007bff" />
