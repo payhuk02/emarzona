@@ -16,7 +16,7 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table";
-import { ShoppingCart, Star, ArrowLeft, CheckCircle2, Package, HelpCircle, ClipboardList, Download, Clock, RefreshCw, DollarSign, Gift } from "lucide-react";
+import { ShoppingCart, Star, ArrowLeft, CheckCircle2, Package, HelpCircle, ClipboardList, Download, Clock, RefreshCw, DollarSign, Gift, Lock, AlertTriangle, CalendarClock } from "lucide-react";
 import ProductCard from "@/components/marketplace/ProductCard";
 import StoreFooter from "@/components/storefront/StoreFooter";
 import { useProducts } from "@/hooks/useProducts";
@@ -326,6 +326,60 @@ const ProductDetails = () => {
                     </span>
                   )}
                 </Button>
+
+                {/* 🔒 NOUVEAU: Badges informatifs (Phase 4) */}
+                {(product.password_protected || product.purchase_limit || product.preorder_allowed) && (
+                  <div className="flex flex-wrap gap-2">
+                    {/* Protection par mot de passe */}
+                    {product.password_protected && (
+                      <Badge variant="outline" className="text-sm bg-yellow-500/10 text-yellow-700 border-yellow-500/20">
+                        <Lock className="h-3 w-3 mr-1" />
+                        Accès protégé
+                      </Badge>
+                    )}
+
+                    {/* Limite d'achat */}
+                    {product.purchase_limit && product.purchase_limit > 0 && (
+                      <Badge variant="outline" className="text-sm bg-orange-500/10 text-orange-700 border-orange-500/20">
+                        <AlertTriangle className="h-3 w-3 mr-1" />
+                        Max {product.purchase_limit} par personne
+                      </Badge>
+                    )}
+
+                    {/* Précommande */}
+                    {product.preorder_allowed && (
+                      <Badge variant="outline" className="text-sm bg-blue-500/10 text-blue-700 border-blue-500/20">
+                        <CalendarClock className="h-3 w-3 mr-1" />
+                        Précommande disponible
+                      </Badge>
+                    )}
+                  </div>
+                )}
+
+                {/* Messages détaillés */}
+                {product.password_protected && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-yellow-500/5 border border-yellow-500/20">
+                    <Lock className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-semibold text-yellow-700 mb-1">Produit à accès restreint</p>
+                      <p className="text-muted-foreground">
+                        Un mot de passe sera requis après l'achat pour accéder à ce produit.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {product.purchase_limit && product.purchase_limit > 0 && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-orange-500/5 border border-orange-500/20">
+                    <AlertTriangle className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-semibold text-orange-700 mb-1">Limite d'achat par personne</p>
+                      <p className="text-muted-foreground">
+                        Vous pouvez acheter maximum {product.purchase_limit} {product.purchase_limit === 1 ? 'exemplaire' : 'exemplaires'} de ce produit.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* ✨ NOUVEAU: Caractéristiques principales */}
                 {product.features && Array.isArray(product.features) && product.features.length > 0 && (
