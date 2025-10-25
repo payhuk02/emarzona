@@ -10,29 +10,37 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { AlertTriangle, CheckCircle, Clock, XCircle, User, Store, Shield, Calendar, MessageSquare, Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Download, Eye, FileText } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { AlertTriangle, CheckCircle, Clock, XCircle, User, Store, Shield, Calendar, MessageSquare, Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Download, Eye, FileText, ExternalLink } from "lucide-react";
 import { useDisputes, SortColumn, SortDirection } from "@/hooks/useDisputes";
 import { Dispute, DisputeStatus, InitiatorType } from "@/types/advanced-features";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useDebounce } from "@/hooks/useDebounce";
 import { exportDisputesToCSV } from "@/lib/export-utils";
+import { Link } from "react-router-dom";
 
 const AdminDisputes = () => {
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<DisputeStatus | "all">("all");
   const [initiatorFilter, setInitiatorFilter] = useState<InitiatorType | "all">("all");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  const [searchInput, setSearchInput] = useState("");
   const [page, setPage] = useState(1);
   const [sortByColumn, setSortByColumn] = useState<SortColumn>('created_at');
   const [sortDir, setSortDir] = useState<SortDirection>('desc');
   const pageSize = 20;
   
+  // Débounce de la recherche pour éviter le spam de requêtes
+  const debouncedSearch = useDebounce(searchInput, 500);
+  
   const filters = {
     ...(statusFilter !== "all" && { status: statusFilter as DisputeStatus }),
     ...(initiatorFilter !== "all" && { initiator_type: initiatorFilter as InitiatorType }),
-    ...(searchTerm.trim() && { search: searchTerm }),
+    ...(priorityFilter !== "all" && { priority: priorityFilter }),
+    ...(debouncedSearch.trim() && { search: debouncedSearch }),
   };
 
   const {
@@ -173,6 +181,12 @@ const AdminDisputes = () => {
     );
   };
 
+  // Vérifier si un litige est nouveau (moins de 24h)
+  const isNewDispute = (createdAt: string): boolean => {
+    const diffHours = (Date.now() - new Date(createdAt).getTime()) / 3600000;
+    return diffHours < 24;
+  };
+
   // Composant pour les headers triables
   const SortableHeader = ({ column, label }: { column: SortColumn; label: string }) => {
     const isActive = sortByColumn === column;
@@ -234,8 +248,10 @@ CREATE TABLE IF NOT EXISTS disputes (
   initiator_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   subject TEXT NOT NULL,
   description TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'open',
-  priority TEXT DEFAULT 'normal',
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN (
+    'open', 'investigating', 'waiting_customer', 'waiting_seller', 'resolved', 'closed'
+  )),
+  priority TEXT DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
   assigned_admin_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   admin_notes TEXT,
   resolution TEXT,
@@ -244,9 +260,14 @@ CREATE TABLE IF NOT EXISTS disputes (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Index
+CREATE INDEX IF NOT EXISTS idx_disputes_order_id ON disputes(order_id);
+CREATE INDEX IF NOT EXISTS idx_disputes_status ON disputes(status);
+CREATE INDEX IF NOT EXISTS idx_disputes_assigned_admin ON disputes(assigned_admin_id);
+
 ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
 
--- Voir le fichier: supabase/migrations/20250124_disputes_system_complete.sql`}
+-- Voir le fichier complet: supabase/migrations/20250124_disputes_system_complete.sql`}
                     </code>
                   </div>
                   <Button onClick={() => window.location.reload()} className="w-full">
@@ -350,9 +371,9 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Rechercher par sujet, description ou ID commande..."
-                    value={searchTerm}
+                    value={searchInput}
                     onChange={(e) => {
-                      setSearchTerm(e.target.value);
+                      setSearchInput(e.target.value);
                       setPage(1); // Reset to page 1 on search
                     }}
                     className="pl-10 w-full"
@@ -392,6 +413,22 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                     </SelectContent>
                   </Select>
 
+                  <Select value={priorityFilter} onValueChange={(value) => {
+                    setPriorityFilter(value);
+                    setPage(1);
+                  }}>
+                    <SelectTrigger className="w-full sm:w-[200px]">
+                      <SelectValue placeholder="Priorité" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes priorités</SelectItem>
+                      <SelectItem value="urgent">🔴 Urgente</SelectItem>
+                      <SelectItem value="high">🟠 Élevée</SelectItem>
+                      <SelectItem value="normal">🔵 Normale</SelectItem>
+                      <SelectItem value="low">🟢 Basse</SelectItem>
+                    </SelectContent>
+                  </Select>
+
                   {stats && stats.unassigned > 0 && (
                     <Badge variant="destructive" className="h-10 flex items-center">
                       {stats.unassigned} non assigné(s)
@@ -399,13 +436,14 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                   )}
 
                   {/* Reset Filters Button */}
-                  {(statusFilter !== "all" || initiatorFilter !== "all" || searchTerm.trim()) && (
+                  {(statusFilter !== "all" || initiatorFilter !== "all" || priorityFilter !== "all" || searchInput.trim()) && (
                     <Button
                       variant="outline"
                       onClick={() => {
                         setStatusFilter("all");
                         setInitiatorFilter("all");
-                        setSearchTerm("");
+                        setPriorityFilter("all");
+                        setSearchInput("");
                         setPage(1);
                       }}
                     >
@@ -454,14 +492,32 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                       </TableHeader>
                       <TableBody>
                         {disputes.map((dispute) => (
-                          <TableRow key={dispute.id}>
+                          <TableRow key={dispute.id} className={isNewDispute(dispute.created_at) ? "bg-yellow-50/30" : ""}>
                             <TableCell className="font-medium">
-                              {dispute.order_id ? dispute.order_id.substring(0, 8) : "N/A"}
+                              {dispute.order_id ? (
+                                <div className="flex items-center gap-2">
+                                  <Link 
+                                    to={`/orders`}
+                                    className="text-primary hover:underline flex items-center gap-1"
+                                    title={`Voir la commande ${dispute.order_id}`}
+                                  >
+                                    {dispute.order_id.substring(0, 8)}
+                                    <ExternalLink className="h-3 w-3" />
+                                  </Link>
+                                  {isNewDispute(dispute.created_at) && (
+                                    <Badge variant="secondary" className="text-xs bg-yellow-200 text-yellow-800 border-yellow-300">
+                                      NOUVEAU
+                                    </Badge>
+                                  )}
+                                </div>
+                              ) : (
+                                "N/A"
+                              )}
                             </TableCell>
                             <TableCell>
                               <div className="flex flex-col gap-1">
                                 {getInitiatorBadge(dispute.initiator_type)}
-                                <span className="text-xs text-muted-foreground">
+                                <span className="text-xs text-muted-foreground capitalize">
                                   {dispute.initiator_type}
                                 </span>
                               </div>
@@ -469,9 +525,18 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                             <TableCell>
                               <div className="max-w-xs">
                                 <p className="font-medium text-sm">{dispute.subject}</p>
-                                <p className="text-xs text-muted-foreground truncate">
-                                  {dispute.description}
-                                </p>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <p className="text-xs text-muted-foreground truncate cursor-help">
+                                        {dispute.description}
+                                      </p>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom" className="max-w-md">
+                                      <p className="text-sm">{dispute.description}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                               </div>
                             </TableCell>
                             <TableCell>{getStatusBadge(dispute.status)}</TableCell>

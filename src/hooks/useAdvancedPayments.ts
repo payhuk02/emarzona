@@ -370,7 +370,7 @@ export const useAdvancedPayments = (
           order_id: data[0].order_id,
           initiator_id: data[0].customer_id || '',
           initiator_type: 'customer',
-          reason,
+          subject: reason,  // CORRIGÉ: 'reason' → 'subject' pour correspondre au schéma de la table
           description,
           status: 'open',
         }]);

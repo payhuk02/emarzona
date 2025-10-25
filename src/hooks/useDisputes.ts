@@ -3,11 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from '@/lib/logger';
 import { Dispute, DisputeStatus, InitiatorType } from "@/types/advanced-features";
+import { RealtimeChannel } from "@supabase/supabase-js";
 
 interface DisputesFilters {
   status?: DisputeStatus;
   initiator_type?: InitiatorType;
   assigned_admin_id?: string;
+  priority?: string;
   search?: string;
 }
 
@@ -69,6 +71,9 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       }
       if (filters?.assigned_admin_id) {
         query = query.eq("assigned_admin_id", filters.assigned_admin_id);
+      }
+      if (filters?.priority) {
+        query = query.eq("priority", filters.priority);
       }
 
       // Recherche textuelle (subject, description, order_id)
@@ -159,6 +164,69 @@ export const useDisputes = (options?: UseDisputesOptions) => {
     fetchDisputes();
     fetchStats();
   }, [fetchDisputes, fetchStats]);
+
+  // Notifications en temps réel
+  useEffect(() => {
+    let channel: RealtimeChannel;
+
+    const setupRealtimeSubscription = async () => {
+      // S'abonner aux changements sur la table disputes
+      channel = supabase
+        .channel('disputes_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'disputes'
+          },
+          (payload) => {
+            logger.info('Nouveau litige créé:', payload.new);
+            const newDispute = payload.new as Dispute;
+            
+            toast({
+              title: "🆕 Nouveau litige",
+              description: `Sujet: ${newDispute.subject}`,
+              duration: 5000,
+            });
+
+            // Recharger les litiges et les stats
+            fetchDisputes();
+            fetchStats();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'disputes'
+          },
+          (payload) => {
+            logger.info('Litige mis à jour:', payload.new);
+            
+            // Recharger seulement si c'est un changement important
+            const oldStatus = (payload.old as Dispute).status;
+            const newStatus = (payload.new as Dispute).status;
+            
+            if (oldStatus !== newStatus) {
+              fetchDisputes();
+              fetchStats();
+            }
+          }
+        )
+        .subscribe();
+    };
+
+    setupRealtimeSubscription();
+
+    // Cleanup lors du démontage
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [fetchDisputes, fetchStats, toast]);
 
   // Assigner un litige à un admin
   const assignDispute = async (disputeId: string, adminId: string): Promise<boolean> => {
