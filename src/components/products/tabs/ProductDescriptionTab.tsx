@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { AIContentGenerator } from "@/components/products/AIContentGenerator";
 import { 
   FileText, 
   Eye, 
@@ -472,13 +473,33 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
           <h2 className="text-xl sm:text-2xl font-bold">Description et SEO</h2>
           <p className="text-sm sm:text-base text-gray-600">Créez une description attrayante et optimisez votre référencement</p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+        <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto flex-wrap">
           <div className="text-right">
             <div className={cn("px-3 py-1 rounded-full text-sm font-medium", getSeoScoreColor(seoScore))}>
               Score SEO: {seoScore}/100
             </div>
             <p className="text-xs text-gray-500 mt-1">{getSeoScoreLabel(seoScore)}</p>
           </div>
+          
+          {/* Générateur IA */}
+          <AIContentGenerator
+            productInfo={{
+              name: formData.name || "",
+              type: (formData as any).product_type || "digital",
+              category: (formData as any).category,
+              price: (formData as any).price,
+              features: formData.features || [],
+            }}
+            onContentGenerated={(content) => {
+              updateFormData("short_description", content.shortDescription);
+              updateFormData("description", content.longDescription);
+              updateFormData("features", content.features);
+              updateFormData("meta_title", content.metaTitle);
+              updateFormData("meta_description", content.metaDescription);
+              updateFormData("meta_keywords", content.keywords.join(", "));
+            }}
+          />
+          
           <Button
             variant="outline"
             onClick={() => setPreviewMode(!previewMode)}
