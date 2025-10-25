@@ -17,11 +17,13 @@ import {
   Palette,
   FileImage,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Zap
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { optimizeImage, formatFileSize } from "@/lib/image-optimization";
 
 interface ImageUploadProps {
   value: string | string[];
@@ -61,6 +63,8 @@ export const ImageUpload = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragOver, setDragOver] = useState(false);
   const [previewImages, setPreviewImages] = useState<UploadedFile[]>([]);
+  const [optimizing, setOptimizing] = useState(false);
+  const [optimizationStats, setOptimizationStats] = useState<{ originalSize: number; optimizedSize: number; ratio: number } | null>(null);
 
   const uploadFile = useCallback(async (file: File): Promise<string> => {
     const fileExt = file.name.split('.').pop();
@@ -127,19 +131,41 @@ export const ImageUpload = ({
       return;
     }
 
-    setUploading(true);
-    setUploadProgress(0);
+    // Optimiser les images d'abord
+    setOptimizing(true);
+    let totalOriginalSize = 0;
+    let totalOptimizedSize = 0;
+    const optimizedFiles: File[] = [];
 
     try {
+      for (const file of fileArray) {
+        const result = await optimizeImage(file);
+        optimizedFiles.push(result.optimizedFile);
+        totalOriginalSize += result.originalSize;
+        totalOptimizedSize += result.optimizedSize;
+      }
+
+      const compressionRatio = ((totalOriginalSize - totalOptimizedSize) / totalOriginalSize) * 100;
+      setOptimizationStats({
+        originalSize: totalOriginalSize,
+        optimizedSize: totalOptimizedSize,
+        ratio: compressionRatio,
+      });
+
+      setOptimizing(false);
+      setUploading(true);
+      setUploadProgress(0);
+
+      // Uploader les fichiers optimisés
       const uploadedUrls: string[] = [];
       
-      for (let i = 0; i < fileArray.length; i++) {
-        const file = fileArray[i];
+      for (let i = 0; i < optimizedFiles.length; i++) {
+        const file = optimizedFiles[i];
         const url = await uploadFile(file);
         uploadedUrls.push(url);
         
         // Mettre à jour le progrès
-        setUploadProgress(((i + 1) / fileArray.length) * 100);
+        setUploadProgress(((i + 1) / optimizedFiles.length) * 100);
         
         // Ajouter à la prévisualisation
         const uploadedFile: UploadedFile = {
@@ -164,7 +190,8 @@ export const ImageUpload = ({
 
       toast({
         title: "Succès",
-        description: `${fileArray.length} fichier(s) téléchargé(s) avec succès.`,
+        description: `${fileArray.length} image(s) optimisée(s) et téléchargée(s) ! (Compression: ${compressionRatio.toFixed(1)}%)`,
+        duration: 5000,
       });
 
     } catch (error: any) {
@@ -284,13 +311,51 @@ export const ImageUpload = ({
             </div>
           </div>
 
-          {/* Barre de progression */}
+          {/* Optimisation en cours */}
+          {optimizing && (
+            <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Zap className="h-5 w-5 text-blue-600 animate-pulse" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    Optimisation des images en cours...
+                  </p>
+                  <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                    Compression automatique pour améliorer la vitesse
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Barre de progression upload */}
           {uploading && (
             <div className="mt-4">
               <Progress value={uploadProgress} className="w-full" />
               <p className="text-sm text-center mt-2">
                 Téléchargement en cours... {Math.round(uploadProgress)}%
               </p>
+            </div>
+          )}
+
+          {/* Statistiques d'optimisation */}
+          {optimizationStats && !optimizing && !uploading && (
+            <div className="mt-4 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-green-900 dark:text-green-100">
+                    Images optimisées avec succès !
+                  </p>
+                  <div className="text-xs text-green-700 dark:text-green-300 mt-1 space-y-1">
+                    <p>Taille originale : {formatFileSize(optimizationStats.originalSize)}</p>
+                    <p>Taille optimisée : {formatFileSize(optimizationStats.optimizedSize)}</p>
+                    <p className="font-semibold">
+                      Économie : {optimizationStats.ratio.toFixed(1)}% ({formatFileSize(optimizationStats.originalSize - optimizationStats.optimizedSize)} économisés)
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </CardContent>
