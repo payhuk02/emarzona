@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Star, Heart, Eye, CheckCircle, Clock, TrendingUp, Loader2, BarChart3 } from "lucide-react";
+import { ShoppingCart, Star, Heart, Eye, CheckCircle, Clock, TrendingUp, Loader2, BarChart3, Download } from "lucide-react";
 import { initiateMonerooPayment } from "@/lib/moneroo-payment";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -329,6 +329,16 @@ const ProductCardProfessional = ({
                 {tag}
               </Badge>
             ))}
+          </div>
+        )}
+
+        {/* 📎 NOUVEAU: Badge fichiers téléchargeables */}
+        {product.downloadable_files && Array.isArray(product.downloadable_files) && product.downloadable_files.length > 0 && (
+          <div className="mb-3">
+            <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-700 border-green-500/20">
+              <Download className="h-3 w-3 mr-1" />
+              {product.downloadable_files.length} fichier{product.downloadable_files.length > 1 ? 's' : ''}
+            </Badge>
           </div>
         )}
 

@@ -3,13 +3,20 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ShoppingCart, Star, ArrowLeft, CheckCircle2, Package, HelpCircle } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+} from "@/components/ui/table";
+import { ShoppingCart, Star, ArrowLeft, CheckCircle2, Package, HelpCircle, ClipboardList, Download, Clock, RefreshCw, DollarSign, Gift } from "lucide-react";
 import ProductCard from "@/components/marketplace/ProductCard";
 import StoreFooter from "@/components/storefront/StoreFooter";
 import { useProducts } from "@/hooks/useProducts";
@@ -245,11 +252,43 @@ const ProductDetails = () => {
                   </div>
                 )}
 
-                <div className="text-4xl font-bold">
-                  {product.price.toLocaleString()}{" "}
-                  <span className="text-2xl text-muted-foreground">
-                    {product.currency}
-                  </span>
+                <div className="space-y-2">
+                  <div className="text-4xl font-bold">
+                    {product.price.toLocaleString()}{" "}
+                    <span className="text-2xl text-muted-foreground">
+                      {product.currency}
+                    </span>
+                  </div>
+
+                  {/* 🎯 NOUVEAU: Modèle de tarification */}
+                  {product.pricing_model && (
+                    <div className="flex items-center gap-2">
+                      {product.pricing_model === 'subscription' && (
+                        <Badge variant="outline" className="text-sm bg-blue-500/10 text-blue-700 border-blue-500/20">
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                          Abonnement
+                        </Badge>
+                      )}
+                      {product.pricing_model === 'one-time' && (
+                        <Badge variant="outline" className="text-sm bg-purple-500/10 text-purple-700 border-purple-500/20">
+                          <DollarSign className="h-3 w-3 mr-1" />
+                          Achat unique
+                        </Badge>
+                      )}
+                      {product.pricing_model === 'free' && (
+                        <Badge variant="outline" className="text-sm bg-green-500/10 text-green-700 border-green-500/20">
+                          <Gift className="h-3 w-3 mr-1" />
+                          Gratuit
+                        </Badge>
+                      )}
+                      {product.pricing_model === 'pay-what-you-want' && (
+                        <Badge variant="outline" className="text-sm bg-orange-500/10 text-orange-700 border-orange-500/20">
+                          <DollarSign className="h-3 w-3 mr-1" />
+                          Prix libre
+                        </Badge>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <Button size="lg" className="w-full sm:w-auto">
@@ -283,6 +322,70 @@ const ProductDetails = () => {
                       className="text-muted-foreground leading-relaxed prose max-w-none"
                       dangerouslySetInnerHTML={{ __html: safeDescription }}
                     />
+                  </div>
+                )}
+
+                {/* 📊 NOUVEAU: Specifications techniques */}
+                {product.specifications && Array.isArray(product.specifications) && product.specifications.length > 0 && (
+                  <div className="pt-6 border-t border-border">
+                    <div className="flex items-center gap-2 mb-4">
+                      <ClipboardList className="h-5 w-5 text-primary" />
+                      <h2 className="text-xl font-semibold">Spécifications techniques</h2>
+                    </div>
+                    <div className="rounded-lg border border-border overflow-hidden bg-card">
+                      <Table>
+                        <TableBody>
+                          {product.specifications.map((spec: any, index: number) => (
+                            <TableRow key={index} className={index % 2 === 0 ? 'bg-muted/50' : ''}>
+                              <TableCell className="font-medium w-1/3 py-3">
+                                {spec.name || spec.label || spec.key}
+                              </TableCell>
+                              <TableCell className="py-3">
+                                {spec.value}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
+
+                {/* 💾 NOUVEAU: Informations de téléchargement */}
+                {product.downloadable_files && Array.isArray(product.downloadable_files) && product.downloadable_files.length > 0 && (
+                  <div className="pt-6 border-t border-border">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Download className="h-5 w-5 text-primary" />
+                      <h2 className="text-xl font-semibold">Fichiers inclus</h2>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border border-border">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Download className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium">
+                              {product.downloadable_files.length} fichier{product.downloadable_files.length > 1 ? 's' : ''} téléchargeable{product.downloadable_files.length > 1 ? 's' : ''}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Accès immédiat après l'achat
+                            </p>
+                          </div>
+                        </div>
+                        {product.download_limit && (
+                          <div className="text-sm text-muted-foreground">
+                            Limite: {product.download_limit} téléchargement{product.download_limit > 1 ? 's' : ''}
+                          </div>
+                        )}
+                      </div>
+                      {product.download_expiry_days && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground px-4">
+                          <Clock className="h-4 w-4" />
+                          <span>Disponible pendant {product.download_expiry_days} jours</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 

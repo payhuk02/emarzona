@@ -1,7 +1,8 @@
 import { Product } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { ShoppingCart, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ShoppingCart, Star, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ProductBanner } from "@/components/ui/ResponsiveProductImage";
 
@@ -59,6 +60,16 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
           
           {product.rating > 0 && (
             <div className="product-rating mb-3">{renderStars(product.rating)}</div>
+          )}
+
+          {/* 📎 NOUVEAU: Badges informatifs */}
+          {(product.downloadable_files && Array.isArray(product.downloadable_files) && product.downloadable_files.length > 0) && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-700 border-green-500/20">
+                <Download className="h-3 w-3 mr-1" />
+                {product.downloadable_files.length} fichier{product.downloadable_files.length > 1 ? 's' : ''}
+              </Badge>
+            </div>
           )}
 
           {/* ✨ NOUVEAU: Description courte */}
