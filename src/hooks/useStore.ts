@@ -141,7 +141,7 @@ export const useStore = () => {
       setLoading(false);
       console.log('✅ [useStore] setLoading(false)');
     }
-  }, [user, authLoading, toast]);
+  }, [user, authLoading]); // ✅ Retiré 'toast' pour éviter les re-renders infinis
 
   const createStore = async (name: string, description?: string) => {
     try {
