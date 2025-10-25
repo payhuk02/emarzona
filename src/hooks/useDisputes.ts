@@ -16,6 +16,8 @@ interface DisputeStats {
   total: number;
   open: number;
   investigating: number;
+  waiting_customer: number;
+  waiting_seller: number;
   resolved: number;
   closed: number;
   unassigned: number;
@@ -127,6 +129,8 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       const total = disputes.length;
       const open = disputes.filter(d => d.status === 'open').length;
       const investigating = disputes.filter(d => d.status === 'investigating').length;
+      const waiting_customer = disputes.filter(d => d.status === 'waiting_customer').length;
+      const waiting_seller = disputes.filter(d => d.status === 'waiting_seller').length;
       const resolved = disputes.filter(d => d.status === 'resolved').length;
       const closed = disputes.filter(d => d.status === 'closed').length;
       const unassigned = disputes.filter(d => !d.assigned_admin_id).length;
@@ -149,6 +153,8 @@ export const useDisputes = (options?: UseDisputesOptions) => {
         total,
         open,
         investigating,
+        waiting_customer,
+        waiting_seller,
         resolved,
         closed,
         unassigned,
@@ -338,6 +344,40 @@ export const useDisputes = (options?: UseDisputesOptions) => {
     }
   };
 
+  // Changer la priorité d'un litige
+  const updateDisputePriority = async (
+    disputeId: string, 
+    priority: 'low' | 'normal' | 'high' | 'urgent'
+  ): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from("disputes")
+        .update({
+          priority,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", disputeId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Priorité mise à jour",
+        description: `Priorité changée à "${priority}"`,
+      });
+
+      await fetchDisputes();
+      return true;
+    } catch (error: any) {
+      logger.error("Error updating dispute priority:", error);
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
   return {
     disputes,
     stats,
@@ -355,6 +395,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
     resolveDispute,
     closeDispute,
     updateDisputeStatus,
+    updateDisputePriority,
   };
 };
 

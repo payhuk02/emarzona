@@ -55,6 +55,7 @@ const AdminDisputes = () => {
     resolveDispute,
     closeDispute,
     updateDisputeStatus,
+    updateDisputePriority,
   } = useDisputes({ filters, page, pageSize, sortBy: sortByColumn, sortDirection: sortDir });
 
   // Fonction pour gérer le tri
@@ -188,6 +189,25 @@ const AdminDisputes = () => {
     return diffHours < 24;
   };
 
+  // Badge de priorité coloré
+  const getPriorityBadge = (priority?: string) => {
+    const config: Record<string, { color: string; label: string; emoji: string }> = {
+      urgent: { color: "bg-red-100 text-red-800 border-red-300", label: "Urgente", emoji: "🔴" },
+      high: { color: "bg-orange-100 text-orange-800 border-orange-300", label: "Élevée", emoji: "🟠" },
+      normal: { color: "bg-blue-100 text-blue-800 border-blue-300", label: "Normale", emoji: "🔵" },
+      low: { color: "bg-gray-100 text-gray-800 border-gray-300", label: "Basse", emoji: "⚪" },
+    };
+
+    const priorityKey = priority || 'normal';
+    const { color, label, emoji } = config[priorityKey] || config.normal;
+
+    return (
+      <Badge className={`${color} border text-xs`}>
+        {emoji} {label}
+      </Badge>
+    );
+  };
+
   // Composant pour les headers triables
   const SortableHeader = ({ column, label }: { column: SortColumn; label: string }) => {
     const isActive = sortByColumn === column;
@@ -313,7 +333,7 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
 
             {/* Stats Cards */}
             {stats && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
@@ -344,6 +364,30 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-blue-600">{stats.investigating}</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-orange-200 bg-orange-50/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                      <User className="h-4 w-4 text-orange-600" />
+                      Attente client
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-orange-600">{stats.waiting_customer}</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-purple-200 bg-purple-50/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                      <Store className="h-4 w-4 text-purple-600" />
+                      Attente vendeur
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-purple-600">{stats.waiting_seller}</div>
                   </CardContent>
                 </Card>
 
@@ -485,7 +529,8 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                           <SortableHeader column="order_id" label="Commande" />
                           <TableHead>Initiateur</TableHead>
                           <SortableHeader column="subject" label="Sujet" />
-                          <SortableHeader column="status" label="Statut" />
+                          <TableHead>Priorité</TableHead>
+                          <TableHead>Statut</TableHead>
                           <TableHead>Assigné à</TableHead>
                           <SortableHeader column="created_at" label="Date" />
                           <TableHead className="text-right">Actions</TableHead>
@@ -540,7 +585,40 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                                 </TooltipProvider>
                               </div>
                             </TableCell>
-                            <TableCell>{getStatusBadge(dispute.status)}</TableCell>
+                            <TableCell>
+                              <Select
+                                value={dispute.priority || 'normal'}
+                                onValueChange={(value) => updateDisputePriority(dispute.id, value as any)}
+                              >
+                                <SelectTrigger className="w-[140px] h-8">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="low">⚪ Basse</SelectItem>
+                                  <SelectItem value="normal">🔵 Normale</SelectItem>
+                                  <SelectItem value="high">🟠 Élevée</SelectItem>
+                                  <SelectItem value="urgent">🔴 Urgente</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell>
+                              <Select
+                                value={dispute.status}
+                                onValueChange={(value) => updateDisputeStatus(dispute.id, value as DisputeStatus)}
+                              >
+                                <SelectTrigger className="w-[160px] h-8">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="open">⚠️ Ouvert</SelectItem>
+                                  <SelectItem value="investigating">🔍 En investigation</SelectItem>
+                                  <SelectItem value="waiting_customer">⏳ Attente client</SelectItem>
+                                  <SelectItem value="waiting_seller">⏳ Attente vendeur</SelectItem>
+                                  <SelectItem value="resolved">✅ Résolu</SelectItem>
+                                  <SelectItem value="closed">❌ Fermé</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
                             <TableCell>
                               {dispute.assigned_admin_id ? (
                                 <div className="flex items-center gap-1">
