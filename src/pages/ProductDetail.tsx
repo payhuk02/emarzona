@@ -3,7 +3,13 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingCart, Star, ArrowLeft } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { ShoppingCart, Star, ArrowLeft, CheckCircle2, Package, HelpCircle } from "lucide-react";
 import ProductCard from "@/components/marketplace/ProductCard";
 import StoreFooter from "@/components/storefront/StoreFooter";
 import { useProducts } from "@/hooks/useProducts";
@@ -197,16 +203,33 @@ const ProductDetails = () => {
         <main className="flex-1">
           <div className="max-w-6xl mx-auto px-4 py-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-              {/* Galerie d'images optimisée */}
+              {/* 🖼️ AMÉLIORÉ: Galerie d'images complète (toutes sources) */}
               <div className="space-y-4">
                 <ProductImageGallery
-                  images={product.image_url ? [product.image_url] : []}
+                  images={[
+                    product.image_url,
+                    ...(Array.isArray(product.images) ? product.images : []),
+                    ...(Array.isArray(product.gallery_images) ? product.gallery_images : [])
+                  ].filter(Boolean)}
                   alt={product.name}
                   context="detail"
                   priority={true}
                   showZoom={true}
-                  showThumbnails={false}
+                  showThumbnails={true}
                 />
+
+                {/* 🎥 NOUVEAU: Vidéo produit */}
+                {product.video_url && (
+                  <div className="aspect-video rounded-lg overflow-hidden border border-border shadow-sm">
+                    <iframe
+                      src={product.video_url}
+                      title={`Vidéo de ${product.name}`}
+                      className="w-full h-full"
+                      allowFullScreen
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Infos produit */}
@@ -234,6 +257,24 @@ const ProductDetails = () => {
                   Acheter maintenant
                 </Button>
 
+                {/* ✨ NOUVEAU: Caractéristiques principales */}
+                {product.features && Array.isArray(product.features) && product.features.length > 0 && (
+                  <div className="pt-6 border-t border-border">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Package className="h-5 w-5 text-primary" />
+                      <h2 className="text-xl font-semibold">Caractéristiques principales</h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {product.features.map((feature: string, index: number) => (
+                        <div key={index} className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                          <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm leading-relaxed">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* ✅ Description HTML nettoyée */}
                 {safeDescription && (
                   <div className="pt-6 border-t border-border">
@@ -260,6 +301,32 @@ const ProductDetails = () => {
                 </div>
               </div>
             </div>
+
+            {/* 📖 NOUVEAU: FAQ Section */}
+            {product.faqs && Array.isArray(product.faqs) && product.faqs.length > 0 && (
+              <div className="mb-12">
+                <div className="flex items-center gap-2 mb-6">
+                  <HelpCircle className="h-6 w-6 text-primary" />
+                  <h2 className="text-2xl font-bold">Questions fréquentes</h2>
+                </div>
+                <Accordion type="single" collapsible className="w-full space-y-2">
+                  {product.faqs.map((faq: any, index: number) => (
+                    <AccordionItem 
+                      key={index} 
+                      value={`faq-${index}`}
+                      className="border border-border rounded-lg px-4 bg-card"
+                    >
+                      <AccordionTrigger className="text-left hover:no-underline">
+                        <span className="font-medium">{faq.question}</span>
+                      </AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground leading-relaxed">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            )}
 
             {/* Produits similaires */}
             {relatedProducts.length > 0 && (

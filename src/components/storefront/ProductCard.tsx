@@ -60,6 +60,13 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
           {product.rating > 0 && (
             <div className="product-rating mb-3">{renderStars(product.rating)}</div>
           )}
+
+          {/* ✨ NOUVEAU: Description courte */}
+          {product.short_description && (
+            <p className="text-xs text-muted-foreground line-clamp-2 mb-3 leading-relaxed">
+              {product.short_description}
+            </p>
+          )}
           
           <div className="flex items-baseline gap-2 mb-4">
             <span className="product-price">
