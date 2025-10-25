@@ -533,5 +533,5 @@ export const RealtimeMetrics: React.FC<RealtimeMetricsProps> = ({
 };
 
 // Import des icônes nécessaires
-import { Eye, MousePointer, Target, BarChart3, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Eye, MousePointer, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
