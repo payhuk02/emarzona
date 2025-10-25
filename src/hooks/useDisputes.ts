@@ -159,10 +159,12 @@ export const useDisputes = (options?: UseDisputesOptions) => {
     }
   }, []);
 
+  // Charger les données au montage et quand les filtres changent
   useEffect(() => {
     fetchDisputes();
     fetchStats();
-  }, [fetchDisputes, fetchStats]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, page, pageSize, sortBy, sortDirection]);
 
   // TODO: Implémenter les notifications en temps réel de manière stable
   // Désactivé temporairement pour éviter les boucles de re-render

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,12 +36,13 @@ const AdminDisputes = () => {
   // Débounce de la recherche pour éviter le spam de requêtes
   const debouncedSearch = useDebounce(searchInput, 500);
   
-  const filters = {
+  // Mémoïser les filtres pour éviter les re-renders inutiles
+  const filters = useMemo(() => ({
     ...(statusFilter !== "all" && { status: statusFilter as DisputeStatus }),
     ...(initiatorFilter !== "all" && { initiator_type: initiatorFilter as InitiatorType }),
     ...(priorityFilter !== "all" && { priority: priorityFilter }),
     ...(debouncedSearch.trim() && { search: debouncedSearch }),
-  };
+  }), [statusFilter, initiatorFilter, priorityFilter, debouncedSearch]);
 
   const {
     disputes,
