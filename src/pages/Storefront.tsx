@@ -51,25 +51,72 @@ const Storefront = () => {
     fetchStore();
   }, [slug]);
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      category === "all" || product.category === category;
-    const matchesType =
-      productType === "all" || product.product_type === productType;
+  const filteredProducts = useMemo(() => 
+    products.filter((product) => {
+      const matchesSearch = product.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        category === "all" || product.category === category;
+      const matchesType =
+        productType === "all" || product.product_type === productType;
 
-    return matchesSearch && matchesCategory && matchesType;
-  });
+      return matchesSearch && matchesCategory && matchesType;
+    }), [products, searchQuery, category, productType]
+  );
 
-  const categories = Array.from(
-    new Set(products.map((p) => p.category).filter(Boolean))
-  ) as string[];
-  const productTypes = Array.from(
-    new Set(products.map((p) => p.product_type).filter(Boolean))
-  ) as string[];
+  const categories = useMemo(() => 
+    Array.from(new Set(products.map((p) => p.category).filter(Boolean))) as string[],
+    [products]
+  );
+  
+  const productTypes = useMemo(() =>
+    Array.from(new Set(products.map((p) => p.product_type).filter(Boolean))) as string[],
+    [products]
+  );
 
+  const storeUrl = useMemo(() => 
+    store ? `${window.location.origin}/stores/${store.slug}` : '',
+    [store]
+  );
+
+  // SEO Meta données - APPELÉ AVANT LES EARLY RETURNS
+  const seoData = useMemo(() => {
+    if (!store) return null;
+    
+    const description = store.description || `Découvrez les produits de ${store.name} sur Payhula. ${products.length} produits disponibles. Boutique en ligne sécurisée avec paiement Mobile Money et CB.`;
+    const truncatedDescription = description.length > 160 
+      ? description.substring(0, 157) + "..." 
+      : description;
+    
+    return {
+      title: `${store.name} - Boutique en ligne`,
+      description: truncatedDescription,
+      keywords: [
+        store.name,
+        'boutique en ligne',
+        'marketplace',
+        'produits digitaux',
+        'achat en ligne afrique',
+        ...categories.slice(0, 3)
+      ].filter(Boolean).join(', '),
+      url: storeUrl,
+      image: store.logo_url || store.banner_url || `${window.location.origin}/og-default.jpg`,
+      imageAlt: `Logo de ${store.name}`
+    };
+  }, [store, storeUrl, products.length, categories]);
+
+  // Breadcrumb - APPELÉ AVANT LES EARLY RETURNS
+  const breadcrumbItems = useMemo(() => {
+    if (!store) return [];
+    return [
+      { name: "Accueil", url: window.location.origin },
+      { name: "Marketplace", url: `${window.location.origin}/marketplace` },
+      { name: store.name, url: storeUrl }
+    ];
+  }, [store, storeUrl]);
+
+  // MAINTENANT les early returns APRÈS tous les hooks
   if (loading) {
     return (
       <div className="min-h-screen">
@@ -99,58 +146,27 @@ const Storefront = () => {
     );
   }
 
-  const storeUrl = `${window.location.origin}/stores/${store.slug}`;
-
-  // SEO Meta données
-  const seoData = useMemo(() => {
-    const description = store.description || `Découvrez les produits de ${store.name} sur Payhula. ${products.length} produits disponibles. Boutique en ligne sécurisée avec paiement Mobile Money et CB.`;
-    const truncatedDescription = description.length > 160 
-      ? description.substring(0, 157) + "..." 
-      : description;
-    
-    return {
-      title: `${store.name} - Boutique en ligne`,
-      description: truncatedDescription,
-      keywords: [
-        store.name,
-        'boutique en ligne',
-        'marketplace',
-        'produits digitaux',
-        'achat en ligne afrique',
-        ...categories.slice(0, 3)
-      ].filter(Boolean).join(', '),
-      url: storeUrl,
-      image: store.logo_url || store.banner_url || `${window.location.origin}/og-default.jpg`,
-      imageAlt: `Logo de ${store.name}`
-    };
-  }, [store, storeUrl, products.length, categories]);
-
-  // Breadcrumb
-  const breadcrumbItems = useMemo(() => [
-    { name: "Accueil", url: window.location.origin },
-    { name: "Marketplace", url: `${window.location.origin}/marketplace` },
-    { name: store.name, url: storeUrl }
-  ], [store.name, storeUrl]);
-
   return (
     <>
       {/* SEO Meta Tags */}
-      <SEOMeta
-        title={seoData.title}
-        description={seoData.description}
-        keywords={seoData.keywords}
-        url={seoData.url}
-        canonical={seoData.url}
-        image={seoData.image}
-        imageAlt={seoData.imageAlt}
-        type="website"
-      />
+      {seoData && (
+        <SEOMeta
+          title={seoData.title}
+          description={seoData.description}
+          keywords={seoData.keywords}
+          url={seoData.url}
+          canonical={seoData.url}
+          image={seoData.image}
+          imageAlt={seoData.imageAlt}
+          type="website"
+        />
+      )}
       
       {/* Schema.org Store */}
       <StoreSchema store={store} />
       
       {/* Breadcrumb Schema */}
-      <BreadcrumbSchema items={breadcrumbItems} />
+      {breadcrumbItems.length > 0 && <BreadcrumbSchema items={breadcrumbItems} />}
 
       <div className="min-h-screen flex flex-col overflow-x-hidden">
         <StoreHeader store={store} />

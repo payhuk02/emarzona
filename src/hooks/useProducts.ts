@@ -31,7 +31,48 @@ export const useProducts = (storeId?: string | null) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchProducts = useCallback(async () => {
+  useEffect(() => {
+    if (!storeId) {
+      setLoading(false);
+      setProducts([]);
+      return;
+    }
+
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        let query = supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (storeId) {
+          query = query.eq('store_id', storeId);
+        }
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+        
+        setProducts(data || []);
+      } catch (error: any) {
+        toast({
+          title: "Erreur",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeId]); // toast intentionnellement omis pour éviter re-renders
+
+  const refetch = useCallback(async () => {
+    if (!storeId) return;
+    
     try {
       setLoading(true);
       let query = supabase
@@ -59,14 +100,5 @@ export const useProducts = (storeId?: string | null) => {
     }
   }, [storeId, toast]);
 
-  useEffect(() => {
-    if (storeId) {
-      fetchProducts();
-    } else {
-      setLoading(false);
-      setProducts([]);
-    }
-  }, [storeId, fetchProducts]);
-
-  return { products, loading, refetch: fetchProducts };
+  return { products, loading, refetch };
 };
