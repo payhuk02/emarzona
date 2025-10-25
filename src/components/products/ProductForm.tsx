@@ -18,6 +18,7 @@ import { ProductPixelsTab } from "./tabs/ProductPixelsTab";
 import { ProductVariantsTab } from "./tabs/ProductVariantsTab";
 import { ProductPromotionsTab } from "./tabs/ProductPromotionsTab";
 import { ProductFeatureTest } from "./tabs/ProductFeatureTest";
+import { ProductAffiliateSettings } from "./ProductAffiliateSettings";
 import { generateSlug } from "@/lib/store-utils";
 import "@/styles/product-creation.css";
 
@@ -597,6 +598,9 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
               <TabsTrigger value="promotions" className="product-tab-trigger">
                 Promotions
               </TabsTrigger>
+              <TabsTrigger value="affiliation" className="product-tab-trigger">
+                Affiliation
+              </TabsTrigger>
               <TabsTrigger value="test" className="product-tab-trigger">
                 Tests
               </TabsTrigger>
@@ -682,6 +686,44 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
                 formData={formData}
                 updateFormData={updateFormData}
               />
+            </TabsContent>
+
+            <TabsContent value="affiliation" className="mt-6">
+              {productId ? (
+                <ProductAffiliateSettings
+                  productId={productId}
+                  storeId={storeId}
+                  productName={formData.name || "Ce produit"}
+                  productPrice={formData.price || 0}
+                />
+              ) : (
+                <Card>
+                  <CardContent className="p-12">
+                    <div className="text-center space-y-4">
+                      <div className="flex justify-center">
+                        <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                          <AlertCircle className="h-8 w-8 text-primary" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-semibold">Configuration de l'affiliation</h3>
+                        <p className="text-muted-foreground max-w-md mx-auto">
+                          Enregistrez d'abord ce produit pour activer et configurer le programme d'affiliation.
+                          Vous pourrez ensuite définir vos taux de commission et conditions.
+                        </p>
+                      </div>
+                      <Button onClick={handleSave} disabled={loading}>
+                        {loading ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Save className="h-4 w-4 mr-2" />
+                        )}
+                        Enregistrer le produit
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="test" className="mt-6">
