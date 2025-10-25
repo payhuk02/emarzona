@@ -18,6 +18,7 @@ import {
   Target,
   Search,
   MessageSquare,
+  TrendingUp,
 } from "lucide-react";
 import payhukLogo from "@/assets/payhuk-logo.png";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -100,6 +101,11 @@ const menuItems = [
     icon: UserPlus,
   },
   {
+    title: "Affiliation",
+    url: "/dashboard/affiliates",
+    icon: TrendingUp,
+  },
+  {
     title: "Mes Pixels",
     url: "/dashboard/pixels",
     icon: Target,
@@ -166,6 +172,11 @@ const adminMenuItems = [
     title: "Litiges",
     url: "/admin/disputes",
     icon: Shield,
+  },
+  {
+    title: "Affiliation",
+    url: "/admin/affiliates",
+    icon: TrendingUp,
   },
   {
     title: "Paramètres",

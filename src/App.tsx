@@ -88,6 +88,11 @@ const AdminActivity = lazy(() => import("./pages/admin/AdminActivity"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
 const AdminDisputes = lazy(() => import("./pages/admin/AdminDisputes"));
+const AdminAffiliates = lazy(() => import("./pages/admin/AdminAffiliates"));
+
+// Pages Affiliation - Lazy loading
+const StoreAffiliates = lazy(() => import("./pages/StoreAffiliates"));
+const AffiliateDashboard = lazy(() => import("./pages/AffiliateDashboard"));
 
 // Pages Moneroo (paiement) - Lazy loading
 const PaymentSuccess = lazy(() => import("./pages/payments/PaymentSuccess"));
@@ -140,6 +145,10 @@ const AppContent = () => {
           <Route path="/dashboard/products/new" element={<ProtectedRoute><CreateProduct /></ProtectedRoute>} />
           <Route path="/dashboard/products/:id/edit" element={<ProtectedRoute><EditProduct /></ProtectedRoute>} />
 
+          {/* --- Routes Affiliation --- */}
+          <Route path="/dashboard/affiliates" element={<ProtectedRoute><StoreAffiliates /></ProtectedRoute>} />
+          <Route path="/affiliate/dashboard" element={<ProtectedRoute><AffiliateDashboard /></ProtectedRoute>} />
+
           {/* --- Routes administrateur --- */}
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
@@ -153,6 +162,7 @@ const AppContent = () => {
           <Route path="/admin/revenue" element={<ProtectedRoute><PlatformRevenue /></ProtectedRoute>} />
           <Route path="/admin/kyc" element={<ProtectedRoute><AdminKYC /></ProtectedRoute>} />
           <Route path="/admin/disputes" element={<ProtectedRoute><AdminDisputes /></ProtectedRoute>} />
+          <Route path="/admin/affiliates" element={<ProtectedRoute><AdminAffiliates /></ProtectedRoute>} />
 
           {/* --- Route de fallback --- */}
           <Route path="*" element={<NotFound />} />
