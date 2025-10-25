@@ -93,7 +93,7 @@ export const useStore = () => {
 
   const fetchStore = useCallback(async () => {
     try {
-      console.log('🔍 [useStore] fetchStore appelé', { authLoading, user: user?.id });
+      console.log('🔍 [useStore] fetchStore appelé', { authLoading, userId: user?.id });
       
       // Attendre que l'authentification soit chargée
       if (authLoading) {
@@ -141,7 +141,7 @@ export const useStore = () => {
       setLoading(false);
       console.log('✅ [useStore] setLoading(false)');
     }
-  }, [user, authLoading]); // ✅ Retiré 'toast' pour éviter les re-renders infinis
+  }, [user, authLoading]); // L'objet user est nécessaire dans le corps de la fonction
 
   const createStore = async (name: string, description?: string) => {
     try {
@@ -244,7 +244,7 @@ export const useStore = () => {
       fetchStore();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authLoading, user]); // ✅ 'fetchStore' intentionnellement omis pour éviter re-renders infinis
+  }, [authLoading, user?.id]); // ✅ Utiliser user?.id (primitive) au lieu de user (objet) pour éviter re-renders
 
   return {
     store,
