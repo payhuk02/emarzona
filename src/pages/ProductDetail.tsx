@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShoppingCart, Star, ArrowLeft } from "lucide-react";
@@ -10,6 +9,7 @@ import StoreFooter from "@/components/storefront/StoreFooter";
 import { useProducts } from "@/hooks/useProducts";
 import DOMPurify from "dompurify";
 import { ProductImageGallery } from "@/components/ui/ProductImageGallery";
+import { SEOMeta, ProductSchema, BreadcrumbSchema } from "@/components/seo";
 
 const ProductDetails = () => {
   const { slug, productSlug } = useParams<{ slug: string; productSlug: string }>();
@@ -112,19 +112,72 @@ const ProductDetails = () => {
     ? DOMPurify.sanitize(product.description)
     : "";
 
+  // SEO Meta données
+  const seoData = useMemo(() => {
+    const plainDescription = product.description?.replace(/<[^>]*>/g, "").trim() || "";
+    const truncatedDescription = plainDescription.length > 160 
+      ? plainDescription.substring(0, 157) + "..." 
+      : plainDescription;
+    
+    return {
+      title: `${product.name} - ${store.name}`,
+      description: truncatedDescription || `Acheter ${product.name} sur ${store.name}. ${product.category || 'Produit digital'} disponible sur Payhula. Paiement sécurisé en ${product.currency}.`,
+      keywords: [
+        product.name,
+        product.category,
+        product.product_type,
+        store.name,
+        'achat en ligne',
+        'marketplace afrique',
+        product.currency === 'XOF' ? 'FCFA' : product.currency
+      ].filter(Boolean).join(', '),
+      url: productUrl,
+      image: product.image_url || `${window.location.origin}/og-default.jpg`,
+      imageAlt: `${product.name} - ${store.name}`,
+      price: product.price,
+      currency: product.currency,
+      availability: product.is_active ? 'instock' : 'outofstock'
+    };
+  }, [product, store, productUrl]);
+
+  // Breadcrumb
+  const breadcrumbItems = useMemo(() => [
+    { name: "Accueil", url: window.location.origin },
+    { name: "Marketplace", url: `${window.location.origin}/marketplace` },
+    { name: store.name, url: `${window.location.origin}/stores/${store.slug}` },
+    { name: product.name, url: productUrl }
+  ], [store, product, productUrl]);
+
   return (
     <>
-      {/* SEO */}
-      <Helmet>
-        <title>{product.name} - {store.name}</title>
-        <meta
-          name="description"
-          content={product.description?.replace(/<[^>]*>/g, "") || `Acheter ${product.name} sur ${store.name}`}
-        />
-        <meta property="og:title" content={product.name} />
-        <meta property="og:description" content={product.description?.replace(/<[^>]*>/g, "") || ""} />
-        {product.image_url && <meta property="og:image" content={product.image_url} />}
-      </Helmet>
+      {/* SEO Meta Tags */}
+      <SEOMeta
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+        url={seoData.url}
+        canonical={seoData.url}
+        image={seoData.image}
+        imageAlt={seoData.imageAlt}
+        type="product"
+        price={seoData.price}
+        currency={seoData.currency}
+        availability={seoData.availability}
+      />
+      
+      {/* Schema.org Product */}
+      <ProductSchema
+        product={{
+          ...product,
+          store: {
+            name: store.name,
+            slug: store.slug
+          }
+        }}
+      />
+      
+      {/* Breadcrumb Schema */}
+      <BreadcrumbSchema items={breadcrumbItems} />
 
       <div className="min-h-screen flex flex-col bg-background">
         {/* Header */}

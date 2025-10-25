@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Helmet } from "react-helmet";
 import { useProducts } from "@/hooks/useProducts";
 import { useReviews } from "@/hooks/useReviews";
 import StoreHeader from "@/components/storefront/StoreHeader";
@@ -14,6 +13,7 @@ import ReviewsList from "@/components/storefront/ReviewsList";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShoppingCart } from "lucide-react";
 import { ProductGrid } from "@/components/ui/ProductGrid";
+import { SEOMeta, StoreSchema, BreadcrumbSchema } from "@/components/seo";
 
 const Storefront = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -99,26 +99,56 @@ const Storefront = () => {
 
   const storeUrl = `${window.location.origin}/stores/${store.slug}`;
 
+  // SEO Meta données
+  const seoData = useMemo(() => {
+    const description = store.description || `Découvrez les produits de ${store.name} sur Payhula. ${products.length} produits disponibles. Boutique en ligne sécurisée avec paiement Mobile Money et CB.`;
+    const truncatedDescription = description.length > 160 
+      ? description.substring(0, 157) + "..." 
+      : description;
+    
+    return {
+      title: `${store.name} - Boutique en ligne`,
+      description: truncatedDescription,
+      keywords: [
+        store.name,
+        'boutique en ligne',
+        'marketplace',
+        'produits digitaux',
+        'achat en ligne afrique',
+        ...categories.slice(0, 3)
+      ].filter(Boolean).join(', '),
+      url: storeUrl,
+      image: store.logo_url || store.banner_url || `${window.location.origin}/og-default.jpg`,
+      imageAlt: `Logo de ${store.name}`
+    };
+  }, [store, storeUrl, products.length, categories]);
+
+  // Breadcrumb
+  const breadcrumbItems = useMemo(() => [
+    { name: "Accueil", url: window.location.origin },
+    { name: "Marketplace", url: `${window.location.origin}/marketplace` },
+    { name: store.name, url: storeUrl }
+  ], [store.name, storeUrl]);
+
   return (
     <>
-      <Helmet>
-        <title>{store.name} - Boutique en ligne</title>
-        <meta name="description" content={store.description || `Découvrez les produits de ${store.name}`} />
-        
-        {/* Open Graph / Facebook */}
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={storeUrl} />
-        <meta property="og:title" content={store.name} />
-        <meta property="og:description" content={store.description || `Découvrez les produits de ${store.name}`} />
-        {store.logo_url && <meta property="og:image" content={store.logo_url} />}
-
-        {/* Twitter */}
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content={storeUrl} />
-        <meta property="twitter:title" content={store.name} />
-        <meta property="twitter:description" content={store.description || `Découvrez les produits de ${store.name}`} />
-        {store.logo_url && <meta property="twitter:image" content={store.logo_url} />}
-      </Helmet>
+      {/* SEO Meta Tags */}
+      <SEOMeta
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+        url={seoData.url}
+        canonical={seoData.url}
+        image={seoData.image}
+        imageAlt={seoData.imageAlt}
+        type="website"
+      />
+      
+      {/* Schema.org Store */}
+      <StoreSchema store={store} />
+      
+      {/* Breadcrumb Schema */}
+      <BreadcrumbSchema items={breadcrumbItems} />
 
       <div className="min-h-screen flex flex-col overflow-x-hidden">
         <StoreHeader store={store} />
