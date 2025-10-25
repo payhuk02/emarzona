@@ -22,6 +22,9 @@ import StoreFooter from "@/components/storefront/StoreFooter";
 import { useProducts } from "@/hooks/useProducts";
 import DOMPurify from "dompurify";
 import { ProductImageGallery } from "@/components/ui/ProductImageGallery";
+import { CountdownTimer } from "@/components/ui/countdown-timer";
+import { CustomFieldsDisplay } from "@/components/products/CustomFieldsDisplay";
+import { ProductVariantSelector } from "@/components/products/ProductVariantSelector";
 import { SEOMeta, ProductSchema, BreadcrumbSchema } from "@/components/seo";
 
 const ProductDetails = () => {
@@ -29,6 +32,7 @@ const ProductDetails = () => {
   const [product, setProduct] = useState<any>(null);
   const [store, setStore] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedVariantPrice, setSelectedVariantPrice] = useState<number | null>(null);
 
   const { products: similarProducts } = useProducts(store?.id);
 
@@ -291,9 +295,36 @@ const ProductDetails = () => {
                   )}
                 </div>
 
+                {/* ⏰ NOUVEAU: Countdown promo */}
+                {product.sale_end_date && (
+                  <div className="flex justify-center sm:justify-start">
+                    <CountdownTimer
+                      endDate={product.sale_end_date}
+                      startDate={product.sale_start_date}
+                    />
+                  </div>
+                )}
+
+                {/* 🎨 NOUVEAU: Sélecteur de variantes */}
+                {product.variants && Array.isArray(product.variants) && product.variants.length > 0 && (
+                  <ProductVariantSelector
+                    variants={product.variants}
+                    basePrice={product.price}
+                    currency={product.currency || "XOF"}
+                    onVariantChange={(variant, price) => {
+                      setSelectedVariantPrice(price);
+                    }}
+                  />
+                )}
+
                 <Button size="lg" className="w-full sm:w-auto">
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   Acheter maintenant
+                  {selectedVariantPrice && selectedVariantPrice !== product.price && (
+                    <span className="ml-2">
+                      ({selectedVariantPrice.toLocaleString()} {product.currency})
+                    </span>
+                  )}
                 </Button>
 
                 {/* ✨ NOUVEAU: Caractéristiques principales */}
@@ -387,6 +418,11 @@ const ProductDetails = () => {
                       )}
                     </div>
                   </div>
+                )}
+
+                {/* 📝 NOUVEAU: Champs personnalisés */}
+                {product.custom_fields && Array.isArray(product.custom_fields) && product.custom_fields.length > 0 && (
+                  <CustomFieldsDisplay fields={product.custom_fields} />
                 )}
 
                 {/* Catégorie et Type */}
