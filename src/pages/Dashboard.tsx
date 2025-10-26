@@ -8,9 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import "@/styles/dashboard-responsive.css";
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const { store, loading: storeLoading } = useStore();
   const { stats, loading, error: hookError, refetch } = useDashboardStats();
   const navigate = useNavigate();
@@ -87,7 +89,7 @@ const Dashboard = () => {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-              <p className="mt-2 text-muted-foreground">Chargement du tableau de bord...</p>
+              <p className="mt-2 text-muted-foreground">{t('dashboard.loading')}</p>
             </div>
           </div>
         </div>
@@ -105,18 +107,18 @@ const Dashboard = () => {
               <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 px-3 sm:px-4 md:px-6">
                 <SidebarTrigger />
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold truncate">Tableau de bord</h1>
+                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold truncate">{t('dashboard.title')}</h1>
                 </div>
               </div>
             </header>
             <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 bg-gradient-hero overflow-x-hidden">
               <div className="max-w-3xl mx-auto text-center py-12">
-                <h2 className="text-2xl font-bold mb-4">Bienvenue ! 🎉</h2>
+                <h2 className="text-2xl font-bold mb-4">{t('dashboard.welcome')}</h2>
                 <p className="text-muted-foreground mb-6">
-                  Commencez par créer votre boutique pour accéder au tableau de bord avancé
+                  {t('dashboard.createStorePrompt')}
                 </p>
                 <Button onClick={() => navigate("/dashboard/store")} size="lg">
-                  Créer ma boutique
+                  {t('dashboard.createStoreButton')}
                 </Button>
               </div>
             </main>
@@ -138,20 +140,20 @@ const Dashboard = () => {
               <SidebarTrigger className="touch-manipulation min-h-[44px] min-w-[44px]" />
               <div className="flex-1 min-w-0">
                 <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate">
-                  Tableau de bord - {store.name}
+                  {t('dashboard.titleWithStore', { storeName: store.name })}
                 </h1>
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs px-2 py-1 hidden sm:flex">
                   <Activity className="h-3 w-3 mr-1" />
-                  En ligne
+                  {t('dashboard.online')}
                 </Badge>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={handleRefresh}
                   className="touch-manipulation min-h-[44px] min-w-[44px]"
-                  aria-label="Actualiser les données"
+                  aria-label={t('dashboard.refresh')}
                 >
                   <Activity className="h-4 w-4" />
                 </Button>
@@ -165,7 +167,7 @@ const Dashboard = () => {
               <div className="mb-4 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 bg-red-500 rounded-full"></div>
-                  <h3 className="font-medium text-red-800 dark:text-red-200">Erreur de chargement</h3>
+                  <h3 className="font-medium text-red-800 dark:text-red-200">{t('dashboard.error.title')}</h3>
                 </div>
                 <p className="text-sm text-red-600 dark:text-red-300 mt-1">{error || hookError}</p>
                 <Button 
@@ -174,7 +176,7 @@ const Dashboard = () => {
                   onClick={handleRefresh}
                   className="mt-2 touch-manipulation min-h-[44px]"
                 >
-                  Réessayer
+                  {t('dashboard.retry')}
                 </Button>
               </div>
             )}
@@ -184,14 +186,14 @@ const Dashboard = () => {
               <div className="dashboard-stats-grid">
                 <Card className="dashboard-card group">
                   <CardHeader className="flex flex-row items-center justify-between pb-2 dashboard-card-header">
-                    <CardTitle className="dashboard-card-title">Produits</CardTitle>
+                    <CardTitle className="dashboard-card-title">{t('dashboard.stats.products.title')}</CardTitle>
                     <div className="dashboard-icon-container bg-green-500/10 group-hover:bg-green-500/20">
                       <Package className="h-4 w-4 text-green-500" />
                     </div>
                   </CardHeader>
                   <CardContent className="dashboard-card-content pt-0">
                     <div className="dashboard-stat-value">{stats.totalProducts}</div>
-                    <p className="dashboard-stat-description">{stats.activeProducts} actifs</p>
+                    <p className="dashboard-stat-description">{t('dashboard.stats.products.active', { count: stats.activeProducts })}</p>
                     <Badge variant="default" className="text-xs px-2 py-1">
                       +{stats.trends.productGrowth}%
                     </Badge>
@@ -200,14 +202,14 @@ const Dashboard = () => {
 
                 <Card className="dashboard-card group">
                   <CardHeader className="flex flex-row items-center justify-between pb-2 dashboard-card-header">
-                    <CardTitle className="dashboard-card-title">Commandes</CardTitle>
+                    <CardTitle className="dashboard-card-title">{t('dashboard.stats.orders.title')}</CardTitle>
                     <div className="dashboard-icon-container bg-blue-500/10 group-hover:bg-blue-500/20">
                       <ShoppingCart className="h-4 w-4 text-blue-500" />
                     </div>
                   </CardHeader>
                   <CardContent className="dashboard-card-content pt-0">
                     <div className="dashboard-stat-value">{stats.totalOrders}</div>
-                    <p className="dashboard-stat-description">{stats.pendingOrders} en attente</p>
+                    <p className="dashboard-stat-description">{t('dashboard.stats.orders.pending', { count: stats.pendingOrders })}</p>
                     <Badge variant="default" className="text-xs px-2 py-1">
                       +{stats.trends.orderGrowth}%
                     </Badge>
@@ -216,14 +218,14 @@ const Dashboard = () => {
 
                 <Card className="dashboard-card group">
                   <CardHeader className="flex flex-row items-center justify-between pb-2 dashboard-card-header">
-                    <CardTitle className="dashboard-card-title">Clients</CardTitle>
+                    <CardTitle className="dashboard-card-title">{t('dashboard.stats.customers.title')}</CardTitle>
                     <div className="dashboard-icon-container bg-purple-500/10 group-hover:bg-purple-500/20">
                       <Users className="h-4 w-4 text-purple-500" />
                     </div>
                   </CardHeader>
                   <CardContent className="dashboard-card-content pt-0">
                     <div className="dashboard-stat-value">{stats.totalCustomers}</div>
-                    <p className="dashboard-stat-description">Clients enregistrés</p>
+                    <p className="dashboard-stat-description">{t('dashboard.stats.customers.registered')}</p>
                     <Badge variant="default" className="text-xs px-2 py-1">
                       +{stats.trends.customerGrowth}%
                     </Badge>
@@ -232,14 +234,14 @@ const Dashboard = () => {
 
                 <Card className="dashboard-card group">
                   <CardHeader className="flex flex-row items-center justify-between pb-2 dashboard-card-header">
-                    <CardTitle className="dashboard-card-title">Revenus</CardTitle>
+                    <CardTitle className="dashboard-card-title">{t('dashboard.stats.revenue.title')}</CardTitle>
                     <div className="dashboard-icon-container bg-yellow-500/10 group-hover:bg-yellow-500/20">
                       <DollarSign className="h-4 w-4 text-yellow-500" />
                     </div>
                   </CardHeader>
                   <CardContent className="dashboard-card-content pt-0">
                     <div className="dashboard-stat-value">{stats.totalRevenue.toLocaleString()} FCFA</div>
-                    <p className="dashboard-stat-description">Total des ventes</p>
+                    <p className="dashboard-stat-description">{t('dashboard.stats.revenue.total')}</p>
                     <Badge variant="default" className="text-xs px-2 py-1">
                       +{stats.trends.revenueGrowth}%
                     </Badge>
@@ -254,7 +256,7 @@ const Dashboard = () => {
                     <div className="p-2 rounded-lg bg-primary/10">
                       <Zap className="h-5 w-5 text-primary" />
                     </div>
-                    Actions Rapides
+                    {t('dashboard.quickActions.title')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-0">

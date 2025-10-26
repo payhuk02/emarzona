@@ -1,99 +1,105 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
+import { visualizer } from "rollup-plugin-visualizer";
+import { compression } from "vite-plugin-compression2";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig({
   server: {
     host: "::",
     port: 8080,
   },
   plugins: [
     react(),
-    mode === 'development' && componentTagger(),
-  ].filter(Boolean),
+    // Compression Brotli
+    compression({
+      algorithm: 'brotliCompress',
+      exclude: [/\.(br)$/, /\.(gz)$/],
+      threshold: 1024, // Compresser les fichiers > 1KB
+      compressionOptions: {
+        level: 11, // Niveau maximum
+      },
+    }),
+    // Compression Gzip (fallback)
+    compression({
+      algorithm: 'gzip',
+      exclude: [/\.(br)$/, /\.(gz)$/],
+      threshold: 1024,
+      compressionOptions: {
+        level: 9,
+      },
+    }),
+    // Visualizer pour analyser le bundle
+    visualizer({
+      filename: './dist/stats.html',
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+    }),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
   build: {
+    // Code splitting avancé
     rollupOptions: {
       output: {
         manualChunks: {
-          // Configuration ultra-simple pour éviter les erreurs React
-          'vendor': [
-            'react',
-            'react-dom',
-            'react-router-dom',
-            '@supabase/supabase-js',
-            '@tanstack/react-query',
-            '@tanstack/react-table',
-            'lucide-react',
-            'clsx',
-            'tailwind-merge',
-            'class-variance-authority',
-            '@hookform/resolvers'
-          ],
-          'ui': [
+          // Vendors
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui': [
             '@radix-ui/react-dialog',
             '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-alert-dialog',
-            '@radix-ui/react-aspect-ratio',
-            '@radix-ui/react-avatar',
-            '@radix-ui/react-checkbox',
-            '@radix-ui/react-collapsible',
-            '@radix-ui/react-context-menu',
-            '@radix-ui/react-hover-card',
-            '@radix-ui/react-label',
-            '@radix-ui/react-menubar',
-            '@radix-ui/react-navigation-menu',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-progress',
-            '@radix-ui/react-radio-group',
-            '@radix-ui/react-scroll-area',
             '@radix-ui/react-select',
-            '@radix-ui/react-separator',
-            '@radix-ui/react-slider',
-            '@radix-ui/react-slot',
-            '@radix-ui/react-switch',
+            '@radix-ui/react-tabs',
             '@radix-ui/react-toast',
-            '@radix-ui/react-toggle',
-            '@radix-ui/react-toggle-group',
-            '@radix-ui/react-tooltip'
           ],
+          'vendor-query': ['@tanstack/react-query'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-i18n': ['i18next', 'react-i18next'],
+          
+          // Editor (si utilisé)
           'editor': [
+            '@tiptap/core',
             '@tiptap/react',
             '@tiptap/starter-kit',
-            '@tiptap/extension-color',
-            '@tiptap/extension-link',
-            '@tiptap/extension-text-align',
-            '@tiptap/extension-text-style',
-            '@tiptap/extension-underline'
-          ]
-        }
-      }
+          ],
+          
+          // Charts (si utilisé)
+          'charts': ['recharts'],
+        },
+      },
     },
-    chunkSizeWarningLimit: 2000, // Augmenté pour éviter les warnings
+    // Optimisations
+    target: 'esnext',
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: mode === 'production',
-        drop_debugger: mode === 'production',
+        drop_console: true, // Supprimer les console.log en production
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info'], // Supprimer ces fonctions
+      },
+      format: {
+        comments: false, // Supprimer tous les commentaires
       },
     },
-    sourcemap: mode === 'development',
-    target: 'esnext',
-    cssCodeSplit: true,
+    // Chunk size warnings
+    chunkSizeWarningLimit: 500, // Warning si chunk > 500KB
+    reportCompressedSize: true,
+    sourcemap: false, // Désactiver en production pour réduire la taille
   },
+  // Optimisation des dépendances
   optimizeDeps: {
     include: [
       'react',
       'react-dom',
-      'react-router-dom'
-    ]
+      'react-router-dom',
+      '@tanstack/react-query',
+      '@supabase/supabase-js',
+    ],
+    exclude: ['@tiptap/core', '@tiptap/react'], // Lazy load
   },
-}));
+});

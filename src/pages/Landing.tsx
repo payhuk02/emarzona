@@ -19,8 +19,10 @@ import {
   CreditCard
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useState, useEffect, useRef } from "react";
 import payhukLogo from "@/assets/payhuk-logo.png";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import testimonial1 from "@/assets/testimonial-1.jpg";
 import testimonial2 from "@/assets/testimonial-2.jpg";
 import testimonial3 from "@/assets/testimonial-3.jpg";
@@ -35,6 +37,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 
 const Landing = () => {
+  const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showCountries, setShowCountries] = useState(false);
   const [animatedStats, setAnimatedStats] = useState({
@@ -90,7 +93,7 @@ const Landing = () => {
           <div className="hidden lg:flex items-center gap-2 xl:gap-3">
             <Link to="/marketplace">
               <Button variant="ghost" className="text-foreground hover:text-primary transition-smooth text-sm xl:text-base">
-                Marketplace
+                {t('landing.nav.marketplace')}
               </Button>
             </Link>
             <Button 
@@ -98,30 +101,31 @@ const Landing = () => {
               className="text-foreground hover:text-primary transition-smooth text-sm xl:text-base"
               onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              Comment ça marche
+              {t('landing.nav.howItWorks')}
             </Button>
             <Button 
               variant="ghost" 
               className="text-foreground hover:text-primary transition-smooth text-sm xl:text-base"
               onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              Tarifs
+              {t('landing.nav.pricing')}
             </Button>
             <Button 
               variant="ghost" 
               className="text-foreground hover:text-primary transition-smooth text-sm xl:text-base"
               onClick={() => document.getElementById('coverage')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              Couverture
+              {t('common.coverage', 'Couverture')}
             </Button>
+            <LanguageSwitcher variant="ghost" showLabel={false} />
             <Link to="/auth">
               <Button variant="ghost" className="text-foreground hover:text-primary transition-smooth text-sm xl:text-base">
-                Se connecter
+                {t('landing.nav.login')}
               </Button>
             </Link>
             <Link to="/auth">
               <Button className="gradient-accent text-accent-foreground font-semibold shadow-glow hover:opacity-90 hover:scale-105 transition-smooth text-sm xl:text-base px-4 xl:px-6">
-                Commencer
+                {t('landing.nav.getStarted')}
               </Button>
             </Link>
           </div>
@@ -142,7 +146,7 @@ const Landing = () => {
             <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
               <Link to="/marketplace" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full text-foreground hover:text-primary transition-smooth">
-                  Marketplace
+                  {t('landing.nav.marketplace')}
                 </Button>
               </Link>
               <Button 
@@ -153,7 +157,7 @@ const Landing = () => {
                   document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
-                Comment ça marche
+                {t('landing.nav.howItWorks')}
               </Button>
               <Button 
                 variant="ghost" 
@@ -163,7 +167,7 @@ const Landing = () => {
                   document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
-                Tarifs
+                {t('landing.nav.pricing')}
               </Button>
               <Button 
                 variant="ghost" 
@@ -173,16 +177,19 @@ const Landing = () => {
                   document.getElementById('coverage')?.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
-                Couverture
+                {t('common.coverage', 'Couverture')}
               </Button>
+              <div className="border-t pt-3">
+                <LanguageSwitcher variant="outline" showLabel={true} className="w-full" />
+              </div>
               <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full text-foreground hover:text-primary transition-smooth">
-                  Se connecter
+                  {t('landing.nav.login')}
                 </Button>
               </Link>
               <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                 <Button className="w-full gradient-accent text-accent-foreground font-semibold shadow-glow hover:opacity-90 transition-smooth">
-                  Commencer gratuitement
+                  {t('landing.nav.getStarted')}
                 </Button>
               </Link>
             </div>
@@ -197,27 +204,26 @@ const Landing = () => {
           <div className="max-w-4xl mx-auto text-center animate-fade-in-up">
             <div className="inline-flex items-center gap-2 bg-secondary/50 backdrop-blur-sm px-3 md:px-4 py-2 rounded-full mb-6 border border-border">
               <Star className="h-4 w-4 text-accent" fill="currentColor" />
-              <span className="text-xs md:text-sm text-foreground">La plateforme tout-en-un pour vendre vos produits digitaux</span>
+              <span className="text-xs md:text-sm text-foreground">{t('landing.hero.badge')}</span>
             </div>
             
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold mb-4 sm:mb-6 leading-tight text-foreground px-2 sm:px-4 break-words">
-              Vendez vos produits digitaux en toute simplicité
+              {t('landing.hero.title')}
             </h1>
             
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-2 sm:px-4 break-words">
-              Créez votre boutique en ligne, gérez vos ventes en FCFA et autres devises, 
-              et développez votre business en Afrique sans commission cachée.
+              {t('landing.hero.subtitle')}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 px-4">
               <Link to="/auth" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto gradient-accent text-accent-foreground font-semibold text-base md:text-lg px-6 md:px-8 py-5 md:py-6 shadow-glow hover:opacity-90 hover:scale-105 transition-smooth">
-                  Commencer maintenant
+                  {t('landing.hero.ctaPrimary')}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Button size="lg" variant="outline" className="w-full sm:w-auto bg-card/50 backdrop-blur-sm text-base md:text-lg px-6 md:px-8 py-5 md:py-6 border-border hover:bg-card hover:scale-105 transition-smooth">
-                Voir la démo
+                {t('landing.hero.ctaSecondary')}
               </Button>
             </div>
 
@@ -227,19 +233,19 @@ const Landing = () => {
                 <div className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-primary mb-0.5 sm:mb-1 break-words">
                   {animatedStats.users.toLocaleString()}+
                 </div>
-                <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Utilisateurs</div>
+                <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">{t('landing.stats.users')}</div>
               </div>
               <div className="bg-card/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 md:p-6 border border-border">
                 <div className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-accent mb-0.5 sm:mb-1 break-words">
                   {animatedStats.sales.toLocaleString()}+
                 </div>
-                <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Ventes</div>
+                <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">{t('landing.stats.sales')}</div>
               </div>
               <div className="bg-card/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 md:p-6 border border-border">
                 <div className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-primary mb-0.5 sm:mb-1 break-words">
                   {animatedStats.stores}+
                 </div>
-                <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Boutiques</div>
+                <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">{t('landing.stats.stores')}</div>
               </div>
             </div>
 
@@ -248,7 +254,7 @@ const Landing = () => {
               <div className="aspect-video bg-gradient-to-br from-secondary to-card p-4 md:p-8 flex items-center justify-center">
                 <div className="text-center">
                   <ShoppingCart className="h-16 md:h-24 w-16 md:w-24 text-primary mx-auto mb-2 md:mb-4 opacity-50" />
-                  <p className="text-sm md:text-base text-muted-foreground">Aperçu de votre future boutique</p>
+                  <p className="text-sm md:text-base text-muted-foreground">{t('landing.hero.mockupPreview')}</p>
                 </div>
               </div>
             </div>
@@ -261,10 +267,10 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-foreground px-4">
-              Ils réussissent avec Payhuk
+              {t('landing.testimonials.title')}
             </h2>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-              Rejoignez des centaines d'entrepreneurs qui développent leur business
+              {t('landing.testimonials.subtitle')}
             </p>
           </div>
 

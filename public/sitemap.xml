@@ -1,29 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-
-  <!-- Homepage -->
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+  <!-- Sitemap généré automatiquement le 2025-10-26T11:31:48.765Z -->
+  <!-- Plateforme: Payhuk SaaS E-Commerce -->
+  
   <url>
-    <loc>https://payhula.vercel.app/</loc>
+    <loc>https://payhuk.com/</loc>
+    <lastmod>2025-10-26</lastmod>
     <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-    <lastmod>2025-10-25</lastmod>
+    <priority>1</priority>
   </url>
-
-  <!-- Marketplace -->
   <url>
-    <loc>https://payhula.vercel.app/marketplace</loc>
-    <changefreq>daily</changefreq>
+    <loc>https://payhuk.com/marketplace</loc>
+    <lastmod>2025-10-26</lastmod>
+    <changefreq>hourly</changefreq>
     <priority>0.9</priority>
-    <lastmod>2025-10-25</lastmod>
   </url>
-
-  <!-- Auth -->
   <url>
-    <loc>https://payhula.vercel.app/auth</loc>
+    <loc>https://payhuk.com/auth</loc>
+    <lastmod>2025-10-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
-
 </urlset>
-

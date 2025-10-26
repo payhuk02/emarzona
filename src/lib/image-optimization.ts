@@ -8,13 +8,14 @@
 import imageCompression from 'browser-image-compression';
 
 /**
- * Options de compression par défaut
+ * Options d'optimisation par défaut
  */
 const DEFAULT_OPTIONS = {
   maxSizeMB: 1, // Taille max 1MB
   maxWidthOrHeight: 1920, // Dimension max 1920px
   useWebWorker: true, // Utiliser Web Worker pour ne pas bloquer l'UI
   fileType: 'image/webp', // Convertir en WebP (meilleur format)
+  initialQuality: 0.8    // 80% quality
 };
 
 /**

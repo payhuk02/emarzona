@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,6 +59,7 @@ import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
 export const AdvancedProfileSettings = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { 
     profile, 
@@ -201,8 +203,8 @@ export const AdvancedProfileSettings = () => {
       const shareUrl = `${window.location.origin}/register?ref=${referralInfo.referral_code}`;
       navigator.clipboard.writeText(shareUrl);
       toast({
-        title: "Lien partagé",
-        description: "Le lien de parrainage a été copié dans le presse-papiers",
+        title: t('settings.profileSettings.referral.linkShared'),
+        description: t('settings.profileSettings.referral.linkCopied'),
       });
     }
   };
@@ -226,7 +228,7 @@ export const AdvancedProfileSettings = () => {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">Chargement du profil...</span>
+        <span className="ml-2">{t('settings.profileSettings.loading')}</span>
       </div>
     );
   }
@@ -236,7 +238,7 @@ export const AdvancedProfileSettings = () => {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Impossible de charger le profil. Veuillez réessayer.
+          {t('settings.profileSettings.error')}
         </AlertDescription>
       </Alert>
     );
@@ -285,16 +287,16 @@ export const AdvancedProfileSettings = () => {
                   <p className="text-gray-400">
                     {formData.firstName && formData.lastName 
                       ? `${formData.firstName} ${formData.lastName}` 
-                      : "Membre depuis " + format(new Date(profile.created_at), "MMMM yyyy", { locale: fr })
+                      : t('settings.profileSettings.memberSince') + " " + format(new Date(profile.created_at), "MMMM yyyy", { locale: fr })
                     }
                   </p>
                   <div className="flex items-center gap-2 mt-2">
                     <Badge variant="outline" className="text-xs">
-                      {profileCompletion}% complété
+                      {profileCompletion}% {t('settings.profileSettings.completed')}
                     </Badge>
                     {profile.is_suspended && (
                       <Badge variant="destructive" className="text-xs">
-                        Suspendu
+                        {t('settings.profileSettings.suspended')}
                       </Badge>
                     )}
                   </div>
@@ -455,12 +457,12 @@ export const AdvancedProfileSettings = () => {
                     {isEditing ? (
                       <>
                         <X className="h-4 w-4 mr-2" />
-                        Annuler
+                        {t('settings.profileSettings.cancel')}
                       </>
                     ) : (
                       <>
                         <Edit3 className="h-4 w-4 mr-2" />
-                        Modifier
+                        {t('settings.profileSettings.edit')}
                       </>
                     )}
                   </Button>
@@ -568,7 +570,7 @@ export const AdvancedProfileSettings = () => {
                         onClick={handleCancel}
                         className="border-gray-600 text-gray-300 hover:bg-gray-700"
                       >
-                        Annuler
+                        {t('settings.profileSettings.cancel')}
                       </Button>
                       <Button
                         type="submit"

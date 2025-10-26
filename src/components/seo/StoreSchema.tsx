@@ -1,14 +1,12 @@
 /**
- * Composant: StoreSchema
- * Description: Génère les données structurées Schema.org pour une boutique
- * Usage: <StoreSchema store={...} />
+ * Composant Schema.org pour les pages boutiques (storefront)
+ * Format: Organization Schema
  */
 
 import { Helmet } from 'react-helmet';
 
 interface StoreSchemaProps {
   store: {
-    id: string;
     name: string;
     slug: string;
     description?: string;
@@ -20,45 +18,77 @@ interface StoreSchemaProps {
     instagram_url?: string;
     twitter_url?: string;
     linkedin_url?: string;
+    created_at?: string;
+    active_clients?: number;
   };
+  url?: string; // Optionnel, sera généré automatiquement si non fourni
 }
 
-export const StoreSchema = ({ store }: StoreSchemaProps) => {
-  const storeUrl = `${window.location.origin}/stores/${store.slug}`;
+export const StoreSchema = ({ store, url }: StoreSchemaProps) => {
+  // Vérifier que store existe
+  if (!store) {
+    console.warn('[StoreSchema] Store is missing');
+    return null;
+  }
+
+  // Générer l'URL par défaut à partir du slug si non fournie
+  const defaultUrl = `/stores/${store.slug}`;
+  const providedUrl = url || defaultUrl;
   
-  // Construction des liens réseaux sociaux
+  // Construire l'URL complète
+  const fullUrl = providedUrl.startsWith('http') 
+    ? providedUrl 
+    : `https://payhuk.com${providedUrl}`;
+  
+  // Réseaux sociaux
   const socialLinks = [
     store.facebook_url,
     store.instagram_url,
     store.twitter_url,
     store.linkedin_url
   ].filter(Boolean);
-  
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "Store",
-    "name": store.name,
-    "description": store.description || `Boutique en ligne de ${store.name} sur Payhula`,
-    "url": storeUrl,
-    "logo": store.logo_url,
-    "image": store.banner_url || store.logo_url,
-    ...(store.contact_phone && { "telephone": store.contact_phone }),
-    ...(store.contact_email && { "email": store.contact_email }),
-    "address": {
-      "@type": "PostalAddress",
-      "addressCountry": "BF" // Burkina Faso par défaut, à personnaliser
-    },
-    ...(socialLinks.length > 0 && { "sameAs": socialLinks })
+
+  const storeSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Store',
+    name: store.name,
+    url: fullUrl,
+    ...(store.description && {
+      description: store.description
+    }),
+    
+    // Logo
+    ...(store.logo_url && {
+      logo: store.logo_url,
+      image: store.logo_url
+    }),
+    
+    // Contact
+    ...(store.contact_email && {
+      email: store.contact_email
+    }),
+    ...(store.contact_phone && {
+      telephone: store.contact_phone
+    }),
+    
+    // Réseaux sociaux
+    ...(socialLinks.length > 0 && {
+      sameAs: socialLinks
+    }),
+    
+    // Organisation parente
+    parentOrganization: {
+      '@type': 'Organization',
+      name: 'Payhuk',
+      url: 'https://payhuk.com'
+    }
   };
-  
+
   return (
     <Helmet>
       <script type="application/ld+json">
-        {JSON.stringify(schema)}
+        {JSON.stringify(storeSchema)}
       </script>
     </Helmet>
   );
 };
-
-export default StoreSchema;
-

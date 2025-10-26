@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +17,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 const Settings = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("profile");
 
@@ -42,10 +44,10 @@ const Settings = () => {
               {/* Header - Responsive */}
               <div className="space-y-2">
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
-                  Paramètres
+                  {t('settings.title')}
                 </h1>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  Gérez vos préférences et paramètres
+                  {t('settings.subtitle')}
                 </p>
               </div>
 
@@ -57,22 +59,22 @@ const Settings = () => {
                   <div className="block sm:hidden">
                     <TabsList className="grid w-full grid-cols-2 h-auto gap-2">
                       <TabsTrigger value="profile" className="text-xs py-2">
-                        Profil
+                        {t('settings.tabs.profile')}
                       </TabsTrigger>
                       <TabsTrigger value="store" className="text-xs py-2">
-                        Boutique
+                        {t('settings.tabs.store')}
                       </TabsTrigger>
                       <TabsTrigger value="domain" className="text-xs py-2">
-                        Domaine
+                        {t('settings.tabs.domain')}
                       </TabsTrigger>
                       <TabsTrigger value="notifications" className="text-xs py-2">
-                        Notifications
+                        {t('settings.tabs.notifications')}
                       </TabsTrigger>
                       <TabsTrigger value="security" className="text-xs py-2">
-                        Sécurité
+                        {t('settings.tabs.security')}
                       </TabsTrigger>
                       <TabsTrigger value="debug" className="text-xs py-2">
-                        Debug
+                        {t('settings.tabs.debug')}
                       </TabsTrigger>
                     </TabsList>
                   </div>
@@ -81,22 +83,22 @@ const Settings = () => {
                   <div className="hidden sm:block lg:hidden">
                     <TabsList className="grid w-full grid-cols-3 h-auto gap-2">
                       <TabsTrigger value="profile" className="text-sm py-2.5">
-                        Profil
+                        {t('settings.tabs.profile')}
                       </TabsTrigger>
                       <TabsTrigger value="store" className="text-sm py-2.5">
-                        Boutique
+                        {t('settings.tabs.store')}
                       </TabsTrigger>
                       <TabsTrigger value="domain" className="text-sm py-2.5">
-                        Domaine
+                        {t('settings.tabs.domain')}
                       </TabsTrigger>
                       <TabsTrigger value="notifications" className="text-sm py-2.5">
-                        Notifications
+                        {t('settings.tabs.notifications')}
                       </TabsTrigger>
                       <TabsTrigger value="security" className="text-sm py-2.5">
-                        Sécurité
+                        {t('settings.tabs.security')}
                       </TabsTrigger>
                       <TabsTrigger value="debug" className="text-sm py-2.5">
-                        Debug
+                        {t('settings.tabs.debug')}
                       </TabsTrigger>
                     </TabsList>
                   </div>
@@ -105,22 +107,22 @@ const Settings = () => {
                   <div className="hidden lg:block">
                     <TabsList className="grid w-full grid-cols-6 h-auto">
                       <TabsTrigger value="profile" className="py-3">
-                        Profil
+                        {t('settings.tabs.profile')}
                       </TabsTrigger>
                       <TabsTrigger value="store" className="py-3">
-                        Boutique
+                        {t('settings.tabs.store')}
                       </TabsTrigger>
                       <TabsTrigger value="domain" className="py-3">
-                        Domaine
+                        {t('settings.tabs.domain')}
                       </TabsTrigger>
                       <TabsTrigger value="notifications" className="py-3">
-                        Notifications
+                        {t('settings.tabs.notifications')}
                       </TabsTrigger>
                       <TabsTrigger value="security" className="py-3">
-                        Sécurité
+                        {t('settings.tabs.security')}
                       </TabsTrigger>
                       <TabsTrigger value="debug" className="py-3">
-                        Debug
+                        {t('settings.tabs.debug')}
                       </TabsTrigger>
                     </TabsList>
                   </div>
@@ -130,9 +132,9 @@ const Settings = () => {
                 <TabsContent value="profile" className="space-y-3 sm:space-y-4 animate-fade-in">
                   <Card className="border-none shadow-lg">
                     <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
-                      <CardTitle className="text-lg sm:text-xl">Informations du profil</CardTitle>
+                      <CardTitle className="text-lg sm:text-xl">{t('settings.profile.cardTitle')}</CardTitle>
                       <CardDescription className="text-xs sm:text-sm">
-                        Gérez vos informations personnelles
+                        {t('settings.profile.cardDescription')}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
@@ -145,9 +147,9 @@ const Settings = () => {
                 <TabsContent value="store" className="space-y-3 sm:space-y-4 animate-fade-in">
                   <Card className="border-none shadow-lg">
                     <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
-                      <CardTitle className="text-lg sm:text-xl">Paramètres de la boutique</CardTitle>
+                      <CardTitle className="text-lg sm:text-xl">{t('settings.store.cardTitle')}</CardTitle>
                       <CardDescription className="text-xs sm:text-sm">
-                        Personnalisez votre boutique en ligne
+                        {t('settings.store.cardDescription')}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
@@ -167,9 +169,9 @@ const Settings = () => {
                 <TabsContent value="notifications" className="space-y-3 sm:space-y-4 animate-fade-in">
                   <Card className="border-none shadow-lg">
                     <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
-                      <CardTitle className="text-lg sm:text-xl">Préférences de notifications</CardTitle>
+                      <CardTitle className="text-lg sm:text-xl">{t('settings.notifications.cardTitle')}</CardTitle>
                       <CardDescription className="text-xs sm:text-sm">
-                        Configurez comment vous souhaitez être notifié
+                        {t('settings.notifications.cardDescription')}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
@@ -182,9 +184,9 @@ const Settings = () => {
                 <TabsContent value="security" className="space-y-3 sm:space-y-4 animate-fade-in">
                   <Card className="border-none shadow-lg">
                     <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
-                      <CardTitle className="text-lg sm:text-xl">Sécurité</CardTitle>
+                      <CardTitle className="text-lg sm:text-xl">{t('settings.security.cardTitle')}</CardTitle>
                       <CardDescription className="text-xs sm:text-sm">
-                        Gérez la sécurité de votre compte
+                        {t('settings.security.cardDescription')}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
@@ -197,9 +199,9 @@ const Settings = () => {
                 <TabsContent value="debug" className="space-y-3 sm:space-y-4 animate-fade-in">
                   <Card className="border-none shadow-lg">
                     <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
-                      <CardTitle className="text-lg sm:text-xl">Debug Profil</CardTitle>
+                      <CardTitle className="text-lg sm:text-xl">{t('settings.debug.cardTitle')}</CardTitle>
                       <CardDescription className="text-xs sm:text-sm">
-                        Testez la connexion et la structure de la base de données
+                        {t('settings.debug.cardDescription')}
                       </CardDescription>
                     </CardHeader>
                             <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">

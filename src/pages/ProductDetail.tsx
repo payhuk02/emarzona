@@ -199,15 +199,13 @@ const ProductDetails = () => {
       )}
       
       {/* Schema.org Product */}
-      <ProductSchema
-        product={{
-          ...product,
-          store: {
-            name: store.name,
-            slug: store.slug
-          }
-        }}
-      />
+      {product && store && (
+        <ProductSchema
+          product={product}
+          store={store}
+          url={productUrl}
+        />
+      )}
       
       {/* Breadcrumb Schema */}
       {breadcrumbItems.length > 0 && <BreadcrumbSchema items={breadcrumbItems} />}

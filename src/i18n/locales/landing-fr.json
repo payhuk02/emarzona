@@ -1,0 +1,174 @@
+{
+  "landing": {
+    "nav": {
+      "marketplace": "Marketplace",
+      "howItWorks": "Comment ça marche",
+      "features": "Fonctionnalités",
+      "pricing": "Tarifs",
+      "login": "Se connecter",
+      "getStarted": "Commencer gratuitement"
+    },
+    "hero": {
+      "badge": "Plateforme E-commerce #1 en Afrique",
+      "title": "Créez votre boutique en ligne en quelques minutes",
+      "subtitle": "Vendez vos produits digitaux et physiques avec une plateforme complète, sécurisée et facile à utiliser. Paiements locaux, sans commission cachée.",
+      "cta": {
+        "primary": "Créer ma boutique gratuitement",
+        "secondary": "Voir la démo"
+      },
+      "stats": {
+        "users": "Utilisateurs actifs",
+        "sales": "En ventes totales",
+        "stores": "Boutiques créées"
+      }
+    },
+    "features": {
+      "title": "Fonctionnalités clés",
+      "subtitle": "Tout ce dont vous avez besoin pour réussir en ligne",
+      "payment": {
+        "title": "Paiements locaux",
+        "description": "Acceptez Mobile Money, Orange Money, Wave et cartes bancaires"
+      },
+      "ecommerce": {
+        "title": "E-commerce complet",
+        "description": "Produits digitaux, physiques, services et abonnements"
+      },
+      "analytics": {
+        "title": "Analyses avancées",
+        "description": "Suivez vos ventes, clients et performances en temps réel"
+      },
+      "security": {
+        "title": "100% Sécurisé",
+        "description": "Paiements sécurisés SSL et protection anti-fraude"
+      },
+      "global": {
+        "title": "Portée mondiale",
+        "description": "Vendez dans toute l'Afrique et à l'international"
+      },
+      "support": {
+        "title": "Support 24/7",
+        "description": "Assistance disponible en français et anglais"
+      }
+    },
+    "howItWorks": {
+      "title": "Comment ça marche ?",
+      "subtitle": "Lancez votre boutique en 3 étapes simples",
+      "step1": {
+        "title": "Créez votre compte",
+        "description": "Inscription gratuite en moins de 2 minutes"
+      },
+      "step2": {
+        "title": "Ajoutez vos produits",
+        "description": "Upload vos produits avec photos et descriptions"
+      },
+      "step3": {
+        "title": "Commencez à vendre",
+        "description": "Partagez votre lien et recevez vos paiements"
+      }
+    },
+    "pricing": {
+      "title": "Tarifs simples et transparents",
+      "subtitle": "Aucun frais caché, payez uniquement sur vos ventes réussies",
+      "plan": {
+        "free": {
+          "name": "Gratuit",
+          "price": "0 FCFA",
+          "period": "/mois",
+          "description": "Parfait pour commencer",
+          "cta": "Commencer gratuitement"
+        },
+        "pro": {
+          "name": "Pro",
+          "price": "15 000 FCFA",
+          "period": "/mois",
+          "description": "Pour les entrepreneurs sérieux",
+          "cta": "Essayer 14 jours gratuit",
+          "popular": "Populaire"
+        }
+      },
+      "features": {
+        "title": "Fonctionnalités incluses",
+        "unlimited": "Produits illimités",
+        "payments": "Tous modes de paiement",
+        "analytics": "Analytics avancé",
+        "support": "Support prioritaire",
+        "domain": "Nom de domaine personnalisé",
+        "marketing": "Outils marketing avancés",
+        "affiliate": "Programme d'affiliation",
+        "api": "Accès API complet"
+      },
+      "note": {
+        "title": "💡 Note importante",
+        "description": "Aucun frais mensuel ! Payez seulement une commission de 3% sur chaque vente réussie."
+      }
+    },
+    "testimonials": {
+      "title": "Ce que disent nos utilisateurs",
+      "subtitle": "Rejoignez des milliers d'entrepreneurs qui nous font confiance",
+      "testimonial1": {
+        "text": "Payhuk a transformé mon activité ! J'ai pu créer ma boutique en 10 minutes et mes ventes ont explosé.",
+        "author": "Aminata Diallo",
+        "role": "Créatrice de bijoux, Dakar"
+      },
+      "testimonial2": {
+        "text": "Une plateforme incroyable ! Le support est réactif et les paiements tombent rapidement. Je recommande à 100%.",
+        "author": "Ibrahim Konaté",
+        "role": "Vendeur de formations en ligne"
+      },
+      "testimonial3": {
+        "text": "Enfin une solution adaptée à l'Afrique ! J'accepte Mobile Money facilement et mes clients adorent.",
+        "author": "Fatoumata Sow",
+        "role": "Boutique de cosmétiques"
+      }
+    },
+    "cta": {
+      "title": "Prêt à lancer votre boutique ?",
+      "subtitle": "Rejoignez des milliers de vendeurs qui réussissent avec Payhuk",
+      "button": "Créer ma boutique maintenant",
+      "note": "Aucune carte bancaire requise • Gratuit à vie"
+    },
+    "footer": {
+      "description": "La plateforme e-commerce nouvelle génération pour l'Afrique",
+      "product": {
+        "title": "Produit",
+        "features": "Fonctionnalités",
+        "pricing": "Tarifs",
+        "demo": "Démo",
+        "changelog": "Nouveautés"
+      },
+      "company": {
+        "title": "Entreprise",
+        "about": "À propos",
+        "blog": "Blog",
+        "careers": "Carrières",
+        "contact": "Contact"
+      },
+      "resources": {
+        "title": "Ressources",
+        "documentation": "Documentation",
+        "guides": "Guides",
+        "api": "API",
+        "support": "Support"
+      },
+      "legal": {
+        "title": "Légal",
+        "privacy": "Confidentialité",
+        "terms": "Conditions d'utilisation",
+        "cookies": "Cookies"
+      },
+      "newsletter": {
+        "title": "Newsletter",
+        "description": "Recevez nos dernières actualités",
+        "placeholder": "Votre email",
+        "button": "S'inscrire"
+      },
+      "social": {
+        "title": "Suivez-nous"
+      },
+      "copyright": "© 2024 Payhuk. Tous droits réservés.",
+      "madeWith": "Fait avec",
+      "in": "au Sénégal"
+    }
+  }
+}
+

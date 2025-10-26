@@ -1,0 +1,618 @@
+{
+  "nav": {
+    "home": "Início",
+    "marketplace": "Mercado",
+    "stores": "Lojas",
+    "dashboard": "Painel",
+    "login": "Entrar",
+    "signup": "Registrar",
+    "profile": "Perfil",
+    "settings": "Configurações",
+    "logout": "Sair",
+    "products": "Produtos",
+    "orders": "Pedidos",
+    "customers": "Clientes",
+    "analytics": "Análises",
+    "help": "Ajuda"
+  },
+  "auth": {
+    "welcome": "Bem-vindo ao Payhuk",
+    "welcomeSubtitle": "Sua plataforma de e-commerce de confiança",
+    "termsNote": "Ao se registrar, você concorda com nossos Termos de Serviço e Política de Privacidade",
+    "login": {
+      "title": "Entrar",
+      "email": "E-mail",
+      "emailPlaceholder": "seu@email.com",
+      "password": "Senha",
+      "passwordPlaceholder": "Sua senha",
+      "button": "Entrar",
+      "buttonLoading": "Conectando...",
+      "success": "Conectado com sucesso!",
+      "successDescription": "Redirecionando para seu painel...",
+      "error": "Erro de autenticação",
+      "errorInvalid": "E-mail ou senha inválidos",
+      "errorRequired": "Por favor, preencha todos os campos"
+    },
+    "signup": {
+      "title": "Registrar",
+      "name": "Nome completo",
+      "namePlaceholder": "João Silva",
+      "email": "E-mail",
+      "emailPlaceholder": "seu@email.com",
+      "password": "Senha",
+      "passwordPlaceholder": "Crie uma senha forte",
+      "passwordHint": "Mínimo de 6 caracteres",
+      "button": "Criar conta",
+      "buttonLoading": "Criando...",
+      "success": "Conta criada!",
+      "successDescription": "Verifique seu e-mail para confirmar sua conta",
+      "error": "Erro ao criar a conta",
+      "errorRequired": "Por favor, preencha todos os campos",
+      "errorExists": "Este e-mail já está em uso"
+    }
+  },
+  "landing": {
+    "nav": {
+      "features": "Recursos",
+      "pricing": "Preços",
+      "about": "Sobre",
+      "contact": "Contato"
+    },
+    "hero": {
+      "badge": "🚀 Plataforma nº 1 de E-commerce",
+      "title": "Venda seus produtos digitais e físicos online",
+      "subtitle": "Crie sua loja online em minutos, venda seus produtos e receba pagamentos de forma segura com o Payhuk",
+      "ctaPrimary": "Criar minha loja grátis",
+      "ctaSecondary": "Explorar o mercado",
+      "mockupPreview": "Pré-visualização da interface do Payhuk"
+    },
+    "stats": {
+      "users": "Usuários ativos",
+      "sales": "Vendas realizadas",
+      "stores": "Lojas ativas"
+    },
+    "testimonials": {
+      "title": "O que nossos clientes dizem",
+      "subtitle": "Milhares de comerciantes confiam no Payhuk",
+      "item1": {
+        "text": "O Payhuk transformou meu negócio! Interface intuitiva e pagamentos rápidos.",
+        "author": "Maria Santos",
+        "role": "Proprietária de Loja Digital"
+      },
+      "item2": {
+        "text": "Melhor plataforma para vender produtos digitais. Recomendo!",
+        "author": "João Costa",
+        "role": "Criador de Conteúdo"
+      },
+      "item3": {
+        "text": "Suporte excepcional e ferramentas poderosas. 5 estrelas!",
+        "author": "Ana Silva",
+        "role": "Empreendedora"
+      }
+    },
+    "features": {
+      "title": "Recursos poderosos para o seu sucesso",
+      "subtitle": "Tudo o que você precisa para vender online",
+      "feature1": {
+        "title": "Pagamentos seguros",
+        "description": "Integração com os principais gateways de pagamento"
+      },
+      "feature2": {
+        "title": "Loja personalizável",
+        "description": "Personalize sua loja para corresponder à sua marca"
+      },
+      "feature3": {
+        "title": "Análises em tempo real",
+        "description": "Acompanhe suas vendas e desempenho"
+      }
+    },
+    "howItWorks": {
+      "title": "Como funciona",
+      "subtitle": "Comece em 3 etapas simples",
+      "step1": {
+        "title": "Criar conta",
+        "description": "Registre-se gratuitamente em menos de 2 minutos"
+      },
+      "step2": {
+        "title": "Configurar loja",
+        "description": "Adicione seus produtos e personalize sua loja"
+      },
+      "step3": {
+        "title": "Começar a vender",
+        "description": "Compartilhe sua loja e comece a ganhar dinheiro"
+      }
+    },
+    "pricing": {
+      "title": "Preços simples e transparentes",
+      "subtitle": "Escolha o plano que se adapta às suas necessidades",
+      "free": {
+        "name": "Grátis",
+        "price": "0€",
+        "period": "/mês",
+        "description": "Perfeito para começar",
+        "features": {
+          "feature1": "Até 10 produtos",
+          "feature2": "Comissão de 5% por venda",
+          "feature3": "Suporte por e-mail",
+          "feature4": "Análises básicas"
+        },
+        "cta": "Começar grátis"
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "29€",
+        "period": "/mês",
+        "description": "Para negócios em crescimento",
+        "features": {
+          "feature1": "Produtos ilimitados",
+          "feature2": "Comissão de 2% por venda",
+          "feature3": "Suporte prioritário",
+          "feature4": "Análises avançadas",
+          "feature5": "Domínio personalizado"
+        },
+        "cta": "Começar teste"
+      }
+    },
+    "cta": {
+      "title": "Pronto para começar?",
+      "subtitle": "Junte-se a milhares de comerciantes bem-sucedidos",
+      "button": "Criar minha loja grátis"
+    },
+    "footer": {
+      "description": "A plataforma de e-commerce que simplifica suas vendas online",
+      "product": {
+        "title": "Produto",
+        "features": "Recursos",
+        "pricing": "Preços",
+        "demo": "Demo"
+      },
+      "company": {
+        "title": "Empresa",
+        "about": "Sobre",
+        "blog": "Blog",
+        "careers": "Carreiras"
+      },
+      "support": {
+        "title": "Suporte",
+        "help": "Central de ajuda",
+        "contact": "Contato",
+        "status": "Status"
+      },
+      "legal": {
+        "title": "Legal",
+        "privacy": "Privacidade",
+        "terms": "Termos",
+        "cookies": "Cookies"
+      },
+      "copyright": "© 2025 Payhuk. Todos os direitos reservados."
+    }
+  },
+  "marketplace": {
+    "title": "Mercado",
+    "subtitle": "Descubra produtos incríveis",
+    "searchPlaceholder": "Pesquisar produtos, lojas...",
+    "loading": "Carregando produtos...",
+    "filters": {
+      "active": "Filtros ativos:",
+      "advanced": "Filtros avançados",
+      "advancedAriaLabel": "Seção de filtros avançados",
+      "clear": "Limpar filtros",
+      "price": "Faixa de preço",
+      "category": "Categoria",
+      "type": "Tipo",
+      "sort": "Ordenar por"
+    },
+    "priceRanges": {
+      "all": "Todos os preços",
+      "free": "Grátis",
+      "under10": "Menos de 10€",
+      "10to50": "10€ - 50€",
+      "50to100": "50€ - 100€",
+      "over100": "Mais de 100€"
+    },
+    "sortOptions": {
+      "recent": "Mais recentes",
+      "priceAsc": "Preço: Menor para Maior",
+      "priceDesc": "Preço: Maior para Menor",
+      "popular": "Mais populares"
+    },
+    "tags": {
+      "new": "Novo",
+      "trending": "Tendência",
+      "bestseller": "Mais vendido",
+      "featured": "Destaque"
+    },
+    "empty": {
+      "title": "Nenhum produto disponível",
+      "description": "Tente outras palavras-chave ou filtros",
+      "noResults": "Nenhum produto encontrado",
+      "createFirst": "Seja o primeiro a vender seus produtos em nosso mercado!",
+      "createStore": "Criar minha loja grátis"
+    }
+  },
+  "dashboard": {
+    "title": "Painel",
+    "titleWithStore": "Painel - {{storeName}}",
+    "loading": "Carregando seu painel...",
+    "welcome": "Bem-vindo ao seu painel",
+    "createStore": "Você ainda não tem uma loja. Crie uma para começar a vender!",
+    "createStoreButton": "Criar minha loja",
+    "online": "Online",
+    "refresh": "Atualizar dados",
+    "retry": "Tentar novamente",
+    "errorLoading": "Erro ao carregar os dados",
+    "stats": {
+      "products": {
+        "title": "Produtos",
+        "description": "Total de produtos"
+      },
+      "orders": {
+        "title": "Pedidos",
+        "description": "Pedidos recebidos"
+      },
+      "customers": {
+        "title": "Clientes",
+        "description": "Clientes ativos"
+      },
+      "revenue": {
+        "title": "Receita",
+        "description": "Receita total"
+      }
+    },
+    "notifications": {
+      "title": "Notificações",
+      "empty": "Nenhuma notificação",
+      "markAllRead": "Marcar todas como lidas"
+    },
+    "quickActions": {
+      "title": "Ações rápidas",
+      "addProduct": "Adicionar produto",
+      "viewOrders": "Ver pedidos",
+      "manageStore": "Gerenciar loja",
+      "viewAnalytics": "Ver análises"
+    }
+  },
+  "products": {
+    "title": "Meus Produtos",
+    "add": "Novo produto",
+    "addShort": "Novo",
+    "refresh": "Atualizar",
+    "export": "Exportar CSV",
+    "import": "Importar CSV",
+    "viewMode": {
+      "grid": "Grade",
+      "list": "Lista"
+    },
+    "stats": {
+      "total": "Total",
+      "active": "Ativos",
+      "draft": "Rascunhos",
+      "outOfStock": "Sem estoque"
+    },
+    "filters": {
+      "search": "Pesquisar produtos...",
+      "category": "Categoria",
+      "type": "Tipo",
+      "status": "Status",
+      "stock": "Estoque",
+      "sortBy": "Ordenar por",
+      "all": "Todos"
+    },
+    "status": {
+      "all": "Todos os status",
+      "active": "Ativo",
+      "draft": "Rascunho",
+      "archived": "Arquivado"
+    },
+    "stockStatus": {
+      "all": "Todos os estoques",
+      "inStock": "Em estoque",
+      "lowStock": "Estoque baixo",
+      "outOfStock": "Sem estoque"
+    },
+    "types": {
+      "all": "Todos os tipos",
+      "digital": "Digital",
+      "physical": "Físico",
+      "service": "Serviço"
+    },
+    "actions": {
+      "edit": "Editar",
+      "duplicate": "Duplicar",
+      "delete": "Excluir",
+      "view": "Ver",
+      "bulkActions": "Ações em massa",
+      "selectAll": "Selecionar todos",
+      "deselectAll": "Desmarcar todos",
+      "deleteSelected": "Excluir selecionados"
+    },
+    "empty": {
+      "title": "Nenhum produto por enquanto",
+      "description": "Crie seu primeiro produto digital ou serviço para começar a vender",
+      "importCsv": "Ou importe seus produtos de um arquivo CSV",
+      "importButton": "Importar CSV",
+      "noResults": "Nenhum produto encontrado",
+      "noResultsDescription": "Nenhum produto corresponde aos seus critérios de pesquisa",
+      "clearFilters": "Limpar filtros"
+    },
+    "loading": "Carregando produtos...",
+    "delete": {
+      "title": "Confirmar exclusão",
+      "description": "Tem certeza de que deseja excluir este produto? Esta ação é irreversível.",
+      "cancel": "Cancelar",
+      "confirm": "Excluir"
+    },
+    "edit": {
+      "title": "Editar produto",
+      "save": "Salvar alterações",
+      "cancel": "Cancelar"
+    },
+    "duplicate": {
+      "success": "Produto duplicado com sucesso",
+      "error": "Erro ao duplicar o produto"
+    },
+    "pagination": {
+      "showing": "Mostrando {{from}} a {{to}} de {{total}} produtos",
+      "previous": "Anterior",
+      "next": "Próximo",
+      "rowsPerPage": "Linhas por página"
+    },
+    "quickView": {
+      "title": "Visualização rápida"
+    }
+  },
+  "orders": {
+    "title": "Pedidos",
+    "subtitle": "Gerencie todos os seus pedidos",
+    "new": "Novo pedido",
+    "export": "Exportar CSV",
+    "filters": {
+      "search": "Pesquisar pedidos...",
+      "status": "Status",
+      "paymentStatus": "Status de pagamento",
+      "dateRange": "Período",
+      "all": "Todos"
+    },
+    "status": {
+      "all": "Todos os status",
+      "pending": "Pendente",
+      "processing": "Processando",
+      "completed": "Concluído",
+      "cancelled": "Cancelado",
+      "refunded": "Reembolsado"
+    },
+    "paymentStatus": {
+      "all": "Todos os pagamentos",
+      "pending": "Pendente",
+      "paid": "Pago",
+      "failed": "Falhou",
+      "refunded": "Reembolsado"
+    },
+    "table": {
+      "orderNumber": "Nº do pedido",
+      "customer": "Cliente",
+      "amount": "Valor",
+      "status": "Status",
+      "payment": "Pagamento",
+      "date": "Data",
+      "actions": "Ações"
+    },
+    "actions": {
+      "view": "Ver",
+      "edit": "Editar",
+      "cancel": "Cancelar",
+      "refund": "Reembolsar",
+      "print": "Imprimir"
+    },
+    "empty": {
+      "title": "Nenhum pedido",
+      "description": "Comece criando seu primeiro pedido",
+      "noResults": "Nenhum pedido corresponde aos seus filtros",
+      "createFirst": "Comece criando seu primeiro pedido"
+    },
+    "loading": "Carregando pedidos...",
+    "toast": {
+      "warning": "Atenção",
+      "noOrders": "Nenhum pedido para exportar",
+      "success": "Sucesso!",
+      "exported": "Pedidos exportados com sucesso",
+      "error": "Erro ao exportar pedidos",
+      "createSuccess": "Pedido criado com sucesso",
+      "updateSuccess": "Pedido atualizado com sucesso",
+      "cancelSuccess": "Pedido cancelado com sucesso",
+      "refundSuccess": "Pedido reembolsado com sucesso"
+    },
+    "pagination": {
+      "showing": "Mostrando {{from}} a {{to}} de {{total}} pedidos",
+      "previous": "Anterior",
+      "next": "Próximo",
+      "rowsPerPage": "Linhas por página"
+    },
+    "details": {
+      "title": "Detalhes do pedido",
+      "orderNumber": "Pedido nº",
+      "customer": "Cliente",
+      "products": "Produtos",
+      "total": "Total",
+      "subtotal": "Subtotal",
+      "shipping": "Frete",
+      "tax": "Impostos",
+      "discount": "Desconto",
+      "notes": "Notas",
+      "timeline": "Histórico",
+      "createdAt": "Criado em",
+      "updatedAt": "Atualizado em"
+    }
+  },
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Gerencie suas preferências e configurações",
+    "tabs": {
+      "profile": "Perfil",
+      "store": "Loja",
+      "domain": "Domínio",
+      "notifications": "Notificações",
+      "security": "Segurança",
+      "debug": "Debug"
+    },
+    "common": {
+      "loading": "Carregando...",
+      "save": "Salvar",
+      "cancel": "Cancelar",
+      "edit": "Editar",
+      "delete": "Excluir",
+      "success": "Sucesso",
+      "error": "Erro"
+    },
+    "profile": {
+      "title": "Perfil",
+      "subtitle": "Gerencie suas informações pessoais",
+      "cardTitle": "Informações do perfil",
+      "cardDescription": "Atualize suas informações pessoais e de contato"
+    },
+    "store": {
+      "title": "Loja",
+      "subtitle": "Configure sua loja online",
+      "cardTitle": "Configurações da loja",
+      "cardDescription": "Personalize o nome, descrição e aparência da sua loja"
+    },
+    "domain": {
+      "title": "Domínio",
+      "subtitle": "Gerencie seu domínio personalizado",
+      "cardTitle": "Domínio personalizado",
+      "cardDescription": "Configure um domínio personalizado para sua loja"
+    },
+    "notifications": {
+      "title": "Notificações",
+      "subtitle": "Gerencie suas preferências de notificação",
+      "cardTitle": "Preferências de notificação",
+      "cardDescription": "Escolha como e quando deseja ser notificado"
+    },
+    "security": {
+      "title": "Segurança",
+      "subtitle": "Proteja sua conta",
+      "cardTitle": "Segurança",
+      "cardDescription": "Altere sua senha e gerencie a segurança da sua conta"
+    },
+    "debug": {
+      "title": "Debug",
+      "subtitle": "Informações técnicas",
+      "cardTitle": "Debug do Perfil",
+      "cardDescription": "Informações técnicas sobre seu perfil"
+    },
+    "profileSettings": {
+      "loading": "Carregando informações do perfil...",
+      "error": "Erro ao carregar as informações do perfil",
+      "memberSince": "Membro desde",
+      "completed": "completo",
+      "suspended": "Suspenso",
+      "edit": "Editar",
+      "cancel": "Cancelar",
+      "save": "Salvar",
+      "referral": {
+        "linkShared": "Link de indicação compartilhado!",
+        "linkCopied": "Link de indicação copiado!",
+        "codeCopied": "Código de indicação copiado!"
+      }
+    },
+    "storeSettings": {
+      "loading": "Carregando informações da loja...",
+      "error": "Erro ao carregar as informações da loja"
+    },
+    "notificationSettings": {
+      "loading": "Carregando preferências de notificação...",
+      "error": "Erro ao carregar as preferências de notificação"
+    },
+    "securitySettings": {
+      "loading": "Carregando configurações de segurança...",
+      "error": "Erro ao carregar as configurações de segurança"
+    },
+    "domainSettings": {
+      "loading": "Carregando configurações de domínio...",
+      "error": "Erro ao carregar as configurações de domínio"
+    }
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "view": "Ver",
+    "close": "Fechar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "search": "Pesquisar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "actions": "Ações",
+    "confirm": "Confirmar",
+    "yes": "Sim",
+    "no": "Não",
+    "all": "Todos",
+    "none": "Nenhum",
+    "other": "Outro",
+    "more": "Mais",
+    "less": "Menos",
+    "show": "Mostrar",
+    "hide": "Ocultar",
+    "open": "Abrir",
+    "select": "Selecionar",
+    "upload": "Enviar",
+    "download": "Baixar",
+    "copy": "Copiar",
+    "share": "Compartilhar",
+    "print": "Imprimir",
+    "export": "Exportar",
+    "import": "Importar",
+    "refresh": "Atualizar",
+    "reset": "Redefinir",
+    "clear": "Limpar",
+    "apply": "Aplicar",
+    "create": "Criar",
+    "add": "Adicionar",
+    "remove": "Remover",
+    "update": "Atualizar",
+    "duplicate": "Duplicar",
+    "archive": "Arquivar",
+    "restore": "Restaurar",
+    "activate": "Ativar",
+    "deactivate": "Desativar",
+    "enable": "Ativar",
+    "disable": "Desativar",
+    "continue": "Continuar",
+    "finish": "Concluir",
+    "submit": "Enviar",
+    "send": "Enviar",
+    "retry": "Tentar novamente",
+    "undo": "Desfazer",
+    "redo": "Refazer"
+  },
+  "errors": {
+    "generic": "Ocorreu um erro. Por favor, tente novamente.",
+    "network": "Erro de conexão. Verifique sua internet.",
+    "notFound": "Página não encontrada",
+    "unauthorized": "Você não tem permissão para acessar esta página",
+    "serverError": "Erro do servidor. Tente novamente mais tarde.",
+    "validation": "Por favor, verifique os campos do formulário",
+    "required": "Este campo é obrigatório",
+    "invalidEmail": "E-mail inválido",
+    "invalidPassword": "Senha deve ter pelo menos 6 caracteres",
+    "passwordMismatch": "As senhas não coincidem",
+    "fileTooBig": "O arquivo é muito grande",
+    "invalidFileType": "Tipo de arquivo inválido"
+  },
+  "success": {
+    "saved": "Salvo com sucesso",
+    "created": "Criado com sucesso",
+    "updated": "Atualizado com sucesso",
+    "deleted": "Excluído com sucesso",
+    "uploaded": "Enviado com sucesso",
+    "copied": "Copiado para a área de transferência",
+    "sent": "Enviado com sucesso"
+  }
+}
+

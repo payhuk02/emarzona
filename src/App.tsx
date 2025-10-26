@@ -98,6 +98,9 @@ const AffiliateDashboard = lazy(() => import("./pages/AffiliateDashboard"));
 const PaymentSuccess = lazy(() => import("./pages/payments/PaymentSuccess"));
 const PaymentCancel = lazy(() => import("./pages/payments/PaymentCancel"));
 
+// Page de test i18n (à supprimer en production)
+const I18nTest = lazy(() => import("./pages/I18nTest"));
+
 const AppContent = () => {
   useScrollRestoration();
   useDarkMode(); // Active le mode sombre globalement
@@ -121,6 +124,9 @@ const AppContent = () => {
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/stores/:slug" element={<Storefront />} />
           <Route path="/stores/:slug/products/:productSlug" element={<ProductDetail />} />
+          
+          {/* --- Route de test i18n (à supprimer en production) --- */}
+          <Route path="/i18n-test" element={<I18nTest />} />
 
           {/* --- Routes Moneroo --- */}
           <Route path="/payment/success" element={<PaymentSuccess />} />
@@ -172,7 +178,36 @@ const AppContent = () => {
   );
 };
 
-const queryClient = new QueryClient();
+// Configuration optimisée de React Query pour les performances
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Cache les données pendant 5 minutes par défaut
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      // Garde les données en cache pendant 10 minutes
+      cacheTime: 10 * 60 * 1000, // 10 minutes (deprecated, use gcTime in v5)
+      gcTime: 10 * 60 * 1000, // 10 minutes (v5+)
+      // Retry automatique en cas d'erreur
+      retry: 2,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      // Refetch automatique
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      refetchOnMount: false, // Ne pas refetch si les données sont fraîches
+      // Performance
+      structuralSharing: true, // Optimise les re-renders
+      keepPreviousData: true, // Garde les données précédentes pendant le chargement
+    },
+    mutations: {
+      // Retry pour les mutations aussi
+      retry: 1,
+      // Options pour les mutations
+      onError: (error) => {
+        console.error('[Mutation Error]', error);
+      },
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

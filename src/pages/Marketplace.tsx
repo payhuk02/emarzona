@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ import '@/styles/marketplace-professional.css';
 import { SEOMeta, WebsiteSchema } from '@/components/seo';
 
 const Marketplace = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   
   // Hook personnalisé pour favoris synchronisés
@@ -119,30 +121,32 @@ const Marketplace = () => {
   });
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
 
-  // Constantes pour les filtres
-  const PRICE_RANGES = [
-    { value: "all", label: "Tous les prix" },
-    { value: "0-5000", label: "0 - 5,000 XOF" },
-    { value: "5000-15000", label: "5,000 - 15,000 XOF" },
-    { value: "15000-50000", label: "15,000 - 50,000 XOF" },
-    { value: "50000-100000", label: "50,000 - 100,000 XOF" },
-    { value: "100000+", label: "100,000+ XOF" }
-  ];
+  // Constantes pour les filtres (traduites)
+  const PRICE_RANGES = useMemo(() => [
+    { value: "all", label: t('marketplace.priceRanges.all') },
+    { value: "0-5000", label: t('marketplace.priceRanges.0-5000') },
+    { value: "5000-15000", label: t('marketplace.priceRanges.5000-15000') },
+    { value: "15000-50000", label: t('marketplace.priceRanges.15000-50000') },
+    { value: "50000-100000", label: t('marketplace.priceRanges.50000-100000') },
+    { value: "100000+", label: t('marketplace.priceRanges.100000+') }
+  ], [t]);
 
-  const SORT_OPTIONS = [
-    { value: "created_at", label: "Plus récents", icon: Clock },
-    { value: "price", label: "Prix", icon: DollarSign },
-    { value: "rating", label: "Note", icon: Star },
-    { value: "sales_count", label: "Ventes", icon: TrendingUp },
-    { value: "name", label: "Nom", icon: Eye },
-    { value: "popularity", label: "Popularité", icon: Zap }
-  ];
+  const SORT_OPTIONS = useMemo(() => [
+    { value: "created_at", label: t('marketplace.sort.newest'), icon: Clock },
+    { value: "price", label: t('marketplace.sort.price'), icon: DollarSign },
+    { value: "rating", label: t('marketplace.sort.rating'), icon: Star },
+    { value: "sales_count", label: t('marketplace.sort.sales'), icon: TrendingUp },
+    { value: "name", label: t('marketplace.sort.name'), icon: Eye },
+    { value: "popularity", label: t('marketplace.sort.popularity'), icon: Zap }
+  ], [t]);
 
-  const PRODUCT_TAGS = [
-    "Nouveau", "Populaire", "En promotion", "Recommandé", "Tendance",
-    "Qualité premium", "Livraison rapide", "Support 24/7", "Garantie",
-    "Formation incluse", "Mise à jour gratuite", "Communauté active"
-  ];
+  const PRODUCT_TAGS = useMemo(() => [
+    t('marketplace.tags.new'), t('marketplace.tags.popular'), t('marketplace.tags.sale'), 
+    t('marketplace.tags.recommended'), t('marketplace.tags.trending'),
+    t('marketplace.tags.premium'), t('marketplace.tags.fastShipping'), t('marketplace.tags.support'), 
+    t('marketplace.tags.warranty'), t('marketplace.tags.training'), t('marketplace.tags.updates'), 
+    t('marketplace.tags.community')
+  ], [t]);
 
   // Synchroniser debouncedSearch avec filters.search
   useEffect(() => {
@@ -656,19 +660,19 @@ const Marketplace = () => {
           <div className="max-w-4xl mx-auto">
             <div className="relative mb-6">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" aria-hidden="true" />
-            <Input
+              <Input
                 type="search"
-                placeholder="Rechercher un produit, une boutique ou une catégorie..."
+                placeholder={t('marketplace.searchPlaceholder')}
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 className="pl-12 pr-4 py-4 text-lg bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 transition-all duration-300"
-                aria-label="Rechercher des produits dans le marketplace"
+                aria-label={t('marketplace.searchPlaceholder')}
               />
               {searchInput && searchInput !== debouncedSearch && (
                 <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
                   <div className="flex items-center gap-2 text-xs text-slate-400">
                     <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                    <span>Recherche...</span>
+                    <span>{t('common.loading')}</span>
                   </div>
                 </div>
               )}
@@ -677,7 +681,7 @@ const Marketplace = () => {
             {/* Filtres actifs (tags) */}
             {(filters.category !== "all" || filters.productType !== "all" || filters.priceRange !== "all" || filters.tags.length > 0 || filters.verifiedOnly || filters.featuredOnly) && (
               <div className="flex flex-wrap gap-2 items-center justify-center mb-4">
-                <span className="text-sm text-slate-300 font-medium">Filtres actifs:</span>
+                <span className="text-sm text-slate-300 font-medium">{t('marketplace.filtersActive')}</span>
                 
                 {filters.category !== "all" && (
                   <Badge variant="secondary" className="bg-slate-700 text-white hover:bg-slate-600 transition-colors flex items-center gap-1">
@@ -763,12 +767,12 @@ const Marketplace = () => {
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
                 className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900"
-                aria-label={`${showFilters ? 'Masquer' : 'Afficher'} les filtres avancés`}
+                aria-label={`${showFilters ? t('common.hide') : t('common.show')} ${t('marketplace.filters.advanced')}`}
                 aria-expanded={showFilters}
                 aria-controls="advanced-filters"
               >
                 <Filter className="h-4 w-4 mr-2" aria-hidden="true" />
-                Filtres avancés
+                {t('marketplace.filters.advanced')}
                 {(filters.category !== "all" || filters.productType !== "all" || filters.priceRange !== "all" || filters.tags.length > 0) && (
                   <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs animate-pulse" aria-label="Filtres actifs">
                     !
@@ -838,7 +842,7 @@ const Marketplace = () => {
           id="advanced-filters" 
           className="py-8 px-4 bg-slate-800/30 backdrop-blur-sm" 
           role="region" 
-          aria-label="Filtres avancés du marketplace"
+          aria-label={t('marketplace.filters.advanced')}
         >
           <div className="container mx-auto max-w-6xl">
             <Card className="bg-slate-800/80 backdrop-blur-sm border-slate-600">
@@ -1132,16 +1136,16 @@ const Marketplace = () => {
                 <ShoppingCart className="h-10 w-10 text-slate-400" />
               </div>
               <h3 className="text-2xl font-semibold text-white mb-2">
-                Aucun produit disponible
+                {t('marketplace.noProducts')}
               </h3>
               <p className="text-slate-400 mb-6">
                 {filters.search
-                  ? "Essayez d'autres mots-clés ou filtres"
-                  : "Soyez le premier à vendre vos produits sur notre marketplace !"}
+                  ? t('marketplace.noProductsSearch')
+                  : t('marketplace.noProductsDefault')}
               </p>
               <Link to="/auth">
                 <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold h-12 px-8 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105">
-                  Créer ma boutique gratuitement
+                  {t('marketplace.createStore')}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>

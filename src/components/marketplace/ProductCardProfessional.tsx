@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ProductBanner } from "@/components/ui/ResponsiveProductImage";
-import { ProductImage } from "@/components/ui/OptimizedImage";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { useMarketplaceFavorites } from "@/hooks/useMarketplaceFavorites";
@@ -195,13 +195,11 @@ const ProductCardProfessional = ({
     <Card className="group relative overflow-hidden bg-white border border-gray-200 hover:border-gray-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 rounded-lg" role="article" aria-label={`Produit: ${product.name}`}>
       {/* Image avec overlay et badges - OPTIMISÉE ET EXTRA AGRANDIE */}
       <div className="relative">
-        <ProductImage
-          src={product.image_url}
+        <OptimizedImage
+          src={product.image_url || '/placeholder-image.png'}
           alt={product.name}
-          className="w-full h-80 object-cover"
-          showSkeleton={true}
+          className="w-full h-80 object-cover rounded-t-lg"
           priority={false}
-          containerClassName="w-full h-80"
         />
         
         {/* Overlay avec badge promotionnel seulement */}

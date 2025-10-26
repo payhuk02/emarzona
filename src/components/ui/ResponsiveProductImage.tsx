@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { useImageOptimization, useLazyLoading } from '@/hooks/useImageOptimization';
 
 interface ResponsiveProductImageProps {
   src?: string;
@@ -29,28 +28,40 @@ export const ResponsiveProductImage = ({
 }: ResponsiveProductImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
-  
-  // Utilisation des hooks d'optimisation
-  const { getOptimizedImageUrl, getOptimalDimensions, createBlurPlaceholder } = useImageOptimization();
-  const { isInView, hasLoaded, elementRef, markAsLoaded } = useLazyLoading(priority);
+  const [isInView, setIsInView] = useState(priority); // Si priority, charger immédiatement
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer pour le lazy loading
+  useEffect(() => {
+    if (priority || !elementRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsInView(true);
+            observer.disconnect();
+          }
+        });
+      },
+      {
+        rootMargin: '50px',
+      }
+    );
+
+    observer.observe(elementRef.current);
+
+    return () => observer.disconnect();
+  }, [priority]);
 
   const handleLoad = () => {
     setIsLoaded(true);
-    markAsLoaded();
   };
 
   const handleError = () => {
     setHasError(true);
     setIsLoaded(false);
   };
-
-  // Obtenir les dimensions optimales selon le contexte
-  const optimalDimensions = getOptimalDimensions(context);
-  
-  // Créer un placeholder blur si nécessaire
-  const blurPlaceholder = placeholder === 'blur' && !blurDataURL 
-    ? createBlurPlaceholder(optimalDimensions.width, optimalDimensions.height)
-    : blurDataURL;
 
   if (!src || hasError) {
     return (
@@ -79,18 +90,8 @@ export const ResponsiveProductImage = ({
       role="img"
       aria-label={alt}
     >
-      {/* Placeholder de chargement avec blur */}
-      {!isLoaded && blurPlaceholder && (
-        <img
-          src={blurPlaceholder}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover filter blur-sm scale-110"
-          aria-hidden="true"
-        />
-      )}
-      
       {/* Placeholder de chargement animé */}
-      {!isLoaded && !blurPlaceholder && (
+      {!isLoaded && (
         <div 
           className="absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 animate-pulse"
           role="status"
@@ -109,11 +110,7 @@ export const ResponsiveProductImage = ({
       {/* Image optimisée avec rendu professionnel */}
       {isInView && (
         <img
-          src={getOptimizedImageUrl(src, {
-            ...optimalDimensions,
-            context,
-            quality
-          })}
+          src={src}
           alt={alt}
           className={cn(
             "w-full h-full object-cover transition-all duration-700 ease-out",

@@ -1,0 +1,310 @@
+# Configuration CI/CD pour les tests automatisés
+name: Tests E2E & Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Exécuter tous les jours à 2h du matin
+    - cron: '0 2 * * *'
+
+jobs:
+  test-unit:
+    name: Tests Unitaires
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run unit tests
+        run: npm run test:unit
+        continue-on-error: true
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+          flags: unittests
+
+  test-e2e:
+    name: Tests E2E
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+      
+      - name: Build application
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      
+      - name: Start server
+        run: |
+          npm run preview &
+          npx wait-on http://localhost:4173
+        env:
+          PORT: 4173
+      
+      - name: Run E2E tests
+        run: npx playwright test
+        env:
+          BASE_URL: http://localhost:4173
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+      
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-screenshots
+          path: test-results/
+          retention-days: 7
+
+  test-visual:
+    name: Tests Visuels
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Pour comparer avec les baselines
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+      
+      - name: Build application
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      
+      - name: Start server
+        run: |
+          npm run preview &
+          npx wait-on http://localhost:4173
+        env:
+          PORT: 4173
+      
+      - name: Run visual regression tests
+        run: npx playwright test visual-regression --update-snapshots
+        env:
+          BASE_URL: http://localhost:4173
+      
+      - name: Upload visual diffs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: visual-diffs
+          path: test-results/
+          retention-days: 14
+
+  test-accessibility:
+    name: Tests Accessibilité
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright & Axe
+        run: |
+          npx playwright install --with-deps chromium
+          npm install --save-dev @axe-core/playwright
+      
+      - name: Build application
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      
+      - name: Start server
+        run: |
+          npm run preview &
+          npx wait-on http://localhost:4173
+        env:
+          PORT: 4173
+      
+      - name: Run accessibility tests
+        run: npx playwright test accessibility
+        env:
+          BASE_URL: http://localhost:4173
+      
+      - name: Upload accessibility report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: accessibility-report
+          path: playwright-report/
+          retention-days: 30
+
+  test-performance:
+    name: Tests Performance
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build application
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            http://localhost:4173
+            http://localhost:4173/marketplace
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  test-responsive:
+    name: Tests Responsivité
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+      
+      - name: Build application
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      
+      - name: Start server
+        run: |
+          npm run preview &
+          npx wait-on http://localhost:4173
+        env:
+          PORT: 4173
+      
+      - name: Run responsive tests
+        run: npx playwright test responsive
+        env:
+          BASE_URL: http://localhost:4173
+      
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: responsive-screenshots
+          path: tests/screenshots/
+          retention-days: 14
+
+  report:
+    name: Rapport Final
+    runs-on: ubuntu-latest
+    needs: [test-unit, test-e2e, test-visual, test-accessibility, test-performance, test-responsive]
+    if: always()
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+      
+      - name: Generate summary report
+        run: |
+          echo "# 📊 Rapport de Tests Automatisés" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Résultats" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Tests Unitaires: ${{ needs.test-unit.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Tests E2E: ${{ needs.test-e2e.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Tests Visuels: ${{ needs.test-visual.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Tests Accessibilité: ${{ needs.test-accessibility.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Tests Performance: ${{ needs.test-performance.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Tests Responsivité: ${{ needs.test-responsive.result }}" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Comment PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## 🧪 Résultats des Tests\n\n' +
+                    '- Tests Unitaires: ${{ needs.test-unit.result }}\n' +
+                    '- Tests E2E: ${{ needs.test-e2e.result }}\n' +
+                    '- Tests Visuels: ${{ needs.test-visual.result }}\n' +
+                    '- Tests Accessibilité: ${{ needs.test-accessibility.result }}\n' +
+                    '- Tests Performance: ${{ needs.test-performance.result }}\n' +
+                    '- Tests Responsivité: ${{ needs.test-responsive.result }}\n\n' +
+                    'Voir les artifacts pour plus de détails.'
+            })
+

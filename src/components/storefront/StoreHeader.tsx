@@ -1,5 +1,6 @@
 import { Store } from "@/hooks/use-store";
 import { Users } from "lucide-react";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
 interface StoreHeaderProps {
   store: Store & {
@@ -12,6 +13,11 @@ interface StoreHeaderProps {
 const StoreHeader = ({ store }: StoreHeaderProps) => {
   return (
     <div className="relative">
+      {/* Language Switcher - Top Right */}
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageSwitcher variant="outline" showLabel={false} />
+      </div>
+
       {/* Banner */}
       <div className="h-48 md:h-64 w-full overflow-hidden bg-gradient-hero">
         {store.banner_url ? (

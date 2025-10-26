@@ -1,85 +1,70 @@
-# ========================================
-# Payhula - Robots Configuration
-# Updated: 2025-10-25
-# ========================================
+# robots.txt - Payhuk SaaS E-Commerce Platform
+# Mise à jour : 26 Octobre 2025
+# Objectif : Optimiser le crawl des moteurs de recherche
 
-# ========================================
-# User Agents - Allowed Crawlers
-# ========================================
-
-# Google
-User-agent: Googlebot
-Allow: /
-Allow: /marketplace
-Allow: /stores/
-Crawl-delay: 1
-
-User-agent: Googlebot-Image
-Allow: /
-
-# Bing
-User-agent: Bingbot
-Allow: /
-Allow: /marketplace
-Allow: /stores/
-Crawl-delay: 2
-
-# Social Media Crawlers (pour partages)
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
-User-agent: LinkedInBot
-Allow: /
-
-User-agent: WhatsApp
-Allow: /
-
-User-agent: Slackbot
-Allow: /
-
-User-agent: TelegramBot
-Allow: /
-
-# ========================================
-# User Agents - Restricted Areas
-# ========================================
+# =============================================================================
+# RÈGLES GÉNÉRALES - Tous les bots
+# =============================================================================
 
 User-agent: *
+
+# Pages publiques autorisées
 Allow: /
 Allow: /marketplace
 Allow: /stores/
+Allow: /auth
 
-# Protected areas (authenticated only)
-Disallow: /dashboard
+# Assets statiques
+Allow: /assets/
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.webp$
+Allow: /*.jpg$
+Allow: /*.png$
+Allow: /*.svg$
+
+# Bloquer les zones privées
 Disallow: /dashboard/
-Disallow: /admin
 Disallow: /admin/
-Disallow: /auth
-Disallow: /auth/
-
-# Payment & API endpoints
-Disallow: /payment/
 Disallow: /api/
 
-# JSON files (avoid indexing data files)
-Disallow: /*.json$
+# Bloquer les pages de paiement (éviter indexation URLs avec tokens)
+Disallow: /payment/
+Disallow: /checkout/
 
-# Search results with parameters (avoid duplicate content)
-Disallow: /*?*search=
-Disallow: /*?*category=
-Disallow: /*?*sort=
+# Bloquer les pages techniques
+Disallow: /*?transaction_id=
+Disallow: /*?payment_id=
+Disallow: /*?token=
+Disallow: /*?ref=
+Disallow: /*aff=
 
-# ========================================
-# Bad Bots (SEO tools that consume bandwidth)
-# ========================================
+# =============================================================================
+# RÈGLES SPÉCIFIQUES - Google
+# =============================================================================
 
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /assets/
+Allow: /*.webp$
+Allow: /*.jpg$
+Allow: /*.png$
+
+# =============================================================================
+# RÈGLES SPÉCIFIQUES - Bing
+# =============================================================================
+
+User-agent: Bingbot
+Allow: /
+
+# =============================================================================
+# BLOQUER LES MAUVAIS BOTS
+# =============================================================================
+
+# Bloquer bots scraping agressifs
 User-agent: AhrefsBot
-Disallow: /
-
-User-agent: MJ12bot
 Disallow: /
 
 User-agent: SemrushBot
@@ -88,18 +73,29 @@ Disallow: /
 User-agent: DotBot
 Disallow: /
 
-User-agent: BLEXBot
+User-agent: MJ12bot
 Disallow: /
 
-# ========================================
-# Sitemaps
-# ========================================
+# Bloquer bots malveillants
+User-agent: GPTBot
+Disallow: /
 
-Sitemap: https://payhula.vercel.app/sitemap.xml
+User-agent: CCBot
+Disallow: /
 
-# ========================================
-# Crawl Rate
-# ========================================
+# =============================================================================
+# SITEMAP
+# =============================================================================
 
-# Google: Utilise Search Console pour ajuster
-# Bing: Crawl-delay défini ci-dessus
+Sitemap: https://payhuk.com/sitemap.xml
+Sitemap: https://www.payhuk.com/sitemap.xml
+
+# =============================================================================
+# INFORMATIONS
+# =============================================================================
+
+# Contact: support@payhuk.com
+# Site: https://payhuk.com
+# Politique de crawl : Respecter un délai de 1 seconde entre requêtes
+
+# Crawl-delay: 1

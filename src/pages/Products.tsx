@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,6 +63,7 @@ const ITEMS_PER_PAGE = 12;
 const PAGINATION_OPTIONS = [12, 24, 36, 48];
 
 const Products = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { store, loading: storeLoading } = useStore();
   const { products, loading: productsLoading, refetch } = useProducts(store?.id);
@@ -461,17 +463,17 @@ const Products = () => {
             <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
               <SidebarTrigger />
               <div className="flex-1">
-                <h1 className="text-xl sm:text-2xl font-bold">Produits</h1>
+                <h1 className="text-xl sm:text-2xl font-bold">{t('products.title')}</h1>
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={handleRefresh} disabled={productsLoading}>
                   <RefreshCw className={`h-4 w-4 mr-2 ${productsLoading ? 'animate-spin' : ''}`} />
-                  <span className="hidden sm:inline">Actualiser</span>
+                  <span className="hidden sm:inline">{t('products.refresh')}</span>
                 </Button>
                 <Button onClick={() => navigate("/dashboard/products/new")} className="bg-blue-600 hover:bg-blue-700">
                   <Plus className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Nouveau produit</span>
-                  <span className="sm:hidden">Nouveau</span>
+                  <span className="hidden sm:inline">{t('products.addNew')}</span>
+                  <span className="sm:hidden">{t('products.add')}</span>
                 </Button>
               </div>
             </div>
@@ -483,7 +485,7 @@ const Products = () => {
                 <Card className="shadow-medium">
                   <CardContent className="py-12 text-center">
                     <Loader2 className="inline-block h-8 w-8 animate-spin text-primary" />
-                    <p className="mt-2 text-muted-foreground">Chargement des produits...</p>
+                    <p className="mt-2 text-muted-foreground">{t('common.loading')}</p>
                   </CardContent>
                 </Card>
               ) : products.length === 0 ? (
@@ -494,19 +496,19 @@ const Products = () => {
                         <Package className="h-10 w-10 text-muted-foreground" />
                       </div>
                     </div>
-                    <CardTitle className="text-2xl">Aucun produit pour le moment</CardTitle>
+                    <CardTitle className="text-2xl">{t('products.empty.title')}</CardTitle>
                     <CardDescription className="mt-2 text-base">
-                      Créez votre premier produit digital ou service pour commencer à vendre
+                      {t('products.empty.description')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="text-center pb-12">
                     <div className="space-y-4">
                       <Button onClick={() => navigate("/dashboard/products/new")} size="lg" className="bg-blue-600 hover:bg-blue-700">
                         <Plus className="h-5 w-5 mr-2" />
-                        Créer mon premier produit
+                        {t('products.add')}
                       </Button>
                       <div className="text-sm text-muted-foreground">
-                        <p className="mb-3">Ou importez vos produits depuis un fichier CSV</p>
+                        <p className="mb-3">{t('common.or')} {t('products.import').toLowerCase()}</p>
                         <Button 
                           variant="outline" 
                           size="sm" 
@@ -514,7 +516,7 @@ const Products = () => {
                           className="hover:bg-muted"
                         >
                           <Upload className="h-4 w-4 mr-2" />
-                          Importer CSV
+                          {t('products.import')}
                         </Button>
                       </div>
                     </div>
@@ -562,9 +564,9 @@ const Products = () => {
                     <Card className="shadow-medium">
                       <CardContent className="py-12 text-center">
                         <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">Aucun produit trouvé</h3>
+                        <h3 className="text-lg font-semibold mb-2">{t('products.empty.noResults')}</h3>
                         <p className="text-muted-foreground mb-4">
-                          Aucun produit ne correspond à vos critères de recherche
+                          {t('products.empty.noResultsDescription')}
                         </p>
                         <Button variant="outline" onClick={() => {
                           setSearchQuery("");
@@ -574,7 +576,7 @@ const Products = () => {
                           setPriceRange([0, 1000000]);
                           setDateRange([null, null]);
                         }}>
-                          Effacer les filtres
+                          {t('common.clearFilters', 'Effacer les filtres')}
                         </Button>
                       </CardContent>
                     </Card>
@@ -788,15 +790,15 @@ const Products = () => {
       <AlertDialog open={!!deletingProductId} onOpenChange={(open) => !open && setDeletingProductId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogTitle>{t('products.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.
+              {t('products.delete.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>{t('products.delete.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
-              Supprimer
+              {t('products.delete.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -816,7 +818,7 @@ const Products = () => {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Eye className="h-5 w-5" />
-                Aperçu rapide
+                {t('products.quickView.title')}
               </DialogTitle>
             </DialogHeader>
 

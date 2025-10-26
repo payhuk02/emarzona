@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,8 +12,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import payhukLogo from "@/assets/payhuk-logo.png";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
 const Auth = () => {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
@@ -38,13 +41,13 @@ const Auth = () => {
 
     // Validation
     if (!email || !password || !name) {
-      setError("Tous les champs sont requis");
+      setError(t('auth.signup.errorRequired'));
       setIsLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError("Le mot de passe doit contenir au moins 6 caractères");
+      setError(t('auth.signup.errorPasswordLength'));
       setIsLoading(false);
       return;
     }
@@ -67,14 +70,14 @@ const Auth = () => {
 
       if (data.user) {
         toast({
-          title: "Compte créé !",
-          description: "Connexion automatique en cours...",
+          title: t('auth.signup.success'),
+          description: t('auth.signup.successDescription'),
         });
         navigate("/dashboard");
       }
     } catch (error: any) {
       console.error('Signup error:', error);
-      setError(error.message || "Erreur lors de la création du compte");
+      setError(error.message || t('auth.signup.error'));
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +93,7 @@ const Auth = () => {
     const password = formData.get('password-login') as string;
 
     if (!email || !password) {
-      setError("Email et mot de passe requis");
+      setError(t('auth.login.errorRequired'));
       setIsLoading(false);
       return;
     }
@@ -105,17 +108,17 @@ const Auth = () => {
 
       if (data.user) {
         toast({
-          title: "Connexion réussie",
-          description: "Redirection vers votre tableau de bord...",
+          title: t('auth.login.success'),
+          description: t('auth.login.successDescription'),
         });
         navigate("/dashboard");
       }
     } catch (error: any) {
       console.error('Login error:', error);
       if (error.message.includes('Invalid login credentials')) {
-        setError("Email ou mot de passe incorrect");
+        setError(t('auth.login.error'));
       } else {
-        setError(error.message || "Erreur lors de la connexion");
+        setError(error.message || t('auth.login.error'));
       }
     } finally {
       setIsLoading(false);
@@ -123,7 +126,12 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen gradient-hero flex items-center justify-center p-4">
+    <div className="min-h-screen gradient-hero flex items-center justify-center p-4 relative">
+      {/* Language Switcher - Top Right */}
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageSwitcher variant="outline" showLabel={false} />
+      </div>
+
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
@@ -136,9 +144,9 @@ const Auth = () => {
 
         <Card className="shadow-large">
           <CardHeader>
-            <CardTitle>Bienvenue</CardTitle>
+            <CardTitle>{t('auth.welcome')}</CardTitle>
             <CardDescription>
-              Connectez-vous ou créez votre compte pour commencer
+              {t('auth.welcomeSubtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -151,30 +159,30 @@ const Auth = () => {
 
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Connexion</TabsTrigger>
-                <TabsTrigger value="signup">Inscription</TabsTrigger>
+                <TabsTrigger value="login">{t('nav.login')}</TabsTrigger>
+                <TabsTrigger value="signup">{t('nav.signup')}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email-login">Email</Label>
+                    <Label htmlFor="email-login">{t('auth.login.email')}</Label>
                     <Input
                       id="email-login"
                       name="email-login"
                       type="email"
-                      placeholder="exemple@email.com"
+                      placeholder={t('auth.login.emailPlaceholder')}
                       required
                       disabled={isLoading}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password-login">Mot de passe</Label>
+                    <Label htmlFor="password-login">{t('auth.login.password')}</Label>
                     <Input
                       id="password-login"
                       name="password-login"
                       type="password"
-                      placeholder="••••••••"
+                      placeholder={t('auth.login.passwordPlaceholder')}
                       required
                       disabled={isLoading}
                     />
@@ -184,7 +192,7 @@ const Auth = () => {
                     className="w-full gradient-primary"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Connexion..." : "Se connecter"}
+                    {isLoading ? t('auth.login.buttonLoading') : t('auth.login.button')}
                   </Button>
                 </form>
               </TabsContent>
@@ -192,40 +200,40 @@ const Auth = () => {
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Nom complet</Label>
+                    <Label htmlFor="name">{t('auth.signup.name')}</Label>
                     <Input
                       id="name"
                       name="name"
                       type="text"
-                      placeholder="Votre nom"
+                      placeholder={t('auth.signup.namePlaceholder')}
                       required
                       disabled={isLoading}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email-signup">Email</Label>
+                    <Label htmlFor="email-signup">{t('auth.signup.email')}</Label>
                     <Input
                       id="email-signup"
                       name="email-signup"
                       type="email"
-                      placeholder="exemple@email.com"
+                      placeholder={t('auth.signup.emailPlaceholder')}
                       required
                       disabled={isLoading}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password-signup">Mot de passe</Label>
+                    <Label htmlFor="password-signup">{t('auth.signup.password')}</Label>
                     <Input
                       id="password-signup"
                       name="password-signup"
                       type="password"
-                      placeholder="••••••••"
+                      placeholder={t('auth.signup.passwordPlaceholder')}
                       required
                       minLength={6}
                       disabled={isLoading}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Minimum 6 caractères
+                      {t('auth.signup.passwordHint')}
                     </p>
                   </div>
                   <Button
@@ -233,7 +241,7 @@ const Auth = () => {
                     className="w-full gradient-primary"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Création..." : "Créer mon compte"}
+                    {isLoading ? t('auth.signup.buttonLoading') : t('auth.signup.button')}
                   </Button>
                 </form>
               </TabsContent>
@@ -242,7 +250,7 @@ const Auth = () => {
         </Card>
 
         <p className="text-center text-sm text-muted-foreground mt-4">
-          En continuant, vous acceptez nos conditions d'utilisation
+          {t('auth.termsNote')}
         </p>
       </div>
     </div>

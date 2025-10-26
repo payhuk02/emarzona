@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import payhukLogo from "@/assets/payhuk-logo.png";
 import { NavLink, useNavigate } from "react-router-dom";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import {
   Sidebar,
   SidebarContent,
@@ -297,7 +298,10 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter className="border-t p-4">
+      <SidebarFooter className="border-t p-4 space-y-2">
+        {!isCollapsed && (
+          <LanguageSwitcher variant="outline" showLabel={true} className="w-full" />
+        )}
         <Button
           variant="ghost"
           className="w-full justify-start !text-black"

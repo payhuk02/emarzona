@@ -22,7 +22,7 @@ import {
   Loader2
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ProductImage } from "@/components/ui/OptimizedImage";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { initiateMonerooPayment } from "@/lib/moneroo-payment";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -171,13 +171,11 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
     <Card className="group relative overflow-hidden bg-white border border-gray-200 hover:border-gray-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 rounded-lg">
       {/* Image avec overlay et badges */}
       <div className="relative">
-        <ProductImage
-          src={product.image_url}
+        <OptimizedImage
+          src={product.image_url || '/placeholder-image.png'}
           alt={product.name}
-          className="w-full h-64 object-cover"
-          showSkeleton={true}
+          className="w-full h-64 object-cover rounded-t-lg"
           priority={false}
-          containerClassName="w-full h-64"
         />
         
         {/* Overlay avec badge promotionnel */}

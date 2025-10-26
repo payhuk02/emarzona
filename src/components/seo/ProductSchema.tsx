@@ -1,7 +1,7 @@
 /**
- * Composant: ProductSchema
- * Description: Génère les données structurées Schema.org pour un produit
- * Usage: <ProductSchema product={...} />
+ * Composant Schema.org pour les pages produits
+ * Génère automatiquement le JSON-LD pour améliorer le SEO
+ * Format: Product Schema (https://schema.org/Product)
  */
 
 import { Helmet } from 'react-helmet';
@@ -10,78 +10,147 @@ interface ProductSchemaProps {
   product: {
     id: string;
     name: string;
-    description?: string;
+    slug?: string;
+    description: string;
     price: number;
     currency: string;
     image_url?: string;
+    images?: Array<{ url: string }>;
     rating?: number;
     reviews_count?: number;
-    slug: string;
     category?: string;
-    sku?: string;
+    is_active?: boolean;
     created_at?: string;
-    updated_at?: string;
-    store: {
-      name: string;
-      slug: string;
-    };
   };
+  store: {
+    name: string;
+    slug: string;
+    logo_url?: string;
+  };
+  url?: string; // Optionnel, sera généré automatiquement si non fourni
 }
 
-export const ProductSchema = ({ product }: ProductSchemaProps) => {
-  const productUrl = `${window.location.origin}/stores/${product.store.slug}/products/${product.slug}`;
+export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
+  // Vérifier que product et store existent
+  if (!product || !store) {
+    console.warn('[ProductSchema] Product or Store is missing:', { product, store });
+    return null;
+  }
+
+  // Générer l'URL par défaut si non fournie
+  const defaultUrl = product.slug 
+    ? `/stores/${store.slug}/products/${product.slug}`
+    : `/stores/${store.slug}`;
+  const providedUrl = url || defaultUrl;
   
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": product.name,
-    "description": product.description?.substring(0, 200) || `Achetez ${product.name} sur Payhula`,
-    "image": product.image_url || `${window.location.origin}/og-default.jpg`,
-    "url": productUrl,
-    "sku": product.sku || product.id,
-    "brand": {
-      "@type": "Brand",
-      "name": product.store.name
-    },
-    "offers": {
-      "@type": "Offer",
-      "url": productUrl,
-      "priceCurrency": product.currency,
-      "price": product.price,
-      "availability": "https://schema.org/InStock",
-      "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-      "seller": {
-        "@type": "Organization",
-        "name": product.store.name,
-        "url": `${window.location.origin}/stores/${product.store.slug}`
+  // Construire l'URL complète
+  const fullUrl = providedUrl.startsWith('http') 
+    ? providedUrl 
+    : `https://payhuk.com${providedUrl}`;
+  
+  // Images du produit
+  const productImages = [
+    product.image_url,
+    ...(product.images?.map(img => img.url) || [])
+  ].filter(Boolean);
+
+  // Schema.org Product
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description || `${product.name} - Disponible sur Payhuk`,
+    image: productImages,
+    url: fullUrl,
+    
+    // SKU et identifiants
+    sku: product.id,
+    productID: product.id,
+    
+    // Catégorie
+    ...(product.category && {
+      category: product.category
+    }),
+    
+    // Prix
+    offers: {
+      '@type': 'Offer',
+      url: fullUrl,
+      priceCurrency: product.currency || 'XOF',
+      price: product.price,
+      priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      availability: product.is_active !== false ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'Organization',
+        name: store.name,
+        url: `https://payhuk.com/stores/${store.slug}`,
+        ...(store.logo_url && {
+          logo: store.logo_url
+        })
       }
+    },
+    
+    // Avis et notes
+    ...(product.rating && product.reviews_count && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: product.rating.toFixed(1),
+        reviewCount: product.reviews_count,
+        bestRating: '5',
+        worstRating: '1'
+      }
+    }),
+    
+    // Marque/Vendeur
+    brand: {
+      '@type': 'Brand',
+      name: store.name
     }
   };
-  
-  // Ajout des avis si disponibles
-  if (product.rating && product.reviews_count && product.reviews_count > 0) {
-    schema["aggregateRating"] = {
-      "@type": "AggregateRating",
-      "ratingValue": product.rating,
-      "reviewCount": product.reviews_count,
-      "bestRating": 5,
-      "worstRating": 1
-    };
-  }
-  
-  // Ajout de la catégorie si disponible
-  if (product.category) {
-    schema["category"] = product.category;
-  }
-  
+
+  // Schema.org BreadcrumbList
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Accueil',
+        item: 'https://payhuk.com'
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Marketplace',
+        item: 'https://payhuk.com/marketplace'
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: store.name,
+        item: `https://payhuk.com/stores/${store.slug}`
+      },
+      {
+        '@type': 'ListItem',
+        position: 4,
+        name: product.name,
+        item: fullUrl
+      }
+    ]
+  };
+
   return (
     <Helmet>
+      {/* Product Schema */}
       <script type="application/ld+json">
-        {JSON.stringify(schema)}
+        {JSON.stringify(productSchema)}
+      </script>
+      
+      {/* Breadcrumb Schema */}
+      <script type="application/ld+json">
+        {JSON.stringify(breadcrumbSchema)}
       </script>
     </Helmet>
   );
 };
-
-export default ProductSchema;
-

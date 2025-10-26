@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X, ShoppingBag, Store, UserCircle } from "lucide-react";
 import { ThemeToggle } from "@/components/navigation/ThemeToggle";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import payhukLogo from "@/assets/payhuk-logo.png";
 
 const MarketplaceHeader = () => {
+  const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -24,35 +27,37 @@ const MarketplaceHeader = () => {
             <Link to="/marketplace">
               <Button variant="ghost" size="sm" className="text-foreground hover:text-primary transition-all">
                 <ShoppingBag className="h-4 w-4 mr-2" />
-                Marketplace
+                {t('nav.marketplace')}
               </Button>
             </Link>
             <Link to="/dashboard">
               <Button variant="ghost" size="sm" className="text-foreground hover:text-primary transition-all">
                 <Store className="h-4 w-4 mr-2" />
-                Ma Boutique
+                {t('nav.dashboard')}
               </Button>
             </Link>
           </nav>
 
           {/* Desktop CTA Buttons */}
           <div className="hidden md:flex items-center gap-2">
+            <LanguageSwitcher variant="outline" showLabel={false} />
             <ThemeToggle />
             <Link to="/auth">
               <Button variant="ghost" size="sm" className="text-foreground hover:text-primary transition-all">
                 <UserCircle className="h-4 w-4 mr-2" />
-                Se connecter
+                {t('nav.login')}
               </Button>
             </Link>
             <Link to="/auth">
               <Button size="sm" className="gradient-accent text-accent-foreground font-semibold hover:shadow-glow">
-                Créer ma boutique
+                {t('auth.signup.title')}
               </Button>
             </Link>
           </div>
 
           {/* Mobile Actions */}
           <div className="flex md:hidden items-center gap-2">
+            <LanguageSwitcher variant="ghost" showLabel={false} />
             <ThemeToggle />
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
@@ -89,20 +94,20 @@ const MarketplaceHeader = () => {
                     <Link to="/marketplace" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start h-12 text-base touch-manipulation min-h-[44px] hover:translate-x-1 transition-transform focus-visible:ring-2 focus-visible:ring-primary">
                         <ShoppingBag className="h-5 w-5 mr-3" />
-                        Marketplace
+                        {t('nav.marketplace')}
                       </Button>
                     </Link>
                     <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start h-12 text-base touch-manipulation hover:translate-x-1 transition-transform">
                         <Store className="h-5 w-5 mr-3" />
-                        Ma Boutique
+                        {t('nav.dashboard')}
                       </Button>
                     </Link>
                     <div className="h-px bg-border my-4" />
                     <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start h-12 text-base touch-manipulation hover:translate-x-1 transition-transform">
                         <UserCircle className="h-5 w-5 mr-3" />
-                        Se connecter
+                        {t('nav.login')}
                       </Button>
                     </Link>
                   </nav>
@@ -111,7 +116,7 @@ const MarketplaceHeader = () => {
                   <div className="pt-4 border-t">
                     <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                       <Button className="w-full h-12 gradient-accent text-accent-foreground font-semibold touch-manipulation hover:shadow-glow">
-                        Créer ma boutique
+                        {t('auth.signup.title')}
                       </Button>
                     </Link>
                   </div>

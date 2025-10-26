@@ -1,0 +1,174 @@
+{
+  "landing": {
+    "nav": {
+      "marketplace": "Marketplace",
+      "howItWorks": "How it works",
+      "features": "Features",
+      "pricing": "Pricing",
+      "login": "Log in",
+      "getStarted": "Get started free"
+    },
+    "hero": {
+      "badge": "#1 E-commerce Platform in Africa",
+      "title": "Create your online store in minutes",
+      "subtitle": "Sell your digital and physical products with a complete, secure and easy-to-use platform. Local payments, no hidden fees.",
+      "cta": {
+        "primary": "Create my store for free",
+        "secondary": "Watch demo"
+      },
+      "stats": {
+        "users": "Active users",
+        "sales": "In total sales",
+        "stores": "Stores created"
+      }
+    },
+    "features": {
+      "title": "Key features",
+      "subtitle": "Everything you need to succeed online",
+      "payment": {
+        "title": "Local payments",
+        "description": "Accept Mobile Money, Orange Money, Wave and credit cards"
+      },
+      "ecommerce": {
+        "title": "Complete e-commerce",
+        "description": "Digital products, physical goods, services and subscriptions"
+      },
+      "analytics": {
+        "title": "Advanced analytics",
+        "description": "Track your sales, customers and performance in real-time"
+      },
+      "security": {
+        "title": "100% Secure",
+        "description": "SSL secured payments and anti-fraud protection"
+      },
+      "global": {
+        "title": "Global reach",
+        "description": "Sell across Africa and internationally"
+      },
+      "support": {
+        "title": "24/7 Support",
+        "description": "Assistance available in French and English"
+      }
+    },
+    "howItWorks": {
+      "title": "How does it work?",
+      "subtitle": "Launch your store in 3 simple steps",
+      "step1": {
+        "title": "Create your account",
+        "description": "Free registration in less than 2 minutes"
+      },
+      "step2": {
+        "title": "Add your products",
+        "description": "Upload your products with photos and descriptions"
+      },
+      "step3": {
+        "title": "Start selling",
+        "description": "Share your link and receive your payments"
+      }
+    },
+    "pricing": {
+      "title": "Simple and transparent pricing",
+      "subtitle": "No hidden fees, pay only on your successful sales",
+      "plan": {
+        "free": {
+          "name": "Free",
+          "price": "0 FCFA",
+          "period": "/month",
+          "description": "Perfect to get started",
+          "cta": "Start for free"
+        },
+        "pro": {
+          "name": "Pro",
+          "price": "15,000 FCFA",
+          "period": "/month",
+          "description": "For serious entrepreneurs",
+          "cta": "Try 14 days free",
+          "popular": "Popular"
+        }
+      },
+      "features": {
+        "title": "Included features",
+        "unlimited": "Unlimited products",
+        "payments": "All payment methods",
+        "analytics": "Advanced analytics",
+        "support": "Priority support",
+        "domain": "Custom domain name",
+        "marketing": "Advanced marketing tools",
+        "affiliate": "Affiliate program",
+        "api": "Full API access"
+      },
+      "note": {
+        "title": "💡 Important note",
+        "description": "No monthly fees! Pay only a 3% commission on each successful sale."
+      }
+    },
+    "testimonials": {
+      "title": "What our users say",
+      "subtitle": "Join thousands of entrepreneurs who trust us",
+      "testimonial1": {
+        "text": "Payhuk transformed my business! I was able to create my store in 10 minutes and my sales exploded.",
+        "author": "Aminata Diallo",
+        "role": "Jewelry maker, Dakar"
+      },
+      "testimonial2": {
+        "text": "An incredible platform! Support is responsive and payments come in quickly. I recommend 100%.",
+        "author": "Ibrahim Konaté",
+        "role": "Online training seller"
+      },
+      "testimonial3": {
+        "text": "Finally a solution adapted to Africa! I accept Mobile Money easily and my customers love it.",
+        "author": "Fatoumata Sow",
+        "role": "Cosmetics store"
+      }
+    },
+    "cta": {
+      "title": "Ready to launch your store?",
+      "subtitle": "Join thousands of sellers succeeding with Payhuk",
+      "button": "Create my store now",
+      "note": "No credit card required • Free forever"
+    },
+    "footer": {
+      "description": "The next generation e-commerce platform for Africa",
+      "product": {
+        "title": "Product",
+        "features": "Features",
+        "pricing": "Pricing",
+        "demo": "Demo",
+        "changelog": "What's new"
+      },
+      "company": {
+        "title": "Company",
+        "about": "About",
+        "blog": "Blog",
+        "careers": "Careers",
+        "contact": "Contact"
+      },
+      "resources": {
+        "title": "Resources",
+        "documentation": "Documentation",
+        "guides": "Guides",
+        "api": "API",
+        "support": "Support"
+      },
+      "legal": {
+        "title": "Legal",
+        "privacy": "Privacy",
+        "terms": "Terms of Service",
+        "cookies": "Cookies"
+      },
+      "newsletter": {
+        "title": "Newsletter",
+        "description": "Get our latest news",
+        "placeholder": "Your email",
+        "button": "Subscribe"
+      },
+      "social": {
+        "title": "Follow us"
+      },
+      "copyright": "© 2024 Payhuk. All rights reserved.",
+      "madeWith": "Made with",
+      "in": "in Senegal"
+    }
+  }
+}
+

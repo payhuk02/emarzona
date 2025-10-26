@@ -1,3 +1,15 @@
+/* All @import statements must come first */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import './styles/animations.css';
+
+/**
+ * Font optimization: font-display: swap
+ * Améliore le FCP (First Contentful Paint)
+ * Évite le FOIT (Flash of Invisible Text)
+ * 
+ * Animations personnalisées importées depuis ./styles/animations.css
+ */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

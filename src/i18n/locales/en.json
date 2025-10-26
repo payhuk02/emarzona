@@ -1,0 +1,777 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "retry": "Retry",
+    "refresh": "Refresh",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "nav": {
+    "home": "Home",
+    "marketplace": "Marketplace",
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "orders": "Orders",
+    "customers": "Customers",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "signup": "Sign up"
+  },
+  "auth": {
+    "welcome": "Welcome",
+    "welcomeSubtitle": "Sign in or create your account to get started",
+    "loading": "Loading...",
+    "termsNote": "By continuing, you accept our terms of service",
+    "login": {
+      "title": "Login",
+      "subtitle": "Sign in to your account",
+      "email": "Email",
+      "emailPlaceholder": "example@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Forgot password?",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create an account",
+      "button": "Sign in",
+      "buttonLoading": "Signing in...",
+      "success": "Login successful",
+      "successDescription": "Redirecting to your dashboard...",
+      "error": "Invalid email or password",
+      "errorRequired": "Email and password required"
+    },
+    "signup": {
+      "title": "Sign up",
+      "subtitle": "Create your seller account",
+      "name": "Full name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "example@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "passwordHint": "Minimum 6 characters",
+      "confirmPassword": "Confirm password",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "button": "Create my account",
+      "buttonLoading": "Creating...",
+      "success": "Account created!",
+      "successDescription": "Automatic sign in in progress...",
+      "error": "Error creating account",
+      "errorRequired": "All fields are required",
+      "errorPasswordLength": "Password must be at least 6 characters",
+      "terms": "By signing up, you agree to our",
+      "termsLink": "Terms of Service",
+      "and": "and",
+      "privacyLink": "Privacy Policy"
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "subtitle": "Enter your email to reset",
+      "email": "Email",
+      "button": "Send reset link",
+      "success": "Reset email sent!",
+      "error": "Error sending email"
+    }
+  },
+  "marketplace": {
+    "title": "Marketplace",
+    "subtitle": "Discover the best products",
+    "searchPlaceholder": "Search for a product, store or category...",
+    "noProducts": "No products available",
+    "noProductsSearch": "Try different keywords or filters",
+    "noProductsDefault": "Be the first to sell your products on our marketplace!",
+    "createStore": "Create my free store",
+    "loading": "Loading products...",
+    "viewProduct": "View product",
+    "addToCart": "Add to cart",
+    "resultsCount": "{{count}} products found",
+    "filtersActive": "Active filters:",
+    "filters": {
+      "title": "Filters",
+      "advanced": "Advanced filters",
+      "category": "Category",
+      "priceRange": "Price range",
+      "rating": "Rating",
+      "availability": "Availability",
+      "reset": "Reset",
+      "apply": "Apply",
+      "verifiedOnly": "Verified products only",
+      "featuredOnly": "Featured products",
+      "inStock": "In stock only"
+    },
+    "priceRanges": {
+      "all": "All prices",
+      "0-5000": "0 - 5,000 XOF",
+      "5000-15000": "5,000 - 15,000 XOF",
+      "15000-50000": "15,000 - 50,000 XOF",
+      "50000-100000": "50,000 - 100,000 XOF",
+      "100000+": "100,000+ XOF"
+    },
+    "sort": {
+      "label": "Sort by",
+      "newest": "Newest",
+      "price": "Price",
+      "rating": "Rating",
+      "sales": "Sales",
+      "name": "Name",
+      "popularity": "Popularity"
+    },
+    "viewMode": {
+      "grid": "Grid",
+      "list": "List"
+    },
+    "tags": {
+      "new": "New",
+      "popular": "Popular",
+      "sale": "On sale",
+      "recommended": "Recommended",
+      "trending": "Trending",
+      "premium": "Premium quality",
+      "fastShipping": "Fast shipping",
+      "support": "24/7 Support",
+      "warranty": "Warranty",
+      "training": "Training included",
+      "updates": "Free updates",
+      "community": "Active community"
+    }
+  },
+  "products": {
+    "title": "My Products",
+    "add": "Add product",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "noProducts": "No products",
+    "create": {
+      "title": "Create product",
+      "name": "Product name",
+      "description": "Description",
+      "price": "Price",
+      "currency": "Currency",
+      "category": "Category",
+      "images": "Images",
+      "uploadImage": "Upload image",
+      "stock": "Stock",
+      "sku": "SKU",
+      "tags": "Tags",
+      "success": "Product created successfully!",
+      "error": "Error creating product"
+    },
+    "details": {
+      "description": "Description",
+      "features": "Features",
+      "reviews": "Reviews",
+      "seller": "Seller",
+      "shipping": "Shipping",
+      "returns": "Returns",
+      "addToCart": "Add to cart",
+      "buyNow": "Buy now",
+      "quantity": "Quantity",
+      "inStock": "In stock",
+      "outOfStock": "Out of stock",
+      "price": "Price"
+    }
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is empty",
+    "items": "item(s)",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "tax": "Tax",
+    "total": "Total",
+    "checkout": "Checkout",
+    "continueShopping": "Continue shopping",
+    "removeItem": "Remove",
+    "updateQuantity": "Update",
+    "success": "Product added to cart",
+    "error": "Error adding to cart"
+  },
+  "orders": {
+    "title": "My Orders",
+    "orderNumber": "Order #{{number}}",
+    "date": "Date",
+    "status": "Status",
+    "total": "Total",
+    "items": "Items",
+    "viewDetails": "View details",
+    "trackOrder": "Track order",
+    "noOrders": "No orders",
+    "statuses": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled",
+      "refunded": "Refunded"
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome, {{name}}!",
+    "stats": {
+      "totalSales": "Total sales",
+      "totalOrders": "Total orders",
+      "totalProducts": "Products",
+      "totalCustomers": "Customers"
+    },
+    "recentOrders": "Recent orders",
+    "topProducts": "Top products",
+    "analytics": "Analytics",
+    "quickActions": "Quick actions"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "store": "Store",
+    "payment": "Payment",
+    "shipping": "Shipping",
+    "notifications": "Notifications",
+    "security": "Security",
+    "language": "Language",
+    "theme": "Theme",
+    "save": "Save changes",
+    "success": "Settings updated!",
+    "error": "Error updating settings"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications",
+    "types": {
+      "order": "New order",
+      "payment": "Payment received",
+      "review": "New review",
+      "message": "New message",
+      "system": "System notification"
+    }
+  },
+  "errors": {
+    "generic": "An error occurred",
+    "network": "Connection error",
+    "notFound": "Page not found",
+    "unauthorized": "Unauthorized",
+    "serverError": "Server error",
+    "validation": "Validation error",
+    "tryAgain": "Please try again"
+  },
+  "footer": {
+    "about": "About",
+    "contact": "Contact",
+    "terms": "Terms of Service",
+    "privacy": "Privacy",
+    "help": "Help",
+    "followUs": "Follow us",
+    "allRightsReserved": "All rights reserved"
+  },
+  "seo": {
+    "home": {
+      "title": "Payhuk - Modern E-commerce Platform",
+      "description": "Create and manage your online store easily with Payhuk"
+    },
+    "marketplace": {
+      "title": "Marketplace - Discover our products",
+      "description": "Explore our selection of quality products"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your preferences and settings",
+    "common": {
+      "loading": "Loading...",
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "success": "Success",
+      "error": "Error"
+    },
+    "tabs": {
+      "profile": "Profile",
+      "store": "Store",
+      "domain": "Domain",
+      "notifications": "Notifications",
+      "security": "Security",
+      "debug": "Debug"
+    },
+    "profileSettings": {
+      "loading": "Loading profile...",
+      "error": "Unable to load profile. Please try again.",
+      "memberSince": "Member since",
+      "completed": "completed",
+      "suspended": "Suspended",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "save": "Save",
+      "referral": {
+        "linkShared": "Link shared",
+        "linkCopied": "Referral link copied to clipboard",
+        "codeCopied": "Referral code copied to clipboard"
+      }
+    },
+    "storeSettings": {
+      "loading": "Loading store...",
+      "error": "Unable to load store.",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "notificationSettings": {
+      "loading": "Loading preferences...",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "securitySettings": {
+      "loading": "Loading settings...",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "domainSettings": {
+      "loading": "Loading domain...",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "profile": {
+      "title": "Profile",
+      "subtitle": "Manage your personal information",
+      "advancedTitle": "Advanced profile settings",
+      "cardTitle": "Profile information",
+      "cardDescription": "Manage your personal information"
+    },
+    "store": {
+      "title": "Store settings",
+      "subtitle": "Configure your online store",
+      "cardTitle": "Store settings",
+      "cardDescription": "Customize your online store"
+    },
+    "domain": {
+      "title": "Custom domain",
+      "subtitle": "Configure your domain name"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Manage your notification preferences",
+      "cardTitle": "Notification preferences",
+      "cardDescription": "Configure how you want to be notified"
+    },
+    "security": {
+      "title": "Security",
+      "subtitle": "Protect your account",
+      "cardTitle": "Security",
+      "cardDescription": "Manage your account security"
+    },
+    "debug": {
+      "title": "Profile Debug",
+      "subtitle": "Debugging tools",
+      "cardTitle": "Profile Debug",
+      "cardDescription": "Test connection and database structure"
+    }
+  },
+  "orders": {
+    "title": "Orders",
+    "new": "New order",
+    "export": "Export CSV",
+    "filters": {
+      "search": "Search by number or customer...",
+      "status": "Status",
+      "allStatus": "All statuses",
+      "paymentStatus": "Payment",
+      "allPayments": "All payments",
+      "dateRange": "Period"
+    },
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "refunded": "Refunded"
+    },
+    "paymentStatus": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    },
+    "table": {
+      "orderNumber": "Number",
+      "customer": "Customer",
+      "amount": "Amount",
+      "status": "Status",
+      "payment": "Payment",
+      "date": "Date",
+      "actions": "Actions"
+    },
+    "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "refund": "Refund",
+      "print": "Print"
+    },
+    "empty": {
+      "title": "No orders",
+      "description": "You haven't received any orders yet",
+      "noResults": "No orders match your filters",
+      "createFirst": "Create manual order"
+    },
+    "toast": {
+      "warning": "Warning",
+      "noOrders": "No orders to export",
+      "success": "Success",
+      "exported": "{{count}} order(s) exported",
+      "error": "Error",
+      "createSuccess": "Order created successfully",
+      "updateSuccess": "Order updated",
+      "cancelSuccess": "Order cancelled",
+      "refundSuccess": "Order refunded"
+    },
+    "pagination": {
+      "showing": "Showing {{from}} to {{to}} of {{total}} orders",
+      "previous": "Previous",
+      "next": "Next",
+      "rowsPerPage": "Rows per page"
+    },
+    "details": {
+      "title": "Order details",
+      "orderNumber": "Order #{{number}}",
+      "customer": "Customer",
+      "products": "Products",
+      "total": "Total",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "tax": "Tax",
+      "discount": "Discount",
+      "notes": "Notes",
+      "timeline": "Timeline",
+      "createdAt": "Created at",
+      "updatedAt": "Updated at"
+    }
+  },
+  "products": {
+    "title": "My Products",
+    "add": "Add product",
+    "addNew": "New product",
+    "refresh": "Refresh",
+    "export": "Export CSV",
+    "import": "Import CSV",
+    "viewMode": {
+      "grid": "Grid",
+      "list": "List"
+    },
+    "stats": {
+      "total": "Total Products",
+      "active": "Active",
+      "inactive": "Inactive",
+      "outOfStock": "Out of Stock"
+    },
+    "filters": {
+      "search": "Search for a product...",
+      "category": "Category",
+      "allCategories": "All categories",
+      "type": "Type",
+      "allTypes": "All types",
+      "status": "Status",
+      "allStatus": "All statuses",
+      "stockStatus": "Stock",
+      "allStock": "All stock",
+      "sortBy": "Sort by",
+      "recent": "Most recent",
+      "oldest": "Oldest",
+      "nameAsc": "Name (A-Z)",
+      "nameDesc": "Name (Z-A)",
+      "priceAsc": "Price ascending",
+      "priceDesc": "Price descending",
+      "stockAsc": "Stock ascending",
+      "stockDesc": "Stock descending"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "draft": "Draft"
+    },
+    "stockStatus": {
+      "inStock": "In stock",
+      "lowStock": "Low stock",
+      "outOfStock": "Out of stock"
+    },
+    "types": {
+      "digital": "Digital",
+      "physical": "Physical",
+      "service": "Service"
+    },
+    "actions": {
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "view": "View",
+      "bulkDelete": "Delete selection",
+      "bulkActivate": "Activate selection",
+      "bulkDeactivate": "Deactivate selection",
+      "selectAll": "Select all",
+      "deselectAll": "Deselect all",
+      "selected": "{{count}} selected"
+    },
+    "empty": {
+      "title": "No products yet",
+      "description": "Start by adding your first product to sell in your store",
+      "noResults": "No products found",
+      "noResultsDescription": "No products match your search criteria",
+      "tryAdjusting": "Try adjusting your filters or search"
+    },
+    "delete": {
+      "title": "Delete product",
+      "description": "Are you sure you want to delete this product? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "success": "Product deleted successfully",
+      "error": "Error deleting product",
+      "bulkTitle": "Delete {{count}} product(s)",
+      "bulkDescription": "Are you sure you want to delete these {{count}} products? This action cannot be undone."
+    },
+    "edit": {
+      "title": "Edit product",
+      "save": "Save",
+      "cancel": "Cancel",
+      "success": "Product updated successfully",
+      "error": "Error updating product"
+    },
+    "duplicate": {
+      "success": "Product duplicated successfully",
+      "error": "Error duplicating product"
+    },
+    "pagination": {
+      "showing": "Showing {{from}} to {{to}} of {{total}} products",
+      "previous": "Previous",
+      "next": "Next",
+      "first": "First",
+      "last": "Last",
+      "itemsPerPage": "Products per page"
+    },
+    "quickView": {
+      "title": "Quick view",
+      "close": "Close",
+      "price": "Price",
+      "stock": "Stock",
+      "category": "Category",
+      "type": "Type",
+      "status": "Status",
+      "createdAt": "Created at",
+      "updatedAt": "Updated at"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "titleWithStore": "Dashboard - {{storeName}}",
+    "loading": "Loading dashboard...",
+    "welcome": "Welcome! 🎉",
+    "createStorePrompt": "Start by creating your store to access the advanced dashboard",
+    "createStoreButton": "Create my store",
+    "online": "Online",
+    "refresh": "Refresh data",
+    "retry": "Retry",
+    "error": {
+      "title": "Loading error",
+      "loading": "Error loading data"
+    },
+    "stats": {
+      "products": {
+        "title": "Products",
+        "active": "{{count}} active"
+      },
+      "orders": {
+        "title": "Orders",
+        "pending": "{{count}} pending"
+      },
+      "customers": {
+        "title": "Customers",
+        "registered": "Registered customers"
+      },
+      "revenue": {
+        "title": "Revenue",
+        "total": "Total sales"
+      }
+    },
+    "notifications": {
+      "title": "Recent notifications",
+      "viewAll": "View all notifications",
+      "empty": "No notifications",
+      "newOrder": "New order",
+      "newOrderMessage": "Order {{orderNumber}} received for {{amount}} FCFA",
+      "outOfStock": "Out of stock",
+      "outOfStockMessage": "Product \"{{productName}}\" is out of stock",
+      "paymentReceived": "Payment received",
+      "paymentReceivedMessage": "Payment of {{amount}} FCFA confirmed"
+    },
+    "quickActions": {
+      "title": "Quick actions",
+      "createProduct": "Create product",
+      "createProductDesc": "Add a new product to your store",
+      "manageOrders": "Manage orders",
+      "manageOrdersDesc": "View and manage your orders",
+      "viewAnalytics": "View analytics",
+      "viewAnalyticsDesc": "Check your detailed statistics",
+      "manageCustomers": "Manage Customers",
+      "manageCustomersDesc": "View and manage your customers",
+      "viewStore": "View my store",
+      "viewStoreDesc": "Customize your online store",
+      "settings": "Settings",
+      "settingsDesc": "Configure your account and store"
+    }
+  },
+  "landing": {
+    "nav": {
+      "marketplace": "Marketplace",
+      "howItWorks": "How it works",
+      "features": "Features",
+      "pricing": "Pricing",
+      "testimonials": "Testimonials",
+      "login": "Sign in",
+      "getStarted": "Get started free"
+    },
+    "hero": {
+      "badge": "The all-in-one platform to sell your digital products",
+      "title": "Sell your digital products with ease",
+      "subtitle": "Create your online store, manage your sales in FCFA and other currencies, and grow your business in Africa with no hidden fees.",
+      "ctaPrimary": "Start now",
+      "ctaSecondary": "See demo",
+      "mockupPreview": "Preview of your future store"
+    },
+    "stats": {
+      "users": "Users",
+      "sales": "Sales",
+      "stores": "Stores"
+    },
+    "testimonials": {
+      "title": "They succeed with Payhuk",
+      "subtitle": "Join hundreds of entrepreneurs growing their business",
+      "items": [
+        {
+          "name": "Amadou K.",
+          "role": "Content Creator",
+          "content": "I doubled my income in 3 months thanks to Payhuk. The platform is simple and FCFA payments are a real plus!"
+        },
+        {
+          "name": "Fatou D.",
+          "role": "Online Trainer",
+          "content": "Finally a solution adapted to the African market! My students can pay easily and I manage everything from my phone."
+        },
+        {
+          "name": "Ibrahim S.",
+          "role": "Developer",
+          "content": "Modern interface, complete features and responsive support. Payhuk is the best platform to sell in Africa."
+        }
+      ]
+    },
+    "features": {
+      "title": "Key features",
+      "subtitle": "Everything you need to succeed",
+      "items": [
+        {
+          "title": "Customizable online store",
+          "description": "Create a professional store in a few clicks, no technical skills required."
+        },
+        {
+          "title": "FCFA payments",
+          "description": "Accept payments in local currency with Moneroo and other payment methods."
+        },
+        {
+          "title": "Complete dashboard",
+          "description": "Track your sales, manage your products and analyze your performance in real-time."
+        },
+        {
+          "title": "Maximum security",
+          "description": "Your data and your customers' data are protected by the latest security technologies."
+        },
+        {
+          "title": "24/7 Support",
+          "description": "Our team is available to support you at every step of your growth."
+        },
+        {
+          "title": "Multi-currency",
+          "description": "Sell in multiple currencies and expand your market internationally."
+        }
+      ]
+    },
+    "howItWorks": {
+      "title": "How does it work?",
+      "subtitle": "Start your business in 3 simple steps",
+      "steps": [
+        {
+          "number": "01",
+          "title": "Create your account",
+          "description": "Free registration in less than a minute. No credit card required."
+        },
+        {
+          "number": "02",
+          "title": "Add your products",
+          "description": "Import your digital or physical products in a few clicks with our intuitive interface."
+        },
+        {
+          "number": "03",
+          "title": "Start selling",
+          "description": "Share your store and receive payments instantly in FCFA and other currencies."
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Simple and transparent pricing",
+      "subtitle": "Start for free, pay only on your sales",
+      "free": {
+        "title": "Free",
+        "price": "0 FCFA",
+        "period": "/month",
+        "description": "Perfect to start",
+        "features": "Included features",
+        "cta": "Start for free"
+      },
+      "featuresList": [
+        "Unlimited online store",
+        "Unlimited products",
+        "Secure payments",
+        "Analytics dashboard",
+        "Email support",
+        "No sales commission"
+      ]
+    },
+    "cta": {
+      "title": "Ready to grow your business?",
+      "subtitle": "Join thousands of African entrepreneurs who succeed with Payhuk",
+      "button": "Create my free account"
+    },
+    "footer": {
+      "description": "The #1 e-commerce platform to sell your digital and physical products in Africa.",
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal",
+      "links": {
+        "features": "Features",
+        "pricing": "Pricing",
+        "marketplace": "Marketplace",
+        "about": "About",
+        "blog": "Blog",
+        "contact": "Contact",
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy"
+      },
+      "copyright": "© 2025 Payhuk. All rights reserved."
+    }
+  }
+}
+

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,7 @@ import { DateRange } from "react-day-picker";
 import { isWithinInterval, startOfDay, endOfDay } from "date-fns";
 
 const Orders = () => {
+  const { t } = useTranslation();
   const { store, loading: storeLoading } = useStore();
   const { toast } = useToast();
   const [page, setPage] = useState(0);
@@ -54,8 +56,8 @@ const Orders = () => {
     try {
       if (!filteredOrders || filteredOrders.length === 0) {
         toast({
-          title: "Attention",
-          description: "Aucune commande à exporter",
+          title: t('orders.toast.warning'),
+          description: t('orders.toast.noOrders'),
           variant: "destructive",
         });
         return;
@@ -63,12 +65,12 @@ const Orders = () => {
 
       exportOrdersToCSV(filteredOrders);
       toast({
-        title: "Succès",
-        description: `${filteredOrders.length} commande(s) exportée(s)`,
+        title: t('orders.toast.success'),
+        description: t('orders.toast.exported', { count: filteredOrders.length }),
       });
     } catch (error: any) {
       toast({
-        title: "Erreur",
+        title: t('orders.toast.error'),
         description: error.message,
         variant: "destructive",
       });
@@ -142,19 +144,19 @@ const Orders = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Commandes</h1>
+                <h1 className="text-3xl font-bold tracking-tight">{t('orders.title')}</h1>
                 <p className="text-muted-foreground mt-1">
-                  Gérez toutes vos commandes
+                  {t('common.manageAll', 'Gérez toutes vos')} {t('orders.title').toLowerCase()}
                 </p>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={handleExportCSV} disabled={!orders || orders.length === 0}>
                   <Download className="h-4 w-4 mr-2" />
-                  Exporter CSV
+                  {t('orders.export')}
                 </Button>
                 <Button onClick={() => setIsCreateDialogOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Nouvelle commande
+                  {t('orders.new')}
                 </Button>
               </div>
             </div>
@@ -206,16 +208,16 @@ const Orders = () => {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Package className="h-16 w-16 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Aucune commande</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t('orders.empty.title')}</h3>
                   <p className="text-muted-foreground text-center mb-4">
                     {searchQuery || statusFilter !== "all" || paymentStatusFilter !== "all" || dateRange?.from
-                      ? "Aucune commande ne correspond à vos filtres"
-                      : "Commencez par créer votre première commande"}
+                      ? t('orders.empty.noResults')
+                      : t('orders.empty.description')}
                   </p>
                   {!searchQuery && statusFilter === "all" && paymentStatusFilter === "all" && !dateRange?.from && (
                     <Button onClick={() => setIsCreateDialogOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Créer une commande
+                      {t('orders.empty.createFirst')}
                     </Button>
                   )}
                 </CardContent>

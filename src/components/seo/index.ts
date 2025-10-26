@@ -1,26 +1,18 @@
 /**
- * Barrel Export: Composants SEO
- * Description: Export centralisé de tous les composants SEO
+ * Export centralisé des composants SEO
  */
 
-import { SEOMeta } from './SEOMeta';
-import { ProductSchema } from './ProductSchema';
-import { StoreSchema } from './StoreSchema';
-import { BreadcrumbSchema } from './BreadcrumbSchema';
-import { WebsiteSchema } from './WebsiteSchema';
-
-export { SEOMeta, type SEOMetaProps } from './SEOMeta';
+// Schema.org Components (nouveaux)
 export { ProductSchema } from './ProductSchema';
 export { StoreSchema } from './StoreSchema';
-export { BreadcrumbSchema, type BreadcrumbItem } from './BreadcrumbSchema';
+export { OrganizationSchema } from './OrganizationSchema';
+
+// Composants SEO existants
+export { SEOMeta } from './SEOMeta';
+export type { SEOMetaProps } from './SEOMeta';
 export { WebsiteSchema } from './WebsiteSchema';
-
-// Export par défaut d'un objet contenant tous les composants
-export default {
-  SEOMeta,
-  ProductSchema,
-  StoreSchema,
-  BreadcrumbSchema,
-  WebsiteSchema,
-};
-
+export { BreadcrumbSchema } from './BreadcrumbSchema';
+export type { BreadcrumbItem } from './BreadcrumbSchema';
+export { SEOOverview } from './SEOOverview';
+export { SEOPagesList } from './SEOPagesList';
+export { SEODetailDialog } from './SEODetailDialog';

@@ -1,0 +1,79 @@
+/**
+ * Polices locales avec font-display: swap
+ * Alternative aux Google Fonts pour meilleures performances
+ * 
+ * Pour utiliser les polices locales:
+ * 1. Télécharger Poppins depuis https://fonts.google.com/specimen/Poppins
+ * 2. Placer les fichiers dans /public/fonts/
+ * 3. Décommenter ce fichier
+ * 4. Importer dans index.html: <link rel="stylesheet" href="/fonts.css">
+ */
+
+/* Poppins Light (300) */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap; /* 🚀 Performance optimization */
+  src: local('Poppins Light'),
+       local('Poppins-Light'),
+       url('/fonts/Poppins-Light.woff2') format('woff2'),
+       url('/fonts/Poppins-Light.woff') format('woff');
+}
+
+/* Poppins Regular (400) */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Poppins Regular'),
+       local('Poppins-Regular'),
+       url('/fonts/Poppins-Regular.woff2') format('woff2'),
+       url('/fonts/Poppins-Regular.woff') format('woff');
+}
+
+/* Poppins Medium (500) */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: local('Poppins Medium'),
+       local('Poppins-Medium'),
+       url('/fonts/Poppins-Medium.woff2') format('woff2'),
+       url('/fonts/Poppins-Medium.woff') format('woff');
+}
+
+/* Poppins SemiBold (600) */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Poppins SemiBold'),
+       local('Poppins-SemiBold'),
+       url('/fonts/Poppins-SemiBold.woff2') format('woff2'),
+       url('/fonts/Poppins-SemiBold.woff') format('woff');
+}
+
+/* Poppins Bold (700) */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Poppins Bold'),
+       local('Poppins-Bold'),
+       url('/fonts/Poppins-Bold.woff2') format('woff2'),
+       url('/fonts/Poppins-Bold.woff') format('woff');
+}
+
+/**
+ * Fallback fonts (system fonts)
+ * Utilisées pendant le chargement des polices web
+ */
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
