@@ -1,4 +1,5 @@
 import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface StoreFooterProps {
   storeName: string;
@@ -15,6 +16,7 @@ const StoreFooter = ({
   twitter_url,
   linkedin_url,
 }: StoreFooterProps) => {
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -50,21 +52,21 @@ const StoreFooter = ({
 
           {/* Legal */}
           <div>
-            <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-lg">Légales</h3>
+            <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-lg">{t('storefront.footer.legal')}</h3>
             <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
               <li>
                 <a href="#terms" className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1">
-                  CGU
+                  {t('storefront.footer.terms')}
                 </a>
               </li>
               <li>
                 <a href="#privacy" className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1">
-                  Confidentialité
+                  {t('storefront.footer.privacy')}
                 </a>
               </li>
               <li>
                 <a href="#refund" className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1">
-                  Remboursement
+                  {t('storefront.footer.refund')}
                 </a>
               </li>
             </ul>
@@ -72,16 +74,16 @@ const StoreFooter = ({
 
           {/* Languages & Location */}
           <div>
-            <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-lg">Localisation</h3>
+            <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-lg">{t('storefront.footer.location')}</h3>
             <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
-                <span>🌍</span> Afrique
+                <span>🌍</span> {t('storefront.footer.africa')}
               </li>
               <li className="flex items-center gap-2">
-                <span>🗣️</span> Français
+                <span>🗣️</span> {t('storefront.footer.french')}
               </li>
               <li className="flex items-center gap-2">
-                <span>💰</span> Multidevise
+                <span>💰</span> {t('storefront.footer.multiCurrency')}
               </li>
             </ul>
           </div>

@@ -415,7 +415,7 @@ const Products = () => {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <Loader2 className="inline-block h-8 w-8 animate-spin text-primary" />
-              <p className="mt-2 text-muted-foreground">Chargement des produits...</p>
+              <p className="mt-2 text-muted-foreground">{t('products.loadingProducts')}</p>
             </div>
           </div>
         </div>
@@ -436,14 +436,14 @@ const Products = () => {
                     <Package className="h-8 w-8 text-muted-foreground" />
                   </div>
                 </div>
-                <CardTitle>Créez votre boutique d'abord</CardTitle>
+                <CardTitle>{t('products.createStoreFirst')}</CardTitle>
                 <CardDescription>
-                  Vous devez créer une boutique avant de pouvoir ajouter des produits
+                  {t('products.createStoreDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-center">
                 <Button onClick={() => navigate("/dashboard/store")}>
-                  Créer ma boutique
+                  {t('products.createMyStore')}
                 </Button>
               </CardContent>
             </Card>

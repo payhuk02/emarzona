@@ -228,6 +228,103 @@
       "noResults": "Nenhum produto encontrado",
       "createFirst": "Seja o primeiro a vender seus produtos em nosso mercado!",
       "createStore": "Criar minha loja grátis"
+    },
+    "hero": {
+      "title": "Marketplace Payhuk",
+      "subtitle": "Descubra milhares de produtos digitais: cursos, ebooks, templates, software e muito mais.",
+      "tagline": "Junte-se à revolução do comércio digital em África",
+      "skipToMain": "Ir para o conteúdo principal"
+    },
+    "stats": {
+      "products": "Produtos",
+      "stores": "Lojas",
+      "rating": "Classificação Média",
+      "sales": "Vendas",
+      "ariaProducts": "{{count}} produtos disponíveis",
+      "ariaStores": "{{count}} lojas ativas",
+      "ariaRating": "Classificação média de {{rating}} em 5",
+      "ariaSales": "{{count}} vendas realizadas",
+      "ariaLabel": "Estatísticas do marketplace"
+    },
+    "toast": {
+      "error": "Erro",
+      "storeUnavailable": "Loja não disponível",
+      "authRequired": "Autenticação Necessária",
+      "loginRequired": "Por favor, faça login para fazer uma compra",
+      "paymentError": "Erro de Pagamento",
+      "paymentFailed": "Não foi possível inicializar o pagamento",
+      "purchaseOf": "Compra de",
+      "shareSuccess": "Partilhado com sucesso",
+      "linkShared": "O link foi partilhado",
+      "shareError": "Erro ao Partilhar",
+      "shareNotAllowed": "Não é possível partilhar o link",
+      "linkCopied": "Link Copiado",
+      "linkCopiedDesc": "O link do produto foi copiado para a área de transferência",
+      "copyError": "Não foi possível copiar o link. Verifique as permissões."
+    },
+    "filterLabels": {
+      "category": "Categoria:",
+      "type": "Tipo:",
+      "priceRange": "Preço:",
+      "tag": "Tag:",
+      "verified": "Apenas verificados",
+      "featured": "Destaque",
+      "clear": "Limpar",
+      "all": "Todos"
+    },
+    "toolbar": {
+      "ariaLabel": "Ações do marketplace"
+    },
+    "sorting": {
+      "label": "Ordenar por:"
+    },
+    "productList": {
+      "ariaLabel": "Lista de produtos"
+    },
+    "pagination": {
+      "ariaLabel": "Paginação de produtos",
+      "previous": "Página anterior",
+      "next": "Página seguinte"
+    },
+    "cta": {
+      "title": "Pronto para lançar a sua loja?",
+      "subtitle": "Junte-se a centenas de empreendedores que estão a crescer o seu negócio com Payhuk.",
+      "startFree": "Começar grátis",
+      "joinCommunity": "Juntar-se à comunidade"
+    }
+  },
+  "storefront": {
+    "filters": {
+      "productType": "Tipo de produto",
+      "selectType": "Selecionar um tipo",
+      "allTypes": "Todos os tipos",
+      "reset": "Redefinir",
+      "apply": "Aplicar"
+    },
+    "footer": {
+      "legal": "Jurídico",
+      "terms": "Termos",
+      "privacy": "Privacidade",
+      "refund": "Reembolso",
+      "location": "Localização",
+      "africa": "África",
+      "french": "Francês",
+      "multiCurrency": "Multi-moeda"
+    },
+    "contact": {
+      "title": "Contatar {storeName}",
+      "description": "Tem alguma pergunta? Não hesite em nos contatar. Responderemos o mais breve possível.",
+      "messageSent": "Mensagem enviada!",
+      "messageDesc": "Responderemos o mais breve possível."
+    },
+    "tabs": {
+      "products": "Produtos",
+      "about": "Sobre",
+      "reviews": "Avaliações",
+      "contact": "Contato",
+      "noAbout": "Nenhuma informação sobre esta loja",
+      "noReviews": "Nenhuma avaliação ainda",
+      "noContact": "Nenhuma informação de contato disponível"
     }
   },
   "dashboard": {
@@ -266,10 +363,33 @@
     },
     "quickActions": {
       "title": "Ações rápidas",
+      "newProduct": "Novo Produto",
+      "newProductDesc": "Adicionar um produto à sua loja",
+      "newOrder": "Novo Pedido",
+      "newOrderDesc": "Criar um pedido manual",
+      "analytics": "Analítica",
+      "analyticsDesc": "Ver estatísticas detalhadas",
       "addProduct": "Adicionar produto",
       "viewOrders": "Ver pedidos",
       "manageStore": "Gerenciar loja",
-      "viewAnalytics": "Ver análises"
+      "viewAnalytics": "Ver análises",
+      "createProduct": "Criar produto",
+      "createProductDesc": "Adicionar um novo produto à sua loja",
+      "manageOrders": "Gerir pedidos",
+      "manageOrdersDesc": "Ver e gerir os seus pedidos",
+      "viewAnalyticsDesc": "Consulte as suas estatísticas detalhadas",
+      "manageCustomers": "Gerir Clientes",
+      "manageCustomersDesc": "Ver e gerir os seus clientes",
+      "viewStore": "Ver minha loja",
+      "viewStoreDesc": "Personalize a sua loja online",
+      "settings": "Configurações",
+      "settingsDesc": "Configure a sua conta e loja"
+    },
+    "recentActivity": {
+      "title": "Atividade Recente"
+    },
+    "notificationsBadge": {
+      "new": "Novo"
     }
   },
   "products": {
@@ -279,6 +399,10 @@
     "refresh": "Atualizar",
     "export": "Exportar CSV",
     "import": "Importar CSV",
+    "loadingProducts": "Carregando produtos...",
+    "createStoreFirst": "Crie sua loja primeiro",
+    "createStoreDescription": "Você deve criar uma loja antes de adicionar produtos",
+    "createMyStore": "Criar minha loja",
     "viewMode": {
       "grid": "Grade",
       "list": "Lista"
@@ -561,6 +685,8 @@
     "hide": "Ocultar",
     "open": "Abrir",
     "select": "Selecionar",
+    "manageAll": "Gerencie todos os seus",
+    "or": "Ou",
     "upload": "Enviar",
     "download": "Baixar",
     "copy": "Copiar",
@@ -613,6 +739,321 @@
     "uploaded": "Enviado com sucesso",
     "copied": "Copiado para a área de transferência",
     "sent": "Enviado com sucesso"
+  },
+  "landing": {
+    "nav": {
+      "marketplace": "Marketplace",
+      "howItWorks": "Como funciona",
+      "features": "Recursos",
+      "pricing": "Preços",
+      "testimonials": "Depoimentos",
+      "login": "Entrar",
+      "getStarted": "Começar grátis"
+    },
+    "hero": {
+      "badge": "A plataforma tudo-em-um para vender seus produtos digitais",
+      "title": "Venda seus produtos digitais com facilidade",
+      "subtitle": "Crie sua loja online, gerencie suas vendas em FCFA e outras moedas, e desenvolva seu negócio na África sem taxas ocultas.",
+      "ctaPrimary": "Começar agora",
+      "ctaSecondary": "Ver demo",
+      "mockupPreview": "Pré-visualização da sua futura loja"
+    },
+    "stats": {
+      "users": "Usuários",
+      "sales": "Vendas",
+      "stores": "Lojas"
+    },
+    "testimonials": {
+      "title": "Eles têm sucesso com Payhuk",
+      "subtitle": "Junte-se a centenas de empreendedores que desenvolvem seus negócios",
+      "items": [
+        {
+          "name": "Amadou K.",
+          "role": "Criador de conteúdo",
+          "content": "Dobrei minha renda em 3 meses graças ao Payhuk. A plataforma é simples e os pagamentos em FCFA são um grande diferencial!"
+        },
+        {
+          "name": "Fatou D.",
+          "role": "Formadora online",
+          "content": "Finalmente uma solução adaptada ao mercado africano! Meus alunos podem pagar facilmente e gerencio tudo pelo meu celular."
+        },
+        {
+          "name": "Ibrahim S.",
+          "role": "Desenvolvedor",
+          "content": "Interface moderna, recursos completos e suporte reativo. Payhuk é a melhor plataforma para vender na África."
+        }
+      ]
+    },
+    "features": {
+      "title": "Recursos principais",
+      "subtitle": "Tudo o que você precisa para ter sucesso",
+      "items": [
+        {
+          "title": "Loja online personalizável",
+          "description": "Crie uma loja profissional em poucos cliques, sem conhecimento técnico."
+        },
+        {
+          "title": "Pagamentos em FCFA",
+          "description": "Aceite pagamentos em moeda local com Moneroo e outros meios de pagamento."
+        },
+        {
+          "title": "Painel completo",
+          "description": "Acompanhe suas vendas, gerencie seus produtos e analise seu desempenho em tempo real."
+        },
+        {
+          "title": "Segurança máxima",
+          "description": "Seus dados e os de seus clientes são protegidos pelas últimas tecnologias de segurança."
+        },
+        {
+          "title": "Suporte 24/7",
+          "description": "Nossa equipe está disponível para acompanhá-lo em cada etapa do seu crescimento."
+        },
+        {
+          "title": "Multi-moedas",
+          "description": "Venda em várias moedas e expanda seu mercado internacionalmente."
+        }
+      ]
+    },
+    "howItWorks": {
+      "title": "Como funciona?",
+      "subtitle": "Inicie seu negócio em 3 passos simples",
+      "steps": [
+        {
+          "number": "01",
+          "title": "Crie sua conta",
+          "description": "Inscrição gratuita em menos de um minuto. Não é necessário cartão de crédito."
+        },
+        {
+          "number": "02",
+          "title": "Adicione seus produtos",
+          "description": "Importe seus produtos digitais ou físicos em poucos cliques com nossa interface intuitiva."
+        },
+        {
+          "number": "03",
+          "title": "Comece a vender",
+          "description": "Compartilhe sua loja e receba pagamentos instantaneamente em FCFA e outras moedas."
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Preços simples e transparentes",
+      "subtitle": "Comece grátis, pague apenas sobre suas vendas",
+      "free": {
+        "title": "Grátis",
+        "price": "0 FCFA",
+        "period": "/mês",
+        "description": "Perfeito para começar",
+        "features": "Recursos incluídos",
+        "cta": "Começar grátis"
+      },
+      "featuresList": [
+        "Loja online ilimitada",
+        "Produtos ilimitados",
+        "Pagamentos seguros",
+        "Painel de análise",
+        "Suporte por e-mail",
+        "Sem comissão sobre vendas"
+      ]
+    },
+    "cta": {
+      "title": "Pronto para desenvolver seu negócio?",
+      "subtitle": "Junte-se a milhares de empreendedores africanos que têm sucesso com Payhuk",
+      "button": "Criar minha conta grátis"
+    },
+    "footer": {
+      "description": "A plataforma de e-commerce nº 1 para vender seus produtos digitais e físicos na África.",
+      "product": "Produto",
+      "company": "Empresa",
+      "legal": "Legal",
+      "support": "Suporte",
+      "links": {
+        "features": "Recursos",
+        "pricing": "Preços",
+        "marketplace": "Marketplace",
+        "demo": "Demo",
+        "documentation": "Documentação",
+        "guides": "Guias",
+        "contact": "Contato",
+        "about": "Sobre",
+        "blog": "Blog",
+        "careers": "Carreiras",
+        "terms": "Termos de Serviço",
+        "privacy": "Política de Privacidade"
+      },
+      "copyright": "© 2025 Payhuk. Todos os direitos reservados."
+    },
+    "featureSections": {
+      "feature1": {
+        "badge": "Configuração rápida",
+        "title": "Sua loja personalizada em 2 minutos",
+        "description": "Crie sua loja online sem habilidades técnicas. Personalize seu design, adicione seus produtos e comece a vender imediatamente.",
+        "cta": "Criar minha loja"
+      },
+      "feature2": {
+        "badge": "Multi-moedas",
+        "title": "Venda em qualquer lugar, em várias moedas",
+        "description": "Aceite pagamentos em FCFA, EUR, USD e mais. Seus clientes pagam em sua moeda local para uma melhor experiência.",
+        "cta": "Descobrir moedas"
+      },
+      "feature3": {
+        "badge": "Segurança máxima",
+        "title": "Conecte suas ferramentas favoritas",
+        "description": "Integre facilmente suas ferramentas de marketing, CRM e outros serviços. Automatize seu negócio para focar no essencial.",
+        "cta": "Ver integrações"
+      },
+      "feature4": {
+        "badge": "Análise",
+        "title": "Acompanhe suas vendas e ajuste sua estratégia",
+        "description": "Painel completo com estatísticas em tempo real. Analise seu desempenho e otimize suas vendas.",
+        "cta": "Ver painel"
+      },
+      "feature5": {
+        "badge": "Suporte 24/7",
+        "title": "Uma equipe ao seu lado 24h por dia",
+        "description": "Nossa equipe de especialistas está disponível para apoiá-lo em cada etapa. Chat ao vivo, e-mail ou telefone - estamos aqui para você.",
+        "cta": "Contatar suporte"
+      }
+    },
+    "keyFeatures": {
+      "title": "Recursos principais",
+      "subtitle": "Tudo o que você precisa para desenvolver seu negócio",
+      "items": {
+        "fcfaPayments": {
+          "title": "Pagamentos em FCFA",
+          "description": "Aceite pagamentos em FCFA (XOF) e outras moedas africanas para facilitar transações locais."
+        },
+        "mobileFirst": {
+          "title": "Mobile-first",
+          "description": "Interface otimizada para celular. Gerencie sua loja de qualquer lugar, a qualquer momento."
+        },
+        "secure": {
+          "title": "Seguro",
+          "description": "Pagamentos seguros e proteção avançada de dados. Suas transações estão 100% protegidas."
+        },
+        "statistics": {
+          "title": "Estatísticas",
+          "description": "Painel completo com análise em tempo real para acompanhar seu desempenho."
+        },
+        "multiLanguage": {
+          "title": "Multi-idioma",
+          "description": "Interface disponível em francês e outros idiomas para atender todos os seus clientes."
+        },
+        "noCommission": {
+          "title": "Sem comissão",
+          "description": "Sem comissão oculta. Mantenha 100% de sua receita com taxas transparentes."
+        }
+      }
+    },
+    "howItWorksDetailed": {
+      "title": "Como funciona?",
+      "subtitle": "Lance sua loja em 3 passos simples",
+      "steps": {
+        "step1": {
+          "number": "1",
+          "title": "Inscreva-se",
+          "description": "Crie sua conta grátis em segundos. Não é necessário cartão de crédito."
+        },
+        "step2": {
+          "number": "2",
+          "title": "Configure sua loja",
+          "description": "Personalize sua loja, adicione seus produtos e configure seus métodos de pagamento."
+        },
+        "step3": {
+          "number": "3",
+          "title": "Comece a vender",
+          "description": "Compartilhe o link da sua loja e comece a receber pagamentos imediatamente."
+        }
+      },
+      "cta": "Começar agora"
+    },
+    "pricingDetailed": {
+      "title": "Preços simples e transparentes",
+      "subtitle": "Comece grátis, pague apenas sobre suas vendas",
+      "free": {
+        "badge": "100% Grátis",
+        "title": "Plataforma completamente gratuita",
+        "price": "0 FCFA",
+        "subtitle": "Sem taxas de inscrição, sem assinatura mensal",
+        "commission": {
+          "percentage": "10%",
+          "title": "Comissão apenas sobre vendas concluídas",
+          "subtitle": "Você só paga se vender!"
+        },
+        "featuresTitle": "Recursos incluídos",
+        "advantagesTitle": "Benefícios",
+        "features": [
+          "Loja personalizada",
+          "Produtos ilimitados",
+          "Pagamentos em FCFA e outras moedas",
+          "Painel de análise"
+        ],
+        "advantages": [
+          "Gestão de pedidos",
+          "Suporte ao cliente reativo",
+          "Pagamentos seguros",
+          "Atualizações gratuitas"
+        ],
+        "cta": "Começar grátis",
+        "note": "Não é necessário cartão de crédito • Sem compromisso • Cancele a qualquer momento"
+      }
+    },
+    "coverage": {
+      "title": "Cobertura internacional",
+      "subtitle": "Aceite pagamentos de todo o mundo com moedas locais",
+      "regions": {
+        "westAfrica": {
+          "title": "África Ocidental",
+          "description": "Pagamentos em FCFA (XOF) disponíveis em toda a zona UEMOA: Senegal, Costa do Marfim, Mali, Benin, Burkina Faso, Níger, Togo, Guiné-Bissau"
+        },
+        "international": {
+          "title": "Moedas internacionais",
+          "description": "Aceite também pagamentos em EUR, USD, GBP e outras moedas principais para atender seus clientes internacionais"
+        },
+        "compliance": {
+          "title": "Conformidade local",
+          "description": "Solução 100% conforme com regulamentações locais e internacionais para transações seguras"
+        }
+      },
+      "cta": {
+        "show": "Ver todos os países cobertos",
+        "hide": "Ocultar"
+      },
+      "detailedCoverage": {
+        "title": "Países cobertos por área geográfica",
+        "zones": {
+          "westAfrica": {
+            "title": "África Ocidental (Zona UEMOA - FCFA XOF)",
+            "countries": ["Senegal", "Costa do Marfim", "Mali", "Benin", "Burkina Faso", "Níger", "Togo", "Guiné-Bissau"]
+          },
+          "centralAfrica": {
+            "title": "África Central (Zona CEMAC - FCFA XAF)",
+            "countries": ["Camarões", "Gabão", "Congo-Brazzaville", "Chade", "RCA", "Guiné Equatorial"]
+          },
+          "northAfrica": {
+            "title": "Norte da África",
+            "countries": ["Marrocos (MAD)", "Argélia (DZD)", "Tunísia (TND)", "Egito (EGP)"]
+          },
+          "eastAfrica": {
+            "title": "África Oriental",
+            "countries": ["Quênia (KES)", "Tanzânia (TZS)", "Uganda (UGX)", "Ruanda (RWF)", "Etiópia (ETB)"]
+          },
+          "southernAfrica": {
+            "title": "África Austral",
+            "countries": ["África do Sul (ZAR)", "Nigéria (NGN)", "Gana (GHS)", "Zimbábue (ZWL)"]
+          },
+          "international": {
+            "title": "Internacional (Moedas principais)",
+            "countries": ["Zona Euro (EUR)", "Estados Unidos (USD)", "Reino Unido (GBP)", "Canadá (CAD)", "Suíça (CHF)"]
+          }
+        },
+        "note": "+ 180 outros países e territórios em todo o mundo"
+      }
+    },
+    "finalCta": {
+      "title": "Comece a vender produtos digitais hoje!",
+      "subtitle": "Junte-se a centenas de empreendedores africanos que já confiam no Payhuk",
+      "button": "Criar minha conta grátis"
+    }
   }
 }
 

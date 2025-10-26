@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface ProductFiltersProps {
   searchQuery: string;
@@ -33,6 +34,7 @@ const ProductFilters = ({
   categories,
   productTypes,
 }: ProductFiltersProps) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const hasActiveFilters = category !== "all" || productType !== "all";
 
@@ -136,13 +138,13 @@ const ProductFilters = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="mobile-type">Type de produit</Label>
+              <Label htmlFor="mobile-type">{t('storefront.filters.productType')}</Label>
               <Select value={productType} onValueChange={onProductTypeChange}>
                 <SelectTrigger id="mobile-type" className="h-12 touch-manipulation">
-                  <SelectValue placeholder="Sélectionner un type" />
+                  <SelectValue placeholder={t('storefront.filters.selectType')} />
                 </SelectTrigger>
                 <SelectContent className="z-[60] bg-background">
-                  <SelectItem value="all">Tous les types</SelectItem>
+                  <SelectItem value="all">{t('storefront.filters.allTypes')}</SelectItem>
                   {productTypes.map((type) => (
                     <SelectItem key={type} value={type}>
                       {type}
@@ -158,13 +160,13 @@ const ProductFilters = ({
                 onClick={clearFilters}
                 className="flex-1 h-12 touch-manipulation"
               >
-                Réinitialiser
+                {t('storefront.filters.reset')}
               </Button>
               <Button
                 onClick={() => setOpen(false)}
                 className="flex-1 h-12 touch-manipulation gradient-primary"
               >
-                Appliquer
+                {t('storefront.filters.apply')}
               </Button>
             </div>
           </div>

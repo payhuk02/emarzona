@@ -1,5 +1,6 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useTranslation } from "react-i18next";
 
 interface StoreTabsProps {
   productsContent: React.ReactNode;
@@ -14,6 +15,7 @@ const StoreTabs = ({
   reviewsContent,
   contactContent,
 }: StoreTabsProps) => {
+  const { t } = useTranslation();
   return (
     <Tabs defaultValue="products" className="w-full">
       {/* Sticky tabs for mobile */}
@@ -24,25 +26,25 @@ const StoreTabs = ({
               value="products"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap"
             >
-              Produits
+              {t('storefront.tabs.products')}
             </TabsTrigger>
             <TabsTrigger
               value="about"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap"
             >
-              À propos
+              {t('storefront.tabs.about')}
             </TabsTrigger>
             <TabsTrigger
               value="reviews"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap"
             >
-              Avis
+              {t('storefront.tabs.reviews')}
             </TabsTrigger>
             <TabsTrigger
               value="contact"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap"
             >
-              Contact
+              {t('storefront.tabs.contact')}
             </TabsTrigger>
           </TabsList>
           <ScrollBar orientation="horizontal" className="invisible" />
@@ -56,7 +58,7 @@ const StoreTabs = ({
       <TabsContent value="about" className="mt-4 sm:mt-6">
         {aboutContent || (
           <div className="text-center py-12 px-4 text-muted-foreground">
-            Aucune information à propos de cette boutique
+            {t('storefront.tabs.noAbout')}
           </div>
         )}
       </TabsContent>
@@ -64,7 +66,7 @@ const StoreTabs = ({
       <TabsContent value="reviews" className="mt-4 sm:mt-6">
         {reviewsContent || (
           <div className="text-center py-12 px-4 text-muted-foreground">
-            Aucun avis pour le moment
+            {t('storefront.tabs.noReviews')}
           </div>
         )}
       </TabsContent>
@@ -72,7 +74,7 @@ const StoreTabs = ({
       <TabsContent value="contact" className="mt-4 sm:mt-6">
         {contactContent || (
           <div className="text-center py-12 px-4 text-muted-foreground">
-            Aucune information de contact disponible
+            {t('storefront.tabs.noContact')}
           </div>
         )}
       </TabsContent>

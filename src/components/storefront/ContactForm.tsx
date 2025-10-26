@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Phone, MessageSquare } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ContactFormProps {
   storeName: string;
@@ -13,6 +14,7 @@ interface ContactFormProps {
 }
 
 const ContactForm = ({ storeName, contactEmail, contactPhone }: ContactFormProps) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -30,8 +32,8 @@ const ContactForm = ({ storeName, contactEmail, contactPhone }: ContactFormProps
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     toast({
-      title: "Message envoyé !",
-      description: "Nous vous répondrons dans les plus brefs délais.",
+      title: t('storefront.contact.messageSent'),
+      description: t('storefront.contact.messageDesc'),
     });
 
     setFormData({ name: "", email: "", subject: "", message: "" });
@@ -41,9 +43,9 @@ const ContactForm = ({ storeName, contactEmail, contactPhone }: ContactFormProps
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6 sm:mb-8">
-        <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Contactez {storeName}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">{t('storefront.contact.title', { storeName })}</h2>
         <p className="text-sm sm:text-base text-muted-foreground">
-          Vous avez une question ? N'hésitez pas à nous contacter. Nous vous répondrons dans les meilleurs délais.
+          {t('storefront.contact.description')}
         </p>
       </div>
 

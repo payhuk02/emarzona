@@ -284,53 +284,39 @@ const Landing = () => {
               className="w-full"
             >
               <CarouselContent className="-ml-2 md:-ml-4">
-                {[
-                  {
-                    name: "Amadou K.",
-                    role: "Créateur de contenu",
-                    content: "J'ai doublé mes revenus en 3 mois grâce à Payhuk. La plateforme est simple et les paiements en FCFA sont un vrai plus !",
-                    avatar: testimonial1
-                  },
-                  {
-                    name: "Fatou D.",
-                    role: "Formatrice en ligne",
-                    content: "Enfin une solution adaptée au marché africain ! Mes étudiants peuvent payer facilement et je gère tout depuis mon téléphone.",
-                    avatar: testimonial2
-                  },
-                  {
-                    name: "Ibrahim S.",
-                    role: "Développeur",
-                    content: "Interface moderne, fonctionnalités complètes et support réactif. Payhuk est la meilleure plateforme pour vendre en Afrique.",
-                    avatar: testimonial3
-                  }
-                ].map((testimonial, index) => (
-                  <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                    <Card className="bg-card border-border shadow-medium hover:shadow-large hover:scale-105 transition-smooth h-full">
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-1 mb-4">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="h-4 w-4 text-accent" fill="currentColor" />
-                          ))}
-                        </div>
-                        <p className="text-foreground mb-6 leading-relaxed text-sm md:text-base">
-                          "{testimonial.content}"
-                        </p>
-                        <div className="flex items-center gap-3">
-                          <img 
-                            src={testimonial.avatar} 
-                            alt={testimonial.name}
-                            className="h-12 w-12 rounded-full object-cover ring-2 ring-primary/20"
-                            loading="lazy"
-                          />
-                          <div>
-                            <p className="font-semibold text-foreground">{testimonial.name}</p>
-                            <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                {(() => {
+                  const testimonials = t('landing.testimonials.items', { returnObjects: true }) as any[];
+                  const avatars = [testimonial1, testimonial2, testimonial3];
+                  
+                  return testimonials.map((testimonial, index) => (
+                    <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                      <Card className="bg-card border-border shadow-medium hover:shadow-large hover:scale-105 transition-smooth h-full">
+                        <CardContent className="p-6">
+                          <div className="flex items-center gap-1 mb-4">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className="h-4 w-4 text-accent" fill="currentColor" />
+                            ))}
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </CarouselItem>
-                ))}
+                          <p className="text-foreground mb-6 leading-relaxed text-sm md:text-base">
+                            "{testimonial.content}"
+                          </p>
+                          <div className="flex items-center gap-3">
+                            <img 
+                              src={avatars[index]} 
+                              alt={testimonial.name}
+                              className="h-12 w-12 rounded-full object-cover ring-2 ring-primary/20"
+                              loading="lazy"
+                            />
+                            <div>
+                              <p className="font-semibold text-foreground">{testimonial.name}</p>
+                              <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </CarouselItem>
+                  ));
+                })()}
               </CarouselContent>
               <div className="hidden md:block">
                 <CarouselPrevious className="left-0" />
@@ -356,18 +342,17 @@ const Landing = () => {
             <div className="order-1 md:order-2 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-accent/20 px-3 md:px-4 py-2 rounded-full mb-4">
                 <Zap className="h-4 w-4 text-accent" />
-                <span className="text-xs md:text-sm font-medium text-accent">Configuration rapide</span>
+                <span className="text-xs md:text-sm font-medium text-accent">{t('landing.featureSections.feature1.badge')}</span>
               </div>
               <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-foreground">
-                Votre boutique personnalisée en 2 minutes
+                {t('landing.featureSections.feature1.title')}
               </h3>
               <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
-                Créez votre boutique en ligne sans compétences techniques. 
-                Personnalisez votre design, ajoutez vos produits et commencez à vendre immédiatement.
+                {t('landing.featureSections.feature1.description')}
               </p>
               <Link to="/auth">
                 <Button className="gradient-primary text-primary-foreground font-semibold hover:scale-105 transition-smooth">
-                  Créer ma boutique
+                  {t('landing.featureSections.feature1.cta')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
@@ -379,18 +364,17 @@ const Landing = () => {
             <div className="text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-primary/20 px-3 md:px-4 py-2 rounded-full mb-4">
                 <Globe className="h-4 w-4 text-primary" />
-                <span className="text-xs md:text-sm font-medium text-primary">Multi-devises</span>
+                <span className="text-xs md:text-sm font-medium text-primary">{t('landing.featureSections.feature2.badge')}</span>
               </div>
               <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-foreground">
-                Vendez partout, dans plusieurs devises
+                {t('landing.featureSections.feature2.title')}
               </h3>
               <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
-                Acceptez les paiements en FCFA, EUR, USD et bien plus. 
-                Vos clients paient dans leur devise locale pour une meilleure expérience.
+                {t('landing.featureSections.feature2.description')}
               </p>
               <Link to="/auth">
                 <Button className="gradient-primary text-primary-foreground font-semibold hover:scale-105 transition-smooth">
-                  Découvrir les devises
+                  {t('landing.featureSections.feature2.cta')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
@@ -416,18 +400,17 @@ const Landing = () => {
             <div className="order-1 md:order-2 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-accent/20 px-3 md:px-4 py-2 rounded-full mb-4">
                 <Shield className="h-4 w-4 text-accent" />
-                <span className="text-xs md:text-sm font-medium text-accent">Sécurité maximale</span>
+                <span className="text-xs md:text-sm font-medium text-accent">{t('landing.featureSections.feature3.badge')}</span>
               </div>
               <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-foreground">
-                Connectez vos outils préférés
+                {t('landing.featureSections.feature3.title')}
               </h3>
               <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
-                Intégrez facilement vos outils marketing, CRM et autres services. 
-                Automatisez votre business pour vous concentrer sur l'essentiel.
+                {t('landing.featureSections.feature3.description')}
               </p>
               <Link to="/auth">
                 <Button className="gradient-primary text-primary-foreground font-semibold hover:scale-105 transition-smooth">
-                  Voir les intégrations
+                  {t('landing.featureSections.feature3.cta')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
@@ -439,18 +422,17 @@ const Landing = () => {
             <div className="text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-primary/20 px-3 md:px-4 py-2 rounded-full mb-4">
                 <BarChart3 className="h-4 w-4 text-primary" />
-                <span className="text-xs md:text-sm font-medium text-primary">Analytics</span>
+                <span className="text-xs md:text-sm font-medium text-primary">{t('landing.featureSections.feature4.badge')}</span>
               </div>
               <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-foreground">
-                Suivez vos ventes et ajustez votre stratégie
+                {t('landing.featureSections.feature4.title')}
               </h3>
               <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
-                Tableau de bord complet avec statistiques en temps réel. 
-                Analysez vos performances et optimisez vos ventes.
+                {t('landing.featureSections.feature4.description')}
               </p>
               <Link to="/auth">
                 <Button className="gradient-primary text-primary-foreground font-semibold hover:scale-105 transition-smooth">
-                  Voir le tableau de bord
+                  {t('landing.featureSections.feature4.cta')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
@@ -476,18 +458,17 @@ const Landing = () => {
             <div className="order-1 md:order-2 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-accent/20 px-3 md:px-4 py-2 rounded-full mb-4">
                 <Users className="h-4 w-4 text-accent" />
-                <span className="text-xs md:text-sm font-medium text-accent">Support 24/7</span>
+                <span className="text-xs md:text-sm font-medium text-accent">{t('landing.featureSections.feature5.badge')}</span>
               </div>
               <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-foreground">
-                Une équipe à vos côtés 24h/24 et 7j/7
+                {t('landing.featureSections.feature5.title')}
               </h3>
               <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
-                Notre équipe d'experts est disponible pour vous accompagner à chaque étape. 
-                Chat en direct, email ou téléphone - nous sommes là pour vous.
+                {t('landing.featureSections.feature5.description')}
               </p>
               <Link to="/auth">
                 <Button className="gradient-primary text-primary-foreground font-semibold hover:scale-105 transition-smooth">
-                  Contacter le support
+                  {t('landing.featureSections.feature5.cta')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
@@ -501,10 +482,10 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-foreground px-4">
-              Fonctionnalités clés
+              {t('landing.keyFeatures.title')}
             </h2>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-              Tout ce dont vous avez besoin pour développer votre business
+              {t('landing.keyFeatures.subtitle')}
             </p>
           </div>
 
@@ -512,33 +493,33 @@ const Landing = () => {
             {[
               {
                 icon: <DollarSign className="h-5 w-5 md:h-6 md:w-6" />,
-                title: "Paiements en FCFA",
-                description: "Acceptez les paiements en FCFA (XOF) et autres devises africaines pour faciliter les transactions locales."
+                title: t('landing.keyFeatures.items.fcfaPayments.title'),
+                description: t('landing.keyFeatures.items.fcfaPayments.description')
               },
               {
                 icon: <Smartphone className="h-5 w-5 md:h-6 md:w-6" />,
-                title: "Mobile-first",
-                description: "Interface optimisée pour mobile. Gérez votre boutique depuis n'importe où, à tout moment."
+                title: t('landing.keyFeatures.items.mobileFirst.title'),
+                description: t('landing.keyFeatures.items.mobileFirst.description')
               },
               {
                 icon: <Lock className="h-5 w-5 md:h-6 md:w-6" />,
-                title: "Sécurisé",
-                description: "Paiements sécurisés et protection avancée de vos données. Vos transactions sont 100% protégées."
+                title: t('landing.keyFeatures.items.secure.title'),
+                description: t('landing.keyFeatures.items.secure.description')
               },
               {
                 icon: <BarChart3 className="h-5 w-5 md:h-6 md:w-6" />,
-                title: "Statistiques",
-                description: "Tableau de bord complet avec analytics en temps réel pour suivre vos performances."
+                title: t('landing.keyFeatures.items.statistics.title'),
+                description: t('landing.keyFeatures.items.statistics.description')
               },
               {
                 icon: <Globe className="h-5 w-5 md:h-6 md:w-6" />,
-                title: "Multi-langues",
-                description: "Interface disponible en français et autres langues pour servir tous vos clients."
+                title: t('landing.keyFeatures.items.multiLanguage.title'),
+                description: t('landing.keyFeatures.items.multiLanguage.description')
               },
               {
                 icon: <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6" />,
-                title: "Sans commission",
-                description: "Pas de commission cachée. Gardez 100% de vos revenus avec des frais transparents."
+                title: t('landing.keyFeatures.items.noCommission.title'),
+                description: t('landing.keyFeatures.items.noCommission.description')
               }
             ].map((feature, index) => (
               <Card key={index} className="bg-card border-border shadow-soft hover:shadow-medium hover:scale-105 transition-smooth group">
@@ -562,31 +543,31 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-foreground px-4">
-              Comment ça marche ?
+              {t('landing.howItWorksDetailed.title')}
             </h2>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-              Lancez votre boutique en 3 étapes simples
+              {t('landing.howItWorksDetailed.subtitle')}
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 md:gap-12 max-w-6xl mx-auto">
             {[
               {
-                step: "1",
-                title: "Inscrivez-vous",
-                description: "Créez votre compte gratuitement en quelques secondes. Aucune carte bancaire requise.",
+                step: t('landing.howItWorksDetailed.steps.step1.number'),
+                title: t('landing.howItWorksDetailed.steps.step1.title'),
+                description: t('landing.howItWorksDetailed.steps.step1.description'),
                 icon: <Users className="h-8 w-8" />
               },
               {
-                step: "2",
-                title: "Configurez votre boutique",
-                description: "Personnalisez votre boutique, ajoutez vos produits et configurez vos moyens de paiement.",
+                step: t('landing.howItWorksDetailed.steps.step2.number'),
+                title: t('landing.howItWorksDetailed.steps.step2.title'),
+                description: t('landing.howItWorksDetailed.steps.step2.description'),
                 icon: <Package className="h-8 w-8" />
               },
               {
-                step: "3",
-                title: "Commencez à vendre",
-                description: "Partagez le lien de votre boutique et commencez à recevoir des paiements immédiatement.",
+                step: t('landing.howItWorksDetailed.steps.step3.number'),
+                title: t('landing.howItWorksDetailed.steps.step3.title'),
+                description: t('landing.howItWorksDetailed.steps.step3.description'),
                 icon: <TrendingUp className="h-8 w-8" />
               }
             ].map((item, index) => (
@@ -608,7 +589,7 @@ const Landing = () => {
           <div className="text-center mt-12 px-4">
             <Link to="/auth">
               <Button size="lg" className="w-full sm:w-auto gradient-accent text-accent-foreground font-semibold text-base md:text-lg px-6 md:px-8 py-5 md:py-6 shadow-glow hover:opacity-90 hover:scale-105 transition-smooth">
-                Commencer maintenant
+                {t('landing.howItWorksDetailed.cta')}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -621,10 +602,10 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-foreground px-4">
-              Tarifs simples et transparents
+              {t('landing.pricingDetailed.title')}
             </h2>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-              Commencez gratuitement, payez uniquement sur vos ventes
+              {t('landing.pricingDetailed.subtitle')}
             </p>
           </div>
 
@@ -633,76 +614,56 @@ const Landing = () => {
               <CardContent className="p-8 md:p-12 text-center">
                 <div className="inline-flex items-center gap-2 bg-primary/20 px-4 py-2 rounded-full mb-6">
                   <Star className="h-4 w-4 text-primary" fill="currentColor" />
-                  <span className="text-sm font-medium text-primary">100% Gratuit</span>
+                  <span className="text-sm font-medium text-primary">{t('landing.pricingDetailed.free.badge')}</span>
                 </div>
                 
                 <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-                  Plateforme entièrement gratuite
+                  {t('landing.pricingDetailed.free.title')}
                 </h3>
                 
                 <div className="mb-8">
                   <div className="text-5xl md:text-6xl font-bold text-primary mb-2">
-                    0 FCFA
+                    {t('landing.pricingDetailed.free.price')}
                   </div>
                   <p className="text-lg text-muted-foreground">
-                    Aucun frais d'inscription, aucun abonnement mensuel
+                    {t('landing.pricingDetailed.free.subtitle')}
                   </p>
                 </div>
 
                 <div className="bg-accent/10 border border-accent/20 rounded-xl p-6 mb-8">
                   <div className="flex items-center justify-center gap-3 mb-2">
                     <DollarSign className="h-6 w-6 text-accent" />
-                    <span className="text-2xl md:text-3xl font-bold text-accent">10%</span>
+                    <span className="text-2xl md:text-3xl font-bold text-accent">{t('landing.pricingDetailed.free.commission.percentage')}</span>
                   </div>
                   <p className="text-base md:text-lg text-foreground">
-                    Commission uniquement sur les ventes réalisées
+                    {t('landing.pricingDetailed.free.commission.title')}
                   </p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Vous ne payez que si vous vendez !
+                    {t('landing.pricingDetailed.free.commission.subtitle')}
                   </p>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6 mb-8 text-left">
                   <div>
-                    <h4 className="font-semibold text-lg mb-4 text-foreground">Fonctionnalités incluses</h4>
+                    <h4 className="font-semibold text-lg mb-4 text-foreground">{t('landing.pricingDetailed.free.featuresTitle')}</h4>
                     <ul className="space-y-3">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                        <span className="text-sm text-foreground">Boutique personnalisée</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                        <span className="text-sm text-foreground">Produits illimités</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                        <span className="text-sm text-foreground">Paiements en FCFA et autres devises</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                        <span className="text-sm text-foreground">Tableau de bord analytics</span>
-                      </li>
+                      {(t('landing.pricingDetailed.free.features', { returnObjects: true }) as string[]).map((feature, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                          <span className="text-sm text-foreground">{feature}</span>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-lg mb-4 text-foreground text-center">Avantages</h4>
+                    <h4 className="font-semibold text-lg mb-4 text-foreground text-center">{t('landing.pricingDetailed.free.advantagesTitle')}</h4>
                     <ul className="space-y-3">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                        <span className="text-sm text-foreground">Gestion des commandes</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                        <span className="text-sm text-foreground">Support client réactif</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                        <span className="text-sm text-foreground">Paiements sécurisés</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                        <span className="text-sm text-foreground">Mises à jour gratuites</span>
-                      </li>
+                      {(t('landing.pricingDetailed.free.advantages', { returnObjects: true }) as string[]).map((advantage, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                          <span className="text-sm text-foreground">{advantage}</span>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 </div>
@@ -712,7 +673,7 @@ const Landing = () => {
                     size="lg"
                     className="w-full md:w-auto gradient-accent text-accent-foreground font-semibold text-lg px-10 py-6 shadow-glow hover:opacity-90 hover:scale-105 transition-smooth inline-flex items-center justify-center gap-2"
                   >
-                    Commencer gratuitement
+                    {t('landing.pricingDetailed.free.cta')}
                     <ArrowRight className="h-5 w-5" />
                   </Button>
                 </Link>
@@ -720,7 +681,7 @@ const Landing = () => {
             </Card>
 
             <p className="text-center text-sm text-muted-foreground mt-6 px-4">
-              Aucune carte bancaire requise • Aucun engagement • Résiliez quand vous voulez
+              {t('landing.pricingDetailed.free.note')}
             </p>
           </div>
         </div>
@@ -731,10 +692,10 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-foreground px-4">
-              Couverture internationale
+              {t('landing.coverage.title')}
             </h2>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-              Acceptez des paiements du monde entier avec des devises locales
+              {t('landing.coverage.subtitle')}
             </p>
           </div>
 
@@ -753,9 +714,9 @@ const Landing = () => {
                   <Globe className="h-5 w-5 text-accent-foreground" />
                 </div>
                 <div>
-                  <h3 className="text-lg md:text-xl font-semibold mb-2 text-foreground">Afrique de l'Ouest</h3>
+                  <h3 className="text-lg md:text-xl font-semibold mb-2 text-foreground">{t('landing.coverage.regions.westAfrica.title')}</h3>
                   <p className="text-sm md:text-base text-muted-foreground">
-                    Paiements en FCFA (XOF) disponibles dans toute la zone UEMOA : Sénégal, Côte d'Ivoire, Mali, Bénin, Burkina Faso, Niger, Togo, Guinée-Bissau
+                    {t('landing.coverage.regions.westAfrica.description')}
                   </p>
                 </div>
               </div>
@@ -765,9 +726,9 @@ const Landing = () => {
                   <CreditCard className="h-5 w-5 text-primary-foreground" />
                 </div>
                 <div>
-                  <h3 className="text-lg md:text-xl font-semibold mb-2 text-foreground">Devises internationales</h3>
+                  <h3 className="text-lg md:text-xl font-semibold mb-2 text-foreground">{t('landing.coverage.regions.international.title')}</h3>
                   <p className="text-sm md:text-base text-muted-foreground">
-                    Acceptez également les paiements en EUR, USD, GBP et autres devises majeures pour servir vos clients internationaux
+                    {t('landing.coverage.regions.international.description')}
                   </p>
                 </div>
               </div>
@@ -777,9 +738,9 @@ const Landing = () => {
                   <Shield className="h-5 w-5 text-accent-foreground" />
                 </div>
                 <div>
-                  <h3 className="text-lg md:text-xl font-semibold mb-2 text-foreground">Conformité locale</h3>
+                  <h3 className="text-lg md:text-xl font-semibold mb-2 text-foreground">{t('landing.coverage.regions.compliance.title')}</h3>
                   <p className="text-sm md:text-base text-muted-foreground">
-                    Solution 100% conforme aux réglementations locales et internationales pour des transactions sécurisées
+                    {t('landing.coverage.regions.compliance.description')}
                   </p>
                 </div>
               </div>
@@ -789,7 +750,7 @@ const Landing = () => {
                   onClick={() => setShowCountries(!showCountries)}
                   className="gradient-primary text-primary-foreground font-semibold hover:scale-105 transition-smooth"
                 >
-                  {showCountries ? 'Masquer' : 'Voir tous les pays couverts'}
+                  {showCountries ? t('landing.coverage.cta.hide') : t('landing.coverage.cta.show')}
                   <ArrowRight className={`ml-2 h-4 w-4 transition-transform ${showCountries ? 'rotate-90' : ''}`} />
                 </Button>
               </div>
@@ -797,176 +758,30 @@ const Landing = () => {
               {/* Liste complète des pays */}
               {showCountries && (
                 <div className="mt-6 p-6 bg-card rounded-lg border border-border shadow-medium animate-fade-in-up">
-                  <h4 className="font-semibold text-lg mb-4 text-foreground">Pays couverts par zone géographique</h4>
+                  <h4 className="font-semibold text-lg mb-4 text-foreground">{t('landing.coverage.detailedCoverage.title')}</h4>
                   
                   <div className="space-y-6">
-                    <div>
-                      <h5 className="font-semibold text-primary mb-2">Afrique de l'Ouest (Zone UEMOA - FCFA XOF)</h5>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Sénégal</span>
+                    {(() => {
+                      const zones = t('landing.coverage.detailedCoverage.zones', { returnObjects: true }) as Record<string, { title: string; countries: string[] }>;
+                      
+                      return Object.entries(zones).map(([key, zone]) => (
+                        <div key={key}>
+                          <h5 className="font-semibold text-primary mb-2">{zone.title}</h5>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
+                            {zone.countries.map((country, idx) => (
+                              <div key={idx} className="flex items-center gap-2">
+                                <CheckCircle2 className="h-4 w-4 text-accent" />
+                                <span>{country}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Côte d'Ivoire</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Mali</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Bénin</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Burkina Faso</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Niger</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Togo</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Guinée-Bissau</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h5 className="font-semibold text-primary mb-2">Afrique Centrale (Zone CEMAC - FCFA XAF)</h5>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Cameroun</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Gabon</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Congo-Brazzaville</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Tchad</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>RCA</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Guinée Équatoriale</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h5 className="font-semibold text-primary mb-2">Afrique du Nord</h5>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Maroc (MAD)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Algérie (DZD)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Tunisie (TND)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Égypte (EGP)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h5 className="font-semibold text-primary mb-2">Afrique de l'Est</h5>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Kenya (KES)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Tanzanie (TZS)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Ouganda (UGX)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Rwanda (RWF)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Éthiopie (ETB)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h5 className="font-semibold text-primary mb-2">Afrique Australe</h5>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Afrique du Sud (ZAR)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Nigeria (NGN)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Ghana (GHS)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Zimbabwe (ZWL)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h5 className="font-semibold text-primary mb-2">International (Devises majeures)</h5>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Zone Euro (EUR)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>États-Unis (USD)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Royaume-Uni (GBP)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Canada (CAD)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-accent" />
-                          <span>Suisse (CHF)</span>
-                        </div>
-                      </div>
-                    </div>
+                      ));
+                    })()}
                   </div>
 
                   <p className="text-sm text-muted-foreground mt-4 italic">
-                    + 180 autres pays et territoires dans le monde entier
+                    {t('landing.coverage.detailedCoverage.note')}
                   </p>
                 </div>
               )}
@@ -981,15 +796,15 @@ const Landing = () => {
         <div className="container mx-auto px-4 text-center relative z-10">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-foreground px-4">
-              Commencez à vendre des produits digitaux dès aujourd'hui !
+              {t('landing.finalCta.title')}
             </h2>
             <p className="text-base md:text-xl text-muted-foreground mb-8 px-4">
-              Rejoignez des centaines d'entrepreneurs africains qui ont déjà fait confiance à Payhuk
+              {t('landing.finalCta.subtitle')}
             </p>
             <div className="px-4">
               <Link to="/auth">
                 <Button size="lg" className="w-full sm:w-auto gradient-accent text-accent-foreground font-semibold text-base md:text-lg px-6 md:px-8 py-5 md:py-6 shadow-glow hover:opacity-90 hover:scale-105 transition-smooth">
-                  Créer mon compte gratuitement
+                  {t('landing.finalCta.button')}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -1008,40 +823,40 @@ const Landing = () => {
                 <span className="text-lg md:text-xl font-bold text-foreground">Payhuk</span>
               </div>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                La plateforme e-commerce moderne pour entrepreneurs africains.
+                {t('landing.footer.description')}
               </p>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4 text-foreground text-sm md:text-base">Produit</h4>
+              <h4 className="font-semibold mb-4 text-foreground text-sm md:text-base">{t('landing.footer.product')}</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">Fonctionnalités</Link></li>
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">Tarifs</Link></li>
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">Démo</Link></li>
+                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">{t('landing.footer.links.features')}</Link></li>
+                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">{t('landing.footer.links.pricing')}</Link></li>
+                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">{t('landing.footer.links.demo')}</Link></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4 text-foreground text-sm md:text-base">Support</h4>
+              <h4 className="font-semibold mb-4 text-foreground text-sm md:text-base">{t('landing.footer.support')}</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">Documentation</Link></li>
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">Guides</Link></li>
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">Contact</Link></li>
+                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">{t('landing.footer.links.documentation')}</Link></li>
+                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">{t('landing.footer.links.guides')}</Link></li>
+                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">{t('landing.footer.links.contact')}</Link></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4 text-foreground text-sm md:text-base">Entreprise</h4>
+              <h4 className="font-semibold mb-4 text-foreground text-sm md:text-base">{t('landing.footer.company')}</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">À propos</Link></li>
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">Blog</Link></li>
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">Carrières</Link></li>
+                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">{t('landing.footer.links.about')}</Link></li>
+                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">{t('landing.footer.links.blog')}</Link></li>
+                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 inline-block transition-smooth">{t('landing.footer.links.careers')}</Link></li>
               </ul>
             </div>
           </div>
           
           <div className="border-t pt-8 text-center">
-            <p className="text-muted-foreground text-xs md:text-sm">© 2025 Payhuk. Tous droits réservés.</p>
+            <p className="text-muted-foreground text-xs md:text-sm">{t('landing.footer.copyright')}</p>
           </div>
         </div>
       </footer>

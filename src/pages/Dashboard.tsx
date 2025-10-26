@@ -23,29 +23,29 @@ const Dashboard = () => {
   const notifications = useMemo(() => [
     {
       id: '1',
-      title: 'Nouvelle commande',
-      message: 'Commande #ORD-20250121-0001 reçue pour 25,000 FCFA',
+      title: t('dashboard.notifications.newOrder'),
+      message: t('dashboard.notifications.newOrderMessage', { orderNumber: 'ORD-20250121-0001', amount: '25,000' }),
       type: 'success' as const,
       timestamp: new Date().toISOString(),
       read: false
     },
     {
       id: '2',
-      title: 'Produit en rupture',
-      message: 'Le produit "Formation Expert" est en rupture de stock',
+      title: t('dashboard.notifications.outOfStock'),
+      message: t('dashboard.notifications.outOfStockMessage', { productName: 'Formation Expert' }),
       type: 'warning' as const,
       timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
       read: false
     },
     {
       id: '3',
-      title: 'Paiement reçu',
-      message: 'Paiement de 15,000 FCFA confirmé',
+      title: t('dashboard.notifications.paymentReceived'),
+      message: t('dashboard.notifications.paymentReceivedMessage', { amount: '15,000' }),
       type: 'success' as const,
       timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
       read: true
     }
-  ], []);
+  ], [t]);
 
   const handleRefresh = async () => {
     try {
@@ -268,8 +268,8 @@ const Dashboard = () => {
                             <Package className="h-6 w-6 text-green-500" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm sm:text-base mb-1">Nouveau Produit</h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground">Ajouter un produit à votre boutique</p>
+                            <h3 className="font-semibold text-sm sm:text-base mb-1">{t('dashboard.quickActions.newProduct')}</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground">{t('dashboard.quickActions.newProductDesc')}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -282,8 +282,8 @@ const Dashboard = () => {
                             <ShoppingCart className="h-6 w-6 text-blue-500" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm sm:text-base mb-1">Nouvelle Commande</h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground">Créer une commande manuelle</p>
+                            <h3 className="font-semibold text-sm sm:text-base mb-1">{t('dashboard.quickActions.newOrder')}</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground">{t('dashboard.quickActions.newOrderDesc')}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -296,8 +296,8 @@ const Dashboard = () => {
                             <Activity className="h-6 w-6 text-purple-500" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm sm:text-base mb-1">Analytics</h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground">Voir les statistiques détaillées</p>
+                            <h3 className="font-semibold text-sm sm:text-base mb-1">{t('dashboard.quickActions.analytics')}</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground">{t('dashboard.quickActions.analyticsDesc')}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -314,7 +314,7 @@ const Dashboard = () => {
                       <div className="p-2 rounded-lg bg-blue-500/10">
                         <Bell className="h-5 w-5 text-blue-500" />
                       </div>
-                      Notifications
+                      {t('dashboard.notifications.title')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 sm:p-6 pt-0">
@@ -341,7 +341,7 @@ const Dashboard = () => {
                               </span>
                               {!notification.read && (
                                 <Badge variant="secondary" className="text-xs px-2 py-0.5">
-                                  Nouveau
+                                  {t('dashboard.notificationsBadge.new')}
                                 </Badge>
                               )}
                             </div>
@@ -358,7 +358,7 @@ const Dashboard = () => {
                       <div className="p-2 rounded-lg bg-green-500/10">
                         <Activity className="h-5 w-5 text-green-500" />
                       </div>
-                      Activité Récente
+                      {t('dashboard.recentActivity.title')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 sm:p-6 pt-0">

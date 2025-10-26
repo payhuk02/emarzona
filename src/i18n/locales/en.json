@@ -20,7 +20,9 @@
     "retry": "Retry",
     "refresh": "Refresh",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "manageAll": "Manage all your",
+    "or": "Or"
   },
   "nav": {
     "home": "Home",
@@ -152,6 +154,103 @@
       "training": "Training included",
       "updates": "Free updates",
       "community": "Active community"
+    },
+    "hero": {
+      "title": "Payhuk Marketplace",
+      "subtitle": "Discover thousands of digital products: courses, ebooks, templates, software, and more.",
+      "tagline": "Join the digital commerce revolution in Africa",
+      "skipToMain": "Skip to main content"
+    },
+    "stats": {
+      "products": "Products",
+      "stores": "Stores",
+      "rating": "Average Rating",
+      "sales": "Sales",
+      "ariaProducts": "{{count}} products available",
+      "ariaStores": "{{count}} active stores",
+      "ariaRating": "Average rating of {{rating}} out of 5",
+      "ariaSales": "{{count}} sales completed",
+      "ariaLabel": "Marketplace statistics"
+    },
+    "toast": {
+      "error": "Error",
+      "storeUnavailable": "Store not available",
+      "authRequired": "Authentication Required",
+      "loginRequired": "Please log in to make a purchase",
+      "paymentError": "Payment Error",
+      "paymentFailed": "Unable to initialize payment",
+      "purchaseOf": "Purchase of",
+      "shareSuccess": "Shared successfully",
+      "linkShared": "Link has been shared",
+      "shareError": "Sharing Error",
+      "shareNotAllowed": "Unable to share link",
+      "linkCopied": "Link Copied",
+      "linkCopiedDesc": "The product link has been copied to clipboard",
+      "copyError": "Unable to copy link. Check permissions."
+    },
+    "filterLabels": {
+      "category": "Category:",
+      "type": "Type:",
+      "priceRange": "Price:",
+      "tag": "Tag:",
+      "verified": "Verified only",
+      "featured": "Featured",
+      "clear": "Clear",
+      "all": "All"
+    },
+    "toolbar": {
+      "ariaLabel": "Marketplace actions"
+    },
+    "sorting": {
+      "label": "Sort by:"
+    },
+    "productList": {
+      "ariaLabel": "Product list"
+    },
+    "pagination": {
+      "ariaLabel": "Product pagination",
+      "previous": "Previous page",
+      "next": "Next page"
+    },
+    "cta": {
+      "title": "Ready to launch your store?",
+      "subtitle": "Join hundreds of entrepreneurs growing their business with Payhuk.",
+      "startFree": "Start for free",
+      "joinCommunity": "Join the community"
+    }
+  },
+  "storefront": {
+    "filters": {
+      "productType": "Product type",
+      "selectType": "Select a type",
+      "allTypes": "All types",
+      "reset": "Reset",
+      "apply": "Apply"
+    },
+    "footer": {
+      "legal": "Legal",
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "refund": "Refund",
+      "location": "Location",
+      "africa": "Africa",
+      "french": "French",
+      "multiCurrency": "Multi-currency"
+    },
+    "contact": {
+      "title": "Contact {storeName}",
+      "description": "Have a question? Don't hesitate to contact us. We'll get back to you as soon as possible.",
+      "messageSent": "Message sent!",
+      "messageDesc": "We'll respond to you as soon as possible."
+    },
+    "tabs": {
+      "products": "Products",
+      "about": "About",
+      "reviews": "Reviews",
+      "contact": "Contact",
+      "noAbout": "No information about this store",
+      "noReviews": "No reviews yet",
+      "noContact": "No contact information available"
     }
   },
   "products": {
@@ -471,6 +570,10 @@
     "refresh": "Refresh",
     "export": "Export CSV",
     "import": "Import CSV",
+    "loadingProducts": "Loading products...",
+    "createStoreFirst": "Create your store first",
+    "createStoreDescription": "You must create a store before you can add products",
+    "createMyStore": "Create my store",
     "viewMode": {
       "grid": "Grid",
       "list": "List"
@@ -621,6 +724,12 @@
     },
     "quickActions": {
       "title": "Quick actions",
+      "newProduct": "New Product",
+      "newProductDesc": "Add a product to your store",
+      "newOrder": "New Order",
+      "newOrderDesc": "Create a manual order",
+      "analytics": "Analytics",
+      "analyticsDesc": "View detailed statistics",
       "createProduct": "Create product",
       "createProductDesc": "Add a new product to your store",
       "manageOrders": "Manage orders",
@@ -633,6 +742,12 @@
       "viewStoreDesc": "Customize your online store",
       "settings": "Settings",
       "settingsDesc": "Configure your account and store"
+    },
+    "recentActivity": {
+      "title": "Recent Activity"
+    },
+    "notificationsBadge": {
+      "new": "New"
     }
   },
   "landing": {
@@ -760,17 +875,194 @@
       "product": "Product",
       "company": "Company",
       "legal": "Legal",
+      "support": "Support",
       "links": {
         "features": "Features",
         "pricing": "Pricing",
         "marketplace": "Marketplace",
+        "demo": "Demo",
+        "documentation": "Documentation",
+        "guides": "Guides",
+        "contact": "Contact",
         "about": "About",
         "blog": "Blog",
-        "contact": "Contact",
+        "careers": "Careers",
         "terms": "Terms of Service",
         "privacy": "Privacy Policy"
       },
       "copyright": "© 2025 Payhuk. All rights reserved."
+    },
+    "featureSections": {
+      "feature1": {
+        "badge": "Quick Setup",
+        "title": "Your custom store in 2 minutes",
+        "description": "Create your online store without technical skills. Customize your design, add your products, and start selling immediately.",
+        "cta": "Create my store"
+      },
+      "feature2": {
+        "badge": "Multi-currency",
+        "title": "Sell everywhere, in multiple currencies",
+        "description": "Accept payments in FCFA, EUR, USD and more. Your customers pay in their local currency for a better experience.",
+        "cta": "Discover currencies"
+      },
+      "feature3": {
+        "badge": "Maximum Security",
+        "title": "Connect your favorite tools",
+        "description": "Easily integrate your marketing, CRM and other services. Automate your business to focus on what matters.",
+        "cta": "See integrations"
+      },
+      "feature4": {
+        "badge": "Analytics",
+        "title": "Track your sales and adjust your strategy",
+        "description": "Complete dashboard with real-time statistics. Analyze your performance and optimize your sales.",
+        "cta": "See dashboard"
+      },
+      "feature5": {
+        "badge": "24/7 Support",
+        "title": "A team by your side 24/7",
+        "description": "Our team of experts is available to support you at every step. Live chat, email or phone - we're here for you.",
+        "cta": "Contact support"
+      }
+    },
+    "keyFeatures": {
+      "title": "Key Features",
+      "subtitle": "Everything you need to grow your business",
+      "items": {
+        "fcfaPayments": {
+          "title": "FCFA Payments",
+          "description": "Accept payments in FCFA (XOF) and other African currencies to facilitate local transactions."
+        },
+        "mobileFirst": {
+          "title": "Mobile-first",
+          "description": "Mobile-optimized interface. Manage your store from anywhere, anytime."
+        },
+        "secure": {
+          "title": "Secure",
+          "description": "Secure payments and advanced data protection. Your transactions are 100% protected."
+        },
+        "statistics": {
+          "title": "Statistics",
+          "description": "Complete dashboard with real-time analytics to track your performance."
+        },
+        "multiLanguage": {
+          "title": "Multi-language",
+          "description": "Interface available in French and other languages to serve all your customers."
+        },
+        "noCommission": {
+          "title": "No commission",
+          "description": "No hidden commission. Keep 100% of your revenue with transparent fees."
+        }
+      }
+    },
+    "howItWorksDetailed": {
+      "title": "How it works?",
+      "subtitle": "Launch your store in 3 simple steps",
+      "steps": {
+        "step1": {
+          "number": "1",
+          "title": "Sign up",
+          "description": "Create your account for free in seconds. No credit card required."
+        },
+        "step2": {
+          "number": "2",
+          "title": "Configure your store",
+          "description": "Customize your store, add your products and set up your payment methods."
+        },
+        "step3": {
+          "number": "3",
+          "title": "Start selling",
+          "description": "Share your store link and start receiving payments immediately."
+        }
+      },
+      "cta": "Start now"
+    },
+    "pricingDetailed": {
+      "title": "Simple and transparent pricing",
+      "subtitle": "Start for free, pay only on your sales",
+      "free": {
+        "badge": "100% Free",
+        "title": "Completely free platform",
+        "price": "0 FCFA",
+        "subtitle": "No registration fees, no monthly subscription",
+        "commission": {
+          "percentage": "10%",
+          "title": "Commission only on completed sales",
+          "subtitle": "You only pay if you sell!"
+        },
+        "featuresTitle": "Included features",
+        "advantagesTitle": "Benefits",
+        "features": [
+          "Custom store",
+          "Unlimited products",
+          "Payments in FCFA and other currencies",
+          "Analytics dashboard"
+        ],
+        "advantages": [
+          "Order management",
+          "Responsive customer support",
+          "Secure payments",
+          "Free updates"
+        ],
+        "cta": "Start for free",
+        "note": "No credit card required • No commitment • Cancel anytime"
+      }
+    },
+    "coverage": {
+      "title": "International coverage",
+      "subtitle": "Accept payments from around the world with local currencies",
+      "regions": {
+        "westAfrica": {
+          "title": "West Africa",
+          "description": "FCFA (XOF) payments available throughout the UEMOA zone: Senegal, Ivory Coast, Mali, Benin, Burkina Faso, Niger, Togo, Guinea-Bissau"
+        },
+        "international": {
+          "title": "International currencies",
+          "description": "Also accept payments in EUR, USD, GBP and other major currencies to serve your international customers"
+        },
+        "compliance": {
+          "title": "Local compliance",
+          "description": "100% compliant solution with local and international regulations for secure transactions"
+        }
+      },
+      "cta": {
+        "show": "See all covered countries",
+        "hide": "Hide"
+      },
+      "detailedCoverage": {
+        "title": "Countries covered by geographical area",
+        "zones": {
+          "westAfrica": {
+            "title": "West Africa (UEMOA Zone - FCFA XOF)",
+            "countries": ["Senegal", "Ivory Coast", "Mali", "Benin", "Burkina Faso", "Niger", "Togo", "Guinea-Bissau"]
+          },
+          "centralAfrica": {
+            "title": "Central Africa (CEMAC Zone - FCFA XAF)",
+            "countries": ["Cameroon", "Gabon", "Congo-Brazzaville", "Chad", "CAR", "Equatorial Guinea"]
+          },
+          "northAfrica": {
+            "title": "North Africa",
+            "countries": ["Morocco (MAD)", "Algeria (DZD)", "Tunisia (TND)", "Egypt (EGP)"]
+          },
+          "eastAfrica": {
+            "title": "East Africa",
+            "countries": ["Kenya (KES)", "Tanzania (TZS)", "Uganda (UGX)", "Rwanda (RWF)", "Ethiopia (ETB)"]
+          },
+          "southernAfrica": {
+            "title": "Southern Africa",
+            "countries": ["South Africa (ZAR)", "Nigeria (NGN)", "Ghana (GHS)", "Zimbabwe (ZWL)"]
+          },
+          "international": {
+            "title": "International (Major currencies)",
+            "countries": ["Eurozone (EUR)", "United States (USD)", "United Kingdom (GBP)", "Canada (CAD)", "Switzerland (CHF)"]
+          }
+        },
+        "note": "+ 180 other countries and territories worldwide"
+      }
+    },
+    "finalCta": {
+      "title": "Start selling digital products today!",
+      "subtitle": "Join hundreds of African entrepreneurs who have already trusted Payhuk",
+      "button": "Create my free account"
     }
   }
 }

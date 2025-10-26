@@ -402,8 +402,8 @@ const Marketplace = () => {
   const handlePurchase = useCallback(async (product: Product) => {
     if (!product.store_id) {
       toast({
-        title: "Erreur",
-        description: "Boutique non disponible",
+        title: t('marketplace.toast.error'),
+        description: t('marketplace.toast.storeUnavailable'),
         variant: "destructive",
       });
       return;
@@ -417,8 +417,8 @@ const Marketplace = () => {
       
       if (!user?.email) {
         toast({
-          title: "Authentification requise",
-          description: "Veuillez vous connecter pour effectuer un achat",
+          title: t('marketplace.toast.authRequired'),
+          description: t('marketplace.toast.loginRequired'),
           variant: "destructive",
         });
         setPurchasing(prev => {
@@ -436,7 +436,7 @@ const Marketplace = () => {
         productId: product.id,
         amount: price,
         currency: product.currency,
-        description: `Achat de ${product.name}`,
+        description: `${t('marketplace.toast.purchaseOf')} ${product.name}`,
         customerEmail: user.email,
         customerName: user.user_metadata?.full_name || user.email.split('@')[0],
         metadata: { 
@@ -452,8 +452,8 @@ const Marketplace = () => {
     } catch (error: any) {
       logger.error("Erreur lors de l'achat:", error);
       toast({
-        title: "Erreur de paiement",
-        description: error.message || "Impossible d'initialiser le paiement",
+        title: t('marketplace.toast.paymentError'),
+        description: error.message || t('marketplace.toast.paymentFailed'),
         variant: "destructive",
       });
     } finally {
@@ -463,7 +463,7 @@ const Marketplace = () => {
         return newSet;
       });
     }
-  }, [toast]);
+  }, [toast, t]);
 
   // Partage de produit
   const handleShare = useCallback(async (product: Product) => {
@@ -477,15 +477,15 @@ const Marketplace = () => {
           url: url,
         });
         toast({
-          title: "Partagé avec succès",
-          description: "Le lien a été partagé",
+          title: t('marketplace.toast.shareSuccess'),
+          description: t('marketplace.toast.linkShared'),
         });
       } catch (error: any) {
         if (error.name !== 'AbortError') {
           logger.error("Erreur lors du partage:", error);
           toast({
-            title: "Erreur de partage",
-            description: "Impossible de partager le lien",
+            title: t('marketplace.toast.shareError'),
+            description: t('marketplace.toast.shareNotAllowed'),
             variant: "destructive",
           });
         }
@@ -494,19 +494,19 @@ const Marketplace = () => {
       try {
         await navigator.clipboard.writeText(url);
         toast({
-          title: "Lien copié",
-          description: "Le lien du produit a été copié dans le presse-papiers",
+          title: t('marketplace.toast.linkCopied'),
+          description: t('marketplace.toast.linkCopiedDesc'),
         });
       } catch (error) {
         logger.error("Erreur lors de la copie:", error);
         toast({
-          title: "Erreur",
-          description: "Impossible de copier le lien. Vérifiez les permissions.",
+          title: t('marketplace.toast.error'),
+          description: t('marketplace.toast.copyError'),
           variant: "destructive",
         });
       }
     }
-  }, [toast]);
+  }, [toast, t]);
 
   // Pagination (basée sur le total côté serveur)
   const totalPages = Math.ceil(pagination.totalItems / pagination.itemsPerPage);
@@ -572,7 +572,7 @@ const Marketplace = () => {
         href="#main-content" 
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-md focus:shadow-lg"
       >
-        Aller au contenu principal
+        {t('marketplace.hero.skipToMain')}
       </a>
       
       <MarketplaceHeader />
@@ -613,45 +613,45 @@ const Marketplace = () => {
                 id="hero-title" 
                 className="text-4xl md:text-6xl font-bold text-white bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
               >
-            Marketplace Payhuk
+            {t('marketplace.hero.title')}
           </h1>
               <Sparkles className="h-8 w-8 text-yellow-400 animate-pulse" aria-hidden="true" />
             </div>
             <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-4xl mx-auto leading-relaxed">
-              Découvrez des milliers de produits digitaux : formations, ebooks, templates, logiciels et plus encore.
+              {t('marketplace.hero.subtitle')}
               <br />
-              <span className="text-blue-400 font-semibold">Rejoignez la révolution du commerce digital en Afrique</span>
+              <span className="text-blue-400 font-semibold">{t('marketplace.hero.tagline')}</span>
             </p>
             
             {/* Statistiques */}
             <div 
               className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mb-8" 
               role="region" 
-              aria-label="Statistiques du marketplace"
+              aria-label={t('marketplace.stats.ariaLabel')}
             >
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
-                <div className="text-2xl font-bold text-blue-400" aria-label={`${stats.totalProducts} produits disponibles`}>
+                <div className="text-2xl font-bold text-blue-400" aria-label={t('marketplace.stats.ariaProducts', { count: stats.totalProducts })}>
                   {stats.totalProducts}
                 </div>
-                <div className="text-sm text-slate-300">Produits</div>
+                <div className="text-sm text-slate-300">{t('marketplace.stats.products')}</div>
               </div>
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
-                <div className="text-2xl font-bold text-green-400" aria-label={`${stats.totalStores} boutiques actives`}>
+                <div className="text-2xl font-bold text-green-400" aria-label={t('marketplace.stats.ariaStores', { count: stats.totalStores })}>
                   {stats.totalStores}
                 </div>
-                <div className="text-sm text-slate-300">Boutiques</div>
+                <div className="text-sm text-slate-300">{t('marketplace.stats.stores')}</div>
               </div>
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
-                <div className="text-2xl font-bold text-yellow-400" aria-label={`Note moyenne de ${stats.averageRating.toFixed(1)} sur 5`}>
+                <div className="text-2xl font-bold text-yellow-400" aria-label={t('marketplace.stats.ariaRating', { rating: stats.averageRating.toFixed(1) })}>
                   {stats.averageRating.toFixed(1)}
                 </div>
-                <div className="text-sm text-slate-300">Note moyenne</div>
+                <div className="text-sm text-slate-300">{t('marketplace.stats.rating')}</div>
               </div>
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
-                <div className="text-2xl font-bold text-purple-400" aria-label={`${stats.totalSales} ventes réalisées`}>
+                <div className="text-2xl font-bold text-purple-400" aria-label={t('marketplace.stats.ariaSales', { count: stats.totalSales })}>
                   {stats.totalSales}
                 </div>
-                <div className="text-sm text-slate-300">Ventes</div>
+                <div className="text-sm text-slate-300">{t('marketplace.stats.sales')}</div>
               </div>
             </div>
           </div>
@@ -685,66 +685,66 @@ const Marketplace = () => {
                 
                 {filters.category !== "all" && (
                   <Badge variant="secondary" className="bg-slate-700 text-white hover:bg-slate-600 transition-colors flex items-center gap-1">
-                    Catégorie: {filters.category}
+                    {t('marketplace.filterLabels.category')} {filters.category}
                     <X 
                       className="h-3 w-3 cursor-pointer hover:text-red-400" 
                       onClick={() => updateFilter({ category: "all" })}
-                      aria-label={`Retirer le filtre catégorie ${filters.category}`}
+                      aria-label={`${t('marketplace.filterLabels.clear')} ${filters.category}`}
                     />
                   </Badge>
                 )}
                 
                 {filters.productType !== "all" && (
                   <Badge variant="secondary" className="bg-slate-700 text-white hover:bg-slate-600 transition-colors flex items-center gap-1">
-                    Type: {filters.productType}
+                    {t('marketplace.filterLabels.type')} {filters.productType}
                     <X 
                       className="h-3 w-3 cursor-pointer hover:text-red-400" 
                       onClick={() => updateFilter({ productType: "all" })}
-                      aria-label={`Retirer le filtre type ${filters.productType}`}
+                      aria-label={`${t('marketplace.filterLabels.clear')} ${filters.productType}`}
                     />
                   </Badge>
                 )}
                 
                 {filters.priceRange !== "all" && (
                   <Badge variant="secondary" className="bg-slate-700 text-white hover:bg-slate-600 transition-colors flex items-center gap-1">
-                    {PRICE_RANGES.find(r => r.value === filters.priceRange)?.label}
+                    {t('marketplace.filterLabels.priceRange')} {PRICE_RANGES.find(r => r.value === filters.priceRange)?.label}
                     <X 
                       className="h-3 w-3 cursor-pointer hover:text-red-400" 
                       onClick={() => updateFilter({ priceRange: "all" })}
-                      aria-label="Retirer le filtre prix"
+                      aria-label={`${t('marketplace.filterLabels.clear')} ${t('marketplace.filterLabels.priceRange')}`}
                     />
                   </Badge>
                 )}
                 
                 {filters.verifiedOnly && (
                   <Badge variant="secondary" className="bg-green-700 text-white hover:bg-green-600 transition-colors flex items-center gap-1">
-                    ✓ Vérifiés uniquement
+                    ✓ {t('marketplace.filterLabels.verified')}
                     <X 
                       className="h-3 w-3 cursor-pointer hover:text-red-400" 
                       onClick={() => updateFilter({ verifiedOnly: false })}
-                      aria-label="Retirer le filtre vérifiés"
+                      aria-label={`${t('marketplace.filterLabels.clear')} ${t('marketplace.filterLabels.verified')}`}
                     />
                   </Badge>
                 )}
                 
                 {filters.featuredOnly && (
                   <Badge variant="secondary" className="bg-yellow-700 text-white hover:bg-yellow-600 transition-colors flex items-center gap-1">
-                    ⭐ Vedettes uniquement
+                    ⭐ {t('marketplace.filterLabels.featured')}
                     <X 
                       className="h-3 w-3 cursor-pointer hover:text-red-400" 
                       onClick={() => updateFilter({ featuredOnly: false })}
-                      aria-label="Retirer le filtre vedettes"
+                      aria-label={`${t('marketplace.filterLabels.clear')} ${t('marketplace.filterLabels.featured')}`}
                     />
                   </Badge>
                 )}
                 
                 {filters.tags.map((tag, index) => (
                   <Badge key={index} variant="secondary" className="bg-purple-700 text-white hover:bg-purple-600 transition-colors flex items-center gap-1">
-                    #{tag}
+                    {t('marketplace.filterLabels.tag')} {tag}
                     <X 
                       className="h-3 w-3 cursor-pointer hover:text-red-400" 
                       onClick={() => updateFilter({ tags: filters.tags.filter(t => t !== tag) })}
-                      aria-label={`Retirer le tag ${tag}`}
+                      aria-label={`${t('marketplace.filterLabels.clear')} ${tag}`}
                     />
                   </Badge>
                 ))}
@@ -754,15 +754,15 @@ const Marketplace = () => {
                   size="sm"
                   onClick={clearFilters}
                   className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                  aria-label="Effacer tous les filtres actifs"
+                  aria-label={`${t('marketplace.filterLabels.clear')} ${t('marketplace.filterLabels.all')}`}
                 >
-                  Tout effacer
+                  {t('marketplace.filterLabels.clear')} {t('marketplace.filterLabels.all')}
                 </Button>
               </div>
             )}
 
             {/* Filtres rapides */}
-            <div className="flex flex-wrap gap-3 justify-center" role="toolbar" aria-label="Actions du marketplace">
+            <div className="flex flex-wrap gap-3 justify-center" role="toolbar" aria-label={t('marketplace.toolbar.ariaLabel')}>
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
@@ -1002,7 +1002,7 @@ const Marketplace = () => {
             <div className="flex items-center gap-3">
               {/* Tri */}
               <div className="flex items-center gap-2">
-                <label className="text-sm text-slate-300">Trier par:</label>
+                <label className="text-sm text-slate-300">{t('marketplace.sorting.label')}</label>
                 <select
                   value={filters.sortBy}
                   onChange={(e) => updateFilter({ sortBy: e.target.value })}
@@ -1051,7 +1051,7 @@ const Marketplace = () => {
         id="main-content" 
         className="py-6 px-4" 
         role="main" 
-        aria-label="Liste des produits"
+        aria-label={t('marketplace.productList.ariaLabel')}
       >
         <div className="w-full mx-auto max-w-7xl px-0 sm:px-4">
           {loading ? (
@@ -1075,14 +1075,14 @@ const Marketplace = () => {
                 <nav 
                   className="flex justify-center items-center gap-2 mt-12" 
                   role="navigation" 
-                  aria-label="Pagination des produits"
+                  aria-label={t('marketplace.pagination.ariaLabel')}
                 >
                   <Button
                     variant="outline"
                     onClick={() => goToPage(pagination.currentPage - 1)}
                     disabled={!canGoPrevious}
                     className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900"
-                    aria-label="Page précédente"
+                    aria-label={t('marketplace.pagination.previous')}
                   >
                     <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                   </Button>
@@ -1123,7 +1123,7 @@ const Marketplace = () => {
                     onClick={() => goToPage(pagination.currentPage + 1)}
                     disabled={!canGoNext}
                     className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900"
-                    aria-label="Page suivante"
+                    aria-label={t('marketplace.pagination.next')}
                   >
                     <ChevronRight className="h-4 w-4" aria-hidden="true" />
                   </Button>
@@ -1161,23 +1161,23 @@ const Marketplace = () => {
           <div className="flex items-center justify-center gap-2 mb-4">
             <Rocket className="h-8 w-8 text-white animate-bounce" />
             <h2 className="text-3xl md:text-4xl font-bold text-white">
-            Prêt à lancer votre boutique ?
+            {t('marketplace.cta.title')}
           </h2>
             <Rocket className="h-8 w-8 text-white animate-bounce" />
           </div>
           <p className="text-xl text-blue-100 mb-8">
-            Rejoignez des centaines d'entrepreneurs qui développent leur business avec Payhuk.
+            {t('marketplace.cta.subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link to="/auth">
               <Button size="lg" className="bg-white text-blue-600 font-semibold h-14 px-8 hover:bg-blue-50 transition-all duration-300 hover:scale-105">
-              Commencer gratuitement
+              {t('marketplace.cta.startFree')}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
             <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600 h-14 px-8 transition-all duration-300 hover:scale-105">
               <Users className="mr-2 h-5 w-5" />
-              Rejoindre la communauté
+              {t('marketplace.cta.joinCommunity')}
             </Button>
           </div>
         </div>
