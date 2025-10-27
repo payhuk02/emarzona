@@ -1,0 +1,20 @@
+# ============================================================
+# TEMPLATE VARIABLES D'ENVIRONNEMENT PRODUCTION
+# Copier dans .env.production sur Vercel
+# ============================================================
+
+# Supabase (PRODUCTION)
+VITE_SUPABASE_URL=https://VOTRE_PROJECT_ID.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGci...
+
+# App Configuration
+VITE_APP_NAME=Payhuk
+VITE_APP_URL=https://payhuk.com
+VITE_APP_ENV=production
+
+# Features
+VITE_ENABLE_ANALYTICS=true
+
+# Payment - Moneroo LIVE
+VITE_MONEROO_PUBLIC_KEY=pk_live_XXX
+

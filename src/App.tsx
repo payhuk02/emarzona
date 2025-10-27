@@ -93,6 +93,8 @@ const AdminAffiliates = lazy(() => import("./pages/admin/AdminAffiliates"));
 // Pages Affiliation - Lazy loading
 const StoreAffiliates = lazy(() => import("./pages/StoreAffiliates"));
 const AffiliateDashboard = lazy(() => import("./pages/AffiliateDashboard"));
+const CourseAffiliate = lazy(() => import("./pages/affiliate/CourseAffiliate"));
+const AffiliateCoursesDashboard = lazy(() => import("./pages/affiliate/AffiliateCoursesDashboard"));
 
 // Pages Moneroo (paiement) - Lazy loading
 const PaymentSuccess = lazy(() => import("./pages/payments/PaymentSuccess"));
@@ -102,6 +104,11 @@ const PaymentCancel = lazy(() => import("./pages/payments/PaymentCancel"));
 const MyCourses = lazy(() => import("./pages/courses/MyCourses"));
 const CreateCourse = lazy(() => import("./pages/courses/CreateCourse"));
 const CourseDetail = lazy(() => import("./pages/courses/CourseDetail"));
+const CourseAnalytics = lazy(() => import("./pages/courses/CourseAnalytics"));
+
+// Pages Notifications - Lazy loading
+const NotificationsCenter = lazy(() => import("./pages/notifications/NotificationsCenter"));
+const NotificationSettings = lazy(() => import("./pages/settings/NotificationSettings"));
 
 // Page de test i18n (à supprimer en production)
 const I18nTest = lazy(() => import("./pages/I18nTest"));
@@ -159,11 +166,18 @@ const AppContent = () => {
           {/* --- Routes Affiliation --- */}
           <Route path="/dashboard/affiliates" element={<ProtectedRoute><StoreAffiliates /></ProtectedRoute>} />
           <Route path="/affiliate/dashboard" element={<ProtectedRoute><AffiliateDashboard /></ProtectedRoute>} />
+          <Route path="/affiliate/courses" element={<ProtectedRoute><AffiliateCoursesDashboard /></ProtectedRoute>} />
+          <Route path="/affiliate/courses/:slug" element={<ProtectedRoute><CourseAffiliate /></ProtectedRoute>} />
+
+          {/* --- Routes Notifications --- */}
+          <Route path="/notifications" element={<ProtectedRoute><NotificationsCenter /></ProtectedRoute>} />
+          <Route path="/settings/notifications" element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>} />
 
           {/* --- Routes Cours --- */}
           <Route path="/dashboard/my-courses" element={<ProtectedRoute><MyCourses /></ProtectedRoute>} />
           <Route path="/dashboard/courses/new" element={<ProtectedRoute><CreateCourse /></ProtectedRoute>} />
           <Route path="/courses/:slug" element={<CourseDetail />} />
+          <Route path="/courses/:slug/analytics" element={<ProtectedRoute><CourseAnalytics /></ProtectedRoute>} />
 
           {/* --- Routes administrateur --- */}
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />

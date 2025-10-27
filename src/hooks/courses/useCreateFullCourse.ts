@@ -46,6 +46,40 @@ interface CreateFullCourseData {
   
   // Curriculum
   sections: Section[];
+  
+  // SEO
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+  og_title?: string;
+  og_description?: string;
+  og_image?: string;
+  
+  // FAQs
+  faqs?: any[];
+  
+  // Affiliation
+  affiliate_enabled?: boolean;
+  commission_rate?: number;
+  commission_type?: 'percentage' | 'fixed';
+  fixed_commission_amount?: number;
+  cookie_duration_days?: number;
+  max_commission_per_sale?: number;
+  min_order_amount?: number;
+  allow_self_referral?: boolean;
+  require_approval?: boolean;
+  affiliate_terms_and_conditions?: string;
+  
+  // Tracking & Pixels
+  tracking_enabled?: boolean;
+  google_analytics_id?: string;
+  facebook_pixel_id?: string;
+  google_tag_manager_id?: string;
+  tiktok_pixel_id?: string;
+  track_video_events?: boolean;
+  track_lesson_completion?: boolean;
+  track_quiz_attempts?: boolean;
+  track_certificate_downloads?: boolean;
 }
 
 /**
@@ -82,6 +116,13 @@ export const useCreateFullCourse = () => {
             promotional_price: data.promotional_price || null,
             is_active: true,
             is_draft: false,
+            // SEO
+            meta_title: data.meta_title || null,
+            meta_description: data.meta_description || null,
+            meta_keywords: data.meta_keywords || null,
+            og_image: data.og_image || null,
+            // FAQs
+            faqs: data.faqs || null,
           })
           .select()
           .single();
@@ -190,6 +231,57 @@ export const useCreateFullCourse = () => {
             totalCreatedLessons++;
             console.log(`✅ Leçon créée: ${lesson.title}`);
           }
+        }
+
+        // ÉTAPE 5 : Créer les settings d'affiliation (si activé)
+        if (data.affiliate_enabled) {
+          console.log('💰 Création des settings d\'affiliation...');
+          const { error: affiliateError } = await supabase
+            .from('product_affiliate_settings')
+            .insert({
+              product_id: product.id,
+              store_id: data.storeId,
+              affiliate_enabled: true,
+              commission_rate: data.commission_rate || 20,
+              commission_type: data.commission_type || 'percentage',
+              fixed_commission_amount: data.fixed_commission_amount || 0,
+              cookie_duration_days: data.cookie_duration_days || 30,
+              max_commission_per_sale: data.max_commission_per_sale || null,
+              min_order_amount: data.min_order_amount || 0,
+              allow_self_referral: data.allow_self_referral || false,
+              require_approval: data.require_approval || false,
+              terms_and_conditions: data.affiliate_terms_and_conditions || '',
+            });
+
+          if (affiliateError) {
+            console.error('❌ Erreur création settings affiliation:', affiliateError);
+            // Ne pas faire de rollback complet car le cours est déjà créé
+            // Juste logger l'erreur et continuer
+            console.warn('⚠️ Le cours a été créé mais sans configuration d\'affiliation');
+          } else {
+            console.log('✅ Settings d\'affiliation créés');
+          }
+        }
+
+        // ÉTAPE 6 : Configurer le tracking et les pixels
+        console.log('📊 Configuration du tracking...');
+        const { error: analyticsError } = await supabase
+          .from('product_analytics')
+          .upsert({
+            product_id: product.id,
+            store_id: data.storeId,
+            tracking_enabled: data.tracking_enabled !== false, // true par défaut
+            google_analytics_id: data.google_analytics_id || null,
+            facebook_pixel_id: data.facebook_pixel_id || null,
+            google_tag_manager_id: data.google_tag_manager_id || null,
+            tiktok_pixel_id: data.tiktok_pixel_id || null,
+          });
+
+        if (analyticsError) {
+          console.error('❌ Erreur configuration analytics:', analyticsError);
+          console.warn('⚠️ Le cours a été créé mais sans configuration analytics');
+        } else {
+          console.log('✅ Tracking configuré avec succès');
         }
 
         console.log('🎉 COURS CRÉÉ AVEC SUCCÈS !');

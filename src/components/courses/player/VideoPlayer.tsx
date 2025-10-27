@@ -10,11 +10,15 @@ import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Play } from 'lucide-react';
 import { useUpdateVideoPosition, useLessonProgress } from '@/hooks/courses/useCourseProgress';
+import { useVideoTracking, useWatchTime } from '@/hooks/courses/useVideoTracking';
+import { getSessionId } from '@/hooks/courses/useCourseAnalytics';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface VideoPlayerProps {
   videoType: 'upload' | 'youtube' | 'vimeo' | 'google-drive';
   videoUrl: string;
   title?: string;
+  productId?: string;
   enrollmentId?: string;
   lessonId?: string;
   onEnded?: () => void;
@@ -25,6 +29,7 @@ export const VideoPlayer = ({
   videoType, 
   videoUrl, 
   title,
+  productId,
   enrollmentId,
   lessonId,
   onEnded,
@@ -34,10 +39,22 @@ export const VideoPlayer = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const saveIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(Date.now());
+  const { user } = useAuth();
   
   // Hooks pour la progression
   const { data: progress } = useLessonProgress(enrollmentId, lessonId);
   const updatePosition = useUpdateVideoPosition();
+  
+  // Hooks pour le tracking avancé
+  const videoTracking = productId ? useVideoTracking({
+    productId,
+    lessonId,
+    userId: user?.id,
+    sessionId: getSessionId(),
+    enabled: true,
+  }) : null;
+  
+  const watchTime = useWatchTime(enrollmentId, lessonId);
 
   // Restaurer la position sauvegardée au chargement
   useEffect(() => {
@@ -106,9 +123,43 @@ export const VideoPlayer = ({
   };
 
   // Gérer les événements vidéo HTML5
+  const handleVideoPlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    // Tracker l'événement play
+    if (videoTracking) {
+      videoTracking.handlePlay(video.currentTime, video.duration);
+    }
+    
+    // Démarrer le chrono de temps de visionnage
+    watchTime.startWatching();
+  };
+  
+  const handleVideoPause = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    // Tracker l'événement pause
+    if (videoTracking) {
+      videoTracking.handlePause(video.currentTime, video.duration);
+    }
+    
+    // Arrêter le chrono
+    watchTime.stopWatching();
+  };
+
   const handleVideoTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
+    
+    // Callback externe
     if (onTimeUpdate) {
-      onTimeUpdate(e.currentTarget.currentTime);
+      onTimeUpdate(video.currentTime);
+    }
+    
+    // Tracker les milestones (25%, 50%, 75%, 100%)
+    if (videoTracking) {
+      videoTracking.handleProgress(video.currentTime, video.duration);
     }
   };
 
@@ -147,6 +198,8 @@ export const VideoPlayer = ({
                   className="w-full h-full"
                   controls
                   controlsList="nodownload"
+                  onPlay={handleVideoPlay}
+                  onPause={handleVideoPause}
                   onTimeUpdate={handleVideoTimeUpdate}
                   onEnded={handleVideoEnded}
                   poster="/placeholder-video.jpg"

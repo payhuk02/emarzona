@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { CourseEnrollment } from '@/types/courses';
+import { notifyCourseEnrollment, notifyLessonComplete, notifyCourseComplete } from '@/lib/notifications/helpers';
 
 /**
  * Hook pour récupérer l'inscription d'un utilisateur à un cours
@@ -90,11 +91,15 @@ export const useCreateEnrollment = () => {
     mutationFn: async ({ 
       courseId, 
       productId, 
-      orderId 
+      orderId,
+      courseName,
+      courseSlug
     }: { 
       courseId: string; 
       productId: string; 
       orderId?: string;
+      courseName?: string;
+      courseSlug?: string;
     }) => {
       // Récupérer l'utilisateur connecté
       const { data: { user } } = await supabase.auth.getUser();
@@ -135,6 +140,12 @@ export const useCreateEnrollment = () => {
         .single();
 
       if (error) throw error;
+      
+      // Créer notification d'enrollment
+      if (courseName && courseSlug) {
+        await notifyCourseEnrollment(user.id, courseName, courseSlug);
+      }
+      
       return data as CourseEnrollment;
     },
     onSuccess: (_, variables) => {

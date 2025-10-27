@@ -7,6 +7,10 @@ import { Check, ChevronLeft, ChevronRight, Save, Loader2 } from "lucide-react";
 import { CourseBasicInfoForm } from "./CourseBasicInfoForm";
 import { CourseCurriculumBuilder } from "./CourseCurriculumBuilder";
 import { CourseAdvancedConfig } from "./CourseAdvancedConfig";
+import { CourseSEOForm, CourseSEOData } from "./CourseSEOForm";
+import { CourseFAQForm, FAQ } from "./CourseFAQForm";
+import { CourseAffiliateSettings, CourseAffiliateData } from "./CourseAffiliateSettings";
+import { CoursePixelsConfig, CoursePixelsData } from "./CoursePixelsConfig";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateFullCourse } from "@/hooks/courses/useCreateFullCourse";
@@ -26,7 +30,10 @@ const STEPS = [
   { id: 1, name: 'Informations de base', description: 'Titre, description, niveau' },
   { id: 2, name: 'Curriculum', description: 'Sections et leçons' },
   { id: 3, name: 'Configuration', description: 'Prix et paramètres' },
-  { id: 4, name: 'Révision', description: 'Vérifier et publier' },
+  { id: 4, name: 'SEO & FAQs', description: 'Référencement et questions' },
+  { id: 5, name: 'Affiliation', description: 'Programme d\'affiliation' },
+  { id: 6, name: 'Tracking', description: 'Pixels & Analytics' },
+  { id: 7, name: 'Révision', description: 'Vérifier et publier' },
 ];
 
 export const CreateCourseWizard = () => {
@@ -57,6 +64,38 @@ export const CreateCourseWizard = () => {
     target_audience: [],
   });
   const [sections, setSections] = useState<Section[]>([]);
+  const [seoData, setSeoData] = useState<CourseSEOData>({
+    meta_title: '',
+    meta_description: '',
+    meta_keywords: '',
+    og_title: '',
+    og_description: '',
+    og_image: '',
+  });
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [affiliateData, setAffiliateData] = useState<CourseAffiliateData>({
+    affiliate_enabled: false,
+    commission_rate: 20,
+    commission_type: 'percentage',
+    fixed_commission_amount: 0,
+    cookie_duration_days: 30,
+    max_commission_per_sale: undefined,
+    min_order_amount: 0,
+    allow_self_referral: false,
+    require_approval: false,
+    terms_and_conditions: '',
+  });
+  const [pixelsData, setPixelsData] = useState<CoursePixelsData>({
+    tracking_enabled: true,
+    google_analytics_id: '',
+    facebook_pixel_id: '',
+    google_tag_manager_id: '',
+    tiktok_pixel_id: '',
+    track_video_events: true,
+    track_lesson_completion: true,
+    track_quiz_attempts: true,
+    track_certificate_downloads: true,
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleFieldChange = (field: string, value: any) => {
@@ -163,6 +202,36 @@ export const CreateCourseWizard = () => {
       prerequisites: formData.prerequisites,
       target_audience: formData.target_audience,
       sections: sections,
+      // SEO
+      meta_title: seoData.meta_title,
+      meta_description: seoData.meta_description,
+      meta_keywords: seoData.meta_keywords,
+      og_title: seoData.og_title,
+      og_description: seoData.og_description,
+      og_image: seoData.og_image,
+      // FAQs
+      faqs: faqs,
+      // Affiliation
+      affiliate_enabled: affiliateData.affiliate_enabled,
+      commission_rate: affiliateData.commission_rate,
+      commission_type: affiliateData.commission_type,
+      fixed_commission_amount: affiliateData.fixed_commission_amount,
+      cookie_duration_days: affiliateData.cookie_duration_days,
+      max_commission_per_sale: affiliateData.max_commission_per_sale,
+      min_order_amount: affiliateData.min_order_amount,
+      allow_self_referral: affiliateData.allow_self_referral,
+      require_approval: affiliateData.require_approval,
+      affiliate_terms_and_conditions: affiliateData.terms_and_conditions,
+      // Tracking & Pixels
+      tracking_enabled: pixelsData.tracking_enabled,
+      google_analytics_id: pixelsData.google_analytics_id,
+      facebook_pixel_id: pixelsData.facebook_pixel_id,
+      google_tag_manager_id: pixelsData.google_tag_manager_id,
+      tiktok_pixel_id: pixelsData.tiktok_pixel_id,
+      track_video_events: pixelsData.track_video_events,
+      track_lesson_completion: pixelsData.track_lesson_completion,
+      track_quiz_attempts: pixelsData.track_quiz_attempts,
+      track_certificate_downloads: pixelsData.track_certificate_downloads,
     };
 
     // Créer le cours
@@ -255,6 +324,40 @@ export const CreateCourseWizard = () => {
         )}
 
         {currentStep === 4 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <CourseSEOForm
+                data={seoData}
+                onChange={setSeoData}
+                courseTitle={formData.title}
+                courseDescription={formData.short_description}
+              />
+            </div>
+            <div>
+              <CourseFAQForm
+                data={faqs}
+                onChange={setFaqs}
+              />
+            </div>
+          </div>
+        )}
+
+        {currentStep === 5 && (
+          <CourseAffiliateSettings
+            data={affiliateData}
+            onChange={setAffiliateData}
+            coursePrice={formData.price}
+          />
+        )}
+
+        {currentStep === 6 && (
+          <CoursePixelsConfig
+            data={pixelsData}
+            onChange={setPixelsData}
+          />
+        )}
+
+        {currentStep === 7 && (
           <div className="space-y-6">
             <Card>
               <CardContent className="p-6">

@@ -114,6 +114,11 @@ const menuItems = [
     icon: TrendingUp,
   },
   {
+    title: "Cours Promus",
+    url: "/affiliate/courses",
+    icon: GraduationCap,
+  },
+  {
     title: "Mes Pixels",
     url: "/dashboard/pixels",
     icon: Target,
