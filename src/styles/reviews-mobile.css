@@ -1,0 +1,166 @@
+/**
+ * Mobile Optimizations pour Reviews
+ * Date : 27 octobre 2025
+ */
+
+/* Touch Targets - Minimum 44px */
+@media (max-width: 768px) {
+  .vote-button,
+  .review-action-button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 12px;
+  }
+
+  /* Larger tap targets for stars */
+  .review-stars button {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px;
+  }
+
+  /* Review Cards */
+  .review-card {
+    @apply p-4;
+  }
+
+  /* Stats on mobile */
+  .review-stats-card {
+    @apply p-4;
+  }
+
+  /* Form inputs */
+  .review-form-input,
+  .review-form-textarea {
+    @apply text-base; /* Prevent zoom on iOS */
+    font-size: 16px !important;
+  }
+
+  /* Media Gallery - Swipeable */
+  .review-media-gallery {
+    @apply overflow-x-auto snap-x snap-mandatory;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  .review-media-gallery::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
+  .review-media-item {
+    @apply snap-center flex-shrink-0;
+  }
+
+  /* Bottom Sheet for Form (mobile) */
+  .review-form-mobile-sheet {
+    @apply fixed bottom-0 left-0 right-0 z-50;
+    @apply bg-background border-t rounded-t-xl;
+    @apply max-h-[90vh] overflow-y-auto;
+    @apply p-6;
+  }
+
+  /* Compact stats on mobile */
+  .review-stats-compact {
+    @apply flex items-center gap-3;
+  }
+
+  .review-stats-compact .average-rating {
+    @apply text-3xl font-bold;
+  }
+
+  .review-stats-compact .stars {
+    @apply scale-90;
+  }
+
+  /* Grid adjustments */
+  .reviews-layout-grid {
+    @apply grid-cols-1 gap-4;
+  }
+
+  /* Floating action button for review */
+  .review-fab {
+    @apply fixed bottom-6 right-6 z-40;
+    @apply w-14 h-14 rounded-full;
+    @apply bg-primary text-primary-foreground;
+    @apply shadow-lg;
+    @apply flex items-center justify-center;
+  }
+
+  /* Sticky filter bar on mobile */
+  .review-filter-mobile {
+    @apply sticky top-0 z-30;
+    @apply bg-background/95 backdrop-blur;
+    @apply border-b;
+    @apply p-4;
+  }
+
+  /* Reduce spacing on mobile */
+  .review-list-mobile .review-card + .review-card {
+    @apply mt-4;
+  }
+
+  /* Image lightbox mobile */
+  .review-image-lightbox-mobile {
+    @apply fixed inset-0 z-50;
+    @apply bg-black/95;
+    @apply flex items-center justify-center;
+  }
+
+  .review-image-lightbox-mobile img {
+    @apply max-w-full max-h-full;
+    @apply object-contain;
+  }
+
+  /* Swipe indicator for media */
+  .swipe-indicator {
+    @apply flex justify-center gap-1 mt-2;
+  }
+
+  .swipe-indicator-dot {
+    @apply w-2 h-2 rounded-full bg-gray-400;
+  }
+
+  .swipe-indicator-dot.active {
+    @apply bg-primary w-4;
+  }
+}
+
+/* Small Mobile (<375px) */
+@media (max-width: 374px) {
+  .review-card {
+    @apply p-3;
+  }
+
+  .review-stats-card {
+    @apply p-3;
+  }
+
+  .vote-button,
+  .review-action-button {
+    @apply text-sm px-3;
+  }
+}
+
+/* Tablet (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .reviews-layout-grid {
+    @apply grid-cols-1 lg:grid-cols-2;
+  }
+
+  /* Stats can stay in sidebar on tablet */
+  .review-stats-tablet {
+    @apply sticky top-20;
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .review-form-mobile-sheet {
+    @apply max-h-[80vh];
+  }
+
+  .review-stats-compact {
+    @apply flex-row;
+  }
+}
+

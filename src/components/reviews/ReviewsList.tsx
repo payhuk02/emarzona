@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useProductReviews, useVoteReview } from '@/hooks/useReviews';
 import type { ReviewFilters } from '@/types/review';
+import { ReviewsListSkeleton } from './ReviewSkeleton';
 
 interface ReviewsListProps {
   productId: string;
@@ -42,11 +43,7 @@ export const ReviewsList: React.FC<ReviewsListProps> = ({
   };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+    return <ReviewsListSkeleton count={3} />;
   }
 
   if (!reviews || reviews.length === 0) {

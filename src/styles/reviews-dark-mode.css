@@ -1,0 +1,112 @@
+/**
+ * Dark Mode Refinements pour Reviews
+ * Date : 27 octobre 2025
+ */
+
+/* Review Cards */
+.dark .review-card {
+  @apply bg-gray-900/50 border-gray-800;
+}
+
+.dark .review-card:hover {
+  @apply bg-gray-900/70 border-gray-700;
+}
+
+/* Stars Colors */
+.dark .star-filled {
+  @apply text-amber-400;
+}
+
+.dark .star-empty {
+  @apply text-gray-600;
+}
+
+/* Review Content */
+.dark .review-content {
+  @apply text-gray-300;
+}
+
+.dark .review-title {
+  @apply text-gray-100;
+}
+
+.dark .reviewer-name {
+  @apply text-gray-200;
+}
+
+/* Media Thumbnails */
+.dark .review-media-thumbnail {
+  @apply border-gray-700 opacity-90;
+}
+
+.dark .review-media-thumbnail:hover {
+  @apply opacity-100 border-gray-600;
+}
+
+/* Vote Buttons */
+.dark .vote-button {
+  @apply bg-gray-800 border-gray-700 text-gray-300;
+}
+
+.dark .vote-button:hover {
+  @apply bg-gray-750 border-gray-600;
+}
+
+.dark .vote-button-active {
+  @apply bg-primary/20 border-primary/50 text-primary;
+}
+
+/* Stats */
+.dark .review-stats-card {
+  @apply bg-gray-900/50 border-gray-800;
+}
+
+.dark .rating-bar {
+  @apply bg-gray-800;
+}
+
+.dark .rating-bar-fill {
+  @apply bg-amber-500;
+}
+
+/* Form */
+.dark .review-form-input {
+  @apply bg-gray-900 border-gray-700 text-gray-100;
+}
+
+.dark .review-form-input:focus {
+  @apply border-primary ring-primary/20;
+}
+
+/* Badges */
+.dark .verified-badge {
+  @apply bg-green-900/30 text-green-400 border-green-700/50;
+}
+
+.dark .featured-badge {
+  @apply bg-amber-900/30 text-amber-400 border-amber-700/50;
+}
+
+/* Skeletons */
+.dark .skeleton {
+  @apply bg-gray-800;
+}
+
+/* Replies */
+.dark .review-reply {
+  @apply bg-gray-850 border-gray-750;
+}
+
+.dark .official-reply {
+  @apply bg-blue-900/20 border-blue-800/50;
+}
+
+/* Dropdown & Dialogs */
+.dark .review-dialog-content {
+  @apply bg-gray-900 border-gray-800;
+}
+
+.dark .review-dropdown {
+  @apply bg-gray-900 border-gray-800;
+}
+

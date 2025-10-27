@@ -2,6 +2,8 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import "./styles/product-banners.css";
+import "./styles/reviews-dark-mode.css";
+import "./styles/reviews-mobile.css";
 import { setupGlobalErrorHandlers } from "./lib/error-logger";
 import "./i18n/config"; // Initialiser i18n
 
