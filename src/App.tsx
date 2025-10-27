@@ -91,6 +91,7 @@ const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
 const AdminDisputes = lazy(() => import("./pages/admin/AdminDisputes"));
 const AdminAffiliates = lazy(() => import("./pages/admin/AdminAffiliates"));
+const AdminReviews = lazy(() => import("./pages/admin/AdminReviews").then(m => ({ default: m.AdminReviews })));
 
 // Pages Affiliation - Lazy loading
 const StoreAffiliates = lazy(() => import("./pages/StoreAffiliates"));
@@ -207,6 +208,7 @@ const AppContent = () => {
           <Route path="/admin/kyc" element={<ProtectedRoute><AdminKYC /></ProtectedRoute>} />
           <Route path="/admin/disputes" element={<ProtectedRoute><AdminDisputes /></ProtectedRoute>} />
           <Route path="/admin/affiliates" element={<ProtectedRoute><AdminAffiliates /></ProtectedRoute>} />
+          <Route path="/admin/reviews" element={<ProtectedRoute><AdminReviews /></ProtectedRoute>} />
 
           {/* --- Route de fallback --- */}
           <Route path="*" element={<NotFound />} />
