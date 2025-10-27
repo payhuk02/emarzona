@@ -107,23 +107,24 @@ export const measurePerformance = async <T,>(
   fn: () => Promise<T> | T,
   tags?: Record<string, string>
 ): Promise<T> => {
-  const transaction = Sentry.startTransaction({
-    name,
-    op: 'function',
-    tags,
-  });
-
-  try {
-    const result = await fn();
-    transaction.setStatus('ok');
-    return result;
-  } catch (error) {
-    transaction.setStatus('internal_error');
-    Sentry.captureException(error);
-    throw error;
-  } finally {
-    transaction.finish();
-  }
+  return await Sentry.startSpan(
+    {
+      name,
+      op: 'function',
+      attributes: tags,
+    },
+    async (span) => {
+      try {
+        const result = await fn();
+        span?.setStatus({ code: 1 }); // OK status
+        return result;
+      } catch (error) {
+        span?.setStatus({ code: 2 }); // ERROR status
+        Sentry.captureException(error);
+        throw error;
+      }
+    }
+  );
 };
 
 /**
@@ -142,18 +143,19 @@ export const captureMessage = (
 
 /**
  * Créer un span pour tracer une opération
+ * Note: Dans Sentry v8+, utiliser directement startSpan au lieu de createSpan
  */
 export const createSpan = (
   operation: string,
   description?: string
-): Sentry.Span | undefined => {
-  const transaction = Sentry.getCurrentScope().getTransaction();
-  if (!transaction) return undefined;
-
-  return transaction.startChild({
-    op: operation,
-    description,
-  });
+): any => {
+  // Dans Sentry v8+, startSpan doit être utilisé directement
+  // Cette fonction est conservée pour compatibilité mais deprecated
+  console.warn('createSpan is deprecated, use Sentry.startSpan directly');
+  return {
+    setStatus: () => {},
+    finish: () => {},
+  };
 };
 
 /**
@@ -164,18 +166,22 @@ export const withSentry = async <T,>(
   fn: () => Promise<T>,
   context?: Record<string, any>
 ): Promise<T> => {
-  const span = createSpan(operation);
-  
-  try {
-    const result = await fn();
-    span?.setStatus('ok');
-    return result;
-  } catch (error) {
-    span?.setStatus('internal_error');
-    captureError(error as Error, context);
-    throw error;
-  } finally {
-    span?.finish();
-  }
+  return await Sentry.startSpan(
+    {
+      name: operation,
+      op: 'function',
+    },
+    async (span) => {
+      try {
+        const result = await fn();
+        span?.setStatus({ code: 1 }); // OK status
+        return result;
+      } catch (error) {
+        span?.setStatus({ code: 2 }); // ERROR status
+        captureError(error as Error, context);
+        throw error;
+      }
+    }
+  );
 };
 

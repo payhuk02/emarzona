@@ -26,6 +26,7 @@ import { CountdownTimer } from "@/components/ui/countdown-timer";
 import { CustomFieldsDisplay } from "@/components/products/CustomFieldsDisplay";
 import { ProductVariantSelector } from "@/components/products/ProductVariantSelector";
 import { SEOMeta, ProductSchema, BreadcrumbSchema } from "@/components/seo";
+import { ProductReviewsSummary } from "@/components/reviews";
 
 const ProductDetails = () => {
   const { slug, productSlug } = useParams<{ slug: string; productSlug: string }>();
@@ -532,6 +533,16 @@ const ProductDetails = () => {
                     </AccordionItem>
                   ))}
                 </Accordion>
+              </div>
+            )}
+
+            {/* Reviews & Ratings */}
+            {product && (
+              <div className="mb-12">
+                <ProductReviewsSummary
+                  productId={product.id}
+                  productType={product.product_type}
+                />
               </div>
             )}
 

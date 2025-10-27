@@ -40,6 +40,7 @@ import { useTrackAnalyticsEvent, getSessionId } from '@/hooks/courses/useCourseA
 import { useIsAffiliateEnabled, useCalculateCommission } from '@/hooks/courses/useCourseAffiliates';
 import { PixelsInit } from '@/components/analytics/PixelsInit';
 import { useProductPixels } from '@/hooks/courses/useProductPixels';
+import { ProductReviewsSummary } from '@/components/reviews';
 
 const CourseDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -568,6 +569,16 @@ const CourseDetail = () => {
             </Card>
           </div>
         </div>
+
+        {/* Reviews & Ratings - Full Width */}
+        {product && (
+          <div className="mt-12">
+            <ProductReviewsSummary
+              productId={product.id}
+              productType="course"
+            />
+          </div>
+        )}
       </div>
     </div>
   );
