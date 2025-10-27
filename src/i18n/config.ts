@@ -63,7 +63,7 @@ i18n
     
     // React options
     react: {
-      useSuspense: true,
+      useSuspense: false, // Désactivé pour compatibilité avec lazy loading
     },
   });
 

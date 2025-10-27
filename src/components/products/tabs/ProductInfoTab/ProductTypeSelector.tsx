@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Star,
   AlertCircle,
+  GraduationCap,
 } from "lucide-react";
 
 /**
@@ -24,6 +25,15 @@ const PRODUCT_TYPES = [
     description: "Ebooks, formations, logiciels, templates, fichiers téléchargeables",
     features: ["Téléchargement instantané", "Pas de stock", "Livraison automatique"],
     color: "blue",
+    popular: true,
+  },
+  {
+    value: "course",
+    label: "Cours en ligne",
+    icon: GraduationCap,
+    description: "Cours vidéo, masterclass, formations structurées avec quiz et certificats",
+    features: ["Vidéos HD", "Quiz & Certificats", "Suivi progression"],
+    color: "orange",
     popular: true,
   },
   {
@@ -61,8 +71,9 @@ interface ProductTypeSelectorProps {
 /**
  * Composant de sélection du type de produit
  * 
- * Permet de choisir entre trois types de produits :
- * - Produit Digital (ebooks, formations, etc.)
+ * Permet de choisir entre quatre types de produits :
+ * - Produit Digital (ebooks, logiciels, templates, etc.)
+ * - Cours en ligne (formations vidéo structurées avec quiz)
  * - Produit Physique (vêtements, accessoires, etc.)
  * - Service (consultations, coaching, etc.)
  * 
@@ -116,6 +127,9 @@ export const ProductTypeSelector = ({
               blue: isSelected
                 ? "border-blue-400 bg-blue-400/10"
                 : "border-gray-600 hover:border-blue-400",
+              orange: isSelected
+                ? "border-orange-400 bg-orange-400/10"
+                : "border-gray-600 hover:border-orange-400",
               green: isSelected
                 ? "border-green-400 bg-green-400/10"
                 : "border-gray-600 hover:border-green-400",
@@ -125,6 +139,7 @@ export const ProductTypeSelector = ({
             };
             const iconColorClasses = {
               blue: "text-blue-400",
+              orange: "text-orange-400",
               green: "text-green-400",
               purple: "text-purple-400",
             };

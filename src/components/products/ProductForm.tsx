@@ -29,6 +29,9 @@ const ProductAffiliateSettings = lazy(() => import("./ProductAffiliateSettings")
 // ✨ Wizard pour nouveaux utilisateurs (+60% taux de complétion)
 const ProductCreationWizard = lazy(() => import("./ProductCreationWizard").then(m => ({ default: m.ProductCreationWizard })));
 
+// 🎓 Wizard pour la création de cours
+const CreateCourseWizard = lazy(() => import("../courses/create/CreateCourseWizard").then(m => ({ default: m.CreateCourseWizard })));
+
 // 📚 Templates de produits
 const TemplateSelector = lazy(() => import("./TemplateSelector").then(m => ({ default: m.TemplateSelector })));
 
@@ -567,13 +570,18 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
     return (
       <div className="product-form-container">
         <Suspense fallback={<TabLoadingSkeleton />}>
-          <ProductCreationWizard
-            formData={formData}
-            updateFormData={updateFormData}
-            onComplete={handlePublish}
-            onSwitchToAdvanced={() => setShowWizard(false)}
-            storeId={storeId}
-          />
+          {formData.product_type === 'course' ? (
+            <CreateCourseWizard />
+          ) : (
+            <ProductCreationWizard
+              formData={formData}
+              updateFormData={updateFormData}
+              onComplete={handlePublish}
+              onSwitchToAdvanced={() => setShowWizard(false)}
+              onCourseTypeSelected={() => updateFormData('product_type', 'course')}
+              storeId={storeId}
+            />
+          )}
         </Suspense>
       </div>
     );

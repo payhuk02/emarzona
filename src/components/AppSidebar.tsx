@@ -19,6 +19,8 @@ import {
   Search,
   MessageSquare,
   TrendingUp,
+  BookOpen,
+  GraduationCap,
 } from "lucide-react";
 import payhukLogo from "@/assets/payhuk-logo.png";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -60,6 +62,11 @@ const menuItems = [
     title: "Produits",
     url: "/dashboard/products",
     icon: Package,
+  },
+  {
+    title: "Mes Cours",
+    url: "/dashboard/my-courses",
+    icon: GraduationCap,
   },
   {
     title: "Commandes",

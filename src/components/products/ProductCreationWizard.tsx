@@ -21,6 +21,7 @@ import {
   Package, 
   Truck, 
   Briefcase,
+  GraduationCap,
   Sparkles,
   Settings
 } from "lucide-react";
@@ -30,6 +31,7 @@ interface WizardProps {
   updateFormData: (field: string, value: any) => void;
   onComplete: () => void;
   onSwitchToAdvanced: () => void;
+  onCourseTypeSelected?: () => void;
   storeId: string;
 }
 
@@ -40,6 +42,13 @@ const PRODUCT_TYPES = [
     icon: Package,
     description: "Ebooks, formations, logiciels, templates",
     color: "blue"
+  },
+  {
+    value: "course",
+    label: "Cours en ligne",
+    icon: GraduationCap,
+    description: "Cours vidéo, masterclass, formations structurées",
+    color: "orange"
   },
   {
     value: "physical",
@@ -62,6 +71,7 @@ export const ProductCreationWizard = ({
   updateFormData,
   onComplete,
   onSwitchToAdvanced,
+  onCourseTypeSelected,
   storeId,
 }: WizardProps) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -70,6 +80,12 @@ export const ProductCreationWizard = ({
   const progress = (currentStep / totalSteps) * 100;
 
   const goToNextStep = () => {
+    // Si on est à l'étape 1 et que le type est "course", passer au wizard de cours
+    if (currentStep === 1 && formData.product_type === 'course' && onCourseTypeSelected) {
+      onCourseTypeSelected();
+      return;
+    }
+    
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {

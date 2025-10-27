@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Package, ShoppingCart, Users, Tag } from "lucide-react";
+import { Plus, Package, ShoppingCart, Users, Tag, GraduationCap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const QuickActions = () => {
@@ -12,6 +12,13 @@ export const QuickActions = () => {
       description: "Créer un nouveau produit",
       icon: Package,
       onClick: () => navigate("/dashboard/products"),
+      variant: "default" as const,
+    },
+    {
+      title: "Créer un cours",
+      description: "Créer un cours en ligne",
+      icon: GraduationCap,
+      onClick: () => navigate("/dashboard/courses/new"),
       variant: "default" as const,
     },
     {

@@ -98,6 +98,11 @@ const AffiliateDashboard = lazy(() => import("./pages/AffiliateDashboard"));
 const PaymentSuccess = lazy(() => import("./pages/payments/PaymentSuccess"));
 const PaymentCancel = lazy(() => import("./pages/payments/PaymentCancel"));
 
+// Pages Cours - Lazy loading
+const MyCourses = lazy(() => import("./pages/courses/MyCourses"));
+const CreateCourse = lazy(() => import("./pages/courses/CreateCourse"));
+const CourseDetail = lazy(() => import("./pages/courses/CourseDetail"));
+
 // Page de test i18n (à supprimer en production)
 const I18nTest = lazy(() => import("./pages/I18nTest"));
 
@@ -154,6 +159,11 @@ const AppContent = () => {
           {/* --- Routes Affiliation --- */}
           <Route path="/dashboard/affiliates" element={<ProtectedRoute><StoreAffiliates /></ProtectedRoute>} />
           <Route path="/affiliate/dashboard" element={<ProtectedRoute><AffiliateDashboard /></ProtectedRoute>} />
+
+          {/* --- Routes Cours --- */}
+          <Route path="/dashboard/my-courses" element={<ProtectedRoute><MyCourses /></ProtectedRoute>} />
+          <Route path="/dashboard/courses/new" element={<ProtectedRoute><CreateCourse /></ProtectedRoute>} />
+          <Route path="/courses/:slug" element={<CourseDetail />} />
 
           {/* --- Routes administrateur --- */}
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
