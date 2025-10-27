@@ -54,7 +54,7 @@ export const ReviewCardSkeleton = () => (
 /**
  * Skeleton pour les statistiques de reviews
  */
-export const ReviewStatsSkele ton = () => (
+export const ReviewStatsSkeleton = () => (
   <Card className="p-6">
     <CardContent className="p-0 space-y-6">
       {/* Average rating */}
