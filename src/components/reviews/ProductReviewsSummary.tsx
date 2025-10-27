@@ -9,6 +9,7 @@ import { ReviewsStats } from './ReviewsStats';
 import { ReviewsList } from './ReviewsList';
 import { ReviewForm } from './ReviewForm';
 import { ReviewReplyForm } from './ReviewReplyForm';
+import { ExportReviewsButton } from './ExportReviewsButton';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -17,6 +18,7 @@ import {
   useProductReviewStats,
   useCanReview,
   useCreateReview,
+  useProductReviews,
 } from '@/hooks/useReviews';
 import type { ProductType } from '@/types/product';
 import { ReviewsErrorBoundary, FormErrorBoundary, ReviewsPlaceholder } from '@/components/errors';
@@ -36,6 +38,7 @@ export const ProductReviewsSummary: React.FC<ProductReviewsSummaryProps> = ({
 
   const { data: stats } = useProductReviewStats(productId);
   const { data: canReview } = useCanReview(productId);
+  const { data: reviews } = useProductReviews(productId);
   const createReview = useCreateReview();
 
   const handleCreateReview = (data: any) => {
@@ -51,12 +54,17 @@ export const ProductReviewsSummary: React.FC<ProductReviewsSummaryProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Avis clients</h2>
-        {canReview?.can_review && (
-          <Button onClick={() => setShowReviewForm(true)}>
-            <Star className="w-4 h-4 mr-2" />
-            Laisser un avis
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {reviews && reviews.length > 0 && (
+            <ExportReviewsButton reviews={reviews} />
+          )}
+          {canReview?.can_review && (
+            <Button onClick={() => setShowReviewForm(true)}>
+              <Star className="w-4 h-4 mr-2" />
+              Laisser un avis
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Info si pas encore acheté */}

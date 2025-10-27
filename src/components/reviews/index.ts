@@ -11,4 +11,5 @@ export { ReviewsStats } from './ReviewsStats';
 export { ReviewFilter } from './ReviewFilter';
 export { ReviewReplyForm } from './ReviewReplyForm';
 export { ProductReviewsSummary } from './ProductReviewsSummary';
+export { ExportReviewsButton } from './ExportReviewsButton';
 
