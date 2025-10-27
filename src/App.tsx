@@ -222,28 +222,36 @@ const AppContent = () => {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Cache les données pendant 5 minutes par défaut
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      // Garde les données en cache pendant 10 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes (deprecated, use gcTime in v5)
-      gcTime: 10 * 60 * 1000, // 10 minutes (v5+)
+      // Cache optimisé par type de données
+      staleTime: 5 * 60 * 1000, // 5 minutes par défaut
+      gcTime: 10 * 60 * 1000, // 10 minutes (garbage collection)
       // Retry automatique en cas d'erreur
       retry: 2,
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-      // Refetch automatique
+      // Refetch intelligent
       refetchOnWindowFocus: true,
       refetchOnReconnect: true,
       refetchOnMount: false, // Ne pas refetch si les données sont fraîches
-      // Performance
+      // Performance optimizations
       structuralSharing: true, // Optimise les re-renders
-      keepPreviousData: true, // Garde les données précédentes pendant le chargement
+      // Optimistic updates
+      networkMode: 'online', // Ne query que si online
     },
     mutations: {
       // Retry pour les mutations aussi
       retry: 1,
-      // Options pour les mutations
+      // Optimistic UI updates
+      onMutate: async () => {
+        // Cancel outgoing queries
+        await queryClient.cancelQueries();
+      },
       onError: (error) => {
         console.error('[Mutation Error]', error);
+        // Rollback optimistic update on error
+      },
+      onSettled: () => {
+        // Refetch after mutation
+        queryClient.invalidateQueries();
       },
     },
   },

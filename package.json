@@ -40,7 +40,9 @@
     "dev:responsive": "npm run dev & npm run test:responsive:mobile",
     "build:responsive": "npm run build && npm run test:responsive",
     "verify:responsive": "node scripts/verify-product-display.js",
-    "verify:all": "npm run verify:responsive && npm run audit:responsive"
+    "verify:all": "npm run verify:responsive && npm run audit:responsive",
+    "analyze:bundle": "npm run build && node scripts/analyze-bundle.js",
+    "build:analyze": "npm run build -- --mode analyze"
   },
   "vercel": {
     "buildCommand": "npm run build",

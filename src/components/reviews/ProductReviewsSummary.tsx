@@ -19,6 +19,7 @@ import {
   useCreateReview,
 } from '@/hooks/useReviews';
 import type { ProductType } from '@/types/product';
+import { ReviewsErrorBoundary, FormErrorBoundary, ReviewsPlaceholder } from '@/components/errors';
 
 interface ProductReviewsSummaryProps {
   productId: string;
@@ -79,23 +80,25 @@ export const ProductReviewsSummary: React.FC<ProductReviewsSummaryProps> = ({
       )}
 
       {/* Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Statistiques */}
-        <div className="lg:col-span-1">
-          <ReviewsStats
-            stats={stats}
-            onFilterByRating={setSelectedRating}
-          />
-        </div>
+      <ReviewsErrorBoundary fallback={<ReviewsPlaceholder />}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Statistiques */}
+          <div className="lg:col-span-1">
+            <ReviewsStats
+              stats={stats}
+              onFilterByRating={setSelectedRating}
+            />
+          </div>
 
-        {/* Liste des avis */}
-        <div className="lg:col-span-2">
-          <ReviewsList
-            productId={productId}
-            onReplyToReview={setReplyToReviewId}
-          />
+          {/* Liste des avis */}
+          <div className="lg:col-span-2">
+            <ReviewsList
+              productId={productId}
+              onReplyToReview={setReplyToReviewId}
+            />
+          </div>
         </div>
-      </div>
+      </ReviewsErrorBoundary>
 
       {/* Dialog formulaire de review */}
       <Dialog open={showReviewForm} onOpenChange={setShowReviewForm}>
@@ -103,13 +106,18 @@ export const ProductReviewsSummary: React.FC<ProductReviewsSummaryProps> = ({
           <DialogHeader>
             <DialogTitle>Laisser un avis</DialogTitle>
           </DialogHeader>
-          <ReviewForm
-            productId={productId}
-            productType={productType}
-            onSubmit={handleCreateReview}
-            onCancel={() => setShowReviewForm(false)}
-            isLoading={createReview.isPending}
-          />
+          <FormErrorBoundary
+            formName="Review Form"
+            onReset={() => setShowReviewForm(false)}
+          >
+            <ReviewForm
+              productId={productId}
+              productType={productType}
+              onSubmit={handleCreateReview}
+              onCancel={() => setShowReviewForm(false)}
+              isLoading={createReview.isPending}
+            />
+          </FormErrorBoundary>
         </DialogContent>
       </Dialog>
 
@@ -120,11 +128,16 @@ export const ProductReviewsSummary: React.FC<ProductReviewsSummaryProps> = ({
             <DialogTitle>Répondre à l'avis</DialogTitle>
           </DialogHeader>
           {replyToReviewId && (
-            <ReviewReplyForm
-              reviewId={replyToReviewId}
-              onSuccess={() => setReplyToReviewId(null)}
-              onCancel={() => setReplyToReviewId(null)}
-            />
+            <FormErrorBoundary
+              formName="Review Reply Form"
+              onReset={() => setReplyToReviewId(null)}
+            >
+              <ReviewReplyForm
+                reviewId={replyToReviewId}
+                onSuccess={() => setReplyToReviewId(null)}
+                onCancel={() => setReplyToReviewId(null)}
+              />
+            </FormErrorBoundary>
           )}
         </DialogContent>
       </Dialog>

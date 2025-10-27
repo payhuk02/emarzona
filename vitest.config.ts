@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
@@ -7,22 +7,19 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-    css: true,
-    pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: true,
-      },
+    setupFiles: './src/test/setup.ts',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'src/test/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/mockData',
+        '**/*.test.{ts,tsx}',
+      ],
     },
-    testTimeout: 10000,
-    hookTimeout: 10000,
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/tests/**', // Exclure les tests Playwright
-      '**/.{idea,git,cache,output,temp}/**',
-    ],
   },
   resolve: {
     alias: {
@@ -30,4 +27,3 @@ export default defineConfig({
     },
   },
 });
-
