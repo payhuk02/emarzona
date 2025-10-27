@@ -27,7 +27,6 @@ import {
   Lightbulb
 } from 'lucide-react';
 import { useCourseDetail } from '@/hooks/courses/useCourseDetail';
-import { useIsEnrolled } from '@/hooks/courses/useCourseEnrollment';
 import { VideoPlayer } from '@/components/courses/player/VideoPlayer';
 import { CourseCurriculum } from '@/components/courses/detail/CourseCurriculum';
 import { CourseProgressBar } from '@/components/courses/detail/CourseProgressBar';
@@ -39,10 +38,6 @@ const CourseDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data, isLoading, error } = useCourseDetail(slug || '');
-  
-  // Récupérer l'enrollment si l'utilisateur est inscrit
-  const courseId = data?.course?.id;
-  const { isEnrolled, enrollment } = useIsEnrolled(courseId);
   
   const [currentLesson, setCurrentLesson] = useState<any>(null);
 
@@ -79,7 +74,7 @@ const CourseDetail = () => {
     );
   }
 
-  const { product, course, sections, store, isEnrolled, lastViewedLesson } = data;
+  const { product, course, sections, store, isEnrolled, enrollment, lastViewedLesson } = data;
 
   // Récupérer la leçon à afficher : dernière vue > première preview > première leçon
   const getInitialLesson = () => {

@@ -71,11 +71,12 @@ export const useCourseDetail = (slug: string) => {
 
       // 7. Vérifier si l'utilisateur est inscrit et récupérer la progression
       let isEnrolled = false;
+      let enrollment = null;
       let lastViewedLesson = null;
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        const { data: enrollment } = await supabase
+        const { data: enrollmentData } = await supabase
           .from('course_enrollments')
           .select('id, status')
           .eq('course_id', course.id)
@@ -83,14 +84,15 @@ export const useCourseDetail = (slug: string) => {
           .eq('status', 'active')
           .maybeSingle();
 
-        isEnrolled = !!enrollment;
+        isEnrolled = !!enrollmentData;
+        enrollment = enrollmentData;
 
         // 8. Si inscrit, récupérer la dernière leçon visualisée
-        if (enrollment) {
+        if (enrollmentData) {
           const { data: progressData } = await supabase
             .from('course_lesson_progress')
             .select('lesson_id, updated_at, is_completed')
-            .eq('enrollment_id', enrollment.id)
+            .eq('enrollment_id', enrollmentData.id)
             .eq('user_id', user.id)
             .order('updated_at', { ascending: false })
             .limit(1)
@@ -115,6 +117,7 @@ export const useCourseDetail = (slug: string) => {
         sections: sectionsWithLessons,
         store,
         isEnrolled,
+        enrollment,
         lastViewedLesson,
       };
     },
