@@ -10,6 +10,8 @@ import { LoadingBar } from "@/components/navigation/LoadingBar";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { PerformanceOptimizer } from "@/components/optimization/PerformanceOptimizer";
+import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
+import { CrispChat } from "@/components/chat/CrispChat";
 import { Suspense, lazy, useEffect } from "react";
 import { initSentry } from "@/lib/sentry";
 import { initWebVitals } from "@/lib/web-vitals";
@@ -96,6 +98,12 @@ const AffiliateDashboard = lazy(() => import("./pages/AffiliateDashboard"));
 const CourseAffiliate = lazy(() => import("./pages/affiliate/CourseAffiliate"));
 const AffiliateCoursesDashboard = lazy(() => import("./pages/affiliate/AffiliateCoursesDashboard"));
 
+// Pages Légales - Lazy loading
+const TermsOfService = lazy(() => import("./pages/legal/TermsOfService"));
+const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy"));
+const CookiePolicy = lazy(() => import("./pages/legal/CookiePolicy"));
+const RefundPolicy = lazy(() => import("./pages/legal/RefundPolicy"));
+
 // Pages Moneroo (paiement) - Lazy loading
 const PaymentSuccess = lazy(() => import("./pages/payments/PaymentSuccess"));
 const PaymentCancel = lazy(() => import("./pages/payments/PaymentCancel"));
@@ -139,6 +147,12 @@ const AppContent = () => {
           
           {/* --- Route de test i18n (à supprimer en production) --- */}
           <Route path="/i18n-test" element={<I18nTest />} />
+
+          {/* --- Routes Légales (publiques) --- */}
+          <Route path="/legal/terms" element={<TermsOfService />} />
+          <Route path="/legal/privacy" element={<PrivacyPolicy />} />
+          <Route path="/legal/cookies" element={<CookiePolicy />} />
+          <Route path="/legal/refund" element={<RefundPolicy />} />
 
           {/* --- Routes Moneroo --- */}
           <Route path="/payment/success" element={<PaymentSuccess />} />
@@ -198,6 +212,8 @@ const AppContent = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      <CookieConsentBanner />
+      <CrispChat />
     </Sentry.ErrorBoundary>
   );
 };

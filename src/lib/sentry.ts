@@ -99,3 +99,83 @@ export const addBreadcrumb = (message: string, category?: string, level?: Sentry
   });
 };
 
+/**
+ * Mesurer la performance d'une fonction
+ */
+export const measurePerformance = async <T,>(
+  name: string,
+  fn: () => Promise<T> | T,
+  tags?: Record<string, string>
+): Promise<T> => {
+  const transaction = Sentry.startTransaction({
+    name,
+    op: 'function',
+    tags,
+  });
+
+  try {
+    const result = await fn();
+    transaction.setStatus('ok');
+    return result;
+  } catch (error) {
+    transaction.setStatus('internal_error');
+    Sentry.captureException(error);
+    throw error;
+  } finally {
+    transaction.finish();
+  }
+};
+
+/**
+ * Capturer un message (non-error)
+ */
+export const captureMessage = (
+  message: string,
+  level: Sentry.SeverityLevel = 'info',
+  context?: Record<string, any>
+) => {
+  if (context) {
+    Sentry.setContext('custom', context);
+  }
+  Sentry.captureMessage(message, level);
+};
+
+/**
+ * Créer un span pour tracer une opération
+ */
+export const createSpan = (
+  operation: string,
+  description?: string
+): Sentry.Span | undefined => {
+  const transaction = Sentry.getCurrentScope().getTransaction();
+  if (!transaction) return undefined;
+
+  return transaction.startChild({
+    op: operation,
+    description,
+  });
+};
+
+/**
+ * Helper pour wrapper des opérations async avec error tracking
+ */
+export const withSentry = async <T,>(
+  operation: string,
+  fn: () => Promise<T>,
+  context?: Record<string, any>
+): Promise<T> => {
+  const span = createSpan(operation);
+  
+  try {
+    const result = await fn();
+    span?.setStatus('ok');
+    return result;
+  } catch (error) {
+    span?.setStatus('internal_error');
+    captureError(error as Error, context);
+    throw error;
+  } finally {
+    span?.finish();
+  }
+};
+

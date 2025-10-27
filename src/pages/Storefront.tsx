@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useProducts } from "@/hooks/useProducts";
-import { useReviews } from "@/hooks/useReviews";
+import { useProductReviews } from "@/hooks/useReviews";
 import StoreHeader from "@/components/storefront/StoreHeader";
 import StoreTabs from "@/components/storefront/StoreTabs";
 import ProductCard from "@/components/storefront/ProductCard";
@@ -26,7 +26,7 @@ const Storefront = () => {
   // Utiliser un ID stable pour éviter les violations des règles des hooks
   const storeId = store?.id || null;
   const { products, loading: productsLoading } = useProducts(storeId);
-  const { reviews, loading: reviewsLoading } = useReviews(storeId);
+  // const { reviews, loading: reviewsLoading } = useReviews(storeId); // TODO: Implement store-wide reviews if needed
 
   useEffect(() => {
     const fetchStore = async () => {

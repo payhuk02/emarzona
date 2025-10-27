@@ -1,11 +1,17 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { visualizer } from "rollup-plugin-visualizer";
 import { compression } from "vite-plugin-compression2";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  const isProduction = mode === 'production';
+  const hasSentryToken = !!env.SENTRY_AUTH_TOKEN;
+
+  return {
   server: {
     host: "::",
     port: 8080,
@@ -37,7 +43,34 @@ export default defineConfig({
       gzipSize: true,
       brotliSize: true,
     }),
-  ],
+    
+    // Sentry plugin pour source maps (seulement en production avec token)
+    isProduction && hasSentryToken && sentryVitePlugin({
+      org: env.VITE_SENTRY_ORG,
+      project: env.VITE_SENTRY_PROJECT,
+      authToken: env.SENTRY_AUTH_TOKEN,
+      
+      // Upload source maps
+      sourcemaps: {
+        assets: './dist/**',
+        ignore: ['node_modules/**'],
+        filesToDeleteAfterUpload: './dist/**/*.map', // Supprimer les .map après upload
+      },
+      
+      // Configuration release
+      release: {
+        name: env.VERCEL_GIT_COMMIT_SHA || `payhuk-${Date.now()}`,
+        deploy: {
+          env: env.VERCEL_ENV || 'production',
+        },
+      },
+      
+      // Options
+      telemetry: false,
+      silent: false,
+      debug: false,
+    }),
+  ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -89,7 +122,7 @@ export default defineConfig({
     // Chunk size warnings
     chunkSizeWarningLimit: 500, // Warning si chunk > 500KB
     reportCompressedSize: true,
-    sourcemap: false, // Désactiver en production pour réduire la taille
+    sourcemap: isProduction, // Activer en production pour Sentry
   },
   // Optimisation des dépendances
   optimizeDeps: {
@@ -102,4 +135,5 @@ export default defineConfig({
     ],
     exclude: ['@tiptap/core', '@tiptap/react'], // Lazy load
   },
+};
 });
