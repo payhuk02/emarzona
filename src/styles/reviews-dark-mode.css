@@ -49,7 +49,7 @@
 }
 
 .dark .vote-button:hover {
-  @apply bg-gray-750 border-gray-600;
+  @apply bg-gray-700 border-gray-600;
 }
 
 .dark .vote-button-active {
@@ -94,7 +94,7 @@
 
 /* Replies */
 .dark .review-reply {
-  @apply bg-gray-850 border-gray-750;
+  @apply bg-gray-800 border-gray-700;
 }
 
 .dark .official-reply {
