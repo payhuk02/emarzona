@@ -32,7 +32,7 @@ import { CreateShipmentDialog } from '@/components/shipping/CreateShipmentDialog
 
 export default function ShippingDashboard() {
   const navigate = useNavigate();
-  const { data: store } = useStore();
+  const { store, loading: storeLoading } = useStore();
   const { data: shipments, isLoading } = useShipments(store?.id || '');
   const updateTracking = useUpdateShipmentTracking();
 
@@ -68,13 +68,38 @@ export default function ShippingDashboard() {
     await updateTracking.mutateAsync(shipmentId);
   };
 
-  if (isLoading) {
+  if (isLoading || storeLoading) {
     return (
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
           <main className="flex-1 p-8">
             <Skeleton className="h-96 w-full" />
+          </main>
+        </div>
+      </SidebarProvider>
+    );
+  }
+
+  // No store found
+  if (!store) {
+    return (
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full">
+          <AppSidebar />
+          <main className="flex-1 p-8">
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h2 className="text-2xl font-bold mb-2">Aucune boutique trouvée</h2>
+                <p className="text-muted-foreground mb-6">
+                  Vous devez créer une boutique avant de pouvoir gérer les expéditions.
+                </p>
+                <Button onClick={() => navigate('/store')}>
+                  Créer ma boutique
+                </Button>
+              </CardContent>
+            </Card>
           </main>
         </div>
       </SidebarProvider>
