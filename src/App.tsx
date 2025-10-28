@@ -133,6 +133,7 @@ const PaymentManagement = lazy(() => import("./pages/payments/PaymentManagement"
 const DisputeDetail = lazy(() => import("./pages/disputes/DisputeDetail"));
 const PayBalance = lazy(() => import("./pages/payments/PayBalance"));
 const ShippingDashboard = lazy(() => import("./pages/shipping/ShippingDashboard"));
+const InventoryDashboard = lazy(() => import("./pages/inventory/InventoryDashboard"));
 
 // Pages Produits Physiques & Services - Détails
 const PhysicalProductDetail = lazy(() => import("./pages/physical/PhysicalProductDetail"));
@@ -228,6 +229,7 @@ const AppContent = () => {
           <Route path="/payments/:orderId/balance" element={<ProtectedRoute><PayBalance /></ProtectedRoute>} />
           <Route path="/disputes/:disputeId" element={<ProtectedRoute><DisputeDetail /></ProtectedRoute>} />
           <Route path="/shipping" element={<ProtectedRoute><ShippingDashboard /></ProtectedRoute>} />
+          <Route path="/inventory" element={<ProtectedRoute><InventoryDashboard /></ProtectedRoute>} />
 
           {/* --- Routes Product Details (Physical, Services) --- */}
           <Route path="/physical/:productId" element={<PhysicalProductDetail />} />
