@@ -21,6 +21,15 @@ import {
   TrendingUp,
   BookOpen,
   GraduationCap,
+  Download,
+  Key,
+  Truck,
+  Warehouse,
+  Calendar,
+  FileText,
+  Scale,
+  BoxIcon,
+  Headphones,
 } from "lucide-react";
 import payhukLogo from "@/assets/payhuk-logo.png";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -42,166 +51,324 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
 
-const menuItems = [
+// Menu organisé par sections
+const menuSections = [
   {
-    title: "Tableau de bord",
-    url: "/dashboard",
-    icon: LayoutDashboard,
+    label: "Principal",
+    items: [
+      {
+        title: "Tableau de bord",
+        url: "/dashboard",
+        icon: LayoutDashboard,
+      },
+      {
+        title: "Boutique",
+        url: "/dashboard/store",
+        icon: Store,
+      },
+      {
+        title: "Marketplace",
+        url: "/marketplace",
+        icon: ShoppingCart,
+      },
+    ]
   },
   {
-    title: "Boutique",
-    url: "/dashboard/store",
-    icon: Store,
+    label: "Produits & Cours",
+    items: [
+      {
+        title: "Produits",
+        url: "/dashboard/products",
+        icon: Package,
+      },
+      {
+        title: "Mes Cours",
+        url: "/dashboard/my-courses",
+        icon: GraduationCap,
+      },
+      {
+        title: "Produits Digitaux",
+        url: "/dashboard/digital-products",
+        icon: Download,
+      },
+      {
+        title: "Mes Téléchargements",
+        url: "/dashboard/my-downloads",
+        icon: Download,
+      },
+      {
+        title: "Mes Licences",
+        url: "/dashboard/my-licenses",
+        icon: Key,
+      },
+    ]
   },
   {
-    title: "Marketplace",
-    url: "/marketplace",
-    icon: ShoppingCart,
+    label: "Ventes & Logistique",
+    items: [
+      {
+        title: "Commandes",
+        url: "/dashboard/orders",
+        icon: ShoppingCart,
+      },
+      {
+        title: "Commandes Avancées",
+        url: "/dashboard/advanced-orders",
+        icon: MessageSquare,
+      },
+      {
+        title: "Réservations",
+        url: "/dashboard/bookings",
+        icon: Calendar,
+      },
+      {
+        title: "Inventaire",
+        url: "/dashboard/inventory",
+        icon: Warehouse,
+      },
+      {
+        title: "Expéditions",
+        url: "/dashboard/shipping",
+        icon: Truck,
+      },
+    ]
   },
   {
-    title: "Produits",
-    url: "/dashboard/products",
-    icon: Package,
+    label: "Finance & Paiements",
+    items: [
+      {
+        title: "Paiements",
+        url: "/dashboard/payments",
+        icon: CreditCard,
+      },
+      {
+        title: "Solde à Payer",
+        url: "/dashboard/pay-balance",
+        icon: DollarSign,
+      },
+      {
+        title: "Gestion Paiements",
+        url: "/dashboard/payment-management",
+        icon: FileText,
+      },
+    ]
   },
   {
-    title: "Mes Cours",
-    url: "/dashboard/my-courses",
-    icon: GraduationCap,
+    label: "Marketing & Croissance",
+    items: [
+      {
+        title: "Clients",
+        url: "/dashboard/customers",
+        icon: Users,
+      },
+      {
+        title: "Promotions",
+        url: "/dashboard/promotions",
+        icon: Tag,
+      },
+      {
+        title: "Parrainage",
+        url: "/dashboard/referrals",
+        icon: UserPlus,
+      },
+      {
+        title: "Affiliation",
+        url: "/dashboard/affiliates",
+        icon: TrendingUp,
+      },
+      {
+        title: "Cours Promus",
+        url: "/affiliate/courses",
+        icon: GraduationCap,
+      },
+    ]
   },
   {
-    title: "Commandes",
-    url: "/dashboard/orders",
-    icon: ShoppingCart,
+    label: "Analytics & SEO",
+    items: [
+      {
+        title: "Statistiques",
+        url: "/dashboard/analytics",
+        icon: BarChart3,
+      },
+      {
+        title: "Mes Pixels",
+        url: "/dashboard/pixels",
+        icon: Target,
+      },
+      {
+        title: "Mon SEO",
+        url: "/dashboard/seo",
+        icon: Search,
+      },
+    ]
   },
   {
-    title: "Commandes Avancées",
-    url: "/dashboard/advanced-orders",
-    icon: MessageSquare,
-  },
-  {
-    title: "Clients",
-    url: "/dashboard/customers",
-    icon: Users,
-  },
-  {
-    title: "Promotions",
-    url: "/dashboard/promotions",
-    icon: Tag,
-  },
-  {
-    title: "Statistiques",
-    url: "/dashboard/analytics",
-    icon: BarChart3,
-  },
-  {
-    title: "Paiements",
-    url: "/dashboard/payments",
-    icon: CreditCard,
-  },
-  {
-    title: "KYC",
-    url: "/dashboard/kyc",
-    icon: Shield,
-  },
-  {
-    title: "Parrainage",
-    url: "/dashboard/referrals",
-    icon: UserPlus,
-  },
-  {
-    title: "Affiliation",
-    url: "/dashboard/affiliates",
-    icon: TrendingUp,
-  },
-  {
-    title: "Cours Promus",
-    url: "/affiliate/courses",
-    icon: GraduationCap,
-  },
-  {
-    title: "Mes Pixels",
-    url: "/dashboard/pixels",
-    icon: Target,
-  },
-  {
-    title: "Mon SEO",
-    url: "/dashboard/seo",
-    icon: Search,
-  },
-  {
-    title: "Paramètres",
-    url: "/dashboard/settings",
-    icon: Settings,
+    label: "Configuration",
+    items: [
+      {
+        title: "KYC",
+        url: "/dashboard/kyc",
+        icon: Shield,
+      },
+      {
+        title: "Paramètres",
+        url: "/dashboard/settings",
+        icon: Settings,
+      },
+    ]
   },
 ];
 
-const adminMenuItems = [
+// Menu flat pour rétrocompatibilité
+const menuItems = menuSections.flatMap(section => section.items);
+
+// Menu Admin organisé par sections
+const adminMenuSections = [
   {
-    title: "Vue d'ensemble",
-    url: "/admin",
-    icon: LayoutDashboard,
+    label: "Administration",
+    items: [
+      {
+        title: "Vue d'ensemble",
+        url: "/admin",
+        icon: LayoutDashboard,
+      },
+      {
+        title: "Utilisateurs",
+        url: "/admin/users",
+        icon: Users,
+      },
+      {
+        title: "Boutiques",
+        url: "/admin/stores",
+        icon: Store,
+      },
+    ]
   },
   {
-    title: "Utilisateurs",
-    url: "/admin/users",
-    icon: Users,
+    label: "Catalogue",
+    items: [
+      {
+        title: "Produits",
+        url: "/admin/products",
+        icon: Package,
+      },
+      {
+        title: "Cours",
+        url: "/admin/courses",
+        icon: GraduationCap,
+      },
+      {
+        title: "Licences",
+        url: "/dashboard/license-management",
+        icon: Key,
+      },
+    ]
   },
   {
-    title: "Boutiques",
-    url: "/admin/stores",
-    icon: Store,
+    label: "Commerce",
+    items: [
+      {
+        title: "Ventes",
+        url: "/admin/sales",
+        icon: ShoppingCart,
+      },
+      {
+        title: "Commandes",
+        url: "/admin/orders",
+        icon: BoxIcon,
+      },
+      {
+        title: "Inventaire Global",
+        url: "/admin/inventory",
+        icon: Warehouse,
+      },
+      {
+        title: "Expéditions",
+        url: "/admin/shipping",
+        icon: Truck,
+      },
+    ]
   },
   {
-    title: "Produits",
-    url: "/admin/products",
-    icon: Package,
+    label: "Finance",
+    items: [
+      {
+        title: "Revenus Plateforme",
+        url: "/admin/revenue",
+        icon: DollarSign,
+      },
+      {
+        title: "Paiements",
+        url: "/admin/payments",
+        icon: CreditCard,
+      },
+      {
+        title: "Litiges",
+        url: "/admin/disputes",
+        icon: Scale,
+      },
+    ]
   },
   {
-    title: "Ventes",
-    url: "/admin/sales",
-    icon: ShoppingCart,
+    label: "Croissance",
+    items: [
+      {
+        title: "Parrainages",
+        url: "/admin/referrals",
+        icon: UserPlus,
+      },
+      {
+        title: "Affiliation",
+        url: "/admin/affiliates",
+        icon: TrendingUp,
+      },
+      {
+        title: "Analytics",
+        url: "/admin/analytics",
+        icon: BarChart3,
+      },
+    ]
   },
   {
-    title: "Parrainages",
-    url: "/admin/referrals",
-    icon: UserPlus,
+    label: "Sécurité & Support",
+    items: [
+      {
+        title: "Admin KYC",
+        url: "/admin/kyc",
+        icon: ShieldCheck,
+      },
+      {
+        title: "Activité",
+        url: "/admin/activity",
+        icon: History,
+      },
+      {
+        title: "Support",
+        url: "/admin/support",
+        icon: Headphones,
+      },
+      {
+        title: "Notifications",
+        url: "/admin/notifications",
+        icon: Bell,
+      },
+    ]
   },
   {
-    title: "Activité",
-    url: "/admin/activity",
-    icon: History,
-  },
-  {
-    title: "Revenus Plateforme",
-    url: "/admin/revenue",
-    icon: DollarSign,
-  },
-  {
-    title: "Admin KYC",
-    url: "/admin/kyc",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Litiges",
-    url: "/admin/disputes",
-    icon: Shield,
-  },
-  {
-    title: "Affiliation",
-    url: "/admin/affiliates",
-    icon: TrendingUp,
-  },
-  {
-    title: "Paramètres",
-    url: "/admin/settings",
-    icon: Settings,
-  },
-  {
-    title: "Notifications",
-    url: "/admin/notifications",
-    icon: Bell,
+    label: "Configuration",
+    items: [
+      {
+        title: "Paramètres",
+        url: "/admin/settings",
+        icon: Settings,
+      },
+    ]
   },
 ];
+
+// Menu Admin flat pour rétrocompatibilité
+const adminMenuItems = adminMenuSections.flatMap(section => section.items);
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -249,42 +416,48 @@ export function AppSidebar() {
           </div>
         </div>
 
-        {/* Menu Items */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="!text-black">Menu principal</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/dashboard"}
-                      className={({ isActive }) =>
-                        `transition-all duration-300 ${
-                          isActive
-                            ? "bg-primary/20 text-primary font-semibold border-l-2 border-primary"
-                            : "!text-black hover:bg-muted hover:translate-x-1"
-                        }`
-                      }
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {!isCollapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Admin Menu Items */}
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="!text-black">Administration</SidebarGroupLabel>
+        {/* Menu Items - Organisé par sections */}
+        {menuSections.map((section) => (
+          <SidebarGroup key={section.label}>
+            <SidebarGroupLabel className="!text-black">
+              {!isCollapsed && section.label}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {adminMenuItems.map((item) => (
+                {section.items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to={item.url}
+                        end={item.url === "/dashboard"}
+                        className={({ isActive }) =>
+                          `transition-all duration-300 ${
+                            isActive
+                              ? "bg-primary/20 text-primary font-semibold border-l-2 border-primary"
+                              : "!text-black hover:bg-muted hover:translate-x-1"
+                          }`
+                        }
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {!isCollapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
+
+        {/* Admin Menu Items - Organisé par sections */}
+        {isAdmin && adminMenuSections.map((section) => (
+          <SidebarGroup key={section.label}>
+            <SidebarGroupLabel className="!text-black">
+              {!isCollapsed && section.label}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {section.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
                       <NavLink
@@ -306,7 +479,7 @@ export function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        )}
+        ))}
       </SidebarContent>
 
       {/* Footer */}
