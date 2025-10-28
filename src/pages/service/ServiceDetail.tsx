@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   ArrowLeft,
   Calendar,
@@ -32,6 +31,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ServiceCalendar } from '@/components/service/ServiceCalendar';
 import { TimeSlotPicker } from '@/components/service/TimeSlotPicker';
 import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummary';
+import { StaffCard } from '@/components/shared';
 
 export default function ServiceDetail() {
   const { serviceId } = useParams<{ serviceId: string }>();
@@ -216,32 +216,22 @@ export default function ServiceDetail() {
 
               {/* Staff */}
               {service?.staff && service.staff.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Notre équipe</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold">Notre équipe</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {service.staff.map((member: any) => (
-                      <div key={member.id} className="flex items-start gap-4">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src={member.photo_url} />
-                          <AvatarFallback>
-                            {member.name?.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="font-semibold">{member.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {member.specialty}
-                          </p>
-                          {member.bio && (
-                            <p className="text-sm mt-1">{member.bio}</p>
-                          )}
-                        </div>
-                      </div>
+                      <StaffCard
+                        key={member.id}
+                        name={member.name}
+                        role={member.specialty}
+                        bio={member.bio}
+                        avatar_url={member.photo_url}
+                        variant="compact"
+                        availability="available"
+                      />
                     ))}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               )}
 
               {/* Reviews */}

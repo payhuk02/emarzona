@@ -33,6 +33,7 @@ import { VariantSelector } from '@/components/physical/VariantSelector';
 import { StockLevelIndicator } from '@/components/physical/InventoryStockIndicator';
 import { ShippingInfoDisplay } from '@/components/physical/ShippingInfoDisplay';
 import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummary';
+import { ProductImages } from '@/components/shared';
 
 export default function PhysicalProductDetail() {
   const { productId } = useParams<{ productId: string }>();
@@ -40,7 +41,6 @@ export default function PhysicalProductDetail() {
   const { toast } = useToast();
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   // Fetch product data
   const { data: product, isLoading } = useQuery({
@@ -92,7 +92,6 @@ export default function PhysicalProductDetail() {
   };
 
   const images = product?.images || [product?.image_url] || [];
-  const currentImage = images[selectedImageIndex];
   const stockQuantity = selectedVariant
     ? product?.inventory?.find((inv: any) => inv.variant_id === selectedVariant.id)?.quantity || 0
     : product?.physical?.total_stock || 0;
@@ -127,39 +126,13 @@ export default function PhysicalProductDetail() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             {/* Left: Images */}
-            <div className="space-y-4">
-              {/* Main Image */}
-              <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                <img
-                  src={currentImage}
-                  alt={product?.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              {/* Thumbnails */}
-              {images.length > 1 && (
-                <div className="grid grid-cols-4 gap-2">
-                  {images.map((img: string, idx: number) => (
-                    <button
-                      key={idx}
-                      onClick={() => setSelectedImageIndex(idx)}
-                      className={`aspect-square rounded border-2 overflow-hidden transition-all ${
-                        selectedImageIndex === idx
-                          ? 'border-primary'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <img
-                        src={img}
-                        alt={`${product?.name} ${idx + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ProductImages
+              images={images}
+              productName={product?.name || 'Produit'}
+              showThumbnails={true}
+              enableLightbox={true}
+              aspectRatio="square"
+            />
 
             {/* Right: Product Info */}
             <div className="space-y-6">
