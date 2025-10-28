@@ -93,6 +93,12 @@ const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications")
 const AdminDisputes = lazy(() => import("./pages/admin/AdminDisputes"));
 const AdminAffiliates = lazy(() => import("./pages/admin/AdminAffiliates"));
 const AdminReviews = lazy(() => import("./pages/admin/AdminReviews").then(m => ({ default: m.AdminReviews })));
+const AdminInventory = lazy(() => import("./pages/admin/AdminInventory"));
+const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
+const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
+const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
+const AdminShipping = lazy(() => import("./pages/admin/AdminShipping"));
+const AdminCourses = lazy(() => import("./pages/admin/AdminCourses"));
 
 // Pages Affiliation - Lazy loading
 const StoreAffiliates = lazy(() => import("./pages/StoreAffiliates"));
@@ -264,6 +270,12 @@ const AppContent = () => {
           <Route path="/admin/disputes" element={<ProtectedRoute><AdminDisputes /></ProtectedRoute>} />
           <Route path="/admin/affiliates" element={<ProtectedRoute><AdminAffiliates /></ProtectedRoute>} />
           <Route path="/admin/reviews" element={<ProtectedRoute><AdminReviews /></ProtectedRoute>} />
+          <Route path="/admin/inventory" element={<ProtectedRoute><AdminInventory /></ProtectedRoute>} />
+          <Route path="/admin/support" element={<ProtectedRoute><AdminSupport /></ProtectedRoute>} />
+          <Route path="/admin/analytics" element={<ProtectedRoute><AdminAnalytics /></ProtectedRoute>} />
+          <Route path="/admin/payments" element={<ProtectedRoute><AdminPayments /></ProtectedRoute>} />
+          <Route path="/admin/shipping" element={<ProtectedRoute><AdminShipping /></ProtectedRoute>} />
+          <Route path="/admin/courses" element={<ProtectedRoute><AdminCourses /></ProtectedRoute>} />
 
           {/* --- Route de fallback --- */}
           <Route path="*" element={<NotFound />} />
