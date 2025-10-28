@@ -32,7 +32,7 @@ import {
   Headphones,
 } from "lucide-react";
 import payhukLogo from "@/assets/payhuk-logo.png";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import {
   Sidebar,
@@ -373,9 +373,13 @@ const adminMenuItems = adminMenuSections.flatMap(section => section.items);
 export function AppSidebar() {
   const { state } = useSidebar();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { isAdmin } = useAdmin();
   const isCollapsed = state === "collapsed";
+  
+  // Détecte si on est sur une page admin
+  const isOnAdminPage = location.pathname.startsWith('/admin');
 
   const handleLogout = async () => {
     try {
@@ -416,8 +420,8 @@ export function AppSidebar() {
           </div>
         </div>
 
-        {/* Menu Items - Organisé par sections */}
-        {menuSections.map((section) => (
+        {/* Menu Items - Organisé par sections (masqué sur pages admin) */}
+        {!isOnAdminPage && menuSections.map((section) => (
           <SidebarGroup key={section.label}>
             <SidebarGroupLabel className="!text-black">
               {!isCollapsed && section.label}
@@ -448,6 +452,27 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+
+        {/* Bouton Retour Dashboard (visible uniquement sur pages admin) */}
+        {isAdmin && isOnAdminPage && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to="/dashboard"
+                      className="!text-primary hover:bg-primary/10 hover:translate-x-1 transition-all duration-300"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      {!isCollapsed && <span>← Retour Dashboard</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {/* Admin Menu Items - Organisé par sections */}
         {isAdmin && adminMenuSections.map((section) => (
