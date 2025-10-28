@@ -121,10 +121,11 @@ const NotificationSettings = lazy(() => import("./pages/settings/NotificationSet
 
 // Pages Produits Digitaux - Lazy loading
 const DigitalProductsList = lazy(() => import("./pages/digital/DigitalProductsList"));
+const DigitalProductDetail = lazy(() => import("./pages/digital/DigitalProductDetail"));
 const MyDownloads = lazy(() => import("./pages/digital/MyDownloads"));
 const MyLicenses = lazy(() => import("./pages/digital/MyLicenses"));
 const LicenseManagement = lazy(() => import("./pages/digital/LicenseManagement"));
-const DigitalAnalyticsDashboard = lazy(() => import("./components/digital/DigitalAnalyticsDashboard").then(m => ({ default: m.DigitalAnalyticsDashboard })));
+const DigitalProductAnalytics = lazy(() => import("./pages/digital/DigitalProductAnalytics"));
 
 // Page de test i18n (à supprimer en production)
 const I18nTest = lazy(() => import("./pages/I18nTest"));
@@ -203,10 +204,11 @@ const AppContent = () => {
 
           {/* --- Routes Produits Digitaux --- */}
           <Route path="/dashboard/digital-products" element={<ProtectedRoute><DigitalProductsList /></ProtectedRoute>} />
+          <Route path="/digital/:productId" element={<DigitalProductDetail />} />
           <Route path="/dashboard/my-downloads" element={<ProtectedRoute><MyDownloads /></ProtectedRoute>} />
           <Route path="/dashboard/my-licenses" element={<ProtectedRoute><MyLicenses /></ProtectedRoute>} />
           <Route path="/dashboard/licenses/manage/:id" element={<ProtectedRoute><LicenseManagement /></ProtectedRoute>} />
-          <Route path="/dashboard/digital/analytics/:productId" element={<ProtectedRoute><DigitalAnalyticsDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/digital/analytics/:productId" element={<ProtectedRoute><DigitalProductAnalytics /></ProtectedRoute>} />
 
           {/* --- Routes administrateur --- */}
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
