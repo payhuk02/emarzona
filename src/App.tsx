@@ -131,6 +131,11 @@ const DigitalProductAnalytics = lazy(() => import("./pages/digital/DigitalProduc
 const OrderMessaging = lazy(() => import("./pages/orders/OrderMessaging"));
 const PaymentManagement = lazy(() => import("./pages/payments/PaymentManagement"));
 const DisputeDetail = lazy(() => import("./pages/disputes/DisputeDetail"));
+const PayBalance = lazy(() => import("./pages/payments/PayBalance"));
+
+// Pages Produits Physiques & Services - Détails
+const PhysicalProductDetail = lazy(() => import("./pages/physical/PhysicalProductDetail"));
+const ServiceDetail = lazy(() => import("./pages/service/ServiceDetail"));
 
 // Page de test i18n (à supprimer en production)
 const I18nTest = lazy(() => import("./pages/I18nTest"));
@@ -218,7 +223,12 @@ const AppContent = () => {
           {/* --- Routes Advanced Systems (Messaging, Payments, Disputes) --- */}
           <Route path="/orders/:orderId/messaging" element={<ProtectedRoute><OrderMessaging /></ProtectedRoute>} />
           <Route path="/payments/:orderId/manage" element={<ProtectedRoute><PaymentManagement /></ProtectedRoute>} />
+          <Route path="/payments/:orderId/balance" element={<ProtectedRoute><PayBalance /></ProtectedRoute>} />
           <Route path="/disputes/:disputeId" element={<ProtectedRoute><DisputeDetail /></ProtectedRoute>} />
+
+          {/* --- Routes Product Details (Physical, Services) --- */}
+          <Route path="/physical/:productId" element={<PhysicalProductDetail />} />
+          <Route path="/service/:serviceId" element={<ServiceDetail />} />
 
           {/* --- Routes administrateur --- */}
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />

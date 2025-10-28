@@ -112,6 +112,7 @@ export const CreateDigitalProductWizard = ({
     description: '',
     short_description: '',
     category: 'ebook',
+    digital_type: 'ebook', // Type de produit digital
     image_url: '',
     price: 0,
     promotional_price: null,
@@ -119,13 +120,25 @@ export const CreateDigitalProductWizard = ({
     
     // Files
     main_file_url: '',
+    main_file_version: '1.0',
     downloadable_files: [],
     
-    // License & Download
+    // License Config
     license_type: 'single',
+    license_duration_days: null, // NULL = lifetime
+    max_activations: 1,
+    allow_license_transfer: false,
+    auto_generate_keys: true,
+    
+    // Download Settings
     download_limit: 5,
     download_expiry_days: 30,
+    require_registration: true,
     watermark_enabled: false,
+    watermark_text: '',
+    
+    // Version
+    version: '1.0',
     
     // Affiliate
     affiliate: {
@@ -262,22 +275,30 @@ export const CreateDigitalProductWizard = ({
                              mainFile?.name?.split('.').pop() || 'unknown';
 
       // 3. Create digital_product
-      const { data: digitalProduct, error: digitalError } = await supabase
+      const { data: digitalProduct, error: digitalError} = await supabase
         .from('digital_products')
         .insert({
           product_id: product.id,
-          digital_type: 'other',
+          digital_type: formData.digital_type || 'other',
           license_type: formData.license_type || 'single',
-          license_duration_days: formData.download_expiry_days || null,
-          max_activations: formData.license_type === 'unlimited' ? -1 : 
-                          formData.license_type === 'multi' ? formData.download_limit : 1,
-          main_file_url: formData.main_file_url || '',
+          license_duration_days: formData.license_duration_days || null, // NULL = lifetime
+          max_activations: formData.max_activations || 
+                          (formData.license_type === 'unlimited' ? -1 : 
+                           formData.license_type === 'multi' ? 5 : 1),
+          allow_license_transfer: formData.allow_license_transfer || false,
+          auto_generate_keys: formData.auto_generate_keys !== false,
+          main_file_url: formData.main_file_url || (mainFile?.url || ''),
           main_file_size_mb: mainFile ? (mainFile.size / (1024 * 1024)) : 0,
           main_file_format: mainFileFormat,
+          main_file_version: formData.main_file_version || '1.0',
+          total_files: formData.downloadable_files?.length || 1,
           total_size_mb: totalSizeMB,
           download_limit: formData.download_limit || 5,
           download_expiry_days: formData.download_expiry_days || 30,
+          require_registration: formData.require_registration !== false,
           watermark_enabled: formData.watermark_enabled || false,
+          watermark_text: formData.watermark_text || '',
+          version: formData.version || '1.0',
           total_downloads: 0,
           unique_downloaders: 0,
         })
