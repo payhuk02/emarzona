@@ -7,7 +7,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@antml:invoke>
 <parameter name="@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 // =====================================================
 // TYPES

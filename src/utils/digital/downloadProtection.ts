@@ -5,7 +5,7 @@
  * Utilitaires de sécurité pour téléchargements
  */
 
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import * as Sentry from '@sentry/react';
 
 // =====================================================
