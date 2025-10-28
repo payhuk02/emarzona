@@ -5,7 +5,7 @@
  * Système de gestion des licenses professionnel
  */
 
-import { useQuery, useMutation, useQueryClient } from '@antml:parameter>
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
