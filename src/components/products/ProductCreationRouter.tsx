@@ -16,8 +16,9 @@ const CreateCourseWizard = lazy(() =>
   import('../courses/create/CreateCourseWizard').then(m => ({ default: m.CreateCourseWizard }))
 );
 
+// V2 : Wizard avec 6 étapes (SEO + FAQs intégrés)
 const CreateDigitalProductWizard = lazy(() => 
-  import('./create/digital/CreateDigitalProductWizard').then(m => ({ default: m.CreateDigitalProductWizard }))
+  import('./create/digital/CreateDigitalProductWizard_v2').then(m => ({ default: m.CreateDigitalProductWizard }))
 );
 
 // V2 : Wizards avec 7 étapes (Affiliation + SEO/FAQs intégrés)

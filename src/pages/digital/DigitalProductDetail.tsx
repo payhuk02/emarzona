@@ -37,6 +37,11 @@ import { DigitalLicenseCard } from '@/components/digital/DigitalLicenseCard';
 import { useDigitalProduct } from '@/hooks/digital/useDigitalProducts';
 import { useHasDownloadAccess } from '@/hooks/digital/useDigitalProducts';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummary';
+import { ReviewsList } from '@/components/reviews/ReviewsList';
+import { ReviewForm } from '@/components/reviews/ReviewForm';
+import { useEffect } from 'react';
+import { useTrackAnalyticsEvent } from '@/hooks/analytics/useTrackAnalyticsEvent';
 
 interface DigitalProductDetailParams {
   productId: string;
@@ -55,6 +60,54 @@ export default function DigitalProductDetail() {
   
   // Check if user has purchased this product
   const { data: hasAccess } = useHasDownloadAccess(productId || '');
+  
+  // Track analytics event
+  const trackEvent = useTrackAnalyticsEvent();
+
+  // Track product view on mount
+  useEffect(() => {
+    if (productId) {
+      trackEvent.mutate({
+        productId,
+        eventType: 'view',
+        eventData: {
+          product_type: 'digital',
+          timestamp: new Date().toISOString(),
+        },
+      });
+
+      // Track with external pixels (Google Analytics, Facebook, TikTok)
+      if (typeof window !== 'undefined') {
+        // Google Analytics
+        if ((window as any).gtag) {
+          (window as any).gtag('event', 'view_item', {
+            items: [{
+              item_id: productId,
+              item_name: digitalProduct?.product?.name || 'Digital Product',
+              item_category: 'digital',
+            }]
+          });
+        }
+
+        // Facebook Pixel
+        if ((window as any).fbq) {
+          (window as any).fbq('track', 'ViewContent', {
+            content_type: 'product',
+            content_ids: [productId],
+            content_category: 'digital',
+          });
+        }
+
+        // TikTok Pixel
+        if ((window as any).ttq) {
+          (window as any).ttq.track('ViewContent', {
+            content_type: 'product',
+            content_id: productId,
+          });
+        }
+      }
+    }
+  }, [productId, trackEvent, digitalProduct]);
 
   if (isLoading) {
     return (
@@ -189,6 +242,17 @@ export default function DigitalProductDetail() {
 
               <Separator />
 
+              {/* Reviews Summary (compact) */}
+              <div className="py-2">
+                <ProductReviewsSummary 
+                  productId={productId || ''} 
+                  productType="digital"
+                  compact
+                />
+              </div>
+
+              <Separator />
+
               {/* Access Status & Actions */}
               <div className="space-y-4">
                 {hasAccess ? (
@@ -310,9 +374,10 @@ export default function DigitalProductDetail() {
       {/* Content Tabs */}
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <Tabs defaultValue="description" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="files">Fichiers détails</TabsTrigger>
+            <TabsTrigger value="reviews">Avis</TabsTrigger>
             <TabsTrigger value="faqs">FAQs</TabsTrigger>
           </TabsList>
 
@@ -385,6 +450,37 @@ export default function DigitalProductDetail() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Reviews Tab */}
+          <TabsContent value="reviews" className="space-y-6">
+            {/* Reviews Summary */}
+            <ProductReviewsSummary productId={productId || ''} productType="digital" />
+
+            {/* Write Review (if user owns) */}
+            {hasAccess && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Laisser un avis</CardTitle>
+                  <CardDescription>
+                    Partagez votre expérience avec ce produit
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ReviewForm productId={productId || ''} productType="digital" />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Reviews List */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Avis des utilisateurs</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ReviewsList productId={productId || ''} productType="digital" />
               </CardContent>
             </Card>
           </TabsContent>
