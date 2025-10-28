@@ -6,7 +6,7 @@
  * Support: Paiement complet, pourcentage, escrow (delivery_secured)
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,7 @@ import {
   TrendingUp,
   Lock
 } from 'lucide-react';
+import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 
 export type PaymentType = 'full' | 'percentage' | 'delivery_secured';
 
@@ -44,10 +45,20 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
   data,
   onUpdate,
 }) => {
+  const { trackEvent } = useAnalyticsTracking();
+
   const handlePaymentTypeChange = (value: PaymentType) => {
     onUpdate({
       ...data,
       payment_type: value,
+    });
+    
+    // Track payment option selection
+    trackEvent('payment_option_selected', {
+      payment_type: value,
+      product_price: productPrice,
+      product_type: productType,
+      percentage_rate: data.percentage_rate || 30,
     });
   };
 

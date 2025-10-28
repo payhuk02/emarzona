@@ -2,13 +2,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, CreditCard, Package, MapPin, Phone, Mail, FileText, MessageSquare, Shield, AlertCircle } from "lucide-react";
+import { Calendar, User, CreditCard, Package, MapPin, Phone, Mail, FileText, MessageSquare, Shield, AlertCircle, Percent } from "lucide-react";
 import { Order } from "@/hooks/useOrders";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useUnreadCount } from "@/hooks/useUnreadCount";
 
 interface OrderDetailDialogProps {
   open: boolean;
@@ -28,6 +29,9 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
   const navigate = useNavigate();
   const [items, setItems] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // Hook pour compter les messages non lus
+  const { data: unreadCount = 0 } = useUnreadCount(order?.id || '');
 
   useEffect(() => {
     const fetchOrderItems = async () => {
@@ -239,6 +243,80 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
             </div>
           </div>
 
+          {/* Payment Type & Details */}
+          <Separator />
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground">Type de Paiement :</span>
+              {(!order.payment_type || order.payment_type === 'full') && (
+                <Badge variant="secondary" className="gap-1">
+                  <CreditCard className="h-3 w-3" />
+                  Paiement Complet
+                </Badge>
+              )}
+              
+              {order.payment_type === 'percentage' && (
+                <Badge variant="default" className="bg-blue-600 gap-1">
+                  <Percent className="h-3 w-3" />
+                  Paiement Partiel {order.percentage_paid && order.total_amount ? `(${Math.round((order.percentage_paid / order.total_amount) * 100)}%)` : ''}
+                </Badge>
+              )}
+              
+              {order.payment_type === 'delivery_secured' && (
+                <Badge variant="default" className="bg-yellow-600 gap-1">
+                  <Shield className="h-3 w-3" />
+                  Paiement Sécurisé (Escrow)
+                </Badge>
+              )}
+            </div>
+
+            {/* Détails paiement partiel */}
+            {order.payment_type === 'percentage' && order.percentage_paid && (
+              <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Acompte payé :</span>
+                  <span className="font-semibold text-blue-700 dark:text-blue-300">
+                    {formatPrice(order.percentage_paid)} {order.currency}
+                  </span>
+                </div>
+                {order.remaining_amount && order.remaining_amount > 0 && (
+                  <>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Solde restant :</span>
+                      <span className="font-semibold text-orange-600 dark:text-orange-400">
+                        {formatPrice(order.remaining_amount)} {order.currency}
+                      </span>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="w-full mt-2 border-blue-500 text-blue-700 hover:bg-blue-50"
+                    >
+                      Payer le solde
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Détails paiement escrow */}
+            {order.payment_type === 'delivery_secured' && (
+              <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <div className="flex items-start gap-2">
+                  <Shield className="h-4 w-4 text-yellow-600 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                      Fonds sécurisés en escrow
+                    </p>
+                    <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                      Les fonds seront libérés après confirmation de livraison ou automatiquement après le délai de sécurité.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Notes */}
           {order.notes && (
             <>
@@ -261,7 +339,7 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Button
                 variant="default"
-                className="w-full"
+                className="w-full relative"
                 onClick={() => {
                   navigate(`/orders/${order.id}/messaging`);
                   onOpenChange(false);
@@ -269,6 +347,11 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
               >
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Messagerie
+                {unreadCount > 0 && (
+                  <Badge className="ml-2 bg-red-500 text-white hover:bg-red-600">
+                    {unreadCount}
+                  </Badge>
+                )}
               </Button>
               
               {/* Show Payment Management button for physical/service products */}

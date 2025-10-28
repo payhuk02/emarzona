@@ -1,14 +1,22 @@
-import { useEffect, useState } from "react";
-import { Clock } from "lucide-react";
-import { Badge } from "./badge";
+/**
+ * Countdown Timer Component
+ * Date: 28 octobre 2025
+ * 
+ * Affiche un compte à rebours jusqu'à une date cible
+ * Utile pour auto-release escrow, deadlines, etc.
+ */
+
+import { useEffect, useState } from 'react';
+import { Clock } from 'lucide-react';
 
 interface CountdownTimerProps {
-  endDate: string | Date;
-  startDate?: string | Date;
-  onExpire?: () => void;
+  targetDate: string | Date;
+  onComplete?: () => void;
+  className?: string;
+  showIcon?: boolean;
 }
 
-interface TimeLeft {
+interface TimeRemaining {
   days: number;
   hours: number;
   minutes: number;
@@ -16,93 +24,180 @@ interface TimeLeft {
   total: number;
 }
 
-export const CountdownTimer = ({ endDate, startDate, onExpire }: CountdownTimerProps) => {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
-  const [isActive, setIsActive] = useState(false);
+export const CountdownTimer = ({
+  targetDate,
+  onComplete,
+  className = '',
+  showIcon = true,
+}: CountdownTimerProps) => {
+  const [timeRemaining, setTimeRemaining] = useState<TimeRemaining>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    total: 0,
+  });
 
   useEffect(() => {
-    const calculateTimeLeft = (): TimeLeft | null => {
+    const calculateTimeRemaining = () => {
+      const target = new Date(targetDate).getTime();
       const now = new Date().getTime();
-      const end = new Date(endDate).getTime();
-      const start = startDate ? new Date(startDate).getTime() : now;
+      const difference = target - now;
 
-      // Si la promo n'a pas encore commencé
-      if (now < start) {
-        setIsActive(false);
-        return null;
-      }
-
-      // Si la promo est terminée
-      if (now > end) {
-        setIsActive(false);
-        if (onExpire) {
-          onExpire();
+      if (difference <= 0) {
+        setTimeRemaining({
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+          total: 0,
+        });
+        
+        if (onComplete) {
+          onComplete();
         }
-        return null;
+        return;
       }
 
-      setIsActive(true);
-      const difference = end - now;
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
-      return {
+      setTimeRemaining({
+        days,
+        hours,
+        minutes,
+        seconds,
         total: difference,
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      };
+      });
     };
 
-    // Calcul initial
-    setTimeLeft(calculateTimeLeft());
+    // Initial calculation
+    calculateTimeRemaining();
 
-    // Mise à jour chaque seconde
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
+    // Update every second
+    const interval = setInterval(calculateTimeRemaining, 1000);
 
-    return () => clearInterval(timer);
-  }, [endDate, startDate, onExpire]);
+    return () => clearInterval(interval);
+  }, [targetDate, onComplete]);
 
-  // Si la promo n'est pas active, ne rien afficher
-  if (!isActive || !timeLeft) {
-    return null;
-  }
+  const formatUnit = (value: number, label: string) => {
+    const plural = value !== 1 ? 's' : '';
+    return value > 0 ? `${value} ${label}${plural}` : '';
+  };
 
-  const formatNumber = (num: number) => String(num).padStart(2, '0');
+  const getFormattedTime = () => {
+    const parts = [];
+    
+    if (timeRemaining.days > 0) {
+      parts.push(formatUnit(timeRemaining.days, 'jour'));
+    }
+    if (timeRemaining.hours > 0 || timeRemaining.days > 0) {
+      parts.push(formatUnit(timeRemaining.hours, 'heure'));
+    }
+    if (timeRemaining.minutes > 0 || timeRemaining.hours > 0 || timeRemaining.days > 0) {
+      parts.push(formatUnit(timeRemaining.minutes, 'minute'));
+    }
+    if (timeRemaining.days === 0) {
+      parts.push(formatUnit(timeRemaining.seconds, 'seconde'));
+    }
+
+    return parts.filter(Boolean).join(', ') || 'Expiré';
+  };
+
+  const getUrgencyClass = () => {
+    if (timeRemaining.total === 0) return 'text-red-600 dark:text-red-400';
+    if (timeRemaining.days === 0 && timeRemaining.hours < 24) return 'text-orange-600 dark:text-orange-400';
+    return 'text-gray-700 dark:text-gray-300';
+  };
 
   return (
-    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20">
-      <Clock className="h-4 w-4 text-orange-600 animate-pulse" />
-      <div className="flex items-center gap-1 text-sm font-semibold">
-        {timeLeft.days > 0 && (
-          <>
-            <div className="flex flex-col items-center">
-              <span className="text-lg text-orange-700">{formatNumber(timeLeft.days)}</span>
-              <span className="text-xs text-muted-foreground">j</span>
-            </div>
-            <span className="text-orange-600">:</span>
-          </>
-        )}
-        <div className="flex flex-col items-center">
-          <span className="text-lg text-orange-700">{formatNumber(timeLeft.hours)}</span>
-          <span className="text-xs text-muted-foreground">h</span>
-        </div>
-        <span className="text-orange-600">:</span>
-        <div className="flex flex-col items-center">
-          <span className="text-lg text-orange-700">{formatNumber(timeLeft.minutes)}</span>
-          <span className="text-xs text-muted-foreground">m</span>
-        </div>
-        <span className="text-orange-600">:</span>
-        <div className="flex flex-col items-center">
-          <span className="text-lg text-orange-700">{formatNumber(timeLeft.seconds)}</span>
-          <span className="text-xs text-muted-foreground">s</span>
-        </div>
-      </div>
-      <Badge variant="destructive" className="ml-2 animate-pulse">
-        Offre limitée
-      </Badge>
+    <div className={`flex items-center gap-2 ${className}`}>
+      {showIcon && <Clock className={`h-4 w-4 ${getUrgencyClass()}`} />}
+      <span className={`font-medium ${getUrgencyClass()}`}>
+        {getFormattedTime()}
+      </span>
     </div>
   );
 };
 
+/**
+ * Compact version for badges
+ */
+export const CountdownBadge = ({
+  targetDate,
+  onComplete,
+}: {
+  targetDate: string | Date;
+  onComplete?: () => void;
+}) => {
+  const [timeRemaining, setTimeRemaining] = useState<TimeRemaining>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    total: 0,
+  });
+
+  useEffect(() => {
+    const calculateTimeRemaining = () => {
+      const target = new Date(targetDate).getTime();
+      const now = new Date().getTime();
+      const difference = target - now;
+
+      if (difference <= 0) {
+        setTimeRemaining({
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+          total: 0,
+        });
+        
+        if (onComplete) {
+          onComplete();
+        }
+        return;
+      }
+
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+      setTimeRemaining({
+        days,
+        hours,
+        minutes,
+        seconds,
+        total: difference,
+      });
+    };
+
+    calculateTimeRemaining();
+    const interval = setInterval(calculateTimeRemaining, 1000);
+
+    return () => clearInterval(interval);
+  }, [targetDate, onComplete]);
+
+  const getCompactFormat = () => {
+    if (timeRemaining.total === 0) return 'Expiré';
+    if (timeRemaining.days > 0) return `${timeRemaining.days}j ${timeRemaining.hours}h`;
+    if (timeRemaining.hours > 0) return `${timeRemaining.hours}h ${timeRemaining.minutes}m`;
+    return `${timeRemaining.minutes}m ${timeRemaining.seconds}s`;
+  };
+
+  const getBadgeColor = () => {
+    if (timeRemaining.total === 0) return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+    if (timeRemaining.days === 0 && timeRemaining.hours < 24) return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+    return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+  };
+
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getBadgeColor()}`}>
+      <Clock className="h-3 w-3" />
+      {getCompactFormat()}
+    </span>
+  );
+};

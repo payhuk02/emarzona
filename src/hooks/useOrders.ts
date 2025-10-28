@@ -15,6 +15,11 @@ export interface Order {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  // Advanced payment fields
+  payment_type?: 'full' | 'percentage' | 'delivery_secured' | null;
+  percentage_paid?: number | null;
+  remaining_amount?: number | null;
+  delivery_status?: string | null;
   customers?: {
     name: string;
     email: string | null;

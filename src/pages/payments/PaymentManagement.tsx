@@ -49,12 +49,15 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { CountdownTimer } from '@/components/ui/countdown-timer';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function PaymentManagement() {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const {
     payments,
@@ -343,12 +346,33 @@ export default function PaymentManagement() {
                                 </span>
                               </div>
                               {payment.held_until && (
-                                <div className="flex justify-between">
-                                  <span className="text-sm text-muted-foreground">Retenu jusqu'à</span>
-                                  <span className="font-medium text-destructive">
-                                    {format(new Date(payment.held_until), 'dd MMM yyyy', { locale: fr })}
-                                  </span>
-                                </div>
+                                <>
+                                  <div className="flex justify-between">
+                                    <span className="text-sm text-muted-foreground">Retenu jusqu'à</span>
+                                    <span className="font-medium text-destructive">
+                                      {format(new Date(payment.held_until), 'dd MMM yyyy', { locale: fr })}
+                                    </span>
+                                  </div>
+                                  
+                                  {/* Countdown Timer */}
+                                  <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                                    <p className="text-xs font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+                                      Libération automatique dans :
+                                    </p>
+                                    <CountdownTimer 
+                                      targetDate={payment.held_until}
+                                      onComplete={() => {
+                                        toast({
+                                          title: '🎉 Paiement libéré automatiquement',
+                                          description: 'Les fonds ont été transférés au vendeur',
+                                        });
+                                        // Refresh payments data
+                                        queryClient.invalidateQueries({ queryKey: ['advanced-payments'] });
+                                      }}
+                                      showIcon={true}
+                                    />
+                                  </div>
+                                </>
                               )}
                             </div>
                           </div>
