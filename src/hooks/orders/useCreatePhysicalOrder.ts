@@ -122,7 +122,7 @@ export const useCreatePhysicalOrder = () => {
         inventoryLocationId,
       } = options;
 
-      // 1. Récupérer les détails du produit
+      // 1. Récupérer les détails du produit (avec payment_options)
       const { data: product, error: productError } = await supabase
         .from('products')
         .select('*')
@@ -132,6 +132,11 @@ export const useCreatePhysicalOrder = () => {
       if (productError || !product) {
         throw new Error('Produit non trouvé');
       }
+
+      // Récupérer les options de paiement configurées
+      const paymentOptions = (product.payment_options as any) || { payment_type: 'full', percentage_rate: 30 };
+      const paymentType = paymentOptions.payment_type || 'full';
+      const percentageRate = paymentOptions.percentage_rate || 30;
 
       // 2. Récupérer les détails physiques
       const { data: physicalProduct, error: physicalError } = await supabase
@@ -258,11 +263,27 @@ export const useCreatePhysicalOrder = () => {
       const unitPrice = (product.promotional_price || product.price) + variantPrice;
       const totalPrice = unitPrice * quantity;
 
+      // Calculer le montant à payer selon le type de paiement
+      let amountToPay = totalPrice;
+      let percentagePaid = 0;
+      let remainingAmount = 0;
+
+      if (paymentType === 'percentage') {
+        // Paiement partiel : calculer l'acompte
+        amountToPay = Math.round((totalPrice * percentageRate) / 100);
+        percentagePaid = amountToPay;
+        remainingAmount = totalPrice - amountToPay;
+      } else if (paymentType === 'delivery_secured') {
+        // Paiement sécurisé : montant total mais retenu en escrow
+        amountToPay = totalPrice;
+      }
+      // Si 'full', amountToPay = totalPrice (déjà défini)
+
       // 7. Générer un numéro de commande
       const { data: orderNumberData } = await supabase.rpc('generate_order_number');
       const orderNumber = orderNumberData || `ORD-${Date.now()}`;
 
-      // 8. Créer la commande
+      // 8. Créer la commande (avec payment_type)
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -274,6 +295,9 @@ export const useCreatePhysicalOrder = () => {
           payment_status: 'pending',
           status: 'pending',
           delivery_status: 'pending',
+          payment_type: paymentType,
+          percentage_paid: percentagePaid,
+          remaining_amount: remainingAmount,
         })
         .select('id')
         .single();
@@ -325,15 +349,38 @@ export const useCreatePhysicalOrder = () => {
         throw new Error('Erreur lors de la création de l\'élément de commande');
       }
 
-      // 10. Initier le paiement Moneroo
+      // 10. Créer un secured_payment si paiement escrow
+      if (paymentType === 'delivery_secured') {
+        await supabase
+          .from('secured_payments')
+          .insert({
+            order_id: order.id,
+            total_amount: totalPrice,
+            held_amount: amountToPay,
+            status: 'held',
+            hold_reason: 'delivery_confirmation',
+            release_conditions: {
+              requires_delivery_confirmation: true,
+              auto_release_days: 7,
+            },
+          });
+      }
+
+      // 11. Initier le paiement Moneroo (avec amountToPay adapté)
+      const paymentDescription = paymentType === 'percentage' 
+        ? `Acompte ${percentageRate}%: ${product.name} x${quantity}`
+        : paymentType === 'delivery_secured'
+        ? `Paiement sécurisé: ${product.name} x${quantity}`
+        : `Achat: ${product.name} x${quantity}`;
+
       const paymentResult = await initiateMonerooPayment({
         storeId,
         productId,
         orderId: order.id,
         customerId,
-        amount: totalPrice,
+        amount: amountToPay,
         currency: product.currency,
-        description: `Achat: ${product.name}${variantId ? ' (variante)' : ''} x${quantity}`,
+        description: paymentDescription,
         customerEmail,
         customerName: customerName || customerEmail.split('@')[0],
         customerPhone,
@@ -345,6 +392,11 @@ export const useCreatePhysicalOrder = () => {
           quantity,
           order_item_id: orderItem.id,
           shipping_address: shippingAddress,
+          payment_type: paymentType,
+          percentage_rate: paymentType === 'percentage' ? percentageRate : null,
+          total_price: totalPrice,
+          amount_paid: amountToPay,
+          remaining_amount: remainingAmount,
         },
       });
 
@@ -360,7 +412,7 @@ export const useCreatePhysicalOrder = () => {
         throw new Error('Erreur lors de l\'initialisation du paiement');
       }
 
-      // 11. Retourner le résultat
+      // 12. Retourner le résultat
       return {
         orderId: order.id,
         orderItemId: orderItem.id,

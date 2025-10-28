@@ -116,7 +116,7 @@ export const useCreateServiceOrder = () => {
         notes,
       } = options;
 
-      // 1. Récupérer les détails du produit
+      // 1. Récupérer les détails du produit (avec payment_options)
       const { data: product, error: productError } = await supabase
         .from('products')
         .select('*')
@@ -126,6 +126,11 @@ export const useCreateServiceOrder = () => {
       if (productError || !product) {
         throw new Error('Produit non trouvé');
       }
+
+      // Récupérer les options de paiement configurées
+      const paymentOptions = (product.payment_options as any) || { payment_type: 'full', percentage_rate: 30 };
+      const paymentType = paymentOptions.payment_type || 'full';
+      const percentageRate = paymentOptions.percentage_rate || 30;
 
       // 2. Récupérer les détails du service
       const { data: serviceProduct, error: serviceError } = await supabase
@@ -230,11 +235,27 @@ export const useCreateServiceOrder = () => {
         totalPrice *= hours;
       }
 
+      // Calculer le montant à payer selon le type de paiement
+      let amountToPay = totalPrice;
+      let percentagePaid = 0;
+      let remainingAmount = 0;
+
+      if (paymentType === 'percentage') {
+        // Paiement partiel : calculer l'acompte
+        amountToPay = Math.round((totalPrice * percentageRate) / 100);
+        percentagePaid = amountToPay;
+        remainingAmount = totalPrice - amountToPay;
+      } else if (paymentType === 'delivery_secured') {
+        // Paiement sécurisé : montant total mais retenu en escrow
+        amountToPay = totalPrice;
+      }
+      // Si 'full', amountToPay = totalPrice (déjà défini)
+
       // 8. Générer un numéro de commande
       const { data: orderNumberData } = await supabase.rpc('generate_order_number');
       const orderNumber = orderNumberData || `ORD-${Date.now()}`;
 
-      // 9. Créer la commande
+      // 9. Créer la commande (avec payment_type)
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -245,6 +266,9 @@ export const useCreateServiceOrder = () => {
           currency: product.currency,
           payment_status: 'pending',
           status: 'pending',
+          payment_type: paymentType,
+          percentage_paid: percentagePaid,
+          remaining_amount: remainingAmount,
         })
         .select('id')
         .single();
@@ -293,7 +317,24 @@ export const useCreateServiceOrder = () => {
         throw new Error('Erreur lors de la création de l\'élément de commande');
       }
 
-      // 11. Initier le paiement Moneroo
+      // 11. Créer un secured_payment si paiement escrow
+      if (paymentType === 'delivery_secured') {
+        await supabase
+          .from('secured_payments')
+          .insert({
+            order_id: order.id,
+            total_amount: totalPrice,
+            held_amount: amountToPay,
+            status: 'held',
+            hold_reason: 'service_completion',
+            release_conditions: {
+              requires_service_completion: true,
+              auto_release_days: 3,
+            },
+          });
+      }
+
+      // 12. Initier le paiement Moneroo (avec amountToPay adapté)
       const bookingDate = new Date(bookingDateTime).toLocaleDateString('fr-FR', {
         day: '2-digit',
         month: 'long',
@@ -302,14 +343,20 @@ export const useCreateServiceOrder = () => {
         minute: '2-digit',
       });
 
+      const paymentDescription = paymentType === 'percentage' 
+        ? `Acompte ${percentageRate}%: ${product.name} - ${bookingDate}`
+        : paymentType === 'delivery_secured'
+        ? `Paiement sécurisé: ${product.name} - ${bookingDate}`
+        : `Réservation: ${product.name} - ${bookingDate}`;
+
       const paymentResult = await initiateMonerooPayment({
         storeId,
         productId,
         orderId: order.id,
         customerId,
-        amount: totalPrice,
+        amount: amountToPay,
         currency: product.currency,
-        description: `Réservation: ${product.name} - ${bookingDate}`,
+        description: paymentDescription,
         customerEmail,
         customerName: customerName || customerEmail.split('@')[0],
         customerPhone,
@@ -321,6 +368,11 @@ export const useCreateServiceOrder = () => {
           duration_minutes: actualDuration,
           number_of_participants: numberOfParticipants,
           order_item_id: orderItem.id,
+          payment_type: paymentType,
+          percentage_rate: paymentType === 'percentage' ? percentageRate : null,
+          total_price: totalPrice,
+          amount_paid: amountToPay,
+          remaining_amount: remainingAmount,
         },
       });
 
@@ -334,7 +386,7 @@ export const useCreateServiceOrder = () => {
         throw new Error('Erreur lors de l\'initialisation du paiement');
       }
 
-      // 12. Retourner le résultat
+      // 13. Retourner le résultat
       return {
         orderId: order.id,
         orderItemId: orderItem.id,
