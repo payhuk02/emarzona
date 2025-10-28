@@ -1,13 +1,31 @@
 /**
- * Service Affiliate Settings
+ * Service Product - Affiliate Settings
  * Date: 28 octobre 2025
  * 
- * Configuration de l'affiliation spécifique aux services
- * Réutilise la même interface que les produits digitaux
+ * Composant réutilisant DigitalAffiliateSettings pour services
  */
 
 import { DigitalAffiliateSettings } from '../digital/DigitalAffiliateSettings';
 
-// Alias simple car la configuration d'affiliation est identique
-export const ServiceAffiliateSettings = DigitalAffiliateSettings;
+interface ServiceAffiliateSettingsProps {
+  productPrice: number;
+  productName: string;
+  data: any;
+  onUpdate: (data: any) => void;
+}
 
+export const ServiceAffiliateSettings = ({
+  productPrice,
+  productName,
+  data,
+  onUpdate,
+}: ServiceAffiliateSettingsProps) => {
+  return (
+    <DigitalAffiliateSettings
+      productPrice={productPrice}
+      productName={productName}
+      data={data}
+      onUpdate={onUpdate}
+    />
+  );
+};

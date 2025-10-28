@@ -1,13 +1,31 @@
 /**
- * Physical Product Affiliate Settings
+ * Physical Product - Affiliate Settings
  * Date: 28 octobre 2025
  * 
- * Configuration de l'affiliation spécifique aux produits physiques
- * Réutilise la même interface que les produits digitaux
+ * Composant réutilisant DigitalAffiliateSettings pour produits physiques
  */
 
 import { DigitalAffiliateSettings } from '../digital/DigitalAffiliateSettings';
 
-// Alias simple car la configuration d'affiliation est identique
-export const PhysicalAffiliateSettings = DigitalAffiliateSettings;
+interface PhysicalAffiliateSettingsProps {
+  productPrice: number;
+  productName: string;
+  data: any;
+  onUpdate: (data: any) => void;
+}
 
+export const PhysicalAffiliateSettings = ({
+  productPrice,
+  productName,
+  data,
+  onUpdate,
+}: PhysicalAffiliateSettingsProps) => {
+  return (
+    <DigitalAffiliateSettings
+      productPrice={productPrice}
+      productName={productName}
+      data={data}
+      onUpdate={onUpdate}
+    />
+  );
+};
