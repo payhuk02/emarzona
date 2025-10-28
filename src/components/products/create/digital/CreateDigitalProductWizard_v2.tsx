@@ -40,8 +40,8 @@ import { DigitalAffiliateSettings } from './DigitalAffiliateSettings';
 import { DigitalPreview } from './DigitalPreview';
 
 // Shared components
-import { ProductSEOForm } from '@/components/products/ProductSEOForm';
-import { ProductFAQForm } from '@/components/products/ProductFAQForm';
+import { ProductSEOForm } from '../shared/ProductSEOForm';
+import { ProductFAQForm } from '../shared/ProductFAQForm';
 
 const STEPS = [
   {
