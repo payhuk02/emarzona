@@ -10,29 +10,20 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { TwoFactorAuth } from "@/components/auth/TwoFactorAuth";
 import { 
   Loader2, 
   Shield, 
   Key, 
-  Smartphone, 
-  Mail, 
   CheckCircle2, 
   AlertCircle,
   Save,
   Eye,
   EyeOff,
-  Lock,
-  Unlock,
   Clock,
-  Smartphone as Phone,
-  QrCode,
-  Copy,
-  Download,
   Trash2,
-  Plus,
   Settings,
-  Activity,
-  AlertTriangle
+  Activity
 } from "lucide-react";
 
 interface SecuritySettings {
@@ -40,11 +31,6 @@ interface SecuritySettings {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
-  
-  // 2FA
-  twoFactorEnabled: boolean;
-  twoFactorMethod: 'app' | 'sms' | 'email';
-  backupCodes: string[];
   
   // Session management
   activeSessions: Array<{
@@ -82,9 +68,6 @@ export const SecuritySettings = () => {
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-    twoFactorEnabled: false,
-    twoFactorMethod: 'app',
-    backupCodes: [],
     activeSessions: [],
     recentLogins: [],
     showOnlineStatus: true,
@@ -101,21 +84,14 @@ export const SecuritySettings = () => {
     
     setLoading(true);
     try {
-      // Load 2FA settings
-      const { data: twoFactorData } = await supabase
-        .from('user_security_settings')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      // Load active sessions
+      // Load active sessions (if table exists)
       const { data: sessionsData } = await supabase
         .from('user_sessions')
         .select('*')
         .eq('user_id', user.id)
         .order('last_active', { ascending: false });
 
-      // Load recent logins
+      // Load recent logins (if table exists)
       const { data: loginsData } = await supabase
         .from('user_login_history')
         .select('*')
@@ -123,24 +99,24 @@ export const SecuritySettings = () => {
         .order('timestamp', { ascending: false })
         .limit(10);
 
+      // Load privacy settings from profile or user_security_settings
+      const { data: privacyData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
       setSettings(prev => ({
         ...prev,
-        twoFactorEnabled: twoFactorData?.two_factor_enabled || false,
-        twoFactorMethod: twoFactorData?.two_factor_method || 'app',
-        backupCodes: twoFactorData?.backup_codes || [],
         activeSessions: sessionsData || [],
         recentLogins: loginsData || [],
-        showOnlineStatus: twoFactorData?.show_online_status ?? true,
-        allowDataCollection: twoFactorData?.allow_data_collection ?? false,
-        marketingEmails: twoFactorData?.marketing_emails ?? false,
+        showOnlineStatus: privacyData?.show_online_status ?? true,
+        allowDataCollection: privacyData?.allow_data_collection ?? false,
+        marketingEmails: privacyData?.marketing_emails ?? false,
       }));
     } catch (error: any) {
       console.error('Error loading security settings:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les paramètres de sécurité",
-        variant: "destructive",
-      });
+      // Don't show error toast if tables don't exist yet (graceful degradation)
     } finally {
       setLoading(false);
     }
@@ -198,60 +174,6 @@ export const SecuritySettings = () => {
     }
   };
 
-  const toggleTwoFactor = async () => {
-    setSaving(true);
-    try {
-      if (settings.twoFactorEnabled) {
-        // Disable 2FA
-        const { error } = await supabase
-          .from('user_security_settings')
-          .update({ two_factor_enabled: false })
-          .eq('user_id', user?.id);
-
-        if (error) throw error;
-
-        setSettings(prev => ({ ...prev, twoFactorEnabled: false }));
-        toast({
-          title: "Succès",
-          description: "Authentification à deux facteurs désactivée",
-        });
-      } else {
-        // Enable 2FA
-        const { error } = await supabase
-          .from('user_security_settings')
-          .upsert({
-            user_id: user?.id,
-            two_factor_enabled: true,
-            two_factor_method: settings.twoFactorMethod,
-            backup_codes: generateBackupCodes(),
-          });
-
-        if (error) throw error;
-
-        setSettings(prev => ({ ...prev, twoFactorEnabled: true }));
-        toast({
-          title: "Succès",
-          description: "Authentification à deux facteurs activée",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const generateBackupCodes = () => {
-    const codes = [];
-    for (let i = 0; i < 10; i++) {
-      codes.push(Math.random().toString(36).substring(2, 8).toUpperCase());
-    }
-    return codes;
-  };
 
   const terminateSession = async (sessionId: string) => {
     try {
@@ -327,16 +249,7 @@ export const SecuritySettings = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 rounded-lg bg-muted/50">
-              <div className="text-2xl font-bold text-green-600">
-                {settings.twoFactorEnabled ? "✓" : "✗"}
-              </div>
-              <div className="text-sm text-muted-foreground">2FA</div>
-              <div className="text-xs">
-                {settings.twoFactorEnabled ? "Activé" : "Désactivé"}
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="text-center p-4 rounded-lg bg-muted/50">
               <div className="text-2xl font-bold text-blue-600">
                 {settings.activeSessions.length}
@@ -347,7 +260,7 @@ export const SecuritySettings = () => {
               <div className="text-2xl font-bold text-purple-600">
                 {settings.recentLogins.filter(l => l.success).length}
               </div>
-              <div className="text-sm text-muted-foreground">Connexions récentes</div>
+              <div className="text-sm text-muted-foreground">Connexions réussies</div>
             </div>
           </div>
         </CardContent>
@@ -455,109 +368,8 @@ export const SecuritySettings = () => {
         </CardContent>
       </Card>
 
-      {/* Two-Factor Authentication */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Smartphone className="h-5 w-5" />
-            Authentification à deux facteurs
-          </CardTitle>
-          <CardDescription>
-            Ajoutez une couche de sécurité supplémentaire à votre compte
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border">
-            <div className="space-y-0.5">
-              <Label className="flex items-center gap-2">
-                {settings.twoFactorEnabled ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <AlertCircle className="h-4 w-4 text-orange-500" />}
-                Authentification à deux facteurs
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                {settings.twoFactorEnabled 
-                  ? "Votre compte est protégé par l'authentification à deux facteurs"
-                  : "Activez l'authentification à deux facteurs pour plus de sécurité"
-                }
-              </p>
-            </div>
-            <Button
-              variant={settings.twoFactorEnabled ? "destructive" : "default"}
-              onClick={toggleTwoFactor}
-              disabled={saving}
-            >
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {settings.twoFactorEnabled ? "Désactiver" : "Activer"}
-            </Button>
-          </div>
-
-          {settings.twoFactorEnabled && (
-            <>
-              <Separator />
-              
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Méthode d'authentification</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Button
-                      variant={settings.twoFactorMethod === 'app' ? 'default' : 'outline'}
-                      onClick={() => setSettings(prev => ({ ...prev, twoFactorMethod: 'app' }))}
-                      className="flex items-center gap-2"
-                    >
-                      <Smartphone className="h-4 w-4" />
-                      App
-                    </Button>
-                    <Button
-                      variant={settings.twoFactorMethod === 'sms' ? 'default' : 'outline'}
-                      onClick={() => setSettings(prev => ({ ...prev, twoFactorMethod: 'sms' }))}
-                      className="flex items-center gap-2"
-                    >
-                      <Phone className="h-4 w-4" />
-                      SMS
-                    </Button>
-                    <Button
-                      variant={settings.twoFactorMethod === 'email' ? 'default' : 'outline'}
-                      onClick={() => setSettings(prev => ({ ...prev, twoFactorMethod: 'email' }))}
-                      className="flex items-center gap-2"
-                    >
-                      <Mail className="h-4 w-4" />
-                      Email
-                    </Button>
-                  </div>
-                </div>
-
-                {settings.backupCodes.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Codes de récupération</Label>
-                    <Alert>
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription>
-                        Conservez ces codes dans un endroit sûr. Ils vous permettront de récupérer l'accès à votre compte si vous perdez votre appareil.
-                      </AlertDescription>
-                    </Alert>
-                    <div className="grid grid-cols-2 gap-2 p-4 bg-muted rounded-lg">
-                      {settings.backupCodes.map((code, index) => (
-                        <div key={index} className="font-mono text-sm">
-                          {code}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Copy className="h-4 w-4 mr-2" />
-                        Copier
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Télécharger
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+      {/* Two-Factor Authentication - Professional Component */}
+      <TwoFactorAuth />
 
       {/* Active Sessions */}
       <Card>
