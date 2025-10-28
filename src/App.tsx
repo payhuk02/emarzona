@@ -127,6 +127,11 @@ const MyLicenses = lazy(() => import("./pages/digital/MyLicenses"));
 const LicenseManagement = lazy(() => import("./pages/digital/LicenseManagement"));
 const DigitalProductAnalytics = lazy(() => import("./pages/digital/DigitalProductAnalytics"));
 
+// Pages Advanced Systems - Lazy loading
+const OrderMessaging = lazy(() => import("./pages/orders/OrderMessaging"));
+const PaymentManagement = lazy(() => import("./pages/payments/PaymentManagement"));
+const DisputeDetail = lazy(() => import("./pages/disputes/DisputeDetail"));
+
 // Page de test i18n (à supprimer en production)
 const I18nTest = lazy(() => import("./pages/I18nTest"));
 
@@ -209,6 +214,11 @@ const AppContent = () => {
           <Route path="/dashboard/my-licenses" element={<ProtectedRoute><MyLicenses /></ProtectedRoute>} />
           <Route path="/dashboard/licenses/manage/:id" element={<ProtectedRoute><LicenseManagement /></ProtectedRoute>} />
           <Route path="/dashboard/digital/analytics/:productId" element={<ProtectedRoute><DigitalProductAnalytics /></ProtectedRoute>} />
+
+          {/* --- Routes Advanced Systems (Messaging, Payments, Disputes) --- */}
+          <Route path="/orders/:orderId/messaging" element={<ProtectedRoute><OrderMessaging /></ProtectedRoute>} />
+          <Route path="/payments/:orderId/manage" element={<ProtectedRoute><PaymentManagement /></ProtectedRoute>} />
+          <Route path="/disputes/:disputeId" element={<ProtectedRoute><DisputeDetail /></ProtectedRoute>} />
 
           {/* --- Routes administrateur --- */}
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
