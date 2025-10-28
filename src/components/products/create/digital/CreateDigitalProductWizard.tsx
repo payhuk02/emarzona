@@ -215,35 +215,54 @@ export const CreateDigitalProductWizard = ({
 
       if (productError) throw productError;
 
-      // 2. Create digital_product
-      const { error: digitalError } = await supabase
+      // 2. Calculate total file size
+      const totalSizeMB = formData.downloadable_files?.reduce((sum, file) => {
+        return sum + (file.size / (1024 * 1024)); // Convert bytes to MB
+      }, 0) || 0;
+
+      // Get main file info
+      const mainFile = formData.downloadable_files?.[0];
+      const mainFileFormat = mainFile?.type?.split('/')[1] || 
+                             mainFile?.name?.split('.').pop() || 'unknown';
+
+      // 3. Create digital_product (with CORRECT columns)
+      const { data: digitalProduct, error: digitalError } = await supabase
         .from('digital_products')
         .insert({
           product_id: product.id,
           digital_type: 'other', // Can be configured based on product category
-          file_access_type: formData.license_type === 'unlimited' ? 'unlimited' : 'limited',
-          download_limit: formData.download_limit || null,
-          download_expiry_days: formData.download_expiry_days || null,
+          license_type: formData.license_type || 'single',
+          license_duration_days: formData.download_expiry_days || null,
+          max_activations: formData.license_type === 'unlimited' ? -1 : 
+                          formData.license_type === 'multi' ? formData.download_limit : 1,
+          main_file_url: formData.main_file_url || '',
+          main_file_size_mb: mainFile ? (mainFile.size / (1024 * 1024)) : 0,
+          main_file_format: mainFileFormat,
+          total_size_mb: totalSizeMB,
+          download_limit: formData.download_limit || 5,
+          download_expiry_days: formData.download_expiry_days || 30,
           watermark_enabled: formData.watermark_enabled || false,
-          requires_license: formData.license_type !== 'single',
-          file_size_mb: 0, // Will be calculated from files
           total_downloads: 0,
-        });
+          unique_downloaders: 0,
+        })
+        .select()
+        .single();
 
       if (digitalError) throw digitalError;
 
-      // 3. Create digital_product_files for each file
-      if (formData.downloadable_files && formData.downloadable_files.length > 0) {
+      // 4. Create digital_product_files for each file (using CORRECT digital_product.id)
+      if (formData.downloadable_files && formData.downloadable_files.length > 0 && digitalProduct) {
         const filesData = formData.downloadable_files.map((file, index) => ({
-          digital_product_id: product.id,
-          file_name: file.name,
+          digital_product_id: digitalProduct.id, // ✅ Use digital_product.id, NOT product.id
+          name: file.name,                        // ✅ Correct column name
           file_url: file.url,
-          file_size_bytes: file.size,
           file_type: file.type,
-          file_extension: file.name.split('.').pop() || '',
-          display_order: index + 1,
-          is_preview: index === 0, // First file as preview
+          file_size_mb: file.size / (1024 * 1024), // ✅ Convert to MB
+          order_index: index,                      // ✅ Correct column name  
+          is_main: index === 0,                    // First file as main
+          is_preview: index === 0,                 // First file as preview
           requires_purchase: true,
+          version: '1.0',
         }));
 
         const { error: filesError } = await supabase
@@ -253,25 +272,8 @@ export const CreateDigitalProductWizard = ({
         if (filesError) throw filesError;
       }
 
-      // 4. Create license if needed
-      if (formData.license_type === 'multi' || formData.license_type === 'unlimited') {
-        const maxActivations = formData.license_type === 'unlimited' ? null : formData.download_limit;
-        
-        const { error: licenseError } = await supabase
-          .from('digital_licenses')
-          .insert({
-            digital_product_id: product.id,
-            license_key: `DL-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-            license_type: formData.license_type,
-            max_activations: maxActivations,
-            expires_at: formData.download_expiry_days 
-              ? new Date(Date.now() + formData.download_expiry_days * 24 * 60 * 60 * 1000).toISOString()
-              : null,
-            is_active: true,
-          });
-
-        if (licenseError) throw licenseError;
-      }
+      // ✅ License will be created AFTER purchase in useCreateDigitalOrder hook
+      // (Not here - licenses should only exist for purchased products)
 
       // 5. Create affiliate settings if enabled
       if (formData.affiliate && formData.affiliate.enabled) {

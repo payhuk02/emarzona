@@ -171,10 +171,13 @@ export const useCreateDigitalOrder = () => {
         customerId = newCustomer.id;
       }
 
-      // 3. Générer une licence si nécessaire
+      // 3. Générer une licence si nécessaire (AFTER purchase, with correct columns)
       let licenseId: string | undefined;
 
       if (generateLicense) {
+        // Get authenticated user ID for license
+        const { data: { user } } = await supabase.auth.getUser();
+        
         const expiresAt = licenseExpiryDays
           ? new Date(Date.now() + licenseExpiryDays * 24 * 60 * 60 * 1000).toISOString()
           : null;
@@ -183,17 +186,21 @@ export const useCreateDigitalOrder = () => {
           .from('digital_licenses')
           .insert({
             digital_product_id: digitalProductId,
+            user_id: user?.id || null, // ✅ Required for RLS
             license_key: generateLicenseKey(),
             license_type: licenseType,
-            max_activations: licenseType === 'unlimited' ? null : maxActivations,
-            activations_count: 0,
+            max_activations: licenseType === 'unlimited' ? -1 : maxActivations, // ✅ -1 for unlimited
+            current_activations: 0, // ✅ Correct column name
             expires_at: expiresAt,
-            is_active: true,
+            status: 'pending', // ✅ Will become 'active' after payment confirmation
+            customer_email: customerEmail, // ✅ Store customer email
+            customer_name: customerName || customerEmail.split('@')[0], // ✅ Store customer name
           })
           .select('id')
           .single();
 
         if (licenseError || !license) {
+          console.error('License creation error:', licenseError);
           throw new Error('Erreur lors de la génération de la licence');
         }
 
