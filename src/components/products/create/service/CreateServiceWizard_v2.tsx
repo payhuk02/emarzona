@@ -94,10 +94,23 @@ const STEPS = [
   },
 ];
 
-export const CreateServiceWizard = () => {
+interface CreateServiceWizardProps {
+  storeId?: string;
+  storeSlug?: string;
+  onSuccess?: () => void;
+  onBack?: () => void;
+}
+
+export const CreateServiceWizard = ({
+  storeId: propsStoreId,
+  storeSlug,
+  onSuccess,
+  onBack,
+}: CreateServiceWizardProps = {}) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { store, loading: storeLoading } = useStore();
+  const { store: hookStore, loading: storeLoading } = useStore();
+  const store = hookStore; // Use hook store (props not needed with useStore)
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Partial<any>>({
     // Basic Info (Step 1)
@@ -411,7 +424,11 @@ export const CreateServiceWizard = () => {
         description: `Service "${product.name}" enregistré. Vous pouvez continuer plus tard.`,
       });
       
-      navigate('/dashboard/products');
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate('/dashboard/products');
+      }
     } catch (error) {
       console.error('Save draft error:', error);
       toast({
@@ -454,7 +471,11 @@ export const CreateServiceWizard = () => {
         description: `"${product.name}" est maintenant disponible à la réservation${formData.affiliate?.enabled ? ' avec programme d\'affiliation activé' : ''}`,
       });
       
-      navigate('/dashboard/products');
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate('/dashboard/products');
+      }
     } catch (error) {
       console.error('Publish error:', error);
       toast({
@@ -509,6 +530,17 @@ export const CreateServiceWizard = () => {
       <div className="container max-w-5xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
+          {onBack && (
+            <Button
+              variant="ghost"
+              onClick={onBack}
+              className="mb-4"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Retour au choix du type
+            </Button>
+          )}
+          
           <div className="flex items-center gap-3 mb-4">
             <div className="p-3 rounded-lg bg-primary/10">
               <Calendar className="h-6 w-6 text-primary" />

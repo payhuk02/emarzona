@@ -20,12 +20,13 @@ const CreateDigitalProductWizard = lazy(() =>
   import('./create/digital/CreateDigitalProductWizard').then(m => ({ default: m.CreateDigitalProductWizard }))
 );
 
+// V2 : Wizards avec 7 étapes (Affiliation + SEO/FAQs intégrés)
 const CreatePhysicalProductWizard = lazy(() => 
-  import('./create/physical/CreatePhysicalProductWizard').then(m => ({ default: m.CreatePhysicalProductWizard }))
+  import('./create/physical/CreatePhysicalProductWizard_v2').then(m => ({ default: m.CreatePhysicalProductWizard }))
 );
 
 const CreateServiceWizard = lazy(() => 
-  import('./create/service/CreateServiceWizard').then(m => ({ default: m.CreateServiceWizard }))
+  import('./create/service/CreateServiceWizard_v2').then(m => ({ default: m.CreateServiceWizard }))
 );
 
 // Fallback : formulaire classique (pour compatibilité)
