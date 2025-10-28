@@ -29,6 +29,7 @@ import {
   Save,
   AlertCircle,
   CheckCircle2,
+  CreditCard,
 } from 'lucide-react';
 import { PhysicalBasicInfoForm } from './PhysicalBasicInfoForm';
 import { PhysicalVariantsBuilder } from './PhysicalVariantsBuilder';
@@ -37,6 +38,7 @@ import { PhysicalShippingConfig } from './PhysicalShippingConfig';
 import { PhysicalAffiliateSettings } from './PhysicalAffiliateSettings';
 import { PhysicalSEOAndFAQs } from './PhysicalSEOAndFAQs';
 import { PhysicalPreview } from './PhysicalPreview';
+import { PaymentOptionsForm } from '../shared/PaymentOptionsForm';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { supabase } from '@/integrations/supabase/client';
@@ -87,6 +89,13 @@ const STEPS = [
   },
   {
     id: 7,
+    title: 'Options de Paiement',
+    description: 'Complet, partiel, escrow',
+    icon: CreditCard,
+    component: PaymentOptionsForm,
+  },
+  {
+    id: 8,
     title: 'Aperçu & Validation',
     description: 'Vérifier et publier',
     icon: Eye,
@@ -173,6 +182,12 @@ export const CreatePhysicalProductWizard = ({
     },
     faqs: [],
     
+    // Payment Options (Step 7 - NOUVEAU)
+    payment: {
+      payment_type: 'full', // 'full' | 'percentage' | 'delivery_secured'
+      percentage_rate: 30, // Pour paiement partiel (10-90%)
+    },
+    
     // Meta
     is_active: true,
   });
@@ -228,6 +243,10 @@ export const CreatePhysicalProductWizard = ({
 
       case 6:
         // SEO & FAQs sont optionnels
+        break;
+
+      case 7:
+        // Payment Options sont optionnelles
         break;
     }
 
@@ -300,6 +319,11 @@ export const CreatePhysicalProductWizard = ({
         og_image: formData.seo?.og_image,
         // FAQs
         faqs: formData.faqs || [],
+        // Payment Options (NOUVEAU)
+        payment_options: formData.payment || {
+          payment_type: 'full',
+          percentage_rate: 30,
+        },
         is_draft: isDraft,
         is_active: !isDraft,
       })
@@ -500,6 +524,14 @@ export const CreatePhysicalProductWizard = ({
           onUpdate: handleUpdateFormData,
         };
       
+      case 7: // Payment Options
+        return {
+          productPrice: formData.price || 0,
+          productType: 'physical' as const,
+          data: formData.payment || {},
+          onUpdate: (paymentData: any) => handleUpdateFormData({ payment: paymentData }),
+        };
+      
       default:
         return baseProps;
     }
@@ -528,7 +560,7 @@ export const CreatePhysicalProductWizard = ({
             <div>
               <h1 className="text-3xl font-bold">Nouveau Produit Physique</h1>
               <p className="text-muted-foreground">
-                Créez un produit physique professionnel en 7 étapes
+                Créez un produit physique professionnel en 8 étapes
               </p>
             </div>
           </div>
@@ -545,7 +577,7 @@ export const CreatePhysicalProductWizard = ({
 
         {/* Steps Indicator */}
         <div className="mb-8">
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-8 gap-2">
             {STEPS.map((step) => {
               const Icon = step.icon;
               const isActive = currentStep === step.id;
@@ -603,7 +635,7 @@ export const CreatePhysicalProductWizard = ({
             </CardTitle>
             <CardDescription>
               {CurrentStep.description}
-              {currentStep >= 5 && <Badge variant="outline" className="ml-2">Optionnel</Badge>}
+              {currentStep >= 5 && currentStep <= 7 && <Badge variant="outline" className="ml-2">Optionnel</Badge>}
             </CardDescription>
           </CardHeader>
           <CardContent>

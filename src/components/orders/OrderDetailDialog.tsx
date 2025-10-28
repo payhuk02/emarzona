@@ -2,11 +2,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, CreditCard, Package, MapPin, Phone, Mail, FileText } from "lucide-react";
+import { Calendar, User, CreditCard, Package, MapPin, Phone, Mail, FileText, MessageSquare, Shield, AlertCircle } from "lucide-react";
 import { Order } from "@/hooks/useOrders";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 interface OrderDetailDialogProps {
@@ -24,6 +25,7 @@ interface OrderItem {
 }
 
 export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDialogProps) => {
+  const navigate = useNavigate();
   const [items, setItems] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -254,13 +256,63 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
           )}
 
           {/* Actions */}
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Fermer
-            </Button>
-            <Button onClick={() => window.print()}>
-              Imprimer
-            </Button>
+          <div className="space-y-4 pt-4">
+            {/* Primary Actions - Messagerie & Paiements */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Button
+                variant="default"
+                className="w-full"
+                onClick={() => {
+                  navigate(`/orders/${order.id}/messaging`);
+                  onOpenChange(false);
+                }}
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Messagerie
+              </Button>
+              
+              {/* Show Payment Management button for physical/service products */}
+              {(order as any).payment_type && (order as any).payment_type !== 'full' && (
+                <Button
+                  variant="outline"
+                  className="w-full border-blue-500 text-blue-700 hover:bg-blue-50"
+                  onClick={() => {
+                    navigate(`/payments/${order.id}/manage`);
+                    onOpenChange(false);
+                  }}
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Gérer Paiements
+                </Button>
+              )}
+            </div>
+
+            {/* Secondary Actions - Dispute & Print */}
+            <div className="flex items-center justify-between gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-red-500 text-red-700 hover:bg-red-50"
+                onClick={() => {
+                  // TODO: Implement dispute creation logic
+                  // For now, just show a toast or navigate to dispute creation
+                  navigate(`/disputes/create?order_id=${order.id}`);
+                  onOpenChange(false);
+                }}
+              >
+                <AlertCircle className="h-4 w-4 mr-2" />
+                Ouvrir litige
+              </Button>
+
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
+                  Fermer
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => window.print()}>
+                  Imprimer
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </DialogContent>

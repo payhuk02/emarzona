@@ -2,8 +2,8 @@
  * Create Service Wizard - PROFESSIONAL V2
  * Date: 28 octobre 2025
  * 
- * Wizard professionnel en 7 étapes pour services
- * Avec Affiliation + SEO/FAQs intégrés
+ * Wizard professionnel en 8 étapes pour services
+ * Avec Affiliation + SEO/FAQs + Payment Options intégrés
  * 100% Parité avec Online Courses
  */
 
@@ -29,6 +29,7 @@ import {
   Save,
   AlertCircle,
   CheckCircle2,
+  CreditCard,
 } from 'lucide-react';
 import { ServiceBasicInfoForm } from './ServiceBasicInfoForm';
 import { ServiceDurationAvailabilityForm } from './ServiceDurationAvailabilityForm';
@@ -37,6 +38,7 @@ import { ServicePricingOptionsForm } from './ServicePricingOptionsForm';
 import { ServiceAffiliateSettings } from './ServiceAffiliateSettings';
 import { ServiceSEOAndFAQs } from './ServiceSEOAndFAQs';
 import { ServicePreview } from './ServicePreview';
+import { PaymentOptionsForm } from '../shared/PaymentOptionsForm';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { supabase } from '@/integrations/supabase/client';
@@ -87,6 +89,13 @@ const STEPS = [
   },
   {
     id: 7,
+    title: 'Options de Paiement',
+    description: 'Complet, partiel, escrow',
+    icon: CreditCard,
+    component: PaymentOptionsForm,
+  },
+  {
+    id: 8,
     title: 'Aperçu & Validation',
     description: 'Vérifier et publier',
     icon: Eye,
@@ -167,6 +176,12 @@ export const CreateServiceWizard = ({
       og_image: '',
     },
     faqs: [],
+    
+    // Payment Options (Step 7 - NOUVEAU)
+    payment: {
+      payment_type: 'full', // 'full' | 'percentage' | 'delivery_secured'
+      percentage_rate: 30, // Pour paiement partiel (10-90%)
+    },
   });
 
   const [validationErrors, setValidationErrors] = useState<Record<number, string[]>>({});
@@ -220,6 +235,10 @@ export const CreateServiceWizard = ({
 
       case 6:
         // SEO & FAQs sont optionnels
+        break;
+
+      case 7:
+        // Payment Options sont optionnelles
         break;
     }
 
@@ -292,6 +311,11 @@ export const CreateServiceWizard = ({
         og_image: formData.seo?.og_image,
         // FAQs
         faqs: formData.faqs || [],
+        // Payment Options (NOUVEAU)
+        payment_options: formData.payment || {
+          payment_type: 'full',
+          percentage_rate: 30,
+        },
         is_draft: isDraft,
         is_active: !isDraft,
       })
@@ -520,6 +544,14 @@ export const CreateServiceWizard = ({
           onUpdate: handleUpdateFormData,
         };
       
+      case 7: // Payment Options
+        return {
+          productPrice: formData.price || 0,
+          productType: 'service' as const,
+          data: formData.payment || {},
+          onUpdate: (paymentData: any) => handleUpdateFormData({ payment: paymentData }),
+        };
+      
       default:
         return baseProps;
     }
@@ -548,7 +580,7 @@ export const CreateServiceWizard = ({
             <div>
               <h1 className="text-3xl font-bold">Nouveau Service</h1>
               <p className="text-muted-foreground">
-                Créez un service professionnel en 7 étapes
+                Créez un service professionnel en 8 étapes
               </p>
             </div>
           </div>
@@ -565,7 +597,7 @@ export const CreateServiceWizard = ({
 
         {/* Steps Indicator */}
         <div className="mb-8">
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-8 gap-2">
             {STEPS.map((step) => {
               const Icon = step.icon;
               const isActive = currentStep === step.id;
@@ -623,7 +655,7 @@ export const CreateServiceWizard = ({
             </CardTitle>
             <CardDescription>
               {CurrentStep.description}
-              {currentStep >= 5 && <Badge variant="outline" className="ml-2">Optionnel</Badge>}
+              {currentStep >= 5 && currentStep <= 7 && <Badge variant="outline" className="ml-2">Optionnel</Badge>}
             </CardDescription>
           </CardHeader>
           <CardContent>
