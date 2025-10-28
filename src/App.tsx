@@ -136,6 +136,7 @@ const PayBalance = lazy(() => import("./pages/payments/PayBalance"));
 // Pages Produits Physiques & Services - Détails
 const PhysicalProductDetail = lazy(() => import("./pages/physical/PhysicalProductDetail"));
 const ServiceDetail = lazy(() => import("./pages/service/ServiceDetail"));
+const BookingsManagement = lazy(() => import("./pages/service/BookingsManagement"));
 
 // Page de test i18n (à supprimer en production)
 const I18nTest = lazy(() => import("./pages/I18nTest"));
@@ -229,6 +230,9 @@ const AppContent = () => {
           {/* --- Routes Product Details (Physical, Services) --- */}
           <Route path="/physical/:productId" element={<PhysicalProductDetail />} />
           <Route path="/service/:serviceId" element={<ServiceDetail />} />
+          
+          {/* --- Routes Service Management --- */}
+          <Route path="/bookings/manage" element={<ProtectedRoute><BookingsManagement /></ProtectedRoute>} />
 
           {/* --- Routes administrateur --- */}
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
