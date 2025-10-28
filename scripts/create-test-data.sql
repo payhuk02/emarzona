@@ -9,23 +9,18 @@
 -- ============================================================
 
 -- 1.1 Créer un produit physique de test
-INSERT INTO products (id, name, description, price, currency, category, store_id, type, image_url, images)
+INSERT INTO products (id, name, description, price, currency, category, store_id, product_type, image_url, images)
 VALUES (
   'test-physical-001',
   'T-Shirt Premium Payhuk',
-  '<p>Un t-shirt de <strong>qualité supérieure</strong> en coton bio.</p><ul><li>100% coton bio</li><li>Coupe moderne</li><li>Résistant au lavage</li><li>Disponible en plusieurs couleurs</li></ul>',
+  $$<p>Un t-shirt de <strong>qualité supérieure</strong> en coton bio.</p><ul><li>100% coton bio</li><li>Coupe moderne</li><li>Résistant au lavage</li><li>Disponible en plusieurs couleurs</li></ul>$$,
   15000,
   'XOF',
   'Vêtements',
   (SELECT id FROM stores LIMIT 1),
   'physical',
   'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800',
-  ARRAY[
-    'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800',
-    'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800',
-    'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800',
-    'https://images.unsplash.com/photo-1562157873-818bc0726f68?w=800'
-  ]
+  '["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800","https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800","https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800","https://images.unsplash.com/photo-1562157873-818bc0726f68?w=800"]'::jsonb
 )
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
@@ -113,11 +108,11 @@ ON CONFLICT (physical_product_id, variant_id) DO UPDATE SET
 -- ============================================================
 
 -- 2.1 Créer un service de test
-INSERT INTO products (id, name, description, price, currency, category, store_id, type, image_url)
+INSERT INTO products (id, name, description, price, currency, category, store_id, product_type, image_url)
 VALUES (
   'test-service-001',
   'Coiffure Professionnelle',
-  '<p>Service de <strong>coiffure haut de gamme</strong> dans notre salon moderne.</p><ul><li>Consultation personnalisée</li><li>Shampoing inclus</li><li>Coupe professionnelle</li><li>Brushing et coiffage</li></ul>',
+  $$<p>Service de <strong>coiffure haut de gamme</strong> dans notre salon moderne.</p><ul><li>Consultation personnalisée</li><li>Shampoing inclus</li><li>Coupe professionnelle</li><li>Brushing et coiffage</li></ul>$$,
   25000,
   'XOF',
   'Beauté',
@@ -154,7 +149,7 @@ SELECT
   (SELECT id FROM service_products WHERE product_id = 'test-service-001'),
   'Marie Dupont',
   'Coiffeuse senior',
-  'Coiffeuse professionnelle avec 10 ans d''expérience en coupe, coloration et balayage. Spécialisée dans les coupes modernes et les colorations créatives.',
+  $$Coiffeuse professionnelle avec 10 ans d'expérience en coupe, coloration et balayage. Spécialisée dans les coupes modernes et les colorations créatives.$$,
   'https://i.pravatar.cc/150?img=1',
   'marie.dupont@example.com'
 WHERE NOT EXISTS (
@@ -169,7 +164,7 @@ SELECT
   (SELECT id FROM service_products WHERE product_id = 'test-service-001'),
   'Sophie Martin',
   'Coiffeuse coloriste',
-  'Spécialiste de la coloration et du balayage, formée aux dernières techniques internationales. 5 ans d''expérience.',
+  $$Spécialiste de la coloration et du balayage, formée aux dernières techniques internationales. 5 ans d'expérience.$$,
   'https://i.pravatar.cc/150?img=5',
   'sophie.martin@example.com'
 WHERE NOT EXISTS (
