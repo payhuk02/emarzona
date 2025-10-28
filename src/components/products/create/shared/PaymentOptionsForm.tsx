@@ -100,8 +100,8 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
             className="space-y-4"
           >
             {/* Full Payment */}
-            <div className="flex items-start space-x-3 p-4 rounded-lg border-2 hover:border-primary transition-colors cursor-pointer">
-              <RadioGroupItem value="full" id="full" className="mt-1" />
+            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-colors cursor-pointer touch-manipulation">
+              <RadioGroupItem value="full" id="full" className="mt-1 min-w-[20px] min-h-[20px]" />
               <Label htmlFor="full" className="flex-1 cursor-pointer">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -127,8 +127,8 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
             </div>
 
             {/* Percentage Payment */}
-            <div className="flex items-start space-x-3 p-4 rounded-lg border-2 hover:border-primary transition-colors cursor-pointer">
-              <RadioGroupItem value="percentage" id="percentage" className="mt-1" />
+            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-colors cursor-pointer touch-manipulation">
+              <RadioGroupItem value="percentage" id="percentage" className="mt-1 min-w-[20px] min-h-[20px]" />
               <Label htmlFor="percentage" className="flex-1 cursor-pointer">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -171,7 +171,7 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-md">
                             <p className="text-xs text-blue-700 dark:text-blue-300 mb-1">Acompte (maintenant)</p>
                             <p className="font-semibold text-blue-900 dark:text-blue-100">
@@ -193,8 +193,8 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
             </div>
 
             {/* Delivery Secured (Escrow) */}
-            <div className="flex items-start space-x-3 p-4 rounded-lg border-2 hover:border-primary transition-colors cursor-pointer">
-              <RadioGroupItem value="delivery_secured" id="delivery_secured" className="mt-1" />
+            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-colors cursor-pointer touch-manipulation">
+              <RadioGroupItem value="delivery_secured" id="delivery_secured" className="mt-1 min-w-[20px] min-h-[20px]" />
               <Label htmlFor="delivery_secured" className="flex-1 cursor-pointer">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
