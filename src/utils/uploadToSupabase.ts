@@ -12,6 +12,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { validateFileSecurity, SAFE_MIME_TYPES } from '@/lib/file-security';
 
 /**
  * Options de configuration pour l'upload
@@ -134,14 +135,26 @@ export async function uploadToSupabaseStorage(
   } = options;
 
   try {
-    // 1. Validation de la taille
+    // 1. VALIDATION DE SÉCURITÉ RENFORCÉE (Magic bytes, signatures, extensions dangereuses)
+    const securityValidation = await validateFileSecurity(file, allowedTypes);
+    
+    if (!securityValidation.isValid) {
+      throw new Error(securityValidation.error || 'Fichier non valide');
+    }
+    
+    // Avertissements de sécurité (logs mais n'arrête pas l'upload)
+    if (securityValidation.warnings && securityValidation.warnings.length > 0) {
+      console.warn('[File Security] Warnings:', securityValidation.warnings);
+    }
+
+    // 2. Validation de la taille
     if (file.size > maxSizeBytes) {
       throw new Error(
         `Fichier trop volumineux. Maximum : ${formatFileSize(maxSizeBytes)}, actuel : ${formatFileSize(file.size)}`
       );
     }
 
-    // 2. Validation du type MIME
+    // 3. Validation du type MIME (double vérification)
     if (!allowedTypes.includes(file.type)) {
       const allowedExtensions = allowedTypes
         .map(type => type.split('/')[1])
@@ -151,11 +164,11 @@ export async function uploadToSupabaseStorage(
       );
     }
 
-    // 3. Générer nom de fichier unique
+    // 4. Générer nom de fichier unique
     const fileName = generateUniqueFileName(file.name, filePrefix);
     const filePath = path ? `${path}/${fileName}` : fileName;
 
-    // 4. Démarrer l'upload
+    // 5. Démarrer l'upload
     if (onProgress) onProgress(10);
 
     const { data, error: uploadError } = await supabase.storage
@@ -171,7 +184,7 @@ export async function uploadToSupabaseStorage(
 
     if (onProgress) onProgress(70);
 
-    // 5. Récupérer l'URL publique
+    // 6. Récupérer l'URL publique
     const { data: { publicUrl } } = supabase.storage
       .from(bucket)
       .getPublicUrl(filePath);

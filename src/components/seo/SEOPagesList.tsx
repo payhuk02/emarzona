@@ -35,7 +35,6 @@ import {
 import { Progress } from "@/components/ui/progress";
 
 import Papa from "papaparse";
-import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
