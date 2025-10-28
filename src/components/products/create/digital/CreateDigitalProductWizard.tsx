@@ -19,6 +19,7 @@ import { generateSlug } from '@/lib/store-utils';
 import { DigitalBasicInfoForm } from './DigitalBasicInfoForm';
 import { DigitalFilesUploader } from './DigitalFilesUploader';
 import { DigitalLicenseConfig } from './DigitalLicenseConfig';
+import { DigitalAffiliateSettings } from './DigitalAffiliateSettings';
 import { DigitalPreview } from './DigitalPreview';
 
 interface CreateDigitalProductWizardProps {
@@ -57,6 +58,20 @@ interface DigitalProductData {
   download_expiry_days: number;
   watermark_enabled: boolean;
   
+  // Affiliate
+  affiliate?: {
+    enabled: boolean;
+    commission_rate: number;
+    commission_type: 'percentage' | 'fixed';
+    fixed_commission_amount: number;
+    cookie_duration_days: number;
+    max_commission_per_sale?: number;
+    min_order_amount: number;
+    allow_self_referral: boolean;
+    require_approval: boolean;
+    terms_and_conditions: string;
+  };
+  
   // Metadata
   product_type: 'digital';
   is_active: boolean;
@@ -66,7 +81,8 @@ const STEPS = [
   { id: 1, name: 'Informations', description: 'Nom, description, prix' },
   { id: 2, name: 'Fichiers', description: 'Upload et gestion' },
   { id: 3, name: 'Configuration', description: 'Licensing et téléchargements' },
-  { id: 4, name: 'Prévisualisation', description: 'Vérifier et publier' },
+  { id: 4, name: 'Affiliation', description: 'Programme d\'affiliation (optionnel)' },
+  { id: 5, name: 'Prévisualisation', description: 'Vérifier et publier' },
 ];
 
 export const CreateDigitalProductWizard = ({
@@ -136,6 +152,8 @@ export const CreateDigitalProductWizard = ({
       case 3:
         return true;
       case 4:
+        return true; // Affiliation is optional
+      case 5:
         return true;
       default:
         return true;
@@ -255,9 +273,34 @@ export const CreateDigitalProductWizard = ({
         if (licenseError) throw licenseError;
       }
 
+      // 5. Create affiliate settings if enabled
+      if (formData.affiliate && formData.affiliate.enabled) {
+        const { error: affiliateError } = await supabase
+          .from('product_affiliate_settings')
+          .insert({
+            product_id: product.id,
+            store_id: storeId,
+            affiliate_enabled: formData.affiliate.enabled,
+            commission_rate: formData.affiliate.commission_rate,
+            commission_type: formData.affiliate.commission_type,
+            fixed_commission_amount: formData.affiliate.fixed_commission_amount,
+            cookie_duration_days: formData.affiliate.cookie_duration_days,
+            max_commission_per_sale: formData.affiliate.max_commission_per_sale,
+            min_order_amount: formData.affiliate.min_order_amount,
+            allow_self_referral: formData.affiliate.allow_self_referral,
+            require_approval: formData.affiliate.require_approval,
+            terms_and_conditions: formData.affiliate.terms_and_conditions,
+          });
+
+        if (affiliateError) {
+          console.error('Affiliate settings error:', affiliateError);
+          // Don't throw, affiliate is optional
+        }
+      }
+
       toast({
         title: '🎉 Succès !',
-        description: `Produit digital "${product.name}" créé avec succès`,
+        description: `Produit digital "${product.name}" créé avec succès${formData.affiliate?.enabled ? ' avec programme d\'affiliation activé' : ''}`,
       });
 
       if (onSuccess) {
@@ -305,6 +348,25 @@ export const CreateDigitalProductWizard = ({
           />
         );
       case 4:
+        return (
+          <DigitalAffiliateSettings
+            productPrice={formData.price || 0}
+            productName={formData.name || 'Produit'}
+            data={formData.affiliate || {
+              enabled: false,
+              commission_rate: 20,
+              commission_type: 'percentage',
+              fixed_commission_amount: 0,
+              cookie_duration_days: 30,
+              min_order_amount: 0,
+              allow_self_referral: false,
+              require_approval: false,
+              terms_and_conditions: '',
+            }}
+            onUpdate={(affiliateData) => updateFormData({ affiliate: affiliateData })}
+          />
+        );
+      case 5:
         return (
           <DigitalPreview
             formData={formData}
