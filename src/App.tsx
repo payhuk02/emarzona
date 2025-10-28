@@ -12,6 +12,7 @@ import { useDarkMode } from "@/hooks/useDarkMode";
 import { PerformanceOptimizer } from "@/components/optimization/PerformanceOptimizer";
 import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 import { CrispChat } from "@/components/chat/CrispChat";
+import { Require2FABanner } from "@/components/auth/Require2FABanner";
 import { Suspense, lazy, useEffect } from "react";
 import { initSentry } from "@/lib/sentry";
 import { initWebVitals } from "@/lib/web-vitals";
@@ -157,6 +158,7 @@ const AppContent = () => {
     <Sentry.ErrorBoundary fallback={<ErrorFallback />} showDialog>
       <PerformanceOptimizer />
       <LoadingBar />
+      <Require2FABanner position="top" />
       <ScrollToTop />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
