@@ -131,8 +131,10 @@ const DigitalProductAnalytics = lazy(() => import("./pages/digital/DigitalProduc
 // Pages Advanced Systems - Lazy loading
 const OrderMessaging = lazy(() => import("./pages/orders/OrderMessaging"));
 const PaymentManagement = lazy(() => import("./pages/payments/PaymentManagement"));
+const PaymentManagementList = lazy(() => import("./pages/payments/PaymentManagementList"));
 const DisputeDetail = lazy(() => import("./pages/disputes/DisputeDetail"));
 const PayBalance = lazy(() => import("./pages/payments/PayBalance"));
+const PayBalanceList = lazy(() => import("./pages/payments/PayBalanceList"));
 const ShippingDashboard = lazy(() => import("./pages/shipping/ShippingDashboard"));
 const InventoryDashboard = lazy(() => import("./pages/inventory/InventoryDashboard"));
 
@@ -232,6 +234,13 @@ const AppContent = () => {
           <Route path="/disputes/:disputeId" element={<ProtectedRoute><DisputeDetail /></ProtectedRoute>} />
           <Route path="/shipping" element={<ProtectedRoute><ShippingDashboard /></ProtectedRoute>} />
           <Route path="/inventory" element={<ProtectedRoute><InventoryDashboard /></ProtectedRoute>} />
+          
+          {/* --- Routes Dashboard Advanced Features --- */}
+          <Route path="/dashboard/payment-management" element={<ProtectedRoute><PaymentManagementList /></ProtectedRoute>} />
+          <Route path="/dashboard/pay-balance" element={<ProtectedRoute><PayBalanceList /></ProtectedRoute>} />
+          <Route path="/dashboard/shipping" element={<ProtectedRoute><ShippingDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/inventory" element={<ProtectedRoute><InventoryDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/bookings" element={<ProtectedRoute><BookingsManagement /></ProtectedRoute>} />
 
           {/* --- Routes Product Details (Physical, Services) --- */}
           <Route path="/physical/:productId" element={<PhysicalProductDetail />} />
