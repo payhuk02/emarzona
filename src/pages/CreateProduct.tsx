@@ -1,11 +1,13 @@
 import { useStore } from "@/hooks/useStore";
-import { ProductForm } from "@/components/products/ProductForm";
+import { ProductCreationRouter } from "@/components/products/ProductCreationRouter";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const CreateProduct = () => {
   const { store, loading } = useStore();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -33,7 +35,11 @@ const CreateProduct = () => {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <main className="flex-1 overflow-x-hidden">
-          <ProductForm storeId={store.id} storeSlug={store.slug} />
+          <ProductCreationRouter 
+            storeId={store.id} 
+            storeSlug={store.slug}
+            onSuccess={() => navigate('/products')}
+          />
         </main>
       </div>
     </SidebarProvider>

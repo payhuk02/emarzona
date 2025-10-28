@@ -119,6 +119,11 @@ const CourseAnalytics = lazy(() => import("./pages/courses/CourseAnalytics"));
 const NotificationsCenter = lazy(() => import("./pages/notifications/NotificationsCenter"));
 const NotificationSettings = lazy(() => import("./pages/settings/NotificationSettings"));
 
+// Pages Produits Digitaux - Lazy loading
+const DigitalProductsList = lazy(() => import("./pages/digital/DigitalProductsList"));
+const MyDownloads = lazy(() => import("./pages/digital/MyDownloads"));
+const MyLicenses = lazy(() => import("./pages/digital/MyLicenses"));
+
 // Page de test i18n (à supprimer en production)
 const I18nTest = lazy(() => import("./pages/I18nTest"));
 
@@ -193,6 +198,11 @@ const AppContent = () => {
           <Route path="/dashboard/courses/new" element={<ProtectedRoute><CreateCourse /></ProtectedRoute>} />
           <Route path="/courses/:slug" element={<CourseDetail />} />
           <Route path="/courses/:slug/analytics" element={<ProtectedRoute><CourseAnalytics /></ProtectedRoute>} />
+
+          {/* --- Routes Produits Digitaux --- */}
+          <Route path="/dashboard/digital-products" element={<ProtectedRoute><DigitalProductsList /></ProtectedRoute>} />
+          <Route path="/dashboard/my-downloads" element={<ProtectedRoute><MyDownloads /></ProtectedRoute>} />
+          <Route path="/dashboard/my-licenses" element={<ProtectedRoute><MyLicenses /></ProtectedRoute>} />
 
           {/* --- Routes administrateur --- */}
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />

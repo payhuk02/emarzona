@@ -1,0 +1,425 @@
+/**
+ * Hook pour créer des commandes de produits physiques
+ * Date: 28 octobre 2025
+ * 
+ * Workflow complet:
+ * 1. Créer/récupérer customer
+ * 2. Vérifier disponibilité stock
+ * 3. Réserver stock (quantity_reserved)
+ * 4. Créer order + order_item
+ * 5. Initier paiement Moneroo
+ * 6. Déduire stock si paiement réussi (via webhook)
+ */
+
+import { useMutation } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { useToast } from '@/hooks/use-toast';
+
+/**
+ * Options pour créer une commande physical
+ */
+export interface CreatePhysicalOrderOptions {
+  /** ID du produit physical */
+  physicalProductId: string;
+  
+  /** ID du produit de base (pour price, etc.) */
+  productId: string;
+  
+  /** ID du store */
+  storeId: string;
+  
+  /** Email du client */
+  customerEmail: string;
+  
+  /** Nom du client (optionnel) */
+  customerName?: string;
+  
+  /** Téléphone du client (optionnel) */
+  customerPhone?: string;
+  
+  /** Adresse de livraison */
+  shippingAddress: {
+    street: string;
+    city: string;
+    state?: string;
+    postal_code: string;
+    country: string;
+  };
+  
+  /** ID de la variante sélectionnée (optionnel) */
+  variantId?: string;
+  
+  /** Quantité commandée */
+  quantity?: number;
+  
+  /** ID de location inventaire (optionnel, sinon prend la première) */
+  inventoryLocationId?: string;
+}
+
+/**
+ * Résultat de la création de commande
+ */
+export interface CreatePhysicalOrderResult {
+  /** ID de la commande créée */
+  orderId: string;
+  
+  /** ID de l'order_item */
+  orderItemId: string;
+  
+  /** ID de l'inventaire réservé */
+  inventoryId: string;
+  
+  /** URL de checkout Moneroo */
+  checkoutUrl: string;
+  
+  /** ID de transaction Moneroo */
+  transactionId: string;
+}
+
+/**
+ * Hook pour créer une commande de produit physique
+ * 
+ * @example
+ * ```typescript
+ * const { mutateAsync: createPhysicalOrder, isPending } = useCreatePhysicalOrder();
+ * 
+ * const handleBuy = async () => {
+ *   const result = await createPhysicalOrder({
+ *     physicalProductId: 'xxx',
+ *     productId: 'yyy',
+ *     storeId: 'zzz',
+ *     customerEmail: 'user@example.com',
+ *     shippingAddress: {
+ *       street: '123 Main St',
+ *       city: 'Paris',
+ *       postal_code: '75001',
+ *       country: 'France',
+ *     },
+ *     quantity: 2,
+ *   });
+ *   
+ *   // Rediriger vers Moneroo
+ *   window.location.href = result.checkoutUrl;
+ * };
+ * ```
+ */
+export const useCreatePhysicalOrder = () => {
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (options: CreatePhysicalOrderOptions): Promise<CreatePhysicalOrderResult> => {
+      const {
+        physicalProductId,
+        productId,
+        storeId,
+        customerEmail,
+        customerName,
+        customerPhone,
+        shippingAddress,
+        variantId,
+        quantity = 1,
+        inventoryLocationId,
+      } = options;
+
+      // 1. Récupérer les détails du produit
+      const { data: product, error: productError } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', productId)
+        .single();
+
+      if (productError || !product) {
+        throw new Error('Produit non trouvé');
+      }
+
+      // 2. Récupérer les détails physiques
+      const { data: physicalProduct, error: physicalError } = await supabase
+        .from('physical_products')
+        .select('*')
+        .eq('id', physicalProductId)
+        .single();
+
+      if (physicalError || !physicalProduct) {
+        throw new Error('Produit physique non trouvé');
+      }
+
+      // 3. Récupérer la variante si spécifiée
+      let variantPrice = 0;
+      if (variantId) {
+        const { data: variant, error: variantError } = await supabase
+          .from('physical_product_variants')
+          .select('*')
+          .eq('id', variantId)
+          .single();
+
+        if (variantError || !variant) {
+          throw new Error('Variante non trouvée');
+        }
+
+        if (!variant.is_available) {
+          throw new Error('Cette variante n\'est pas disponible');
+        }
+
+        variantPrice = variant.price_adjustment || 0;
+      }
+
+      // 4. Vérifier et réserver le stock
+      const { data: inventories, error: inventoryError } = await supabase
+        .from('physical_product_inventory')
+        .select('*')
+        .eq('physical_product_id', physicalProductId)
+        .eq('track_inventory', true)
+        .order('quantity_available', { ascending: false });
+
+      if (inventoryError) {
+        throw new Error('Erreur lors de la vérification du stock');
+      }
+
+      // Trouver l'inventaire avec stock suffisant
+      let selectedInventory = inventories?.find(inv => 
+        (inv.quantity_available || 0) >= quantity
+      );
+
+      // Si un inventoryLocationId est spécifié, utiliser celui-là
+      if (inventoryLocationId) {
+        selectedInventory = inventories?.find(inv => inv.id === inventoryLocationId);
+      }
+
+      if (!selectedInventory) {
+        throw new Error(`Stock insuffisant (demandé: ${quantity})`);
+      }
+
+      // Réserver le stock
+      const { error: reserveError } = await supabase
+        .from('physical_product_inventory')
+        .update({
+          quantity_reserved: (selectedInventory.quantity_reserved || 0) + quantity,
+        })
+        .eq('id', selectedInventory.id);
+
+      if (reserveError) {
+        throw new Error('Erreur lors de la réservation du stock');
+      }
+
+      // 5. Récupérer ou créer le customer
+      let customerId: string;
+      
+      const { data: existingCustomer } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('store_id', storeId)
+        .eq('email', customerEmail)
+        .single();
+
+      if (existingCustomer) {
+        customerId = existingCustomer.id;
+        
+        // Mettre à jour l'adresse
+        await supabase
+          .from('customers')
+          .update({
+            address: `${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.postal_code}`,
+            city: shippingAddress.city,
+            country: shippingAddress.country,
+          })
+          .eq('id', customerId);
+      } else {
+        const { data: newCustomer, error: customerError } = await supabase
+          .from('customers')
+          .insert({
+            store_id: storeId,
+            email: customerEmail,
+            name: customerName || customerEmail.split('@')[0],
+            phone: customerPhone,
+            address: `${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.postal_code}`,
+            city: shippingAddress.city,
+            country: shippingAddress.country,
+          })
+          .select('id')
+          .single();
+
+        if (customerError || !newCustomer) {
+          // Annuler la réservation en cas d'erreur
+          await supabase
+            .from('physical_product_inventory')
+            .update({
+              quantity_reserved: (selectedInventory.quantity_reserved || 0),
+            })
+            .eq('id', selectedInventory.id);
+            
+          throw new Error('Erreur lors de la création du client');
+        }
+
+        customerId = newCustomer.id;
+      }
+
+      // 6. Calculer le prix total
+      const unitPrice = (product.promotional_price || product.price) + variantPrice;
+      const totalPrice = unitPrice * quantity;
+
+      // 7. Générer un numéro de commande
+      const { data: orderNumberData } = await supabase.rpc('generate_order_number');
+      const orderNumber = orderNumberData || `ORD-${Date.now()}`;
+
+      // 8. Créer la commande
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          store_id: storeId,
+          customer_id: customerId,
+          order_number: orderNumber,
+          total_amount: totalPrice,
+          currency: product.currency,
+          payment_status: 'pending',
+          status: 'pending',
+          delivery_status: 'pending',
+        })
+        .select('id')
+        .single();
+
+      if (orderError || !order) {
+        // Annuler la réservation
+        await supabase
+          .from('physical_product_inventory')
+          .update({
+            quantity_reserved: (selectedInventory.quantity_reserved || 0),
+          })
+          .eq('id', selectedInventory.id);
+          
+        throw new Error('Erreur lors de la création de la commande');
+      }
+
+      // 9. Créer l'order_item avec les références spécialisées
+      const { data: orderItem, error: orderItemError } = await supabase
+        .from('order_items')
+        .insert({
+          order_id: order.id,
+          product_id: productId,
+          product_type: 'physical',
+          physical_product_id: physicalProductId,
+          variant_id: variantId,
+          product_name: product.name,
+          quantity,
+          unit_price: unitPrice,
+          total_price: totalPrice,
+          item_metadata: {
+            inventory_id: selectedInventory.id,
+            inventory_location: selectedInventory.location_name,
+            variant_price_adjustment: variantPrice,
+            shipping_address: shippingAddress,
+          },
+        })
+        .select('id')
+        .single();
+
+      if (orderItemError || !orderItem) {
+        // Annuler la réservation
+        await supabase
+          .from('physical_product_inventory')
+          .update({
+            quantity_reserved: (selectedInventory.quantity_reserved || 0),
+          })
+          .eq('id', selectedInventory.id);
+          
+        throw new Error('Erreur lors de la création de l\'élément de commande');
+      }
+
+      // 10. Initier le paiement Moneroo
+      const paymentResult = await initiateMonerooPayment({
+        storeId,
+        productId,
+        orderId: order.id,
+        customerId,
+        amount: totalPrice,
+        currency: product.currency,
+        description: `Achat: ${product.name}${variantId ? ' (variante)' : ''} x${quantity}`,
+        customerEmail,
+        customerName: customerName || customerEmail.split('@')[0],
+        customerPhone,
+        metadata: {
+          product_type: 'physical',
+          physical_product_id: physicalProductId,
+          variant_id: variantId,
+          inventory_id: selectedInventory.id,
+          quantity,
+          order_item_id: orderItem.id,
+          shipping_address: shippingAddress,
+        },
+      });
+
+      if (!paymentResult.success || !paymentResult.checkout_url) {
+        // Annuler la réservation
+        await supabase
+          .from('physical_product_inventory')
+          .update({
+            quantity_reserved: (selectedInventory.quantity_reserved || 0),
+          })
+          .eq('id', selectedInventory.id);
+          
+        throw new Error('Erreur lors de l\'initialisation du paiement');
+      }
+
+      // 11. Retourner le résultat
+      return {
+        orderId: order.id,
+        orderItemId: orderItem.id,
+        inventoryId: selectedInventory.id,
+        checkoutUrl: paymentResult.checkout_url,
+        transactionId: paymentResult.transaction_id,
+      };
+    },
+
+    onSuccess: (data) => {
+      toast({
+        title: '✅ Commande créée',
+        description: 'Stock réservé. Redirection vers le paiement...',
+      });
+    },
+
+    onError: (error: Error) => {
+      console.error('Physical order creation error:', error);
+      toast({
+        title: '❌ Erreur',
+        description: error.message || 'Impossible de créer la commande',
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
+/**
+ * Hook pour vérifier la disponibilité du stock
+ */
+export const useCheckStockAvailability = () => {
+  return useMutation({
+    mutationFn: async ({
+      physicalProductId,
+      quantity = 1,
+    }: {
+      physicalProductId: string;
+      quantity?: number;
+    }): Promise<{ available: boolean; availableQuantity: number }> => {
+      const { data: inventories, error } = await supabase
+        .from('physical_product_inventory')
+        .select('quantity_available, quantity_reserved')
+        .eq('physical_product_id', physicalProductId)
+        .eq('track_inventory', true);
+
+      if (error) {
+        throw error;
+      }
+
+      const totalAvailable = inventories?.reduce(
+        (sum, inv) => sum + ((inv.quantity_available || 0) - (inv.quantity_reserved || 0)),
+        0
+      ) || 0;
+
+      return {
+        available: totalAvailable >= quantity,
+        availableQuantity: totalAvailable,
+      };
+    },
+  });
+};
+
