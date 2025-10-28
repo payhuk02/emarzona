@@ -41,7 +41,7 @@ import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummar
 import { ReviewsList } from '@/components/reviews/ReviewsList';
 import { ReviewForm } from '@/components/reviews/ReviewForm';
 import { useEffect } from 'react';
-import { useTrackAnalyticsEvent } from '@/hooks/analytics/useTrackAnalyticsEvent';
+import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 
 interface DigitalProductDetailParams {
   productId: string;
@@ -62,18 +62,14 @@ export default function DigitalProductDetail() {
   const { data: hasAccess } = useHasDownloadAccess(productId || '');
   
   // Track analytics event
-  const trackEvent = useTrackAnalyticsEvent();
+  const { trackView } = useAnalyticsTracking();
 
   // Track product view on mount
   useEffect(() => {
     if (productId) {
-      trackEvent.mutate({
-        productId,
-        eventType: 'view',
-        eventData: {
-          product_type: 'digital',
-          timestamp: new Date().toISOString(),
-        },
+      trackView(productId, {
+        product_type: 'digital',
+        timestamp: new Date().toISOString(),
       });
 
       // Track with external pixels (Google Analytics, Facebook, TikTok)
@@ -107,7 +103,7 @@ export default function DigitalProductDetail() {
         }
       }
     }
-  }, [productId, trackEvent, digitalProduct]);
+  }, [productId, trackView, digitalProduct]);
 
   if (isLoading) {
     return (
