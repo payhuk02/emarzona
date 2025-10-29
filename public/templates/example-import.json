@@ -1,0 +1,153 @@
+{
+  "version": "2.0.0",
+  "exportedAt": "2025-10-29T12:00:00Z",
+  "exportedBy": "Payhuk Platform",
+  "template": {
+    "metadata": {
+      "id": "example-import-template-v2",
+      "version": "1.0.0",
+      "name": "Template d'Import Test",
+      "shortDescription": "Template exemple pour tester l'import",
+      "description": "Ce template sert à tester le système d'import de Payhuk. Il contient tous les champs requis et peut être importé via fichier, URL, ou JSON direct.",
+      "category": "example",
+      "productType": "digital",
+      "tier": "free",
+      "designStyle": "modern",
+      "author": {
+        "name": "Payhuk Team",
+        "email": "templates@payhuk.com",
+        "url": "https://payhuk.com"
+      },
+      "tags": ["example", "test", "import", "demo"],
+      "thumbnail": "/templates/example-thumb.jpg",
+      "previewImages": ["/templates/example-1.jpg"],
+      "demoUrl": "https://demo.payhuk.com/templates/example",
+      "industry": "technology",
+      "targetAudience": ["developers", "testers"],
+      "features": [
+        "Validation complète",
+        "Migration automatique",
+        "Checksum intégré",
+        "Exemple fonctionnel"
+      ],
+      "requirements": ["Aucun"],
+      "license": "Test License",
+      "price": 0,
+      "analytics": {
+        "downloads": 0,
+        "views": 0,
+        "rating": 5.0,
+        "favorites": 0,
+        "usageCount": 0
+      },
+      "seo": {
+        "title": "Template d'Import Test | Payhuk",
+        "metaDescription": "Template exemple pour tester l'import",
+        "keywords": ["test", "import", "example"],
+        "ogImage": "/templates/example-og.jpg"
+      },
+      "createdAt": "2025-10-29T12:00:00Z",
+      "updatedAt": "2025-10-29T12:00:00Z"
+    },
+    "data": {
+      "basic": {
+        "name": "Produit Test Import",
+        "slug": "produit-test-import",
+        "tagline": "Testez le système d'import",
+        "shortDescription": "Un produit de test pour vérifier l'import de templates",
+        "fullDescription": "Ce produit sert uniquement à tester le système d'import de templates. Si vous voyez ceci, l'import a fonctionné ! 🎉\n\nVous pouvez maintenant :\n- Personnaliser ce template\n- L'exporter à nouveau\n- Le partager avec d'autres\n- L'utiliser comme base",
+        "category": "digital",
+        "subcategory": "test",
+        "brand": "Payhuk Test"
+      },
+      "pricing": {
+        "basePrice": 0,
+        "currency": "EUR",
+        "salePrice": null,
+        "compareAtPrice": null,
+        "costPerItem": 0,
+        "taxable": false,
+        "taxCode": "DIGITAL"
+      },
+      "visual": {
+        "thumbnail": "/products/test-main.jpg",
+        "images": ["/products/test-1.jpg", "/products/test-2.jpg"],
+        "videoUrl": null,
+        "has360View": false,
+        "hasModelPhotos": false
+      },
+      "seo": {
+        "metaTitle": "Produit Test Import | Payhuk",
+        "metaDescription": "Template de test pour vérifier l'import",
+        "keywords": ["test", "import", "template"],
+        "slug": "produit-test-import"
+      },
+      "features": [
+        "✅ Import réussi",
+        "✅ Validation passée",
+        "✅ Template fonctionnel",
+        "✅ Prêt à personnaliser"
+      ],
+      "benefits": [
+        "Vérification du système d'import",
+        "Exemple de structure complète",
+        "Base pour vos propres templates"
+      ],
+      "specifications": {
+        "format": "JSON",
+        "version": "2.0.0",
+        "compatible": "Payhuk Platform"
+      },
+      "designTokens": {
+        "colors": {
+          "primary": "#3b82f6",
+          "secondary": "#8b5cf6",
+          "accent": "#10b981",
+          "background": "#ffffff",
+          "text": "#1f2937"
+        },
+        "typography": {
+          "fontFamily": "Inter, sans-serif",
+          "headingSize": "32px",
+          "bodySize": "16px",
+          "lineHeight": "1.6"
+        },
+        "spacing": {
+          "small": "8px",
+          "medium": "16px",
+          "large": "32px"
+        },
+        "borderRadius": "8px",
+        "shadows": {
+          "card": "0 2px 8px rgba(0,0,0,0.1)",
+          "hover": "0 4px 12px rgba(0,0,0,0.15)"
+        }
+      },
+      "faqs": [
+        {
+          "question": "Comment importer ce template ?",
+          "answer": "Utilisez le bouton 'Importer' dans l'interface de templates et choisissez l'une des 3 méthodes : fichier, URL, ou JSON direct."
+        },
+        {
+          "question": "Puis-je modifier ce template ?",
+          "answer": "Absolument ! Utilisez le Customizer pour modifier visuellement, ou éditez le JSON directement."
+        },
+        {
+          "question": "Est-ce que l'import fonctionne vraiment ?",
+          "answer": "Si vous lisez ceci, oui ! 🎉 L'import a parfaitement fonctionné."
+        }
+      ],
+      "customFields": {
+        "testField": "Cette valeur de test prouve que l'import est complet",
+        "importDate": "2025-10-29",
+        "status": "success"
+      }
+    }
+  },
+  "checksums": {
+    "metadata": "test-checksum-metadata",
+    "data": "test-checksum-data",
+    "full": "test-checksum-full"
+  }
+}
+
