@@ -14,7 +14,7 @@
 
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { CourseStatus } from '@/components/courses/CourseStatusIndicator';
 import { CourseCategory } from '@/components/courses/CoursesList';
 
