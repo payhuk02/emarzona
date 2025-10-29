@@ -287,7 +287,7 @@ export const BulkServiceUpdate: React.FC<BulkServiceUpdateProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `services-bulk-${Date.now()}.csv';
+    a.download = `services-bulk-${Date.now()}.csv`;
     a.click();
   };
 
@@ -534,12 +534,12 @@ export const BulkServiceUpdate: React.FC<BulkServiceUpdateProps> = ({
                       </p>
                       <p className="text-xs text-blue-700 mt-1">
                         {selectedIds.size} service(s) seront modifié(s)
-                        {updateField === 'price' && updateMode === 'set' && ` → ${updateValue} EUR`}
-                        {updateField === 'price' && updateMode === 'adjust' && ` → ${updateValue.includes('%') ? updateValue : `${updateValue} EUR`}`}
-                        {updateField === 'duration' && updateMode === 'set' && ` → ${updateValue} min`}
-                        {updateField === 'duration' && updateMode === 'adjust' && ` → ${updateValue} min`}
-                        {updateField === 'isActive' && ` → ${updateValue === 'true' ? 'Actif' : 'Inactif'}`}
-                        {updateField === 'category' && ` → ${updateValue}`}
+                        {updateField === 'price' && updateMode === 'set' && <span> → {updateValue} EUR</span>}
+                        {updateField === 'price' && updateMode === 'adjust' && <span> → {updateValue.includes('%') ? updateValue : updateValue + ' EUR'}</span>}
+                        {updateField === 'duration' && updateMode === 'set' && <span> → {updateValue} min</span>}
+                        {updateField === 'duration' && updateMode === 'adjust' && <span> → {updateValue} min</span>}
+                        {updateField === 'isActive' && <span> → {updateValue === 'true' ? 'Actif' : 'Inactif'}</span>}
+                        {updateField === 'category' && <span> → {updateValue}</span>}
                       </p>
                     </div>
                   </div>
