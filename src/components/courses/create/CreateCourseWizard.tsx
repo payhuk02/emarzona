@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Check, ChevronLeft, ChevronRight, Save, Loader2 } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Save, Loader2, Sparkles } from "lucide-react";
 import { CourseBasicInfoForm } from "./CourseBasicInfoForm";
 import { CourseCurriculumBuilder } from "./CourseCurriculumBuilder";
 import { CourseAdvancedConfig } from "./CourseAdvancedConfig";
@@ -16,6 +16,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useCreateFullCourse } from "@/hooks/courses/useCreateFullCourse";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStore } from "@/hooks/useStore";
+
+// Template system
+import { TemplateSelector } from "@/components/templates/TemplateSelector";
+import { useTemplateApplier } from "@/hooks/useTemplateApplier";
+import type { ProductTemplate } from "@/types/templates";
 
 interface Section {
   id: string;
@@ -44,6 +49,11 @@ export const CreateCourseWizard = () => {
   const createFullCourse = useCreateFullCourse();
   
   const [currentStep, setCurrentStep] = useState(1);
+  
+  // Template system
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const { applyTemplate } = useTemplateApplier();
+  
   const [formData, setFormData] = useState({
     // Informations de base
     title: '',
@@ -106,6 +116,36 @@ export const CreateCourseWizard = () => {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
+      });
+    }
+  };
+
+  /**
+   * Handle template selection
+   */
+  const handleTemplateSelect = (template: ProductTemplate) => {
+    try {
+      const updatedData = applyTemplate(template, formData, {
+        mergeMode: 'smart', // Ne remplace que les champs vides
+      });
+      
+      setFormData(updatedData);
+      setShowTemplateSelector(false);
+      
+      toast({
+        title: '✨ Template appliqué !',
+        description: `Le template "${template.name}" a été appliqué avec succès. Personnalisez maintenant votre cours.`,
+      });
+      
+      // Optionnel : passer à l'étape 1 si on n'y est pas déjà
+      if (currentStep !== 1) {
+        setCurrentStep(1);
+      }
+    } catch (error: any) {
+      toast({
+        title: '❌ Erreur',
+        description: error.message || 'Impossible d\'appliquer le template',
+        variant: 'destructive',
       });
     }
   };
@@ -242,6 +282,29 @@ export const CreateCourseWizard = () => {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Créer un Nouveau Cours</h1>
+          <p className="text-muted-foreground">
+            Créez un cours en ligne professionnel en 7 étapes
+          </p>
+        </div>
+        
+        {/* Template Button */}
+        {currentStep === 1 && (
+          <Button
+            variant="outline"
+            onClick={() => setShowTemplateSelector(true)}
+            className="gap-2 border-2 border-primary/20 hover:border-primary hover:bg-primary/5"
+          >
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="hidden sm:inline">Utiliser un template</span>
+            <Badge variant="secondary" className="ml-1">Nouveau</Badge>
+          </Button>
+        )}
+      </div>
+      
       {/* Stepper */}
       <Card>
         <CardContent className="p-6">
@@ -522,6 +585,14 @@ export const CreateCourseWizard = () => {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Template Selector Dialog */}
+      <TemplateSelector
+        productType="course"
+        open={showTemplateSelector}
+        onClose={() => setShowTemplateSelector(false)}
+        onSelectTemplate={handleTemplateSelect}
+      />
     </div>
   );
 };

@@ -30,6 +30,7 @@ import {
   AlertCircle,
   CheckCircle2,
   CreditCard,
+  Sparkles,
 } from 'lucide-react';
 import { PhysicalBasicInfoForm } from './PhysicalBasicInfoForm';
 import { PhysicalVariantsBuilder } from './PhysicalVariantsBuilder';
@@ -43,6 +44,11 @@ import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { supabase } from '@/integrations/supabase/client';
 import type { PhysicalProductFormData } from '@/types/physical-product';
+
+// Template system
+import { TemplateSelector } from '@/components/templates/TemplateSelector';
+import { useTemplateApplier } from '@/hooks/useTemplateApplier';
+import type { ProductTemplate } from '@/types/templates';
 
 const STEPS = [
   {
@@ -121,6 +127,11 @@ export const CreatePhysicalProductWizard = ({
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore; // Use hook store (props not needed with useStore)
   const [currentStep, setCurrentStep] = useState(1);
+  
+  // Template system
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const { applyTemplate } = useTemplateApplier();
+  
   const [formData, setFormData] = useState<Partial<any>>({
     // Basic Info (Step 1)
     name: '',
@@ -280,6 +291,36 @@ export const CreatePhysicalProductWizard = ({
    */
   const handleUpdateFormData = (data: any) => {
     setFormData({ ...formData, ...data });
+  };
+
+  /**
+   * Handle template selection
+   */
+  const handleTemplateSelect = (template: ProductTemplate) => {
+    try {
+      const updatedData = applyTemplate(template, formData, {
+        mergeMode: 'smart', // Ne remplace que les champs vides
+      });
+      
+      setFormData(updatedData);
+      setShowTemplateSelector(false);
+      
+      toast({
+        title: '✨ Template appliqué !',
+        description: `Le template "${template.name}" a été appliqué avec succès. Personnalisez maintenant votre produit.`,
+      });
+      
+      // Optionnel : passer à l'étape 1 si on n'y est pas déjà
+      if (currentStep !== 1) {
+        setCurrentStep(1);
+      }
+    } catch (error: any) {
+      toast({
+        title: '❌ Erreur',
+        description: error.message || 'Impossible d\'appliquer le template',
+        variant: 'destructive',
+      });
+    }
   };
 
   /**
@@ -553,16 +594,31 @@ export const CreatePhysicalProductWizard = ({
             </Button>
           )}
           
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 rounded-lg bg-primary/10">
-              <Package className="h-6 w-6 text-primary" />
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-lg bg-primary/10">
+                <Package className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">Nouveau Produit Physique</h1>
+                <p className="text-muted-foreground">
+                  Créez un produit physique professionnel en 8 étapes
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold">Nouveau Produit Physique</h1>
-              <p className="text-muted-foreground">
-                Créez un produit physique professionnel en 8 étapes
-              </p>
-            </div>
+            
+            {/* Template Button */}
+            {currentStep === 1 && (
+              <Button
+                variant="outline"
+                onClick={() => setShowTemplateSelector(true)}
+                className="gap-2 border-2 border-primary/20 hover:border-primary hover:bg-primary/5"
+              >
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="hidden sm:inline">Utiliser un template</span>
+                <Badge variant="secondary" className="ml-1">Nouveau</Badge>
+              </Button>
+            )}
           </div>
 
           {/* Progress Bar */}
@@ -681,6 +737,14 @@ export const CreatePhysicalProductWizard = ({
           </div>
         </div>
       </div>
+      
+      {/* Template Selector Dialog */}
+      <TemplateSelector
+        productType="physical"
+        open={showTemplateSelector}
+        onClose={() => setShowTemplateSelector(false)}
+        onSelectTemplate={handleTemplateSelect}
+      />
     </div>
   );
 };
