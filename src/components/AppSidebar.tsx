@@ -30,6 +30,9 @@ import {
   Scale,
   BoxIcon,
   Headphones,
+  Palette,
+  Layout,
+  Sparkles,
 } from "lucide-react";
 import payhukLogo from "@/assets/payhuk-logo.png";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
@@ -100,6 +103,26 @@ const menuSections = [
         title: "Mes Licences",
         url: "/dashboard/my-licenses",
         icon: Key,
+      },
+    ]
+  },
+  {
+    label: "Templates & Design",
+    items: [
+      {
+        title: "Marketplace Templates",
+        url: "/demo/templates-ui",
+        icon: Palette,
+      },
+      {
+        title: "Mes Templates",
+        url: "/dashboard/my-templates",
+        icon: Layout,
+      },
+      {
+        title: "Créer avec Template",
+        url: "/dashboard/products/new",
+        icon: Sparkles,
       },
     ]
   },
@@ -262,6 +285,26 @@ const adminMenuSections = [
         title: "Licences",
         url: "/dashboard/license-management",
         icon: Key,
+      },
+    ]
+  },
+  {
+    label: "Templates & Design",
+    items: [
+      {
+        title: "Marketplace Templates",
+        url: "/demo/templates-ui",
+        icon: Palette,
+      },
+      {
+        title: "Gestion Templates",
+        url: "/admin/templates",
+        icon: Layout,
+      },
+      {
+        title: "Templates Premium",
+        url: "/admin/templates-premium",
+        icon: Sparkles,
       },
     ]
   },
