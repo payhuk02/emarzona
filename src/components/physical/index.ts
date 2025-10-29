@@ -67,3 +67,48 @@ export type {
   PreOrderManagerProps,
 } from './PreOrderManager';
 
+// Backorder Manager (DAY 7)
+export { BackorderManager } from './BackorderManager';
+export type {
+  Backorder,
+  BackorderCustomer,
+  BackorderStatus,
+  BackorderPriority,
+  BackorderManagerProps,
+} from './BackorderManager';
+
+// Variant Image Gallery (DAY 7)
+export { VariantImageGallery } from './VariantImageGallery';
+export type {
+  VariantImage,
+  VariantWithImages,
+  VariantImageGalleryProps,
+} from './VariantImageGallery';
+
+// Size Chart Builder (DAY 8)
+export { SizeChartBuilder } from './SizeChartBuilder';
+export type {
+  SizeChart,
+  SizeChartMeasurement,
+  MeasurementUnit,
+  SizeSystem,
+  SizeChartBuilderProps,
+} from './SizeChartBuilder';
+
+// Product Bundle Builder (DAY 8)
+export { ProductBundleBuilder } from './ProductBundleBuilder';
+export type {
+  ProductBundle,
+  BundleProduct,
+  BundleType,
+  ProductBundleBuilderProps,
+} from './ProductBundleBuilder';
+
+// Inventory Dashboard (DAY 9)
+export { InventoryDashboard } from './InventoryDashboard';
+export type { InventoryDashboardProps } from './InventoryDashboard';
+
+// Shipping Dashboard (DAY 10)
+export { ShippingDashboard } from './ShippingDashboard';
+export type { ShippingDashboardProps } from './ShippingDashboard';
+
