@@ -317,3 +317,48 @@ export const useDigitalProductsByStatus = (status: DigitalProduct['status'] | un
     enabled: status !== undefined,
   });
 };
+
+/**
+ * useRemainingDownloads - Hook pour obtenir le nombre de téléchargements restants
+ */
+export const useRemainingDownloads = (digitalProductId: string | undefined) => {
+  return useQuery({
+    queryKey: ['digitalProduct', digitalProductId, 'remainingDownloads'],
+    queryFn: async () => {
+      if (!digitalProductId) throw new Error('ID produit manquant');
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
+
+      // Get product download limits
+      const { data: product, error: productError } = await supabase
+        .from('digital_products')
+        .select('max_licenses, current_licenses')
+        .eq('id', digitalProductId)
+        .single();
+
+      if (productError) throw productError;
+
+      // Count user's downloads for this product
+      const { count, error: countError } = await supabase
+        .from('digital_product_downloads')
+        .select('*', { count: 'exact', head: true })
+        .eq('digital_product_id', digitalProductId)
+        .eq('user_id', user.id);
+
+      if (countError) throw countError;
+
+      const downloadCount = count || 0;
+      const maxDownloads = product?.max_licenses || Infinity;
+      const remaining = maxDownloads === Infinity ? Infinity : Math.max(0, maxDownloads - downloadCount);
+
+      return {
+        downloadCount,
+        maxDownloads,
+        remaining,
+        hasRemainingDownloads: remaining > 0 || remaining === Infinity,
+      };
+    },
+    enabled: !!digitalProductId,
+  });
+};
