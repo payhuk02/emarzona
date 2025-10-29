@@ -66,3 +66,46 @@ export type {
   BulkServiceUpdateProps 
 } from './BulkServiceUpdate';
 
+// Recurring Booking Manager (Day 5 - Professional Components)
+export { RecurringBookingManager } from './RecurringBookingManager';
+export type { 
+  RecurrencePattern, 
+  DayOfWeek, 
+  RecurringBooking, 
+  RecurringBookingManagerProps 
+} from './RecurringBookingManager';
+
+// Waitlist Manager (Day 5 - Professional Components)
+export { WaitlistManager } from './WaitlistManager';
+export type { 
+  WaitlistStatus, 
+  WaitlistPriority, 
+  WaitlistEntry, 
+  WaitlistStats, 
+  WaitlistManagerProps 
+} from './WaitlistManager';
+
+// Service Bundle Builder (Day 5 - Professional Components)
+export { ServiceBundleBuilder } from './ServiceBundleBuilder';
+export type { 
+  BundleService, 
+  BundleItem, 
+  ServiceBundle, 
+  ServiceBundleBuilderProps 
+} from './ServiceBundleBuilder';
+
+// Services Dashboard (Day 6 - Professional Components)
+export { ServicesDashboard } from './ServicesDashboard';
+export type { 
+  ServicePerformance, 
+  ServicesDashboardStats, 
+  ServicesDashboardProps 
+} from './ServicesDashboard';
+
+// Bookings Dashboard (Day 6 - Professional Components)
+export { BookingsDashboard } from './BookingsDashboard';
+export type { 
+  BookingsDashboardStats, 
+  BookingsDashboardProps 
+} from './BookingsDashboard';
+
