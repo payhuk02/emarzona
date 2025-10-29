@@ -18,30 +18,12 @@ export default defineConfig(({ mode }) => {
   },
   plugins: [
     react(),
-    // Compression Brotli
-    compression({
-      algorithm: 'brotliCompress',
-      exclude: [/\.(br)$/, /\.(gz)$/],
-      threshold: 1024, // Compresser les fichiers > 1KB
-      compressionOptions: {
-        level: 11, // Niveau maximum
-      },
-    }),
-    // Compression Gzip (fallback)
-    compression({
-      algorithm: 'gzip',
-      exclude: [/\.(br)$/, /\.(gz)$/],
-      threshold: 1024,
-      compressionOptions: {
-        level: 9,
-      },
-    }),
-    // Visualizer pour analyser le bundle
-    visualizer({
+    // Visualizer seulement en dev
+    !isProduction && visualizer({
       filename: './dist/stats.html',
       open: false,
-      gzipSize: true,
-      brotliSize: true,
+      gzipSize: false,
+      brotliSize: false,
     }),
     
     // Sentry plugin pour source maps (seulement en production avec token)
@@ -77,63 +59,32 @@ export default defineConfig(({ mode }) => {
     },
   },
   build: {
-    // Code splitting avancé
+    // Code splitting simplifié pour build plus rapide
     rollupOptions: {
       output: {
         manualChunks: {
-          // Vendors
+          // Vendors principaux seulement
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-select',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-toast',
-          ],
           'vendor-query': ['@tanstack/react-query'],
           'vendor-supabase': ['@supabase/supabase-js'],
-          'vendor-i18n': ['i18next', 'react-i18next'],
-          
-          // Editor (si utilisé)
-          'editor': [
-            '@tiptap/core',
-            '@tiptap/react',
-            '@tiptap/starter-kit',
-          ],
-          
-          // Charts (si utilisé)
-          'charts': ['recharts'],
         },
       },
     },
-    // Optimisations
-    target: 'esnext',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true, // Supprimer les console.log en production
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info'], // Supprimer ces fonctions
-      },
-      format: {
-        comments: false, // Supprimer tous les commentaires
-      },
-    },
+    // Optimisations pour vitesse de build
+    target: 'es2015',
+    minify: 'esbuild', // Plus rapide que terser
     // Chunk size warnings
-    chunkSizeWarningLimit: 500, // Warning si chunk > 500KB
-    reportCompressedSize: true,
-    sourcemap: isProduction, // Activer en production pour Sentry
+    chunkSizeWarningLimit: 1000, // Plus tolérant
+    reportCompressedSize: false, // Désactivé pour vitesse
+    sourcemap: isProduction && hasSentryToken, // Seulement si Sentry configuré
   },
-  // Optimisation des dépendances
+  // Optimisation des dépendances (simplifié)
   optimizeDeps: {
     include: [
       'react',
       'react-dom',
-      'react-router-dom',
       '@tanstack/react-query',
-      '@supabase/supabase-js',
     ],
-    exclude: ['@tiptap/core', '@tiptap/react'], // Lazy load
   },
 };
 });
