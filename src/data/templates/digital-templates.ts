@@ -112,6 +112,27 @@ Ce guide complet vous accompagne pas à pas pour maîtriser [votre sujet].
         license_type: 'single',
         download_limit: null, // Illimité
         drm_enabled: false,
+        // ⭐ NOUVEAU: License Management
+        license_settings: {
+          type: 'single', // single, multi, unlimited, subscription
+          max_activations: 1,
+          allow_deactivation: true,
+          expiry_days: null, // null = permanent
+        },
+        // ⭐ NOUVEAU: Versioning
+        versioning: {
+          enabled: true,
+          initial_version: '1.0.0',
+          notify_customers: true,
+          auto_update: false,
+        },
+        // ⭐ NOUVEAU: Download Protection
+        download_protection: {
+          enabled: true,
+          token_expires_hours: 24,
+          max_downloads_per_token: 3,
+          ip_restriction: false,
+        },
       },
       affiliate: {
         enabled: true,
@@ -211,11 +232,37 @@ Ce guide complet vous accompagne pas à pas pour maîtriser [votre sujet].
         license_type: 'multi', // 2 appareils
         download_limit: null,
         drm_enabled: true,
+        // ⭐ NOUVEAU: License Management
+        license_settings: {
+          type: 'multi', // 2 activations
+          max_activations: 2,
+          allow_deactivation: true,
+          expiry_days: null, // null = permanent
+        },
+        // ⭐ NOUVEAU: Versioning
+        versioning: {
+          enabled: true,
+          initial_version: '2.0.1',
+          notify_customers: true,
+          auto_update: true, // Auto-update pour les logiciels
+        },
+        // ⭐ NOUVEAU: Download Protection
+        download_protection: {
+          enabled: true,
+          token_expires_hours: 48,
+          max_downloads_per_token: 5,
+          ip_restriction: true, // Sécurité accrue pour les logiciels
+        },
       },
       affiliate: {
         enabled: true,
         commission_rate: 25,
         commission_type: 'percentage',
+      },
+      tracking: {
+        pixels_enabled: true,
+        analytics_enabled: true,
+        events: ['view_item', 'add_to_cart', 'purchase', 'download', 'license_activation'],
       },
     },
   },
@@ -309,11 +356,37 @@ Ce guide complet vous accompagne pas à pas pour maîtriser [votre sujet].
         license_type: 'single',
         download_limit: null,
         drm_enabled: false,
+        // ⭐ NOUVEAU: License Management
+        license_settings: {
+          type: 'single',
+          max_activations: 1,
+          allow_deactivation: false, // Licence simple pour l'audio
+          expiry_days: null,
+        },
+        // ⭐ NOUVEAU: Versioning
+        versioning: {
+          enabled: false, // Pas de versioning pour les packs audio
+          initial_version: '1.0.0',
+          notify_customers: false,
+          auto_update: false,
+        },
+        // ⭐ NOUVEAU: Download Protection
+        download_protection: {
+          enabled: true,
+          token_expires_hours: 12,
+          max_downloads_per_token: 2,
+          ip_restriction: false,
+        },
       },
       affiliate: {
         enabled: true,
         commission_rate: 35,
         commission_type: 'percentage',
+      },
+      tracking: {
+        pixels_enabled: true,
+        analytics_enabled: true,
+        events: ['view_item', 'add_to_cart', 'purchase', 'download'],
       },
     },
   },
@@ -386,11 +459,37 @@ Ce guide complet vous accompagne pas à pas pour maîtriser [votre sujet].
         license_type: 'single',
         download_limit: null,
         drm_enabled: false,
+        // ⭐ NOUVEAU: License Management
+        license_settings: {
+          type: 'unlimited', // Licence étendue pour design
+          max_activations: null, // Illimité
+          allow_deactivation: false,
+          expiry_days: null,
+        },
+        // ⭐ NOUVEAU: Versioning
+        versioning: {
+          enabled: true, // Mises à jour des templates
+          initial_version: '1.0.0',
+          notify_customers: true,
+          auto_update: false,
+        },
+        // ⭐ NOUVEAU: Download Protection
+        download_protection: {
+          enabled: true,
+          token_expires_hours: 72, // 3 jours pour les gros fichiers
+          max_downloads_per_token: 10,
+          ip_restriction: false,
+        },
       },
       affiliate: {
         enabled: true,
         commission_rate: 40,
         commission_type: 'percentage',
+      },
+      tracking: {
+        pixels_enabled: true,
+        analytics_enabled: true,
+        events: ['view_item', 'add_to_cart', 'purchase', 'download'],
       },
     },
   },
@@ -477,11 +576,37 @@ Ce guide complet vous accompagne pas à pas pour maîtriser [votre sujet].
         license_type: 'single',
         download_limit: null,
         drm_enabled: false,
+        // ⭐ NOUVEAU: License Management
+        license_settings: {
+          type: 'single',
+          max_activations: 1,
+          allow_deactivation: false,
+          expiry_days: null,
+        },
+        // ⭐ NOUVEAU: Versioning
+        versioning: {
+          enabled: false, // Pas de versioning pour les photos
+          initial_version: '1.0.0',
+          notify_customers: false,
+          auto_update: false,
+        },
+        // ⭐ NOUVEAU: Download Protection
+        download_protection: {
+          enabled: true,
+          token_expires_hours: 48,
+          max_downloads_per_token: 3,
+          ip_restriction: false,
+        },
       },
       affiliate: {
         enabled: true,
         commission_rate: 30,
         commission_type: 'percentage',
+      },
+      tracking: {
+        pixels_enabled: true,
+        analytics_enabled: true,
+        events: ['view_item', 'add_to_cart', 'purchase', 'download'],
       },
     },
   },
