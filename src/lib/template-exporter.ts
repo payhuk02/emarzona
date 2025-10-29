@@ -476,5 +476,72 @@ export function quickDownload(template: TemplateV2): void {
   downloadTemplate(template, { pretty: true });
 }
 
+// ============================================================================
+// COMPONENT-FRIENDLY EXPORTS (for UI components)
+// ============================================================================
+
+/**
+ * Export template as JSON (with options)
+ */
+export function exportTemplateAsJSON(
+  template: TemplateV2,
+  options?: { includeAnalytics?: boolean; addChecksum?: boolean }
+): any {
+  const exporter = new TemplateExporter({
+    includeAnalytics: options?.includeAnalytics || false,
+    includeChecksums: options?.addChecksum || true,
+    pretty: true,
+  });
+  
+  const result = exporter.exportToJSON(template);
+  
+  if (result.success && typeof result.data === 'string') {
+    return JSON.parse(result.data);
+  }
+  
+  throw new Error(result.error || 'Export failed');
+}
+
+/**
+ * Export template as downloadable file
+ */
+export async function exportTemplateAsFile(
+  template: TemplateV2,
+  options?: { includeAnalytics?: boolean; addChecksum?: boolean }
+): Promise<void> {
+  const exporter = new TemplateExporter({
+    includeAnalytics: options?.includeAnalytics || false,
+    includeChecksums: options?.addChecksum || true,
+    pretty: true,
+  });
+  
+  const result = exporter.exportAsFile(template);
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Export failed');
+  }
+}
+
+/**
+ * Export multiple templates as ZIP
+ */
+export async function exportTemplatesAsZip(
+  templates: TemplateV2[],
+  filename: string,
+  options?: { includeAnalytics?: boolean; addChecksum?: boolean }
+): Promise<void> {
+  const exporter = new TemplateExporter({
+    includeAnalytics: options?.includeAnalytics || false,
+    includeChecksums: options?.addChecksum || true,
+    pretty: true,
+  });
+  
+  const result = await exporter.exportAsZip(templates, filename);
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Batch export failed');
+  }
+}
+
 export default TemplateExporter;
 
