@@ -16,6 +16,7 @@ DECLARE
   v_product2_id UUID;
   v_product3_id UUID;
   v_bundle_id UUID;
+  v_product_count INTEGER;
 BEGIN
   -- Récupérer le premier store
   SELECT id INTO v_store_id FROM public.stores LIMIT 1;
@@ -26,18 +27,45 @@ BEGIN
   
   RAISE NOTICE '✅ Store trouvé: %', v_store_id;
   
-  -- Récupérer 3 produits du store
-  SELECT id INTO v_product1_id FROM public.products 
-  WHERE store_id = v_store_id LIMIT 1 OFFSET 0;
+  -- Vérifier combien de produits existent
+  SELECT COUNT(*) INTO v_product_count 
+  FROM public.products 
+  WHERE store_id = v_store_id;
   
-  SELECT id INTO v_product2_id FROM public.products 
-  WHERE store_id = v_store_id LIMIT 1 OFFSET 1;
-  
-  SELECT id INTO v_product3_id FROM public.products 
-  WHERE store_id = v_store_id LIMIT 1 OFFSET 2;
-  
-  IF v_product1_id IS NULL THEN
-    RAISE EXCEPTION 'Pas assez de produits dans ce store. Créez des produits d''abord.';
+  IF v_product_count < 3 THEN
+    RAISE NOTICE '⚠️  Seulement % produit(s) trouvé(s). Création de produits temporaires...', v_product_count;
+    
+    -- Créer 3 produits temporaires pour le test
+    INSERT INTO public.products (store_id, name, slug, price, is_active, product_type)
+    VALUES 
+      (v_store_id, 'Produit Test Bundle 1', 'test-bundle-prod-' || gen_random_uuid(), 49.99, true, 'digital'),
+      (v_store_id, 'Produit Test Bundle 2', 'test-bundle-prod-' || gen_random_uuid(), 39.99, true, 'digital'),
+      (v_store_id, 'Produit Test Bundle 3', 'test-bundle-prod-' || gen_random_uuid(), 29.99, true, 'digital');
+    
+    -- Récupérer les IDs des produits qui viennent d'être créés
+    SELECT id INTO v_product1_id FROM public.products 
+    WHERE store_id = v_store_id AND name = 'Produit Test Bundle 1' 
+    ORDER BY created_at DESC LIMIT 1;
+    
+    SELECT id INTO v_product2_id FROM public.products 
+    WHERE store_id = v_store_id AND name = 'Produit Test Bundle 2' 
+    ORDER BY created_at DESC LIMIT 1;
+    
+    SELECT id INTO v_product3_id FROM public.products 
+    WHERE store_id = v_store_id AND name = 'Produit Test Bundle 3' 
+    ORDER BY created_at DESC LIMIT 1;
+    
+    RAISE NOTICE '✅ 3 produits de test créés';
+  ELSE
+    -- Récupérer 3 produits existants du store
+    SELECT id INTO v_product1_id FROM public.products 
+    WHERE store_id = v_store_id LIMIT 1 OFFSET 0;
+    
+    SELECT id INTO v_product2_id FROM public.products 
+    WHERE store_id = v_store_id LIMIT 1 OFFSET 1;
+    
+    SELECT id INTO v_product3_id FROM public.products 
+    WHERE store_id = v_store_id LIMIT 1 OFFSET 2;
   END IF;
   
   RAISE NOTICE '✅ Produits trouvés: %, %, %', v_product1_id, v_product2_id, v_product3_id;
