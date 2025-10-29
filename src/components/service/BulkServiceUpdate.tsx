@@ -488,7 +488,7 @@ export const BulkServiceUpdate: React.FC<BulkServiceUpdateProps> = ({
                 <div className="space-y-2">
                   <Label>
                     {fieldConfig.label}
-                    {fieldConfig.unit && ` (${fieldConfig.unit})`}
+                    {fieldConfig.unit && <span> ({fieldConfig.unit})</span>}
                   </Label>
                   {updateField === 'isActive' ? (
                     <Select value={updateValue} onValueChange={setUpdateValue}>
