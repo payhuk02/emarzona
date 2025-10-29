@@ -13,19 +13,19 @@ export {
 // Variant Selector
 export { VariantSelector } from './VariantSelector';
 
-// Inventory Components
+// Inventory Components (NEW)
 export {
-  StockLevelIndicator,
-  InventoryStats,
-  LowStockAlert,
-  StockMovementBadge,
+  InventoryStockIndicator,
+  CompactStockIndicator,
+  DetailedStockIndicator,
+  StockBadge,
 } from './InventoryStockIndicator';
 
-// Shipping Components
+// Shipping Components (NEW)
 export {
   ShippingInfoDisplay,
-  ShippingRatesDisplay,
-  ShippingZoneBadge,
-  ShippingSummary,
+  CompactShippingInfo,
+  DetailedShippingInfo,
+  ShippingStatusBadge,
 } from './ShippingInfoDisplay';
 
