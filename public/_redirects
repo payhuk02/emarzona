@@ -1,11 +1,1 @@
-# Redirections pour SPA (Single Page Application)
-# Toutes les routes non statiques doivent rediriger vers index.html
-# pour permettre au router client de gérer la navigation
-
-# Redirection générale pour toutes les routes
-/*    /index.html   200
-
-# Redirections spécifiques si nécessaire
-/home    /    301
-/dashboard    /dashboard/    301
-/admin    /admin/    301
+/* /index.html 200
