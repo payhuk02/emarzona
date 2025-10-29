@@ -362,3 +362,45 @@ export const useRemainingDownloads = (digitalProductId: string | undefined) => {
     enabled: !!digitalProductId,
   });
 };
+
+/**
+ * useHasDownloadAccess - Hook pour vérifier si l'utilisateur a accès au téléchargement
+ */
+export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
+  return useQuery({
+    queryKey: ['digitalProduct', digitalProductId, 'hasAccess'],
+    queryFn: async () => {
+      if (!digitalProductId) throw new Error('ID produit manquant');
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
+
+      // Check if user has purchased this product via order_items
+      const { data: orderItems, error } = await supabase
+        .from('order_items')
+        .select(`
+          id,
+          orders!inner (
+            id,
+            payment_status,
+            customers!inner (
+              email
+            )
+          )
+        `)
+        .eq('product_id', digitalProductId)
+        .eq('orders.payment_status', 'paid')
+        .eq('orders.customers.email', user.email);
+
+      if (error) throw error;
+
+      const hasAccess = orderItems && orderItems.length > 0;
+
+      return {
+        hasAccess,
+        purchaseCount: orderItems?.length || 0,
+      };
+    },
+    enabled: !!digitalProductId,
+  });
+};
