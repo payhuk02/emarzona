@@ -30,7 +30,7 @@ import {
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { VariantSelector } from '@/components/physical/VariantSelector';
-import { StockLevelIndicator } from '@/components/physical/InventoryStockIndicator';
+import { InventoryStockIndicator } from '@/components/physical/InventoryStockIndicator';
 import { ShippingInfoDisplay } from '@/components/physical/ShippingInfoDisplay';
 import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummary';
 import { ProductImages } from '@/components/shared';
@@ -160,7 +160,12 @@ export default function PhysicalProductDetail() {
               </div>
 
               {/* Stock Indicator */}
-              <StockLevelIndicator quantity={stockQuantity} showProgress={true} />
+              <InventoryStockIndicator 
+                quantity={stockQuantity} 
+                lowStockThreshold={10}
+                showProgress={true} 
+                variant="default"
+              />
 
               {/* Variants */}
               {product?.variants && product.variants.length > 0 && (
