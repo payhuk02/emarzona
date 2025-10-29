@@ -149,6 +149,9 @@ const PhysicalProductDetail = lazy(() => import("./pages/physical/PhysicalProduc
 const ServiceDetail = lazy(() => import("./pages/service/ServiceDetail"));
 const BookingsManagement = lazy(() => import("./pages/service/BookingsManagement"));
 
+// Pages Demo - Templates UI V2
+const TemplatesUIDemo = lazy(() => import("./pages/demo/TemplatesUIDemo"));
+
 // Page de test i18n (à supprimer en production)
 const I18nTest = lazy(() => import("./pages/I18nTest"));
 
@@ -254,6 +257,9 @@ const AppContent = () => {
           
           {/* --- Routes Service Management --- */}
           <Route path="/bookings/manage" element={<ProtectedRoute><BookingsManagement /></ProtectedRoute>} />
+
+          {/* --- Routes Demo --- */}
+          <Route path="/demo/templates-ui" element={<ProtectedRoute><TemplatesUIDemo /></ProtectedRoute>} />
 
           {/* --- Routes administrateur --- */}
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
