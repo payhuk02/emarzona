@@ -28,6 +28,7 @@ import {
   Tablet
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 /**
  * Form data interface pour ProductVisualTab
@@ -56,13 +57,52 @@ interface ProductVisualTabProps {
 export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductVisualTabProps) => {
   const [activePreview, setActivePreview] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const { toast } = useToast();
 
   const handleImageUpload = (urls: string | string[]) => {
-    if (Array.isArray(urls)) {
-      updateFormData("gallery_images", urls);
-    } else {
-      updateFormData("image_url", urls);
-    }
+    const toArray = Array.isArray(urls) ? urls : [urls];
+    const validateImage = async (url: string): Promise<boolean> => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const ratio = img.width / img.height;
+          const target = 1280 / 720; // 16:9
+          const ok = Math.abs(ratio - target) <= 0.03; // tolérance ~3%
+          resolve(ok);
+        };
+        img.onerror = () => resolve(false);
+        img.src = url;
+      });
+    };
+
+    const apply = async () => {
+      const valids: string[] = [];
+      for (const u of toArray) {
+        if (await validateImage(u)) {
+          valids.push(u);
+        } else {
+          console.warn('Image rejetée: ratio non conforme 16:9 (1280x720 attendu)', u);
+          toast({
+            title: "Format d'image non valide",
+            description: "Veuillez utiliser une image 1280×720 (ratio 16:9).",
+            variant: "destructive",
+          });
+        }
+      }
+      if (Array.isArray(urls)) {
+        updateFormData("gallery_images", valids);
+        if (valids.length > 0) {
+          toast({ title: "Images ajoutées", description: `${valids.length} image(s) conforme(s) 16:9` });
+        }
+      } else {
+        updateFormData("image_url", valids[0] || "");
+        if (valids[0]) {
+          toast({ title: "Image principale ajoutée", description: "Format 1280×720 détecté" });
+        }
+      }
+    };
+
+    void apply();
   };
 
   const removeImage = (index: number, type: 'main' | 'gallery') => {
