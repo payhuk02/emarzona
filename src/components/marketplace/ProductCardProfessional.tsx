@@ -208,6 +208,8 @@ const ProductCardProfessional = ({
         <OptimizedImage
           src={product.image_url || '/placeholder-image.png'}
           alt={product.name}
+          width={1280}
+          height={720}
           className="w-full h-80 object-cover rounded-t-lg"
           priority={false}
         />
