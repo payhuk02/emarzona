@@ -36,6 +36,7 @@ import { DigitalDownloadButton } from '@/components/digital/DigitalDownloadButto
 import { DigitalLicenseCard } from '@/components/digital/DigitalLicenseCard';
 import { useDigitalProduct } from '@/hooks/digital/useDigitalProducts';
 import { useHasDownloadAccess } from '@/hooks/digital/useDigitalProducts';
+import { sanitizeHTML } from '@/lib/html-sanitizer';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummary';
 import { ReviewsList } from '@/components/reviews/ReviewsList';
@@ -386,7 +387,7 @@ export default function DigitalProductDetail() {
               <CardContent>
                 <div 
                   className="prose dark:prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: product.description || '' }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(product.description || '', 'productDescription') }}
                 />
               </CardContent>
             </Card>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { safeRedirect } from "@/lib/url-validator";
 import { ProductBanner } from "@/components/ui/ResponsiveProductImage";
 import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { supabase } from "@/integrations/supabase/client";
@@ -152,7 +153,13 @@ const ProductCardProfessional = ({
       });
 
       if (result.checkout_url) {
-        window.location.href = result.checkout_url;
+        safeRedirect(result.checkout_url, () => {
+          toast({
+            title: "Erreur de paiement",
+            description: "URL de paiement invalide. Veuillez réessayer.",
+            variant: "destructive",
+          });
+        });
       }
     } catch (error: any) {
       logger.error("Erreur lors de l'achat:", error);

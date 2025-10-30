@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { monerooClient, MonerooPaymentData, MonerooCheckoutData } from "@/lib/moneroo-client";
 import { useToast } from "@/hooks/use-toast";
+import { safeRedirect } from "@/lib/url-validator";
 
 export const useMoneroo = () => {
   const [loading, setLoading] = useState(false);
@@ -34,7 +35,13 @@ export const useMoneroo = () => {
       
       // Rediriger vers l'URL de checkout Moneroo si disponible
       if (result.checkout_url) {
-        window.location.href = result.checkout_url;
+        safeRedirect(result.checkout_url, () => {
+          toast({
+            title: "Erreur",
+            description: "URL de paiement invalide. Veuillez réessayer.",
+            variant: "destructive",
+          });
+        });
       }
       
       return result;

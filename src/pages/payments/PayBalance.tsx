@@ -28,6 +28,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { safeRedirect } from '@/lib/url-validator';
 
 export default function PayBalance() {
   const { orderId } = useParams<{ orderId: string }>();
@@ -97,7 +98,13 @@ export default function PayBalance() {
     },
     onSuccess: (data) => {
       if (data.payment_url) {
-        window.location.href = data.payment_url;
+        safeRedirect(data.payment_url, () => {
+          toast({
+            title: '❌ Erreur',
+            description: 'URL de paiement invalide. Veuillez réessayer.',
+            variant: 'destructive',
+          });
+        });
       }
     },
     onError: (error: any) => {

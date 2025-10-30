@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { safeRedirect } from "@/lib/url-validator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -447,7 +448,13 @@ const Marketplace = () => {
       });
 
       if (result.checkout_url) {
-        window.location.href = result.checkout_url;
+        safeRedirect(result.checkout_url, () => {
+          toast({
+            title: t('marketplace.toast.paymentError'),
+            description: "URL de paiement invalide. Veuillez réessayer.",
+            variant: "destructive",
+          });
+        });
       }
     } catch (error: any) {
       logger.error("Erreur lors de l'achat:", error);

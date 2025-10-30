@@ -26,6 +26,7 @@ import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { initiateMonerooPayment } from "@/lib/moneroo-payment";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { safeRedirect } from "@/lib/url-validator";
 
 interface ProductCardProps {
   product: Product;
@@ -140,7 +141,13 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
       });
 
       if (result.success && result.paymentUrl) {
-        window.location.href = result.paymentUrl;
+        safeRedirect(result.paymentUrl, () => {
+          toast({
+            title: "Erreur",
+            description: "URL de paiement invalide. Veuillez réessayer.",
+            variant: "destructive",
+          });
+        });
       } else {
         throw new Error(result.error || "Échec de l'initialisation du paiement");
       }

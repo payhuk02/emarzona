@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sanitizeString } from "@/lib/validation";
+import { sanitizeHTML } from "@/lib/html-sanitizer";
 import React from "react";
 
 /**
@@ -587,7 +588,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
               {previewMode ? (
                 <div 
                   className="prose max-w-none p-4 border rounded-lg bg-gray-50"
-                  dangerouslySetInnerHTML={{ __html: formData.description || "" }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(formData.description || "", 'productDescription') }}
                 />
               ) : (
                 <RichTextEditor

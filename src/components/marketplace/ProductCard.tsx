@@ -4,6 +4,7 @@ import { ShoppingCart, Star, Percent, Loader2 } from "lucide-react";
 import { initiateMonerooPayment } from "@/lib/moneroo-payment";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { safeRedirect } from "@/lib/url-validator";
 import { ProductBanner } from "@/components/ui/ResponsiveProductImage";
 
 interface ProductCardProps {
@@ -72,7 +73,13 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
       });
 
       if (result.checkout_url) {
-        window.location.href = result.checkout_url;
+        safeRedirect(result.checkout_url, () => {
+          toast({
+            title: "Erreur de paiement",
+            description: "URL de paiement invalide. Veuillez réessayer.",
+            variant: "destructive",
+          });
+        });
       }
     } catch (error: any) {
       console.error("Erreur Moneroo:", error);

@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
+import { sanitizeHTML } from '@/lib/html-sanitizer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -208,7 +209,7 @@ export default function ServiceDetail() {
                   <CardContent>
                     <div
                       className="prose dark:prose-invert max-w-none"
-                      dangerouslySetInnerHTML={{ __html: service.description }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHTML(service.description, 'productDescription') }}
                     />
                   </CardContent>
                 </Card>
