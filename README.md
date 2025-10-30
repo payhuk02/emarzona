@@ -8,6 +8,8 @@
 [![React](https://img.shields.io/badge/React-18.3-61dafb)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.4-646cff)](https://vitejs.dev/)
 [![Tests](https://img.shields.io/badge/tests-50%2B-green)](./tests)
+[![Security](https://img.shields.io/badge/security-90%2F100-success)](SECURITY.md)
+[![Audit](https://img.shields.io/badge/audit-2025--10--30-informational)](AUDIT_COMPLET_PAYHULA_2025_PROFESSIONNEL.md)
 
 ---
 
