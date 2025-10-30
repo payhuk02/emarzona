@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { RichTextEditorPro } from "@/components/ui/rich-text-editor-pro";
 import { AIContentGenerator } from "@/components/products/AIContentGenerator";
 import { 
   FileText, 
@@ -591,10 +592,12 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                   dangerouslySetInnerHTML={{ __html: sanitizeHTML(formData.description || "", 'productDescription') }}
                 />
               ) : (
-                <RichTextEditor
+                <RichTextEditorPro
                   content={formData.description || ""}
                   onChange={(content) => updateFormData("description", content)}
-                  placeholder="Décrivez votre produit en détail..."
+                  placeholder="Décrivez votre produit en détail avec toutes les fonctionnalités professionnelles..."
+                  showWordCount={true}
+                  maxHeight="600px"
                 />
               )}
             </CardContent>
