@@ -77,9 +77,9 @@ export const ProductImageGallery = ({
       params.set('width', '150');
       params.set('height', '150');
     } else {
-      // Pour les images principales, optimiser pour le ratio 16:9
-      params.set('width', '1920');
-      params.set('height', '1080');
+      // Pour les images principales, optimiser pour le ratio 16:9 (1280x720)
+      params.set('width', '1280');
+      params.set('height', '720');
     }
 
     return `${originalSrc}?${params.toString()}`;
