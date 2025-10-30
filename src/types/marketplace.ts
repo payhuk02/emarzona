@@ -20,6 +20,8 @@ export interface Product {
   created_at: string;
   updated_at: string;
   tags?: string[];
+  licensing_type?: 'standard' | 'plr' | 'copyrighted' | null;
+  license_terms?: string | null;
   stores?: {
     id: string;
     name: string;
@@ -33,6 +35,7 @@ export interface FilterState {
   search: string;
   category: string;
   productType: string;
+  licensingType?: 'all' | 'standard' | 'plr' | 'copyrighted';
   priceRange: string;
   rating: string;
   sortBy: string;

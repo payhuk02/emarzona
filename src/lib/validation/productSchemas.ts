@@ -34,6 +34,23 @@ export const ProductImportSchema = z.object({
     errorMap: () => ({ message: 'Type de produit invalide (digital, physical, service)' })
   }),
   
+  // Licensing (optionnel)
+  licensing_type: z.union([
+    z.enum(['standard', 'plr', 'copyrighted']),
+    z.string().transform((val) => {
+      const v = (val || '').toString().trim().toLowerCase();
+      if (!v) return undefined as any;
+      if (['standard', 'plr', 'copyrighted'].includes(v)) return v as any;
+      return undefined as any;
+    })
+  ]).optional(),
+  
+  license_terms: z.string()
+    .max(2000, 'Les conditions de licence ne peuvent pas dépasser 2000 caractères')
+    .optional()
+    .nullable()
+    .transform((val) => val || null),
+  
   // Champs optionnels
   description: z.string()
     .max(5000, 'La description ne peut pas dépasser 5000 caractères')

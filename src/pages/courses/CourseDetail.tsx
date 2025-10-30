@@ -24,7 +24,8 @@ import {
   Award,
   TrendingUp,
   Target,
-  Lightbulb
+  Lightbulb,
+  Shield
 } from 'lucide-react';
 import { useCourseDetail } from '@/hooks/courses/useCourseDetail';
 import { VideoPlayer } from '@/components/courses/player/VideoPlayer';
@@ -222,6 +223,23 @@ const CourseDetail = () => {
               {product.short_description}
             </p>
 
+            {/* Licensing banner (courses are products with product_type='course') */}
+            {product?.licensing_type && (
+              <div className="mb-4 flex items-start gap-3 p-3 rounded-lg bg-white/10">
+                <div className={`h-8 w-8 rounded-full flex items-center justify-center ${product.licensing_type === 'plr' ? 'bg-emerald-500/20' : product.licensing_type === 'copyrighted' ? 'bg-red-500/20' : 'bg-white/20'}`}>
+                  <Shield className="h-4 w-4 text-white" />
+                </div>
+                <div className="text-sm">
+                  <p className="font-semibold">
+                    {product.licensing_type === 'plr' ? 'Licence PLR (droits de label privé)' : product.licensing_type === 'copyrighted' ? "Protégé par droit d'auteur" : 'Licence standard'}
+                  </p>
+                  {product.license_terms && (
+                    <p className="opacity-90 mt-1 whitespace-pre-wrap">{product.license_terms}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Stats */}
             <div className="flex flex-wrap gap-6 text-sm">
               <div className="flex items-center gap-2">
@@ -334,6 +352,25 @@ const CourseDetail = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Conditions de licence */}
+            {product.licensing_type && (
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-bold mb-3">Conditions de licence</h2>
+                  <div className="text-sm text-gray-700 space-y-2">
+                    <p>
+                      Type de licence: <strong>{product.licensing_type === 'plr' ? 'PLR (droits de label privé)' : product.licensing_type === 'copyrighted' ? "Protégé par droit d'auteur" : 'Standard'}</strong>
+                    </p>
+                    {product.license_terms ? (
+                      <p className="whitespace-pre-wrap">{product.license_terms}</p>
+                    ) : (
+                      <p>Les conditions détaillées de licence seront précisées par le vendeur.</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Learning Objectives */}
             {course.learning_objectives && course.learning_objectives.length > 0 && (

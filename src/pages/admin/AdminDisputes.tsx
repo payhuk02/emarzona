@@ -20,6 +20,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useDebounce } from "@/hooks/useDebounce";
 import { exportDisputesToCSV } from "@/lib/export-utils";
 import { Link } from "react-router-dom";
+import { ProtectedAction } from "@/components/admin/ProtectedAction";
+import { Admin2FABanner } from "@/components/admin/Admin2FABanner";
+import { useAdminMFA } from "@/hooks/useAdminMFA";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { RequireAAL2 } from "@/components/admin/RequireAAL2";
 
 const AdminDisputes = () => {
   const { toast } = useToast();
@@ -31,6 +36,7 @@ const AdminDisputes = () => {
   const [sortByColumn, setSortByColumn] = useState<SortColumn>('created_at');
   const [sortDir, setSortDir] = useState<SortDirection>('desc');
   const pageSize = 20;
+  const { isAAL2 } = useAdminMFA();
   
   // Débounce de la recherche pour éviter le spam de requêtes
   const debouncedSearch = useDebounce(searchInput, 500);
@@ -298,7 +304,9 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
 
   return (
     <AdminLayout>
+      <RequireAAL2>
       <div className="space-y-6">
+            <Admin2FABanner />
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -310,15 +318,26 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                   Gérez et résolvez les litiges entre clients et vendeurs
                 </p>
               </div>
-              <Button
-                onClick={handleExportCSV}
-                variant="outline"
-                className="w-full sm:w-auto"
-                disabled={disputes.length === 0}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Exporter CSV
-              </Button>
+              <ProtectedAction permission="disputes.manage">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <Button
+                          onClick={handleExportCSV}
+                          variant="outline"
+                          className="w-full sm:w-auto"
+                          disabled={disputes.length === 0 || !isAAL2}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Exporter CSV
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    {(!isAAL2) && (<TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>)}
+                  </Tooltip>
+                </TooltipProvider>
+              </ProtectedAction>
             </div>
 
             {/* Stats Cards */}
@@ -576,38 +595,42 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Select
-                                value={dispute.priority || 'normal'}
-                                onValueChange={(value) => updateDisputePriority(dispute.id, value as any)}
-                              >
-                                <SelectTrigger className="w-[140px] h-8">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="low">⚪ Basse</SelectItem>
-                                  <SelectItem value="normal">🔵 Normale</SelectItem>
-                                  <SelectItem value="high">🟠 Élevée</SelectItem>
-                                  <SelectItem value="urgent">🔴 Urgente</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              <ProtectedAction permission="disputes.manage">
+                                <Select
+                                  value={dispute.priority || 'normal'}
+                                  onValueChange={(value) => isAAL2 && updateDisputePriority(dispute.id, value as any)}
+                                >
+                                  <SelectTrigger className="w-[140px] h-8">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="low">⚪ Basse</SelectItem>
+                                    <SelectItem value="normal">🔵 Normale</SelectItem>
+                                    <SelectItem value="high">🟠 Élevée</SelectItem>
+                                    <SelectItem value="urgent">🔴 Urgente</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </ProtectedAction>
                             </TableCell>
                             <TableCell>
-                              <Select
-                                value={dispute.status}
-                                onValueChange={(value) => updateDisputeStatus(dispute.id, value as DisputeStatus)}
-                              >
-                                <SelectTrigger className="w-[160px] h-8">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="open">⚠️ Ouvert</SelectItem>
-                                  <SelectItem value="investigating">🔍 En investigation</SelectItem>
-                                  <SelectItem value="waiting_customer">⏳ Attente client</SelectItem>
-                                  <SelectItem value="waiting_seller">⏳ Attente vendeur</SelectItem>
-                                  <SelectItem value="resolved">✅ Résolu</SelectItem>
-                                  <SelectItem value="closed">❌ Fermé</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              <ProtectedAction permission="disputes.manage">
+                                <Select
+                                  value={dispute.status}
+                                  onValueChange={(value) => isAAL2 && updateDisputeStatus(dispute.id, value as DisputeStatus)}
+                                >
+                                  <SelectTrigger className="w-[160px] h-8">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="open">⚠️ Ouvert</SelectItem>
+                                    <SelectItem value="investigating">🔍 En investigation</SelectItem>
+                                    <SelectItem value="waiting_customer">⏳ Attente client</SelectItem>
+                                    <SelectItem value="waiting_seller">⏳ Attente vendeur</SelectItem>
+                                    <SelectItem value="resolved">✅ Résolu</SelectItem>
+                                    <SelectItem value="closed">❌ Fermé</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </ProtectedAction>
                             </TableCell>
                             <TableCell>
                               {dispute.assigned_admin_id ? (
@@ -638,39 +661,81 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                                 >
                                   <Eye className="h-4 w-4" />
                                 </Button>
-                                {!dispute.assigned_admin_id && (
+                                <ProtectedAction permission="disputes.manage">
+                                  {!dispute.assigned_admin_id && (
+                                  <TooltipProvider>
+                                  <Tooltip>
+                                  <TooltipTrigger asChild>
+                                  <span>
+                                  <Button
+                                      size="sm"
+                                      variant="outline"
+                                      disabled={!isAAL2}
+                                    onClick={() => isAAL2 && handleOpenDialog(dispute, "assign")}
+                                    >
+                                      M'assigner
+                                    </Button>
+                                  </span>
+                                  </TooltipTrigger>
+                                  {!isAAL2 && (<TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>)}
+                                  </Tooltip>
+                                  </TooltipProvider>
+                                  )}
+                                  <TooltipProvider>
+                                  <Tooltip>
+                                  <TooltipTrigger asChild>
+                                  <span>
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => handleOpenDialog(dispute, "assign")}
+                                    disabled={!isAAL2}
+                                    onClick={() => isAAL2 && handleOpenDialog(dispute, "notes")}
                                   >
-                                    M'assigner
+                                    Notes
                                   </Button>
-                                )}
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleOpenDialog(dispute, "notes")}
-                                >
-                                  Notes
-                                  </Button>
-                                {dispute.status !== "resolved" && dispute.status !== "closed" && (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleOpenDialog(dispute, "resolve")}
-                                  >
-                                    Résoudre
-                                  </Button>
-                                )}
-                                {dispute.status === "resolved" && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => closeDispute(dispute.id)}
-                                  >
-                                    Fermer
-                                  </Button>
-                                )}
+                                  </span>
+                                  </TooltipTrigger>
+                                  {!isAAL2 && (<TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>)}
+                                  </Tooltip>
+                                  </TooltipProvider>
+                                  {dispute.status !== "resolved" && dispute.status !== "closed" && (
+                                    <TooltipProvider>
+                                    <Tooltip>
+                                    <TooltipTrigger asChild>
+                                    <span>
+                                    <Button
+                                      size="sm"
+                                      disabled={!isAAL2}
+                                      onClick={() => isAAL2 && handleOpenDialog(dispute, "resolve")}
+                                    >
+                                      Résoudre
+                                    </Button>
+                                    </span>
+                                    </TooltipTrigger>
+                                    {!isAAL2 && (<TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>)}
+                                    </Tooltip>
+                                    </TooltipProvider>
+                                  )}
+                                  {dispute.status === "resolved" && (
+                                    <TooltipProvider>
+                                    <Tooltip>
+                                    <TooltipTrigger asChild>
+                                    <span>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      disabled={!isAAL2}
+                                      onClick={() => isAAL2 && closeDispute(dispute.id)}
+                                    >
+                                      Fermer
+                                    </Button>
+                                    </span>
+                                    </TooltipTrigger>
+                                    {!isAAL2 && (<TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>)}
+                                    </Tooltip>
+                                    </TooltipProvider>
+                                  )}
+                                </ProtectedAction>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -970,6 +1035,7 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </RequireAAL2>
     </AdminLayout>
   );
 };

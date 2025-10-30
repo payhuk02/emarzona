@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Star, Percent, Loader2 } from "lucide-react";
+import { ShoppingCart, Star, Percent, Loader2, Shield } from "lucide-react";
 import { initiateMonerooPayment } from "@/lib/moneroo-payment";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -108,13 +108,29 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
           className="w-full product-banner"
           fallbackIcon={<ShoppingCart className="h-16 w-16 opacity-20" />}
           badges={
-            hasPromo ? (
-              <div className="product-badge" role="img" aria-label={`Réduction de ${discountPercent}%`}>
-                <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
-                  <Percent className="h-3 w-3" /> -{discountPercent}%
+            <div className="flex flex-col gap-1">
+              {hasPromo && (
+                <div className="product-badge" role="img" aria-label={`Réduction de ${discountPercent}%`}>
+                  <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
+                    <Percent className="h-3 w-3" /> -{discountPercent}%
+                  </div>
                 </div>
-              </div>
-            ) : undefined
+              )}
+              {(product as any).licensing_type === 'plr' && (
+                <div className="product-badge">
+                  <div className="bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1" aria-label="Licence PLR" title="PLR (Private Label Rights) : peut être modifié et revendu selon conditions">
+                    <Shield className="h-3 w-3" /> PLR
+                  </div>
+                </div>
+              )}
+              {(product as any).licensing_type === 'copyrighted' && (
+                <div className="product-badge">
+                  <div className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1" aria-label="Protégé par droit d'auteur" title="Protégé par droit d'auteur : revente/modification non autorisées">
+                    <Shield className="h-3 w-3" /> Droit d'auteur
+                  </div>
+                </div>
+              )}
+            </div>
           }
         />
       </div>
@@ -143,7 +159,7 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
             <div className="h-5 mb-3" />
           )}
 
-          <div className="flex items-baseline gap-2 mb-4" aria-label="Prix du produit">
+          <div className="flex items-baseline gap-2 mb-2" aria-label="Prix du produit">
             {hasPromo && (
               <span className="text-sm text-muted-foreground line-through" aria-label="Prix original">
                 {product.price.toLocaleString()} {product.currency ?? "FCFA"}
@@ -153,6 +169,12 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
               {price.toLocaleString()} {product.currency ?? "FCFA"}
             </span>
           </div>
+
+          {(product as any).licensing_type && (
+            <span className="text-xs text-muted-foreground mb-4 block">
+              {(product as any).licensing_type === 'plr' ? 'Licence PLR (droits de label privé)' : (product as any).licensing_type === 'copyrighted' ? 'Protégé par droit d\'auteur' : 'Licence standard'}
+            </span>
+          )}
 
           <span className="text-xs text-muted-foreground mb-4 block" aria-label="Nombre de ventes">
             {product.purchases_count

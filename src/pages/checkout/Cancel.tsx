@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { XCircle, RotateCcw, Loader2 } from "lucide-react";
+import { XCircle, RotateCcw, Loader2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 
 const CheckoutCancel = () => {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [transaction, setTransaction] = useState<any>(null);
+  const [product, setProduct] = useState<any>(null);
 
   const transactionId = searchParams.get("transaction_id");
 
@@ -37,6 +39,15 @@ const CheckoutCancel = () => {
             event_type: "cancelled",
             status: "cancelled",
           }]);
+
+          if (data.product_id) {
+            const { data: prod } = await supabase
+              .from('products')
+              .select('id,name,licensing_type,license_terms')
+              .eq('id', data.product_id)
+              .single();
+            if (prod) setProduct(prod);
+          }
         }
       } catch (err) {
         console.error("Error updating transaction:", err);
@@ -95,6 +106,29 @@ const CheckoutCancel = () => {
       <p className="text-muted-foreground max-w-md mb-8">
         Votre paiement n'a pas été finalisé. Aucun montant n'a été débité.
       </p>
+
+      {/* Rappel des conditions de licence si applicable */}
+      {product?.licensing_type && (
+        <Card className="max-w-md w-full my-2">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3 text-left">
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center ${product.licensing_type === 'plr' ? 'bg-emerald-100' : product.licensing_type === 'copyrighted' ? 'bg-red-100' : 'bg-gray-100'}`}>
+                <Shield className={`h-4 w-4 ${product.licensing_type === 'plr' ? 'text-emerald-700' : product.licensing_type === 'copyrighted' ? 'text-red-700' : 'text-gray-700'}`} />
+              </div>
+              <div className="text-sm">
+                <p className="font-semibold">
+                  {product.licensing_type === 'plr' ? 'Licence PLR (droits de label privé)' : product.licensing_type === 'copyrighted' ? "Protégé par droit d'auteur" : 'Licence standard'}
+                </p>
+                {product.license_terms ? (
+                  <p className="text-muted-foreground mt-1 whitespace-pre-wrap">{product.license_terms}</p>
+                ) : (
+                  <p className="text-muted-foreground mt-1">Si vous réessayez l'achat, veuillez respecter les conditions d'utilisation.</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3">
         <Link to="/marketplace">

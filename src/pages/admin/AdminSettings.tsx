@@ -8,9 +8,27 @@ import { usePlatformSettings } from '@/hooks/usePlatformSettings';
 import { Settings, Save, Info, Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAdminPermissions, DEFAULT_PERMISSION_KEYS } from '@/hooks/useAdminPermissions';
+import { useCurrentAdminPermissions } from '@/hooks/useCurrentAdminPermissions';
+import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
+import { useAdminMFA } from '@/hooks/useAdminMFA';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Shield } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminSettings = () => {
   const { settings: dbSettings, loading, error, updateSettings } = usePlatformSettings();
+  const { roles, loading: rolesLoading, error: rolesError, updateRolePermissions, refresh } = useAdminPermissions();
+  const { can } = useCurrentAdminPermissions();
+  const { isAAL2 } = useAdminMFA();
+  const [routes, setRoutes] = useState<string[]>(Array.isArray((dbSettings as any)?.require_aal2_routes) ? (dbSettings as any).require_aal2_routes : []);
+  const [newRoute, setNewRoute] = useState('');
+  const defaultRoutes = ['/admin/payments','/admin/audit','/admin/users','/admin/products','/admin/disputes'];
+  useEffect(() => {
+    const arr = Array.isArray((dbSettings as any)?.require_aal2_routes) ? (dbSettings as any).require_aal2_routes : [];
+    setRoutes(arr);
+  }, [dbSettings]);
   
   // État local pour le formulaire
   const [localSettings, setLocalSettings] = useState({
@@ -100,6 +118,7 @@ const AdminSettings = () => {
         </div>
 
         {/* Commission Settings */}
+        {can('users.roles') && (
         <Card>
           <CardHeader>
             <CardTitle>Taux de commission</CardTitle>
@@ -152,6 +171,7 @@ const AdminSettings = () => {
             </Alert>
           </CardContent>
         </Card>
+        )}
 
         {/* Withdrawal Settings */}
         <Card>
@@ -254,6 +274,115 @@ const AdminSettings = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* RBAC - Gestion des permissions par rôle */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Permissions des rôles (RBAC)</CardTitle>
+                <CardDescription>Activez/Désactivez les capacités par rôle administrateur</CardDescription>
+              </div>
+              <Shield className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {rolesLoading ? (
+              <Skeleton className="h-32" />
+            ) : rolesError ? (
+              <Alert variant="destructive">
+                <AlertDescription>{rolesError}</AlertDescription>
+              </Alert>
+            ) : (
+      <div className="space-y-6">
+        <Admin2FABanner />
+          <Card>
+            <CardHeader>
+              <CardTitle>État 2FA</CardTitle>
+              <CardDescription>Statut actuel d’authentification multi-facteurs</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <span>Session administrateur:</span>
+                <Badge variant={isAAL2 ? 'default' : 'destructive'}>{isAAL2 ? 'AAL2 - 2FA active' : 'AAL1 - 2FA inactive'}</Badge>
+              </div>
+            </CardContent>
+          </Card>
+                {roles.map((r) => (
+                  <div key={r.role} className="border rounded-lg p-4">
+                    <div className="font-semibold mb-3 capitalize">{r.role.replace('_', ' ')}</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {DEFAULT_PERMISSION_KEYS.map((perm) => {
+                        const checked = Boolean((r.permissions as any)?.[perm]);
+                        return (
+                          <label key={perm} className="flex items-center gap-2">
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={async (v) => {
+                                const next = { ...(r.permissions as any), [perm]: Boolean(v) };
+                                await updateRolePermissions(r.role, next);
+                              }}
+                            />
+                            <span className="text-sm text-muted-foreground">{perm}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Routes protégées AAL2 */}
+        {can('settings.manage') && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Routes protégées (AAL2)</CardTitle>
+            <CardDescription>Liste des préfixes de routes admin nécessitant la 2FA</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={() => {
+                const merged = Array.from(new Set([...(routes||[]), ...defaultRoutes]));
+                setRoutes(merged);
+              }}>Ajouter suggestions</Button>
+              <Button variant="outline" size="sm" onClick={() => setRoutes(defaultRoutes)}>Réinitialiser par défaut</Button>
+            </div>
+            <div className="flex gap-2">
+              <Input placeholder="/admin/xxx" value={newRoute} onChange={e => setNewRoute(e.target.value)} />
+              <Button
+                onClick={() => {
+                  const r = newRoute.trim();
+                  if (!r) return;
+                  if (routes.includes(r)) return;
+                  setRoutes([...routes, r]);
+                  setNewRoute('');
+                }}
+              >Ajouter</Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {routes.map(r => (
+                <div key={r} className="flex items-center gap-2 border rounded px-2 py-1 text-sm">
+                  <code>{r}</code>
+                  <Button variant="outline" size="xs" onClick={() => setRoutes(routes.filter(x => x !== r))}>Retirer</Button>
+                </div>
+              ))}
+              {routes.length === 0 && <div className="text-sm text-muted-foreground">Aucune route configurée</div>}
+            </div>
+            <div className="flex justify-end">
+              <Button
+                onClick={async () => {
+                  await (async () => {
+                    await supabase.from('admin_config').upsert({ key: 'admin', settings: { ...(dbSettings as any), require_aal2_routes: routes }, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+                  })();
+                }}
+              >Enregistrer</Button>
+            </div>
+          </CardContent>
+        </Card>
+        )}
 
         {/* Save Button */}
         <div className="flex justify-end">

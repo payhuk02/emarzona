@@ -39,6 +39,10 @@ export const productSchema = z.object({
     .min(2, 'La catégorie doit contenir au moins 2 caractères')
     .max(50, 'La catégorie ne peut pas dépasser 50 caractères')
     .optional(),
+
+  // Licensing: standard | plr | copyrighted
+  licensing_type: z.enum(['standard', 'plr', 'copyrighted']).optional(),
+  license_terms: z.string().max(2000, 'Les conditions ne peuvent pas dépasser 2000 caractères').optional().or(z.literal('')),
 });
 
 // Schéma pour les commandes

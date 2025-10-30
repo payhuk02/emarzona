@@ -22,6 +22,7 @@ const Storefront = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [productType, setProductType] = useState("all");
+  const [licensingType, setLicensingType] = useState<'all' | 'standard' | 'plr' | 'copyrighted'>('all');
 
   // Utiliser un ID stable pour éviter les violations des règles des hooks
   const storeId = store?.id || null;
@@ -60,9 +61,11 @@ const Storefront = () => {
         category === "all" || product.category === category;
       const matchesType =
         productType === "all" || product.product_type === productType;
+      const matchesLicense =
+        licensingType === 'all' || (product as any).licensing_type === licensingType;
 
-      return matchesSearch && matchesCategory && matchesType;
-    }), [products, searchQuery, category, productType]
+      return matchesSearch && matchesCategory && matchesType && matchesLicense;
+    }), [products, searchQuery, category, productType, licensingType]
   );
 
   const categories = useMemo(() => 
@@ -182,6 +185,8 @@ const Storefront = () => {
                     category={category}
                     onCategoryChange={setCategory}
                     productType={productType}
+                    licensingType={licensingType}
+                    onLicensingTypeChange={setLicensingType}
                     onProductTypeChange={setProductType}
                     categories={categories}
                     productTypes={productTypes}

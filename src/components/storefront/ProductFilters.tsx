@@ -20,6 +20,8 @@ interface ProductFiltersProps {
   onCategoryChange: (value: string) => void;
   productType: string;
   onProductTypeChange: (value: string) => void;
+  licensingType?: 'all' | 'standard' | 'plr' | 'copyrighted';
+  onLicensingTypeChange?: (value: 'all' | 'standard' | 'plr' | 'copyrighted') => void;
   categories: string[];
   productTypes: string[];
 }
@@ -30,17 +32,20 @@ const ProductFilters = ({
   category,
   onCategoryChange,
   productType,
+  licensingType = 'all',
+  onLicensingTypeChange,
   onProductTypeChange,
   categories,
   productTypes,
 }: ProductFiltersProps) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const hasActiveFilters = category !== "all" || productType !== "all";
+  const hasActiveFilters = category !== "all" || productType !== "all" || licensingType !== 'all';
 
   const clearFilters = () => {
     onCategoryChange("all");
     onProductTypeChange("all");
+    onLicensingTypeChange && onLicensingTypeChange('all');
   };
 
   return (
@@ -72,6 +77,21 @@ const ProductFilters = ({
             ))}
           </SelectContent>
         </Select>
+
+        {/* Licensing type */}
+        {onLicensingTypeChange && (
+          <Select value={licensingType} onValueChange={(v) => onLicensingTypeChange(v as any)}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Licence" />
+            </SelectTrigger>
+            <SelectContent className="z-50 bg-background">
+              <SelectItem value="all">Toutes licences</SelectItem>
+              <SelectItem value="standard">Standard</SelectItem>
+              <SelectItem value="plr">PLR</SelectItem>
+              <SelectItem value="copyrighted">Droit d'auteur</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
 
         <Select value={productType} onValueChange={onProductTypeChange}>
           <SelectTrigger className="w-[200px]">
@@ -153,6 +173,23 @@ const ProductFilters = ({
                 </SelectContent>
               </Select>
             </div>
+
+          {onLicensingTypeChange && (
+            <div className="space-y-2">
+              <Label htmlFor="mobile-license">Licence</Label>
+              <Select value={licensingType} onValueChange={(v) => onLicensingTypeChange(v as any)}>
+                <SelectTrigger id="mobile-license" className="h-12 touch-manipulation">
+                  <SelectValue placeholder="Sélectionner une licence" />
+                </SelectTrigger>
+                <SelectContent className="z-[60] bg-background">
+                  <SelectItem value="all">Toutes licences</SelectItem>
+                  <SelectItem value="standard">Standard</SelectItem>
+                  <SelectItem value="plr">PLR</SelectItem>
+                  <SelectItem value="copyrighted">Droit d'auteur</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
             <div className="flex gap-3 pt-4">
               <Button

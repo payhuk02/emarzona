@@ -3,6 +3,9 @@ import { AdminRoute } from '@/components/AdminRoute';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useAdminMFA } from '@/hooks/useAdminMFA';
 import {
   LayoutDashboard,
   Users,
@@ -37,6 +40,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAAL2 } = useAdminMFA();
 
   return (
     <AdminRoute>
@@ -52,9 +56,23 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             {/* Header */}
             <div className="flex h-16 items-center justify-between px-4 border-b">
               {sidebarOpen && (
-                <h2 className="text-lg font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                  Administration
-                </h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                    Administration
+                  </h2>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Badge variant={isAAL2 ? 'default' : 'destructive'} className="text-[10px] uppercase tracking-wide">
+                            {isAAL2 ? 'AAL2' : 'AAL1'}
+                          </Badge>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>{isAAL2 ? '2FA active (AAL2)' : '2FA inactive - activez la 2FA'}</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               )}
               <Button
                 variant="ghost"

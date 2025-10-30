@@ -7,11 +7,8 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { mockFedexService } from '@/services/fedex/mockFedexService';
-import type {
-  FedexShipmentRequest,
-  FedexRateRequest,
-} from '@/services/fedex/mockFedexService';
+import { getFedexService } from '@/services/fedex';
+import type { FedexShipmentRequest, FedexRateRequest } from '@/services/fedex';
 import { useToast } from '@/hooks/use-toast';
 
 // =====================================================
@@ -122,7 +119,7 @@ export const useFedexTracking = (trackingNumber: string, enabled = true) => {
   return useQuery({
     queryKey: ['fedex-tracking', trackingNumber],
     queryFn: async () => {
-      const trackingData = await mockFedexService.getTracking(trackingNumber);
+      const trackingData = await getFedexService().getTracking(trackingNumber);
       return trackingData;
     },
     enabled: !!trackingNumber && enabled,
@@ -138,7 +135,7 @@ export const useFedexRates = (request: FedexRateRequest | null) => {
     queryKey: ['fedex-rates', request],
     queryFn: async () => {
       if (!request) return [];
-      const rates = await mockFedexService.getRates(request);
+      const rates = await getFedexService().getRates(request);
       return rates;
     },
     enabled: !!request,
@@ -186,7 +183,7 @@ export const useCreateFedexShipment = () => {
       shipmentRequest: FedexShipmentRequest;
     }) => {
       // 1. Create shipment with FedEx API
-      const fedexResponse = await mockFedexService.createShipment(shipmentRequest);
+      const fedexResponse = await getFedexService().createShipment(shipmentRequest);
 
       if (!fedexResponse.success) {
         throw new Error('Failed to create FedEx shipment');
@@ -277,7 +274,7 @@ export const useUpdateShipmentTracking = () => {
       }
 
       // 2. Get latest tracking from FedEx
-      const trackingData = await mockFedexService.getTracking(
+      const trackingData = await getFedexService().getTracking(
         shipment.tracking_number
       );
 
@@ -345,7 +342,7 @@ export const useCancelShipment = () => {
 
       // 2. Cancel with FedEx (if not already delivered)
       if (shipment.status !== 'delivered' && shipment.tracking_number) {
-        await mockFedexService.cancelShipment(shipment.tracking_number);
+        await getFedexService().cancelShipment(shipment.tracking_number);
       }
 
       // 3. Update database

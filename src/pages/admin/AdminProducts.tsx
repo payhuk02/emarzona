@@ -21,6 +21,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '@/lib/utils';
+import { ProtectedAction } from '@/components/admin/ProtectedAction';
+import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
+import { useAdminMFA } from '@/hooks/useAdminMFA';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { RequireAAL2 } from '@/components/admin/RequireAAL2';
 
 interface ProductData {
   id: string;
@@ -41,6 +46,7 @@ const AdminProducts = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { deleteProduct, toggleProductStatus } = useAdminActions();
   const navigate = useNavigate();
+  const { isAAL2 } = useAdminMFA();
 
   const fetchProducts = async () => {
     try {
@@ -89,7 +95,9 @@ const AdminProducts = () => {
 
   return (
     <AdminLayout>
+      <RequireAAL2>
       <div className="container mx-auto p-6 space-y-6 animate-fade-in">
+        <Admin2FABanner />
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -144,36 +152,66 @@ const AdminProducts = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={async () => {
-                            await toggleProductStatus(product.id, product.is_active);
-                            fetchProducts();
-                          }}
-                        >
-                          {product.is_active ? (
-                            <>
-                              <PowerOff className="h-4 w-4 mr-1" />
-                              Désactiver
-                            </>
-                          ) : (
-                            <>
-                              <Power className="h-4 w-4 mr-1" />
-                              Activer
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedProduct(product.id);
-                            setDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <ProtectedAction permission="products.manage">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={!isAAL2}
+                                    onClick={async () => {
+                                      if (!isAAL2) return;
+                                      await toggleProductStatus(product.id, product.is_active);
+                                      fetchProducts();
+                                    }}
+                                  >
+                                    {product.is_active ? (
+                                      <>
+                                        <PowerOff className="h-4 w-4 mr-1" />
+                                        Désactiver
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Power className="h-4 w-4 mr-1" />
+                                        Activer
+                                      </>
+                                    )}
+                                  </Button>
+                                </span>
+                              </TooltipTrigger>
+                              {!isAAL2 && (
+                                <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>
+                              )}
+                            </Tooltip>
+                          </TooltipProvider>
+                        </ProtectedAction>
+                        <ProtectedAction permission="products.manage">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    disabled={!isAAL2}
+                                    onClick={() => {
+                                      if (!isAAL2) return;
+                                      setSelectedProduct(product.id);
+                                      setDeleteDialogOpen(true);
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </span>
+                              </TooltipTrigger>
+                              {!isAAL2 && (
+                                <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>
+                              )}
+                            </Tooltip>
+                          </TooltipProvider>
+                        </ProtectedAction>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -216,6 +254,7 @@ const AdminProducts = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+      </RequireAAL2>
     </AdminLayout>
   );
 };

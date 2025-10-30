@@ -342,7 +342,7 @@ const Products = () => {
     try {
       const headers = [
         'id', 'name', 'slug', 'description', 'price', 'currency', 
-        'category', 'product_type', 'is_active', 'rating', 'reviews_count', 
+        'category', 'product_type', 'licensing_type', 'license_terms', 'is_active', 'rating', 'reviews_count', 
         'created_at', 'updated_at'
       ];
 

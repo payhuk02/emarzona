@@ -19,7 +19,8 @@ import {
   Eye,
   TrendingUp,
   CheckCircle,
-  Loader2
+  Loader2,
+  Shield
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { OptimizedImage } from "@/components/ui/OptimizedImage";
@@ -196,6 +197,22 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
           </div>
         )}
 
+        {/* Licensing badges */}
+        {(product as any).licensing_type && (
+          <div className="absolute top-3 left-3 flex flex-col gap-1">
+            {(product as any).licensing_type === 'plr' && (
+              <Badge className="bg-emerald-100 text-emerald-800 border-0" title="PLR (Private Label Rights) : peut être modifié et revendu selon conditions">
+                <Shield className="h-3 w-3 mr-1" /> PLR
+              </Badge>
+            )}
+            {(product as any).licensing_type === 'copyrighted' && (
+              <Badge className="bg-red-100 text-red-800 border-0" title="Protégé par droit d'auteur : revente/modification non autorisées">
+                <Shield className="h-3 w-3 mr-1" /> Droit d'auteur
+              </Badge>
+            )}
+          </div>
+        )}
+
         {/* Bouton favori */}
         <button
           onClick={handleFavorite}
@@ -324,6 +341,15 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
               <Download className="h-3 w-3 mr-1" />
               {product.downloadable_files.length} fichier{product.downloadable_files.length > 1 ? 's' : ''}
             </Badge>
+          </div>
+        )}
+
+        {/* Licensing short note */}
+        {(product as any).licensing_type && (
+          <div className="mb-3">
+            <span className="text-xs text-gray-600">
+              {(product as any).licensing_type === 'plr' ? 'Licence PLR (droits de label privé)' : (product as any).licensing_type === 'copyrighted' ? 'Protégé par droit d\'auteur' : 'Licence standard'}
+            </span>
           </div>
         )}
 

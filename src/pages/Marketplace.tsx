@@ -86,6 +86,7 @@ const Marketplace = () => {
     search: "",
     category: "all",
     productType: "all",
+    licensingType: 'all',
     priceRange: "all",
     rating: "all",
     sortBy: "created_at",
@@ -196,6 +197,10 @@ const Marketplace = () => {
         }
       }
       
+      if (filters.licensingType && filters.licensingType !== 'all') {
+        query = query.eq('licensing_type', filters.licensingType);
+      }
+
       if (filters.rating !== "all") {
         query = query.gte("rating", Number(filters.rating));
       }
@@ -882,6 +887,21 @@ const Marketplace = () => {
                       {productTypes.map(type => (
                         <option key={type} value={type}>{type}</option>
                       ))}
+                    </select>
+                  </div>
+
+                  {/* Type de licence */}
+                  <div>
+                    <label className="text-sm font-medium text-slate-300 mb-2 block">Licence</label>
+                    <select
+                      value={filters.licensingType || 'all'}
+                      onChange={(e) => updateFilter({ licensingType: e.target.value as any })}
+                      className="w-full p-2 bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500"
+                    >
+                      <option value="all">Toutes</option>
+                      <option value="standard">Standard</option>
+                      <option value="plr">PLR</option>
+                      <option value="copyrighted">Droit d'auteur</option>
                     </select>
                   </div>
 

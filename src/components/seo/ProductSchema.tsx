@@ -21,6 +21,8 @@ interface ProductSchemaProps {
     category?: string;
     is_active?: boolean;
     created_at?: string;
+    licensing_type?: 'standard' | 'plr' | 'copyrighted';
+    license_terms?: string | null;
   };
   store: {
     name: string;
@@ -105,7 +107,20 @@ export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
     brand: {
       '@type': 'Brand',
       name: store.name
-    }
+    },
+    // Licensing as additionalProperty for SEO context
+    ...(product.licensing_type && {
+      additionalProperty: [
+        {
+          '@type': 'PropertyValue',
+          name: 'licensing_type',
+          value: product.licensing_type
+        },
+        ...(product.license_terms
+          ? [{ '@type': 'PropertyValue', name: 'license_terms', value: product.license_terms }]
+          : [])
+      ]
+    })
   };
 
   // Schema.org BreadcrumbList

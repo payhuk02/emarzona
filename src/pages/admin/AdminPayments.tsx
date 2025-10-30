@@ -31,6 +31,9 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { ProtectedAction } from '@/components/admin/ProtectedAction';
+import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
+import { RequireAAL2 } from '@/components/admin/RequireAAL2';
 
 export default function AdminPayments() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,7 +98,9 @@ export default function AdminPayments() {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <main className="flex-1 overflow-auto">
+          <RequireAAL2>
           <div className="container mx-auto p-6 space-y-6">
+            <Admin2FABanner />
             {/* Header */}
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Paiements</h1>
@@ -148,6 +153,16 @@ export default function AdminPayments() {
             </div>
 
             {/* Filters & Table */}
+            <ProtectedAction permission="payments.manage" fallback={
+              <Card>
+                <CardHeader>
+                  <CardTitle>Liste des Paiements</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-12 text-muted-foreground">Accès restreint</div>
+                </CardContent>
+              </Card>
+            }>
             <Card>
               <CardHeader>
                 <div className="flex flex-col md:flex-row gap-4">
@@ -221,7 +236,9 @@ export default function AdminPayments() {
                 )}
               </CardContent>
             </Card>
+            </ProtectedAction>
           </div>
+          </RequireAAL2>
         </main>
       </div>
     </SidebarProvider>

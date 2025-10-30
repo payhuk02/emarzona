@@ -134,10 +134,10 @@ export const ImportCSVDialog = ({
 
   const handleDownloadTemplate = () => {
     const template = [
-      ['name', 'slug', 'description', 'price', 'currency', 'product_type', 'category', 'is_active', 'stock_quantity', 'sku', 'promotional_price', 'image_url'],
-      ['Mon Produit', 'mon-produit', 'Description du produit', '10000', 'XOF', 'digital', 'Formation', 'true', '100', 'SKU-001', '', ''],
-      ['Formation React', 'formation-react', 'Apprenez React de A à Z', '50000', 'XOF', 'digital', 'Formation', 'true', '0', 'REACT-001', '45000', ''],
-      ['T-Shirt', 't-shirt-logo', 'T-Shirt avec logo', '15000', 'XOF', 'physical', 'Vêtements', 'true', '50', 'TS-001', '', ''],
+      ['name', 'slug', 'description', 'price', 'currency', 'product_type', 'category', 'licensing_type', 'license_terms', 'is_active', 'stock_quantity', 'sku', 'promotional_price', 'image_url'],
+      ['Mon Produit', 'mon-produit', 'Description du produit', '10000', 'XOF', 'digital', 'Formation', 'standard', '', 'true', '100', 'SKU-001', '', ''],
+      ['Pack PLR Marketing', 'pack-plr-marketing', 'Ressources marketing réutilisables', '30000', 'XOF', 'digital', 'Template', 'plr', 'Peut être revendu/modifié avec attribution.', 'true', '0', 'PLR-001', '', ''],
+      ['Formation React', 'formation-react', 'Apprenez React de A à Z', '50000', 'XOF', 'digital', 'Formation', 'copyrighted', 'Usage personnel. Revente/interdite.', 'true', '0', 'REACT-001', '45000', ''],
     ];
 
     const csv = template.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
@@ -190,7 +190,9 @@ export const ImportCSVDialog = ({
               <AlertDescription>
                 Le fichier doit être au format CSV avec les colonnes suivantes :
                 <strong> name, slug, price, currency, product_type</strong> (obligatoires) et 
-                <strong> description, category, is_active, stock_quantity, sku, promotional_price, image_url</strong> (optionnels)
+                <strong> description, category, is_active, stock_quantity, sku, promotional_price, image_url, licensing_type, license_terms</strong> (optionnels)
+                <br />
+                licensing_type accepté: <code>standard</code>, <code>plr</code>, <code>copyrighted</code>
               </AlertDescription>
             </Alert>
 
@@ -199,8 +201,8 @@ export const ImportCSVDialog = ({
             <div className="space-y-3">
               <h4 className="font-medium text-sm">Format du fichier CSV :</h4>
               <code className="block bg-muted p-3 rounded text-xs overflow-x-auto whitespace-pre">
-{`name,slug,description,price,currency,product_type,category
-"Mon Produit","mon-produit","Description",10000,XOF,digital,"Formation"`}
+{`name,slug,description,price,currency,product_type,category,licensing_type,license_terms
+"Mon Produit","mon-produit","Description",10000,XOF,digital,"Formation",plr,"Peut être revendu et modifié avec attribution."`}
               </code>
               <Button
                 variant="outline"
@@ -257,6 +259,7 @@ export const ImportCSVDialog = ({
                             <TableHead>Type</TableHead>
                             <TableHead>Catégorie</TableHead>
                             <TableHead>Statut</TableHead>
+                            <TableHead>Licence</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -274,6 +277,7 @@ export const ImportCSVDialog = ({
                                   {item.data.is_active ? 'Actif' : 'Inactif'}
                                 </Badge>
                               </TableCell>
+                              <TableCell className="text-xs">{item.data.licensing_type || '-'}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>

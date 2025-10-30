@@ -40,9 +40,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Users, Search, Download, Shield, User, Ban, CheckCircle, Trash2, AlertTriangle, FileDown, ArrowUpDown, ArrowUp, ArrowDown, Filter } from 'lucide-react';
+import { Users, Search, Download, Shield, User, Ban, CheckCircle, Trash2, AlertTriangle, FileDown, ArrowUpDown, ArrowUp, ArrowDown, Filter, Plus, Edit3 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrentAdminPermissions } from '@/hooks/useCurrentAdminPermissions';
+import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
+import { useAdminMFA } from '@/hooks/useAdminMFA';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { RequireAAL2 } from '@/components/admin/RequireAAL2';
 
 const AdminUsers = () => {
   // États pour pagination, tri et filtres
@@ -65,13 +70,21 @@ const AdminUsers = () => {
     filters,
   });
   
-  const { suspendUser, unsuspendUser, deleteUser } = useAdminActions();
+  const { suspendUser, unsuspendUser, deleteUser, setUserRole, promoteToAdmin } = useAdminActions();
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [roleTargetUser, setRoleTargetUser] = useState<{ id: string; email: string } | null>(null);
+  const [newRole, setNewRole] = useState<string>('admin');
+  const [addAdminOpen, setAddAdminOpen] = useState(false);
+  const [addAdminEmail, setAddAdminEmail] = useState('');
+  const [addAdminRole, setAddAdminRole] = useState('admin');
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
   const [suspensionReason, setSuspensionReason] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const { toast } = useToast();
+  const { can } = useCurrentAdminPermissions();
+  const { isAAL2 } = useAdminMFA();
   
   // Fonction pour gérer le tri
   const handleSort = (column: typeof sortBy) => {
@@ -210,7 +223,8 @@ const AdminUsers = () => {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="container mx-auto p-6 space-y-6">
+      <div className="container mx-auto p-6 space-y-6">
+        <Admin2FABanner />
           <Skeleton className="h-12 w-64" />
           <Skeleton className="h-96" />
         </div>
@@ -220,6 +234,7 @@ const AdminUsers = () => {
 
   return (
     <AdminLayout>
+      <RequireAAL2>
       <div className="container mx-auto p-6 space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <div>
@@ -231,6 +246,21 @@ const AdminUsers = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            {can('users.roles') && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button variant="outline" size="sm" onClick={() => setAddAdminOpen(true)} disabled={!isAAL2}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Ajouter un administrateur
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  {!isAAL2 && (<TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>)}
+                </Tooltip>
+              </TooltipProvider>
+            )}
             <Users className="h-5 w-5 text-muted-foreground" />
           </div>
         </div>
@@ -439,10 +469,40 @@ const AdminUsers = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {can('users.roles') && (
+                        <TooltipProvider>
+                        <Tooltip>
+                        <TooltipTrigger asChild>
+                        <span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={!isAAL2}
+                          onClick={() => {
+                            setRoleTargetUser({ id: user.user_id, email: user.email });
+                            setNewRole(user.role || 'user');
+                            setRoleDialogOpen(true);
+                          }}
+                        >
+                          <Edit3 className="h-4 w-4 mr-1" />
+                          Rôle
+                        </Button>
+                        </span>
+                        </TooltipTrigger>
+                        {!isAAL2 && (<TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>)}
+                        </Tooltip>
+                        </TooltipProvider>
+                        )}
                         {user.is_suspended ? (
+                          can('users.manage') && (
+                          <TooltipProvider>
+                          <Tooltip>
+                          <TooltipTrigger asChild>
+                          <span>
                           <Button
                             variant="outline"
                             size="sm"
+                            disabled={!isAAL2}
                             onClick={async () => {
                               await unsuspendUser(user.user_id);
                               refetch();
@@ -451,10 +511,22 @@ const AdminUsers = () => {
                             <CheckCircle className="h-4 w-4 mr-1" />
                             Réactiver
                           </Button>
+                          </span>
+                          </TooltipTrigger>
+                          {!isAAL2 && (<TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>)}
+                          </Tooltip>
+                          </TooltipProvider>
+                          )
                         ) : (
+                          can('users.manage') && (
+                          <TooltipProvider>
+                          <Tooltip>
+                          <TooltipTrigger asChild>
+                          <span>
                           <Button
                             variant="outline"
                             size="sm"
+                            disabled={!isAAL2}
                             onClick={() => {
                               setSelectedUser(user.user_id);
                               setSuspendDialogOpen(true);
@@ -463,10 +535,22 @@ const AdminUsers = () => {
                             <Ban className="h-4 w-4 mr-1" />
                             Suspendre
                           </Button>
+                          </span>
+                          </TooltipTrigger>
+                          {!isAAL2 && (<TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>)}
+                          </Tooltip>
+                          </TooltipProvider>
+                          )
                         )}
+                        {can('users.manage') && (
+                        <TooltipProvider>
+                        <Tooltip>
+                        <TooltipTrigger asChild>
+                        <span>
                         <Button
                           variant="destructive"
                           size="sm"
+                          disabled={!isAAL2}
                           onClick={() => {
                             setSelectedUser(user.user_id);
                             setDeleteDialogOpen(true);
@@ -474,6 +558,12 @@ const AdminUsers = () => {
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
+                        </span>
+                        </TooltipTrigger>
+                        {!isAAL2 && (<TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>)}
+                        </Tooltip>
+                        </TooltipProvider>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -578,6 +668,103 @@ const AdminUsers = () => {
           </CardContent>
         </Card>
 
+        {/* Dialog: changer le rôle */}
+        {can('users.roles') && (
+        <Dialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Changer le rôle</DialogTitle>
+              <DialogDescription>
+                {roleTargetUser?.email}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label>Nouveau rôle</Label>
+              <Select value={newRole} onValueChange={setNewRole}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner un rôle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="moderator">Moderator</SelectItem>
+                  <SelectItem value="support">Support</SelectItem>
+                  <SelectItem value="viewer">Viewer</SelectItem>
+                  <SelectItem value="user">Utilisateur</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setRoleDialogOpen(false)}>Annuler</Button>
+              <Button
+                onClick={async () => {
+                  if (roleTargetUser) {
+                    const ok = await setUserRole(roleTargetUser.id, newRole);
+                    if (ok) {
+                      setRoleDialogOpen(false);
+                      refetch();
+                    }
+                  }
+                }}
+              >
+                Enregistrer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        )}
+
+        {/* Dialog: ajouter un administrateur */}
+        {can('users.roles') && (
+        <Dialog open={addAdminOpen} onOpenChange={setAddAdminOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Ajouter un administrateur</DialogTitle>
+              <DialogDescription>
+                Saisissez l’email d’un utilisateur existant puis choisissez un rôle.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input value={addAdminEmail} onChange={(e) => setAddAdminEmail(e.target.value)} placeholder="admin@example.com" />
+              </div>
+              <div className="space-y-2">
+                <Label>Rôle</Label>
+                <Select value={addAdminRole} onValueChange={setAddAdminRole}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un rôle" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="moderator">Moderator</SelectItem>
+                    <SelectItem value="support">Support</SelectItem>
+                    <SelectItem value="viewer">Viewer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAddAdminOpen(false)}>Annuler</Button>
+              <Button
+                onClick={async () => {
+                  if (!addAdminEmail.trim()) return;
+                  const ok = await promoteToAdmin(addAdminEmail.trim(), addAdminRole);
+                  if (ok) {
+                    setAddAdminOpen(false);
+                    setAddAdminEmail('');
+                    refetch();
+                  }
+                }}
+              >
+                Ajouter
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        )}
+
         {/* Dialogue de suspension */}
         <Dialog open={suspendDialogOpen} onOpenChange={setSuspendDialogOpen}>
           <DialogContent>
@@ -643,6 +830,7 @@ const AdminUsers = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+      </RequireAAL2>
     </AdminLayout>
   );
 };

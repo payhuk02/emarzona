@@ -3,6 +3,8 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BoxIcon, TrendingUp, DollarSign, Package } from "lucide-react";
+import { Admin2FABanner } from "@/components/admin/Admin2FABanner";
+import { ProtectedAction } from "@/components/admin/ProtectedAction";
 
 export default function AdminOrders() {
   // Mock data - à remplacer par vraies données
@@ -21,6 +23,7 @@ export default function AdminOrders() {
         <AppSidebar />
         <main className="flex-1 overflow-auto p-6">
           <div className="max-w-7xl mx-auto space-y-6">
+            <Admin2FABanner />
             {/* Header */}
             <div>
               <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -98,6 +101,19 @@ export default function AdminOrders() {
             </div>
 
             {/* Table */}
+            <ProtectedAction permission="orders.manage" fallback={
+              <Card>
+                <CardHeader>
+                  <CardTitle>Liste des Commandes</CardTitle>
+                  <CardDescription>Accès restreint</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-12 text-muted-foreground">
+                    Vous n'avez pas la permission de gérer les commandes.
+                  </div>
+                </CardContent>
+              </Card>
+            }>
             <Card>
               <CardHeader>
                 <CardTitle>Liste des Commandes</CardTitle>
@@ -115,6 +131,7 @@ export default function AdminOrders() {
                 </div>
               </CardContent>
             </Card>
+            </ProtectedAction>
           </div>
         </main>
       </div>

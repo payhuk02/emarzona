@@ -618,6 +618,84 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
           </CardContent>
         </Card>
 
+        {/* Droits & Licensing */}
+        <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-emerald-500/20">
+                <Shield className="h-5 w-5 text-emerald-400" />
+              </div>
+              <div>
+                <CardTitle className="text-lg font-semibold text-white">Droits & Licensing</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Informez vos clients du régime de droits de votre produit (affiché sur marketplace et boutiques)
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-white flex items-center gap-2">
+                  Type de licence
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3 w-3 text-gray-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <div className="max-w-xs text-xs space-y-1">
+                        <p><strong>Standard</strong>: usage personnel de l'acheteur. Revente/modification non autorisée.</p>
+                        <p><strong>PLR (Private Label Rights)</strong>: l'acheteur peut modifier et revendre, selon les conditions précisées.</p>
+                        <p><strong>Droit d'auteur</strong>: contenu protégé, aucun droit de revente/modification.</p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </Label>
+                <Select
+                  value={(formData.licensing_type as string) || 'standard'}
+                  onValueChange={(value) => updateFormData('licensing_type', value)}
+                >
+                  <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20">
+                    <SelectValue placeholder="Sélectionner un type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectItem value="standard" className="text-white">Standard (usage personnel)</SelectItem>
+                    <SelectItem value="plr" className="text-white">PLR - Private Label Rights</SelectItem>
+                    <SelectItem value="copyrighted" className="text-white">Protégé par droit d'auteur</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-400">Applicable surtout pour produits numériques et cours</p>
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label className="text-sm font-medium text-white flex items-center gap-2">
+                  Conditions / Notes de licence
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3 w-3 text-gray-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <div className="max-w-xs text-xs">
+                        Détaillez clairement ce que l'acheteur a le droit de faire (ex: attribution requise, revente autorisée, modifications permises, etc.).
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </Label>
+                <Textarea
+                  value={formData.license_terms || ''}
+                  onChange={(e) => updateFormData('license_terms', e.target.value)}
+                  placeholder={
+                    (formData.licensing_type === 'plr')
+                      ? 'Ex: Autorisé à revendre/modifier avec attribution...'
+                      : 'Ex: Usage personnel uniquement. Revente/interdite...'
+                  }
+                  className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[100px]"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Prix et tarification */}
         <ProductPricing
           formData={formData}

@@ -248,6 +248,8 @@ export const sendDigitalProductConfirmation = async (params: {
   downloadLink: string;
   fileFormat?: string;
   fileSize?: string;
+  licensingType?: 'standard' | 'plr' | 'copyrighted';
+  licenseTerms?: string;
 }) => {
   return sendEmail({
     templateSlug: 'order-confirmation-digital',
@@ -265,6 +267,8 @@ export const sendDigitalProductConfirmation = async (params: {
       download_link: params.downloadLink,
       file_format: params.fileFormat,
       file_size: params.fileSize,
+      licensing_type: params.licensingType,
+      license_terms: params.licenseTerms,
     },
   });
 };
@@ -354,6 +358,8 @@ export const sendCourseEnrollmentConfirmation = async (params: {
   instructorName: string;
   courseDuration?: string;
   certificateAvailable?: boolean;
+  licensingType?: 'standard' | 'plr' | 'copyrighted';
+  licenseTerms?: string;
 }) => {
   return sendEmail({
     templateSlug: 'course-enrollment-confirmation',
@@ -371,6 +377,8 @@ export const sendCourseEnrollmentConfirmation = async (params: {
       instructor_name: params.instructorName,
       course_duration: params.courseDuration,
       certificate_available: params.certificateAvailable,
+      licensing_type: params.licensingType,
+      license_terms: params.licenseTerms,
     },
   });
 };

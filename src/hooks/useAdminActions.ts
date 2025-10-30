@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logAdminAction } from "@/lib/audit";
 
 export const useAdminActions = () => {
   const { toast } = useToast();
@@ -10,20 +11,12 @@ export const useAdminActions = () => {
     targetId: string,
     details?: any
   ) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      await supabase.from('admin_actions').insert({
-        admin_id: user.id,
-        action_type: actionType,
-        target_type: targetType,
-        target_id: targetId,
-        details: details || {},
-      });
-    } catch (error) {
-      console.error('Error logging admin action:', error);
-    }
+    await logAdminAction({
+      action: actionType,
+      targetType,
+      targetId,
+      metadata: details ?? {},
+    });
   };
 
   const suspendUser = async (userId: string, reason: string) => {
@@ -147,6 +140,72 @@ export const useAdminActions = () => {
     }
   };
 
+  const setUserRole = async (userId: string, role: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Optional: ensure caller is super admin
+      const { data: me } = await supabase
+        .from('profiles')
+        .select('is_super_admin')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (!me?.is_super_admin) throw new Error('Action réservée au super administrateur');
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role })
+        .eq('user_id', userId);
+      if (error) throw error;
+
+      await logAction('SET_USER_ROLE', 'user', userId, { role });
+
+      toast({ title: 'Rôle mis à jour', description: `Nouveau rôle: ${role}` });
+      return true;
+    } catch (error: any) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+      return false;
+    }
+  };
+
+  const promoteToAdmin = async (email: string, role: string = 'admin') => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Check super admin
+      const { data: me } = await supabase
+        .from('profiles')
+        .select('is_super_admin')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (!me?.is_super_admin) throw new Error('Action réservée au super administrateur');
+
+      // Find target profile by email
+      const { data: target } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('email', email)
+        .maybeSingle();
+      if (!target?.user_id) throw new Error('Utilisateur introuvable');
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role })
+        .eq('user_id', target.user_id);
+      if (error) throw error;
+
+      await logAction('PROMOTE_ADMIN', 'user', target.user_id, { email, role });
+
+      toast({ title: 'Administrateur ajouté', description: `${email} → ${role}` });
+      return true;
+    } catch (error: any) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+      return false;
+    }
+  };
+
   const deleteProduct = async (productId: string) => {
     try {
       await logAction('DELETE_PRODUCT', 'product', productId);
@@ -240,5 +299,7 @@ export const useAdminActions = () => {
     deleteProduct,
     toggleProductStatus,
     cancelOrder,
+    setUserRole,
+    promoteToAdmin,
   };
 };

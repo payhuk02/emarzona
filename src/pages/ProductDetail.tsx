@@ -16,7 +16,7 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table";
-import { ShoppingCart, Star, ArrowLeft, CheckCircle2, Package, HelpCircle, ClipboardList, Download, Clock, RefreshCw, DollarSign, Gift, Lock, AlertTriangle, CalendarClock } from "lucide-react";
+import { ShoppingCart, Star, ArrowLeft, CheckCircle2, Package, HelpCircle, ClipboardList, Download, Clock, RefreshCw, DollarSign, Gift, Lock, AlertTriangle, CalendarClock, Shield } from "lucide-react";
 import ProductCard from "@/components/marketplace/ProductCard";
 import StoreFooter from "@/components/storefront/StoreFooter";
 import { useProducts } from "@/hooks/useProducts";
@@ -262,6 +262,23 @@ const ProductDetails = () => {
               <div className="space-y-6">
                 <h1 className="text-3xl font-bold">{product.name}</h1>
 
+                {/* Licensing banner */}
+                {product.licensing_type && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg border bg-muted/50">
+                    <div className={`h-8 w-8 rounded-full flex items-center justify-center ${product.licensing_type === 'plr' ? 'bg-emerald-100' : product.licensing_type === 'copyrighted' ? 'bg-red-100' : 'bg-gray-100'}`}>
+                      <Shield className={`h-4 w-4 ${product.licensing_type === 'plr' ? 'text-emerald-700' : product.licensing_type === 'copyrighted' ? 'text-red-700' : 'text-gray-700'}`} />
+                    </div>
+                    <div className="text-sm">
+                      <p className="font-semibold">
+                        {product.licensing_type === 'plr' ? 'Licence PLR (droits de label privé)' : product.licensing_type === 'copyrighted' ? "Protégé par droit d'auteur" : 'Licence standard'}
+                      </p>
+                      {product.license_terms && (
+                        <p className="text-muted-foreground mt-1 whitespace-pre-wrap">{product.license_terms}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {product.rating > 0 && (
                   <div className="flex items-center gap-2">
                     {renderStars(product.rating)}
@@ -422,6 +439,23 @@ const ProductDetails = () => {
                       className="text-muted-foreground leading-relaxed prose max-w-none"
                       dangerouslySetInnerHTML={{ __html: safeDescription }}
                     />
+                  </div>
+                )}
+
+                {/* 📜 Conditions de licence */}
+                {product.licensing_type && (
+                  <div className="pt-6 border-t border-border">
+                    <h2 className="text-xl font-semibold mb-3">Conditions de licence</h2>
+                    <div className="text-sm text-muted-foreground space-y-2">
+                      <p>
+                        Type de licence: <strong>{product.licensing_type === 'plr' ? 'PLR (droits de label privé)' : product.licensing_type === 'copyrighted' ? "Protégé par droit d'auteur" : 'Standard'}</strong>
+                      </p>
+                      {product.license_terms ? (
+                        <p className="whitespace-pre-wrap">{product.license_terms}</p>
+                      ) : (
+                        <p>Les conditions détaillées de licence seront précisées par le vendeur.</p>
+                      )}
+                    </div>
                   </div>
                 )}
 
