@@ -11,11 +11,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus } from "lucide-react";
+import { Plus, Info } from "lucide-react";
 import ProductSlugEditor from "./ProductSlugEditor";
 import ImageUpload from "./ImageUpload";
 import { useProductManagement } from "@/hooks/useProductManagement";
 import { generateSlug } from "@/lib/store-utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface CreateProductDialogProps {
   storeId: string;
@@ -136,10 +137,34 @@ const CreateProductDialog = ({
             />
           </div>
 
-          <ImageUpload
-            value={imageUrl}
-            onChange={setImageUrl}
-          />
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">Recommandé: 1280×720 (16:9), WebP/JPEG</p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" aria-label="Guidelines Médias" className="text-gray-500 hover:text-gray-700">
+                    <Info className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent align="end">
+                  <div className="max-w-[260px] text-xs">
+                    Utilisez 1280×720 (ratio 16:9) pour un rendu optimal.
+                    <a
+                      href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-600 underline ml-1"
+                    >Voir Médias</a>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <ImageUpload
+              value={imageUrl}
+              onChange={setImageUrl}
+            />
+            <p className="text-xs text-gray-500">Astuce: respectez 1280×720 (16:9) pour les cartes Marketplace et la boutique.</p>
+          </div>
 
           <div>
             <Label htmlFor="description">Description</Label>
