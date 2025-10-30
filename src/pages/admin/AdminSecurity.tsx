@@ -89,9 +89,24 @@ export default function AdminSecurity() {
       const { error } = await supabase.auth.mfa.verify({ factorId, code: verifyCode });
       if (error) {
         console.error('MFA verify error:', error);
+        // Si le facteur n'existe plus (expiré ou invalidé), proposer de relancer
+        if (error.message?.includes('not found') || error.message?.includes('challenge ID')) {
+          toast({
+            title: 'Facteur expiré',
+            description: 'Le QR code a expiré. Veuillez cliquer sur "Commencer l\'activation" pour en générer un nouveau.',
+            variant: 'destructive',
+          });
+          // Reset pour permettre un nouvel enrollment
+          setFactorId(null);
+          setQr(null);
+          setSecret(null);
+          setUri(null);
+          setVerifyCode('');
+          return;
+        }
         toast({
           title: 'Code invalide',
-          description: error.message || 'Le code entré est incorrect',
+          description: error.message || 'Le code entré est incorrect. Vérifiez que l\'heure de votre appareil est correcte.',
           variant: 'destructive',
         });
         return;
@@ -163,6 +178,12 @@ export default function AdminSecurity() {
                       <p className="text-sm text-muted-foreground mb-3">
                         Scannez ce QR code avec votre application d'authentification (Google Authenticator, Authy, Microsoft Authenticator, etc.), puis entrez le code à 6 chiffres généré.
                       </p>
+                      <Alert className="mb-3">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription className="text-xs">
+                          ⚠️ <strong>Important :</strong> Ce QR code expire après quelques minutes. Si vous obtenez une erreur "not found", cliquez à nouveau sur "Commencer l'activation" pour générer un nouveau QR code.
+                        </AlertDescription>
+                      </Alert>
                       {qr ? (
                         <div className="flex justify-center mb-4">
                           <img 
@@ -204,7 +225,7 @@ export default function AdminSecurity() {
                       </div>
                     )}
 
-                    <div className="pt-4 border-t">
+                    <div className="pt-4 border-t space-y-3">
                       <p className="text-sm font-medium mb-2">Entrez le code à 6 chiffres de votre application :</p>
                       <div className="flex items-center gap-2">
                         <Input 
@@ -216,6 +237,16 @@ export default function AdminSecurity() {
                         />
                         <Button onClick={verifyEnroll} disabled={!verifyCode || verifyCode.length !== 6}>
                           Vérifier
+                        </Button>
+                      </div>
+                      <div className="flex justify-center">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={startEnroll}
+                          disabled={enrolling}
+                        >
+                          {enrolling ? 'Génération...' : 'Générer un nouveau QR code'}
                         </Button>
                       </div>
                     </div>
