@@ -437,7 +437,7 @@ export const RichTextEditorPro = ({
             <div className="flex items-center gap-1">
               <select
                 onChange={(e) => execCommand('fontSize', e.target.value)}
-                className="h-8 px-2 text-sm border rounded"
+                className="h-8 px-2 text-sm border rounded bg-white text-black dark:bg-gray-800 dark:text-white"
                 disabled={disabled}
                 title="Taille de police"
               >
@@ -453,7 +453,7 @@ export const RichTextEditorPro = ({
 
               <select
                 onChange={(e) => execCommand('fontName', e.target.value)}
-                className="h-8 px-2 text-sm border rounded"
+                className="h-8 px-2 text-sm border rounded bg-white text-black dark:bg-gray-800 dark:text-white"
                 disabled={disabled}
                 title="Police de caractères"
               >
@@ -539,7 +539,7 @@ export const RichTextEditorPro = ({
                 }
                 e.target.value = '';
               }}
-              className="h-8 px-2 text-sm border rounded"
+              className="h-8 px-2 text-sm border rounded bg-white text-black dark:bg-gray-800 dark:text-white"
               disabled={disabled}
               title="Style de titre"
             >
