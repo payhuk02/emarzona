@@ -1,30 +1,20 @@
 /**
  * 🎓 COURSES TEMPLATES V2 - INDEX
- * All 10 course templates - COMPLETE
+ * Top 5 Elite Course Templates - ULTRA PRO
  */
 
 import codingBootcampTemplate from './coding-bootcamp';
 import businessCourseTemplate from './business-course';
 import languageLearningTemplate from './language-learning';
-import fitnessTrainingTemplate from './fitness-training';
-import creativeSkillsTemplate from './creative-skills';
-import marketingCourseTemplate from './marketing-course';
 import dataScienceTemplate from './data-science';
-import musicProductionTemplate from './music-production';
-import professionalCertificationTemplate from './professional-certification';
 import executiveMBATemplate from './executive-mba';
 
-// Export all course templates
+// Export all course templates (Top 5 Elite)
 export const coursesTemplatesV2 = [
   codingBootcampTemplate,
   businessCourseTemplate,
   languageLearningTemplate,
-  fitnessTrainingTemplate,
-  creativeSkillsTemplate,
-  marketingCourseTemplate,
   dataScienceTemplate,
-  musicProductionTemplate,
-  professionalCertificationTemplate,
   executiveMBATemplate,
 ];
 
@@ -33,12 +23,7 @@ export {
   codingBootcampTemplate,
   businessCourseTemplate,
   languageLearningTemplate,
-  fitnessTrainingTemplate,
-  creativeSkillsTemplate,
-  marketingCourseTemplate,
   dataScienceTemplate,
-  musicProductionTemplate,
-  professionalCertificationTemplate,
   executiveMBATemplate,
 };
 
@@ -51,15 +36,9 @@ export const coursesTemplatesStats = {
     'coding': 1,
     'business': 1,
     'languages': 1,
-    'fitness': 1,
-    'creative': 1,
-    'marketing': 1,
     'data-science': 1,
-    'music': 1,
-    'certification': 1,
     'executive-education': 1,
   },
 };
 
 export default coursesTemplatesV2;
-

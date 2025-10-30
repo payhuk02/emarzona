@@ -1,29 +1,19 @@
 /**
  * 📦 DIGITAL PRODUCTS TEMPLATES V2 - INDEX
- * Export all 15 digital product templates
+ * Top 5 Elite Digital Templates - ULTRA PRO
  * 
  * @version 2.0.0
  * @author Payhula Team
- * @date 2025-10-29
+ * @date 2025-10-30
  */
 
-// FREE TEMPLATES (10)
+// FREE TEMPLATES (3)
 import ebookMinimalTemplate from './ebook-minimal';
 import softwareModernTemplate from './software-modern';
 import courseBundleTemplate from './course-bundle';
-import musicAudioTemplate from './music-audio';
-import videoContentTemplate from './video-content';
-import graphicPackTemplate from './graphic-pack';
-import appPluginTemplate from './app-plugin';
-import photographyPackTemplate from './photography-pack';
-import fontCollectionTemplate from './font-collection';
-import codeTemplateTemplate from './code-template';
 
-// PREMIUM TEMPLATES (5)
+// PREMIUM TEMPLATES (2)
 import saasCompleteTemplate from './saas-complete';
-import creatorBundlePremiumTemplate from './creator-bundle-premium';
-import ultimateEbookPremiumTemplate from './ultimate-ebook-premium';
-import enterpriseSoftwarePremiumTemplate from './enterprise-software-premium';
 import membershipSitePremiumTemplate from './membership-site-premium';
 
 // ============================================================================
@@ -35,23 +25,13 @@ export {
   ebookMinimalTemplate,
   softwareModernTemplate,
   courseBundleTemplate,
-  musicAudioTemplate,
-  videoContentTemplate,
-  graphicPackTemplate,
-  appPluginTemplate,
-  photographyPackTemplate,
-  fontCollectionTemplate,
-  codeTemplateTemplate,
   // Premium
   saasCompleteTemplate,
-  creatorBundlePremiumTemplate,
-  ultimateEbookPremiumTemplate,
-  enterpriseSoftwarePremiumTemplate,
   membershipSitePremiumTemplate,
 };
 
 // ============================================================================
-// ARRAY EXPORT
+// ARRAY EXPORT (Top 5 Elite)
 // ============================================================================
 
 export const digitalTemplatesV2 = [
@@ -59,18 +39,8 @@ export const digitalTemplatesV2 = [
   ebookMinimalTemplate,
   softwareModernTemplate,
   courseBundleTemplate,
-  musicAudioTemplate,
-  videoContentTemplate,
-  graphicPackTemplate,
-  appPluginTemplate,
-  photographyPackTemplate,
-  fontCollectionTemplate,
-  codeTemplateTemplate,
   // Premium
   saasCompleteTemplate,
-  creatorBundlePremiumTemplate,
-  ultimateEbookPremiumTemplate,
-  enterpriseSoftwarePremiumTemplate,
   membershipSitePremiumTemplate,
 ];
 
@@ -79,17 +49,10 @@ export const digitalTemplatesV2 = [
 // ============================================================================
 
 export const digitalTemplatesByCategory = {
-  ebook: [ebookMinimalTemplate, ultimateEbookPremiumTemplate],
-  software: [softwareModernTemplate, appPluginTemplate, enterpriseSoftwarePremiumTemplate],
-  saas: [saasCompleteTemplate, softwareModernTemplate, membershipSitePremiumTemplate],
-  app: [appPluginTemplate],
-  music: [musicAudioTemplate],
-  video: [videoContentTemplate],
-  graphic: [graphicPackTemplate],
-  photo: [photographyPackTemplate],
-  font: [fontCollectionTemplate],
-  code: [codeTemplateTemplate],
-  template: [creatorBundlePremiumTemplate],
+  ebook: [ebookMinimalTemplate],
+  software: [softwareModernTemplate],
+  saas: [saasCompleteTemplate, membershipSitePremiumTemplate],
+  courses: [courseBundleTemplate],
 };
 
 // ============================================================================
@@ -101,19 +64,9 @@ export const digitalTemplatesByTier = {
     ebookMinimalTemplate,
     softwareModernTemplate,
     courseBundleTemplate,
-    musicAudioTemplate,
-    videoContentTemplate,
-    graphicPackTemplate,
-    appPluginTemplate,
-    photographyPackTemplate,
-    fontCollectionTemplate,
-    codeTemplateTemplate,
   ],
   premium: [
     saasCompleteTemplate,
-    creatorBundlePremiumTemplate,
-    ultimateEbookPremiumTemplate,
-    enterpriseSoftwarePremiumTemplate,
     membershipSitePremiumTemplate,
   ],
 };
@@ -123,12 +76,9 @@ export const digitalTemplatesByTier = {
 // ============================================================================
 
 export const digitalTemplatesByStyle = {
-  minimal: [ebookMinimalTemplate, fontCollectionTemplate],
-  modern: [softwareModernTemplate, videoContentTemplate, appPluginTemplate, codeTemplateTemplate, membershipSitePremiumTemplate],
-  professional: [saasCompleteTemplate, courseBundleTemplate, enterpriseSoftwarePremiumTemplate],
-  creative: [musicAudioTemplate, graphicPackTemplate, creatorBundlePremiumTemplate],
-  luxury: [ultimateEbookPremiumTemplate],
-  elegant: [photographyPackTemplate],
+  minimal: [ebookMinimalTemplate],
+  modern: [softwareModernTemplate, membershipSitePremiumTemplate],
+  professional: [saasCompleteTemplate, courseBundleTemplate],
 };
 
 // ============================================================================
@@ -136,11 +86,9 @@ export const digitalTemplatesByStyle = {
 // ============================================================================
 
 export const digitalTemplatesByIndustry = {
-  education: [courseBundleTemplate, ultimateEbookPremiumTemplate],
-  technology: [softwareModernTemplate, appPluginTemplate, enterpriseSoftwarePremiumTemplate, codeTemplateTemplate],
-  creative: [graphicPackTemplate, photographyPackTemplate, fontCollectionTemplate, musicAudioTemplate],
-  business: [saasCompleteTemplate, enterpriseSoftwarePremiumTemplate],
-  entertainment: [musicAudioTemplate, videoContentTemplate],
+  education: [courseBundleTemplate, ebookMinimalTemplate],
+  technology: [softwareModernTemplate],
+  business: [saasCompleteTemplate],
   community: [membershipSitePremiumTemplate],
 };
 
@@ -155,30 +103,28 @@ export const digitalTemplatesStats = {
   categories: Object.keys(digitalTemplatesByCategory).length,
   styles: Object.keys(digitalTemplatesByStyle).length,
   industries: Object.keys(digitalTemplatesByIndustry).length,
-  averagePrice: 58.4, // Average of premium templates
-  totalValue: 292, // Sum of all premium prices
+  averagePrice: 87.5, // Average of 2 premium templates (99 + 76) / 2
+  totalValue: 175, // Sum of all premium prices
 };
 
 // ============================================================================
-// FEATURED TEMPLATES
+// FEATURED TEMPLATES (All Elite)
 // ============================================================================
 
 export const featuredTemplates = [
   saasCompleteTemplate,
   softwareModernTemplate,
-  ultimateEbookPremiumTemplate,
-  enterpriseSoftwarePremiumTemplate,
+  membershipSitePremiumTemplate,
+  courseBundleTemplate,
+  ebookMinimalTemplate,
 ];
 
 // ============================================================================
-// NEW TEMPLATES (Recently Added)
+// NEW TEMPLATES (Recently Updated)
 // ============================================================================
 
 export const newTemplates = [
-  photographyPackTemplate,
-  fontCollectionTemplate,
-  codeTemplateTemplate,
-  enterpriseSoftwarePremiumTemplate,
+  saasCompleteTemplate,
   membershipSitePremiumTemplate,
 ];
 
