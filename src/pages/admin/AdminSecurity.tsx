@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { ProtectedAction } from '@/components/admin/ProtectedAction';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ShieldAlert } from 'lucide-react';
 
 export default function AdminSecurity() {
   const [enrolling, setEnrolling] = useState(false);
@@ -43,7 +45,20 @@ export default function AdminSecurity() {
 
   return (
     <AdminLayout>
-      <ProtectedAction permission="settings.manage">
+      <ProtectedAction
+        permission="settings.manage"
+        fallback={
+          <div className="p-6">
+            <Alert variant="destructive">
+              <ShieldAlert className="h-4 w-4" />
+              <AlertDescription>
+                Accès restreint. Vous n'avez pas les permissions nécessaires (settings.manage).
+                Veuillez contacter un super administrateur.
+              </AlertDescription>
+            </Alert>
+          </div>
+        }
+      >
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Sécurité admin</h1>
