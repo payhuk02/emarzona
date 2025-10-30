@@ -22,6 +22,69 @@ export const useAdminPermissions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const DEFAULT_ROLES: Array<{ role: string; permissions: RolePermissions }> = [
+    {
+      role: 'admin',
+      permissions: Object.fromEntries(DEFAULT_PERMISSION_KEYS.map((k) => [k, true])) as RolePermissions,
+    },
+    {
+      role: 'manager',
+      permissions: {
+        'users.manage': false,
+        'users.roles': false,
+        'products.manage': true,
+        'orders.manage': true,
+        'payments.manage': true,
+        'disputes.manage': true,
+        'settings.manage': false,
+        'emails.manage': true,
+        'analytics.view': true,
+      },
+    },
+    {
+      role: 'moderator',
+      permissions: {
+        'users.manage': false,
+        'users.roles': false,
+        'products.manage': true,
+        'orders.manage': true,
+        'payments.manage': false,
+        'disputes.manage': true,
+        'settings.manage': false,
+        'emails.manage': false,
+        'analytics.view': true,
+      },
+    },
+    {
+      role: 'support',
+      permissions: {
+        'users.manage': false,
+        'users.roles': false,
+        'products.manage': false,
+        'orders.manage': true,
+        'payments.manage': false,
+        'disputes.manage': true,
+        'settings.manage': false,
+        'emails.manage': false,
+        'analytics.view': true,
+      },
+    },
+    {
+      role: 'viewer',
+      permissions: {
+        'users.manage': false,
+        'users.roles': false,
+        'products.manage': false,
+        'orders.manage': false,
+        'payments.manage': false,
+        'disputes.manage': false,
+        'settings.manage': false,
+        'emails.manage': false,
+        'analytics.view': true,
+      },
+    },
+  ];
+
   const fetchRoles = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -34,7 +97,9 @@ export const useAdminPermissions = () => {
       setRoles((data || []) as any);
     } catch (e: any) {
       setError(e.message);
-      toast({ title: 'Erreur', description: e.message, variant: 'destructive' });
+      // Fallback: table absente en production → utiliser des rôles par défaut côté client
+      setRoles(DEFAULT_ROLES);
+      toast({ title: 'RBAC non initialisé', description: 'Utilisation des rôles par défaut côté client. Veuillez exécuter la migration platform_roles.', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
