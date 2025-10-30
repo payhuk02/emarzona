@@ -16,6 +16,7 @@ import { RefreshCw, Check, X } from 'lucide-react';
 import { generateSlug } from '@/lib/store-utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useState } from 'react';
+import { AIContentGenerator } from '@/components/products/AIContentGenerator';
 
 interface DigitalBasicInfoFormProps {
   formData: any;
@@ -200,6 +201,25 @@ export const DigitalBasicInfoForm = ({
         <Label htmlFor="description">
           Description complète
         </Label>
+        {/* Génération IA */}
+        <div className="mb-2">
+          <AIContentGenerator
+            productInfo={{
+              name: formData.name || '',
+              type: 'digital',
+              category: formData.category,
+              price: formData.price,
+              features: formData.features,
+            }}
+            onContentGenerated={(content) => {
+              updateFormData({
+                short_description: content.shortDescription,
+                description: content.longDescription,
+                features: content.features,
+              });
+            }}
+          />
+        </div>
         <RichTextEditorPro
           content={formData.description || ''}
           onChange={(content) => updateFormData({ description: content })}

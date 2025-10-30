@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { AIContentGenerator } from '@/components/products/AIContentGenerator';
 import { ImagePlus, X, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { uploadToSupabaseStorage } from '@/utils/uploadToSupabase';
@@ -140,6 +141,25 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
       {/* Description */}
       <div className="space-y-2">
         <Label htmlFor="description">Description *</Label>
+        {/* Génération IA */}
+        <div className="mb-2">
+          <AIContentGenerator
+            productInfo={{
+              name: data.name || '',
+              type: 'service',
+              category: data.category,
+              price: Number(data.price) || undefined,
+              features: data.features,
+            }}
+            onContentGenerated={(content) => {
+              onUpdate({
+                short_description: content.shortDescription,
+                description: content.longDescription,
+                features: content.features,
+              });
+            }}
+          />
+        </div>
         <RichTextEditorPro
           content={data.description || ''}
           onChange={(content) => onUpdate({ description: content })}

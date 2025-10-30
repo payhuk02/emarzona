@@ -15,6 +15,7 @@ import { ImagePlus, X, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { uploadToSupabaseStorage } from '@/utils/uploadToSupabase';
 import type { PhysicalProductFormData } from '@/types/physical-product';
+import { AIContentGenerator } from '@/components/products/AIContentGenerator';
 
 interface PhysicalBasicInfoFormProps {
   data: Partial<PhysicalProductFormData>;
@@ -110,6 +111,25 @@ export const PhysicalBasicInfoForm = ({ data, onUpdate }: PhysicalBasicInfoFormP
       {/* Description */}
       <div className="space-y-2">
         <Label htmlFor="description">Description *</Label>
+        {/* Génération IA */}
+        <div className="mb-2">
+          <AIContentGenerator
+            productInfo={{
+              name: data.name || '',
+              type: 'physical',
+              category: data.category,
+              price: Number(data.price) || undefined,
+              features: data.features,
+            }}
+            onContentGenerated={(content) => {
+              onUpdate({
+                short_description: content.shortDescription,
+                description: content.longDescription,
+                features: content.features,
+              });
+            }}
+          />
+        </div>
         <RichTextEditorPro
           content={data.description || ''}
           onChange={(content) => onUpdate({ description: content })}
