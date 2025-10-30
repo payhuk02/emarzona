@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditorPro } from '@/components/ui/rich-text-editor-pro';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImagePlus, X, Loader2 } from 'lucide-react';
@@ -109,12 +110,12 @@ export const PhysicalBasicInfoForm = ({ data, onUpdate }: PhysicalBasicInfoFormP
       {/* Description */}
       <div className="space-y-2">
         <Label htmlFor="description">Description *</Label>
-        <Textarea
-          id="description"
+        <RichTextEditorPro
+          content={data.description || ''}
+          onChange={(content) => onUpdate({ description: content })}
           placeholder="Décrivez votre produit en détail..."
-          value={data.description || ''}
-          onChange={(e) => onUpdate({ description: e.target.value })}
-          rows={6}
+          showWordCount={true}
+          maxHeight="400px"
         />
       </div>
 
