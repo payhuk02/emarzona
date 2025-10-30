@@ -152,6 +152,14 @@ const BookingsManagement = lazy(() => import("./pages/service/BookingsManagement
 // Pages Demo - Templates UI V2
 const TemplatesUIDemo = lazy(() => import("./pages/demo/TemplatesUIDemo"));
 
+// Pages Templates - User
+const MyTemplates = lazy(() => import("./pages/MyTemplates"));
+
+// Pages Templates - Admin
+const AdminTemplates = lazy(() => import("./pages/admin/AdminTemplates"));
+const AdminTemplatesPremium = lazy(() => import("./pages/admin/AdminTemplatesPremium"));
+const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
+
 // Page de test i18n (à supprimer en production)
 const I18nTest = lazy(() => import("./pages/I18nTest"));
 
@@ -234,7 +242,11 @@ const AppContent = () => {
           <Route path="/dashboard/my-downloads" element={<ProtectedRoute><MyDownloads /></ProtectedRoute>} />
           <Route path="/dashboard/my-licenses" element={<ProtectedRoute><MyLicenses /></ProtectedRoute>} />
           <Route path="/dashboard/licenses/manage/:id" element={<ProtectedRoute><LicenseManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/license-management" element={<ProtectedRoute><MyLicenses /></ProtectedRoute>} />
           <Route path="/dashboard/digital/analytics/:productId" element={<ProtectedRoute><DigitalProductAnalytics /></ProtectedRoute>} />
+          
+          {/* --- Routes Templates --- */}
+          <Route path="/dashboard/my-templates" element={<ProtectedRoute><MyTemplates /></ProtectedRoute>} />
 
           {/* --- Routes Advanced Systems (Messaging, Payments, Disputes) --- */}
           <Route path="/orders/:orderId/messaging" element={<ProtectedRoute><OrderMessaging /></ProtectedRoute>} />
@@ -282,6 +294,9 @@ const AppContent = () => {
           <Route path="/admin/payments" element={<ProtectedRoute><AdminPayments /></ProtectedRoute>} />
           <Route path="/admin/shipping" element={<ProtectedRoute><AdminShipping /></ProtectedRoute>} />
           <Route path="/admin/courses" element={<ProtectedRoute><AdminCourses /></ProtectedRoute>} />
+          <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
+          <Route path="/admin/templates" element={<ProtectedRoute><AdminTemplates /></ProtectedRoute>} />
+          <Route path="/admin/templates-premium" element={<ProtectedRoute><AdminTemplatesPremium /></ProtectedRoute>} />
 
           {/* --- Route de fallback --- */}
           <Route path="*" element={<NotFound />} />
