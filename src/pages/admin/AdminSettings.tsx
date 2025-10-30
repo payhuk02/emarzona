@@ -24,7 +24,7 @@ const AdminSettings = () => {
   const { isAAL2 } = useAdminMFA();
   const [routes, setRoutes] = useState<string[]>(Array.isArray((dbSettings as any)?.require_aal2_routes) ? (dbSettings as any).require_aal2_routes : []);
   const [newRoute, setNewRoute] = useState('');
-  const defaultRoutes = ['/admin/payments','/admin/audit','/admin/users','/admin/products','/admin/disputes'];
+  const defaultRoutes = ['/admin/payments','/admin/audit','/admin/users','/admin/products','/admin/disputes','/admin/settings'];
   useEffect(() => {
     const arr = Array.isArray((dbSettings as any)?.require_aal2_routes) ? (dbSettings as any).require_aal2_routes : [];
     setRoutes(arr);
