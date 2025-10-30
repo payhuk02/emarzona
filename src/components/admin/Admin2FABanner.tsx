@@ -24,7 +24,7 @@ export const Admin2FABanner = () => {
   if (!requires2FA) return null;
 
   return (
-    <Alert className="border-amber-300 bg-amber-50">
+    <Alert className="border-amber-300 bg-amber-50 dark:bg-transparent dark:border-amber-500/60 dark:text-amber-200">
       <ShieldAlert className="h-4 w-4" />
       <AlertTitle>Sécurité renforcée requise</AlertTitle>
       <AlertDescription>
