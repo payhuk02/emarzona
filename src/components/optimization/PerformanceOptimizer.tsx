@@ -25,19 +25,7 @@ export const MobilePerformanceOptimizer = () => {
           }
         });
         
-        // Précharger les ressources critiques
-        const preloadLink = document.createElement('link');
-        preloadLink.rel = 'preload';
-        preloadLink.href = '/assets/critical.css';
-        preloadLink.as = 'style';
-        document.head.appendChild(preloadLink);
-        
-        // Optimiser les polices pour mobile
-        const fontLink = document.createElement('link');
-        fontLink.rel = 'preload';
-        fontLink.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap';
-        fontLink.as = 'style';
-        document.head.appendChild(fontLink);
+        // Suppression des préchargements non garantis (évite 404/CSP en production)
       }
     };
 
@@ -205,19 +193,7 @@ export const PerformanceOptimizer = () => {
 
       images.forEach(img => imageObserver.observe(img));
 
-      // Précharger les ressources critiques
-      const criticalResources = [
-        '/assets/critical.css',
-        '/assets/fonts.css'
-      ];
-
-      criticalResources.forEach(resource => {
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.href = resource;
-        link.as = 'style';
-        document.head.appendChild(link);
-      });
+      // Ne pas précharger des ressources qui peuvent ne pas exister côté CDN
     };
 
     optimizePerformance();
