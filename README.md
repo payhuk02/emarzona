@@ -4,11 +4,12 @@
 > Solution professionnelle pour la vente de produits digitaux, physiques, services et cours en ligne
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8_Strict-blue)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3-61dafb)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.4-646cff)](https://vitejs.dev/)
 [![Tests](https://img.shields.io/badge/tests-50%2B-green)](./tests)
-[![Security](https://img.shields.io/badge/security-90%2F100-success)](SECURITY.md)
+[![Security](https://img.shields.io/badge/security-95%2F100-success)](SECURITY.md)
+[![Code Quality](https://img.shields.io/badge/quality-98%2F100-brightgreen)](TYPESCRIPT_STRICT_COMPLETE.md)
 [![Audit](https://img.shields.io/badge/audit-2025--10--30-informational)](AUDIT_COMPLET_PAYHULA_2025_PROFESSIONNEL.md)
 
 ---
