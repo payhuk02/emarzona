@@ -25,10 +25,12 @@ import {
   FileImage,
   Monitor,
   Smartphone,
-  Tablet
+  Tablet,
+  Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 /**
  * Form data interface pour ProductVisualTab
@@ -180,6 +182,24 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
               <CardTitle className="flex items-center gap-2">
                 <ImageIcon className="h-5 w-5" />
                 Image principale
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button type="button" aria-label="Guidelines Médias" className="text-gray-500 hover:text-gray-700">
+                      <Info className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent align="start">
+                    <div className="max-w-[260px] text-xs">
+                      Utilisez des images 1280×720 (16:9), idéalement WebP.
+                      <a
+                        href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-600 underline ml-1"
+                      >Voir Médias</a>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
               </CardTitle>
               <CardDescription>
                 Image affichée en premier sur votre produit
@@ -234,6 +254,24 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
               <CardTitle className="flex items-center gap-2">
                 <Images className="h-5 w-5" />
                 Galerie d'images
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button type="button" aria-label="Guidelines Médias" className="text-gray-500 hover:text-gray-700">
+                      <Info className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent align="start">
+                    <div className="max-w-[260px] text-xs">
+                      Chaque image devrait être en 1280×720 (16:9) pour un rendu optimal.
+                      <a
+                        href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-600 underline ml-1"
+                      >Voir Médias</a>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
               </CardTitle>
               <CardDescription>
                 Images supplémentaires pour votre produit
