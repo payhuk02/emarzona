@@ -2,6 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditorPro } from "@/components/ui/rich-text-editor-pro";
+import { AIContentGenerator } from "@/components/products/AIContentGenerator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Info } from "lucide-react";
@@ -154,13 +156,28 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
             <Label htmlFor="description">
               Description complète <span className="text-red-500">*</span>
             </Label>
-            <Textarea
-              id="description"
-              placeholder="Décrivez en détail ce que les étudiants apprendront, les prérequis, et ce qui rend votre cours unique..."
-              value={formData.description}
-              onChange={(e) => onChange('description', e.target.value)}
-              className={errors.description ? 'border-red-500' : ''}
-              rows={6}
+            {/* Générateur IA */}
+            <div className="mb-2">
+              <AIContentGenerator
+                productInfo={{
+                  name: formData.title || '',
+                  type: 'service',
+                  // Cours: on assimile à 'service' pour le ton marketing
+                  category: formData.category,
+                  features: [],
+                }}
+                onContentGenerated={(content) => {
+                  onChange('short_description', content.shortDescription);
+                  onChange('description', content.longDescription);
+                }}
+              />
+            </div>
+            <RichTextEditorPro
+              content={formData.description}
+              onChange={(content) => onChange('description', content)}
+              placeholder="Décrivez en détail ce que les étudiants apprendront, les objectifs, prérequis et ce qui rend votre cours unique..."
+              showWordCount={true}
+              maxHeight="500px"
             />
             {errors.description && (
               <p className="text-sm text-red-500">{errors.description}</p>
