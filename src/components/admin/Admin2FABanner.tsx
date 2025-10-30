@@ -24,12 +24,12 @@ export const Admin2FABanner = () => {
   if (!requires2FA) return null;
 
   return (
-    <Alert className="border-amber-300 bg-amber-50 dark:bg-transparent dark:border-amber-500/60 dark:text-amber-200">
+    <Alert className="border-amber-500/60 bg-transparent text-amber-200">
       <ShieldAlert className="h-4 w-4" />
       <AlertTitle>Sécurité renforcée requise</AlertTitle>
       <AlertDescription>
         Activez l’authentification à deux facteurs (2FA) pour accéder à toutes les fonctionnalités d’administration.{' '}
-        <Link to="/admin/security" className="underline font-medium">Configurer maintenant</Link>
+        <Link to="/admin/security" className="underline font-medium text-blue-400 hover:text-blue-300">Configurer maintenant</Link>
       </AlertDescription>
     </Alert>
   );
