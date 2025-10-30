@@ -289,8 +289,14 @@ export const CourseSEOForm = ({
                   value={data.og_image}
                   onChange={(e) => onChange({ ...data, og_image: e.target.value })}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Image affichée lors du partage. Dimensions recommandées : 1200x630px.
+                <p className="text-xs text-muted-foreground flex items-center gap-2">
+                  Image affichée lors du partage. Dimensions recommandées : 1200x630px (Open Graph).
+                  <a
+                    href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-600 underline"
+                  >Voir Médias</a>
                 </p>
               </div>
             </div>

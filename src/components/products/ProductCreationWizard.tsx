@@ -23,8 +23,10 @@ import {
   Briefcase,
   GraduationCap,
   Sparkles,
-  Settings
+  Settings,
+  Info
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface WizardProps {
   formData: any;
@@ -275,12 +277,34 @@ export const ProductCreationWizard = ({
               </div>
 
               <div className="mt-8">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">Recommandé: 1280×720 (16:9), WebP/JPEG</p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" aria-label="Guidelines Médias" className="text-gray-500 hover:text-gray-700">
+                        <Info className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent align="end">
+                      <div className="max-w-[260px] text-xs">
+                        Utilisez 1280×720 (ratio 16:9) pour un rendu optimal.
+                        <a
+                          href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-blue-600 underline ml-1"
+                        >Voir Médias</a>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <ImageUpload
                   value={formData.image_url || ""}
                   onChange={(url) => updateFormData("image_url", url)}
                   storeId={storeId}
                   maxSize={10}
                 />
+                <p className="text-xs text-gray-500 mt-2">Astuce: respectez le format 1280×720 (16:9) pour les cartes Marketplace et la boutique.</p>
 
                 {formData.image_url && (
                   <div className="mt-6 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
