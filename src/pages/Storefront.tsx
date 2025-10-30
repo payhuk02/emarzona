@@ -27,7 +27,9 @@ const Storefront = () => {
   // Utiliser un ID stable pour éviter les violations des règles des hooks
   const storeId = store?.id || null;
   const { products, loading: productsLoading } = useProducts(storeId);
-  // const { reviews, loading: reviewsLoading } = useReviews(storeId); // TODO: Implement store-wide reviews if needed
+  // Store-wide reviews not implemented yet; keep placeholders to avoid runtime errors
+  const reviews: any[] = [];
+  const reviewsLoading = false;
 
   useEffect(() => {
     const fetchStore = async () => {
