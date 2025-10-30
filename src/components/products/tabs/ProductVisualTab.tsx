@@ -193,6 +193,7 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                 multiple={false}
                 maxSize={10}
               />
+              <p className="text-xs text-gray-500 mt-2">Format recommandé: 1280×720 (ratio 16:9), WebP/JPEG, qualité 80–90.</p>
               
               {formData.image_url && (
                 <div className="mt-4">
@@ -247,6 +248,7 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                 maxFiles={10}
                 maxSize={10}
               />
+              <p className="text-xs text-gray-500 mt-2">Chaque image: 1280×720 (ratio 16:9) pour un rendu optimal sur Marketplace et boutique.</p>
               
               {(formData.gallery_images || []).length > 0 && (
                 <div className="mt-4">
