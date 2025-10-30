@@ -43,6 +43,8 @@ export const CourseCard = ({ course }: CourseCardProps) => {
           <img
             src={product.image_url}
             alt={product.name}
+            width={1280}
+            height={720}
             className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
           />
         ) : (

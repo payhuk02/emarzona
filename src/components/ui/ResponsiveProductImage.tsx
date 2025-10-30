@@ -112,6 +112,8 @@ export const ResponsiveProductImage = ({
         <img
           src={src}
           alt={alt}
+          width={1280}
+          height={720}
           className={cn(
             "w-full h-full object-cover transition-all duration-700 ease-out",
             "transform-gpu will-change-transform",
