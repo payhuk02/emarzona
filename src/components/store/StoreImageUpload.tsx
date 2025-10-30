@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Upload, X, Image as ImageIcon, AlertCircle, Check } from "lucide-react";
+import { Upload, X, Image as ImageIcon, AlertCircle, Check, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { uploadImage, validateImageFile, replaceImage, ImageType } from "@/lib/image-upload";
 import { supabase } from "@/integrations/supabase/client";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface StoreImageUploadProps {
   label: string;
@@ -177,7 +178,27 @@ const StoreImageUpload = ({
 
   return (
     <div className="space-y-3">
-      <Label className="text-sm font-medium">{label}</Label>
+      <div className="flex items-center gap-2">
+        <Label className="text-sm font-medium">{label}</Label>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button type="button" aria-label="Guidelines Médias" className="text-gray-500 hover:text-gray-700">
+              <Info className="h-4 w-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent align="start">
+            <div className="max-w-[260px] text-xs">
+              {aspectRatio === 'banner' ? 'Recommandé: 1280×720 (16:9) – WebP/JPEG' : aspectRatio === 'square' ? 'Recommandé: 500×500 (carré) – WebP/PNG' : 'Utilisez des images optimisées (WebP)'}
+              <a
+                href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 underline ml-1"
+              >Voir Médias</a>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </div>
       
       {value ? (
         <Card className="overflow-hidden">
@@ -273,6 +294,11 @@ const StoreImageUpload = ({
 
       {description && (
         <p className="text-xs text-muted-foreground">{description}</p>
+      )}
+      {!description && (
+        <p className="text-xs text-muted-foreground">
+          {aspectRatio === 'banner' ? 'Format recommandé: 1280×720 (16:9) – idéal pour les bannières.' : aspectRatio === 'square' ? 'Format recommandé: 500×500 (ratio 1:1) pour les logos.' : 'Préférez des images en WebP, taille ≤ ' + maxSize + 'MB.'}
+        </p>
       )}
 
       <Input

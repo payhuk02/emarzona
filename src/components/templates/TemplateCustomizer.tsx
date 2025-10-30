@@ -30,6 +30,7 @@ import {
   ChevronDown,
   Pipette,
   Upload,
+  Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,6 +56,7 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { TemplateV2, TemplateData } from '@/types/templates-v2';
 import { applyTemplate } from '@/lib/template-engine';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 // ============================================================================
 // TYPES
@@ -398,7 +400,27 @@ function VisualEditor({ template, onUpdate }: EditorProps) {
   return (
     <div className="space-y-4">
       <div>
-        <Label>Images du produit</Label>
+        <div className="flex items-center gap-2">
+          <Label>Images du produit</Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button type="button" aria-label="Guidelines Médias" className="text-gray-500 hover:text-gray-700">
+                <Info className="w-4 h-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent align="start">
+              <div className="max-w-[260px] text-xs">
+                Recommandé: 1280×720 (16:9), WebP/JPEG. Optimise l’affichage des templates.
+                <a
+                  href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-600 underline ml-1"
+                >Voir Médias</a>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </div>
         <div className="grid grid-cols-2 gap-2 mt-2">
           {[0, 1, 2, 3].map((index) => (
             <button
@@ -421,6 +443,7 @@ function VisualEditor({ template, onUpdate }: EditorProps) {
             </button>
           ))}
         </div>
+        <p className="text-xs text-muted-foreground mt-2">Conseil: utilisez des images 16:9 (1280×720) pour une cohérence visuelle.</p>
       </div>
 
       <div>
