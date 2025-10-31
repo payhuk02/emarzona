@@ -3,11 +3,13 @@ import { ProductCreationRouter } from "@/components/products/ProductCreationRout
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const CreateProduct = () => {
   const { store, loading } = useStore();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const productType = searchParams.get('type') || undefined;
 
   if (loading) {
     return (
@@ -38,6 +40,7 @@ const CreateProduct = () => {
           <ProductCreationRouter 
             storeId={store.id} 
             storeSlug={store.slug}
+            initialProductType={productType}
             onSuccess={() => navigate('/products')}
           />
         </main>

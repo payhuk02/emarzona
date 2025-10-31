@@ -51,23 +51,77 @@ export interface DigitalProductData {
 
 /**
  * useDigitalProducts - Hook pour lister les produits digitaux
+ * Avec jointure sur products pour avoir toutes les infos
  */
-export const useDigitalProducts = () => {
+export const useDigitalProducts = (storeId?: string) => {
   return useQuery({
-    queryKey: ['digitalProducts'],
+    queryKey: ['digitalProducts', storeId],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
+      // Étape 1: Obtenir les product_ids pertinents
+      let productIds: string[] = [];
+
+      if (storeId) {
+        // Si storeId est fourni, obtenir tous les products de ce store
+        const { data: products, error: productsError } = await supabase
+          .from('products')
+          .select('id')
+          .eq('store_id', storeId);
+
+        if (productsError) throw productsError;
+        productIds = products?.map(p => p.id) || [];
+      } else {
+        // Sinon, obtenir tous les stores de l'utilisateur, puis leurs products
+        const { data: stores, error: storesError } = await supabase
+          .from('stores')
+          .select('id')
+          .eq('user_id', user.id);
+
+        if (storesError) throw storesError;
+
+        if (stores && stores.length > 0) {
+          const storeIds = stores.map(s => s.id);
+          const { data: products, error: productsError } = await supabase
+            .from('products')
+            .select('id')
+            .in('store_id', storeIds);
+
+          if (productsError) throw productsError;
+          productIds = products?.map(p => p.id) || [];
+        }
+      }
+
+      // Si aucun product_id trouvé, retourner un tableau vide
+      if (productIds.length === 0) {
+        return [];
+      }
+
+      // Étape 2: Obtenir les digital_products avec jointure sur products
       const { data, error } = await supabase
         .from('digital_products')
-        .select('*')
-        .eq('user_id', user.id)
+        .select(`
+          *,
+          product:products!digital_products_product_id_fkey (
+            id,
+            name,
+            slug,
+            description,
+            price,
+            currency,
+            is_active,
+            primary_image_url,
+            store_id
+          )
+        `)
+        .in('product_id', productIds)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as DigitalProduct[];
+      return data as any[]; // Retourner avec la relation product incluse
     },
+    enabled: true,
   });
 };
 

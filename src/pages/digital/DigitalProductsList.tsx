@@ -97,38 +97,15 @@ export const DigitalProductsList = () => {
   useScrollAnimation(filtersRef);
   useScrollAnimation(productsRef);
 
-  // Data fetching - Note: Le hook actuel ne prend pas store_id, mais la structure de données attend `p.product`
-  // On adaptera selon la structure réelle de la base de données
-  const { data: productsData, isLoading, error, refetch } = useDigitalProducts();
+  // Data fetching avec jointure sur products
+  const { data: productsData, isLoading, error, refetch } = useDigitalProducts(store?.id);
 
   /**
-   * Adapter les données selon la structure réelle
-   * Si les données viennent avec une relation `product`, on les garde telles quelles
-   * Sinon, on les adapte pour correspondre à la structure attendue
+   * Utiliser directement les données avec la structure product incluse
    */
   const products = useMemo(() => {
     if (!productsData) return [];
-    
-    // Si les données ont déjà la structure avec `product`, on les retourne telles quelles
-    if (productsData.length > 0 && 'product' in productsData[0]) {
-      return productsData as any[];
-    }
-    
-    // Sinon, on adapte la structure pour correspondre au format attendu
-    return productsData.map((p: any) => ({
-      ...p,
-      product: {
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        is_active: p.status === 'active' || p.status === 'published',
-        image_url: p.thumbnailUrl,
-        slug: p.slug || p.id,
-      },
-      digital_type: p.category || 'other',
-      total_downloads: p.totalDownloads || 0,
-      created_at: p.createdAt || p.created_at,
-    }));
+    return productsData as any[];
   }, [productsData]);
 
   /**
@@ -243,7 +220,7 @@ export const DigitalProductsList = () => {
       // Cmd/Ctrl + N pour nouveau produit
       if ((e.metaKey || e.ctrlKey) && e.key === 'n' && !e.shiftKey) {
         e.preventDefault();
-        navigate('/products/create?type=digital');
+        navigate('/dashboard/products/new?type=digital');
         logger.info('Raccourci clavier: Nouveau produit digital');
       }
     };
@@ -378,7 +355,7 @@ export const DigitalProductsList = () => {
                       <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
                     </Button>
                     <Button 
-                      onClick={() => navigate('/products/create?type=digital')}
+                      onClick={() => navigate('/dashboard/products/new?type=digital')}
                       className="bg-white text-blue-600 hover:bg-blue-50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                       size="sm"
                     >
@@ -635,7 +612,7 @@ export const DigitalProductsList = () => {
                           {t('digitalProducts.empty.description', 'Créez votre premier produit digital pour commencer à vendre')}
                         </p>
                         <Button 
-                          onClick={() => navigate('/products/create?type=digital')}
+                          onClick={() => navigate('/dashboard/products/new?type=digital')}
                           className="gap-2"
                         >
                           <Plus className="h-4 w-4" />
