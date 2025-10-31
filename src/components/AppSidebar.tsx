@@ -688,7 +688,7 @@ export function AppSidebar() {
                                   </>
                                 )}
                               </NavLink>
-                            </TooltipTrigger>
+                            </SidebarMenuButton>
                           </TooltipTrigger>
                           {isCollapsed && (
                             <TooltipContent side="right" className="flex items-center gap-2">
