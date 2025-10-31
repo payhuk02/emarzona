@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +24,12 @@ interface Notification {
 
 const AdminNotifications = () => {
   const { toast } = useToast();
+  
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const formRef = useScrollAnimation<HTMLDivElement>();
+  const historyRef = useScrollAnimation<HTMLDivElement>();
+
   const [notificationForm, setNotificationForm] = useState({
     title: '',
     message: '',
@@ -50,7 +58,11 @@ const AdminNotifications = () => {
     },
   ]);
 
-  const handleSendNotification = () => {
+  useEffect(() => {
+    logger.info('Admin Notifications page chargée');
+  }, []);
+
+  const handleSendNotification = useCallback(() => {
     if (!notificationForm.title || !notificationForm.message) {
       toast({
         title: 'Erreur',
@@ -72,7 +84,8 @@ const AdminNotifications = () => {
       type: 'both',
       recipients: 'all',
     });
-  };
+    logger.info('Notification envoyée');
+  }, [notificationForm, toast]);
 
   return (
     <AdminLayout>

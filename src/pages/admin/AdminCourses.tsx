@@ -3,8 +3,10 @@
  * Vue globale des cours en ligne de tous les instructeurs
  */
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -35,6 +37,11 @@ export default function AdminCourses() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
 
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const tableRef = useScrollAnimation<HTMLDivElement>();
+
   // Fetch all courses
   const { data: courses, isLoading } = useQuery({
     queryKey: ['admin-courses'],
@@ -54,21 +61,29 @@ export default function AdminCourses() {
     },
   });
 
-  // Stats
-  const totalCourses = courses?.length || 0;
-  const publishedCourses = courses?.filter(c => c.status === 'published').length || 0;
-  const totalStudents = courses?.reduce((sum, c) => sum + (c.enrollments?.[0]?.count || 0), 0) || 0;
-  const averageRating = courses?.length
-    ? courses.reduce((sum, c) => {
-        const ratings = c.reviews || [];
-        const avgRating = ratings.length
-          ? ratings.reduce((s: number, r: any) => s + (r.rating || 0), 0) / ratings.length
-          : 0;
-        return sum + avgRating;
-      }, 0) / courses.length
-    : 0;
+  // Stats optimisées avec useMemo
+  const stats = useMemo(() => ({
+    totalCourses: courses?.length || 0,
+    publishedCourses: courses?.filter(c => c.status === 'published').length || 0,
+    totalStudents: courses?.reduce((sum, c) => sum + (c.enrollments?.[0]?.count || 0), 0) || 0,
+    averageRating: courses?.length
+      ? courses.reduce((sum, c) => {
+          const ratings = c.reviews || [];
+          const avgRating = ratings.length
+            ? ratings.reduce((s: number, r: any) => s + (r.rating || 0), 0) / ratings.length
+            : 0;
+          return sum + avgRating;
+        }, 0) / courses.length
+      : 0,
+  }), [courses]);
 
-  const getStatusBadge = (status: string) => {
+  useEffect(() => {
+    if (!isLoading && courses) {
+      logger.info(`Admin Courses: ${courses.length} cours chargés`);
+    }
+  }, [isLoading, courses]);
+
+  const getStatusBadge = useCallback((status: string) => {
     switch (status) {
       case 'published':
         return <Badge variant="default">Publié</Badge>;
@@ -79,9 +94,9 @@ export default function AdminCourses() {
       default:
         return <Badge>{status}</Badge>;
     }
-  };
+  }, []);
 
-  const filteredCourses = courses?.filter(course => {
+  const filteredCourses = useMemo(() => courses?.filter(course => {
     const matchesSearch =
       course.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       course.instructor?.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -93,7 +108,7 @@ export default function AdminCourses() {
       (activeTab === 'archived' && course.status === 'archived');
 
     return matchesSearch && matchesTab;
-  });
+  }) || [], [courses, searchQuery, activeTab]);
 
   return (
     <SidebarProvider>
@@ -102,53 +117,53 @@ export default function AdminCourses() {
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto p-6 space-y-6">
             {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Cours en Ligne</h1>
+            <div ref={headerRef} role="banner">
+              <h1 className="text-3xl font-bold tracking-tight" id="admin-courses-title">Cours en Ligne</h1>
               <p className="text-muted-foreground">
                 Vue d'ensemble de tous les cours de la plateforme
               </p>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid gap-4 md:grid-cols-4">
+            <div ref={statsRef} className="grid gap-4 md:grid-cols-4" role="region" aria-label="Statistiques des cours">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Cours</CardTitle>
-                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                  <GraduationCap className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{totalCourses}</div>
+                  <div className="text-2xl font-bold">{stats.totalCourses}</div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Cours Publiés</CardTitle>
-                  <BookOpen className="h-4 w-4 text-green-500" />
+                  <BookOpen className="h-4 w-4 text-green-500" aria-hidden="true" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{publishedCourses}</div>
+                  <div className="text-2xl font-bold text-green-600">{stats.publishedCourses}</div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Étudiants</CardTitle>
-                  <Users className="h-4 w-4 text-blue-500" />
+                  <Users className="h-4 w-4 text-blue-500" aria-hidden="true" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">{totalStudents}</div>
+                  <div className="text-2xl font-bold text-blue-600">{stats.totalStudents}</div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Note Moyenne</CardTitle>
-                  <Star className="h-4 w-4 text-yellow-500" />
+                  <Star className="h-4 w-4 text-yellow-500" aria-hidden="true" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-yellow-600">
-                    {averageRating.toFixed(1)} ⭐
+                    {stats.averageRating.toFixed(1)} ⭐
                   </div>
                 </CardContent>
               </Card>

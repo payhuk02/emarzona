@@ -3,8 +3,10 @@
  * Vue globale des expéditions de tous les vendeurs
  */
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -35,6 +37,11 @@ export default function AdminShipping() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
 
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const tableRef = useScrollAnimation<HTMLDivElement>();
+
   // Fetch all shipments
   const { data: shipments, isLoading } = useQuery({
     queryKey: ['admin-shipments'],
@@ -56,13 +63,21 @@ export default function AdminShipping() {
     },
   });
 
-  // Stats
-  const totalShipments = shipments?.length || 0;
-  const pendingShipments = shipments?.filter(s => s.status === 'pending').length || 0;
-  const inTransitShipments = shipments?.filter(s => s.status === 'in_transit').length || 0;
-  const deliveredShipments = shipments?.filter(s => s.status === 'delivered').length || 0;
+  // Stats optimisées avec useMemo
+  const stats = useMemo(() => ({
+    totalShipments: shipments?.length || 0,
+    pendingShipments: shipments?.filter(s => s.status === 'pending').length || 0,
+    inTransitShipments: shipments?.filter(s => s.status === 'in_transit').length || 0,
+    deliveredShipments: shipments?.filter(s => s.status === 'delivered').length || 0,
+  }), [shipments]);
 
-  const getStatusBadge = (status: string) => {
+  useEffect(() => {
+    if (!isLoading && shipments) {
+      logger.info(`Admin Shipping: ${shipments.length} expéditions chargées`);
+    }
+  }, [isLoading, shipments]);
+
+  const getStatusBadge = useCallback((status: string) => {
     switch (status) {
       case 'pending':
         return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" /> En attente</Badge>;
@@ -75,9 +90,9 @@ export default function AdminShipping() {
       default:
         return <Badge>{status}</Badge>;
     }
-  };
+  }, []);
 
-  const filteredShipments = shipments?.filter(shipment => {
+  const filteredShipments = useMemo(() => shipments?.filter(shipment => {
     const matchesSearch =
       shipment.tracking_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       shipment.order?.order_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -90,7 +105,7 @@ export default function AdminShipping() {
       (activeTab === 'delivered' && shipment.status === 'delivered');
 
     return matchesSearch && matchesTab;
-  });
+  }) || [], [shipments, searchQuery, activeTab]);
 
   return (
     <SidebarProvider>

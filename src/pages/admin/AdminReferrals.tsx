@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -15,6 +17,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 const AdminReferrals = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
+
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const tableRef = useScrollAnimation<HTMLDivElement>();
 
   const { data: referrals, isLoading } = useQuery({
     queryKey: ['admin-referrals'],
@@ -46,12 +53,21 @@ const AdminReferrals = () => {
     },
   });
 
-  const totalReferrals = referrals?.length || 0;
-  const activeReferrals = referrals?.filter(r => r.status === 'active').length || 0;
-  const totalCommissions = referralCommissions?.reduce((sum, c) => sum + Number(c.commission_amount), 0) || 0;
+  const stats = useMemo(() => ({
+    totalReferrals: referrals?.length || 0,
+    activeReferrals: referrals?.filter(r => r.status === 'active').length || 0,
+    totalCommissions: referralCommissions?.reduce((sum, c) => sum + Number(c.commission_amount), 0) || 0,
+  }), [referrals, referralCommissions]);
 
-  const exportToCSV = () => {
+  useEffect(() => {
+    if (!isLoading && referrals) {
+      logger.info(`Admin Referrals: ${referrals.length} parrainages chargés`);
+    }
+  }, [isLoading, referrals]);
+
+  const exportToCSV = useCallback(() => {
     if (!referrals) return;
+    logger.info(`Export CSV de ${referrals.length} parrainages`);
 
     const csvContent = [
       ['Parrain', 'Filleul', 'Code', 'Statut', 'Date'].join(','),
@@ -73,17 +89,19 @@ const AdminReferrals = () => {
     a.download = `parrainages_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
 
+    URL.revokeObjectURL(url);
+    logger.info('Export CSV parrainages réussi');
     toast({
       title: 'Export réussi',
       description: 'Les parrainages ont été exportés avec succès.',
     });
-  };
+  }, [referrals, toast]);
 
-  const filteredReferrals = referrals?.filter((ref: any) =>
+  const filteredReferrals = useMemo(() => referrals?.filter((ref: any) =>
     ref.referrer?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     ref.referred?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     ref.referral_code?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) || [], [referrals, searchTerm]);
 
   if (isLoading) {
     return (

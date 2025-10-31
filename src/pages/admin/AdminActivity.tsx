@@ -1,5 +1,8 @@
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useAdminActivity } from '@/hooks/useAdminActivity';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -54,6 +57,16 @@ const getActionVariant = (actionType: string): "default" | "destructive" | "seco
 
 const AdminActivity = () => {
   const { actions, loading } = useAdminActivity();
+
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const listRef = useScrollAnimation<HTMLDivElement>();
+
+  useEffect(() => {
+    if (!loading && actions) {
+      logger.info(`Admin Activity: ${actions.length} actions chargées`);
+    }
+  }, [loading, actions]);
 
   if (loading) {
     return (

@@ -3,8 +3,10 @@
  * Vue globale de l'inventaire de tous les vendeurs
  */
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,6 +38,11 @@ export default function AdminInventory() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
 
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const tableRef = useScrollAnimation<HTMLDivElement>();
+
   // Fetch all inventory items
   const { data: inventoryItems, isLoading } = useQuery({
     queryKey: ['admin-inventory'],
@@ -61,18 +68,26 @@ export default function AdminInventory() {
     },
   });
 
-  // Stats
-  const totalItems = inventoryItems?.length || 0;
-  const lowStockItems = inventoryItems?.filter(item => 
-    item.quantity <= (item.low_stock_threshold || 10)
-  ).length || 0;
-  const outOfStockItems = inventoryItems?.filter(item => item.quantity === 0).length || 0;
-  const totalValue = inventoryItems?.reduce((sum, item) => 
-    sum + (item.quantity * (item.variant?.product?.price || 0)), 0
-  ) || 0;
+  // Stats optimisées avec useMemo
+  const stats = useMemo(() => ({
+    totalItems: inventoryItems?.length || 0,
+    lowStockItems: inventoryItems?.filter(item => 
+      item.quantity <= (item.low_stock_threshold || 10)
+    ).length || 0,
+    outOfStockItems: inventoryItems?.filter(item => item.quantity === 0).length || 0,
+    totalValue: inventoryItems?.reduce((sum, item) => 
+      sum + (item.quantity * (item.variant?.product?.price || 0)), 0
+    ) || 0,
+  }), [inventoryItems]);
 
-  // Filter items
-  const filteredItems = inventoryItems?.filter(item => {
+  useEffect(() => {
+    if (!isLoading && inventoryItems) {
+      logger.info(`Admin Inventory: ${inventoryItems.length} articles d'inventaire chargés`);
+    }
+  }, [isLoading, inventoryItems]);
+
+  // Filter items optimisé avec useMemo
+  const filteredItems = useMemo(() => inventoryItems?.filter(item => {
     const matchesSearch = 
       item.variant?.product?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.variant?.variant_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -84,7 +99,7 @@ export default function AdminInventory() {
       (activeTab === 'out' && item.quantity === 0);
 
     return matchesSearch && matchesTab;
-  });
+  }) || [], [inventoryItems, searchQuery, activeTab]);
 
   return (
     <SidebarProvider>
