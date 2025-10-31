@@ -3,8 +3,10 @@
  * Gestion des tickets de support
  */
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,8 +35,13 @@ export default function AdminSupport() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
 
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const tableRef = useScrollAnimation<HTMLDivElement>();
+
   // Mock data - À remplacer par vraies données
-  const mockTickets = [
+  const mockTickets = useMemo(() => [
     {
       id: '1',
       ticket_number: 'TICKET-001',
@@ -70,9 +77,9 @@ export default function AdminSupport() {
       default:
         return <Badge>{status}</Badge>;
     }
-  };
+  }, []);
 
-  const getPriorityBadge = (priority: string) => {
+  const getPriorityBadge = useCallback((priority: string) => {
     switch (priority) {
       case 'high':
         return <Badge variant="destructive">Haute</Badge>;
@@ -83,7 +90,7 @@ export default function AdminSupport() {
       default:
         return <Badge>{priority}</Badge>;
     }
-  };
+  }, []);
 
   return (
     <SidebarProvider>
@@ -92,9 +99,9 @@ export default function AdminSupport() {
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto p-6 space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div ref={headerRef} className="flex items-center justify-between" role="banner">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Support Client</h1>
+                <h1 className="text-3xl font-bold tracking-tight" id="admin-support-title">Support Client</h1>
                 <p className="text-muted-foreground">
                   Gérez les tickets de support des utilisateurs
                 </p>
@@ -106,7 +113,7 @@ export default function AdminSupport() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid gap-4 md:grid-cols-4">
+            <div ref={statsRef} className="grid gap-4 md:grid-cols-4" role="region" aria-label="Statistiques des tickets">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Tickets</CardTitle>
@@ -155,6 +162,7 @@ export default function AdminSupport() {
             </div>
 
             {/* Filters & Table */}
+            <div ref={tableRef} role="region" aria-label="Tableau des tickets">
             <Card>
               <CardHeader>
                 <div className="flex flex-col md:flex-row gap-4">

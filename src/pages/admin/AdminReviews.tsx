@@ -3,8 +3,10 @@
  * Date : 27 octobre 2025
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Flag, CheckCircle2, XCircle } from 'lucide-react';
@@ -21,9 +23,20 @@ import {
 export const AdminReviews = () => {
   const [activeTab, setActiveTab] = useState<'pending' | 'flagged' | 'approved' | 'all'>('pending');
 
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const tabsRef = useScrollAnimation<HTMLDivElement>();
+
   // Data hooks
   const { data: stats } = useAdminReviewStats();
   const { data: reviews, isLoading } = useAdminReviews({ status: activeTab });
+
+  useEffect(() => {
+    if (!isLoading && reviews) {
+      logger.info(`Admin Reviews: ${reviews.length} avis chargés (tab: ${activeTab})`);
+    }
+  }, [isLoading, reviews, activeTab]);
 
   // Action hooks
   const approveReviews = useApproveReviews();
@@ -34,15 +47,15 @@ export const AdminReviews = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Modération des Avis</h1>
+      <div ref={headerRef} role="banner">
+        <h1 className="text-3xl font-bold" id="admin-reviews-title">Modération des Avis</h1>
         <p className="text-muted-foreground mt-2">
           Gérer et modérer tous les avis clients de la plateforme
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div ref={statsRef} className="grid grid-cols-1 md:grid-cols-4 gap-4" role="region" aria-label="Statistiques des avis">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">En attente</CardTitle>
@@ -97,7 +110,8 @@ export const AdminReviews = () => {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <div ref={tabsRef} role="region" aria-label="Onglets de modération">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="pending">
             En attente

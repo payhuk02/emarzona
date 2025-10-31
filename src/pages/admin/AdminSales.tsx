@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -16,6 +18,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 const AdminSales = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
+
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const tablesRef = useScrollAnimation<HTMLDivElement>();
 
   const { data: sales, isLoading } = useQuery({
     queryKey: ['admin-sales'],
@@ -47,10 +54,23 @@ const AdminSales = () => {
     },
   });
 
-  const totalRevenue = sales?.reduce((sum, s) => sum + Number(s.amount), 0) || 0;
-  const totalCommissions = commissions?.reduce((sum, c) => sum + Number(c.commission_amount), 0) || 0;
+  const totalRevenue = useMemo(() => 
+    sales?.reduce((sum, s) => sum + Number(s.amount), 0) || 0,
+    [sales]
+  );
+  const totalCommissions = useMemo(() => 
+    commissions?.reduce((sum, c) => sum + Number(c.commission_amount), 0) || 0,
+    [commissions]
+  );
 
-  const exportToCSV = (type: 'sales' | 'commissions') => {
+  useEffect(() => {
+    if (!isLoading && sales && commissions) {
+      logger.info(`Admin Sales: ${sales.length} ventes, ${commissions.length} commissions chargées`);
+    }
+  }, [isLoading, sales, commissions]);
+
+  const exportToCSV = useCallback((type: 'sales' | 'commissions') => {
+    logger.info(`Export CSV ${type}: ${type === 'sales' ? sales?.length : commissions?.length} éléments`);
     const data = type === 'sales' ? sales : commissions;
     if (!data) return;
 
@@ -84,18 +104,20 @@ const AdminSales = () => {
     a.download = `${type}_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
 
+    URL.revokeObjectURL(url);
+    logger.info(`Export CSV ${type} réussi`);
     toast({
       title: 'Export réussi',
       description: `Les données ont été exportées avec succès.`,
     });
-  };
+  }, [sales, commissions, toast]);
 
-  const filteredSales = sales?.filter((sale: any) => {
+  const filteredSales = useMemo(() => sales?.filter((sale: any) => {
     const storeName = sale.stores?.[0]?.name || '';
     const orderNumber = sale.orders?.[0]?.order_number || '';
     return storeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
            orderNumber.toLowerCase().includes(searchTerm.toLowerCase());
-  });
+  }) || [], [sales, searchTerm]);
 
   if (isLoading) {
     return (
@@ -116,20 +138,20 @@ const AdminSales = () => {
     <AdminLayout>
       <div className="container mx-auto p-6 space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div ref={headerRef} className="flex items-center justify-between" role="banner">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-sales-title">
               Gestion des ventes
             </h1>
             <p className="text-muted-foreground mt-2">
               Suivi des ventes et commissions de la plateforme
             </p>
           </div>
-          <ShoppingCart className="h-8 w-8 text-muted-foreground" />
+          <ShoppingCart className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-6 md:grid-cols-3">
+        <div ref={statsRef} className="grid gap-6 md:grid-cols-3" role="region" aria-label="Statistiques des ventes">
           <Card className="hover-scale">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -320,6 +342,7 @@ const AdminSales = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        </div>
       </div>
     </AdminLayout>
   );

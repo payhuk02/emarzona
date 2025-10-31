@@ -4,8 +4,10 @@
  * Date: 25/10/2025
  */
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -70,8 +72,13 @@ const AdminAffiliates = () => {
   const [suspendReason, setSuspendReason] = useState('');
   const [paymentReference, setPaymentReference] = useState('');
 
-  // Stats globales
-  const globalStats = {
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const tablesRef = useScrollAnimation<HTMLDivElement>();
+
+  // Stats globales optimisées avec useMemo
+  const globalStats = useMemo(() => ({
     total_affiliates: affiliates.length,
     active_affiliates: affiliates.filter(a => a.status === 'active').length,
     suspended_affiliates: affiliates.filter(a => a.status === 'suspended').length,
@@ -81,73 +88,96 @@ const AdminAffiliates = () => {
     total_commission_earned: affiliates.reduce((sum, a) => sum + a.total_commission_earned, 0),
     total_commission_paid: affiliates.reduce((sum, a) => sum + a.total_commission_paid, 0),
     pending_commission: affiliates.reduce((sum, a) => sum + a.pending_commission, 0),
-  };
+  }), [affiliates]);
 
-  const handleApproveCommission = async (commission: any) => {
+  useEffect(() => {
+    if (!affiliatesLoading && affiliates) {
+      logger.info(`Admin Affiliates: ${affiliates.length} affiliés chargés`);
+    }
+  }, [affiliatesLoading, affiliates]);
+
+  const handleApproveCommission = useCallback(async (commission: any) => {
+    logger.info(`Approbation commission ${commission.id}`);
     await approveCommission({ commission_id: commission.id });
-  };
+    logger.info('Commission approuvée avec succès');
+  }, [approveCommission]);
 
-  const handleRejectCommission = async () => {
+  const handleRejectCommission = useCallback(async () => {
     if (selectedCommission && rejectReason) {
       await rejectCommission({ 
         commission_id: selectedCommission.id, 
         rejection_reason: rejectReason 
       });
+      logger.info(`Rejet commission ${selectedCommission.id}`);
       setShowRejectDialog(false);
       setRejectReason('');
       setSelectedCommission(null);
+      logger.info('Commission rejetée avec succès');
     }
-  };
+  }, [selectedCommission, rejectReason, rejectCommission]);
 
-  const handlePayCommission = async () => {
+  const handlePayCommission = useCallback(async () => {
     if (selectedCommission && paymentReference) {
+      logger.info(`Paiement commission ${selectedCommission.id}`);
       await markAsPaid({
         commission_id: selectedCommission.id,
         payment_method: 'mobile_money',
         payment_reference: paymentReference,
       });
+      logger.info('Paiement commission marqué avec succès');
       setShowPayDialog(false);
       setPaymentReference('');
       setSelectedCommission(null);
     }
-  };
+  }, [selectedCommission, paymentReference, markAsPaid]);
 
-  const handleApproveWithdrawal = async (withdrawal: any) => {
+  const handleApproveWithdrawal = useCallback(async (withdrawal: any) => {
+    logger.info(`Approbation retrait ${withdrawal.id}`);
     await approveWithdrawal(withdrawal.id);
-  };
+    logger.info('Retrait approuvé avec succès');
+  }, [approveWithdrawal]);
 
-  const handleRejectWithdrawal = async () => {
+  const handleRejectWithdrawal = useCallback(async () => {
     if (selectedWithdrawal && rejectReason) {
+      logger.info(`Rejet retrait ${selectedWithdrawal.id}`);
       await rejectWithdrawal(selectedWithdrawal.id, rejectReason);
+      logger.info('Retrait rejeté avec succès');
       setShowRejectDialog(false);
       setRejectReason('');
       setSelectedWithdrawal(null);
     }
-  };
+  }, [selectedWithdrawal, rejectReason, rejectWithdrawal]);
 
-  const handleCompleteWithdrawal = async () => {
+  const handleCompleteWithdrawal = useCallback(async () => {
     if (selectedWithdrawal && paymentReference) {
+      logger.info(`Complétion retrait ${selectedWithdrawal.id}`);
       await completeWithdrawal(selectedWithdrawal.id, paymentReference);
+      logger.info('Retrait complété avec succès');
       setShowPayDialog(false);
       setPaymentReference('');
       setSelectedWithdrawal(null);
     }
-  };
+  }, [selectedWithdrawal, paymentReference, completeWithdrawal]);
 
-  const handleSuspendAffiliate = async () => {
+  const handleSuspendAffiliate = useCallback(async () => {
     if (selectedAffiliate && suspendReason) {
+      logger.info(`Suspension affilié ${selectedAffiliate.id}`);
       await suspendAffiliate(selectedAffiliate.id, suspendReason);
+      logger.info('Affilié suspendu avec succès');
       setShowSuspendDialog(false);
       setSuspendReason('');
       setSelectedAffiliate(null);
     }
-  };
+  }, [selectedAffiliate, suspendReason, suspendAffiliate]);
 
-  const handleActivateAffiliate = async (affiliate: any) => {
+  const handleActivateAffiliate = useCallback(async (affiliate: any) => {
+    logger.info(`Activation affilié ${affiliate.id}`);
     await activateAffiliate(affiliate.id);
-  };
+    logger.info('Affilié activé avec succès');
+  }, [activateAffiliate]);
 
-  const exportToCSV = () => {
+  const exportToCSV = useCallback(() => {
+    logger.info(`Export CSV de ${affiliates.length} affiliés`);
     const csvContent = [
       ['Affilié', 'Email', 'Code', 'Clics', 'Ventes', 'CA', 'Commissions', 'Statut'].join(','),
       ...affiliates.map((aff) =>
@@ -191,9 +221,9 @@ const AdminAffiliates = () => {
     <AdminLayout>
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div ref={headerRef} className="flex items-center justify-between" role="banner">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-affiliates-title">
               Gestion du système d'affiliation
             </h1>
             <p className="text-muted-foreground mt-2">
@@ -223,7 +253,7 @@ const AdminAffiliates = () => {
         )}
 
         {/* Stats globales */}
-        <div className="grid gap-6 md:grid-cols-4">
+        <div ref={statsRef} className="grid gap-6 md:grid-cols-4" role="region" aria-label="Statistiques des affiliés">
           <Card className="hover-scale">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
