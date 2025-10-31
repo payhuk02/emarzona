@@ -1,4 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,8 +65,14 @@ const AdminDisputes = () => {
     updateDisputePriority,
   } = useDisputes({ filters, page, pageSize, sortBy: sortByColumn, sortDirection: sortDir });
 
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const tableRef = useScrollAnimation<HTMLDivElement>();
+
   // Fonction pour gérer le tri
-  const handleSort = (column: SortColumn) => {
+  const handleSort = useCallback((column: SortColumn) => {
+    logger.info(`Tri des litiges par ${column}`);
     if (sortByColumn === column) {
       // Toggle direction si même colonne
       setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
@@ -74,12 +82,13 @@ const AdminDisputes = () => {
       setSortDir('desc');
     }
     setPage(1); // Reset à la page 1 lors du tri
-  };
+  }, [sortByColumn, sortDir]);
 
   // Fonction pour exporter les litiges en CSV
-  const handleExportCSV = () => {
+  const handleExportCSV = useCallback(() => {
     try {
       if (disputes.length === 0) {
+        logger.warn('Export CSV: aucun litige à exporter');
         toast({
           title: "Aucune donnée",
           description: "Il n'y a aucun litige à exporter",
@@ -87,19 +96,22 @@ const AdminDisputes = () => {
         });
         return;
       }
+      logger.info(`Export CSV de ${disputes.length} litiges`);
       exportDisputesToCSV(disputes);
+      logger.info('Export CSV réussi');
       toast({
         title: "Export réussi",
         description: `${disputes.length} litige(s) exporté(s) en CSV`,
       });
     } catch (error: any) {
+      logger.error('Erreur lors de l\'export CSV:', error);
       toast({
         title: "Erreur d'export",
-        description: error.message,
+        description: error.message || "Impossible d'exporter les litiges",
         variant: "destructive",
       });
     }
-  };
+  }, [disputes, toast]);
 
   const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -107,7 +119,7 @@ const AdminDisputes = () => {
   const [actionType, setActionType] = useState<"assign" | "notes" | "resolve" | null>(null);
   const [inputValue, setInputValue] = useState("");
 
-  const handleOpenDialog = (dispute: Dispute, action: "assign" | "notes" | "resolve") => {
+  const handleOpenDialog = useCallback((dispute: Dispute, action: "assign" | "notes" | "resolve") => {
     setSelectedDispute(dispute);
     setActionType(action);
     
@@ -120,8 +132,9 @@ const AdminDisputes = () => {
     setDialogOpen(true);
   };
 
-  const handleAction = async () => {
+  const handleAction = useCallback(async () => {
     if (!selectedDispute) return;
+    logger.info(`Action sur litige ${selectedDispute.id}: ${actionType}`);
 
     let success = false;
 
@@ -145,11 +158,14 @@ const AdminDisputes = () => {
     }
 
     if (success) {
+      logger.info(`Action ${actionType} réussie sur litige ${selectedDispute.id}`);
       setDialogOpen(false);
       setSelectedDispute(null);
       setInputValue("");
+    } else {
+      logger.error(`Échec de l'action ${actionType} sur litige ${selectedDispute.id}`);
     }
-  };
+  }, [selectedDispute, actionType, inputValue, assignDispute, updateAdminNotes, resolveDispute, toast]);
 
   const getStatusBadge = (status: DisputeStatus) => {
     const config: Record<DisputeStatus, { color: string; icon: any; label: string }> = {

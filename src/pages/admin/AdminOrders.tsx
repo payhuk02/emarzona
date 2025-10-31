@@ -1,3 +1,4 @@
+import { useMemo, useEffect } from 'react';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,17 +6,27 @@ import { Badge } from "@/components/ui/badge";
 import { BoxIcon, TrendingUp, DollarSign, Package } from "lucide-react";
 import { Admin2FABanner } from "@/components/admin/Admin2FABanner";
 import { ProtectedAction } from "@/components/admin/ProtectedAction";
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export default function AdminOrders() {
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+
   // Mock data - à remplacer par vraies données
-  const stats = {
+  const stats = useMemo(() => ({
     total: 1247,
     pending: 45,
     processing: 78,
     shipped: 892,
     delivered: 198,
     totalRevenue: 45780,
-  };
+  }), []);
+
+  useEffect(() => {
+    logger.info('Admin Orders page chargée');
+  }, []);
 
   return (
     <SidebarProvider>
@@ -25,9 +36,9 @@ export default function AdminOrders() {
           <div className="max-w-7xl mx-auto space-y-6">
             <Admin2FABanner />
             {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
-                <BoxIcon className="h-8 w-8 text-primary" />
+            <div ref={headerRef} role="banner">
+              <h1 className="text-3xl font-bold flex items-center gap-2" id="admin-orders-title">
+                <BoxIcon className="h-8 w-8 text-primary" aria-hidden="true" />
                 Gestion Commandes Globales
               </h1>
               <p className="text-muted-foreground mt-1">
@@ -36,7 +47,7 @@ export default function AdminOrders() {
             </div>
 
             {/* Stats */}
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+            <div ref={statsRef} className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4" role="region" aria-label="Statistiques des commandes">
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -122,8 +133,8 @@ export default function AdminOrders() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12 text-muted-foreground">
-                  <BoxIcon className="h-12 w-12 mx-auto mb-4" />
+                <div className="text-center py-12 text-muted-foreground" role="status" aria-live="polite">
+                  <BoxIcon className="h-12 w-12 mx-auto mb-4" aria-hidden="true" />
                   <p>Fonctionnalité en développement</p>
                   <p className="text-sm mt-2">
                     La liste complète des commandes sera bientôt disponible

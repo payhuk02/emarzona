@@ -33,7 +33,12 @@ export default function AdminAudit() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const tableRef = useScrollAnimation<HTMLDivElement>();
+
   useEffect(() => {
+    logger.info('Chargement des logs d\'audit admin');
     const load = async () => {
       setLoading(true);
       const { data, error } = await supabase
@@ -41,7 +46,12 @@ export default function AdminAudit() {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(200);
-      if (!error) setRows(data as any);
+      if (!error) {
+        setRows(data as any);
+        logger.info(`${data?.length || 0} actions d'audit chargées`);
+      } else {
+        logger.error('Erreur lors du chargement des logs d\'audit:', error);
+      }
       setLoading(false);
     };
     load();
@@ -65,7 +75,8 @@ export default function AdminAudit() {
     return filtered.slice(start, start + pageSize);
   }, [filtered, page, pageSize]);
 
-  const exportCSV = () => {
+  const exportCSV = useCallback(() => {
+    logger.info(`Export CSV de ${filtered.length} actions d'audit`);
     const header = ['date', 'action', 'target_type', 'target_id', 'actor_id', 'metadata'];
     const lines = [header.join(',')].concat(
       filtered.map(r => [
@@ -84,9 +95,11 @@ export default function AdminAudit() {
     a.download = `admin_audit_${Date.now()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  };
+    logger.info('Export CSV réussi');
+  }, [filtered]);
 
-  const exportJSON = () => {
+  const exportJSON = useCallback(() => {
+    logger.info(`Export JSON de ${filtered.length} actions d'audit`);
     const blob = new Blob([JSON.stringify(filtered, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -94,7 +107,8 @@ export default function AdminAudit() {
     a.download = `admin_audit_${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
-  };
+    logger.info('Export JSON réussi');
+  }, [filtered]);
 
   return (
     <AdminLayout>

@@ -3,13 +3,15 @@
  * Vue globale des paiements de la plateforme
  */
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import {
   Table,
   TableBody,
@@ -39,6 +41,11 @@ export default function AdminPayments() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
 
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const tableRef = useScrollAnimation<HTMLDivElement>();
+
   // Fetch all payments
   const { data: payments, isLoading } = useQuery({
     queryKey: ['admin-payments'],
@@ -59,13 +66,31 @@ export default function AdminPayments() {
     },
   });
 
-  // Stats
-  const totalAmount = payments?.reduce((sum, p) => sum + (p.total_amount || 0), 0) || 0;
-  const successfulPayments = payments?.filter(p => p.payment_status === 'completed').length || 0;
-  const pendingPayments = payments?.filter(p => p.payment_status === 'pending').length || 0;
-  const failedPayments = payments?.filter(p => p.payment_status === 'failed').length || 0;
+  // Stats optimisés avec useMemo
+  const totalAmount = useMemo(() => 
+    payments?.reduce((sum, p) => sum + (p.total_amount || 0), 0) || 0,
+    [payments]
+  );
+  const successfulPayments = useMemo(() => 
+    payments?.filter(p => p.payment_status === 'completed').length || 0,
+    [payments]
+  );
+  const pendingPayments = useMemo(() => 
+    payments?.filter(p => p.payment_status === 'pending').length || 0,
+    [payments]
+  );
+  const failedPayments = useMemo(() => 
+    payments?.filter(p => p.payment_status === 'failed').length || 0,
+    [payments]
+  );
 
-  const getStatusBadge = (status: string) => {
+  useEffect(() => {
+    if (!isLoading && payments) {
+      logger.info(`Admin Payments: ${payments.length} paiements chargés`);
+    }
+  }, [isLoading, payments]);
+
+  const getStatusBadge = useCallback((status: string) => {
     switch (status) {
       case 'completed':
         return <Badge variant="default"><CheckCircle className="h-3 w-3 mr-1" /> Payé</Badge>;
@@ -76,9 +101,9 @@ export default function AdminPayments() {
       default:
         return <Badge>{status}</Badge>;
     }
-  };
+  }, []);
 
-  const filteredPayments = payments?.filter(payment => {
+  const filteredPayments = useMemo(() => payments?.filter(payment => {
     const matchesSearch =
       payment.order_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       payment.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -91,7 +116,7 @@ export default function AdminPayments() {
       (activeTab === 'failed' && payment.payment_status === 'failed');
 
     return matchesSearch && matchesTab;
-  });
+  }) || [], [payments, searchQuery, activeTab]);
 
   return (
     <SidebarProvider>
@@ -102,15 +127,15 @@ export default function AdminPayments() {
           <div className="container mx-auto p-6 space-y-6">
             <Admin2FABanner />
             {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Paiements</h1>
+            <div ref={headerRef} role="banner">
+              <h1 className="text-3xl font-bold tracking-tight" id="admin-payments-title">Paiements</h1>
               <p className="text-muted-foreground">
                 Vue d'ensemble de tous les paiements de la plateforme
               </p>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid gap-4 md:grid-cols-4">
+            <div ref={statsRef} className="grid gap-4 md:grid-cols-4" role="region" aria-label="Statistiques des paiements">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Montant Total</CardTitle>

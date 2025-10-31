@@ -3,6 +3,7 @@
  * Analytics globales de la plateforme
  */
 
+import { useMemo, useEffect } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -16,10 +17,17 @@ import {
   Store,
   Activity,
 } from 'lucide-react';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export default function AdminAnalytics() {
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const chartsRef = useScrollAnimation<HTMLDivElement>();
+
   // Mock stats - À remplacer par vraies données
-  const stats = {
+  const stats = useMemo(() => ({
     totalRevenue: 15680000,
     totalOrders: 1245,
     totalUsers: 856,
@@ -28,7 +36,11 @@ export default function AdminAnalytics() {
     conversionRate: 3.2,
     averageOrderValue: 12590,
     activeUsers: 234,
-  };
+  }), []);
+
+  useEffect(() => {
+    logger.info('Admin Analytics page chargée');
+  }, []);
 
   return (
     <SidebarProvider>
@@ -37,15 +49,15 @@ export default function AdminAnalytics() {
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto p-6 space-y-6">
             {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Analytics Plateforme</h1>
+            <div ref={headerRef} role="banner">
+              <h1 className="text-3xl font-bold tracking-tight" id="admin-analytics-title">Analytics Plateforme</h1>
               <p className="text-muted-foreground">
                 Vue d'ensemble des statistiques globales
               </p>
             </div>
 
             {/* Main Stats Grid */}
-            <div className="grid gap-4 md:grid-cols-4">
+            <div ref={statsRef} className="grid gap-4 md:grid-cols-4" role="region" aria-label="Statistiques principales">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Revenu Total</CardTitle>
@@ -147,7 +159,7 @@ export default function AdminAnalytics() {
             </div>
 
             {/* Charts Placeholder */}
-            <div className="grid gap-4 md:grid-cols-2">
+            <div ref={chartsRef} className="grid gap-4 md:grid-cols-2" role="region" aria-label="Graphiques analytiques">
               <Card>
                 <CardHeader>
                   <CardTitle>Revenus Mensuels</CardTitle>

@@ -17,9 +17,11 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Store, Search, Trash2, AlertTriangle, Eye } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 interface StoreData {
   id: string;
@@ -40,7 +42,12 @@ const AdminStores = () => {
   const { deleteStore } = useAdminActions();
   const navigate = useNavigate();
 
-  const fetchStores = async () => {
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const tableRef = useScrollAnimation<HTMLDivElement>();
+
+  const fetchStores = useCallback(async () => {
+    logger.info('Chargement des boutiques admin');
     try {
       const { data, error } = await supabase
         .from('stores')
@@ -71,21 +78,22 @@ const AdminStores = () => {
       );
 
       setStores(storesWithDetails);
-    } catch (error) {
-      console.error('Error fetching stores:', error);
+      logger.info(`${storesWithDetails.length} boutiques chargées`);
+    } catch (error: any) {
+      logger.error('Erreur lors du chargement des boutiques:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchStores();
-  }, []);
+  }, [fetchStores]);
 
-  const filteredStores = stores.filter(store =>
+  const filteredStores = useMemo(() => stores.filter(store =>
     store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     store.owner_name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ), [stores, searchTerm]);
 
   if (loading) {
     return (
