@@ -559,24 +559,24 @@ const Products = () => {
         
         <div className="flex-1 flex flex-col">
           <header className="sticky top-0 z-20 border-b bg-card/95 backdrop-blur-md shadow-sm transition-all duration-300" role="banner">
-            <div className="flex h-14 sm:h-16 items-center gap-3 sm:gap-4 px-3 sm:px-4 lg:px-6">
+            <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-3 lg:gap-4 px-2 sm:px-3 lg:px-6 overflow-hidden">
               <SidebarTrigger 
                 aria-label={t('dashboard.sidebarToggle', 'Toggle sidebar')}
-                className="hover:bg-accent/50 transition-colors duration-200"
+                className="hover:bg-accent/50 transition-colors duration-200 flex-shrink-0 touch-manipulation min-h-[44px] min-w-[44px]"
               />
-              <div className="flex-1 min-w-0">
-                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate" id="products-title">
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <h1 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate px-1" id="products-title">
                   {t('products.title')}
                 </h1>
               </div>
-              <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+              <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 flex-shrink-0">
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={handleRefresh} 
                   disabled={productsLoading}
                   aria-label={t('products.refresh')}
-                  className="hidden sm:flex hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95"
+                  className="hidden sm:flex hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[36px]"
                   title={`Actualiser (F5)`}
                 >
                   <RefreshCw className={`h-4 w-4 ${productsLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
@@ -588,28 +588,29 @@ const Products = () => {
                   onClick={handleRefresh} 
                   disabled={productsLoading}
                   aria-label={t('products.refresh')}
-                  className="sm:hidden hover:scale-110 active:scale-95 transition-transform duration-200"
+                  className="sm:hidden hover:scale-110 active:scale-95 transition-transform duration-200 touch-manipulation min-h-[44px] min-w-[44px]"
                   title="Actualiser"
                 >
                   <RefreshCw className={`h-4 w-4 ${productsLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
                 </Button>
                 <Button 
                   onClick={() => navigate("/dashboard/products/new")} 
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all duration-200 group hover:scale-105 active:scale-95"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all duration-200 group hover:scale-105 active:scale-95 touch-manipulation min-h-[36px] sm:min-h-[40px] text-xs sm:text-sm px-2 sm:px-3 lg:px-4"
                   aria-label={t('products.addNew')}
                   size="sm"
                   title="Nouveau produit (Cmd/Ctrl+N)"
                 >
-                  <Plus className="h-4 w-4 mr-1.5 sm:mr-2 group-hover:rotate-90 transition-transform duration-200" aria-hidden="true" />
+                  <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5 lg:mr-2 group-hover:rotate-90 transition-transform duration-200 flex-shrink-0" aria-hidden="true" />
+                  <span className="hidden xs:inline sm:hidden">{t('products.add')}</span>
                   <span className="hidden sm:inline">{t('products.addNew')}</span>
-                  <span className="sm:hidden">{t('products.add')}</span>
+                  <span className="xs:hidden">+</span>
                 </Button>
               </div>
             </div>
           </header>
 
-          <main className="flex-1 p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-background via-background to-muted/20" role="main" aria-labelledby="products-title">
-            <div className="max-w-7xl mx-auto space-y-4 sm:space-y-5 lg:space-y-6">
+          <main className="flex-1 p-2 sm:p-3 md:p-4 lg:p-6 bg-gradient-to-br from-background via-background to-muted/20 overflow-x-hidden" role="main" aria-labelledby="products-title">
+            <div className="max-w-7xl mx-auto space-y-2.5 sm:space-y-3 lg:space-y-5 xl:space-y-6 px-1 sm:px-2 lg:px-3">
               {productsLoading ? (
                 <Card className="shadow-sm border-border/50 bg-card/50 backdrop-blur-sm">
                   <CardContent className="py-12 text-center" role="status" aria-live="polite">
@@ -735,36 +736,38 @@ const Products = () => {
                     </Card>
                   ) : (
                     <>
-                      {/* Barre d'actions avec design amélioré */}
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 sm:p-4 bg-card/50 rounded-lg border border-border/50 backdrop-blur-sm">
-                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                          {paginatedProducts.length > 0 && (
-                            <Checkbox
-                              checked={selectedProducts.length === paginatedProducts.length && paginatedProducts.length > 0}
-                              onCheckedChange={handleSelectAll}
-                              aria-label="Sélectionner tous les produits"
-                              className="transition-all duration-200"
-                            />
-                          )}
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-sm font-medium text-foreground">
-                              {filteredProducts.length} produit{filteredProducts.length > 1 ? "s" : ""} trouvé{filteredProducts.length > 1 ? "s" : ""}
-                            </p>
-                            {selectedProducts.length > 0 && (
-                              <Badge variant="default" className="animate-in zoom-in-95 duration-200 shadow-sm">
-                                {selectedProducts.length} sélectionné{selectedProducts.length > 1 ? "s" : ""}
-                              </Badge>
+                      {/* Barre d'actions avec design amélioré pour mobile */}
+                      <div className="flex flex-col gap-2 sm:gap-3 lg:gap-4 p-2 sm:p-3 lg:p-4 bg-card/50 rounded-lg border border-border/50 backdrop-blur-sm">
+                        <div className="flex items-center justify-between gap-2 sm:gap-3 flex-wrap">
+                          <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+                            {paginatedProducts.length > 0 && (
+                              <Checkbox
+                                checked={selectedProducts.length === paginatedProducts.length && paginatedProducts.length > 0}
+                                onCheckedChange={handleSelectAll}
+                                aria-label="Sélectionner tous les produits"
+                                className="transition-all duration-200 flex-shrink-0"
+                              />
                             )}
+                            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
+                              <p className="text-xs sm:text-sm font-medium text-foreground whitespace-nowrap">
+                                {filteredProducts.length} produit{filteredProducts.length > 1 ? "s" : ""} trouvé{filteredProducts.length > 1 ? "s" : ""}
+                              </p>
+                              {selectedProducts.length > 0 && (
+                                <Badge variant="default" className="animate-in zoom-in-95 duration-200 shadow-sm text-xs flex-shrink-0">
+                                  {selectedProducts.length} sélectionné{selectedProducts.length > 1 ? "s" : ""}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <div className="flex items-center gap-2 w-full">
                           <Button 
                             variant="outline" 
                             size="sm" 
                             onClick={() => setImportDialogOpen(true)}
-                            className="flex-1 sm:flex-initial hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95"
+                            className="flex-1 hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[40px] text-xs sm:text-sm"
                           >
-                            <Upload className="h-4 w-4 mr-1.5 sm:mr-2" />
+                            <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
                             <span className="hidden sm:inline">Importer</span>
                             <span className="sm:hidden">Import</span>
                           </Button>
@@ -773,12 +776,12 @@ const Products = () => {
                             size="sm" 
                             onClick={handleExportCSV}
                             disabled={exportingCSV || filteredProducts.length === 0}
-                            className="flex-1 sm:flex-initial hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[40px] text-xs sm:text-sm"
                           >
                             {exportingCSV ? (
-                              <Loader2 className="h-4 w-4 mr-1.5 sm:mr-2 animate-spin" />
+                              <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin flex-shrink-0" />
                             ) : (
-                              <Download className="h-4 w-4 mr-1.5 sm:mr-2" />
+                              <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
                             )}
                             <span className="hidden sm:inline">Exporter</span>
                             <span className="sm:hidden">Export</span>

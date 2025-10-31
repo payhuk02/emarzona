@@ -193,30 +193,30 @@ const ProductCardDashboard = ({
         )}
       </CardHeader>
       
-      <CardContent className="p-3 sm:p-4 space-y-2.5 sm:space-y-3">
-        <div className="space-y-2">
-          <CardTitle className="line-clamp-2 text-base sm:text-lg leading-tight group-hover:text-primary transition-colors duration-200 font-semibold">
+      <CardContent className="p-2.5 sm:p-3 lg:p-4 space-y-2 sm:space-y-2.5 lg:space-y-3">
+        <div className="space-y-1.5 sm:space-y-2">
+          <CardTitle className="line-clamp-2 text-sm sm:text-base lg:text-lg leading-tight group-hover:text-primary transition-colors duration-200 font-semibold">
             {product.name}
           </CardTitle>
           {product.description && (
-            <CardDescription className="line-clamp-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">
+            <CardDescription className="line-clamp-2 text-[10px] sm:text-xs lg:text-sm leading-relaxed text-muted-foreground">
               {product.description.replace(/<[^>]*>/g, '')}
             </CardDescription>
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 dark:text-green-400" />
-            <span className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-2 lg:gap-0">
+          <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 flex-wrap">
+            <DollarSign className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+            <span className="text-base sm:text-lg lg:text-xl font-bold text-green-600 dark:text-green-400 break-words">
               {product.price.toLocaleString()} {product.currency}
             </span>
           </div>
           {product.rating > 0 && (
-            <div className="flex items-center gap-1">
-              <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-500 fill-current" />
-              <span className="text-xs sm:text-sm font-medium">{product.rating.toFixed(1)}</span>
-              <span className="text-[10px] sm:text-xs text-muted-foreground">({product.reviews_count})</span>
+            <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+              <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 text-yellow-500 fill-current" />
+              <span className="text-[10px] sm:text-xs lg:text-sm font-medium">{product.rating.toFixed(1)}</span>
+              <span className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">({product.reviews_count})</span>
             </div>
           )}
         </div>
@@ -271,14 +271,14 @@ const ProductCardDashboard = ({
           </div>
         </div>
 
-        <div className="flex gap-1.5 sm:gap-2 pt-2">
+        <div className="flex gap-1.5 sm:gap-2 pt-1.5 sm:pt-2">
           <Button
             variant="outline"
             size="sm"
-            className="flex-1 text-xs sm:text-sm hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all duration-200 hover:scale-105 active:scale-95"
+            className="flex-1 text-[10px] sm:text-xs lg:text-sm hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[36px] sm:min-h-[38px]"
             onClick={onEdit}
           >
-            <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+            <Edit className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 mr-0.5 sm:mr-1 lg:mr-1.5 flex-shrink-0" />
             <span className="hidden sm:inline">Modifier</span>
             <span className="sm:hidden">Modif.</span>
           </Button>
@@ -288,9 +288,9 @@ const ProductCardDashboard = ({
               <Button 
                 variant="outline" 
                 size="sm"
-                className="hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95"
+                className="hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[36px] sm:min-h-[38px] min-w-[36px] sm:min-w-[38px] px-2"
               >
-                <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <MoreVertical className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">

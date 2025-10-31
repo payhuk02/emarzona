@@ -81,14 +81,14 @@ const ProductStats = ({ products, filteredProducts }: ProductStatsProps) => {
   });
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
       <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-          <CardTitle className="text-xs sm:text-sm font-medium">Produits totaux</CardTitle>
-          <Package className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 lg:p-6">
+          <CardTitle className="text-[11px] sm:text-xs lg:text-sm font-medium">Produits totaux</CardTitle>
+          <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200 flex-shrink-0" />
         </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0">
-          <div className="text-xl sm:text-2xl font-bold mb-2">{totalProducts}</div>
+        <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+          <div className="text-lg sm:text-xl lg:text-2xl font-bold mb-1.5 sm:mb-2">{totalProducts}</div>
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             <Badge variant="secondary" className="text-[10px] sm:text-xs animate-in zoom-in-95 duration-200">
               {activeProducts} actifs
@@ -101,41 +101,41 @@ const ProductStats = ({ products, filteredProducts }: ProductStatsProps) => {
       </Card>
 
       <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-          <CardTitle className="text-xs sm:text-sm font-medium">Revenus potentiels</CardTitle>
-          <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 lg:p-6">
+          <CardTitle className="text-[11px] sm:text-xs lg:text-sm font-medium">Revenus potentiels</CardTitle>
+          <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200 flex-shrink-0" />
         </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0">
-          <div className="text-xl sm:text-2xl font-bold mb-1">{totalRevenue.toLocaleString()} FCFA</div>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">
+        <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+          <div className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold mb-1 break-words">{totalRevenue.toLocaleString()} FCFA</div>
+          <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground line-clamp-2">
             Prix moyen: {averagePrice.toLocaleString()} FCFA
           </p>
         </CardContent>
       </Card>
 
       <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-          <CardTitle className="text-xs sm:text-sm font-medium">Performance</CardTitle>
-          <Star className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200 fill-yellow-400/50 group-hover:fill-yellow-400" />
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 lg:p-6">
+          <CardTitle className="text-[11px] sm:text-xs lg:text-sm font-medium">Performance</CardTitle>
+          <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200 fill-yellow-400/50 group-hover:fill-yellow-400 flex-shrink-0" />
         </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0">
-          <div className="text-xl sm:text-2xl font-bold mb-1">{averageRating.toFixed(1)}/5</div>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">
+        <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+          <div className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold mb-1">{averageRating.toFixed(1)}/5</div>
+          <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
             {totalReviews} avis au total
           </p>
         </CardContent>
       </Card>
 
       <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-          <CardTitle className="text-xs sm:text-sm font-medium">Top catégorie</CardTitle>
-          <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 lg:p-6">
+          <CardTitle className="text-[11px] sm:text-xs lg:text-sm font-medium">Top catégorie</CardTitle>
+          <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200 flex-shrink-0" />
         </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0">
-          <div className="text-lg sm:text-xl lg:text-2xl font-bold mb-1 line-clamp-1">
+        <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+          <div className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold mb-1 line-clamp-1 break-words">
             {topCategory ? topCategory[0] : "Aucune"}
           </div>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">
+          <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
             {topCategory ? `${topCategory[1]} produit${topCategory[1] > 1 ? "s" : ""}` : "Pas de catégorie"}
           </p>
         </CardContent>
@@ -143,20 +143,20 @@ const ProductStats = ({ products, filteredProducts }: ProductStatsProps) => {
 
       {/* Nouvelle carte : Statistiques de stock */}
       <Card className={`group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm ${stockStats.needsRestock > 0 ? "border-orange-500/50 shadow-orange-500/10" : ""}`}>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-          <CardTitle className="text-xs sm:text-sm font-medium">État des stocks</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 lg:p-6">
+          <CardTitle className="text-[11px] sm:text-xs lg:text-sm font-medium">État des stocks</CardTitle>
           {stockStats.needsRestock > 0 ? (
-            <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500 animate-pulse" />
+            <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-orange-500 animate-pulse flex-shrink-0" />
           ) : (
-            <PackageCheck className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 group-hover:scale-110 transition-transform duration-200" />
+            <PackageCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-green-500 group-hover:scale-110 transition-transform duration-200 flex-shrink-0" />
           )}
         </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0">
+        <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
           {productsWithInventory.length > 0 ? (
             <>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="text-xl sm:text-2xl font-bold">{productsWithInventory.length}</div>
-                <span className="text-xs sm:text-sm text-muted-foreground">produits</span>
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                <div className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold">{productsWithInventory.length}</div>
+                <span className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground">produits</span>
               </div>
               <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
                 {stockStats.in_stock > 0 && (

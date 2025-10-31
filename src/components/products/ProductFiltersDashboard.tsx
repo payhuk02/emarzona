@@ -94,9 +94,9 @@ const ProductFiltersDashboard = ({
   ];
 
   return (
-    <div className="space-y-3 sm:space-y-4">
+    <div className="space-y-2 sm:space-y-3 lg:space-y-4">
       {/* Statistiques rapides avec design amélioré */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 sm:p-4 bg-card/30 rounded-lg border border-border/30 backdrop-blur-sm">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 lg:gap-4 p-2 sm:p-3 lg:p-4 bg-card/30 rounded-lg border border-border/30 backdrop-blur-sm">
         <div className="flex flex-wrap items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-primary" />
