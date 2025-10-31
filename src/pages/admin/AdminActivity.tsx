@@ -151,6 +151,7 @@ const AdminActivity = () => {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </AdminLayout>
   );
