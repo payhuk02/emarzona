@@ -122,33 +122,33 @@ const AdminReferrals = () => {
     <AdminLayout>
       <div className="container mx-auto p-6 space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div ref={headerRef} className="flex items-center justify-between" role="banner">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-referrals-title">
               Gestion des parrainages
             </h1>
             <p className="text-muted-foreground mt-2">
               Suivi des parrainages et commissions (2%)
             </p>
           </div>
-          <UserPlus className="h-8 w-8 text-muted-foreground" />
+          <UserPlus className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-6 md:grid-cols-3">
+        <div ref={statsRef} className="grid gap-6 md:grid-cols-3" role="region" aria-label="Statistiques des parrainages">
           <Card className="hover-scale">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Total Parrainages
               </CardTitle>
-              <Users className="h-4 w-4 text-blue-600" />
+              <Users className="h-4 w-4 text-blue-600" aria-hidden="true" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600">
-                {totalReferrals}
+                {stats.totalReferrals}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                {activeReferrals} actifs
+                {stats.activeReferrals} actifs
               </p>
             </CardContent>
           </Card>
@@ -158,11 +158,11 @@ const AdminReferrals = () => {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Commissions Totales
               </CardTitle>
-              <TrendingUp className="h-4 w-4 text-pink-600" />
+              <TrendingUp className="h-4 w-4 text-pink-600" aria-hidden="true" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-pink-600">
-                {formatCurrency(totalCommissions)}
+                {formatCurrency(stats.totalCommissions)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 2% sur ventes filleuls
@@ -175,11 +175,11 @@ const AdminReferrals = () => {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Taux de Conversion
               </CardTitle>
-              <UserPlus className="h-4 w-4 text-emerald-600" />
+              <UserPlus className="h-4 w-4 text-emerald-600" aria-hidden="true" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-emerald-600">
-                {totalReferrals > 0 ? Math.round((activeReferrals / totalReferrals) * 100) : 0}%
+                {stats.totalReferrals > 0 ? Math.round((stats.activeReferrals / stats.totalReferrals) * 100) : 0}%
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 Parrainages actifs

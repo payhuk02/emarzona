@@ -91,16 +91,16 @@ const AdminNotifications = () => {
     <AdminLayout>
       <div className="container mx-auto p-6 space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div ref={headerRef} className="flex items-center justify-between" role="banner">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-notifications-title">
               Notifications
             </h1>
             <p className="text-muted-foreground mt-2">
               Gérer les notifications internes et emails
             </p>
           </div>
-          <Bell className="h-8 w-8 text-muted-foreground" />
+          <Bell className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
         </div>
 
         <Tabs defaultValue="send" className="space-y-4">

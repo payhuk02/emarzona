@@ -82,19 +82,20 @@ const AdminActivity = () => {
   return (
     <AdminLayout>
       <div className="container mx-auto p-6 space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
+        <div ref={headerRef} className="flex items-center justify-between" role="banner">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-activity-title">
               Historique des actions
             </h1>
             <p className="text-muted-foreground mt-2">
               Toutes les interventions administrateurs
             </p>
           </div>
-          <History className="h-5 w-5 text-muted-foreground" />
+          <History className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
         </div>
 
-        <Card>
+        <div ref={listRef} role="region" aria-label="Liste des actions récentes">
+          <Card>
           <CardHeader>
             <CardTitle>Actions récentes</CardTitle>
             <CardDescription>
