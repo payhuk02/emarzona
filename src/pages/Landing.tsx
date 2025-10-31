@@ -81,7 +81,6 @@ const Landing = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const { t } = useTranslation();
   const baseUrl = window.location.origin;
 
   // Animations au scroll pour les sections
@@ -155,7 +154,7 @@ const Landing = () => {
                 {t('landing.nav.getStarted')}
               </Button>
             </Link>
-          </div>
+          </nav>
 
           {/* Mobile Menu Button */}
           <button
