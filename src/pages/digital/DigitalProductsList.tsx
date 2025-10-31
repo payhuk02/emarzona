@@ -57,7 +57,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '@/hooks/useStore';
 import { useDigitalProducts } from '@/hooks/digital/useDigitalProducts';
-import { DigitalProductsGrid, DigitalProductCard } from '@/components/digital';
+import { DigitalProductsGrid } from '@/components/digital';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
@@ -85,17 +85,11 @@ export const DigitalProductsList = () => {
   const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Refs for scroll animations
-  const headerRef = useRef<HTMLDivElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
-  const filtersRef = useRef<HTMLDivElement>(null);
-  const productsRef = useRef<HTMLDivElement>(null);
-
-  // Animation hooks
-  useScrollAnimation(headerRef);
-  useScrollAnimation(statsRef);
-  useScrollAnimation(filtersRef);
-  useScrollAnimation(productsRef);
+  // Animation hooks - useScrollAnimation retourne un ref
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const filtersRef = useScrollAnimation<HTMLDivElement>();
+  const productsRef = useScrollAnimation<HTMLDivElement>();
 
   // Data fetching avec jointure sur products
   const { data: productsData, isLoading, error, refetch } = useDigitalProducts(store?.id);
@@ -624,35 +618,59 @@ export const DigitalProductsList = () => {
                     <>
                       {viewMode === 'grid' ? (
                         <DigitalProductsGrid
-                          products={paginatedProducts.map(dp => {
-                            const product = 'product' in dp ? dp.product : dp;
-                            return {
-                              id: dp.id,
-                              ...product,
-                              digital_type: dp.digital_type || 'other',
-                              total_downloads: dp.total_downloads || dp.totalDownloads || 0,
-                              license_type: dp.license_type || 'single',
-                            };
-                          })}
+                          products={paginatedProducts
+                            .filter(dp => {
+                              const product = 'product' in dp ? dp.product : dp;
+                              return product && product.id; // Filtrer les produits invalides
+                            })
+                            .map(dp => {
+                              const product = 'product' in dp ? dp.product : dp;
+                              return {
+                                id: dp.id,
+                                name: product?.name || 'Produit sans nom',
+                                slug: product?.slug || dp.id,
+                                description: product?.description,
+                                price: product?.price || 0,
+                                currency: product?.currency || 'XOF',
+                                image_url: product?.primary_image_url || product?.image_url,
+                                digital_type: dp.digital_type || 'other',
+                                total_downloads: dp.total_downloads || dp.totalDownloads || 0,
+                                license_type: dp.license_type || 'single',
+                                average_rating: dp.average_rating || 0,
+                                total_reviews: dp.total_reviews || 0,
+                                version: dp.version,
+                              };
+                            })}
                           loading={false}
                         />
                       ) : (
                         <div className="space-y-3 sm:space-y-4">
-                          {paginatedProducts.map((dp) => {
-                            const product = 'product' in dp ? dp.product : dp;
-                            return (
+                          {paginatedProducts
+                            .filter(dp => {
+                              const product = 'product' in dp ? dp.product : dp;
+                              return product && product.id; // Filtrer les produits invalides
+                            })
+                            .map((dp) => {
+                              const product = 'product' in dp ? dp.product : dp;
+                              if (!product) return null;
+                              return (
                               <Card 
                                 key={dp.id}
                                 className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/30 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-left-2"
                               >
                                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                                   <div className="relative w-full sm:w-32 lg:w-40 h-40 sm:h-full min-h-[160px] overflow-hidden rounded-t-lg sm:rounded-l-lg sm:rounded-tr-none bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700">
-                                    {product.image_url ? (
+                                    {(product.primary_image_url || product.image_url) ? (
                                       <img
-                                        src={product.image_url}
-                                        alt={product.name}
+                                        src={product.primary_image_url || product.image_url}
+                                        alt={product.name || 'Produit digital'}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                         loading="lazy"
+                                        onError={(e) => {
+                                          // Fallback si l'image échoue à charger
+                                          const target = e.target as HTMLImageElement;
+                                          target.style.display = 'none';
+                                        }}
                                       />
                                     ) : (
                                       <div className="w-full h-full flex items-center justify-center">
@@ -706,7 +724,8 @@ export const DigitalProductsList = () => {
                                 </div>
                               </Card>
                             );
-                          })}
+                          })
+                          .filter(Boolean)}
                         </div>
                       )}
                       
@@ -813,25 +832,104 @@ export const DigitalProductsList = () => {
                       </div>
                     </Card>
                   ) : (
-                    <DigitalProductsGrid
-                      products={filteredProducts
-                        .filter(dp => {
+                    <>
+                      <DigitalProductsGrid
+                        products={filteredProducts
+                          .filter(dp => {
+                            const product = 'product' in dp ? dp.product : dp;
+                            return product.is_active !== undefined ? product.is_active : (dp.status === 'active' || dp.status === 'published');
+                          })
+                          .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                          .map(dp => {
+                            const product = 'product' in dp ? dp.product : dp;
+                            return {
+                              id: dp.id,
+                              ...product,
+                              digital_type: dp.digital_type || 'other',
+                              total_downloads: dp.total_downloads || dp.totalDownloads || 0,
+                              license_type: dp.license_type || 'single',
+                            };
+                          })}
+                        loading={false}
+                      />
+                      {/* Pagination pour les produits actifs */}
+                      {(() => {
+                        const activeProducts = filteredProducts.filter(dp => {
                           const product = 'product' in dp ? dp.product : dp;
                           return product.is_active !== undefined ? product.is_active : (dp.status === 'active' || dp.status === 'published');
-                        })
-                        .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-                        .map(dp => {
-                          const product = 'product' in dp ? dp.product : dp;
-                          return {
-                            id: dp.id,
-                            ...product,
-                            digital_type: dp.digital_type || 'other',
-                            total_downloads: dp.total_downloads || dp.totalDownloads || 0,
-                            license_type: dp.license_type || 'single',
-                          };
-                        })}
-                      loading={false}
-                    />
+                        });
+                        const activeTotalPages = Math.ceil(activeProducts.length / itemsPerPage);
+                        return activeTotalPages > 1 && (
+                          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-muted-foreground">
+                                {t('digitalProducts.itemsPerPage', 'Par page')}:
+                              </span>
+                              <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
+                                <SelectTrigger className="w-20">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {PAGINATION_OPTIONS.map((option) => (
+                                    <SelectItem key={option} value={option.toString()}>
+                                      {option}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="flex items-center gap-1 sm:gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePageChange(1)}
+                                disabled={currentPage === 1}
+                                className="hidden sm:flex"
+                                aria-label={t('digitalProducts.firstPage', 'Première page')}
+                              >
+                                <ChevronsLeft className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                aria-label={t('digitalProducts.previousPage', 'Page précédente')}
+                              >
+                                <ChevronLeft className="h-4 w-4" />
+                              </Button>
+                              
+                              <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4">
+                                <span className="text-sm">
+                                  {t('digitalProducts.page', 'Page')} {currentPage} {t('digitalProducts.of', 'sur')} {activeTotalPages}
+                                </span>
+                              </div>
+                              
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === activeTotalPages}
+                                aria-label={t('digitalProducts.nextPage', 'Page suivante')}
+                              >
+                                <ChevronRight className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePageChange(activeTotalPages)}
+                                disabled={currentPage === activeTotalPages}
+                                className="hidden sm:flex"
+                                aria-label={t('digitalProducts.lastPage', 'Dernière page')}
+                              >
+                                <ChevronsRight className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </>
                   )}
                 </TabsContent>
 
@@ -864,25 +962,104 @@ export const DigitalProductsList = () => {
                       </div>
                     </Card>
                   ) : (
-                    <DigitalProductsGrid
-                      products={filteredProducts
-                        .filter(dp => {
+                    <>
+                      <DigitalProductsGrid
+                        products={filteredProducts
+                          .filter(dp => {
+                            const product = 'product' in dp ? dp.product : dp;
+                            return !(product.is_active !== undefined ? product.is_active : (dp.status === 'active' || dp.status === 'published'));
+                          })
+                          .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                          .map(dp => {
+                            const product = 'product' in dp ? dp.product : dp;
+                            return {
+                              id: dp.id,
+                              ...product,
+                              digital_type: dp.digital_type || 'other',
+                              total_downloads: dp.total_downloads || dp.totalDownloads || 0,
+                              license_type: dp.license_type || 'single',
+                            };
+                          })}
+                        loading={false}
+                      />
+                      {/* Pagination pour les brouillons */}
+                      {(() => {
+                        const draftProducts = filteredProducts.filter(dp => {
                           const product = 'product' in dp ? dp.product : dp;
                           return !(product.is_active !== undefined ? product.is_active : (dp.status === 'active' || dp.status === 'published'));
-                        })
-                        .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-                        .map(dp => {
-                          const product = 'product' in dp ? dp.product : dp;
-                          return {
-                            id: dp.id,
-                            ...product,
-                            digital_type: dp.digital_type || 'other',
-                            total_downloads: dp.total_downloads || dp.totalDownloads || 0,
-                            license_type: dp.license_type || 'single',
-                          };
-                        })}
-                      loading={false}
-                    />
+                        });
+                        const draftTotalPages = Math.ceil(draftProducts.length / itemsPerPage);
+                        return draftTotalPages > 1 && (
+                          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-muted-foreground">
+                                {t('digitalProducts.itemsPerPage', 'Par page')}:
+                              </span>
+                              <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
+                                <SelectTrigger className="w-20">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {PAGINATION_OPTIONS.map((option) => (
+                                    <SelectItem key={option} value={option.toString()}>
+                                      {option}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="flex items-center gap-1 sm:gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePageChange(1)}
+                                disabled={currentPage === 1}
+                                className="hidden sm:flex"
+                                aria-label={t('digitalProducts.firstPage', 'Première page')}
+                              >
+                                <ChevronsLeft className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                aria-label={t('digitalProducts.previousPage', 'Page précédente')}
+                              >
+                                <ChevronLeft className="h-4 w-4" />
+                              </Button>
+                              
+                              <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4">
+                                <span className="text-sm">
+                                  {t('digitalProducts.page', 'Page')} {currentPage} {t('digitalProducts.of', 'sur')} {draftTotalPages}
+                                </span>
+                              </div>
+                              
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === draftTotalPages}
+                                aria-label={t('digitalProducts.nextPage', 'Page suivante')}
+                              >
+                                <ChevronRight className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePageChange(draftTotalPages)}
+                                disabled={currentPage === draftTotalPages}
+                                className="hidden sm:flex"
+                                aria-label={t('digitalProducts.lastPage', 'Dernière page')}
+                              >
+                                <ChevronsRight className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </>
                   )}
                 </TabsContent>
               </Tabs>
