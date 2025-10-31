@@ -47,23 +47,50 @@ self.addEventListener('activate', (event) => {
   console.log('[SW] Activating Service Worker...', CACHE_VERSION);
   
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => {
-            // Supprimer les anciens caches
-            return name.startsWith('payhuk-') && !Object.values(CACHE_NAMES).includes(name);
-          })
-          .map((name) => {
-            console.log('[SW] Deleting old cache:', name);
-            return caches.delete(name);
-          })
-      );
-    })
+    Promise.all([
+      // Nettoyer les anciens caches
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames
+            .filter((name) => {
+              // Supprimer les anciens caches
+              return name.startsWith('payhuk-') && !Object.values(CACHE_NAMES).includes(name);
+            })
+            .map((name) => {
+              console.log('[SW] Deleting old cache:', name);
+              return caches.delete(name);
+            })
+        );
+      }),
+      // Réclamer les clients immédiatement
+      self.clients.claim(),
+      // Nettoyer les références aux chunks obsolètes
+      caches.open(CACHE_NAMES.static).then((cache) => {
+        return cache.keys().then((requests) => {
+          // Vérifier que tous les fichiers existent encore
+          return Promise.allSettled(
+            requests.map((request) => {
+              return fetch(request, { method: 'HEAD' })
+                .then((response) => {
+                  // Si 404, supprimer du cache
+                  if (response.status === 404) {
+                    console.warn('[SW] Removing 404 resource from cache:', request.url);
+                    return cache.delete(request);
+                  }
+                })
+                .catch(() => {
+                  // Si erreur réseau, supprimer aussi
+                  console.warn('[SW] Removing unreachable resource from cache:', request.url);
+                  return cache.delete(request);
+                });
+            })
+          );
+        });
+      }).catch((err) => {
+        console.warn('[SW] Error cleaning static cache:', err);
+      })
+    ])
   );
-  
-  // Prendre le contrôle immédiatement
-  return self.clients.claim();
 });
 
 // Stratégies de cache
