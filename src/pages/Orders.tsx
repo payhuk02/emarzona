@@ -23,18 +23,15 @@ import {
   RefreshCw, 
   Loader2, 
   AlertCircle, 
-  TrendingUp,
-  Filter,
   Grid3x3,
   List,
   Keyboard,
   CheckCircle2,
   Clock,
   DollarSign,
-  Users,
 } from "lucide-react";
 import { useStore } from "@/hooks/use-store";
-import { useOrders, SortColumn, SortDirection, Order } from "@/hooks/useOrders";
+import { useOrders, SortColumn, SortDirection } from "@/hooks/useOrders";
 import { CreateOrderDialog } from "@/components/orders/CreateOrderDialog";
 import { OrdersList } from "@/components/orders/OrdersList";
 import { OrderFilters } from "@/components/orders/OrderFilters";
@@ -46,7 +43,6 @@ import { isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
-import { cn } from '@/lib/utils';
 
 type ViewMode = 'grid' | 'list';
 
@@ -92,6 +88,41 @@ const Orders = () => {
 
     return { total, pending, completed, totalRevenue };
   }, [orders]);
+
+  // Filter orders - Défini AVANT handleExportCSV pour éviter l'erreur
+  const filteredOrders = useMemo(() => {
+    if (!orders) return [];
+    
+    return orders.filter((order) => {
+      // Search filter
+      const searchLower = debouncedSearch.toLowerCase();
+      const matchesSearch = 
+        order.order_number.toLowerCase().includes(searchLower) ||
+        order.customers?.name?.toLowerCase().includes(searchLower) ||
+        order.customers?.email?.toLowerCase().includes(searchLower);
+      
+      // Status filter
+      const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+      
+      // Payment status filter
+      const matchesPayment = paymentStatusFilter === "all" || order.payment_status === paymentStatusFilter;
+      
+      // Date range filter
+      let matchesDateRange = true;
+      if (dateRange?.from && dateRange?.to) {
+        const orderDate = new Date(order.created_at);
+        matchesDateRange = isWithinInterval(orderDate, {
+          start: startOfDay(dateRange.from),
+          end: endOfDay(dateRange.to),
+        });
+      } else if (dateRange?.from) {
+        const orderDate = new Date(order.created_at);
+        matchesDateRange = orderDate >= startOfDay(dateRange.from);
+      }
+      
+      return matchesSearch && matchesStatus && matchesPayment && matchesDateRange;
+    });
+  }, [orders, debouncedSearch, statusFilter, paymentStatusFilter, dateRange]);
 
   // Handle sort
   const handleSort = useCallback((column: SortColumn) => {
@@ -152,41 +183,6 @@ const Orders = () => {
       description: t('orders.refreshedDesc', 'Les commandes ont été actualisées'),
     });
   }, [refetch, toast, t]);
-
-  // Filter orders
-  const filteredOrders = useMemo(() => {
-    if (!orders) return [];
-    
-    return orders.filter((order) => {
-      // Search filter
-      const searchLower = debouncedSearch.toLowerCase();
-      const matchesSearch = 
-        order.order_number.toLowerCase().includes(searchLower) ||
-        order.customers?.name?.toLowerCase().includes(searchLower) ||
-        order.customers?.email?.toLowerCase().includes(searchLower);
-      
-      // Status filter
-      const matchesStatus = statusFilter === "all" || order.status === statusFilter;
-      
-      // Payment status filter
-      const matchesPayment = paymentStatusFilter === "all" || order.payment_status === paymentStatusFilter;
-      
-      // Date range filter
-      let matchesDateRange = true;
-      if (dateRange?.from && dateRange?.to) {
-        const orderDate = new Date(order.created_at);
-        matchesDateRange = isWithinInterval(orderDate, {
-          start: startOfDay(dateRange.from),
-          end: endOfDay(dateRange.to),
-        });
-      } else if (dateRange?.from) {
-        const orderDate = new Date(order.created_at);
-        matchesDateRange = orderDate >= startOfDay(dateRange.from);
-      }
-      
-      return matchesSearch && matchesStatus && matchesPayment && matchesDateRange;
-    });
-  }, [orders, debouncedSearch, statusFilter, paymentStatusFilter, dateRange]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
