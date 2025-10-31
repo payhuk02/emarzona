@@ -9,7 +9,7 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 45
     runs-on: ubuntu-latest
     
     steps:
@@ -55,7 +55,7 @@ jobs:
         retention-days: 7
 
   test-products:
-    timeout-minutes: 30
+    timeout-minutes: 25
     runs-on: ubuntu-latest
     
     steps:

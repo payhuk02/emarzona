@@ -14,6 +14,9 @@ export default defineConfig({
   globalSetup: './tests/setup/global-setup.ts',
   globalTeardown: './tests/setup/global-teardown.ts',
   
+  /* Maximum time one test can run for. */
+  timeout: 60 * 1000, // 60 seconds per test
+  
   /* Run tests in files in parallel */
   fullyParallel: true,
   
@@ -21,10 +24,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 1 : 0,
   
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  /* Run tests in parallel on CI for faster execution */
+  workers: process.env.CI ? 3 : undefined,
   
   /* Reporter to use. */
   reporter: [
