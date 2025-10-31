@@ -1,4 +1,5 @@
 import { Search, SlidersHorizontal, Filter, X, Grid3X3, List, BarChart3 } from "lucide-react";
+import { Command } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -93,48 +94,50 @@ const ProductFiltersDashboard = ({
   ];
 
   return (
-    <div className="space-y-4">
-      {/* Statistiques rapides */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <div className="space-y-3 sm:space-y-4">
+      {/* Statistiques rapides avec design amélioré */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 sm:p-4 bg-card/30 rounded-lg border border-border/30 backdrop-blur-sm">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">
+            <BarChart3 className="h-4 w-4 text-primary" />
+            <span className="text-xs sm:text-sm font-medium text-foreground">
               {totalProducts} produit{totalProducts > 1 ? "s" : ""} total
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-green-500"></div>
-            <span className="text-sm text-muted-foreground">
+            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+            <span className="text-xs sm:text-sm text-muted-foreground">
               {activeProducts} actif{activeProducts > 1 ? "s" : ""}
             </span>
           </div>
         </div>
         
         {onViewModeChange && (
-          <div className="flex items-center gap-1 border rounded-lg p-1">
+          <div className="flex items-center gap-1 border border-border/50 rounded-lg p-1 bg-background/50">
             <Button
               variant={viewMode === "grid" ? "default" : "ghost"}
               size="sm"
               onClick={() => onViewModeChange("grid")}
-              className="h-8 w-8 p-0"
+              className="h-7 sm:h-8 w-7 sm:w-8 p-0 transition-all duration-200 hover:scale-110"
+              aria-label="Vue en grille"
             >
-              <Grid3X3 className="h-4 w-4" />
+              <Grid3X3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
             <Button
               variant={viewMode === "list" ? "default" : "ghost"}
               size="sm"
               onClick={() => onViewModeChange("list")}
-              className="h-8 w-8 p-0"
+              className="h-7 sm:h-8 w-7 sm:w-8 p-0 transition-all duration-200 hover:scale-110"
+              aria-label="Vue en liste"
             >
-              <List className="h-4 w-4" />
+              <List className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
           </div>
         )}
       </div>
 
-      {/* Barre de recherche et filtres */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      {/* Barre de recherche et filtres avec design amélioré */}
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -142,33 +145,38 @@ const ProductFiltersDashboard = ({
             placeholder="Rechercher un produit..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10"
+            className="pl-10 pr-9 h-9 sm:h-10 bg-background/50 border-border/50 focus:bg-background focus:border-primary/50 transition-all duration-200"
           />
           {searchQuery && (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onSearchChange("")}
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 hover:bg-accent/50 transition-all duration-200"
+              aria-label="Effacer la recherche"
             >
-              <X className="h-3 w-3" />
+              <X className="h-3.5 w-3.5" />
             </Button>
           )}
         </div>
 
         <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="relative">
-              <SlidersHorizontal className="h-4 w-4 mr-2" />
-              Filtres
+            <Button 
+              variant="outline" 
+              className="relative h-9 sm:h-10 hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95"
+            >
+              <SlidersHorizontal className="h-4 w-4 mr-1.5 sm:mr-2" />
+              <span className="hidden sm:inline">Filtres</span>
+              <span className="sm:hidden">Filtres</span>
               {hasFilters && (
-                <Badge variant="secondary" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                <Badge variant="secondary" className="ml-1.5 sm:ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] font-semibold animate-in zoom-in-95 duration-200">
                   {getActiveFiltersCount()}
                 </Badge>
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80" align="end">
+          <PopoverContent className="w-[calc(100vw-2rem)] sm:w-80 max-w-[320px] sm:max-w-none" align="end" sideOffset={8}>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium flex items-center gap-2">
@@ -342,7 +350,7 @@ const ProductFiltersDashboard = ({
         </Popover>
 
         <Select value={sortBy} onValueChange={onSortByChange}>
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger className="w-full sm:w-[140px] lg:w-[180px] h-9 sm:h-10 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200">
             <SelectValue placeholder="Trier par" />
           </SelectTrigger>
           <SelectContent>

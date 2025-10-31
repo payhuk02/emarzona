@@ -81,111 +81,111 @@ const ProductStats = ({ products, filteredProducts }: ProductStatsProps) => {
   });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Produits totaux</CardTitle>
-          <Package className="h-4 w-4 text-muted-foreground" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+      <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+          <CardTitle className="text-xs sm:text-sm font-medium">Produits totaux</CardTitle>
+          <Package className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{totalProducts}</div>
-          <div className="flex items-center gap-2 mt-1">
-            <Badge variant="secondary" className="text-xs">
+        <CardContent className="p-4 sm:p-6 pt-0">
+          <div className="text-xl sm:text-2xl font-bold mb-2">{totalProducts}</div>
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            <Badge variant="secondary" className="text-[10px] sm:text-xs animate-in zoom-in-95 duration-200">
               {activeProducts} actifs
             </Badge>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-[10px] sm:text-xs">
               {inactiveProducts} inactifs
             </Badge>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Revenus potentiels</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
+      <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+          <CardTitle className="text-xs sm:text-sm font-medium">Revenus potentiels</CardTitle>
+          <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{totalRevenue.toLocaleString()} FCFA</div>
-          <p className="text-xs text-muted-foreground mt-1">
+        <CardContent className="p-4 sm:p-6 pt-0">
+          <div className="text-xl sm:text-2xl font-bold mb-1">{totalRevenue.toLocaleString()} FCFA</div>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">
             Prix moyen: {averagePrice.toLocaleString()} FCFA
           </p>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Performance</CardTitle>
-          <Star className="h-4 w-4 text-muted-foreground" />
+      <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+          <CardTitle className="text-xs sm:text-sm font-medium">Performance</CardTitle>
+          <Star className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200 fill-yellow-400/50 group-hover:fill-yellow-400" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{averageRating.toFixed(1)}/5</div>
-          <p className="text-xs text-muted-foreground mt-1">
+        <CardContent className="p-4 sm:p-6 pt-0">
+          <div className="text-xl sm:text-2xl font-bold mb-1">{averageRating.toFixed(1)}/5</div>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">
             {totalReviews} avis au total
           </p>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Top catégorie</CardTitle>
-          <BarChart3 className="h-4 w-4 text-muted-foreground" />
+      <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+          <CardTitle className="text-xs sm:text-sm font-medium">Top catégorie</CardTitle>
+          <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
+        <CardContent className="p-4 sm:p-6 pt-0">
+          <div className="text-lg sm:text-xl lg:text-2xl font-bold mb-1 line-clamp-1">
             {topCategory ? topCategory[0] : "Aucune"}
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[10px] sm:text-xs text-muted-foreground">
             {topCategory ? `${topCategory[1]} produit${topCategory[1] > 1 ? "s" : ""}` : "Pas de catégorie"}
           </p>
         </CardContent>
       </Card>
 
       {/* Nouvelle carte : Statistiques de stock */}
-      <Card className={stockStats.needsRestock > 0 ? "border-orange-500/50" : ""}>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">État des stocks</CardTitle>
+      <Card className={`group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm ${stockStats.needsRestock > 0 ? "border-orange-500/50 shadow-orange-500/10" : ""}`}>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+          <CardTitle className="text-xs sm:text-sm font-medium">État des stocks</CardTitle>
           {stockStats.needsRestock > 0 ? (
-            <AlertTriangle className="h-4 w-4 text-orange-500" />
+            <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500 animate-pulse" />
           ) : (
-            <PackageCheck className="h-4 w-4 text-green-500" />
+            <PackageCheck className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 group-hover:scale-110 transition-transform duration-200" />
           )}
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6 pt-0">
           {productsWithInventory.length > 0 ? (
             <>
               <div className="flex items-center gap-2 mb-2">
-                <div className="text-2xl font-bold">{productsWithInventory.length}</div>
-                <span className="text-sm text-muted-foreground">produits</span>
+                <div className="text-xl sm:text-2xl font-bold">{productsWithInventory.length}</div>
+                <span className="text-xs sm:text-sm text-muted-foreground">produits</span>
               </div>
-              <div className="flex flex-wrap items-center gap-1">
+              <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
                 {stockStats.in_stock > 0 && (
-                  <Badge variant="outline" className="text-xs bg-green-500/20 text-green-400 border-green-500/30">
+                  <Badge variant="outline" className="text-[10px] sm:text-xs bg-green-500/20 text-green-400 border-green-500/30 animate-in zoom-in-95 duration-200">
                     <PackageCheck className="h-3 w-3 mr-1" />
                     {stockStats.in_stock}
                   </Badge>
                 )}
                 {stockStats.low_stock > 0 && (
-                  <Badge variant="outline" className="text-xs bg-orange-500/20 text-orange-400 border-orange-500/30">
+                  <Badge variant="outline" className="text-[10px] sm:text-xs bg-orange-500/20 text-orange-400 border-orange-500/30 animate-in zoom-in-95 duration-200">
                     <AlertTriangle className="h-3 w-3 mr-1" />
                     {stockStats.low_stock}
                   </Badge>
                 )}
                 {stockStats.out_of_stock > 0 && (
-                  <Badge variant="outline" className="text-xs bg-red-500/20 text-red-400 border-red-500/30">
+                  <Badge variant="outline" className="text-[10px] sm:text-xs bg-red-500/20 text-red-400 border-red-500/30 animate-in zoom-in-95 duration-200">
                     <PackageX className="h-3 w-3 mr-1" />
                     {stockStats.out_of_stock}
                   </Badge>
                 )}
               </div>
               {stockStats.needsRestock > 0 && (
-                <p className="text-xs text-orange-500 font-medium mt-2">
+                <p className="text-[10px] sm:text-xs text-orange-500 font-medium mt-2 animate-in fade-in duration-300">
                   ⚠️ {stockStats.needsRestock} produit{stockStats.needsRestock > 1 ? "s" : ""} à réapprovisionner
                 </p>
               )}
             </>
           ) : (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs sm:text-sm text-muted-foreground">
               Aucun produit avec inventaire
             </div>
           )}

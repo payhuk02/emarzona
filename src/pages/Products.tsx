@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -12,13 +12,11 @@ import {
   RefreshCw, 
   Download, 
   Upload, 
-  Copy, 
   Eye, 
   ChevronLeft, 
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  FileSpreadsheet,
   Loader2
 } from "lucide-react";
 import { useStore } from "@/hooks/useStore";
@@ -46,20 +44,16 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { ProductGrid } from "@/components/ui/ProductGrid";
 import { Checkbox } from "@/components/ui/checkbox";
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { AlertCircle } from 'lucide-react';
 
 // Constantes pour la pagination
 const ITEMS_PER_PAGE = 12;
@@ -76,11 +70,9 @@ const Products = () => {
   // États
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
-  const [deletingProductIds, setDeletingProductIds] = useState<string[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
-  const [duplicatingProductId, setDuplicatingProductId] = useState<string | null>(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [exportingCSV, setExportingCSV] = useState(false);
   
@@ -218,6 +210,74 @@ const Products = () => {
   const filtersRef = useScrollAnimation<HTMLDivElement>();
   const productsRef = useScrollAnimation<HTMLDivElement>();
 
+  // Sélection de tous les produits
+  const handleSelectAll = useCallback(() => {
+    if (selectedProducts.length === paginatedProducts.length) {
+      setSelectedProducts([]);
+    } else {
+      setSelectedProducts(paginatedProducts.map(p => p.id));
+    }
+  }, [selectedProducts.length, paginatedProducts]);
+
+  // Raccourcis clavier avancés
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignorer si on est dans un input, textarea ou select
+      if (
+        (e.target as HTMLElement).tagName === 'INPUT' ||
+        (e.target as HTMLElement).tagName === 'TEXTAREA' ||
+        (e.target as HTMLElement).tagName === 'SELECT' ||
+        (e.target as HTMLElement).isContentEditable
+      ) {
+        return;
+      }
+
+      // Cmd/Ctrl + K : Focus sur la recherche
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        const searchInput = document.querySelector('input[type="search"]') as HTMLInputElement;
+        if (searchInput) {
+          searchInput.focus();
+        }
+      }
+
+      // Cmd/Ctrl + N : Nouveau produit
+      if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
+        e.preventDefault();
+        navigate("/dashboard/products/new");
+      }
+
+      // Cmd/Ctrl + A : Sélectionner tous les produits visibles
+      if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+        e.preventDefault();
+        handleSelectAll();
+      }
+
+      // Escape : Effacer la sélection
+      if (e.key === 'Escape' && selectedProducts.length > 0) {
+        setSelectedProducts([]);
+      }
+
+      // G : Basculer vue grille/liste
+      if (e.key === 'g' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        setViewMode(prev => prev === "grid" ? "list" : "grid");
+      }
+
+      // / : Focus sur la recherche
+      if (e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        const searchInput = document.querySelector('input[type="search"]') as HTMLInputElement;
+        if (searchInput) {
+          searchInput.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate, selectedProducts, handleSelectAll]);
+
   // Handlers optimisés avec useCallback
   const handleDelete = useCallback(async () => {
     if (deletingProductId) {
@@ -246,7 +306,6 @@ const Products = () => {
     try {
       logger.info(`Suppression en lot de ${productIds.length} produits`);
       await Promise.all(productIds.map(id => deleteProduct(id)));
-      setDeletingProductIds([]);
       setSelectedProducts([]);
       await refetch();
       logger.info('Produits supprimés avec succès');
@@ -327,14 +386,15 @@ const Products = () => {
         return;
       }
 
-      const duplicatedProduct = {
-        ...product,
-        id: undefined,
-        name: `${product.name} (copie)`,
-        slug: `${product.slug}-copie-${Date.now()}`,
-        created_at: undefined,
-        updated_at: undefined,
-      };
+      // TODO: Implémenter la duplication via l'API
+      // const duplicatedProduct = {
+      //   ...product,
+      //   id: undefined,
+      //   name: `${product.name} (copie)`,
+      //   slug: `${product.slug}-copie-${Date.now()}`,
+      //   created_at: undefined,
+      //   updated_at: undefined,
+      // };
 
       // Ici, vous devriez appeler votre API pour créer le nouveau produit
       // Pour l'instant, simulons avec une mise à jour
@@ -434,14 +494,6 @@ const Products = () => {
     }
   }, [filteredProducts, toast]);
 
-  // Sélection de tous les produits
-  const handleSelectAll = useCallback(() => {
-    if (selectedProducts.length === paginatedProducts.length) {
-      setSelectedProducts([]);
-    } else {
-      setSelectedProducts(paginatedProducts.map(p => p.id));
-    }
-  }, [selectedProducts, paginatedProducts]);
 
   // Pagination handlers
   const handlePageChange = useCallback((page: number) => {
@@ -506,29 +558,49 @@ const Products = () => {
         <AppSidebar />
         
         <div className="flex-1 flex flex-col">
-          <header className="sticky top-0 z-10 border-b bg-card shadow-soft backdrop-blur-sm" role="banner">
-            <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
-              <SidebarTrigger aria-label={t('dashboard.sidebarToggle', 'Toggle sidebar')} />
-              <div className="flex-1">
-                <h1 className="text-xl sm:text-2xl font-bold" id="products-title">{t('products.title')}</h1>
+          <header className="sticky top-0 z-20 border-b bg-card/95 backdrop-blur-md shadow-sm transition-all duration-300" role="banner">
+            <div className="flex h-14 sm:h-16 items-center gap-3 sm:gap-4 px-3 sm:px-4 lg:px-6">
+              <SidebarTrigger 
+                aria-label={t('dashboard.sidebarToggle', 'Toggle sidebar')}
+                className="hover:bg-accent/50 transition-colors duration-200"
+              />
+              <div className="flex-1 min-w-0">
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate" id="products-title">
+                  {t('products.title')}
+                </h1>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                 <Button 
-                  variant="outline" 
+                  variant="ghost" 
                   size="sm" 
                   onClick={handleRefresh} 
                   disabled={productsLoading}
                   aria-label={t('products.refresh')}
+                  className="hidden sm:flex hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95"
+                  title={`Actualiser (F5)`}
                 >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${productsLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
-                  <span className="hidden sm:inline">{t('products.refresh')}</span>
+                  <RefreshCw className={`h-4 w-4 ${productsLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
+                  <span className="hidden lg:inline ml-2">{t('products.refresh')}</span>
+                </Button>
+                <Button 
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleRefresh} 
+                  disabled={productsLoading}
+                  aria-label={t('products.refresh')}
+                  className="sm:hidden hover:scale-110 active:scale-95 transition-transform duration-200"
+                  title="Actualiser"
+                >
+                  <RefreshCw className={`h-4 w-4 ${productsLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
                 </Button>
                 <Button 
                   onClick={() => navigate("/dashboard/products/new")} 
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all duration-200 group hover:scale-105 active:scale-95"
                   aria-label={t('products.addNew')}
+                  size="sm"
+                  title="Nouveau produit (Cmd/Ctrl+N)"
                 >
-                  <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
+                  <Plus className="h-4 w-4 mr-1.5 sm:mr-2 group-hover:rotate-90 transition-transform duration-200" aria-hidden="true" />
                   <span className="hidden sm:inline">{t('products.addNew')}</span>
                   <span className="sm:hidden">{t('products.add')}</span>
                 </Button>
@@ -536,41 +608,45 @@ const Products = () => {
             </div>
           </header>
 
-          <main className="flex-1 p-4 sm:p-6 bg-gradient-hero" role="main" aria-labelledby="products-title">
-            <div className="max-w-7xl mx-auto space-y-6">
+          <main className="flex-1 p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-background via-background to-muted/20" role="main" aria-labelledby="products-title">
+            <div className="max-w-7xl mx-auto space-y-4 sm:space-y-5 lg:space-y-6">
               {productsLoading ? (
-                <Card className="shadow-medium">
+                <Card className="shadow-sm border-border/50 bg-card/50 backdrop-blur-sm">
                   <CardContent className="py-12 text-center" role="status" aria-live="polite">
-                    <Loader2 className="inline-block h-8 w-8 animate-spin text-primary" aria-hidden="true" />
+                    <Loader2 className="inline-block h-8 w-8 animate-spin text-primary mb-3" aria-hidden="true" />
                     <p className="mt-2 text-muted-foreground">{t('common.loading')}</p>
                   </CardContent>
                 </Card>
               ) : products.length === 0 ? (
-                <Card className="shadow-medium border-2 border-dashed">
-                  <CardHeader className="text-center py-12">
-                    <div className="flex justify-center mb-4">
-                      <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
-                        <Package className="h-10 w-10 text-muted-foreground" />
+                <Card className="shadow-sm border-2 border-dashed border-border/50 bg-card/30 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
+                  <CardHeader className="text-center py-8 sm:py-12">
+                    <div className="flex justify-center mb-4 animate-in zoom-in-95 duration-500">
+                      <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                        <Package className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
                       </div>
                     </div>
-                    <CardTitle className="text-2xl">{t('products.empty.title')}</CardTitle>
-                    <CardDescription className="mt-2 text-base">
+                    <CardTitle className="text-xl sm:text-2xl font-bold">{t('products.empty.title')}</CardTitle>
+                    <CardDescription className="mt-2 text-sm sm:text-base">
                       {t('products.empty.description')}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="text-center pb-12">
+                  <CardContent className="text-center pb-8 sm:pb-12">
                     <div className="space-y-4">
-                      <Button onClick={() => navigate("/dashboard/products/new")} size="lg" className="bg-blue-600 hover:bg-blue-700">
-                        <Plus className="h-5 w-5 mr-2" />
+                      <Button 
+                        onClick={() => navigate("/dashboard/products/new")} 
+                        size="lg" 
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 group"
+                      >
+                        <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform duration-200" />
                         {t('products.add')}
                       </Button>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-xs sm:text-sm text-muted-foreground">
                         <p className="mb-3">{t('common.or')} {t('products.import').toLowerCase()}</p>
                         <Button 
                           variant="outline" 
                           size="sm" 
                           onClick={() => setImportDialogOpen(true)}
-                          className="hover:bg-muted"
+                          className="hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95"
                         >
                           <Upload className="h-4 w-4 mr-2" />
                           {t('products.import')}
@@ -581,24 +657,36 @@ const Products = () => {
                 </Card>
               ) : (
                 <>
-                  {/* Statistiques */}
-                  <div ref={statsRef} role="region" aria-label={t('products.stats.ariaLabel', 'Statistiques des produits')}>
+                  {/* Statistiques avec animations améliorées */}
+                  <div 
+                    ref={statsRef} 
+                    role="region" 
+                    aria-label={t('products.stats.ariaLabel', 'Statistiques des produits')}
+                    className="animate-in fade-in slide-in-from-top-4 duration-500"
+                  >
                     <ProductStats products={products} filteredProducts={filteredProducts} />
                   </div>
 
-                  {/* Actions en lot */}
+                  {/* Actions en lot avec animation */}
                   {selectedProducts.length > 0 && (
-                    <ProductBulkActions
-                      selectedProducts={selectedProducts}
-                      products={products}
-                      onSelectionChange={setSelectedProducts}
-                      onBulkAction={handleBulkAction}
-                      onDelete={handleBulkDelete}
-                    />
+                    <div className="animate-in slide-in-from-top-2 duration-300">
+                      <ProductBulkActions
+                        selectedProducts={selectedProducts}
+                        products={products}
+                        onSelectionChange={setSelectedProducts}
+                        onBulkAction={handleBulkAction}
+                        onDelete={handleBulkDelete}
+                      />
+                    </div>
                   )}
 
-                  {/* Filtres */}
-                  <div ref={filtersRef} role="region" aria-label={t('products.filters.ariaLabel', 'Filtres de recherche')}>
+                  {/* Filtres avec animations */}
+                  <div 
+                    ref={filtersRef} 
+                    role="region" 
+                    aria-label={t('products.filters.ariaLabel', 'Filtres de recherche')}
+                    className="animate-in fade-in slide-in-from-bottom-2 duration-500"
+                  >
                     <ProductFiltersDashboard
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
@@ -622,80 +710,131 @@ const Products = () => {
                   </div>
 
                   {filteredProducts.length === 0 ? (
-                    <Card className="shadow-medium">
-                      <CardContent className="py-12 text-center">
-                        <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">{t('products.empty.noResults')}</h3>
-                        <p className="text-muted-foreground mb-4">
+                    <Card className="shadow-sm border-border/50 bg-card/30 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
+                      <CardContent className="py-8 sm:py-12 text-center">
+                        <Package className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4 animate-pulse" />
+                        <h3 className="text-base sm:text-lg font-semibold mb-2">{t('products.empty.noResults')}</h3>
+                        <p className="text-sm sm:text-base text-muted-foreground mb-4">
                           {t('products.empty.noResultsDescription')}
                         </p>
-                        <Button variant="outline" onClick={() => {
-                          setSearchQuery("");
-                          setCategory("all");
-                          setProductType("all");
-                          setStatus("all");
-                          setPriceRange([0, 1000000]);
-                          setDateRange([null, null]);
-                        }}>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => {
+                            setSearchQuery("");
+                            setCategory("all");
+                            setProductType("all");
+                            setStatus("all");
+                            setPriceRange([0, 1000000]);
+                            setDateRange([null, null]);
+                          }}
+                          className="hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95"
+                        >
                           {t('common.clearFilters', 'Effacer les filtres')}
                         </Button>
                       </CardContent>
                     </Card>
                   ) : (
                     <>
-                      <div className="flex items-center justify-between flex-wrap gap-4">
-                        <div className="flex items-center gap-3">
+                      {/* Barre d'actions avec design amélioré */}
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 sm:p-4 bg-card/50 rounded-lg border border-border/50 backdrop-blur-sm">
+                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                           {paginatedProducts.length > 0 && (
                             <Checkbox
-                              checked={selectedProducts.length === paginatedProducts.length}
+                              checked={selectedProducts.length === paginatedProducts.length && paginatedProducts.length > 0}
                               onCheckedChange={handleSelectAll}
                               aria-label="Sélectionner tous les produits"
+                              className="transition-all duration-200"
                             />
                           )}
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-medium text-foreground">
                               {filteredProducts.length} produit{filteredProducts.length > 1 ? "s" : ""} trouvé{filteredProducts.length > 1 ? "s" : ""}
                             </p>
                             {selectedProducts.length > 0 && (
-                              <Badge variant="secondary">
+                              <Badge variant="default" className="animate-in zoom-in-95 duration-200 shadow-sm">
                                 {selectedProducts.length} sélectionné{selectedProducts.length > 1 ? "s" : ""}
                               </Badge>
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
                           <Button 
                             variant="outline" 
                             size="sm" 
                             onClick={() => setImportDialogOpen(true)}
-                            className="hover:bg-muted"
+                            className="flex-1 sm:flex-initial hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95"
                           >
-                            <Upload className="h-4 w-4 mr-2" />
+                            <Upload className="h-4 w-4 mr-1.5 sm:mr-2" />
                             <span className="hidden sm:inline">Importer</span>
+                            <span className="sm:hidden">Import</span>
                           </Button>
                           <Button 
                             variant="outline" 
                             size="sm" 
                             onClick={handleExportCSV}
                             disabled={exportingCSV || filteredProducts.length === 0}
-                            className="hover:bg-muted"
+                            className="flex-1 sm:flex-initial hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {exportingCSV ? (
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              <Loader2 className="h-4 w-4 mr-1.5 sm:mr-2 animate-spin" />
                             ) : (
-                              <Download className="h-4 w-4 mr-2" />
+                              <Download className="h-4 w-4 mr-1.5 sm:mr-2" />
                             )}
                             <span className="hidden sm:inline">Exporter</span>
+                            <span className="sm:hidden">Export</span>
                           </Button>
                         </div>
                       </div>
 
                       {viewMode === "grid" ? (
-                        <div ref={productsRef} role="region" aria-label={t('products.list.ariaLabel', 'Liste des produits')}>
-                          <ProductGrid>
-                            {paginatedProducts.map((product) => (
-                              <ProductCardDashboard
+                        <div 
+                          ref={productsRef} 
+                          role="region" 
+                          aria-label={t('products.list.ariaLabel', 'Liste des produits')}
+                          className="animate-in fade-in slide-in-from-bottom-4 duration-700"
+                        >
+                          <ProductGrid className="gap-3 sm:gap-4 lg:gap-6">
+                            {paginatedProducts.map((product, index) => (
+                              <div
                                 key={product.id}
+                                className="animate-in fade-in slide-in-from-bottom-2"
+                                style={{ animationDelay: `${index * 50}ms` }}
+                              >
+                                <ProductCardDashboard
+                                  product={product}
+                                  storeSlug={store.slug}
+                                  onEdit={() => setEditingProduct(product)}
+                                  onDelete={() => setDeletingProductId(product.id)}
+                                  onToggleStatus={() => handleToggleStatus(product.id)}
+                                  onDuplicate={() => handleDuplicateProduct(product.id)}
+                                  onQuickView={() => setQuickViewProduct(product)}
+                                  isSelected={selectedProducts.includes(product.id)}
+                                  onSelect={(selected) => {
+                                    if (selected) {
+                                      setSelectedProducts([...selectedProducts, product.id]);
+                                    } else {
+                                      setSelectedProducts(selectedProducts.filter(id => id !== product.id));
+                                    }
+                                  }}
+                                />
+                              </div>
+                            ))}
+                          </ProductGrid>
+                        </div>
+                      ) : (
+                        <div 
+                          ref={productsRef} 
+                          className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700" 
+                          role="region" 
+                          aria-label={t('products.list.ariaLabel', 'Liste des produits')}
+                        >
+                          {paginatedProducts.map((product, index) => (
+                            <div
+                              key={product.id}
+                              className="animate-in fade-in slide-in-from-left-2"
+                              style={{ animationDelay: `${index * 30}ms` }}
+                            >
+                              <ProductListView
                                 product={product}
                                 storeSlug={store.slug}
                                 onEdit={() => setEditingProduct(product)}
@@ -712,54 +851,32 @@ const Products = () => {
                                   }
                                 }}
                               />
-                            ))}
-                          </ProductGrid>
-                        </div>
-                      ) : (
-                        <div ref={productsRef} className="space-y-3" role="region" aria-label={t('products.list.ariaLabel', 'Liste des produits')}>
-                          {paginatedProducts.map((product) => (
-                            <ProductListView
-                              key={product.id}
-                              product={product}
-                              storeSlug={store.slug}
-                              onEdit={() => setEditingProduct(product)}
-                              onDelete={() => setDeletingProductId(product.id)}
-                              onToggleStatus={() => handleToggleStatus(product.id)}
-                              onDuplicate={() => handleDuplicateProduct(product.id)}
-                              onQuickView={() => setQuickViewProduct(product)}
-                              isSelected={selectedProducts.includes(product.id)}
-                              onSelect={(selected) => {
-                                if (selected) {
-                                  setSelectedProducts([...selectedProducts, product.id]);
-                                } else {
-                                  setSelectedProducts(selectedProducts.filter(id => id !== product.id));
-                                }
-                              }}
-                            />
+                            </div>
                           ))}
                         </div>
                       )}
 
-                      {/* Pagination */}
+                      {/* Pagination avec design amélioré */}
                       {totalPages > 1 && (
-                        <Card className="shadow-soft">
-                          <CardContent className="p-4">
-                            <nav className="flex flex-col sm:flex-row items-center justify-between gap-4" role="navigation" aria-label={t('products.pagination.ariaLabel', 'Navigation des pages')}>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Card className="shadow-sm border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-2 duration-500">
+                          <CardContent className="p-3 sm:p-4">
+                            <nav className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4" role="navigation" aria-label={t('products.pagination.ariaLabel', 'Navigation des pages')}>
+                              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground flex-wrap justify-center sm:justify-start">
                                 <label htmlFor="items-per-page" className="sr-only">{t('products.pagination.itemsPerPage')}</label>
-                                <span>{t('products.pagination.displaying', 'Affichage de')}</span>
+                                <span className="hidden sm:inline">{t('products.pagination.displaying', 'Affichage de')}</span>
                                 <select
                                   id="items-per-page"
                                   value={itemsPerPage}
                                   onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                                  className="px-2 py-1 border rounded-md bg-background"
+                                  className="px-2 py-1.5 border rounded-md bg-background text-xs sm:text-sm hover:bg-accent/50 transition-colors duration-200 focus:ring-2 focus:ring-primary focus:ring-offset-1"
                                   aria-label={t('products.pagination.selectItemsPerPage')}
                                 >
                                   {PAGINATION_OPTIONS.map(option => (
                                     <option key={option} value={option}>{option}</option>
                                   ))}
                                 </select>
-                                <span>{t('products.pagination.perPage', 'produits par page')}</span>
+                                <span className="hidden sm:inline">{t('products.pagination.perPage', 'produits par page')}</span>
+                                <span className="sm:hidden">/ page</span>
                               </div>
 
                               <div className="flex items-center gap-1" role="group" aria-label={t('products.pagination.controls')}>
@@ -769,6 +886,7 @@ const Products = () => {
                                   onClick={() => handlePageChange(1)}
                                   disabled={currentPage === 1}
                                   aria-label={t('products.pagination.firstPage', 'Première page')}
+                                  className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40"
                                 >
                                   <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
                                 </Button>
@@ -778,11 +896,12 @@ const Products = () => {
                                   onClick={() => handlePageChange(currentPage - 1)}
                                   disabled={currentPage === 1}
                                   aria-label={t('products.pagination.previousPage', 'Page précédente')}
+                                  className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40"
                                 >
                                   <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                                 </Button>
 
-                                <div className="flex items-center gap-1 px-2">
+                                <div className="flex items-center gap-1 px-1 sm:px-2">
                                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                                     let pageNumber;
                                     if (totalPages <= 5) {
@@ -801,8 +920,8 @@ const Products = () => {
                                         variant={currentPage === pageNumber ? "default" : "outline"}
                                         size="sm"
                                         onClick={() => handlePageChange(pageNumber)}
-                                        className="min-w-[36px]"
-                                        aria-label={t('products.pagination.goToPage', { page: pageNumber }, `Aller à la page ${pageNumber}`)}
+                                        className="min-w-[32px] sm:min-w-[36px] h-8 transition-all duration-200 hover:scale-105 active:scale-95"
+                                        aria-label={`Aller à la page ${pageNumber}`}
                                         aria-current={currentPage === pageNumber ? "page" : undefined}
                                       >
                                         {pageNumber}
@@ -817,6 +936,7 @@ const Products = () => {
                                   onClick={() => handlePageChange(currentPage + 1)}
                                   disabled={currentPage === totalPages}
                                   aria-label={t('products.pagination.nextPage', 'Page suivante')}
+                                  className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40"
                                 >
                                   <ChevronRight className="h-4 w-4" aria-hidden="true" />
                                 </Button>
@@ -826,13 +946,14 @@ const Products = () => {
                                   onClick={() => handlePageChange(totalPages)}
                                   disabled={currentPage === totalPages}
                                   aria-label={t('products.pagination.lastPage', 'Dernière page')}
+                                  className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40"
                                 >
                                   <ChevronsRight className="h-4 w-4" aria-hidden="true" />
                                 </Button>
                               </div>
 
-                              <div className="text-sm text-muted-foreground">
-                                Page {currentPage} sur {totalPages}
+                              <div className="text-xs sm:text-sm text-muted-foreground font-medium">
+                                Page {currentPage} <span className="hidden sm:inline">sur</span> <span className="sm:hidden">/</span> {totalPages}
                               </div>
                             </nav>
                           </CardContent>
@@ -895,10 +1016,10 @@ const Products = () => {
             </DialogHeader>
 
             <div className="space-y-4">
-              {quickViewProduct.images && quickViewProduct.images.length > 0 && (
+              {quickViewProduct.image_url && (
                 <div className="aspect-video w-full rounded-lg overflow-hidden bg-muted">
                   <img
-                    src={quickViewProduct.images[0]}
+                    src={quickViewProduct.image_url}
                     alt={quickViewProduct.name}
                     className="w-full h-full object-cover"
                   />

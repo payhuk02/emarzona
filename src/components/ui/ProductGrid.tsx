@@ -88,7 +88,7 @@ export const ProductGrid = ({
       ref={gridRef}
       className={cn(
         "products-grid-mobile sm:products-grid-tablet lg:products-grid-desktop xl:products-grid-wide",
-        "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-1.5 sm:gap-6 lg:gap-8 w-full max-w-full",
+        "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 w-full max-w-full",
         className
       )}
     >
