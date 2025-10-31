@@ -35,6 +35,10 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { SEOMeta } from "@/components/seo/SEOMeta";
+import { WebsiteSchema } from "@/components/seo/WebsiteSchema";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 const Landing = () => {
   const { t } = useTranslation();
@@ -77,10 +81,33 @@ const Landing = () => {
     return () => clearInterval(timer);
   }, []);
 
+  const { t } = useTranslation();
+  const baseUrl = window.location.origin;
+
+  // Animations au scroll pour les sections
+  const heroRef = useScrollAnimation<HTMLDivElement>();
+  const featuresRef = useScrollAnimation<HTMLDivElement>();
+  const pricingRef = useScrollAnimation<HTMLDivElement>();
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
+      {/* SEO Meta Tags */}
+      <SEOMeta
+        title={t('landing.hero.title')}
+        description={t('landing.hero.subtitle')}
+        keywords="payhuk, marketplace, e-commerce, produits digitaux, afrique, mobile money, paiement XOF, CFA"
+        url={baseUrl}
+        canonical={baseUrl}
+        image={`${baseUrl}/og-landing.jpg`}
+        imageAlt="Payhuk - Marketplace de produits digitaux en Afrique"
+        type="website"
+        locale="fr_FR"
+      />
+
+      {/* Schema.org Website Data */}
+      <WebsiteSchema />
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur-sm shadow-soft">
+      <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur-sm shadow-soft" role="banner">
         <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 flex items-center justify-between gap-2 sm:gap-4">
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             <img src={payhukLogo} alt="Payhuk" className="h-6 w-6 sm:h-8 sm:w-8" />
@@ -90,7 +117,7 @@ const Landing = () => {
           </div>
           
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-2 xl:gap-3">
+          <nav className="hidden lg:flex items-center gap-2 xl:gap-3" aria-label="Navigation principale">
             <Link to="/marketplace">
               <Button variant="ghost" className="text-foreground hover:text-primary transition-smooth text-sm xl:text-base">
                 {t('landing.nav.marketplace')}
@@ -142,7 +169,7 @@ const Landing = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t bg-card/98 backdrop-blur-sm animate-fade-in-up">
+          <nav className="lg:hidden border-t bg-card/98 backdrop-blur-sm animate-fade-in-up" aria-label="Menu mobile">
             <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
               <Link to="/marketplace" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full text-foreground hover:text-primary transition-smooth">
@@ -193,12 +220,12 @@ const Landing = () => {
                 </Button>
               </Link>
             </div>
-          </div>
+          </nav>
         )}
       </header>
 
       {/* Hero Section */}
-      <section className="gradient-hero relative overflow-hidden py-12 sm:py-16 md:py-24 lg:py-32">
+      <section className="gradient-hero relative overflow-hidden py-12 sm:py-16 md:py-24 lg:py-32" ref={heroRef} aria-label="Section principale">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.1),transparent_50%)]"></div>
         <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center animate-fade-in-up">
@@ -301,11 +328,13 @@ const Landing = () => {
                             "{testimonial.content}"
                           </p>
                           <div className="flex items-center gap-3">
-                            <img 
-                              src={avatars[index]} 
-                              alt={testimonial.name}
+                            <OptimizedImage
+                              src={avatars[index]}
+                              alt={`Photo de ${testimonial.name}`}
+                              width={48}
+                              height={48}
                               className="h-12 w-12 rounded-full object-cover ring-2 ring-primary/20"
-                              loading="lazy"
+                              priority={index === 0}
                             />
                             <div>
                               <p className="font-semibold text-foreground">{testimonial.name}</p>
@@ -328,7 +357,7 @@ const Landing = () => {
       </section>
 
       {/* Feature Sections */}
-      <section className="py-16 md:py-20 bg-background">
+      <section className="py-16 md:py-20 bg-background" ref={featuresRef} aria-label="Fonctionnalités">
         <div className="container mx-auto px-4 space-y-20 md:space-y-32">
           {/* Feature 1 */}
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center max-w-6xl mx-auto">
@@ -598,7 +627,7 @@ const Landing = () => {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-16 md:py-20 bg-secondary/30 scroll-mt-20">
+      <section id="pricing" className="py-16 md:py-20 bg-secondary/30 scroll-mt-20" ref={pricingRef} aria-label="Tarification">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-foreground px-4">
@@ -814,7 +843,7 @@ const Landing = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-card py-12 md:py-16">
+      <footer className="border-t bg-card py-12 md:py-16" role="contentinfo">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-8 mb-12">
             <div className="col-span-2 md:col-span-1">
