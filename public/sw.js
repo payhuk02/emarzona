@@ -99,11 +99,26 @@ const strategies = {
   cacheFirst: async (request) => {
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
+      // Vérifier que le cache n'est pas obsolète en testant la réponse
       return cachedResponse;
     }
     
     try {
       const response = await fetch(request);
+      
+      // Si 404, supprimer du cache s'il existe et retourner erreur
+      if (response.status === 404) {
+        console.warn('[SW] Resource not found (404):', request.url);
+        const cache = await caches.open(CACHE_NAMES.static);
+        await cache.delete(request); // Nettoyer si présent
+        // Retourner une réponse qui redirige vers l'index pour SPA
+        if (request.url.includes('.js') || request.url.includes('.css')) {
+          // Pour les chunks, ne pas casser l'app, laisser le navigateur gérer
+          return response;
+        }
+        return response;
+      }
+      
       if (response.ok) {
         const responseClone = response.clone();
         const cache = await caches.open(CACHE_NAMES.static);
@@ -115,6 +130,13 @@ const strategies = {
     } catch (error) {
       // Ne pas throw, retourner une réponse d'erreur pour éviter les erreurs non gérées
       console.warn('[SW] Cache first fetch failed:', request.url, error);
+      // Si c'est un chunk JS/CSS manquant, retourner une réponse qui ne casse pas l'app
+      if (request.url.includes('.js') || request.url.includes('.css')) {
+        return new Response('', {
+          status: 404,
+          statusText: 'Not Found'
+        });
+      }
       return new Response('Asset not available', {
         status: 503,
         statusText: 'Service Unavailable'
