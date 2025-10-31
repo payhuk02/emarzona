@@ -64,7 +64,11 @@ export default function AdminSupport() {
       created_at: new Date(Date.now() - 86400000).toISOString(),
       messages_count: 5,
     },
-  ];
+  ], []);
+
+  useEffect(() => {
+    logger.info('Admin Support page chargée');
+  }, []);
 
   const getStatusBadge = useCallback((status: string) => {
     switch (status) {
