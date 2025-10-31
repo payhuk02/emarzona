@@ -1,15 +1,20 @@
 /**
- * Product Creation Router
- * Date: 27 octobre 2025
+ * Product Creation Router - Professional & Optimized
+ * Date: 2025-01-01
  * 
  * Point d'entrée unifié pour la création de produits.
  * Route automatiquement vers le wizard approprié selon le type.
+ * Version optimisée avec design professionnel, responsive et fonctionnalités avancées.
  */
 
-import { useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, ArrowLeft } from 'lucide-react';
 import { EnhancedProductTypeSelector } from './EnhancedProductTypeSelector';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 // Lazy loading des wizards pour optimiser les performances
 const CreateCourseWizard = lazy(() => 
@@ -45,19 +50,25 @@ interface ProductCreationRouterProps {
 /**
  * Loading fallback component
  */
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-[60vh]">
-    <Card className="w-full max-w-md">
-      <CardContent className="flex flex-col items-center justify-center py-12">
-        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-        <p className="text-lg font-medium">Chargement du wizard...</p>
-        <p className="text-sm text-muted-foreground mt-2">
-          Préparation de votre espace de création
-        </p>
-      </CardContent>
-    </Card>
-  </div>
-);
+const LoadingFallback = () => {
+  const { t } = useTranslation();
+  
+  return (
+    <div className="flex items-center justify-center min-h-[60vh] px-4">
+      <Card className="w-full max-w-md animate-in fade-in zoom-in duration-500">
+        <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16">
+          <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-primary mb-4 sm:mb-6" aria-hidden="true" />
+          <p className="text-base sm:text-lg font-medium text-center">
+            {t('wizard.loading', 'Chargement du wizard...')}
+          </p>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-2 text-center">
+            {t('wizard.loadingDesc', 'Préparation de votre espace de création')}
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
 
 /**
  * Router principal pour la création de produits
@@ -82,32 +93,56 @@ export const ProductCreationRouter = ({
   initialProductType,
   onSuccess,
 }: ProductCreationRouterProps) => {
+  const { t } = useTranslation();
   const [selectedType, setSelectedType] = useState<string | null>(
     initialProductType || null
   );
 
+  // Refs for animations
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+
   /**
    * Handler pour le changement de type
    */
-  const handleTypeSelect = (type: string) => {
+  const handleTypeSelect = useCallback((type: string) => {
+    logger.info('Type de produit sélectionné dans le router', { type });
     setSelectedType(type);
-  };
+  }, []);
 
   /**
    * Handler pour retour arrière (changement de type)
    */
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
+    logger.info('Retour au sélecteur de type');
     setSelectedType(null);
-  };
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  /**
+   * Logging on mount
+   */
+  useEffect(() => {
+    logger.info('ProductCreationRouter ouvert', { 
+      storeId, 
+      initialProductType,
+      selectedType 
+    });
+  }, [storeId, initialProductType, selectedType]);
 
   // Si pas encore de type sélectionné, afficher le sélecteur
   if (!selectedType) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Créer un nouveau produit</h1>
-          <p className="text-muted-foreground">
-            Choisissez le type de produit que vous souhaitez vendre
+      <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 max-w-7xl overflow-x-hidden">
+        <div 
+          ref={headerRef}
+          className="mb-6 sm:mb-8 animate-in fade-in slide-in-from-top-4 duration-700"
+        >
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+            {t('products.createNew', 'Créer un nouveau produit')}
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            {t('products.chooseType', 'Choisissez le type de produit que vous souhaitez vendre')}
           </p>
         </div>
         
@@ -159,14 +194,22 @@ export const ProductCreationRouter = ({
 
       {/* Fallback vers formulaire classique pour types non reconnus */}
       {!['course', 'digital', 'physical', 'service'].includes(selectedType) && (
-        <ProductForm
-          storeId={storeId}
-          storeSlug={storeSlug}
-          onSuccess={onSuccess}
-        />
+        <div className="container mx-auto px-4 py-8 max-w-5xl">
+          <Button
+            variant="ghost"
+            onClick={handleBack}
+            className="mb-6"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {t('common.back', 'Retour')}
+          </Button>
+          <ProductForm
+            storeId={storeId}
+            storeSlug={storeSlug}
+            onSuccess={onSuccess}
+          />
+        </div>
       )}
     </Suspense>
   );
 };
-
-
