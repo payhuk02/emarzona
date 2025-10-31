@@ -652,7 +652,7 @@ export const DigitalProductsList = () => {
                                 description: product?.description,
                                 price: product?.price || 0,
                                 currency: product?.currency || 'XOF',
-                                image_url: product?.primary_image_url || product?.image_url,
+                                image_url: product?.image_url,
                                 digital_type: dp.digital_type || 'other',
                                 total_downloads: dp.total_downloads || dp.totalDownloads || 0,
                                 license_type: dp.license_type || 'single',
@@ -680,9 +680,9 @@ export const DigitalProductsList = () => {
                               >
                                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                                   <div className="relative w-full sm:w-32 lg:w-40 h-40 sm:h-full min-h-[160px] overflow-hidden rounded-t-lg sm:rounded-l-lg sm:rounded-tr-none bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700">
-                                    {(product.primary_image_url || product.image_url) ? (
+                                    {product.image_url ? (
                                       <img
-                                        src={product.primary_image_url || product.image_url}
+                                        src={product.image_url}
                                         alt={product.name || 'Produit digital'}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                         loading="lazy"

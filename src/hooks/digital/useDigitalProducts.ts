@@ -121,6 +121,7 @@ export const useDigitalProducts = (storeId?: string) => {
 
         // Étape 2: Obtenir les digital_products avec jointure sur products
         // Utiliser la syntaxe de jointure Supabase avec la clé étrangère explicite
+        // Note: La colonne est 'image_url', pas 'primary_image_url'
         const { data, error } = await supabase
           .from('digital_products')
           .select(`
@@ -133,7 +134,7 @@ export const useDigitalProducts = (storeId?: string) => {
               price,
               currency,
               is_active,
-              primary_image_url,
+              image_url,
               store_id
             )
           `)
@@ -155,7 +156,7 @@ export const useDigitalProducts = (storeId?: string) => {
                 price,
                 currency,
                 is_active,
-                primary_image_url,
+                image_url,
                 store_id
               )
             `)
