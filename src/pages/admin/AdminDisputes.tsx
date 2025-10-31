@@ -130,7 +130,7 @@ const AdminDisputes = () => {
     }
     
     setDialogOpen(true);
-  };
+  }, []);
 
   const handleAction = useCallback(async () => {
     if (!selectedDispute) return;
