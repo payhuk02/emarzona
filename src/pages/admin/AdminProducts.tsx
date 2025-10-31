@@ -17,10 +17,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Package, Search, Trash2, AlertTriangle, Eye, Power, PowerOff } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '@/lib/utils';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { ProtectedAction } from '@/components/admin/ProtectedAction';
 import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
 import { useAdminMFA } from '@/hooks/useAdminMFA';
@@ -48,7 +50,12 @@ const AdminProducts = () => {
   const navigate = useNavigate();
   const { isAAL2 } = useAdminMFA();
 
-  const fetchProducts = async () => {
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const tableRef = useScrollAnimation<HTMLDivElement>();
+
+  const fetchProducts = useCallback(async () => {
+    logger.info('Chargement des produits admin');
     try {
       const { data, error } = await supabase
         .from('products')
@@ -66,21 +73,22 @@ const AdminProducts = () => {
       }));
 
       setProducts(productsWithStore);
-    } catch (error) {
-      console.error('Error fetching products:', error);
+      logger.info(`${productsWithStore.length} produits chargés`);
+    } catch (error: any) {
+      logger.error('Erreur lors du chargement des produits:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
-  const filteredProducts = products.filter(product =>
+  const filteredProducts = useMemo(() => products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.store_name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ), [products, searchTerm]);
 
   if (loading) {
     return (
@@ -98,16 +106,16 @@ const AdminProducts = () => {
       <RequireAAL2>
       <div className="container mx-auto p-6 space-y-6 animate-fade-in">
         <Admin2FABanner />
-        <div className="flex items-center justify-between">
+        <div ref={headerRef} className="flex items-center justify-between" role="banner">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-products-title">
               Gestion des produits
             </h1>
             <p className="text-muted-foreground mt-2">
               {products.length} produit{products.length > 1 ? 's' : ''} sur la plateforme
             </p>
           </div>
-          <Package className="h-5 w-5 text-muted-foreground" />
+          <Package className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
         </div>
 
         <Card>
@@ -125,7 +133,8 @@ const AdminProducts = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <Table>
+            <div ref={tableRef} role="region" aria-label="Tableau des produits">
+              <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Nom</TableHead>
@@ -219,10 +228,11 @@ const AdminProducts = () => {
               </TableBody>
             </Table>
             {filteredProducts.length === 0 && (
-              <div className="text-center py-12 text-muted-foreground">
+              <div className="text-center py-12 text-muted-foreground" role="status" aria-live="polite">
                 Aucun produit trouvé
               </div>
             )}
+            </div>
           </CardContent>
         </Card>
 

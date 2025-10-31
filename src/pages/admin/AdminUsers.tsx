@@ -41,8 +41,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Users, Search, Download, Shield, User, Ban, CheckCircle, Trash2, AlertTriangle, FileDown, ArrowUpDown, ArrowUp, ArrowDown, Filter, Plus, Edit3 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 import { useCurrentAdminPermissions } from '@/hooks/useCurrentAdminPermissions';
 import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
 import { useAdminMFA } from '@/hooks/useAdminMFA';
@@ -87,7 +88,8 @@ const AdminUsers = () => {
   const { isAAL2 } = useAdminMFA();
   
   // Fonction pour gérer le tri
-  const handleSort = (column: typeof sortBy) => {
+  const handleSort = useCallback((column: typeof sortBy) => {
+    logger.info(`Tri des utilisateurs par ${column}`);
     if (sortBy === column) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -95,20 +97,22 @@ const AdminUsers = () => {
       setSortDirection('desc');
     }
     setPage(1); // Reset à la page 1
-  };
+  }, [sortBy, sortDirection]);
   
   // Fonction pour gérer les filtres
-  const handleFilterChange = (key: keyof UserFilters, value: any) => {
+  const handleFilterChange = useCallback((key: keyof UserFilters, value: any) => {
+    logger.info(`Filtre utilisateurs ${key}: ${value}`);
     setFilters(prev => ({ ...prev, [key]: value }));
     setPage(1); // Reset à la page 1
-  };
+  }, []);
   
   // Calculer pagination
   const totalPages = Math.ceil(totalCount / pageSize);
   const from = (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, totalCount);
 
-  const exportToCSV = () => {
+  const exportToCSV = useCallback(() => {
+    logger.info(`Export CSV de ${users.length} utilisateurs`);
     const csvContent = [
       ['Email', 'Nom complet', 'Prénom', 'Nom', 'Rôle', 'Statut', 'Date d\'inscription'].join(','),
       ...users.map(user =>
@@ -132,11 +136,12 @@ const AdminUsers = () => {
     a.click();
     window.URL.revokeObjectURL(url);
     
+    logger.info('Export CSV réussi');
     toast({
       title: "Export réussi",
       description: `${users.length} utilisateur(s) exporté(s) en CSV`,
     });
-  };
+  }, [users, toast]);
 
   const exportToPDF = async () => {
     // Créer le contenu HTML pour le PDF

@@ -1,3 +1,4 @@
+import { useMemo, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useAdminStats } from '@/hooks/useAdminStats';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,11 +14,26 @@ import {
   BarChart3
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const AdminDashboard = () => {
   const { stats, loading } = useAdminStats();
 
-  const statsCards = [
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const usersRef = useScrollAnimation<HTMLDivElement>();
+  const storesRef = useScrollAnimation<HTMLDivElement>();
+
+  // Logging pour le chargement des stats
+  useEffect(() => {
+    if (!loading && stats) {
+      logger.info(`Admin Dashboard stats chargées: ${stats.totalUsers} utilisateurs, ${stats.totalStores} boutiques`);
+    }
+  }, [loading, stats]);
+
+  const statsCards = useMemo(() => [
     {
       title: "Utilisateurs totaux",
       value: stats.totalUsers,
@@ -74,7 +90,7 @@ const AdminDashboard = () => {
       color: "text-pink-600",
       bgColor: "bg-pink-50 dark:bg-pink-950/50",
     },
-  ];
+  ], [stats]);
 
   if (loading) {
     return (
@@ -94,23 +110,23 @@ const AdminDashboard = () => {
   return (
     <AdminLayout>
       <div className="container mx-auto p-6 space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
+        <div ref={headerRef} className="flex items-center justify-between" role="banner">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-dashboard-title">
               Tableau de bord administrateur
             </h1>
             <p className="text-muted-foreground mt-2">
               Vue d'ensemble de la plateforme
             </p>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <BarChart3 className="h-5 w-5" />
+          <div className="flex items-center gap-2 text-muted-foreground" role="status" aria-label="Statistiques globales">
+            <BarChart3 className="h-5 w-5" aria-hidden="true" />
             <span className="text-sm">Statistiques globales</span>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div ref={statsRef} className="grid gap-6 md:grid-cols-2 lg:grid-cols-4" role="region" aria-label="Cartes statistiques">
           {statsCards.map((stat, index) => (
             <Card key={index} className="hover-scale border-muted/50 hover:border-primary/50 transition-all">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -137,7 +153,7 @@ const AdminDashboard = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
+              <Users className="h-5 w-5" aria-hidden="true" />
               Utilisateurs récents
             </CardTitle>
             <CardDescription>
@@ -145,7 +161,7 @@ const AdminDashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div ref={usersRef} className="space-y-4" role="region" aria-label="Liste des utilisateurs récents">
               {stats.recentUsers.map((user) => (
                 <div
                   key={user.id}
@@ -168,7 +184,7 @@ const AdminDashboard = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Store className="h-5 w-5" />
+              <Store className="h-5 w-5" aria-hidden="true" />
               Top boutiques
             </CardTitle>
             <CardDescription>
@@ -176,7 +192,7 @@ const AdminDashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div ref={storesRef} className="space-y-4" role="region" aria-label="Liste des top boutiques">
               {stats.topStores.map((store, index) => (
                 <div
                   key={store.id}
