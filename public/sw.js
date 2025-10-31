@@ -25,7 +25,16 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAMES.static).then((cache) => {
       console.log('[SW] Precaching static assets');
-      return cache.addAll(STATIC_ASSETS);
+      // Cache les assets de manière individuelle pour gérer les erreurs gracieusement
+      return Promise.allSettled(
+        STATIC_ASSETS.map((asset) =>
+          cache.add(asset).catch((err) => {
+            console.warn(`[SW] Failed to cache ${asset}:`, err);
+            // Ne pas throw pour éviter de casser l'installation du SW
+            return null;
+          })
+        )
+      );
     })
   );
   
