@@ -301,18 +301,26 @@ export const DigitalProductsList = () => {
   }, [products?.length, store?.id]);
 
   /**
-   * Error handling
+   * Error handling avec détails
    */
   useEffect(() => {
     if (error) {
-      logger.error('Erreur lors du chargement des produits digitaux', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Erreur lors du chargement des produits digitaux', {
+        error,
+        message: errorMessage,
+        storeId: store?.id,
+        hasStore: !!store,
+      });
       toast({
         title: 'Erreur',
-        description: 'Impossible de charger les produits digitaux. Veuillez réessayer.',
+        description: errorMessage.includes('Erreur') 
+          ? errorMessage 
+          : `Impossible de charger les produits digitaux: ${errorMessage}. Veuillez réessayer.`,
         variant: 'destructive',
       });
     }
-  }, [error, toast]);
+  }, [error, toast, store?.id]);
 
   return (
     <SidebarProvider>
