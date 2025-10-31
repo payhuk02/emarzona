@@ -342,7 +342,6 @@ const AdminSales = () => {
             </Card>
           </TabsContent>
         </Tabs>
-        </div>
       </div>
     </AdminLayout>
   );
