@@ -200,7 +200,9 @@ const AdminAffiliates = () => {
     a.href = url;
     a.download = `affilies_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
-  };
+    URL.revokeObjectURL(url);
+    logger.info('Export CSV réussi');
+  }, [affiliates]);
 
   if (affiliatesLoading) {
     return (
