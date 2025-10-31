@@ -57,78 +57,180 @@ export const useDigitalProducts = (storeId?: string) => {
   return useQuery({
     queryKey: ['digitalProducts', storeId],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Non authentifié');
+      try {
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError) {
+          console.error('Erreur auth:', authError);
+          throw new Error('Erreur d\'authentification: ' + authError.message);
+        }
+        if (!user) {
+          throw new Error('Non authentifié');
+        }
 
-      // Étape 1: Obtenir les product_ids pertinents
-      let productIds: string[] = [];
+        // Étape 1: Obtenir les product_ids pertinents
+        let productIds: string[] = [];
 
-      if (storeId) {
-        // Si storeId est fourni, obtenir tous les products de ce store
-        const { data: products, error: productsError } = await supabase
-          .from('products')
-          .select('id')
-          .eq('store_id', storeId);
-
-        if (productsError) throw productsError;
-        productIds = products?.map(p => p.id) || [];
-      } else {
-        // Sinon, obtenir tous les stores de l'utilisateur, puis leurs products
-        const { data: stores, error: storesError } = await supabase
-          .from('stores')
-          .select('id')
-          .eq('user_id', user.id);
-
-        if (storesError) throw storesError;
-
-        if (stores && stores.length > 0) {
-          const storeIds = stores.map(s => s.id);
+        if (storeId) {
+          // Si storeId est fourni, obtenir tous les products de ce store
           const { data: products, error: productsError } = await supabase
             .from('products')
             .select('id')
-            .in('store_id', storeIds);
+            .eq('store_id', storeId);
 
-          if (productsError) throw productsError;
+          if (productsError) {
+            console.error('Erreur lors de la récupération des products:', productsError);
+            throw new Error('Erreur lors de la récupération des produits: ' + productsError.message);
+          }
           productIds = products?.map(p => p.id) || [];
+        } else {
+          // Sinon, obtenir tous les stores de l'utilisateur, puis leurs products
+          const { data: stores, error: storesError } = await supabase
+            .from('stores')
+            .select('id')
+            .eq('user_id', user.id);
+
+          if (storesError) {
+            console.error('Erreur lors de la récupération des stores:', storesError);
+            throw new Error('Erreur lors de la récupération des boutiques: ' + storesError.message);
+          }
+
+          if (stores && stores.length > 0) {
+            const storeIds = stores.map(s => s.id);
+            const { data: products, error: productsError } = await supabase
+              .from('products')
+              .select('id')
+              .in('store_id', storeIds);
+
+            if (productsError) {
+              console.error('Erreur lors de la récupération des products pour les stores:', productsError);
+              throw new Error('Erreur lors de la récupération des produits: ' + productsError.message);
+            }
+            productIds = products?.map(p => p.id) || [];
+          } else {
+            // Pas de stores, retourner un tableau vide (pas une erreur)
+            console.log('Aucune boutique trouvée pour l\'utilisateur');
+            return [];
+          }
         }
+
+        // Si aucun product_id trouvé, retourner un tableau vide (pas une erreur)
+        if (productIds.length === 0) {
+          console.log('Aucun produit trouvé pour les stores sélectionnés');
+          return [];
+        }
+
+        // Étape 2: Obtenir les digital_products avec jointure sur products
+        // Utiliser la syntaxe de jointure Supabase avec la clé étrangère explicite
+        const { data, error } = await supabase
+          .from('digital_products')
+          .select(`
+            *,
+            products!digital_products_product_id_fkey (
+              id,
+              name,
+              slug,
+              description,
+              price,
+              currency,
+              is_active,
+              primary_image_url,
+              store_id
+            )
+          `)
+          .in('product_id', productIds)
+          .order('created_at', { ascending: false });
+        
+        // Si la jointure avec la clé explicite ne fonctionne pas, essayer sans
+        if (error && error.code === 'PGRST116') {
+          console.warn('Tentative avec syntaxe alternative de jointure');
+          const { data: altData, error: altError } = await supabase
+            .from('digital_products')
+            .select(`
+              *,
+              products (
+                id,
+                name,
+                slug,
+                description,
+                price,
+                currency,
+                is_active,
+                primary_image_url,
+                store_id
+              )
+            `)
+            .in('product_id', productIds)
+            .order('created_at', { ascending: false });
+          
+          if (altError) {
+            console.error('Erreur avec syntaxe alternative:', altError);
+            throw new Error('Erreur lors du chargement des produits digitaux: ' + altError.message);
+          }
+          
+          // Utiliser les données de la requête alternative
+          const mappedAltData = (altData || []).map((item: any) => {
+            const productData = item.products;
+            let product = null;
+            
+            if (productData) {
+              if (Array.isArray(productData)) {
+                product = productData[0] || null;
+              } else {
+                product = productData;
+              }
+            }
+
+            return {
+              ...item,
+              product: product,
+            };
+          }).filter((item: any) => item.product !== null);
+          
+          return mappedAltData as any[];
+        }
+        
+        if (error) {
+          console.error('Erreur lors de la récupération des digital_products:', error);
+          console.error('Détails:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            productIds: productIds.length
+          });
+          throw new Error('Erreur lors du chargement des produits digitaux: ' + error.message);
+        }
+
+        // Mapper les données pour avoir la structure attendue avec `product`
+        const mappedData = (data || []).map((item: any) => {
+          // S'assurer que products n'est pas null
+          const productData = item.products;
+          let product = null;
+          
+          if (productData) {
+            if (Array.isArray(productData)) {
+              product = productData[0] || null;
+            } else {
+              product = productData;
+            }
+          }
+
+          return {
+            ...item,
+            product: product, // Peut être null si pas de relation
+          };
+        }).filter((item: any) => item.product !== null); // Filtrer les items sans produit associé
+
+        return mappedData as any[];
+      } catch (error: any) {
+        console.error('Erreur dans useDigitalProducts:', error);
+        // Re-lancer l'erreur avec un message plus clair
+        throw new Error(error.message || 'Impossible de charger les produits digitaux. Veuillez réessayer.');
       }
-
-      // Si aucun product_id trouvé, retourner un tableau vide
-      if (productIds.length === 0) {
-        return [];
-      }
-
-      // Étape 2: Obtenir les digital_products avec jointure sur products
-      // Utiliser la syntaxe de jointure Supabase standard avec le nom de la table
-      const { data, error } = await supabase
-        .from('digital_products')
-        .select(`
-          *,
-          products (
-            id,
-            name,
-            slug,
-            description,
-            price,
-            currency,
-            is_active,
-            primary_image_url,
-            store_id
-          )
-        `)
-        .in('product_id', productIds)
-        .order('created_at', { ascending: false });
-      
-      // Mapper les données pour avoir la structure attendue avec `product`
-      const mappedData = data?.map((item: any) => ({
-        ...item,
-        product: Array.isArray(item.products) ? item.products[0] : item.products, // Prendre le premier élément si c'est un tableau
-      })) || [];
-
-      if (error) throw error;
-      return mappedData as any[]; // Retourner avec la relation product incluse
     },
     enabled: true,
+    retry: 1, // Réessayer une fois en cas d'erreur
+    retryDelay: 1000, // Attendre 1 seconde avant de réessayer
   });
 };
 
