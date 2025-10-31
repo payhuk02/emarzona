@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { AlertCircle } from 'lucide-react';
 import "@/styles/dashboard-responsive.css";
 
 const Dashboard = () => {
@@ -47,39 +50,47 @@ const Dashboard = () => {
     }
   ], [t]);
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     try {
       setError(null);
+      logger.info('Actualisation du dashboard...');
       await refetch();
       setLastUpdated(new Date().toISOString());
+      logger.info('Dashboard actualisé avec succès');
     } catch (err: any) {
+      logger.error('Erreur lors de l\'actualisation du dashboard:', err);
       setError(err.message || 'Erreur lors du chargement des données');
     }
-  };
+  }, [refetch]);
 
-  const handleCreateProduct = () => {
+  const handleCreateProduct = useCallback(() => {
     navigate('/dashboard/products/new');
-  };
+  }, [navigate]);
 
-  const handleCreateOrder = () => {
+  const handleCreateOrder = useCallback(() => {
     navigate('/dashboard/orders');
-  };
+  }, [navigate]);
 
-  const handleViewAnalytics = () => {
+  const handleViewAnalytics = useCallback(() => {
     navigate('/dashboard/analytics');
-  };
+  }, [navigate]);
 
-  const handleManageCustomers = () => {
+  const handleManageCustomers = useCallback(() => {
     navigate('/dashboard/customers');
-  };
+  }, [navigate]);
 
-  const handleViewStore = () => {
+  const handleViewStore = useCallback(() => {
     navigate('/dashboard/store');
-  };
+  }, [navigate]);
 
-  const handleSettings = () => {
+  const handleSettings = useCallback(() => {
     navigate('/dashboard/settings');
-  };
+  }, [navigate]);
+
+  // Animations au scroll
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const actionsRef = useScrollAnimation<HTMLDivElement>();
+  const bottomRef = useScrollAnimation<HTMLDivElement>();
 
   if (storeLoading || loading) {
     return (
@@ -135,17 +146,17 @@ const Dashboard = () => {
         
         <div className="flex-1 flex flex-col">
           {/* Header - Responsive et Professionnel */}
-          <header className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur-sm shadow-soft">
+          <header className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur-sm shadow-soft" role="banner">
             <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 px-3 sm:px-4 md:px-6">
-              <SidebarTrigger className="touch-manipulation min-h-[44px] min-w-[44px]" />
+              <SidebarTrigger className="touch-manipulation min-h-[44px] min-w-[44px]" aria-label={t('dashboard.sidebarToggle', 'Toggle sidebar')} />
               <div className="flex-1 min-w-0">
-                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate">
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate" id="dashboard-title">
                   {t('dashboard.titleWithStore', { storeName: store.name })}
                 </h1>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs px-2 py-1 hidden sm:flex">
-                  <Activity className="h-3 w-3 mr-1" />
+                <Badge variant="outline" className="text-xs px-2 py-1 hidden sm:flex" aria-label={t('dashboard.status.online', 'En ligne')}>
+                  <Activity className="h-3 w-3 mr-1" aria-hidden="true" />
                   {t('dashboard.online')}
                 </Badge>
                 <Button 
@@ -154,19 +165,20 @@ const Dashboard = () => {
                   onClick={handleRefresh}
                   className="touch-manipulation min-h-[44px] min-w-[44px]"
                   aria-label={t('dashboard.refresh')}
+                  title={t('dashboard.refresh')}
                 >
-                  <Activity className="h-4 w-4" />
+                  <Activity className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </div>
             </div>
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 bg-gradient-hero overflow-x-hidden">
+          <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 bg-gradient-hero overflow-x-hidden" role="main" aria-labelledby="dashboard-title">
             {(error || hookError) && (
-              <div className="mb-4 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="mb-4 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg" role="alert" aria-live="polite">
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 bg-red-500 rounded-full"></div>
+                  <AlertCircle className="h-5 w-5 text-red-500" aria-hidden="true" />
                   <h3 className="font-medium text-red-800 dark:text-red-200">{t('dashboard.error.title')}</h3>
                 </div>
                 <p className="text-sm text-red-600 dark:text-red-300 mt-1">{error || hookError}</p>
@@ -175,6 +187,7 @@ const Dashboard = () => {
                   size="sm" 
                   onClick={handleRefresh}
                   className="mt-2 touch-manipulation min-h-[44px]"
+                  aria-label={t('dashboard.retry')}
                 >
                   {t('dashboard.retry')}
                 </Button>
@@ -183,7 +196,7 @@ const Dashboard = () => {
             <div className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
               
               {/* Stats Grid - Responsive et Professionnel */}
-              <div className="dashboard-stats-grid">
+              <div ref={statsRef} className="dashboard-stats-grid" role="region" aria-label={t('dashboard.stats.ariaLabel', 'Statistiques du tableau de bord')}>
                 <Card className="dashboard-card group">
                   <CardHeader className="flex flex-row items-center justify-between pb-2 dashboard-card-header">
                     <CardTitle className="dashboard-card-title">{t('dashboard.stats.products.title')}</CardTitle>
@@ -250,22 +263,34 @@ const Dashboard = () => {
                 </div>
 
                 {/* Quick Actions - Responsive et Professionnel */}
-              <Card className="shadow-soft hover:shadow-lg transition-all duration-300">
+              <Card ref={actionsRef} className="shadow-soft hover:shadow-lg transition-all duration-300" role="region" aria-labelledby="quick-actions-title">
                 <CardHeader className="pb-3 p-4 sm:p-6">
-                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <CardTitle id="quick-actions-title" className="flex items-center gap-2 text-base sm:text-lg">
                     <div className="p-2 rounded-lg bg-primary/10">
-                      <Zap className="h-5 w-5 text-primary" />
+                      <Zap className="h-5 w-5 text-primary" aria-hidden="true" />
                     </div>
                     {t('dashboard.quickActions.title')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-0">
-                  <div className="dashboard-actions-grid">
-                    <Card className="cursor-pointer shadow-soft hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:scale-105 group touch-manipulation min-h-[120px] sm:min-h-[140px]">
+                  <div className="dashboard-actions-grid" role="list" aria-label={t('dashboard.quickActions.ariaLabel', 'Actions rapides disponibles')}>
+                    <Card 
+                      className="cursor-pointer shadow-soft hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:scale-105 group touch-manipulation min-h-[120px] sm:min-h-[140px]"
+                      onClick={handleCreateProduct}
+                      role="listitem"
+                      aria-label={t('dashboard.quickActions.newProduct')}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleCreateProduct();
+                        }
+                      }}
+                    >
                       <CardContent className="p-4 sm:p-6 h-full flex flex-col justify-center">
                         <div className="flex items-start gap-3">
                           <div className="p-3 rounded-xl bg-green-500/10 group-hover:bg-green-500/20 transition-colors">
-                            <Package className="h-6 w-6 text-green-500" />
+                            <Package className="h-6 w-6 text-green-500" aria-hidden="true" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-sm sm:text-base mb-1">{t('dashboard.quickActions.newProduct')}</h3>
@@ -275,11 +300,23 @@ const Dashboard = () => {
                       </CardContent>
                     </Card>
 
-                    <Card className="cursor-pointer shadow-soft hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:scale-105 group touch-manipulation min-h-[120px] sm:min-h-[140px]" onClick={handleCreateOrder}>
+                    <Card 
+                      className="cursor-pointer shadow-soft hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:scale-105 group touch-manipulation min-h-[120px] sm:min-h-[140px]" 
+                      onClick={handleCreateOrder}
+                      role="listitem"
+                      aria-label={t('dashboard.quickActions.newOrder')}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleCreateOrder();
+                        }
+                      }}
+                    >
                       <CardContent className="p-4 sm:p-6 h-full flex flex-col justify-center">
                         <div className="flex items-start gap-3">
                           <div className="p-3 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
-                            <ShoppingCart className="h-6 w-6 text-blue-500" />
+                            <ShoppingCart className="h-6 w-6 text-blue-500" aria-hidden="true" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-sm sm:text-base mb-1">{t('dashboard.quickActions.newOrder')}</h3>
@@ -289,11 +326,23 @@ const Dashboard = () => {
                       </CardContent>
                     </Card>
 
-                    <Card className="cursor-pointer shadow-soft hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:scale-105 group touch-manipulation min-h-[120px] sm:min-h-[140px]" onClick={handleViewAnalytics}>
+                    <Card 
+                      className="cursor-pointer shadow-soft hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:scale-105 group touch-manipulation min-h-[120px] sm:min-h-[140px]" 
+                      onClick={handleViewAnalytics}
+                      role="listitem"
+                      aria-label={t('dashboard.quickActions.analytics')}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleViewAnalytics();
+                        }
+                      }}
+                    >
                       <CardContent className="p-4 sm:p-6 h-full flex flex-col justify-center">
                         <div className="flex items-start gap-3">
                           <div className="p-3 rounded-xl bg-purple-500/10 group-hover:bg-purple-500/20 transition-colors">
-                            <Activity className="h-6 w-6 text-purple-500" />
+                            <Activity className="h-6 w-6 text-purple-500" aria-hidden="true" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-sm sm:text-base mb-1">{t('dashboard.quickActions.analytics')}</h3>
@@ -307,23 +356,23 @@ const Dashboard = () => {
               </Card>
 
               {/* Bottom Row - Responsive et Professionnel */}
-              <div className="dashboard-bottom-grid">
-                <Card className="shadow-soft hover:shadow-lg transition-all duration-300">
+              <div ref={bottomRef} className="dashboard-bottom-grid" role="region" aria-label={t('dashboard.bottomSection.ariaLabel', 'Notifications et activité récente')}>
+                <Card className="shadow-soft hover:shadow-lg transition-all duration-300" role="region" aria-labelledby="notifications-title">
                   <CardHeader className="pb-3 p-4 sm:p-6">
-                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <CardTitle id="notifications-title" className="flex items-center gap-2 text-base sm:text-lg">
                       <div className="p-2 rounded-lg bg-blue-500/10">
-                        <Bell className="h-5 w-5 text-blue-500" />
+                        <Bell className="h-5 w-5 text-blue-500" aria-hidden="true" />
                       </div>
                       {t('dashboard.notifications.title')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 sm:p-6 pt-0">
-                    <div className="space-y-3">
+                    <div className="space-y-3" role="list" aria-label={t('dashboard.notifications.list.ariaLabel', 'Liste des notifications')}>
                       {notifications.map((notification) => (
-                        <div key={notification.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors touch-manipulation">
+                        <div key={notification.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors touch-manipulation" role="listitem">
                           <div className="flex-shrink-0 mt-0.5">
                             <div className="p-1.5 rounded-full bg-blue-500/10">
-                              <Bell className="h-3 w-3 text-blue-500" />
+                              <Bell className="h-3 w-3 text-blue-500" aria-hidden="true" />
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">

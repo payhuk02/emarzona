@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import { exportOrdersToCSV } from "@/lib/export-utils";
 import { useToast } from "@/hooks/use-toast";
 import { DateRange } from "react-day-picker";
 import { isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const Orders = () => {
   const { t } = useTranslation();
@@ -39,7 +41,13 @@ const Orders = () => {
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const handleSort = (column: SortColumn) => {
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const filtersRef = useScrollAnimation<HTMLDivElement>();
+  const ordersRef = useScrollAnimation<HTMLDivElement>();
+
+  const handleSort = useCallback((column: SortColumn) => {
+    logger.info(`Tri des commandes par ${column}`);
     if (sortBy === column) {
       // Toggle direction if clicking the same column
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -50,11 +58,12 @@ const Orders = () => {
     }
     // Reset to first page when sorting changes
     setPage(0);
-  };
+  }, [sortBy, sortDirection]);
 
-  const handleExportCSV = () => {
+  const handleExportCSV = useCallback(() => {
     try {
       if (!filteredOrders || filteredOrders.length === 0) {
+        logger.warn('Export CSV: aucune commande à exporter');
         toast({
           title: t('orders.toast.warning'),
           description: t('orders.toast.noOrders'),
@@ -63,21 +72,24 @@ const Orders = () => {
         return;
       }
 
+      logger.info(`Export CSV de ${filteredOrders.length} commandes`);
       exportOrdersToCSV(filteredOrders);
+      logger.info('Export CSV réussi');
       toast({
         title: t('orders.toast.success'),
         description: t('orders.toast.exported', { count: filteredOrders.length }),
       });
     } catch (error: any) {
+      logger.error('Erreur lors de l\'export CSV:', error);
       toast({
         title: t('orders.toast.error'),
-        description: error.message,
+        description: error.message || "Impossible d'exporter les commandes",
         variant: "destructive",
       });
     }
-  };
+  }, [filteredOrders, toast, t]);
 
-  const filteredOrders = orders?.filter((order) => {
+  const filteredOrders = useMemo(() => orders?.filter((order) => {
     const matchesSearch = 
       order.order_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.customers?.name?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -99,7 +111,7 @@ const Orders = () => {
     }
     
     return matchesSearch && matchesStatus && matchesPayment && matchesDateRange;
-  });
+  }), [orders, searchQuery, statusFilter, paymentStatusFilter, dateRange]);
 
   if (storeLoading) {
     return (
@@ -139,30 +151,39 @@ const Orders = () => {
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
+        <main className="flex-1 p-4 md:p-6 lg:p-8" role="main" aria-labelledby="orders-title">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div ref={headerRef} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4" role="banner">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">{t('orders.title')}</h1>
+                <h1 className="text-3xl font-bold tracking-tight" id="orders-title">{t('orders.title')}</h1>
                 <p className="text-muted-foreground mt-1">
                   {t('common.manageAll', 'Gérez toutes vos')} {t('orders.title').toLowerCase()}
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={handleExportCSV} disabled={!orders || orders.length === 0}>
-                  <Download className="h-4 w-4 mr-2" />
+                <Button 
+                  variant="outline" 
+                  onClick={handleExportCSV} 
+                  disabled={!orders || orders.length === 0}
+                  aria-label={t('orders.export')}
+                >
+                  <Download className="h-4 w-4 mr-2" aria-hidden="true" />
                   {t('orders.export')}
                 </Button>
-                <Button onClick={() => setIsCreateDialogOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button 
+                  onClick={() => setIsCreateDialogOpen(true)}
+                  aria-label={t('orders.new')}
+                >
+                  <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
                   {t('orders.new')}
                 </Button>
               </div>
             </div>
 
             {/* Filters */}
-            <OrderFilters
+            <div ref={filtersRef} role="region" aria-label={t('orders.filters.ariaLabel', 'Filtres de recherche des commandes')}>
+              <OrderFilters
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
               statusFilter={statusFilter}
@@ -172,16 +193,17 @@ const Orders = () => {
               dateRange={dateRange}
               onDateRangeChange={setDateRange}
             />
+            </div>
 
             {/* Orders Table */}
             {ordersLoading ? (
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-6" role="status" aria-live="polite">
                   <Skeleton className="h-96 w-full" />
                 </CardContent>
               </Card>
             ) : filteredOrders && filteredOrders.length > 0 ? (
-              <>
+              <div ref={ordersRef} role="region" aria-label={t('orders.list.ariaLabel', 'Liste des commandes')}>
                 <OrdersList 
                   orders={filteredOrders} 
                   onUpdate={refetch} 
@@ -203,11 +225,11 @@ const Orders = () => {
                     }}
                   />
                 )}
-              </>
+              </div>
             ) : (
               <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Package className="h-16 w-16 text-muted-foreground mb-4" />
+                <CardContent className="flex flex-col items-center justify-center py-12" role="status" aria-live="polite">
+                  <Package className="h-16 w-16 text-muted-foreground mb-4" aria-hidden="true" />
                   <h3 className="text-lg font-semibold mb-2">{t('orders.empty.title')}</h3>
                   <p className="text-muted-foreground text-center mb-4">
                     {searchQuery || statusFilter !== "all" || paymentStatusFilter !== "all" || dateRange?.from
@@ -215,8 +237,11 @@ const Orders = () => {
                       : t('orders.empty.description')}
                   </p>
                   {!searchQuery && statusFilter === "all" && paymentStatusFilter === "all" && !dateRange?.from && (
-                    <Button onClick={() => setIsCreateDialogOpen(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
+                    <Button 
+                      onClick={() => setIsCreateDialogOpen(true)}
+                      aria-label={t('orders.empty.createFirst')}
+                    >
+                      <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
                       {t('orders.empty.createFirst')}
                     </Button>
                   )}

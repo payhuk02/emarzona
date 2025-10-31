@@ -1,3 +1,4 @@
+import { useMemo, useEffect } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,8 @@ import { TrendingUp, DollarSign, ShoppingCart, Users, Package } from "lucide-rea
 import { SalesChart } from "@/components/analytics/SalesChart";
 import { TopProducts } from "@/components/analytics/TopProducts";
 import { RecentOrders } from "@/components/analytics/RecentOrders";
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const Analytics = () => {
   const { store, loading: storeLoading } = useStore();
@@ -17,9 +20,31 @@ const Analytics = () => {
   const { customers, loading: customersLoading } = useCustomers(store?.id);
   const { products, loading: productsLoading } = useProducts(store?.id);
 
-  const totalRevenue = orders?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0;
-  const completedOrders = orders?.filter(o => o.status === 'completed').length || 0;
-  const activeProducts = products?.filter(p => p.is_active).length || 0;
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const chartsRef = useScrollAnimation<HTMLDivElement>();
+
+  // Calculs optimisés avec useMemo
+  const totalRevenue = useMemo(() => 
+    orders?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0,
+    [orders]
+  );
+  const completedOrders = useMemo(() => 
+    orders?.filter(o => o.status === 'completed').length || 0,
+    [orders]
+  );
+  const activeProducts = useMemo(() => 
+    products?.filter(p => p.is_active).length || 0,
+    [products]
+  );
+
+  // Logging pour le chargement des données
+  useEffect(() => {
+    if (!ordersLoading && !customersLoading && !productsLoading && orders && customers && products) {
+      logger.info(`Analytics chargées: ${orders.length} commandes, ${customers.length} clients, ${products.length} produits`);
+    }
+  }, [ordersLoading, customersLoading, productsLoading, orders, customers, products]);
 
   if (storeLoading) {
     return (
@@ -61,18 +86,18 @@ const Analytics = () => {
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
+        <main className="flex-1 p-4 md:p-6 lg:p-8" role="main" aria-labelledby="analytics-title">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Statistiques</h1>
+            <div ref={headerRef} role="banner">
+              <h1 className="text-3xl font-bold tracking-tight" id="analytics-title">Statistiques</h1>
               <p className="text-muted-foreground mt-1">
                 Vue d'ensemble de votre activité
               </p>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div ref={statsRef} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" role="region" aria-label="Cartes statistiques">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium">Revenu total</CardTitle>
@@ -153,12 +178,14 @@ const Analytics = () => {
             </div>
 
             {/* Charts and Tables */}
-            <div className="grid gap-6 md:grid-cols-2">
+            <div ref={chartsRef} className="grid gap-6 md:grid-cols-2" role="region" aria-label="Graphiques et tableaux">
               <SalesChart orders={orders || []} loading={isLoading} />
               <TopProducts orders={orders || []} loading={isLoading} />
             </div>
 
-            <RecentOrders orders={orders?.slice(0, 5) || []} loading={isLoading} />
+            <div role="region" aria-label="Commandes récentes">
+              <RecentOrders orders={orders?.slice(0, 5) || []} loading={isLoading} />
+            </div>
           </div>
         </main>
       </div>

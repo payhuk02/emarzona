@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -43,6 +43,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const Payments = () => {
   const navigate = useNavigate();
@@ -142,14 +144,20 @@ const Payments = () => {
     return filtered;
   }, [payments, searchQuery, statusFilter, methodFilter, dateFilter, sortBy]);
 
-  const completedPayments = payments.filter(p => p.status === 'completed').length;
-  const pendingPayments = payments.filter(p => p.status === 'pending').length;
-  const failedPayments = payments.filter(p => p.status === 'failed').length;
-  const totalRevenue = payments.filter(p => p.status === 'completed').reduce((sum, p) => sum + p.amount, 0);
+  // Animations au scroll
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const filtersRef = useScrollAnimation<HTMLDivElement>();
+  const paymentsRef = useScrollAnimation<HTMLDivElement>();
 
-  const handleDelete = async () => {
+  const completedPayments = useMemo(() => payments.filter(p => p.status === 'completed').length, [payments]);
+  const pendingPayments = useMemo(() => payments.filter(p => p.status === 'pending').length, [payments]);
+  const failedPayments = useMemo(() => payments.filter(p => p.status === 'failed').length, [payments]);
+  const totalRevenue = useMemo(() => payments.filter(p => p.status === 'completed').reduce((sum, p) => sum + p.amount, 0), [payments]);
+
+  const handleDelete = useCallback(async () => {
     if (deletingPaymentId) {
       try {
+        logger.info(`Suppression du paiement ${deletingPaymentId}`);
         const { error } = await supabase
           .from("payments")
           .delete()
@@ -157,46 +165,52 @@ const Payments = () => {
 
         if (error) throw error;
 
+        logger.info('Paiement supprimé avec succès');
         toast({
           title: "Succès",
           description: "Paiement supprimé avec succès",
         });
 
-        refetch();
+        await refetch();
       } catch (error: any) {
+        logger.error('Erreur lors de la suppression du paiement:', error);
         toast({
           title: "Erreur",
-          description: error.message,
+          description: error.message || "Impossible de supprimer le paiement",
           variant: "destructive",
         });
       } finally {
         setDeletingPaymentId(null);
       }
     }
-  };
+  }, [deletingPaymentId, refetch, toast]);
 
-  const handleBulkDelete = async (paymentIds: string[]) => {
+  const handleBulkDelete = useCallback(async (paymentIds: string[]) => {
     try {
+      logger.info(`Suppression en lot de ${paymentIds.length} paiements`);
       await Promise.all(paymentIds.map(id => 
         supabase.from("payments").delete().eq("id", id)
       ));
       setSelectedPayments([]);
-      refetch();
+      await refetch();
+      logger.info('Paiements supprimés avec succès');
       toast({
         title: "Succès",
         description: `${paymentIds.length} paiement(s) supprimé(s)`,
       });
-    } catch (error) {
+    } catch (error: any) {
+      logger.error('Erreur lors de la suppression en lot:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de supprimer tous les paiements",
+        description: error.message || "Impossible de supprimer tous les paiements",
         variant: "destructive",
       });
     }
-  };
+  }, [refetch, toast]);
 
-  const handleBulkAction = async (action: string, paymentIds: string[]) => {
+  const handleBulkAction = useCallback(async (action: string, paymentIds: string[]) => {
     try {
+      logger.info(`Action en lot: ${action} sur ${paymentIds.length} paiements`);
       const updates = action === 'complete' ? { status: 'completed' } : 
                      action === 'fail' ? { status: 'failed' } : 
                      { status: 'pending' };
@@ -206,28 +220,31 @@ const Payments = () => {
       ));
       
       setSelectedPayments([]);
-      refetch();
+      await refetch();
+      logger.info('Action en lot appliquée avec succès');
       
       toast({
         title: "Succès",
         description: `${paymentIds.length} paiement(s) mis à jour`,
       });
-    } catch (error) {
+    } catch (error: any) {
+      logger.error(`Erreur lors de l'action en lot ${action}:`, error);
       toast({
         title: "Erreur",
-        description: `Impossible de ${action} les paiements`,
+        description: error.message || `Impossible de ${action} les paiements`,
         variant: "destructive",
       });
     }
-  };
+  }, [refetch, toast]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
+    logger.info('Actualisation de la liste des paiements');
     refetch();
     toast({
       title: "Actualisation",
       description: "Liste des paiements mise à jour",
     });
-  };
+  }, [refetch, toast]);
 
   if (storeLoading) {
     return (
@@ -281,26 +298,26 @@ const Payments = () => {
         <AppSidebar />
         
         <div className="flex-1 flex flex-col">
-          <header className="sticky top-0 z-10 border-b bg-card shadow-soft">
+          <header className="sticky top-0 z-10 border-b bg-card shadow-soft" role="banner">
             <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
-              <SidebarTrigger />
+              <SidebarTrigger aria-label="Toggle sidebar" />
               <div className="flex-1">
-                <h1 className="text-xl sm:text-2xl font-bold">Paiements</h1>
+                <h1 className="text-xl sm:text-2xl font-bold" id="payments-title">Paiements</h1>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handleRefresh}>
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                <Button variant="outline" size="sm" onClick={handleRefresh} aria-label="Actualiser les paiements">
+                  <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
                   Actualiser
                 </Button>
-                <Button onClick={() => setIsCreateOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button onClick={() => setIsCreateOpen(true)} aria-label="Créer un nouveau paiement">
+                  <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
                   Nouveau paiement
                 </Button>
               </div>
             </div>
           </header>
 
-          <main className="flex-1 p-4 sm:p-6 bg-gradient-hero">
+          <main className="flex-1 p-4 sm:p-6 bg-gradient-hero" role="main" aria-labelledby="payments-title">
             <div className="max-w-7xl mx-auto space-y-6">
               {paymentsLoading ? (
                 <Card className="shadow-medium">
@@ -341,11 +358,13 @@ const Payments = () => {
             ) : (
               <>
                   {/* Statistiques */}
-                  <PaymentStats 
-                    payments={payments} 
-                    filteredPayments={filteredPayments}
-                    transactions={transactions}
-                  />
+                  <div ref={statsRef} role="region" aria-label="Statistiques des paiements">
+                    <PaymentStats 
+                      payments={payments} 
+                      filteredPayments={filteredPayments}
+                      transactions={transactions}
+                    />
+                  </div>
 
                   {/* Actions en lot */}
                   {selectedPayments.length > 0 && (
@@ -359,7 +378,8 @@ const Payments = () => {
                   )}
 
                   {/* Filtres */}
-                  <PaymentFiltersDashboard
+                  <div ref={filtersRef} role="region" aria-label="Filtres de recherche des paiements">
+                    <PaymentFiltersDashboard
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
                   statusFilter={statusFilter}
@@ -376,7 +396,8 @@ const Payments = () => {
                     onViewModeChange={setViewMode}
                     totalPayments={payments.length}
                     completedPayments={completedPayments}
-                  />
+                    />
+                  </div>
 
                   {filteredPayments.length === 0 ? (
                     <Card className="shadow-medium">
@@ -418,7 +439,7 @@ const Payments = () => {
                       </div>
 
                       {viewMode === "grid" ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                        <div ref={paymentsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6" role="region" aria-label="Liste des paiements">
                           {filteredPayments.map((payment) => (
                             <PaymentCardDashboard
                               key={payment.id}
@@ -430,7 +451,7 @@ const Payments = () => {
                           ))}
                         </div>
                       ) : (
-                        <div className="space-y-3">
+                        <div ref={paymentsRef} className="space-y-3" role="region" aria-label="Liste des paiements">
                           {filteredPayments.map((payment) => (
                             <PaymentListView
                               key={payment.id}

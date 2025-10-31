@@ -57,6 +57,9 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { ProductGrid } from "@/components/ui/ProductGrid";
 import { Checkbox } from "@/components/ui/checkbox";
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { AlertCircle } from 'lucide-react';
 
 // Constantes pour la pagination
 const ITEMS_PER_PAGE = 12;
@@ -210,81 +213,119 @@ const Products = () => {
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const activeProducts = products.filter(p => p.is_active).length;
 
-  // Handlers
-  const handleDelete = async () => {
-    if (deletingProductId) {
-      await deleteProduct(deletingProductId);
-      setDeletingProductId(null);
-      refetch();
-      toast({
-        title: "Produit supprimé",
-        description: "Le produit a été supprimé avec succès",
-      });
-    }
-  };
+  // Animations au scroll
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const filtersRef = useScrollAnimation<HTMLDivElement>();
+  const productsRef = useScrollAnimation<HTMLDivElement>();
 
-  const handleBulkDelete = async (productIds: string[]) => {
+  // Handlers optimisés avec useCallback
+  const handleDelete = useCallback(async () => {
+    if (deletingProductId) {
+      try {
+        logger.info(`Suppression du produit ${deletingProductId}`);
+        await deleteProduct(deletingProductId);
+        setDeletingProductId(null);
+        await refetch();
+        logger.info('Produit supprimé avec succès');
+        toast({
+          title: "Produit supprimé",
+          description: "Le produit a été supprimé avec succès",
+        });
+      } catch (error: any) {
+        logger.error('Erreur lors de la suppression du produit:', error);
+        toast({
+          title: "Erreur",
+          description: error.message || "Impossible de supprimer le produit",
+          variant: "destructive",
+        });
+      }
+    }
+  }, [deletingProductId, deleteProduct, refetch, toast]);
+
+  const handleBulkDelete = useCallback(async (productIds: string[]) => {
     try {
+      logger.info(`Suppression en lot de ${productIds.length} produits`);
       await Promise.all(productIds.map(id => deleteProduct(id)));
       setDeletingProductIds([]);
       setSelectedProducts([]);
-      refetch();
+      await refetch();
+      logger.info('Produits supprimés avec succès');
       toast({
         title: "Produits supprimés",
         description: `${productIds.length} produit(s) supprimé(s) avec succès`,
       });
-    } catch (error) {
+    } catch (error: any) {
+      logger.error('Erreur lors de la suppression en lot:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de supprimer tous les produits",
+        description: error.message || "Impossible de supprimer tous les produits",
         variant: "destructive",
       });
     }
-  };
+  }, [deleteProduct, refetch, toast]);
 
-  const handleBulkAction = async (action: string, productIds: string[]) => {
+  const handleBulkAction = useCallback(async (action: string, productIds: string[]) => {
     try {
+      logger.info(`Action en lot: ${action} sur ${productIds.length} produits`);
       const updates = action === 'activate' ? { is_active: true } : { is_active: false };
       await Promise.all(productIds.map(id => updateProduct(id, updates)));
       setSelectedProducts([]);
-      refetch();
+      await refetch();
+      logger.info('Action en lot appliquée avec succès');
       toast({
         title: "Action appliquée",
         description: `${productIds.length} produit(s) ${action === 'activate' ? 'activé(s)' : 'désactivé(s)'}`,
       });
-    } catch (error) {
+    } catch (error: any) {
+      logger.error(`Erreur lors de l'action en lot ${action}:`, error);
       toast({
         title: "Erreur",
-        description: `Impossible de ${action === 'activate' ? 'activer' : 'désactiver'} les produits`,
+        description: error.message || `Impossible de ${action === 'activate' ? 'activer' : 'désactiver'} les produits`,
         variant: "destructive",
       });
     }
-  };
+  }, [updateProduct, refetch, toast]);
 
-  const handleToggleStatus = async (productId: string) => {
+  const handleToggleStatus = useCallback(async (productId: string) => {
     const product = products.find(p => p.id === productId);
     if (product) {
-      await updateProduct(productId, { is_active: !product.is_active });
-      refetch();
-      toast({
-        title: product.is_active ? "Produit désactivé" : "Produit activé",
-        description: `Le produit a été ${product.is_active ? 'désactivé' : 'activé'} avec succès`,
-      });
+      try {
+        logger.info(`Changement de statut du produit ${productId}: ${!product.is_active ? 'actif' : 'inactif'}`);
+        await updateProduct(productId, { is_active: !product.is_active });
+        await refetch();
+        logger.info('Statut du produit modifié avec succès');
+        toast({
+          title: product.is_active ? "Produit désactivé" : "Produit activé",
+          description: `Le produit a été ${product.is_active ? 'désactivé' : 'activé'} avec succès`,
+        });
+      } catch (error: any) {
+        logger.error('Erreur lors du changement de statut:', error);
+        toast({
+          title: "Erreur",
+          description: error.message || "Impossible de modifier le statut du produit",
+          variant: "destructive",
+        });
+      }
     }
-  };
+  }, [products, updateProduct, refetch, toast]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
+    logger.info('Actualisation de la liste des produits');
     refetch();
     toast({
       title: "Actualisation",
       description: "Liste des produits mise à jour",
     });
-  };
+  }, [refetch, toast]);
 
   const handleDuplicateProduct = useCallback(async (productId: string) => {
     try {
+      logger.info(`Duplication du produit ${productId}`);
       const product = products.find(p => p.id === productId);
-      if (!product) return;
+      if (!product) {
+        logger.warn(`Produit ${productId} introuvable pour duplication`);
+        return;
+      }
 
       const duplicatedProduct = {
         ...product,
@@ -297,15 +338,17 @@ const Products = () => {
 
       // Ici, vous devriez appeler votre API pour créer le nouveau produit
       // Pour l'instant, simulons avec une mise à jour
+      await refetch();
+      logger.info('Produit dupliqué avec succès');
       toast({
         title: "Produit dupliqué",
         description: "Le produit a été dupliqué avec succès",
       });
-      refetch();
-    } catch (error) {
+    } catch (error: any) {
+      logger.error('Erreur lors de la duplication du produit:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de dupliquer le produit",
+        description: error.message || "Impossible de dupliquer le produit",
         variant: "destructive",
       });
     }
@@ -340,6 +383,7 @@ const Products = () => {
     setExportingCSV(true);
 
     try {
+      logger.info(`Export CSV de ${filteredProducts.length} produits`);
       const headers = [
         'id', 'name', 'slug', 'description', 'price', 'currency', 
         'category', 'product_type', 'licensing_type', 'license_terms', 'is_active', 'rating', 'reviews_count', 
@@ -371,15 +415,18 @@ const Products = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
+      logger.info('Export CSV réussi');
       toast({
         title: "Export réussi",
         description: `${filteredProducts.length} produit(s) exporté(s)`,
       });
-    } catch (error) {
+    } catch (error: any) {
+      logger.error('Erreur lors de l\'export CSV:', error);
       toast({
         title: "Erreur d'export",
-        description: "Impossible d'exporter les produits",
+        description: error.message || "Impossible d'exporter les produits",
         variant: "destructive",
       });
     } finally {
@@ -397,15 +444,15 @@ const Products = () => {
   }, [selectedProducts, paginatedProducts]);
 
   // Pagination handlers
-  const handlePageChange = (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, []);
 
-  const handleItemsPerPageChange = (value: number) => {
+  const handleItemsPerPageChange = useCallback((value: number) => {
     setItemsPerPage(value);
     setCurrentPage(1);
-  };
+  }, []);
 
   if (storeLoading) {
     return (
@@ -459,19 +506,29 @@ const Products = () => {
         <AppSidebar />
         
         <div className="flex-1 flex flex-col">
-          <header className="sticky top-0 z-10 border-b bg-card shadow-soft backdrop-blur-sm">
+          <header className="sticky top-0 z-10 border-b bg-card shadow-soft backdrop-blur-sm" role="banner">
             <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
-              <SidebarTrigger />
+              <SidebarTrigger aria-label={t('dashboard.sidebarToggle', 'Toggle sidebar')} />
               <div className="flex-1">
-                <h1 className="text-xl sm:text-2xl font-bold">{t('products.title')}</h1>
+                <h1 className="text-xl sm:text-2xl font-bold" id="products-title">{t('products.title')}</h1>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handleRefresh} disabled={productsLoading}>
-                  <RefreshCw className={`h-4 w-4 mr-2 ${productsLoading ? 'animate-spin' : ''}`} />
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRefresh} 
+                  disabled={productsLoading}
+                  aria-label={t('products.refresh')}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${productsLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
                   <span className="hidden sm:inline">{t('products.refresh')}</span>
                 </Button>
-                <Button onClick={() => navigate("/dashboard/products/new")} className="bg-blue-600 hover:bg-blue-700">
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button 
+                  onClick={() => navigate("/dashboard/products/new")} 
+                  className="bg-blue-600 hover:bg-blue-700"
+                  aria-label={t('products.addNew')}
+                >
+                  <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
                   <span className="hidden sm:inline">{t('products.addNew')}</span>
                   <span className="sm:hidden">{t('products.add')}</span>
                 </Button>
@@ -479,12 +536,12 @@ const Products = () => {
             </div>
           </header>
 
-          <main className="flex-1 p-4 sm:p-6 bg-gradient-hero">
+          <main className="flex-1 p-4 sm:p-6 bg-gradient-hero" role="main" aria-labelledby="products-title">
             <div className="max-w-7xl mx-auto space-y-6">
               {productsLoading ? (
                 <Card className="shadow-medium">
-                  <CardContent className="py-12 text-center">
-                    <Loader2 className="inline-block h-8 w-8 animate-spin text-primary" />
+                  <CardContent className="py-12 text-center" role="status" aria-live="polite">
+                    <Loader2 className="inline-block h-8 w-8 animate-spin text-primary" aria-hidden="true" />
                     <p className="mt-2 text-muted-foreground">{t('common.loading')}</p>
                   </CardContent>
                 </Card>
@@ -525,7 +582,9 @@ const Products = () => {
               ) : (
                 <>
                   {/* Statistiques */}
-                  <ProductStats products={products} filteredProducts={filteredProducts} />
+                  <div ref={statsRef} role="region" aria-label={t('products.stats.ariaLabel', 'Statistiques des produits')}>
+                    <ProductStats products={products} filteredProducts={filteredProducts} />
+                  </div>
 
                   {/* Actions en lot */}
                   {selectedProducts.length > 0 && (
@@ -539,7 +598,8 @@ const Products = () => {
                   )}
 
                   {/* Filtres */}
-                  <ProductFiltersDashboard
+                  <div ref={filtersRef} role="region" aria-label={t('products.filters.ariaLabel', 'Filtres de recherche')}>
+                    <ProductFiltersDashboard
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
                     category={category}
@@ -558,7 +618,8 @@ const Products = () => {
                     onViewModeChange={setViewMode}
                     totalProducts={products.length}
                     activeProducts={activeProducts}
-                  />
+                    />
+                  </div>
 
                   {filteredProducts.length === 0 ? (
                     <Card className="shadow-medium">
@@ -630,30 +691,32 @@ const Products = () => {
                       </div>
 
                       {viewMode === "grid" ? (
-                        <ProductGrid>
-                          {paginatedProducts.map((product) => (
-                            <ProductCardDashboard
-                              key={product.id}
-                              product={product}
-                              storeSlug={store.slug}
-                              onEdit={() => setEditingProduct(product)}
-                              onDelete={() => setDeletingProductId(product.id)}
-                              onToggleStatus={() => handleToggleStatus(product.id)}
-                              onDuplicate={() => handleDuplicateProduct(product.id)}
-                              onQuickView={() => setQuickViewProduct(product)}
-                              isSelected={selectedProducts.includes(product.id)}
-                              onSelect={(selected) => {
-                                if (selected) {
-                                  setSelectedProducts([...selectedProducts, product.id]);
-                                } else {
-                                  setSelectedProducts(selectedProducts.filter(id => id !== product.id));
-                                }
-                              }}
-                            />
-                          ))}
-                        </ProductGrid>
+                        <div ref={productsRef} role="region" aria-label={t('products.list.ariaLabel', 'Liste des produits')}>
+                          <ProductGrid>
+                            {paginatedProducts.map((product) => (
+                              <ProductCardDashboard
+                                key={product.id}
+                                product={product}
+                                storeSlug={store.slug}
+                                onEdit={() => setEditingProduct(product)}
+                                onDelete={() => setDeletingProductId(product.id)}
+                                onToggleStatus={() => handleToggleStatus(product.id)}
+                                onDuplicate={() => handleDuplicateProduct(product.id)}
+                                onQuickView={() => setQuickViewProduct(product)}
+                                isSelected={selectedProducts.includes(product.id)}
+                                onSelect={(selected) => {
+                                  if (selected) {
+                                    setSelectedProducts([...selectedProducts, product.id]);
+                                  } else {
+                                    setSelectedProducts(selectedProducts.filter(id => id !== product.id));
+                                  }
+                                }}
+                              />
+                            ))}
+                          </ProductGrid>
+                        </div>
                       ) : (
-                        <div className="space-y-3">
+                        <div ref={productsRef} className="space-y-3" role="region" aria-label={t('products.list.ariaLabel', 'Liste des produits')}>
                           {paginatedProducts.map((product) => (
                             <ProductListView
                               key={product.id}
@@ -681,37 +744,42 @@ const Products = () => {
                       {totalPages > 1 && (
                         <Card className="shadow-soft">
                           <CardContent className="p-4">
-                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <nav className="flex flex-col sm:flex-row items-center justify-between gap-4" role="navigation" aria-label={t('products.pagination.ariaLabel', 'Navigation des pages')}>
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <span>Affichage de</span>
+                                <label htmlFor="items-per-page" className="sr-only">{t('products.pagination.itemsPerPage')}</label>
+                                <span>{t('products.pagination.displaying', 'Affichage de')}</span>
                                 <select
+                                  id="items-per-page"
                                   value={itemsPerPage}
                                   onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
                                   className="px-2 py-1 border rounded-md bg-background"
+                                  aria-label={t('products.pagination.selectItemsPerPage')}
                                 >
                                   {PAGINATION_OPTIONS.map(option => (
                                     <option key={option} value={option}>{option}</option>
                                   ))}
                                 </select>
-                                <span>produits par page</span>
+                                <span>{t('products.pagination.perPage', 'produits par page')}</span>
                               </div>
 
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-1" role="group" aria-label={t('products.pagination.controls')}>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handlePageChange(1)}
                                   disabled={currentPage === 1}
+                                  aria-label={t('products.pagination.firstPage', 'Première page')}
                                 >
-                                  <ChevronsLeft className="h-4 w-4" />
+                                  <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handlePageChange(currentPage - 1)}
                                   disabled={currentPage === 1}
+                                  aria-label={t('products.pagination.previousPage', 'Page précédente')}
                                 >
-                                  <ChevronLeft className="h-4 w-4" />
+                                  <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                                 </Button>
 
                                 <div className="flex items-center gap-1 px-2">
@@ -734,6 +802,8 @@ const Products = () => {
                                         size="sm"
                                         onClick={() => handlePageChange(pageNumber)}
                                         className="min-w-[36px]"
+                                        aria-label={t('products.pagination.goToPage', { page: pageNumber }, `Aller à la page ${pageNumber}`)}
+                                        aria-current={currentPage === pageNumber ? "page" : undefined}
                                       >
                                         {pageNumber}
                                       </Button>
@@ -746,16 +816,18 @@ const Products = () => {
                                   size="sm"
                                   onClick={() => handlePageChange(currentPage + 1)}
                                   disabled={currentPage === totalPages}
+                                  aria-label={t('products.pagination.nextPage', 'Page suivante')}
                                 >
-                                  <ChevronRight className="h-4 w-4" />
+                                  <ChevronRight className="h-4 w-4" aria-hidden="true" />
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handlePageChange(totalPages)}
                                   disabled={currentPage === totalPages}
+                                  aria-label={t('products.pagination.lastPage', 'Dernière page')}
                                 >
-                                  <ChevronsRight className="h-4 w-4" />
+                                  <ChevronsRight className="h-4 w-4" aria-hidden="true" />
                                 </Button>
                               </div>
 
