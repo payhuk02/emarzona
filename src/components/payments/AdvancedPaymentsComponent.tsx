@@ -1,4 +1,11 @@
-import React, { useState } from 'react';
+/**
+ * 🚀 AdvancedPaymentsComponent - Professional & Optimized
+ * Composant optimisé avec design professionnel, responsive et fonctionnalités avancées
+ * Gestion complète des paiements avancés (complet, pourcentage, sécurisé)
+ */
+
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,12 +49,19 @@ import {
   DollarSign,
   Calendar,
   User,
-  Store,
   Package,
   MoreVertical,
   Eye,
   Unlock,
-  AlertTriangle
+  AlertTriangle,
+  Search,
+  Filter,
+  Loader2,
+  RefreshCw,
+  Grid3X3,
+  List,
+  ArrowUpRight,
+  Download,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -62,6 +76,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { logger } from '@/lib/logger';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 interface AdvancedPaymentsComponentProps {
   storeId?: string;
@@ -76,6 +93,30 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
   customerId,
   className = ""
 }) => {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showDisputeDialog, setShowDisputeDialog] = useState(false);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<AdvancedPayment | null>(null);
+  const [disputeReason, setDisputeReason] = useState("");
+  const [disputeDescription, setDisputeDescription] = useState("");
+  
+  // Filtres et recherche
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("recent");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  
+  // Debounce search
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  // Animations au scroll
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const paymentsListRef = useScrollAnimation<HTMLDivElement>();
+
   const {
     payments,
     loading,
@@ -85,35 +126,160 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
     createSecuredPayment,
     releasePayment,
     openDispute,
-    updatePayment,
     deletePayment,
-  } = useAdvancedPayments(storeId);
+    refetch,
+  } = useAdvancedPayments(storeId, {
+    status: statusFilter !== "all" ? statusFilter as PaymentStatus : undefined,
+    payment_type: typeFilter !== "all" ? typeFilter as PaymentType : undefined,
+  });
 
-  if (!storeId) {
-    return (
-      <Card className={className}>
-        <CardContent className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Boutique non trouvée</h3>
-            <p className="text-muted-foreground">
-              Impossible de charger les paiements sans identifiant de boutique
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Filtrage et tri des paiements
+  const filteredAndSortedPayments = useMemo(() => {
+    let filtered = [...(payments || [])];
 
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showDisputeDialog, setShowDisputeDialog] = useState(false);
-  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
-  const [selectedPayment, setSelectedPayment] = useState<AdvancedPayment | null>(null);
-  const [disputeReason, setDisputeReason] = useState("");
-  const [disputeDescription, setDisputeDescription] = useState("");
-  const { toast } = useToast();
+    // Filtre par recherche
+    if (debouncedSearchQuery) {
+      const query = debouncedSearchQuery.toLowerCase();
+      filtered = filtered.filter((payment) => {
+        return (
+          payment.transaction_id?.toLowerCase().includes(query) ||
+          payment.notes?.toLowerCase().includes(query) ||
+          payment.customers?.name?.toLowerCase().includes(query) ||
+          payment.orders?.order_number?.toLowerCase().includes(query)
+        );
+      });
+    }
 
-  const getStatusBadge = (status: PaymentStatus) => {
+    // Filtre par orderId si fourni
+    if (orderId) {
+      filtered = filtered.filter((payment) => payment.order_id === orderId);
+    }
+
+    // Tri
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "recent":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "amount-asc":
+          return a.amount - b.amount;
+        case "amount-desc":
+          return b.amount - a.amount;
+        case "status":
+          return a.status.localeCompare(b.status);
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [payments, debouncedSearchQuery, orderId, sortBy]);
+
+  // Statistiques calculées
+  const computedStats = useMemo(() => {
+    if (!stats) {
+      return {
+        totalPayments: 0,
+        completedPayments: 0,
+        totalRevenue: 0,
+        heldRevenue: 0,
+        heldPayments: 0,
+        successRate: 0,
+      };
+    }
+
+    return {
+      totalPayments: stats.total_payments || 0,
+      completedPayments: stats.completed_payments || 0,
+      totalRevenue: stats.total_revenue || 0,
+      heldRevenue: stats.held_revenue || 0,
+      heldPayments: stats.held_payments || 0,
+      successRate: stats.success_rate || 0,
+    };
+  }, [stats]);
+
+  // Handlers
+  const handleRefresh = useCallback(() => {
+    refetch?.();
+    logger.info('Rafraîchissement des paiements avancés');
+    toast({
+      title: t('common.refreshed', 'Actualisé'),
+      description: t('common.refreshedDesc', 'Les paiements ont été actualisés'),
+    });
+  }, [refetch, toast, t]);
+
+  const handleReleasePayment = useCallback(async (payment: AdvancedPayment) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: t('errors.auth', 'Erreur'),
+        description: t('errors.notAuthenticated', 'Utilisateur non authentifié'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const result = await releasePayment(payment.id, user.id);
+    if (result.success) {
+      toast({
+        title: t('success.title', 'Succès'),
+        description: t('payments.released', 'Paiement libéré avec succès'),
+      });
+      logger.info('Paiement libéré', { paymentId: payment.id });
+    } else {
+      toast({
+        title: t('errors.title', 'Erreur'),
+        description: result.error || t('payments.releaseError', 'Impossible de libérer le paiement'),
+        variant: "destructive",
+      });
+      logger.error('Erreur lors de la libération du paiement', { paymentId: payment.id, error: result.error });
+    }
+  }, [releasePayment, toast, t]);
+
+  const handleOpenDispute = useCallback(async () => {
+    if (!selectedPayment || !disputeReason || !disputeDescription) return;
+
+    const result = await openDispute(selectedPayment.id, disputeReason, disputeDescription);
+    if (result.success) {
+      setShowDisputeDialog(false);
+      setDisputeReason("");
+      setDisputeDescription("");
+      setSelectedPayment(null);
+      toast({
+        title: t('success.title', 'Succès'),
+        description: t('payments.disputeOpened', 'Litige ouvert avec succès'),
+      });
+      logger.info('Litige ouvert', { paymentId: selectedPayment.id });
+    } else {
+      toast({
+        title: t('errors.title', 'Erreur'),
+        description: result.error || t('payments.disputeError', 'Impossible d\'ouvrir le litige'),
+        variant: "destructive",
+      });
+      logger.error('Erreur lors de l\'ouverture du litige', { paymentId: selectedPayment.id, error: result.error });
+    }
+  }, [selectedPayment, disputeReason, disputeDescription, openDispute, toast, t]);
+
+  const handleDeletePayment = useCallback(async (payment: AdvancedPayment) => {
+    const result = await deletePayment(payment.id);
+    if (!result.success) {
+      toast({
+        title: t('errors.title', 'Erreur'),
+        description: result.error || t('payments.deleteError', 'Impossible de supprimer le paiement'),
+        variant: "destructive",
+      });
+      logger.error('Erreur lors de la suppression du paiement', { paymentId: payment.id, error: result.error });
+    } else {
+      toast({
+        title: t('success.title', 'Succès'),
+        description: t('payments.deleted', 'Paiement supprimé avec succès'),
+      });
+      logger.info('Paiement supprimé', { paymentId: payment.id });
+    }
+  }, [deletePayment, toast, t]);
+
+  const getStatusBadge = useCallback((status: PaymentStatus) => {
     const variants: Record<PaymentStatus, "default" | "secondary" | "destructive" | "outline"> = {
       pending: "secondary",
       completed: "default",
@@ -125,23 +291,23 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
     };
 
     const labels: Record<PaymentStatus, string> = {
-      pending: "En attente",
-      completed: "Complété",
-      failed: "Échoué",
-      refunded: "Remboursé",
-      held: "Retenu",
-      released: "Libéré",
-      disputed: "En litige",
+      pending: t('payments.status.pending', 'En attente'),
+      completed: t('payments.status.completed', 'Complété'),
+      failed: t('payments.status.failed', 'Échoué'),
+      refunded: t('payments.status.refunded', 'Remboursé'),
+      held: t('payments.status.held', 'Retenu'),
+      released: t('payments.status.released', 'Libéré'),
+      disputed: t('payments.status.disputed', 'En litige'),
     };
 
     const icons: Record<PaymentStatus, React.ReactNode> = {
-      pending: <Clock className="h-3 w-3" />,
-      completed: <CheckCircle className="h-3 w-3" />,
-      failed: <XCircle className="h-3 w-3" />,
-      refunded: <XCircle className="h-3 w-3" />,
-      held: <Shield className="h-3 w-3" />,
-      released: <Unlock className="h-3 w-3" />,
-      disputed: <AlertTriangle className="h-3 w-3" />,
+      pending: <Clock className="h-3 w-3" aria-hidden="true" />,
+      completed: <CheckCircle className="h-3 w-3" aria-hidden="true" />,
+      failed: <XCircle className="h-3 w-3" aria-hidden="true" />,
+      refunded: <XCircle className="h-3 w-3" aria-hidden="true" />,
+      held: <Shield className="h-3 w-3" aria-hidden="true" />,
+      released: <Unlock className="h-3 w-3" aria-hidden="true" />,
+      disputed: <AlertTriangle className="h-3 w-3" aria-hidden="true" />,
     };
 
     return (
@@ -150,9 +316,9 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
         {labels[status] || status}
       </Badge>
     );
-  };
+  }, [t]);
 
-  const getPaymentTypeBadge = (type: PaymentType) => {
+  const getPaymentTypeBadge = useCallback((type: PaymentType) => {
     const variants: Record<PaymentType, "default" | "secondary" | "outline"> = {
       full: "default",
       percentage: "secondary",
@@ -160,15 +326,15 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
     };
 
     const labels: Record<PaymentType, string> = {
-      full: "Paiement complet",
-      percentage: "Paiement partiel",
-      delivery_secured: "Paiement sécurisé",
+      full: t('payments.type.full', 'Paiement complet'),
+      percentage: t('payments.type.percentage', 'Paiement partiel'),
+      delivery_secured: t('payments.type.secured', 'Paiement sécurisé'),
     };
 
     const icons: Record<PaymentType, React.ReactNode> = {
-      full: <CreditCard className="h-3 w-3" />,
-      percentage: <Percent className="h-3 w-3" />,
-      delivery_secured: <Shield className="h-3 w-3" />,
+      full: <CreditCard className="h-3 w-3" aria-hidden="true" />,
+      percentage: <Percent className="h-3 w-3" aria-hidden="true" />,
+      delivery_secured: <Shield className="h-3 w-3" aria-hidden="true" />,
     };
 
     return (
@@ -177,83 +343,65 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
         {labels[type] || type}
       </Badge>
     );
-  };
+  }, [t]);
 
-  const getMethodLabel = (method: string) => {
+  const getMethodLabel = useCallback((method: string) => {
     const labels: Record<string, string> = {
-      cash: "Espèces",
-      card: "Carte bancaire",
-      mobile_money: "Mobile Money",
-      bank_transfer: "Virement bancaire",
-      check: "Chèque",
-      other: "Autre",
+      cash: t('payments.method.cash', 'Espèces'),
+      card: t('payments.method.card', 'Carte bancaire'),
+      mobile_money: t('payments.method.mobileMoney', 'Mobile Money'),
+      bank_transfer: t('payments.method.bankTransfer', 'Virement bancaire'),
+      check: t('payments.method.check', 'Chèque'),
+      other: t('payments.method.other', 'Autre'),
     };
     return labels[method] || method;
-  };
+  }, [t]);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     return formatDistanceToNow(new Date(dateString), { 
       addSuffix: true, 
       locale: fr 
     });
-  };
+  }, []);
 
-  const handleReleasePayment = async (payment: AdvancedPayment) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: "Erreur",
-        description: "Utilisateur non authentifié",
-        variant: "destructive",
-      });
-      return;
-    }
+  // Logging on mount
+  useEffect(() => {
+    logger.info('AdvancedPaymentsComponent chargé', {
+      storeId,
+      orderId,
+      totalPayments: payments?.length || 0,
+    });
+  }, [storeId, orderId, payments?.length]);
 
-    const result = await releasePayment(payment.id, user.id);
-    if (result.success) {
-      toast({
-        title: "Succès",
-        description: "Paiement libéré avec succès",
-      });
-    } else {
-      toast({
-        title: "Erreur",
-        description: result.error || "Impossible de libérer le paiement",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleOpenDispute = async () => {
-    if (!selectedPayment || !disputeReason || !disputeDescription) return;
-
-    const result = await openDispute(selectedPayment.id, disputeReason, disputeDescription);
-    if (result.success) {
-      setShowDisputeDialog(false);
-      setDisputeReason("");
-      setDisputeDescription("");
-      setSelectedPayment(null);
-    }
-  };
-
-  const handleDeletePayment = async (payment: AdvancedPayment) => {
-    const result = await deletePayment(payment.id);
-    if (!result.success) {
-      toast({
-        title: "Erreur",
-        description: result.error || "Impossible de supprimer le paiement",
-        variant: "destructive",
-      });
-    }
-  };
+  if (!storeId) {
+    return (
+      <Card className={`border-border/50 bg-card/50 backdrop-blur-sm ${className}`}>
+        <CardContent className="flex items-center justify-center min-h-[300px] sm:min-h-[400px] p-6 sm:p-12">
+          <div className="text-center space-y-4 animate-in fade-in zoom-in-95 duration-500">
+            <div className="p-4 rounded-full bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 mx-auto w-fit">
+              <CreditCard className="h-12 w-12 sm:h-16 sm:w-16 text-blue-600 dark:text-blue-400" aria-hidden="true" />
+            </div>
+            <h3 className="text-lg sm:text-xl font-semibold">
+              {t('payments.noStore', 'Boutique non trouvée')}
+            </h3>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
+              {t('payments.noStoreDesc', 'Impossible de charger les paiements sans identifiant de boutique')}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (loading) {
     return (
-      <Card className={className}>
-        <CardContent className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-            <p className="mt-2 text-muted-foreground">Chargement des paiements...</p>
+      <Card className={`border-border/50 bg-card/50 backdrop-blur-sm ${className}`}>
+        <CardContent className="flex items-center justify-center min-h-[300px] sm:min-h-[400px] p-6 sm:p-12" role="status" aria-live="polite">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+            <p className="text-sm text-muted-foreground">
+              {t('payments.loading', 'Chargement des paiements...')}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -261,569 +409,747 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
   }
 
   return (
-    <div className={className}>
-      {/* Statistiques */}
+    <div className={`space-y-4 sm:space-y-6 ${className}`}>
+      {/* Statistiques - Responsive & Animated */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Paiements totaux</CardTitle>
-              <CreditCard className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.total_payments}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats.completed_payments} complétés
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Revenus totaux</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.total_revenue.toLocaleString()} FCFA</div>
-              <p className="text-xs text-muted-foreground">
-                {stats.held_revenue.toLocaleString()} FCFA retenus
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Paiements retenus</CardTitle>
-              <Shield className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.held_payments}</div>
-              <p className="text-xs text-muted-foreground">
-                En attente de libération
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Taux de réussite</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.success_rate.toFixed(1)}%</div>
-              <p className="text-xs text-muted-foreground">
-                Paiements réussis
-              </p>
-            </CardContent>
-          </Card>
+        <div 
+          ref={statsRef}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
+          role="region"
+          aria-label={t('payments.stats.ariaLabel', 'Statistiques des paiements')}
+        >
+          {[
+            {
+              label: t('payments.stats.total', 'Paiements totaux'),
+              value: computedStats.totalPayments,
+              subValue: `${computedStats.completedPayments} ${t('payments.stats.completed', 'complétés')}`,
+              icon: CreditCard,
+              color: "from-blue-600 to-cyan-600",
+              bgColor: "from-blue-500/10 to-cyan-500/5",
+            },
+            {
+              label: t('payments.stats.revenue', 'Revenus totaux'),
+              value: `${computedStats.totalRevenue.toLocaleString()} FCFA`,
+              subValue: `${computedStats.heldRevenue.toLocaleString()} FCFA ${t('payments.stats.held', 'retenus')}`,
+              icon: DollarSign,
+              color: "from-green-600 to-emerald-600",
+              bgColor: "from-green-500/10 to-emerald-500/5",
+            },
+            {
+              label: t('payments.stats.held', 'Paiements retenus'),
+              value: computedStats.heldPayments,
+              subValue: t('payments.stats.pendingRelease', 'En attente de libération'),
+              icon: Shield,
+              color: "from-orange-600 to-amber-600",
+              bgColor: "from-orange-500/10 to-amber-500/5",
+            },
+            {
+              label: t('payments.stats.successRate', 'Taux de réussite'),
+              value: `${computedStats.successRate.toFixed(1)}%`,
+              subValue: t('payments.stats.successful', 'Paiements réussis'),
+              icon: CheckCircle,
+              color: "from-purple-600 to-pink-600",
+              bgColor: "from-purple-500/10 to-pink-500/5",
+            },
+          ].map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <Card
+                key={stat.label}
+                className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 group overflow-hidden"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${stat.bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                <CardHeader className="relative pb-2 sm:pb-3 p-3 sm:p-4">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
+                    <div className={`p-1.5 sm:p-2 rounded-lg bg-gradient-to-br ${stat.bgColor} border border-opacity-20`}>
+                      <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-foreground/70" aria-hidden="true" />
+                    </div>
+                    {stat.label}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="relative p-3 sm:p-4 pt-0">
+                  <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
+                    {stat.value}
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-1">
+                    {stat.subValue}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
-      {/* Actions */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold">Paiements avancés</h2>
-          <p className="text-muted-foreground">
-            Gérez les paiements par pourcentage et les paiements sécurisés
+      {/* Header avec Actions - Responsive */}
+      <div 
+        ref={headerRef}
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 sm:p-6 rounded-lg border border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700"
+      >
+        <div className="flex-1 min-w-0">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2">
+            {t('payments.title', 'Paiements avancés')}
+          </h2>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            {t('payments.description', 'Gérez les paiements par pourcentage et les paiements sécurisés')}
           </p>
         </div>
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogTrigger asChild>
-            <Button>
-              <CreditCard className="h-4 w-4 mr-2" />
-              Nouveau paiement
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Créer un paiement avancé</DialogTitle>
-              <DialogDescription>
-                Choisissez le type de paiement et configurez les paramètres
-              </DialogDescription>
-            </DialogHeader>
-            <PaymentForm
-              storeId={storeId}
-              orderId={orderId}
-              customerId={customerId}
-              onCreatePayment={(result) => {
-                if (result.success) {
-                  setShowCreateDialog(false);
-                  toast({
-                    title: "Succès",
-                    description: "Paiement créé avec succès",
-                  });
-                } else {
-                  toast({
-                    title: "Erreur",
-                    description: result.error || "Impossible de créer le paiement",
-                    variant: "destructive",
-                  });
-                }
-              }}
-            />
-          </DialogContent>
-        </Dialog>
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            className="h-9 sm:h-10"
+            aria-label={t('common.refresh', 'Rafraîchir')}
+          >
+            <RefreshCw className="h-4 w-4" aria-hidden="true" />
+            <span className="hidden sm:inline ml-2">{t('common.refresh', 'Actualiser')}</span>
+          </Button>
+          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+            <DialogTrigger asChild>
+              <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 h-9 sm:h-10">
+                <CreditCard className="h-4 w-4" aria-hidden="true" />
+                <span className="ml-2">{t('payments.new', 'Nouveau paiement')}</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{t('payments.create.title', 'Créer un paiement avancé')}</DialogTitle>
+                <DialogDescription>
+                  {t('payments.create.description', 'Choisissez le type de paiement et configurez les paramètres')}
+                </DialogDescription>
+              </DialogHeader>
+              <PaymentForm
+                storeId={storeId}
+                orderId={orderId}
+                customerId={customerId}
+                onCreatePayment={(result) => {
+                  if (result.success) {
+                    setShowCreateDialog(false);
+                    toast({
+                      title: t('success.title', 'Succès'),
+                      description: t('payments.created', 'Paiement créé avec succès'),
+                    });
+                    logger.info('Paiement créé', { storeId, orderId });
+                  } else {
+                    toast({
+                      title: t('errors.title', 'Erreur'),
+                      description: result.error || t('payments.createError', 'Impossible de créer le paiement'),
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
-      {/* Liste des paiements */}
-      <div className="space-y-4">
-        {payments.length === 0 ? (
-          <Card>
-            <CardContent className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Aucun paiement</h3>
-                <p className="text-muted-foreground">
-                  Créez votre premier paiement avancé pour commencer
+      {/* Filtres et Recherche - Responsive */}
+      <div className="space-y-3 sm:space-y-4 p-4 sm:p-6 rounded-lg border border-border/50 bg-card/50 backdrop-blur-sm">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <Input
+              placeholder={t('payments.search.placeholder', 'Rechercher par transaction, notes...')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-10 sm:h-11 text-sm sm:text-base"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-[160px] h-10 sm:h-11 text-sm sm:text-base">
+              <Filter className="h-4 w-4 mr-2" aria-hidden="true" />
+              <SelectValue placeholder={t('payments.filters.status', 'Statut')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('payments.filters.allStatus', 'Tous les statuts')}</SelectItem>
+              <SelectItem value="pending">{t('payments.status.pending', 'En attente')}</SelectItem>
+              <SelectItem value="completed">{t('payments.status.completed', 'Complété')}</SelectItem>
+              <SelectItem value="failed">{t('payments.status.failed', 'Échoué')}</SelectItem>
+              <SelectItem value="held">{t('payments.status.held', 'Retenu')}</SelectItem>
+              <SelectItem value="disputed">{t('payments.status.disputed', 'En litige')}</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-full sm:w-[160px] h-10 sm:h-11 text-sm sm:text-base">
+              <SelectValue placeholder={t('payments.filters.type', 'Type')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('payments.filters.allTypes', 'Tous les types')}</SelectItem>
+              <SelectItem value="full">{t('payments.type.full', 'Complet')}</SelectItem>
+              <SelectItem value="percentage">{t('payments.type.percentage', 'Pourcentage')}</SelectItem>
+              <SelectItem value="delivery_secured">{t('payments.type.secured', 'Sécurisé')}</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-full sm:w-[140px] h-10 sm:h-11 text-sm sm:text-base">
+              <SelectValue placeholder={t('payments.sort', 'Trier')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">{t('payments.sort.recent', 'Plus récents')}</SelectItem>
+              <SelectItem value="oldest">{t('payments.sort.oldest', 'Plus anciens')}</SelectItem>
+              <SelectItem value="amount-desc">{t('payments.sort.amountDesc', 'Montant décroissant')}</SelectItem>
+              <SelectItem value="amount-asc">{t('payments.sort.amountAsc', 'Montant croissant')}</SelectItem>
+              <SelectItem value="status">{t('payments.sort.status', 'Par statut')}</SelectItem>
+            </SelectContent>
+          </Select>
+          <div className="flex gap-2">
+            <Button
+              variant={viewMode === "list" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("list")}
+              className="h-10 sm:h-11"
+              aria-label={t('payments.view.list', 'Vue liste')}
+            >
+              <List className="h-4 w-4" aria-hidden="true" />
+            </Button>
+            <Button
+              variant={viewMode === "grid" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("grid")}
+              className="h-10 sm:h-11"
+              aria-label={t('payments.view.grid', 'Vue grille')}
+            >
+              <Grid3X3 className="h-4 w-4" aria-hidden="true" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Liste des paiements - Responsive */}
+      <div 
+        ref={paymentsListRef}
+        className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
+        role="region"
+        aria-label={t('payments.list.ariaLabel', 'Liste des paiements')}
+      >
+        {filteredAndSortedPayments.length === 0 ? (
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardContent className="flex items-center justify-center min-h-[300px] sm:min-h-[400px] p-6 sm:p-12">
+              <div className="text-center space-y-4 animate-in fade-in zoom-in-95 duration-500">
+                <div className="p-4 rounded-full bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 mx-auto w-fit">
+                  <CreditCard className="h-12 w-12 sm:h-16 sm:w-16 text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold">
+                  {searchQuery || statusFilter !== "all" || typeFilter !== "all"
+                    ? t('payments.noResults', 'Aucun paiement trouvé')
+                    : t('payments.empty', 'Aucun paiement')}
+                </h3>
+                <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
+                  {searchQuery || statusFilter !== "all" || typeFilter !== "all"
+                    ? t('payments.noResultsDesc', 'Aucun paiement ne correspond à vos critères de recherche')
+                    : t('payments.emptyDesc', 'Créez votre premier paiement avancé pour commencer')}
                 </p>
+                {!searchQuery && statusFilter === "all" && typeFilter === "all" && (
+                  <Button
+                    onClick={() => setShowCreateDialog(true)}
+                    className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" aria-hidden="true" />
+                    {t('payments.createFirst', 'Créer un paiement')}
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
         ) : (
-          payments.map((payment) => (
-            <Card key={payment.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="font-semibold text-lg">
-                        {payment.transaction_id ? `#${payment.transaction_id.slice(-8)}` : 'Paiement'}
-                      </h3>
-                      {getStatusBadge(payment.status)}
-                      {getPaymentTypeBadge(payment.payment_type)}
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-green-600" />
-                        <span className="font-semibold text-green-600">
-                          {payment.amount.toLocaleString()} {payment.currency}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CreditCard className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{getMethodLabel(payment.payment_method)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{formatDate(payment.created_at)}</span>
-                      </div>
-                    </div>
-
-                    {/* Informations spécifiques au type de paiement */}
-                    {payment.payment_type === 'percentage' && (
-                      <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg mb-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Percent className="h-4 w-4 text-blue-600" />
-                          <span className="font-medium text-blue-900 dark:text-blue-100">
-                            Paiement par pourcentage
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div>
-                            <span className="text-muted-foreground">Pourcentage payé:</span>
-                            <span className="font-medium ml-1">{payment.percentage_rate}%</span>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Montant restant:</span>
-                            <span className="font-medium ml-1">
-                              {payment.remaining_amount?.toLocaleString()} {payment.currency}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {payment.payment_type === 'delivery_secured' && (
-                      <div className="bg-orange-50 dark:bg-orange-950 p-3 rounded-lg mb-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Shield className="h-4 w-4 text-orange-600" />
-                          <span className="font-medium text-orange-900 dark:text-orange-100">
-                            Paiement sécurisé
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div>
-                            <span className="text-muted-foreground">Statut:</span>
-                            <span className="font-medium ml-1">
-                              {payment.is_held ? 'Retenu' : 'Libéré'}
-                            </span>
-                          </div>
-                          {payment.held_until && (
-                            <div>
-                              <span className="text-muted-foreground">Retenu jusqu'au:</span>
-                              <span className="font-medium ml-1">
-                                {new Date(payment.held_until).toLocaleDateString('fr-FR')}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Informations sur les clients et commandes */}
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      {payment.customers && (
-                        <div className="flex items-center gap-1">
-                          <User className="h-3 w-3" />
-                          <span>{payment.customers.name}</span>
-                        </div>
-                      )}
-                      {payment.orders && (
-                        <div className="flex items-center gap-1">
-                          <Package className="h-3 w-3" />
-                          <span>Commande #{payment.orders.order_number}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {payment.notes && (
-                      <div className="mt-3 p-2 bg-muted rounded text-sm">
-                        <span className="font-medium">Notes:</span> {payment.notes}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedPayment(payment);
-                        setShowDetailsDialog(true);
-                      }}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      Voir
-                    </Button>
-                    
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {payment.is_held && payment.status === 'held' && (
-                          <DropdownMenuItem onClick={() => handleReleasePayment(payment)}>
-                            <Unlock className="h-4 w-4 mr-2" />
-                            Libérer le paiement
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem onClick={() => {
-                          setSelectedPayment(payment);
-                          setShowDisputeDialog(true);
-                        }}>
-                          <AlertTriangle className="h-4 w-4 mr-2" />
-                          Ouvrir un litige
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          onClick={() => handleDeletePayment(payment)}
-                          className="text-destructive"
-                        >
-                          <XCircle className="h-4 w-4 mr-2" />
-                          Supprimer
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+          <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-4"}>
+            {filteredAndSortedPayments.map((payment, index) => (
+              <PaymentCard
+                key={payment.id}
+                payment={payment}
+                index={index}
+                getStatusBadge={getStatusBadge}
+                getPaymentTypeBadge={getPaymentTypeBadge}
+                getMethodLabel={getMethodLabel}
+                formatDate={formatDate}
+                onView={(payment) => {
+                  setSelectedPayment(payment);
+                  setShowDetailsDialog(true);
+                }}
+                onRelease={handleReleasePayment}
+                onDispute={(payment) => {
+                  setSelectedPayment(payment);
+                  setShowDisputeDialog(true);
+                }}
+                onDelete={handleDeletePayment}
+                viewMode={viewMode}
+              />
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Dialog de détails du paiement */}
-      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              Détails du paiement
-            </DialogTitle>
-            <DialogDescription>
-              Informations complètes sur le paiement sélectionné
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedPayment && (
-            <div className="space-y-6">
-              {/* Statut et Type */}
-              <div className="flex items-center gap-3">
-                {getStatusBadge(selectedPayment.status)}
-                {getPaymentTypeBadge(selectedPayment.payment_type)}
-                {selectedPayment.is_held && (
-                  <Badge variant="outline" className="flex items-center gap-1">
-                    <Shield className="h-3 w-3" />
-                    Fonds retenus
-                  </Badge>
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Informations principales */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <CreditCard className="h-4 w-4" />
-                    Informations de paiement
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">ID Transaction:</span>
-                      <span className="font-mono">
-                        {selectedPayment.transaction_id || 'N/A'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Montant:</span>
-                      <span className="font-semibold text-green-600">
-                        {selectedPayment.amount.toLocaleString()} {selectedPayment.currency}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Méthode:</span>
-                      <span className="font-medium">{getMethodLabel(selectedPayment.payment_method)}</span>
-                    </div>
-                    {selectedPayment.payment_type === 'percentage' && (
-                      <>
-                        <Separator />
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Taux:</span>
-                          <span>{selectedPayment.percentage_rate}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Montant partiel:</span>
-                          <span className="text-green-600">
-                            {selectedPayment.percentage_amount?.toLocaleString() || 0} {selectedPayment.currency}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Montant restant:</span>
-                          <span className="text-orange-600">
-                            {selectedPayment.remaining_amount?.toLocaleString() || 0} {selectedPayment.currency}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Dates et délais
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Créé:</span>
-                      <span>{formatDate(selectedPayment.created_at)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Mis à jour:</span>
-                      <span>{formatDate(selectedPayment.updated_at)}</span>
-                    </div>
-                    {selectedPayment.held_until && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Retenu jusqu'au:</span>
-                        <span className="text-orange-600">
-                          {new Date(selectedPayment.held_until).toLocaleDateString('fr-FR')}
-                        </span>
-                      </div>
-                    )}
-                    {selectedPayment.delivery_confirmed_at && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Livraison confirmée:</span>
-                        <span className="text-green-600">
-                          {formatDate(selectedPayment.delivery_confirmed_at)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Informations sur la rétention */}
-              {selectedPayment.is_held && (
-                <>
-                  <Separator />
-                  <div className="space-y-3">
-                    <h3 className="font-semibold flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-orange-600" />
-                      Informations de rétention
-                    </h3>
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2 text-orange-600 font-medium">
-                          <AlertCircle className="h-4 w-4" />
-                          Les fonds sont actuellement retenus
-                        </div>
-                        {selectedPayment.release_conditions && (
-                          <div className="mt-2">
-                            <span className="text-muted-foreground">Conditions de libération:</span>
-                            <ul className="mt-1 ml-4 space-y-1">
-                              {Object.entries(selectedPayment.release_conditions as Record<string, boolean>).map(([key, value]) => (
-                                <li key={key} className="flex items-center gap-2">
-                                  {value ? (
-                                    <CheckCircle className="h-3 w-3 text-green-600" />
-                                  ) : (
-                                    <XCircle className="h-3 w-3 text-gray-400" />
-                                  )}
-                                  <span>{key.replace(/_/g, ' ')}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Litiges */}
-              {(selectedPayment.dispute_opened_at || selectedPayment.status === 'disputed') && (
-                <>
-                  <Separator />
-                  <div className="space-y-3">
-                    <h3 className="font-semibold flex items-center gap-2 text-red-600">
-                      <AlertTriangle className="h-4 w-4" />
-                      Litige en cours
-                    </h3>
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <div className="space-y-2 text-sm">
-                        {selectedPayment.dispute_opened_at && (
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Ouvert le:</span>
-                            <span>{formatDate(selectedPayment.dispute_opened_at)}</span>
-                          </div>
-                        )}
-                        {selectedPayment.dispute_resolved_at && (
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Résolu le:</span>
-                            <span className="text-green-600">
-                              {formatDate(selectedPayment.dispute_resolved_at)}
-                            </span>
-                          </div>
-                        )}
-                        {selectedPayment.dispute_resolution && (
-                          <div className="mt-2">
-                            <span className="text-muted-foreground block mb-1">Résolution:</span>
-                            <p className="text-sm">{selectedPayment.dispute_resolution}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Notes */}
-              {selectedPayment.notes && (
-                <>
-                  <Separator />
-                  <div className="space-y-2">
-                    <h3 className="font-semibold">Notes</h3>
-                    <p className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
-                      {selectedPayment.notes}
-                    </p>
-                  </div>
-                </>
-              )}
-
-              {/* Actions rapides */}
-              <Separator />
-              <div className="flex items-center justify-end gap-2">
-                {selectedPayment.is_held && selectedPayment.status === 'held' && (
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      handleReleasePayment(selectedPayment);
-                      setShowDetailsDialog(false);
-                    }}
-                  >
-                    <Unlock className="h-4 w-4 mr-2" />
-                    Libérer le paiement
-                  </Button>
-                )}
-                {selectedPayment.status !== 'disputed' && (
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setShowDetailsDialog(false);
-                      setShowDisputeDialog(true);
-                    }}
-                  >
-                    <AlertTriangle className="h-4 w-4 mr-2" />
-                    Ouvrir un litige
-                  </Button>
-                )}
-                <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
-                  Fermer
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Dialog de détails */}
+      <PaymentDetailsDialog
+        open={showDetailsDialog}
+        onOpenChange={setShowDetailsDialog}
+        payment={selectedPayment}
+        getStatusBadge={getStatusBadge}
+        getPaymentTypeBadge={getPaymentTypeBadge}
+        getMethodLabel={getMethodLabel}
+        formatDate={formatDate}
+        t={t}
+      />
 
       {/* Dialog de litige */}
-      <AlertDialog open={showDisputeDialog} onOpenChange={setShowDisputeDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Ouvrir un litige</AlertDialogTitle>
-            <AlertDialogDescription>
-              Vous êtes sur le point d'ouvrir un litige pour ce paiement. 
-              Cette action sera visible par l'administrateur et peut affecter le statut du paiement.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="dispute-reason">Raison du litige</Label>
-              <Select value={disputeReason} onValueChange={setDisputeReason}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionnez une raison" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="delivery_issue">Problème de livraison</SelectItem>
-                  <SelectItem value="product_issue">Problème avec le produit</SelectItem>
-                  <SelectItem value="payment_issue">Problème de paiement</SelectItem>
-                  <SelectItem value="communication_issue">Problème de communication</SelectItem>
-                  <SelectItem value="other">Autre</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="dispute-description">Description détaillée</Label>
-              <Textarea
-                id="dispute-description"
-                value={disputeDescription}
-                onChange={(e) => setDisputeDescription(e.target.value)}
-                placeholder="Décrivez le problème en détail..."
-                rows={4}
-              />
-            </div>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleOpenDispute}
-              disabled={!disputeReason || !disputeDescription}
-            >
-              Ouvrir le litige
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DisputeDialog
+        open={showDisputeDialog}
+        onOpenChange={setShowDisputeDialog}
+        payment={selectedPayment}
+        disputeReason={disputeReason}
+        disputeDescription={disputeDescription}
+        onReasonChange={setDisputeReason}
+        onDescriptionChange={setDisputeDescription}
+        onSubmit={handleOpenDispute}
+        t={t}
+      />
     </div>
   );
 };
 
-// Composant de formulaire de paiement
+// Composant PaymentCard optimisé
+interface PaymentCardProps {
+  payment: AdvancedPayment;
+  index: number;
+  getStatusBadge: (status: PaymentStatus) => React.ReactNode;
+  getPaymentTypeBadge: (type: PaymentType) => React.ReactNode;
+  getMethodLabel: (method: string) => string;
+  formatDate: (date: string) => string;
+  onView: (payment: AdvancedPayment) => void;
+  onRelease: (payment: AdvancedPayment) => void;
+  onDispute: (payment: AdvancedPayment) => void;
+  onDelete: (payment: AdvancedPayment) => void;
+  viewMode: "grid" | "list";
+}
+
+const PaymentCard: React.FC<PaymentCardProps> = ({
+  payment,
+  index,
+  getStatusBadge,
+  getPaymentTypeBadge,
+  getMethodLabel,
+  formatDate,
+  onView,
+  onRelease,
+  onDispute,
+  onDelete,
+  viewMode,
+}) => {
+  return (
+    <Card
+      className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.01] group overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+      style={{ animationDelay: `${index * 50}ms` }}
+    >
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex-1 min-w-0 space-y-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <h3 className="font-semibold text-base sm:text-lg truncate">
+                {payment.transaction_id ? `#${payment.transaction_id.slice(-8)}` : 'Paiement'}
+              </h3>
+              {getStatusBadge(payment.status)}
+              {getPaymentTypeBadge(payment.payment_type)}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-green-600 shrink-0" aria-hidden="true" />
+                <span className="font-semibold text-green-600 text-sm sm:text-base">
+                  {payment.amount.toLocaleString()} {payment.currency}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden="true" />
+                <span className="text-sm sm:text-base">{getMethodLabel(payment.payment_method)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden="true" />
+                <span className="text-sm sm:text-base">{formatDate(payment.created_at)}</span>
+              </div>
+            </div>
+
+            {/* Informations spécifiques */}
+            {payment.payment_type === 'percentage' && payment.percentage_rate && (
+              <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <Percent className="h-4 w-4 text-blue-600" aria-hidden="true" />
+                  <span className="font-medium text-blue-900 dark:text-blue-100 text-sm">
+                    {getPaymentTypeBadge(payment.payment_type)}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
+                  <div>
+                    <span className="text-muted-foreground">{'Pourcentage:'}</span>
+                    <span className="font-medium ml-1">{payment.percentage_rate}%</span>
+                  </div>
+                  {payment.remaining_amount && (
+                    <div>
+                      <span className="text-muted-foreground">{'Restant:'}</span>
+                      <span className="font-medium ml-1">
+                        {payment.remaining_amount.toLocaleString()} {payment.currency}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {payment.payment_type === 'delivery_secured' && (
+              <div className="bg-orange-50 dark:bg-orange-950 p-3 rounded-lg border border-orange-200 dark:border-orange-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <Shield className="h-4 w-4 text-orange-600" aria-hidden="true" />
+                  <span className="font-medium text-orange-900 dark:text-orange-100 text-sm">
+                    {getPaymentTypeBadge(payment.payment_type)}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
+                  <div>
+                    <span className="text-muted-foreground">{'Statut:'}</span>
+                    <span className="font-medium ml-1">
+                      {payment.is_held ? 'Retenu' : 'Libéré'}
+                    </span>
+                  </div>
+                  {payment.held_until && (
+                    <div>
+                      <span className="text-muted-foreground">{'Jusqu\'au:'}</span>
+                      <span className="font-medium ml-1">
+                        {new Date(payment.held_until).toLocaleDateString('fr-FR')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Client et commande */}
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+              {payment.customers && (
+                <div className="flex items-center gap-1.5">
+                  <User className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  <span className="truncate">{payment.customers.name}</span>
+                </div>
+              )}
+              {payment.orders && (
+                <div className="flex items-center gap-1.5">
+                  <Package className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  <span className="truncate">Commande #{payment.orders.order_number}</span>
+                </div>
+              )}
+            </div>
+
+            {payment.notes && (
+              <div className="mt-2 p-2 bg-muted/50 rounded text-xs sm:text-sm">
+                <span className="font-medium">{'Notes:'}</span> {payment.notes}
+              </div>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end sm:justify-start">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onView(payment)}
+              className="h-9 sm:h-10 text-xs sm:text-sm"
+              aria-label="Voir les détails"
+            >
+              <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" aria-hidden="true" />
+              <span className="hidden sm:inline">Voir</span>
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 sm:h-10 text-xs sm:text-sm">
+                  <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {payment.is_held && payment.status === 'held' && (
+                  <DropdownMenuItem onClick={() => onRelease(payment)}>
+                    <Unlock className="h-4 w-4 mr-2" aria-hidden="true" />
+                    Libérer le paiement
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={() => onDispute(payment)}>
+                  <AlertTriangle className="h-4 w-4 mr-2" aria-hidden="true" />
+                  Ouvrir un litige
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={() => onDelete(payment)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <XCircle className="h-4 w-4 mr-2" aria-hidden="true" />
+                  Supprimer
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Composant PaymentDetailsDialog optimisé
+interface PaymentDetailsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  payment: AdvancedPayment | null;
+  getStatusBadge: (status: PaymentStatus) => React.ReactNode;
+  getPaymentTypeBadge: (type: PaymentType) => React.ReactNode;
+  getMethodLabel: (method: string) => string;
+  formatDate: (date: string) => string;
+  t: (key: string, defaultValue?: string) => string;
+}
+
+const PaymentDetailsDialog: React.FC<PaymentDetailsDialogProps> = ({
+  open,
+  onOpenChange,
+  payment,
+  getStatusBadge,
+  getPaymentTypeBadge,
+  getMethodLabel,
+  formatDate,
+  t,
+}) => {
+  if (!payment) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Eye className="h-5 w-5" aria-hidden="true" />
+            {t('payments.details.title', 'Détails du paiement')}
+          </DialogTitle>
+          <DialogDescription>
+            {t('payments.details.description', 'Informations complètes sur le paiement sélectionné')}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-6">
+          {/* Statut et Type */}
+          <div className="flex flex-wrap items-center gap-3">
+            {getStatusBadge(payment.status)}
+            {getPaymentTypeBadge(payment.payment_type)}
+            {payment.is_held && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Shield className="h-3 w-3" aria-hidden="true" />
+                {t('payments.held', 'Fonds retenus')}
+              </Badge>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Informations principales */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h3 className="font-semibold flex items-center gap-2">
+                <CreditCard className="h-4 w-4" aria-hidden="true" />
+                {t('payments.details.paymentInfo', 'Informations de paiement')}
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t('payments.details.transactionId', 'ID Transaction:')}</span>
+                  <span className="font-mono text-xs">
+                    {payment.transaction_id || 'N/A'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t('payments.details.amount', 'Montant:')}</span>
+                  <span className="font-semibold text-green-600">
+                    {payment.amount.toLocaleString()} {payment.currency}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t('payments.details.method', 'Méthode:')}</span>
+                  <span className="font-medium">{getMethodLabel(payment.payment_method)}</span>
+                </div>
+                {payment.payment_type === 'percentage' && (
+                  <>
+                    <Separator />
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{t('payments.details.percentage', 'Taux:')}</span>
+                      <span>{payment.percentage_rate}%</span>
+                    </div>
+                    {payment.remaining_amount && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{t('payments.details.remaining', 'Restant:')}</span>
+                        <span>
+                          {payment.remaining_amount.toLocaleString()} {payment.currency}
+                        </span>
+                      </div>
+                    )}
+                  </>
+                )}
+                {payment.payment_type === 'delivery_secured' && (
+                  <>
+                    <Separator />
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{t('payments.details.heldStatus', 'Statut:')}</span>
+                      <span>{payment.is_held ? t('payments.held', 'Retenu') : t('payments.released', 'Libéré')}</span>
+                    </div>
+                    {payment.held_until && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{t('payments.details.heldUntil', 'Retenu jusqu\'au:')}</span>
+                        <span>{new Date(payment.held_until).toLocaleDateString('fr-FR')}</span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Calendar className="h-4 w-4" aria-hidden="true" />
+                {t('payments.details.timeline', 'Chronologie')}
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t('payments.details.created', 'Créé:')}</span>
+                  <span>{formatDate(payment.created_at)}</span>
+                </div>
+                {payment.updated_at && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('payments.details.updated', 'Modifié:')}</span>
+                    <span>{formatDate(payment.updated_at)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Client et commande */}
+          {(payment.customers || payment.orders) && (
+            <div className="space-y-4">
+              <h3 className="font-semibold">{t('payments.details.related', 'Informations liées')}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                {payment.customers && (
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <div>
+                      <div className="text-muted-foreground">{t('payments.details.customer', 'Client')}</div>
+                      <div className="font-medium">{payment.customers.name}</div>
+                      {payment.customers.email && (
+                        <div className="text-xs text-muted-foreground">{payment.customers.email}</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {payment.orders && (
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <div>
+                      <div className="text-muted-foreground">{t('payments.details.order', 'Commande')}</div>
+                      <div className="font-medium">#{payment.orders.order_number}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Notes */}
+          {payment.notes && (
+            <>
+              <Separator />
+              <div className="space-y-2">
+                <h3 className="font-semibold">{t('payments.details.notes', 'Notes')}</h3>
+                <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                  {payment.notes}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Composant DisputeDialog optimisé
+interface DisputeDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  payment: AdvancedPayment | null;
+  disputeReason: string;
+  disputeDescription: string;
+  onReasonChange: (value: string) => void;
+  onDescriptionChange: (value: string) => void;
+  onSubmit: () => void;
+  t: (key: string, defaultValue?: string) => string;
+}
+
+const DisputeDialog: React.FC<DisputeDialogProps> = ({
+  open,
+  onOpenChange,
+  payment,
+  disputeReason,
+  disputeDescription,
+  onReasonChange,
+  onDescriptionChange,
+  onSubmit,
+  t,
+}) => {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="max-w-2xl">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-destructive" aria-hidden="true" />
+            {t('payments.dispute.title', 'Ouvrir un litige')}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {t('payments.dispute.description', 'Veuillez décrire la raison et les détails du litige pour le paiement sélectionné')}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="dispute-reason">{t('payments.dispute.reason', 'Raison du litige')}</Label>
+            <Input
+              id="dispute-reason"
+              value={disputeReason}
+              onChange={(e) => onReasonChange(e.target.value)}
+              placeholder={t('payments.dispute.reasonPlaceholder', 'Ex: Livraison non reçue, produit défectueux...')}
+              className="mt-2"
+            />
+          </div>
+          <div>
+            <Label htmlFor="dispute-description">{t('payments.dispute.descriptionLabel', 'Description détaillée')}</Label>
+            <Textarea
+              id="dispute-description"
+              value={disputeDescription}
+              onChange={(e) => onDescriptionChange(e.target.value)}
+              placeholder={t('payments.dispute.descriptionPlaceholder', 'Décrivez le problème en détail...')}
+              rows={4}
+              className="mt-2"
+            />
+          </div>
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t('common.cancel', 'Annuler')}</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={onSubmit}
+            disabled={!disputeReason || !disputeDescription}
+            className="bg-destructive hover:bg-destructive/90"
+          >
+            {t('payments.dispute.submit', 'Ouvrir le litige')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
+
+// Composant PaymentForm optimisé
 interface PaymentFormProps {
   storeId: string;
   orderId?: string;
@@ -837,6 +1163,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   customerId,
   onCreatePayment,
 }) => {
+  const { t } = useTranslation();
   const [paymentType, setPaymentType] = useState<PaymentType>('full');
   const [formData, setFormData] = useState({
     amount: '',
@@ -848,12 +1175,12 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
   const { createPayment, createPercentagePayment, createSecuredPayment } = useAdvancedPayments(storeId);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
     const amount = parseFloat(formData.amount);
     if (isNaN(amount) || amount <= 0) {
-      onCreatePayment({ success: false, error: "Montant invalide" });
+      onCreatePayment({ success: false, error: t('payments.form.invalidAmount', 'Montant invalide') });
       return;
     }
 
@@ -884,7 +1211,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
             delivery_confirmed: true,
             customer_satisfied: true,
           },
-          heldUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 jours
+          heldUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         });
         break;
       default:
@@ -892,27 +1219,27 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     }
 
     onCreatePayment(result);
-  };
+  }, [paymentType, formData, storeId, orderId, customerId, createPayment, createPercentagePayment, createSecuredPayment, onCreatePayment, t]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="payment-type">Type de paiement</Label>
+        <Label htmlFor="payment-type">{t('payments.form.type', 'Type de paiement')}</Label>
         <Select value={paymentType} onValueChange={(value: PaymentType) => setPaymentType(value)}>
-          <SelectTrigger>
+          <SelectTrigger id="payment-type" className="mt-2">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="full">Paiement complet</SelectItem>
-            <SelectItem value="percentage">Paiement par pourcentage</SelectItem>
-            <SelectItem value="delivery_secured">Paiement sécurisé (à la livraison)</SelectItem>
+            <SelectItem value="full">{t('payments.type.full', 'Paiement complet')}</SelectItem>
+            <SelectItem value="percentage">{t('payments.type.percentage', 'Paiement par pourcentage')}</SelectItem>
+            <SelectItem value="delivery_secured">{t('payments.type.securedDelivery', 'Paiement sécurisé (à la livraison)')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="amount">Montant</Label>
+          <Label htmlFor="amount">{t('payments.form.amount', 'Montant')}</Label>
           <Input
             id="amount"
             type="number"
@@ -920,12 +1247,13 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
             value={formData.amount}
             onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
             required
+            className="mt-2"
           />
         </div>
         <div>
-          <Label htmlFor="currency">Devise</Label>
+          <Label htmlFor="currency">{t('payments.form.currency', 'Devise')}</Label>
           <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
-            <SelectTrigger>
+            <SelectTrigger id="currency" className="mt-2">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -938,23 +1266,23 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       </div>
 
       <div>
-        <Label htmlFor="payment-method">Méthode de paiement</Label>
+        <Label htmlFor="payment-method">{t('payments.form.method', 'Méthode de paiement')}</Label>
         <Select value={formData.payment_method} onValueChange={(value) => setFormData({ ...formData, payment_method: value })}>
-          <SelectTrigger>
+          <SelectTrigger id="payment-method" className="mt-2">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="mobile_money">Mobile Money</SelectItem>
-            <SelectItem value="card">Carte bancaire</SelectItem>
-            <SelectItem value="bank_transfer">Virement bancaire</SelectItem>
-            <SelectItem value="cash">Espèces</SelectItem>
+            <SelectItem value="mobile_money">{t('payments.method.mobileMoney', 'Mobile Money')}</SelectItem>
+            <SelectItem value="card">{t('payments.method.card', 'Carte bancaire')}</SelectItem>
+            <SelectItem value="bank_transfer">{t('payments.method.bankTransfer', 'Virement bancaire')}</SelectItem>
+            <SelectItem value="cash">{t('payments.method.cash', 'Espèces')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {paymentType === 'percentage' && (
         <div>
-          <Label htmlFor="percentage-rate">Pourcentage à payer</Label>
+          <Label htmlFor="percentage-rate">{t('payments.form.percentage', 'Pourcentage à payer')}</Label>
           <Input
             id="percentage-rate"
             type="number"
@@ -963,41 +1291,42 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
             value={formData.percentage_rate}
             onChange={(e) => setFormData({ ...formData, percentage_rate: parseInt(e.target.value) })}
             required
+            className="mt-2"
           />
           <p className="text-sm text-muted-foreground mt-1">
-            Le client paiera {formData.percentage_rate}% maintenant et le reste après validation
+            {t('payments.form.percentageDesc', 'Le client paiera {{percentage}}% maintenant et le reste après validation', { percentage: formData.percentage_rate })}
           </p>
         </div>
       )}
 
       {paymentType === 'delivery_secured' && (
-        <div className="bg-orange-50 dark:bg-orange-950 p-3 rounded-lg">
+        <div className="bg-orange-50 dark:bg-orange-950 p-3 sm:p-4 rounded-lg border border-orange-200 dark:border-orange-800">
           <div className="flex items-center gap-2 mb-2">
-            <Shield className="h-4 w-4 text-orange-600" />
+            <Shield className="h-4 w-4 text-orange-600" aria-hidden="true" />
             <span className="font-medium text-orange-900 dark:text-orange-100">
-              Paiement sécurisé
+              {t('payments.type.secured', 'Paiement sécurisé')}
             </span>
           </div>
           <p className="text-sm text-orange-800 dark:text-orange-200">
-            Le montant sera retenu par la plateforme jusqu'à confirmation de livraison par le client.
-            En cas de problème, la somme reste bloquée jusqu'à résolution.
+            {t('payments.form.securedDesc', 'Le montant sera retenu par la plateforme jusqu\'à confirmation de livraison par le client. En cas de problème, la somme reste bloquée jusqu\'à résolution.')}
           </p>
         </div>
       )}
 
       <div>
-        <Label htmlFor="notes">Notes (optionnel)</Label>
+        <Label htmlFor="notes">{t('payments.form.notes', 'Notes (optionnel)')}</Label>
         <Textarea
           id="notes"
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
           rows={3}
+          className="mt-2"
         />
       </div>
 
-      <div className="flex justify-end gap-2">
-        <Button type="submit">
-          Créer le paiement
+      <div className="flex justify-end gap-2 pt-4">
+        <Button type="submit" className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700">
+          {t('payments.form.submit', 'Créer le paiement')}
         </Button>
       </div>
     </form>
