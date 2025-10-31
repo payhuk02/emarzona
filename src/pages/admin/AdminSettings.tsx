@@ -25,6 +25,7 @@ const AdminSettings = () => {
   const [routes, setRoutes] = useState<string[]>(Array.isArray((dbSettings as any)?.require_aal2_routes) ? (dbSettings as any).require_aal2_routes : []);
   const [newRoute, setNewRoute] = useState('');
   const defaultRoutes = ['/admin/payments','/admin/audit','/admin/users','/admin/products','/admin/disputes','/admin/settings'];
+  const [roleSearch, setRoleSearch] = useState('');
   useEffect(() => {
     const arr = Array.isArray((dbSettings as any)?.require_aal2_routes) ? (dbSettings as any).require_aal2_routes : [];
     setRoutes(arr);
@@ -308,26 +309,111 @@ const AdminSettings = () => {
               </div>
             </CardContent>
           </Card>
-                {roles.map((r) => (
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <Input placeholder="Rechercher un rôle…" value={roleSearch} onChange={(e) => setRoleSearch(e.target.value)} className="max-w-sm" />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        for (const r of roles) {
+                          const seed = roles.find(rr => rr.role === r.role)?.permissions || {};
+                          await updateRolePermissions(r.role, seed as any);
+                        }
+                      }}
+                    >Réinitialiser tous les rôles</Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const json = JSON.stringify(roles.map(r => ({ role: r.role, permissions: r.permissions })), null, 2);
+                        const blob = new Blob([json], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url; a.download = `rbac_${Date.now()}.json`; a.click(); URL.revokeObjectURL(url);
+                      }}
+                    >Exporter JSON</Button>
+                    <label className="text-sm border rounded px-2 py-1 cursor-pointer">
+                      Importer JSON
+                      <input type="file" accept="application/json" className="hidden" onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const text = await file.text();
+                        try {
+                          const data = JSON.parse(text) as Array<{ role: string; permissions: Record<string, boolean> }>;
+                          for (const item of data) {
+                            await updateRolePermissions(item.role, item.permissions);
+                          }
+                        } catch (_) { /* ignore */ }
+                        e.currentTarget.value = '';
+                      }} />
+                    </label>
+                  </div>
+                </div>
+                {roles.filter(r => !roleSearch || r.role.toLowerCase().includes(roleSearch.toLowerCase())).map((r) => (
                   <div key={r.role} className="border rounded-lg p-4">
                     <div className="font-semibold mb-3 capitalize">{r.role.replace('_', ' ')}</div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {DEFAULT_PERMISSION_KEYS.map((perm) => {
-                        const checked = Boolean((r.permissions as any)?.[perm]);
-                        return (
-                          <label key={perm} className="flex items-center gap-2">
-                            <Checkbox
-                              checked={checked}
-                              onCheckedChange={async (v) => {
-                                const next = { ...(r.permissions as any), [perm]: Boolean(v) };
-                                await updateRolePermissions(r.role, next);
-                              }}
-                            />
-                            <span className="text-sm text-muted-foreground">{perm}</span>
-                          </label>
-                        );
-                      })}
+                    <div className="flex items-center gap-2 mb-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          const next = Object.fromEntries(Object.keys(r.permissions || {}).map(k => [k, true]));
+                          await updateRolePermissions(r.role, next);
+                        }}
+                      >Tout activer</Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          const next = Object.fromEntries(Object.keys(r.permissions || {}).map(k => [k, false]));
+                          await updateRolePermissions(r.role, next);
+                        }}
+                      >Tout désactiver</Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          // recharger les permissions seed (on part de la source actuelle "roles")
+                          const seed = roles.find(rr => rr.role === r.role)?.permissions || {};
+                          await updateRolePermissions(r.role, seed as any);
+                        }}
+                      >Réinitialiser par défaut</Button>
                     </div>
+                    {(() => {
+                      const grouped = DEFAULT_PERMISSION_KEYS.reduce((acc: Record<string, string[]>, perm: string) => {
+                        const grp = perm.split('.')[0] || 'autres';
+                        (acc[grp] = acc[grp] || []).push(perm);
+                        return acc;
+                      }, {});
+                      return (
+                        <div className="space-y-4">
+                          {Object.entries(grouped).map(([grp, perms]) => (
+                            <div key={grp}>
+                              <div className="text-xs font-semibold uppercase text-muted-foreground mb-2">{grp}</div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {perms.map((perm) => {
+                                  const checked = Boolean((r.permissions as any)?.[perm]);
+                                  const defaultChecked = Boolean((roles.find(rr => rr.role === r.role)?.permissions as any)?.[perm]);
+                                  return (
+                                    <label key={perm} className="flex items-center gap-2">
+                                      <Checkbox
+                                        checked={checked}
+                                        onCheckedChange={async (v) => {
+                                          const next = { ...(r.permissions as any), [perm]: Boolean(v) };
+                                          await updateRolePermissions(r.role, next);
+                                        }}
+                                      />
+                                      <span className={`text-sm ${checked !== defaultChecked ? 'text-amber-600' : 'text-muted-foreground'}`}>{perm}{checked !== defaultChecked ? ' *' : ''}</span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>

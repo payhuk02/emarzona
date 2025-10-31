@@ -182,6 +182,8 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
         <OptimizedImage
           src={product.image_url || '/placeholder-image.png'}
           alt={product.name}
+          width={1280}
+          height={720}
           className="w-full h-64 object-cover rounded-t-lg"
           priority={false}
         />

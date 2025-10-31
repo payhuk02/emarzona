@@ -55,6 +55,7 @@ export const CourseSchema = ({
       "@type": "Course",
       "name": courseName,
       "description": description,
+      "isFamilyFriendly": true,
       "provider": {
         "@type": "Organization",
         "name": provider.name,
@@ -73,6 +74,7 @@ export const CourseSchema = ({
           "price": price,
           "priceCurrency": currency,
           "availability": "https://schema.org/InStock",
+          ...(url && { "url": url }),
         },
       }),
       ...(category && { "coursePrerequisites": category }),

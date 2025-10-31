@@ -6,6 +6,7 @@
 export { ProductSchema } from './ProductSchema';
 export { StoreSchema } from './StoreSchema';
 export { OrganizationSchema } from './OrganizationSchema';
+export { ItemListSchema } from './ItemListSchema';
 
 // Composants SEO existants
 export { SEOMeta } from './SEOMeta';

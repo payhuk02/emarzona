@@ -108,6 +108,14 @@ export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
       '@type': 'Brand',
       name: store.name
     },
+    isFamilyFriendly: true,
+    ...(product.licensing_type && {
+      license: product.licensing_type === 'plr'
+        ? 'Private Label Rights (PLR)'
+        : product.licensing_type === 'copyrighted'
+        ? 'All Rights Reserved'
+        : 'Standard License'
+    }),
     // Licensing as additionalProperty for SEO context
     ...(product.licensing_type && {
       additionalProperty: [

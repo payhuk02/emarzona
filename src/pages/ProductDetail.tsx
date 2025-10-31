@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table";
-import { ShoppingCart, Star, ArrowLeft, CheckCircle2, Package, HelpCircle, ClipboardList, Download, Clock, RefreshCw, DollarSign, Gift, Lock, AlertTriangle, CalendarClock, Shield } from "lucide-react";
+import { ShoppingCart, Star, ArrowLeft, CheckCircle2, Package, HelpCircle, ClipboardList, Download, Clock, RefreshCw, DollarSign, Gift, Lock, AlertTriangle, CalendarClock, Shield, AlertCircle } from "lucide-react";
 import ProductCard from "@/components/marketplace/ProductCard";
 import StoreFooter from "@/components/storefront/StoreFooter";
 import { useProducts } from "@/hooks/useProducts";
@@ -27,54 +27,86 @@ import { CustomFieldsDisplay } from "@/components/products/CustomFieldsDisplay";
 import { ProductVariantSelector } from "@/components/products/ProductVariantSelector";
 import { SEOMeta, ProductSchema, BreadcrumbSchema } from "@/components/seo";
 import { ProductReviewsSummary } from "@/components/reviews";
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const ProductDetails = () => {
   const { slug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const [product, setProduct] = useState<any>(null);
   const [store, setStore] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedVariantPrice, setSelectedVariantPrice] = useState<number | null>(null);
 
   // ID stable pour éviter les violations des règles des hooks
   const storeId = store?.id || null;
   const { products: similarProducts } = useProducts(storeId);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!slug || !productSlug) return;
+  const fetchData = useCallback(async () => {
+    if (!slug || !productSlug) {
+      setError("Slug de boutique ou produit manquant");
+      setLoading(false);
+      return;
+    }
+
+    try {
       setLoading(true);
+      setError(null);
 
-      try {
-        // Fetch store
-        const { data: storeData, error: storeError } = await supabase
-          .from("stores")
-          .select("*")
-          .eq("slug", slug)
-          .limit(1);
+      // Fetch store
+      const { data: storeData, error: storeError } = await supabase
+        .from("stores")
+        .select("*")
+        .eq("slug", slug)
+        .limit(1);
 
-        if (storeError) throw storeError;
-        setStore(storeData && storeData.length > 0 ? storeData[0] : null);
-
-        // Fetch product
-        const { data: productData, error: productError } = await supabase
-          .from("products")
-          .select("*")
-          .eq("slug", productSlug)
-          .eq("store_id", storeData && storeData.length > 0 ? storeData[0].id : "")
-          .eq("is_active", true)
-          .limit(1);
-
-        if (productError) throw productError;
-        setProduct(productData && productData.length > 0 ? productData[0] : null);
-      } catch (error) {
-        console.error("Erreur de chargement :", error);
-      } finally {
+      if (storeError) throw storeError;
+      
+      if (!storeData || storeData.length === 0) {
+        setStore(null);
+        setProduct(null);
+        setError("Boutique introuvable");
         setLoading(false);
+        return;
       }
-    };
 
-    fetchData();
+      const foundStore = storeData[0];
+      setStore(foundStore);
+      logger.info(`Boutique chargée: ${foundStore.name} (${slug})`);
+
+      // Fetch product
+      const { data: productData, error: productError } = await supabase
+        .from("products")
+        .select("*")
+        .eq("slug", productSlug)
+        .eq("store_id", foundStore.id)
+        .eq("is_active", true)
+        .limit(1);
+
+      if (productError) throw productError;
+      
+      if (!productData || productData.length === 0) {
+        setProduct(null);
+        setError("Produit introuvable ou non disponible");
+        logger.warn(`Produit introuvable: ${productSlug} dans la boutique ${foundStore.name}`);
+      } else {
+        setProduct(productData[0]);
+        logger.info(`Produit chargé: ${productData[0].name} (${productSlug})`);
+      }
+    } catch (error: any) {
+      logger.error("Erreur lors du chargement du produit:", error);
+      const errorMessage = error?.message || "Impossible de charger le produit. Veuillez réessayer plus tard.";
+      setError(errorMessage);
+      setStore(null);
+      setProduct(null);
+    } finally {
+      setLoading(false);
+    }
   }, [slug, productSlug]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   // Calculs et hooks AVANT les early returns
   const productUrl = useMemo(() => 
@@ -133,6 +165,12 @@ const ProductDetails = () => {
     ];
   }, [store, product, productUrl]);
 
+  // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLElement>();
+  const galleryRef = useScrollAnimation<HTMLDivElement>();
+  const detailsRef = useScrollAnimation<HTMLDivElement>();
+  const reviewsRef = useScrollAnimation<HTMLDivElement>();
+
   const renderStars = (rating: number) => (
     <div className="flex items-center gap-1">
       {[1, 2, 3, 4, 5].map((star) => (
@@ -162,19 +200,48 @@ const ProductDetails = () => {
   }
 
   if (!product || !store) {
+    if (loading) return null; // Le skeleton sera affiché
+
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Produit introuvable</h1>
-          <p className="text-muted-foreground">
-            Ce produit n'existe pas ou n'est plus disponible.
+      <div className="min-h-screen flex items-center justify-center bg-background" role="alert" aria-live="polite">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="h-20 w-20 rounded-full bg-red-500/10 mx-auto mb-4 flex items-center justify-center">
+            <AlertCircle className="h-10 w-10 text-red-500" aria-hidden="true" />
+          </div>
+          <h1 className="text-2xl font-bold mb-2 text-foreground">
+            {error?.includes("Boutique") ? "Boutique introuvable" : "Produit introuvable"}
+          </h1>
+          <p className="text-muted-foreground mb-6">
+            {error || "Ce produit n'existe pas ou n'est plus disponible."}
           </p>
-          <Link to={`/stores/${slug}`}>
-            <Button className="mt-4">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour à la boutique
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            {error && (
+              <Button
+                onClick={() => {
+                  setError(null);
+                  fetchData();
+                }}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105"
+                aria-label="Réessayer le chargement"
+              >
+                Réessayer
+              </Button>
+            )}
+            {slug && (
+              <Link to={`/stores/${slug}`}>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Retour à la boutique
+                </Button>
+              </Link>
+            )}
+            <Link to="/marketplace">
+              <Button variant="outline" className="w-full sm:w-auto">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Retour au marketplace
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -213,24 +280,25 @@ const ProductDetails = () => {
 
       <div className="min-h-screen flex flex-col bg-background">
         {/* Header */}
-        <header className="border-b bg-card shadow-sm sticky top-0 z-10">
+        <header ref={headerRef} className="border-b bg-card shadow-sm sticky top-0 z-10" role="banner">
           <div className="max-w-6xl mx-auto px-4 py-3">
             <Link
               to={`/stores/${store.slug}`}
               className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
+              aria-label={`Retour à la boutique ${store.name}`}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4 mr-2" aria-hidden="true" />
               Retour à {store.name}
             </Link>
           </div>
         </header>
 
         {/* Contenu principal */}
-        <main className="flex-1">
+        <main className="flex-1" role="main">
           <div className="max-w-6xl mx-auto px-4 py-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
               {/* 🖼️ AMÉLIORÉ: Galerie d'images complète (toutes sources) */}
-              <div className="space-y-4">
+              <div ref={galleryRef} className="space-y-4" role="group" aria-label="Galerie d'images du produit">
                 <ProductImageGallery
                   images={[
                     product.image_url,
@@ -259,8 +327,8 @@ const ProductDetails = () => {
               </div>
 
               {/* Infos produit */}
-              <div className="space-y-6">
-                <h1 className="text-3xl font-bold">{product.name}</h1>
+              <div ref={detailsRef} className="space-y-6">
+                <h1 className="text-3xl font-bold" id="product-title">{product.name}</h1>
 
                 {/* Licensing banner */}
                 {product.licensing_type && (
@@ -572,7 +640,8 @@ const ProductDetails = () => {
 
             {/* Reviews & Ratings */}
             {product && (
-              <div className="mb-12">
+              <div ref={reviewsRef} className="mb-12" role="region" aria-labelledby="reviews-heading">
+                <h2 id="reviews-heading" className="sr-only">Avis et évaluations</h2>
                 <ProductReviewsSummary
                   productId={product.id}
                   productType={product.product_type}
@@ -582,15 +651,16 @@ const ProductDetails = () => {
 
             {/* Produits similaires */}
             {relatedProducts.length > 0 && (
-              <div>
-                <h2 className="text-2xl font-bold mb-6">Produits similaires</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div role="region" aria-labelledby="related-products-heading">
+                <h2 id="related-products-heading" className="text-2xl font-bold mb-6">Produits similaires</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6" role="list" aria-label="Liste de produits similaires">
                   {relatedProducts.map((related) => (
-                    <ProductCard
-                      key={related.id}
-                      product={related}
-                      storeSlug={store.slug}
-                    />
+                    <div key={related.id} role="listitem">
+                      <ProductCard
+                        product={related}
+                        storeSlug={store.slug}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>

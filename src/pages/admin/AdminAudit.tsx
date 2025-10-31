@@ -26,6 +26,12 @@ export default function AdminAudit() {
   const [rows, setRows] = useState<AdminActionRow[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [fromDate, setFromDate] = useState<string>('');
+  const [toDate, setToDate] = useState<string>('');
+  const [actionFilter, setActionFilter] = useState('');
+  const [actorFilter, setActorFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   useEffect(() => {
     const load = async () => {
@@ -43,12 +49,21 @@ export default function AdminAudit() {
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return rows.filter(r =>
+    const passText = (r: AdminActionRow) =>
       r.action.toLowerCase().includes(q) ||
       (r.target_type ?? '').toLowerCase().includes(q) ||
-      (r.target_id ?? '').toLowerCase().includes(q)
-    );
-  }, [rows, search]);
+      (r.target_id ?? '').toLowerCase().includes(q);
+    const passAction = !actionFilter || r.action.toLowerCase().includes(actionFilter.toLowerCase());
+    const passActor = !actorFilter || r.actor_id.toLowerCase().includes(actorFilter.toLowerCase());
+    const passFrom = !fromDate || new Date(r.created_at) >= new Date(fromDate);
+    const passTo = !toDate || new Date(r.created_at) <= new Date(toDate);
+    return rows.filter(r => passText(r) && passAction && passActor && passFrom && passTo);
+  }, [rows, search, actionFilter, actorFilter, fromDate, toDate]);
+
+  const paged = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, page, pageSize]);
 
   const exportCSV = () => {
     const header = ['date', 'action', 'target_type', 'target_id', 'actor_id', 'metadata'];
@@ -67,6 +82,16 @@ export default function AdminAudit() {
     const a = document.createElement('a');
     a.href = url;
     a.download = `admin_audit_${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportJSON = () => {
+    const blob = new Blob([JSON.stringify(filtered, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `admin_audit_${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -96,14 +121,40 @@ export default function AdminAudit() {
             <CardHeader>
               <CardTitle>Logs</CardTitle>
               <CardDescription>Dernières 200 actions</CardDescription>
-              <div className="flex items-center gap-3 mt-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Rechercher (action, cible, id)" value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+              <div className="flex flex-col gap-3 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Rechercher (action, cible, id)" value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} className="pl-9" />
+                  </div>
+                  <Input placeholder="Filtrer action" value={actionFilter} onChange={e => { setActionFilter(e.target.value); setPage(1); }} />
+                  <Input placeholder="Filtrer acteur (UUID)" value={actorFilter} onChange={e => { setActorFilter(e.target.value); setPage(1); }} />
+                  <div className="flex items-center gap-2">
+                    <Input type="date" value={fromDate} onChange={e => { setFromDate(e.target.value); setPage(1); }} />
+                    <Input type="date" value={toDate} onChange={e => { setToDate(e.target.value); setPage(1); }} />
+                  </div>
                 </div>
-                <Button variant="outline" onClick={exportCSV}>
-                  <Download className="h-4 w-4 mr-2"/>Exporter CSV
-                </Button>
+                <div className="relative flex-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" onClick={exportCSV}>
+                        <Download className="h-4 w-4 mr-2"/>Exporter CSV
+                      </Button>
+                      <Button variant="outline" onClick={exportJSON}>Exporter JSON</Button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Page</span>
+                      <Input className="w-16" type="number" min={1} value={page} onChange={e => setPage(Math.max(1, Number(e.target.value)||1))} />
+                      <span className="text-sm text-muted-foreground">/ {Math.max(1, Math.ceil(filtered.length / pageSize))}</span>
+                      <select className="border rounded px-2 py-1 text-sm" value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}>
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -125,7 +176,7 @@ export default function AdminAudit() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filtered.map(r => (
+                      {paged.map(r => (
                         <TableRow key={r.id}>
                           <TableCell className="text-muted-foreground">{new Date(r.created_at).toLocaleString()}</TableCell>
                           <TableCell><Badge variant="secondary">{r.action}</Badge></TableCell>

@@ -60,7 +60,8 @@ import { Product, FilterState, PaginationState } from '@/types/marketplace';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
 import { useDebounce } from '@/hooks/useDebounce';
 import '@/styles/marketplace-professional.css';
-import { SEOMeta, WebsiteSchema } from '@/components/seo';
+import { SEOMeta, WebsiteSchema, BreadcrumbSchema, ItemListSchema } from '@/components/seo';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const Marketplace = () => {
   const { t } = useTranslation();
@@ -79,6 +80,7 @@ const Marketplace = () => {
   // États principaux
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [purchasing, setPurchasing] = useState<Set<string>>(new Set());
   
   // États des filtres
@@ -226,12 +228,15 @@ const Marketplace = () => {
       logger.info(`${data?.length || 0} produits chargés (page ${pagination.currentPage}/${Math.ceil((count || 0) / pagination.itemsPerPage)})`);
       setProducts((data || []) as unknown as Product[]);
       setPagination(prev => ({ ...prev, totalItems: count || 0 }));
+      setError(null); // Réinitialiser l'erreur en cas de succès
       
-    } catch (error) {
+    } catch (error: any) {
       logger.error("❌ Erreur lors du chargement des produits :", error);
+      const errorMessage = error?.message || "Impossible de charger les produits. Veuillez réessayer plus tard.";
+      setError(errorMessage);
       toast({
         title: "Erreur",
-        description: "Impossible de charger les produits",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -253,6 +258,8 @@ const Marketplace = () => {
 
           if (payload.eventType === "INSERT") {
             setProducts((prev) => [payload.new as Product, ...prev]);
+            // Mettre à jour le total si nécessaire
+            setPagination(prev => ({ ...prev, totalItems: prev.totalItems + 1 }));
           } else if (payload.eventType === "UPDATE") {
             setProducts((prev) =>
               prev.map((p) =>
@@ -263,6 +270,8 @@ const Marketplace = () => {
             setProducts((prev) =>
               prev.filter((p) => p.id !== payload.old.id)
             );
+            // Mettre à jour le total si nécessaire
+            setPagination(prev => ({ ...prev, totalItems: Math.max(0, prev.totalItems - 1) }));
           }
         }
       )
@@ -562,6 +571,30 @@ const Marketplace = () => {
     image: `${window.location.origin}/og-marketplace.jpg`,
   }), [stats]);
 
+  // Breadcrumb items pour SEO
+  const breadcrumbItems = useMemo(() => [
+    { name: 'Accueil', url: `${window.location.origin}/` },
+    { name: 'Marketplace', url: `${window.location.origin}/marketplace` }
+  ], []);
+
+  // Items pour ItemListSchema (premiers produits visibles)
+  const itemListItems = useMemo(() => {
+    return paginatedProducts.slice(0, 20).map(product => ({
+      id: product.id,
+      name: product.name,
+      url: `/stores/${product.stores?.slug || 'default'}/products/${product.slug}`,
+      image: product.image_url,
+      description: product.short_description || product.description,
+      price: product.promotional_price || product.price,
+      currency: product.currency || 'XOF',
+      rating: product.rating
+    }));
+  }, [paginatedProducts]);
+
+  // Animations au scroll
+  const heroRef = useScrollAnimation<HTMLDivElement>();
+  const productsRef = useScrollAnimation<HTMLDivElement>();
+
   return (
     <>
       {/* SEO Meta Tags */}
@@ -573,10 +606,25 @@ const Marketplace = () => {
         image={marketplaceSeoData.image}
         imageAlt="Marketplace Payhula - Produits Digitaux en Afrique"
         type="website"
+        canonical={marketplaceSeoData.url}
       />
       
       {/* Schema.org Website */}
       <WebsiteSchema />
+      
+      {/* Schema.org Breadcrumb */}
+      <BreadcrumbSchema items={breadcrumbItems} />
+      
+      {/* Schema.org ItemList pour la collection de produits */}
+      {itemListItems.length > 0 && (
+        <ItemListSchema
+          items={itemListItems}
+          name="Marketplace Payhula"
+          description={`Collection de ${stats.totalProducts} produits digitaux disponibles sur Payhula`}
+          url="/marketplace"
+          numberOfItems={stats.totalProducts}
+        />
+      )}
       
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Skip to main content link for keyboard navigation */}
@@ -612,6 +660,7 @@ const Marketplace = () => {
 
       {/* Hero Section */}
       <section 
+        ref={heroRef}
         className="relative py-16 px-4 overflow-hidden" 
         aria-labelledby="hero-title"
         role="banner"
@@ -1075,6 +1124,7 @@ const Marketplace = () => {
 
       {/* Liste des produits */}
       <section 
+        ref={productsRef}
         id="main-content" 
         className="py-6 px-4" 
         role="main" 
@@ -1083,10 +1133,33 @@ const Marketplace = () => {
         <div className="w-full mx-auto max-w-7xl px-0 sm:px-4">
           {loading ? (
             <ProductGrid loading={true} skeletonCount={pagination.itemsPerPage} />
+          ) : error ? (
+            <div className="text-center py-16" role="alert" aria-live="polite">
+              <div className="h-20 w-20 rounded-full bg-red-500/10 mx-auto mb-4 flex items-center justify-center">
+                <AlertCircle className="h-10 w-10 text-red-500" aria-hidden="true" />
+              </div>
+              <h3 className="text-2xl font-semibold text-white mb-2">
+                {t('marketplace.error.title', 'Erreur de chargement')}
+              </h3>
+              <p className="text-slate-400 mb-6 max-w-md mx-auto">
+                {error}
+              </p>
+              <Button
+                onClick={() => {
+                  setError(null);
+                  fetchProducts();
+                }}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold h-12 px-8 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105"
+                aria-label={t('marketplace.error.retry', 'Réessayer')}
+              >
+                {t('marketplace.error.retry', 'Réessayer')}
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
           ) : paginatedProducts.length > 0 ? (
             <>
               <ProductGrid>
-                {paginatedProducts.map((product) => (
+                {paginatedProducts.map((product, index) => (
                   <ProductCardProfessional
                     key={product.id}
                     product={product}
