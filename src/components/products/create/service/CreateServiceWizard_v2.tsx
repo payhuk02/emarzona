@@ -1,14 +1,14 @@
 /**
- * Create Service Wizard - PROFESSIONAL V2
- * Date: 28 octobre 2025
+ * Create Service Wizard - Professional & Optimized V2
+ * Date: 2025-01-01
  * 
  * Wizard professionnel en 8 étapes pour services
- * Avec Affiliation + SEO/FAQs + Payment Options intégrés
- * 100% Parité avec Online Courses
+ * Version optimisée avec design professionnel, responsive et fonctionnalités avancées
  */
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,12 +25,16 @@ import {
   Search,
   Eye,
   ArrowLeft,
-  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
   Save,
   AlertCircle,
   CheckCircle2,
+  Check,
   CreditCard,
   Sparkles,
+  Loader2,
+  Keyboard,
 } from 'lucide-react';
 import { ServiceBasicInfoForm } from './ServiceBasicInfoForm';
 import { ServiceDurationAvailabilityForm } from './ServiceDurationAvailabilityForm';
@@ -43,6 +47,9 @@ import { PaymentOptionsForm } from '../shared/PaymentOptionsForm';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { cn } from '@/lib/utils';
 import type { ServiceProductFormData } from '@/types/service-product';
 
 // Template system
@@ -122,15 +129,25 @@ export const CreateServiceWizard = ({
   onSuccess,
   onBack,
 }: CreateServiceWizardProps = {}) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { store: hookStore, loading: storeLoading } = useStore();
-  const store = hookStore; // Use hook store (props not needed with useStore)
+  const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
   const [currentStep, setCurrentStep] = useState(1);
   
   // Template system
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const { applyTemplate } = useTemplateApplier();
+
+  // Auto-save
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Refs for animations
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const stepsRef = useScrollAnimation<HTMLDivElement>();
+  const contentRef = useScrollAnimation<HTMLDivElement>();
   
   const [formData, setFormData] = useState<Partial<any>>({
     // Basic Info (Step 1)
@@ -164,7 +181,7 @@ export const CreateServiceWizard = ({
     buffer_time_after: 0,
     advance_booking_days: 30,
     
-    // Affiliation (Step 5 - NOUVEAU)
+    // Affiliation (Step 5)
     affiliate: {
       enabled: false,
       commission_rate: 10,
@@ -177,7 +194,7 @@ export const CreateServiceWizard = ({
       terms_and_conditions: '',
     },
     
-    // SEO & FAQs (Step 6 - NOUVEAU)
+    // SEO & FAQs (Step 6)
     seo: {
       meta_title: '',
       meta_description: '',
@@ -188,7 +205,7 @@ export const CreateServiceWizard = ({
     },
     faqs: [],
     
-    // Payment Options (Step 7 - NOUVEAU)
+    // Payment Options (Step 7)
     payment: {
       payment_type: 'full', // 'full' | 'percentage' | 'delivery_secured'
       percentage_rate: 30, // Pour paiement partiel (10-90%)
@@ -199,96 +216,68 @@ export const CreateServiceWizard = ({
   const [isSaving, setIsSaving] = useState(false);
 
   /**
-   * Validate current step
+   * Update form data with auto-save
    */
-  const validateStep = (step: number): boolean => {
-    const errors: string[] = [];
-
-    switch (step) {
-      case 1:
-        if (!formData.name?.trim()) errors.push('Le nom du service est requis');
-        if (!formData.description?.trim()) errors.push('La description est requise');
-        if (!formData.price || formData.price <= 0) errors.push('Le prix doit être supérieur à 0');
-        break;
-
-      case 2:
-        if (!formData.duration || formData.duration <= 0) {
-          errors.push('La durée du service est requise');
-        }
-        if (formData.location_type === 'on_site' && !formData.location_address?.trim()) {
-          errors.push('L\'adresse est requise pour les services sur site');
-        }
-        if (formData.location_type === 'online' && !formData.meeting_url?.trim()) {
-          errors.push('L\'URL de réunion est requise pour les services en ligne');
-        }
-        break;
-
-      case 3:
-        if (formData.requires_staff && (!formData.staff_members || formData.staff_members.length === 0)) {
-          errors.push('Au moins un membre du personnel est requis');
-        }
-        if (!formData.max_participants || formData.max_participants < 1) {
-          errors.push('Le nombre maximum de participants doit être au moins 1');
-        }
-        break;
-
-      case 4:
-        if (formData.deposit_required) {
-          if (!formData.deposit_amount || formData.deposit_amount <= 0) {
-            errors.push('Le montant de l\'acompte est requis');
-          }
-        }
-        break;
-
-      case 5:
-        // Affiliation est optionnelle
-        break;
-
-      case 6:
-        // SEO & FAQs sont optionnels
-        break;
-
-      case 7:
-        // Payment Options sont optionnelles
-        break;
-    }
-
-    setValidationErrors({ ...validationErrors, [step]: errors });
-    return errors.length === 0;
-  };
+  const handleUpdateFormData = useCallback((data: any) => {
+    setFormData(prev => {
+      const newData = { ...prev, ...data };
+      
+      // Auto-save after 2 seconds of inactivity
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+      
+      autoSaveTimeoutRef.current = setTimeout(() => {
+        handleAutoSave(newData);
+      }, 2000);
+      
+      return newData;
+    });
+  }, []);
 
   /**
-   * Handle step navigation
+   * Auto-save draft
    */
-  const handleNext = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(currentStep + 1);
-      window.scrollTo(0, 0);
-    } else {
-      toast({
-        title: 'Erreurs de validation',
-        description: 'Veuillez corriger les erreurs avant de continuer',
-        variant: 'destructive',
-      });
+  const handleAutoSave = useCallback(async (data?: any) => {
+    const dataToSave = data || formData;
+    
+    // Ne pas auto-save si pas de nom
+    if (!dataToSave.name || dataToSave.name.trim() === '') {
+      return;
     }
-  };
 
-  const handleBack = () => {
-    setCurrentStep(currentStep - 1);
-    window.scrollTo(0, 0);
-  };
+    setIsAutoSaving(true);
+    try {
+      // Sauvegarder dans localStorage pour l'instant
+      localStorage.setItem('service-product-draft', JSON.stringify(dataToSave));
+      logger.info('Brouillon service auto-sauvegardé', { step: currentStep });
+    } catch (error) {
+      console.error('Auto-save error:', error);
+    } finally {
+      setIsAutoSaving(false);
+    }
+  }, [formData, currentStep]);
 
   /**
-   * Handle form data update
+   * Load draft from localStorage
    */
-  const handleUpdateFormData = (data: any) => {
-    setFormData({ ...formData, ...data });
-  };
+  useEffect(() => {
+    const savedDraft = localStorage.getItem('service-product-draft');
+    if (savedDraft) {
+      try {
+        const draft = JSON.parse(savedDraft);
+        setFormData(draft);
+        logger.info('Brouillon service chargé depuis localStorage');
+      } catch (error) {
+        console.error('Error loading draft:', error);
+      }
+    }
+  }, []);
 
   /**
    * Handle template selection
    */
-  const handleTemplateSelect = (template: ProductTemplate) => {
+  const handleTemplateSelect = useCallback((template: ProductTemplate) => {
     try {
       const updatedData = applyTemplate(template, formData, {
         mergeMode: 'smart', // Ne remplace que les champs vides
@@ -296,6 +285,8 @@ export const CreateServiceWizard = ({
       
       setFormData(updatedData);
       setShowTemplateSelector(false);
+      
+      logger.info('Template appliqué au service', { templateName: template.name });
       
       toast({
         title: '✨ Template appliqué !',
@@ -307,20 +298,147 @@ export const CreateServiceWizard = ({
         setCurrentStep(1);
       }
     } catch (error: any) {
+      logger.error('Erreur lors de l\'application du template', error);
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible d\'appliquer le template',
         variant: 'destructive',
       });
     }
-  };
+  }, [formData, currentStep, applyTemplate, toast]);
+
+  /**
+   * Validate current step
+   */
+  const validateStep = useCallback((step: number): boolean => {
+    const errors: string[] = [];
+
+    switch (step) {
+      case 1:
+        if (!formData.name?.trim()) errors.push(t('services.errors.nameRequired', 'Le nom du service est requis'));
+        if (!formData.description?.trim()) errors.push(t('services.errors.descriptionRequired', 'La description est requise'));
+        if (!formData.price || formData.price <= 0) errors.push(t('services.errors.priceRequired', 'Le prix doit être supérieur à 0'));
+        break;
+
+      case 2:
+        if (!formData.duration || formData.duration <= 0) {
+          errors.push(t('services.errors.durationRequired', 'La durée du service est requise'));
+        }
+        if (formData.location_type === 'on_site' && !formData.location_address?.trim()) {
+          errors.push(t('services.errors.addressRequired', 'L\'adresse est requise pour les services sur site'));
+        }
+        if (formData.location_type === 'online' && !formData.meeting_url?.trim()) {
+          errors.push(t('services.errors.meetingUrlRequired', 'L\'URL de réunion est requise pour les services en ligne'));
+        }
+        break;
+
+      case 3:
+        if (formData.requires_staff && (!formData.staff_members || formData.staff_members.length === 0)) {
+          errors.push(t('services.errors.staffRequired', 'Au moins un membre du personnel est requis'));
+        }
+        if (!formData.max_participants || formData.max_participants < 1) {
+          errors.push(t('services.errors.maxParticipantsRequired', 'Le nombre maximum de participants doit être au moins 1'));
+        }
+        break;
+
+      case 4:
+        if (formData.deposit_required) {
+          if (!formData.deposit_amount || formData.deposit_amount <= 0) {
+            errors.push(t('services.errors.depositRequired', 'Le montant de l\'acompte est requis'));
+          }
+        }
+        break;
+
+      case 5:
+      case 6:
+      case 7:
+        // Optional steps
+        break;
+    }
+
+    setValidationErrors(prev => ({ ...prev, [step]: errors }));
+    const isValid = errors.length === 0;
+    
+    if (!isValid) {
+      logger.warn('Validation échouée', { step, errors });
+    }
+    
+    return isValid;
+  }, [formData, t]);
+
+  /**
+   * Navigation handlers
+   */
+  const handleNext = useCallback(() => {
+    if (validateStep(currentStep)) {
+      const nextStepNum = currentStep + 1;
+      setCurrentStep(nextStepNum);
+      logger.info('Navigation vers étape suivante', { from: currentStep, to: nextStepNum });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      toast({
+        title: t('services.errors.validationTitle', 'Erreurs de validation'),
+        description: t('services.errors.validationDesc', 'Veuillez corriger les erreurs avant de continuer'),
+        variant: 'destructive',
+      });
+    }
+  }, [currentStep, validateStep, toast, t]);
+
+  const handleBack = useCallback(() => {
+    if (currentStep > 1) {
+      const prevStepNum = currentStep - 1;
+      setCurrentStep(prevStepNum);
+      logger.info('Navigation vers étape précédente', { from: currentStep, to: prevStepNum });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentStep]);
+
+  const handleStepClick = useCallback((stepId: number) => {
+    // Permettre de revenir en arrière, mais valider avant d'avancer
+    if (stepId < currentStep || validateStep(currentStep)) {
+      setCurrentStep(stepId);
+      logger.info('Navigation directe vers étape', { to: stepId });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentStep, validateStep]);
+
+  /**
+   * Keyboard shortcuts
+   */
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ne pas intercepter si on est dans un input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // Ctrl/Cmd + S pour sauvegarder brouillon
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSaveDraft();
+      }
+
+      // Flèches pour navigation
+      if (e.key === 'ArrowRight' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        handleNext();
+      }
+      if (e.key === 'ArrowLeft' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        handleBack();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleNext, handleBack]);
 
   /**
    * Helper function to save service product
    */
-  const saveServiceProduct = async (isDraft: boolean) => {
+  const saveServiceProduct = useCallback(async (isDraft: boolean) => {
     if (!store) {
-      throw new Error('Aucune boutique trouvée');
+      throw new Error(t('services.errors.noStore', 'Aucune boutique trouvée'));
     }
 
     // 1. Generate slug from name
@@ -352,7 +470,7 @@ export const CreateServiceWizard = ({
         og_image: formData.seo?.og_image,
         // FAQs
         faqs: formData.faqs || [],
-        // Payment Options (NOUVEAU)
+        // Payment Options
         payment_options: formData.payment || {
           payment_type: 'full',
           percentage_rate: 30,
@@ -448,7 +566,7 @@ export const CreateServiceWizard = ({
       if (resourcesError) throw resourcesError;
     }
 
-    // 7. Create affiliate settings if enabled (NOUVEAU)
+    // 7. Create affiliate settings if enabled
     if (formData.affiliate && formData.affiliate.enabled) {
       const { error: affiliateError } = await supabase
         .from('product_affiliate_settings')
@@ -469,24 +587,28 @@ export const CreateServiceWizard = ({
 
       if (affiliateError) {
         console.error('Affiliate settings error:', affiliateError);
-        // Don't throw, affiliate is optional
       }
     }
 
+    // Clear draft from localStorage on success
+    localStorage.removeItem('service-product-draft');
+
     return product;
-  };
+  }, [formData, store, t]);
 
   /**
    * Save as draft
    */
-  const handleSaveDraft = async () => {
+  const handleSaveDraft = useCallback(async () => {
     setIsSaving(true);
     try {
       const product = await saveServiceProduct(true);
       
+      logger.info('Brouillon service sauvegardé', { productId: product.id });
+      
       toast({
-        title: '✅ Brouillon sauvegardé',
-        description: `Service "${product.name}" enregistré. Vous pouvez continuer plus tard.`,
+        title: t('services.draftSaved', '✅ Brouillon sauvegardé'),
+        description: t('services.draftSavedDesc', 'Service "{{name}}" enregistré. Vous pouvez continuer plus tard.', { name: product.name }),
       });
       
       if (onSuccess) {
@@ -495,22 +617,22 @@ export const CreateServiceWizard = ({
         navigate('/dashboard/products');
       }
     } catch (error) {
-      console.error('Save draft error:', error);
+      logger.error('Erreur lors de la sauvegarde du brouillon', error);
       toast({
-        title: '❌ Erreur de sauvegarde',
-        description: error instanceof Error ? error.message : 'Impossible de sauvegarder le brouillon',
+        title: t('services.errors.saveError', '❌ Erreur de sauvegarde'),
+        description: error instanceof Error ? error.message : t('services.errors.saveErrorDesc', 'Impossible de sauvegarder le brouillon'),
         variant: 'destructive',
       });
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [saveServiceProduct, toast, onSuccess, navigate, t]);
 
   /**
    * Publish service
    */
-  const handlePublish = async () => {
-    // Validate required steps (1-4 are required, 5-6 are optional)
+  const handlePublish = useCallback(async () => {
+    // Validate required steps (1-4 are required, 5-7 are optional)
     let allValid = true;
     for (let step = 1; step <= 4; step++) {
       if (!validateStep(step)) {
@@ -520,8 +642,8 @@ export const CreateServiceWizard = ({
 
     if (!allValid) {
       toast({
-        title: '⚠️ Erreurs de validation',
-        description: 'Veuillez corriger toutes les erreurs avant de publier',
+        title: t('services.errors.validationAllTitle', '⚠️ Erreurs de validation'),
+        description: t('services.errors.validationAllDesc', 'Veuillez corriger toutes les erreurs avant de publier'),
         variant: 'destructive',
       });
       return;
@@ -531,9 +653,14 @@ export const CreateServiceWizard = ({
     try {
       const product = await saveServiceProduct(false);
       
+      logger.info('Service publié', { productId: product.id, productName: product.name });
+      
       toast({
-        title: '🎉 Service publié !',
-        description: `"${product.name}" est maintenant disponible à la réservation${formData.affiliate?.enabled ? ' avec programme d\'affiliation activé' : ''}`,
+        title: t('services.published', '🎉 Service publié !'),
+        description: t('services.publishedDesc', '"{{name}}" est maintenant disponible à la réservation{{affiliate}}', { 
+          name: product.name,
+          affiliate: formData.affiliate?.enabled ? ' avec programme d\'affiliation activé' : ''
+        }),
       });
       
       if (onSuccess) {
@@ -542,23 +669,21 @@ export const CreateServiceWizard = ({
         navigate('/dashboard/products');
       }
     } catch (error) {
-      console.error('Publish error:', error);
+      logger.error('Erreur lors de la publication', error);
       toast({
-        title: '❌ Erreur de publication',
-        description: error instanceof Error ? error.message : 'Impossible de publier le service',
+        title: t('services.errors.publishError', '❌ Erreur de publication'),
+        description: error instanceof Error ? error.message : t('services.errors.publishErrorDesc', 'Impossible de publier le service'),
         variant: 'destructive',
       });
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [validateStep, saveServiceProduct, formData.affiliate?.enabled, toast, onSuccess, navigate, t]);
 
-  const CurrentStep = STEPS[currentStep - 1];
-  const CurrentStepComponent = CurrentStep.component;
-  const progress = (currentStep / STEPS.length) * 100;
-
-  // Props for current step
-  const getStepProps = () => {
+  /**
+   * Get props for current step component
+   */
+  const getStepProps = useCallback(() => {
     const baseProps = {
       data: formData,
       onUpdate: handleUpdateFormData,
@@ -568,7 +693,7 @@ export const CreateServiceWizard = ({
       case 5: // Affiliation
         return {
           productPrice: formData.price || 0,
-          productName: formData.name || 'Service',
+          productName: formData.name || t('services.service', 'Service'),
           data: formData.affiliate || {},
           onUpdate: (affiliateData: any) => handleUpdateFormData({ affiliate: affiliateData }),
         };
@@ -596,104 +721,187 @@ export const CreateServiceWizard = ({
       default:
         return baseProps;
     }
-  };
+  }, [currentStep, formData, handleUpdateFormData, t]);
+
+  const CurrentStep = STEPS[currentStep - 1];
+  const CurrentStepComponent = CurrentStep.component;
+
+  /**
+   * Calculate progress
+   */
+  const progress = useMemo(() => (currentStep / STEPS.length) * 100, [currentStep]);
+
+  /**
+   * Logging on mount
+   */
+  useEffect(() => {
+    logger.info('Wizard Service ouvert', { step: currentStep, storeId: store?.id });
+  }, []);
+
+  /**
+   * Cleanup auto-save on unmount
+   */
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  if (storeLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background py-8">
-      <div className="container max-w-5xl mx-auto px-4">
+    <div className="min-h-screen bg-background py-4 sm:py-6 lg:py-8 overflow-x-hidden">
+      <div className="container max-w-5xl mx-auto px-2 sm:px-4 lg:px-6">
         {/* Header */}
-        <div className="mb-8">
+        <div 
+          ref={headerRef}
+          className="mb-6 sm:mb-8 animate-in fade-in slide-in-from-top-4 duration-700"
+        >
           {onBack && (
             <Button
               variant="ghost"
               onClick={onBack}
-              className="mb-4"
+              className="mb-3 sm:mb-4 text-xs sm:text-sm"
+              size="sm"
+              aria-label={t('common.back', 'Retour')}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour au choix du type
+              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+              <span className="hidden sm:inline">{t('services.backToType', 'Retour au choix du type')}</span>
+              <span className="sm:hidden">{t('common.back', 'Retour')}</span>
             </Button>
           )}
           
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-lg bg-primary/10">
-                <Calendar className="h-6 w-6 text-primary" />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500 dark:text-purple-400" aria-hidden="true" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold">Nouveau Service</h1>
-                <p className="text-muted-foreground">
-                  Créez un service professionnel en 8 étapes
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2">
+                  {t('services.create.title', 'Nouveau Service')}
+                </h1>
+                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                  {t('services.create.subtitle', 'Créez un service professionnel en 8 étapes')}
                 </p>
               </div>
             </div>
             
-            {/* Template Button */}
+            {/* Template Button - Badge "Nouveau" supprimé */}
             {currentStep === 1 && (
               <Button
                 variant="outline"
-                onClick={() => setShowTemplateSelector(true)}
-                className="gap-2 border-2 border-primary/20 hover:border-primary hover:bg-primary/5"
+                onClick={() => {
+                  setShowTemplateSelector(true);
+                  logger.info('Ouverture sélecteur de template pour service');
+                }}
+                className="gap-2 border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md"
+                size="sm"
+                aria-label={t('services.useTemplate', 'Utiliser un template')}
               >
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span className="hidden sm:inline">Utiliser un template</span>
-                <Badge variant="secondary" className="ml-1">Nouveau</Badge>
+                <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                <span className="hidden sm:inline">{t('services.useTemplate', 'Utiliser un template')}</span>
+                <span className="sm:hidden">{t('services.template', 'Template')}</span>
               </Button>
             )}
           </div>
 
           {/* Progress Bar */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">Étape {currentStep} sur {STEPS.length}</span>
-              <span className="text-muted-foreground">{Math.round(progress)}% complété</span>
-            </div>
-            <Progress value={progress} className="h-2" />
-          </div>
-        </div>
-
-        {/* Steps Indicator */}
-        <div className="mb-8">
-          <div className="grid grid-cols-8 gap-2">
-            {STEPS.map((step) => {
-              const Icon = step.icon;
-              const isActive = currentStep === step.id;
-              const isCompleted = currentStep > step.id;
-              const hasErrors = validationErrors[step.id]?.length > 0;
-
-              return (
-                <button
-                  key={step.id}
-                  onClick={() => {
-                    if (step.id < currentStep || validateStep(currentStep)) {
-                      setCurrentStep(step.id);
-                    }
-                  }}
-                  className={`
-                    p-3 rounded-lg border-2 transition-all text-left
-                    ${isActive ? 'border-primary bg-primary/5' : ''}
-                    ${isCompleted ? 'border-green-500 bg-green-50 dark:bg-green-950' : ''}
-                    ${!isActive && !isCompleted ? 'border-gray-200 hover:border-gray-300' : ''}
-                    ${hasErrors ? 'border-red-500' : ''}
-                  `}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <Icon className={`h-4 w-4 ${isActive ? 'text-primary' : isCompleted ? 'text-green-600' : 'text-muted-foreground'}`} />
-                    {isCompleted && <CheckCircle2 className="h-3 w-3 text-green-600 ml-auto" />}
-                    {hasErrors && <AlertCircle className="h-3 w-3 text-red-600 ml-auto" />}
+            <div className="flex items-center justify-between text-xs sm:text-sm">
+              <span className="font-medium">
+                {t('services.step', 'Étape')} {currentStep} {t('services.of', 'sur')} {STEPS.length}
+              </span>
+              <div className="flex items-center gap-2">
+                {isAutoSaving && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <span className="hidden sm:inline">{t('services.autoSaving', 'Auto-sauvegarde...')}</span>
                   </div>
-                  <div className="text-xs font-medium truncate">{step.title}</div>
-                </button>
-              );
-            })}
+                )}
+                <span className="text-muted-foreground">{Math.round(progress)}% {t('services.completed', 'complété')}</span>
+              </div>
+            </div>
+            <Progress 
+              value={progress} 
+              className="h-1.5 sm:h-2 bg-muted"
+            />
           </div>
         </div>
+
+        {/* Steps Indicator - Responsive */}
+        <Card 
+          ref={stepsRef}
+          className="mb-6 sm:mb-8 border-border/50 bg-card/50 backdrop-blur-sm shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-700"
+        >
+          <CardContent className="p-3 sm:p-4 lg:p-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-3">
+              {STEPS.map((step, index) => {
+                const Icon = step.icon;
+                const isActive = currentStep === step.id;
+                const isCompleted = currentStep > step.id;
+                const hasErrors = validationErrors[step.id]?.length > 0;
+
+                return (
+                  <button
+                    key={step.id}
+                    onClick={() => handleStepClick(step.id)}
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-label={`${t('services.step', 'Étape')} ${step.id}: ${step.title}`}
+                    className={cn(
+                      "relative p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-300 text-left",
+                      "hover:shadow-md hover:scale-[1.02] touch-manipulation",
+                      isActive && 'border-purple-500 bg-purple-50 dark:bg-purple-950/30 shadow-lg scale-[1.02] ring-2 ring-purple-500/20',
+                      isCompleted && 'border-green-500 bg-green-50 dark:bg-green-950/30',
+                      !isActive && !isCompleted && !hasErrors && 'border-border hover:border-purple-500/50 bg-card/50',
+                      hasErrors && 'border-red-500 bg-red-50 dark:bg-red-950/30',
+                      "animate-in fade-in slide-in-from-bottom-4"
+                    )}
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                      <Icon className={cn(
+                        "h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 transition-colors",
+                        isActive ? 'text-purple-600 dark:text-purple-400' : 
+                        isCompleted ? 'text-green-600 dark:text-green-400' : 
+                        hasErrors ? 'text-red-600 dark:text-red-400' :
+                        'text-muted-foreground'
+                      )} />
+                      {isCompleted && <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400 flex-shrink-0 ml-auto" aria-hidden="true" />}
+                      {hasErrors && !isCompleted && <AlertCircle className="h-3 w-3 text-red-600 dark:text-red-400 flex-shrink-0 ml-auto" aria-hidden="true" />}
+                    </div>
+                    <div className={cn(
+                      "text-[10px] sm:text-xs font-medium truncate",
+                      isActive && "text-purple-600 dark:text-purple-400 font-semibold",
+                      hasErrors && !isActive && "text-red-600 dark:text-red-400",
+                      !isActive && !hasErrors && "text-muted-foreground"
+                    )}>
+                      {step.title}
+                    </div>
+                    <div className="text-[9px] sm:text-[10px] text-muted-foreground truncate hidden sm:block mt-0.5">
+                      {step.description}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Validation Errors */}
         {validationErrors[currentStep]?.length > 0 && (
-          <Alert variant="destructive" className="mb-6">
+          <Alert variant="destructive" className="mb-4 sm:mb-6 animate-in fade-in slide-in-from-top-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <ul className="list-disc list-inside">
+              <ul className="list-disc list-inside text-xs sm:text-sm space-y-1">
                 {validationErrors[currentStep].map((error, index) => (
                   <li key={index}>{error}</li>
                 ))}
@@ -703,57 +911,121 @@ export const CreateServiceWizard = ({
         )}
 
         {/* Current Step */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              {React.createElement(CurrentStep.icon, { className: 'h-5 w-5' })}
+        <Card 
+          ref={contentRef}
+          className="mb-6 sm:mb-8 border-border/50 bg-card/50 backdrop-blur-sm shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-700"
+        >
+          <CardHeader className="p-3 sm:p-4 lg:p-6">
+            <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg lg:text-xl">
+              {React.createElement(CurrentStep.icon, { className: 'h-4 w-4 sm:h-5 sm:w-5' })}
               {CurrentStep.title}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm flex items-center gap-2">
               {CurrentStep.description}
-              {currentStep >= 5 && currentStep <= 7 && <Badge variant="outline" className="ml-2">Optionnel</Badge>}
+              {currentStep >= 5 && currentStep <= 7 && (
+                <Badge variant="outline" className="text-[10px] sm:text-xs">
+                  {t('services.optional', 'Optionnel')}
+                </Badge>
+              )}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
             <CurrentStepComponent {...getStepProps()} />
           </CardContent>
         </Card>
 
-        {/* Navigation Buttons */}
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2">
-            {currentStep > 1 && (
-              <Button
-                variant="outline"
-                onClick={handleBack}
-                disabled={isSaving}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Précédent
-              </Button>
-            )}
-          </div>
+        {/* Navigation Buttons - Responsive */}
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="flex gap-2">
+                {currentStep > 1 && (
+                  <Button
+                    variant="outline"
+                    onClick={handleBack}
+                    disabled={isSaving}
+                    className="flex-1 sm:flex-none"
+                    size="sm"
+                    aria-label={t('services.previous', 'Étape précédente')}
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1.5 sm:mr-2" />
+                    <span className="hidden sm:inline">{t('services.previous', 'Précédent')}</span>
+                    <span className="sm:hidden">{t('services.prev', 'Préc.')}</span>
+                  </Button>
+                )}
+              </div>
 
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleSaveDraft}
-              disabled={isSaving}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              Sauvegarder brouillon
-            </Button>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <Button
+                  variant="outline"
+                  onClick={handleSaveDraft}
+                  disabled={isSaving}
+                  className="flex-1 sm:flex-none"
+                  size="sm"
+                  aria-label={t('services.saveDraft', 'Sauvegarder comme brouillon')}
+                >
+                  <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                  <span className="hidden sm:inline">{t('services.saveDraft', 'Sauvegarder brouillon')}</span>
+                  <span className="sm:hidden">{t('services.draft', 'Brouillon')}</span>
+                  <Badge variant="secondary" className="ml-1.5 hidden sm:flex text-[10px]">
+                    ⌘S
+                  </Badge>
+                </Button>
 
-            {currentStep < STEPS.length ? (
-              <Button onClick={handleNext} disabled={isSaving}>
-                Suivant
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            ) : (
-              <Button onClick={handlePublish} disabled={isSaving}>
-                {isSaving ? 'Publication...' : 'Publier le service'}
-              </Button>
-            )}
+                {currentStep < STEPS.length ? (
+                  <Button 
+                    onClick={handleNext} 
+                    disabled={isSaving}
+                    className="flex-1 sm:flex-none bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                    size="sm"
+                    aria-label={t('services.next', 'Étape suivante')}
+                  >
+                    <span className="hidden sm:inline">{t('services.next', 'Suivant')}</span>
+                    <span className="sm:hidden">{t('services.nextShort', 'Suiv.')}</span>
+                    <ChevronRight className="h-4 w-4 ml-1.5 sm:ml-2" />
+                    <Badge variant="secondary" className="ml-1.5 hidden sm:flex text-[10px]">
+                      ⌘→
+                    </Badge>
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={handlePublish} 
+                    disabled={isSaving}
+                    className="flex-1 sm:flex-none bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                    size="sm"
+                    aria-label={t('services.publish', 'Publier le service')}
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
+                        <span className="hidden sm:inline">{t('services.publishing', 'Publication...')}</span>
+                        <span className="sm:hidden">{t('services.publishingShort', 'Pub...')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                        <span className="hidden sm:inline">{t('services.publish', 'Publier le service')}</span>
+                        <span className="sm:hidden">{t('services.publishShort', 'Publier')}</span>
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Keyboard Shortcuts Help */}
+        <div className="hidden lg:flex items-center justify-center gap-4 pt-4 border-t border-border/50">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Keyboard className="h-3 w-3" aria-hidden="true" />
+            <span>{t('common.shortcuts', 'Raccourcis')}:</span>
+            <Badge variant="outline" className="text-[10px] font-mono">⌘S</Badge>
+            <span className="text-muted-foreground">{t('services.shortcuts.save', 'Brouillon')}</span>
+            <Badge variant="outline" className="text-[10px] font-mono ml-2">⌘→</Badge>
+            <span className="text-muted-foreground">{t('services.shortcuts.next', 'Suivant')}</span>
+            <Badge variant="outline" className="text-[10px] font-mono ml-2">⌘←</Badge>
+            <span className="text-muted-foreground">{t('services.shortcuts.prev', 'Précédent')}</span>
           </div>
         </div>
       </div>
@@ -762,10 +1034,12 @@ export const CreateServiceWizard = ({
       <TemplateSelector
         productType="service"
         open={showTemplateSelector}
-        onClose={() => setShowTemplateSelector(false)}
+        onClose={() => {
+          setShowTemplateSelector(false);
+          logger.info('Fermeture sélecteur de template pour service');
+        }}
         onSelectTemplate={handleTemplateSelect}
       />
     </div>
   );
 };
-
