@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertCircle, Eye, EyeOff, Mail, CheckCircle2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,11 @@ const Auth = () => {
   const [error, setError] = useState<string>("");
   const [showPassword, setShowPassword] = useState({ login: false, signup: false });
   const [passwordStrength, setPasswordStrength] = useState<number>(0);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [isResetLoading, setIsResetLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetError, setResetError] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -34,6 +40,27 @@ const Auth = () => {
       navigate('/dashboard');
     }
   }, [user, navigate]);
+
+  // Check for password reset token in URL
+  useEffect(() => {
+    const handleHashChange = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const type = hashParams.get('type');
+      const accessToken = hashParams.get('access_token');
+      
+      if (type === 'recovery' && accessToken) {
+        // User clicked on password reset link from email
+        setShowForgotPassword(false);
+        // The user will be redirected to a password update form
+        // For now, we'll let Supabase handle the redirect
+        // The user should already be authenticated with the recovery token
+      }
+    };
+
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Calculate password strength
   const calculatePasswordStrength = (password: string): number => {
@@ -50,6 +77,44 @@ const Auth = () => {
   const handlePasswordChange = (value: string, type: 'signup') => {
     if (type === 'signup') {
       setPasswordStrength(calculatePasswordStrength(value));
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setResetError("");
+    setIsResetLoading(true);
+
+    if (!resetEmail || !resetEmail.includes('@')) {
+      setResetError(t('auth.forgotPassword.errorInvalidEmail', 'Veuillez entrer une adresse email valide'));
+      setIsResetLoading(false);
+      return;
+    }
+
+    try {
+      const redirectUrl = `${window.location.origin}/auth?type=reset-password`;
+      
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: redirectUrl,
+      });
+
+      if (resetError) throw resetError;
+
+      setResetSent(true);
+      toast({
+        title: t('auth.forgotPassword.successTitle', 'Email envoyé'),
+        description: t('auth.forgotPassword.successDescription', `Un email de réinitialisation a été envoyé à ${resetEmail}. Vérifiez votre boîte de réception.`),
+      });
+    } catch (error: any) {
+      console.error('Reset password error:', error);
+      setResetError(error.message || t('auth.forgotPassword.error', 'Une erreur est survenue lors de l\'envoi de l\'email'));
+      toast({
+        title: t('auth.forgotPassword.errorTitle', 'Erreur'),
+        description: error.message || t('auth.forgotPassword.error', 'Une erreur est survenue'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsResetLoading(false);
     }
   };
 
@@ -233,13 +298,19 @@ const Auth = () => {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="password-login">{t('auth.login.password')}</Label>
-                      <Link 
-                        to="/auth/reset-password" 
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowForgotPassword(true);
+                          setResetSent(false);
+                          setResetError("");
+                          setResetEmail("");
+                        }}
                         className="text-xs text-primary hover:underline"
                         aria-label="Réinitialiser le mot de passe"
                       >
                         {t('auth.login.forgotPassword', 'Mot de passe oublié ?')}
-                      </Link>
+                      </button>
                     </div>
                     <div className="relative">
                       <Input
@@ -388,6 +459,102 @@ const Auth = () => {
           {t('auth.termsNote')}
         </p>
       </div>
+
+      {/* Dialog Réinitialisation du mot de passe */}
+      <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('auth.forgotPassword.title', 'Réinitialiser le mot de passe')}</DialogTitle>
+            <DialogDescription>
+              {t('auth.forgotPassword.description', 'Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.')}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {resetSent ? (
+            <div className="space-y-4 py-4">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="rounded-full bg-green-100 dark:bg-green-900 p-3">
+                  <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-lg">{t('auth.forgotPassword.successTitle', 'Email envoyé !')}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t('auth.forgotPassword.successMessage', `Nous avons envoyé un lien de réinitialisation à ${resetEmail}. Vérifiez votre boîte de réception et votre dossier spam.`)}
+                  </p>
+                </div>
+                <Button
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setResetSent(false);
+                    setResetEmail("");
+                  }}
+                  className="w-full"
+                >
+                  {t('common.close', 'Fermer')}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleForgotPassword} className="space-y-4 py-4">
+              {resetError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{resetError}</AlertDescription>
+                </Alert>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="reset-email">{t('auth.forgotPassword.emailLabel', 'Adresse email')}</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="reset-email"
+                    type="email"
+                    placeholder={t('auth.forgotPassword.emailPlaceholder', 'votre@email.com')}
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                    disabled={isResetLoading}
+                    autoComplete="email"
+                    className="pl-10"
+                    aria-required="true"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isResetLoading || !resetEmail}
+                  aria-busy={isResetLoading}
+                >
+                  {isResetLoading ? (
+                    <>
+                      <span className="animate-spin mr-2">⏳</span>
+                      {t('auth.forgotPassword.sending', 'Envoi en cours...')}
+                    </>
+                  ) : (
+                    t('auth.forgotPassword.sendButton', 'Envoyer le lien de réinitialisation')
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setResetEmail("");
+                    setResetError("");
+                  }}
+                  disabled={isResetLoading}
+                >
+                  {t('common.cancel', 'Annuler')}
+                </Button>
+              </div>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
