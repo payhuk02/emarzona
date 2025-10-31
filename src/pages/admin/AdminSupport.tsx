@@ -66,7 +66,7 @@ export default function AdminSupport() {
     },
   ];
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = useCallback((status: string) => {
     switch (status) {
       case 'open':
         return <Badge variant="default"><AlertCircle className="h-3 w-3 mr-1" /> Ouvert</Badge>;
