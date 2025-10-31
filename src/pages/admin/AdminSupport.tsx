@@ -237,6 +237,7 @@ export default function AdminSupport() {
                 </Table>
               </CardContent>
             </Card>
+            </div>
           </div>
         </main>
       </div>
