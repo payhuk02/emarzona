@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,14 +13,20 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import payhukLogo from "@/assets/payhuk-logo.png";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { SEOMeta } from "@/components/seo/SEOMeta";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 
 const Auth = () => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const [showPassword, setShowPassword] = useState({ login: false, signup: false });
+  const [passwordStrength, setPasswordStrength] = useState<number>(0);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const loginFormRef = useRef<HTMLFormElement>(null);
+  const signupFormRef = useRef<HTMLFormElement>(null);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -28,6 +34,24 @@ const Auth = () => {
       navigate('/dashboard');
     }
   }, [user, navigate]);
+
+  // Calculate password strength
+  const calculatePasswordStrength = (password: string): number => {
+    if (!password) return 0;
+    let strength = 0;
+    if (password.length >= 6) strength += 1;
+    if (password.length >= 8) strength += 1;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 1;
+    if (/\d/.test(password)) strength += 1;
+    if (/[^a-zA-Z\d]/.test(password)) strength += 1;
+    return Math.min(strength, 5);
+  };
+
+  const handlePasswordChange = (value: string, type: 'signup') => {
+    if (type === 'signup') {
+      setPasswordStrength(calculatePasswordStrength(value));
+    }
+  };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -125,8 +149,22 @@ const Auth = () => {
     }
   };
 
+  const baseUrl = window.location.origin;
+
   return (
     <div className="min-h-screen gradient-hero flex items-center justify-center p-4 relative">
+      {/* SEO Meta Tags */}
+      <SEOMeta
+        title={`${t('nav.login')} / ${t('nav.signup')} - Payhuk`}
+        description={t('auth.welcomeSubtitle')}
+        keywords="payhuk, connexion, inscription, authentification, compte utilisateur"
+        url={`${baseUrl}/auth`}
+        canonical={`${baseUrl}/auth`}
+        type="website"
+        locale="fr_FR"
+        noindex={true}
+      />
+
       {/* Language Switcher - Top Right */}
       <div className="absolute top-4 right-4 z-50">
         <LanguageSwitcher variant="outline" showLabel={false} />
@@ -134,17 +172,24 @@ const Auth = () => {
 
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-6">
-            <img src={payhukLogo} alt="Payhuk" className="h-10 w-10" />
+          <Link to="/" className="inline-flex items-center gap-2 mb-6" aria-label="Retour à l'accueil">
+            <OptimizedImage
+              src={payhukLogo}
+              alt="Payhuk Logo"
+              width={40}
+              height={40}
+              className="h-10 w-10"
+              priority
+            />
             <span className="text-3xl font-bold">
               Payhuk
             </span>
           </Link>
         </div>
 
-        <Card className="shadow-large">
+        <Card className="shadow-large" role="main" aria-labelledby="auth-title">
           <CardHeader>
-            <CardTitle>{t('auth.welcome')}</CardTitle>
+            <CardTitle id="auth-title">{t('auth.welcome')}</CardTitle>
             <CardDescription>
               {t('auth.welcomeSubtitle')}
             </CardDescription>
@@ -164,7 +209,13 @@ const Auth = () => {
               </TabsList>
 
               <TabsContent value="login">
-                <form onSubmit={handleSignIn} className="space-y-4">
+                <form 
+                  ref={loginFormRef}
+                  onSubmit={handleSignIn} 
+                  className="space-y-4"
+                  aria-label={t('auth.login.formLabel')}
+                  noValidate
+                >
                   <div className="space-y-2">
                     <Label htmlFor="email-login">{t('auth.login.email')}</Label>
                     <Input
@@ -174,23 +225,51 @@ const Auth = () => {
                       placeholder={t('auth.login.emailPlaceholder')}
                       required
                       disabled={isLoading}
+                      autoComplete="email"
+                      aria-required="true"
+                      aria-invalid={error.includes('email') || error.includes('Email')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password-login">{t('auth.login.password')}</Label>
-                    <Input
-                      id="password-login"
-                      name="password-login"
-                      type="password"
-                      placeholder={t('auth.login.passwordPlaceholder')}
-                      required
-                      disabled={isLoading}
-                    />
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password-login">{t('auth.login.password')}</Label>
+                      <Link 
+                        to="/auth/reset-password" 
+                        className="text-xs text-primary hover:underline"
+                        aria-label="Réinitialiser le mot de passe"
+                      >
+                        {t('auth.login.forgotPassword', 'Mot de passe oublié ?')}
+                      </Link>
+                    </div>
+                    <div className="relative">
+                      <Input
+                        id="password-login"
+                        name="password-login"
+                        type={showPassword.login ? "text" : "password"}
+                        placeholder={t('auth.login.passwordPlaceholder')}
+                        required
+                        disabled={isLoading}
+                        autoComplete="current-password"
+                        aria-required="true"
+                        aria-invalid={error.includes('password') || error.includes('mot de passe')}
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword({ ...showPassword, login: !showPassword.login })}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label={showPassword.login ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                        tabIndex={-1}
+                      >
+                        {showPassword.login ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
                   <Button
                     type="submit"
                     className="w-full gradient-primary"
                     disabled={isLoading}
+                    aria-busy={isLoading}
                   >
                     {isLoading ? t('auth.login.buttonLoading') : t('auth.login.button')}
                   </Button>
@@ -198,7 +277,13 @@ const Auth = () => {
               </TabsContent>
 
               <TabsContent value="signup">
-                <form onSubmit={handleSignUp} className="space-y-4">
+                <form 
+                  ref={signupFormRef}
+                  onSubmit={handleSignUp} 
+                  className="space-y-4"
+                  aria-label={t('auth.signup.formLabel')}
+                  noValidate
+                >
                   <div className="space-y-2">
                     <Label htmlFor="name">{t('auth.signup.name')}</Label>
                     <Input
@@ -208,6 +293,9 @@ const Auth = () => {
                       placeholder={t('auth.signup.namePlaceholder')}
                       required
                       disabled={isLoading}
+                      autoComplete="name"
+                      aria-required="true"
+                      aria-invalid={error.includes('name') || error.includes('nom')}
                     />
                   </div>
                   <div className="space-y-2">
@@ -219,19 +307,65 @@ const Auth = () => {
                       placeholder={t('auth.signup.emailPlaceholder')}
                       required
                       disabled={isLoading}
+                      autoComplete="email"
+                      aria-required="true"
+                      aria-invalid={error.includes('email') || error.includes('Email')}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password-signup">{t('auth.signup.password')}</Label>
-                    <Input
-                      id="password-signup"
-                      name="password-signup"
-                      type="password"
-                      placeholder={t('auth.signup.passwordPlaceholder')}
-                      required
-                      minLength={6}
-                      disabled={isLoading}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="password-signup"
+                        name="password-signup"
+                        type={showPassword.signup ? "text" : "password"}
+                        placeholder={t('auth.signup.passwordPlaceholder')}
+                        required
+                        minLength={6}
+                        disabled={isLoading}
+                        autoComplete="new-password"
+                        aria-required="true"
+                        aria-invalid={error.includes('password') || error.includes('mot de passe')}
+                        className="pr-10"
+                        onChange={(e) => handlePasswordChange(e.target.value, 'signup')}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword({ ...showPassword, signup: !showPassword.signup })}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label={showPassword.signup ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                        tabIndex={-1}
+                      >
+                        {showPassword.signup ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    {passwordStrength > 0 && (
+                      <div className="space-y-1">
+                        <div className="flex gap-1 h-1.5">
+                          {[1, 2, 3, 4, 5].map((level) => (
+                            <div
+                              key={level}
+                              className={`flex-1 rounded-full transition-colors ${
+                                level <= passwordStrength
+                                  ? level <= 2
+                                    ? 'bg-red-500'
+                                    : level <= 4
+                                    ? 'bg-yellow-500'
+                                    : 'bg-green-500'
+                                  : 'bg-muted'
+                              }`}
+                              aria-hidden="true"
+                            />
+                          ))}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {passwordStrength <= 2 && t('auth.signup.passwordStrength.weak', 'Faible')}
+                          {passwordStrength === 3 && t('auth.signup.passwordStrength.medium', 'Moyen')}
+                          {passwordStrength === 4 && t('auth.signup.passwordStrength.good', 'Bon')}
+                          {passwordStrength >= 5 && t('auth.signup.passwordStrength.strong', 'Fort')}
+                        </p>
+                      </div>
+                    )}
                     <p className="text-xs text-muted-foreground">
                       {t('auth.signup.passwordHint')}
                     </p>
@@ -240,6 +374,7 @@ const Auth = () => {
                     type="submit"
                     className="w-full gradient-primary"
                     disabled={isLoading}
+                    aria-busy={isLoading}
                   >
                     {isLoading ? t('auth.signup.buttonLoading') : t('auth.signup.button')}
                   </Button>
