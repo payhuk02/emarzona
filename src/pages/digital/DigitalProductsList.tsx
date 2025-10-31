@@ -92,7 +92,19 @@ export const DigitalProductsList = () => {
   const productsRef = useScrollAnimation<HTMLDivElement>();
 
   // Data fetching avec jointure sur products
+  // Si pas de store, le hook récupérera tous les produits de tous les stores de l'utilisateur
   const { data: productsData, isLoading, error, refetch } = useDigitalProducts(store?.id);
+  
+  // Log pour débogage
+  useEffect(() => {
+    if (error) {
+      console.error('Erreur dans DigitalProductsList:', {
+        error,
+        storeId: store?.id,
+        hasStore: !!store,
+      });
+    }
+  }, [error, store?.id]);
 
   /**
    * Utiliser directement les données avec la structure product incluse
