@@ -99,11 +99,12 @@ export const useDigitalProducts = (storeId?: string) => {
       }
 
       // Étape 2: Obtenir les digital_products avec jointure sur products
+      // Utiliser la syntaxe de jointure Supabase standard avec le nom de la table
       const { data, error } = await supabase
         .from('digital_products')
         .select(`
           *,
-          product:products!digital_products_product_id_fkey (
+          products (
             id,
             name,
             slug,
@@ -117,9 +118,15 @@ export const useDigitalProducts = (storeId?: string) => {
         `)
         .in('product_id', productIds)
         .order('created_at', { ascending: false });
+      
+      // Mapper les données pour avoir la structure attendue avec `product`
+      const mappedData = data?.map((item: any) => ({
+        ...item,
+        product: Array.isArray(item.products) ? item.products[0] : item.products, // Prendre le premier élément si c'est un tableau
+      })) || [];
 
       if (error) throw error;
-      return data as any[]; // Retourner avec la relation product incluse
+      return mappedData as any[]; // Retourner avec la relation product incluse
     },
     enabled: true,
   });
