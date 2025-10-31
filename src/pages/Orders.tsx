@@ -68,7 +68,7 @@ const Orders = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Fetch orders with error handling
-  const { orders, loading: ordersLoading, totalCount, refetch } = useOrders(store?.id, { 
+  const { orders, loading: ordersLoading, totalCount, error: ordersError, refetch } = useOrders(store?.id, { 
     page, 
     pageSize,
     sortBy,
@@ -238,13 +238,14 @@ const Orders = () => {
     });
   }, [store?.id, orders?.length]);
 
-  // Error boundary - catch errors from hook
+  // Update error state from hook
   useEffect(() => {
-    if (ordersLoading === false && (!orders || orders.length === 0) && store?.id) {
-      // This could indicate an error, but we'll handle it gracefully
+    if (ordersError) {
+      setError(ordersError.message || 'Une erreur est survenue lors du chargement des commandes');
+    } else {
       setError(null);
     }
-  }, [ordersLoading, orders, store?.id]);
+  }, [ordersError]);
 
   // Loading state
   if (storeLoading) {

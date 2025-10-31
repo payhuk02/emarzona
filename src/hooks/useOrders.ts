@@ -42,19 +42,24 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
 
   const fetchOrders = async () => {
     if (!storeId) {
       setLoading(false);
+      setError(null);
       return;
     }
 
     try {
+      setLoading(true);
+      setError(null);
+      
       const from = page * pageSize;
       const to = from + pageSize - 1;
 
-      const { data, error, count } = await supabase
+      const { data, error: queryError, count } = await supabase
         .from('orders')
         .select(`
           *,
@@ -68,15 +73,34 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
         .order(sortBy, { ascending: sortDirection === 'asc' })
         .range(from, to);
 
-      if (error) throw error;
+      if (queryError) {
+        // Ne pas afficher de toast si c'est juste que la table n'existe pas encore
+        if (queryError.code === '42P01' || queryError.message?.includes('does not exist')) {
+          console.warn('Table orders n\'existe pas encore');
+          setOrders([]);
+          setTotalCount(0);
+          return;
+        }
+        throw queryError;
+      }
+      
       setOrders(data || []);
       setTotalCount(count || 0);
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
-      });
+      setError(null);
+    } catch (err: any) {
+      console.error('Erreur lors de la récupération des commandes:', err);
+      setError(err);
+      // Afficher un toast uniquement pour les erreurs critiques
+      if (err.message && !err.message.includes('does not exist')) {
+        toast({
+          title: "Erreur",
+          description: err.message || "Impossible de charger les commandes",
+          variant: "destructive",
+        });
+      }
+      // Toujours retourner un tableau vide en cas d'erreur pour éviter de casser l'UI
+      setOrders([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
@@ -90,6 +114,7 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
     orders, 
     loading, 
     totalCount,
+    error,
     refetch: fetchOrders 
   };
 };
