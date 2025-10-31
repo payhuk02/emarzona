@@ -217,6 +217,7 @@ export const AdminReviews = () => {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 };
