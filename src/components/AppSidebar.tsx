@@ -282,6 +282,11 @@ const adminMenuSections = [
         icon: GraduationCap,
       },
       {
+        title: "Avis",
+        url: "/admin/reviews",
+        icon: FileText,
+      },
+      {
         title: "Licences",
         url: "/dashboard/license-management",
         icon: Key,
@@ -382,9 +387,19 @@ const adminMenuSections = [
         icon: ShieldCheck,
       },
       {
+        title: "Sécurité 2FA",
+        url: "/admin/security",
+        icon: Shield,
+      },
+      {
         title: "Activité",
         url: "/admin/activity",
         icon: History,
+      },
+      {
+        title: "Audit",
+        url: "/admin/audit",
+        icon: FileText,
       },
       {
         title: "Support",

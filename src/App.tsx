@@ -100,6 +100,7 @@ const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
 const AdminShipping = lazy(() => import("./pages/admin/AdminShipping"));
 const AdminCourses = lazy(() => import("./pages/admin/AdminCourses"));
 const AdminSecurity = lazy(() => import("./pages/admin/AdminSecurity"));
+const AdminAudit = lazy(() => import("./pages/admin/AdminAudit"));
 
 // Pages Affiliation - Lazy loading
 const StoreAffiliates = lazy(() => import("./pages/StoreAffiliates"));
@@ -296,6 +297,7 @@ const AppContent = () => {
           <Route path="/admin/shipping" element={<ProtectedRoute><AdminShipping /></ProtectedRoute>} />
           <Route path="/admin/courses" element={<ProtectedRoute><AdminCourses /></ProtectedRoute>} />
           <Route path="/admin/security" element={<ProtectedRoute><AdminSecurity /></ProtectedRoute>} />
+          <Route path="/admin/audit" element={<ProtectedRoute><AdminAudit /></ProtectedRoute>} />
           <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
           <Route path="/admin/templates" element={<ProtectedRoute><AdminTemplates /></ProtectedRoute>} />
           <Route path="/admin/templates-premium" element={<ProtectedRoute><AdminTemplatesPremium /></ProtectedRoute>} />

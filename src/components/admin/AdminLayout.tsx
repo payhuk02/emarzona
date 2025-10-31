@@ -18,23 +18,100 @@ import {
   Store,
   Package,
   History,
+  BoxIcon,
+  CreditCard,
+  Scale,
+  TrendingUp,
+  BarChart3,
+  ShieldCheck,
+  Headphones,
+  GraduationCap,
+  Warehouse,
+  Truck,
+  DollarSign,
+  FileText,
+  Sparkles,
+  Layout,
+  Key,
+  Shield,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
   children: ReactNode;
 }
 
-const menuItems = [
-  { icon: LayoutDashboard, label: 'Vue d\'ensemble', path: '/admin' },
-  { icon: Users, label: 'Utilisateurs', path: '/admin/users' },
-  { icon: Store, label: 'Boutiques', path: '/admin/stores' },
-  { icon: Package, label: 'Produits', path: '/admin/products' },
-  { icon: ShoppingCart, label: 'Ventes', path: '/admin/sales' },
-  { icon: UserPlus, label: 'Parrainages', path: '/admin/referrals' },
-  { icon: History, label: 'Activité', path: '/admin/activity' },
-  { icon: Settings, label: 'Paramètres', path: '/admin/settings' },
-  { icon: Bell, label: 'Notifications', path: '/admin/notifications' },
+// Menu organisé par sections pour une meilleure navigation
+const menuSections = [
+  {
+    label: 'Administration',
+    items: [
+      { icon: LayoutDashboard, label: 'Vue d\'ensemble', path: '/admin' },
+      { icon: Users, label: 'Utilisateurs', path: '/admin/users' },
+      { icon: Store, label: 'Boutiques', path: '/admin/stores' },
+    ]
+  },
+  {
+    label: 'Catalogue',
+    items: [
+      { icon: Package, label: 'Produits', path: '/admin/products' },
+      { icon: GraduationCap, label: 'Cours', path: '/admin/courses' },
+      { icon: FileText, label: 'Avis', path: '/admin/reviews' },
+      { icon: Key, label: 'Licences', path: '/dashboard/license-management' },
+    ]
+  },
+  {
+    label: 'Commerce',
+    items: [
+      { icon: ShoppingCart, label: 'Ventes', path: '/admin/sales' },
+      { icon: BoxIcon, label: 'Commandes', path: '/admin/orders' },
+      { icon: Warehouse, label: 'Inventaire', path: '/admin/inventory' },
+      { icon: Truck, label: 'Expéditions', path: '/admin/shipping' },
+    ]
+  },
+  {
+    label: 'Finance',
+    items: [
+      { icon: DollarSign, label: 'Revenus', path: '/admin/revenue' },
+      { icon: CreditCard, label: 'Paiements', path: '/admin/payments' },
+      { icon: Scale, label: 'Litiges', path: '/admin/disputes' },
+    ]
+  },
+  {
+    label: 'Croissance',
+    items: [
+      { icon: UserPlus, label: 'Parrainages', path: '/admin/referrals' },
+      { icon: TrendingUp, label: 'Affiliation', path: '/admin/affiliates' },
+      { icon: BarChart3, label: 'Analytics', path: '/admin/analytics' },
+    ]
+  },
+  {
+    label: 'Sécurité & Support',
+    items: [
+      { icon: ShieldCheck, label: 'Admin KYC', path: '/admin/kyc' },
+      { icon: Shield, label: 'Sécurité 2FA', path: '/admin/security' },
+      { icon: History, label: 'Activité', path: '/admin/activity' },
+      { icon: FileText, label: 'Audit', path: '/admin/audit' },
+      { icon: Headphones, label: 'Support', path: '/admin/support' },
+      { icon: Bell, label: 'Notifications', path: '/admin/notifications' },
+    ]
+  },
+  {
+    label: 'Templates',
+    items: [
+      { icon: Layout, label: 'Templates', path: '/admin/templates' },
+      { icon: Sparkles, label: 'Templates Premium', path: '/admin/templates-premium' },
+    ]
+  },
+  {
+    label: 'Configuration',
+    items: [
+      { icon: Settings, label: 'Paramètres', path: '/admin/settings' },
+    ]
+  },
 ];
+
+// Menu flat pour la navigation
+const menuItems = menuSections.flatMap(section => section.items);
 
 export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -84,27 +161,38 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
               </Button>
             </div>
 
-            {/* Menu Items */}
-            <nav className="flex-1 space-y-2 p-4">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
+            {/* Menu Items organisés par sections */}
+            <nav className="flex-1 space-y-4 p-4 overflow-y-auto">
+              {menuSections.map((section) => (
+                <div key={section.label} className="space-y-2">
+                  {sidebarOpen && (
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
+                      {section.label}
+                    </h3>
+                  )}
+                  <div className="space-y-1">
+                    {section.items.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = location.pathname === item.path;
 
-                return (
-                  <Button
-                    key={item.path}
-                    variant={isActive ? 'default' : 'ghost'}
-                    className={cn(
-                      'w-full justify-start gap-3',
-                      !sidebarOpen && 'justify-center'
-                    )}
-                    onClick={() => navigate(item.path)}
-                  >
-                    <Icon className="h-5 w-5" />
-                    {sidebarOpen && <span>{item.label}</span>}
-                  </Button>
-                );
-              })}
+                      return (
+                        <Button
+                          key={item.path}
+                          variant={isActive ? 'default' : 'ghost'}
+                          className={cn(
+                            'w-full justify-start gap-3',
+                            !sidebarOpen && 'justify-center'
+                          )}
+                          onClick={() => navigate(item.path)}
+                        >
+                          <Icon className="h-5 w-5" />
+                          {sidebarOpen && <span>{item.label}</span>}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </nav>
           </div>
         </aside>
