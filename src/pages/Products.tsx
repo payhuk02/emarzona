@@ -834,7 +834,7 @@ const Products = () => {
                               <div className="text-sm text-muted-foreground">
                                 Page {currentPage} sur {totalPages}
                               </div>
-                            </div>
+                            </nav>
                           </CardContent>
                         </Card>
                       )}
