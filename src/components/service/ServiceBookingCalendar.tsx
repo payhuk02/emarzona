@@ -285,26 +285,23 @@ export const ServiceBookingCalendar = ({
           {/* Navigation */}
           <div className="flex items-center gap-2">
             <Button 
-              variant="outline" 
               size="sm" 
               onClick={goToBack}
-              className="border-foreground/20 text-foreground hover:bg-foreground/10 hover:text-foreground font-medium"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white font-medium"
             >
               ← Préc.
             </Button>
             <Button 
-              variant="outline" 
               size="sm" 
               onClick={goToToday}
-              className="border-foreground/20 text-foreground hover:bg-foreground/10 hover:text-foreground font-medium"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white font-medium"
             >
               Aujourd'hui
             </Button>
             <Button 
-              variant="outline" 
               size="sm" 
               onClick={goToNext}
-              className="border-foreground/20 text-foreground hover:bg-foreground/10 hover:text-foreground font-medium"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white font-medium"
             >
               Suiv. →
             </Button>
@@ -320,13 +317,12 @@ export const ServiceBookingCalendar = ({
             {(['month', 'week', 'day'] as View[]).map((v) => (
               <Button
                 key={v}
-                variant={toolbar.view === v ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => toolbar.onView(v)}
                 className={
                   toolbar.view === v
-                    ? 'font-medium'
-                    : 'border-foreground/20 text-foreground hover:bg-foreground/10 hover:text-foreground font-medium'
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white font-medium'
+                    : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white font-medium opacity-80 hover:opacity-100'
                 }
               >
                 {v === 'month' ? 'Mois' : v === 'week' ? 'Semaine' : 'Jour'}
