@@ -467,15 +467,14 @@ export default function InventoryDashboard() {
                 )}
               </TabsContent>
             </Tabs>
-          </div>
-
-          {/* Stock Adjustment Dialog */}
-          <StockAdjustmentDialog
-            open={adjustDialogOpen}
-            onOpenChange={setAdjustDialogOpen}
-            item={selectedItem}
-          />
         </div>
+
+        {/* Stock Adjustment Dialog */}
+        <StockAdjustmentDialog
+          open={adjustDialogOpen}
+          onOpenChange={setAdjustDialogOpen}
+          item={selectedItem}
+        />
       </main>
     </div>
   </SidebarProvider>
