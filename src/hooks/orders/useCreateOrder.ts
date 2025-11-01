@@ -12,6 +12,7 @@ import { useCreateDigitalOrder, type CreateDigitalOrderOptions } from './useCrea
 import { useCreatePhysicalOrder, type CreatePhysicalOrderOptions } from './useCreatePhysicalOrder';
 import { useCreateServiceOrder, type CreateServiceOrderOptions } from './useCreateServiceOrder';
 import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 
 /**
  * Options génériques pour créer une commande
@@ -228,6 +229,9 @@ export const useCreateOrder = () => {
 
           const totalPrice = (product.promotional_price || product.price) * quantity;
 
+          // Récupérer le cookie d'affiliation s'il existe
+          const affiliateTrackingCookie = getAffiliateTrackingCookie();
+
           const { data: order, error: orderError } = await supabase
             .from('orders')
             .insert({
@@ -238,6 +242,7 @@ export const useCreateOrder = () => {
               currency: product.currency,
               payment_status: 'pending',
               status: 'pending',
+              affiliate_tracking_cookie: affiliateTrackingCookie, // Inclure le cookie d'affiliation
             })
             .select('id')
             .single();

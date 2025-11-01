@@ -15,6 +15,7 @@ import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 import { useToast } from '@/hooks/use-toast';
+import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 
 /**
  * Options pour créer une commande physical
@@ -284,6 +285,9 @@ export const useCreatePhysicalOrder = () => {
       const orderNumber = orderNumberData || `ORD-${Date.now()}`;
 
       // 8. Créer la commande (avec payment_type)
+      // Récupérer le cookie d'affiliation s'il existe
+      const affiliateTrackingCookie = getAffiliateTrackingCookie();
+
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -298,6 +302,7 @@ export const useCreatePhysicalOrder = () => {
           payment_type: paymentType,
           percentage_paid: percentagePaid,
           remaining_amount: remainingAmount,
+          affiliate_tracking_cookie: affiliateTrackingCookie, // Inclure le cookie d'affiliation
         })
         .select('id')
         .single();
