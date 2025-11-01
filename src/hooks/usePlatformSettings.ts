@@ -12,8 +12,8 @@ export const usePlatformSettings = (key: string = 'admin') => {
   const [settings, setSettings] = useState<PlatformSettings>({});
 
   const refresh = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
     try {
       const { data, error } = await supabase
         .from('admin_config')

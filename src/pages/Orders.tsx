@@ -513,16 +513,16 @@ const Orders = () => {
               aria-label={t('orders.filters.ariaLabel', 'Filtres de recherche des commandes')}
               className="animate-in fade-in slide-in-from-bottom-4 duration-700"
             >
-              <OrderFilters
+            <OrderFilters
                 searchQuery={searchInput}
                 onSearchChange={setSearchInput}
-                statusFilter={statusFilter}
-                onStatusChange={setStatusFilter}
-                paymentStatusFilter={paymentStatusFilter}
-                onPaymentStatusChange={setPaymentStatusFilter}
-                dateRange={dateRange}
-                onDateRangeChange={setDateRange}
-              />
+              statusFilter={statusFilter}
+              onStatusChange={setStatusFilter}
+              paymentStatusFilter={paymentStatusFilter}
+              onPaymentStatusChange={setPaymentStatusFilter}
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+            />
             </div>
 
             {/* Orders Content */}
