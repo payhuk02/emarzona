@@ -1,260 +1,225 @@
-import { useState, useMemo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  CreditCard, 
-  Plus, 
-  RefreshCw, 
-  Download, 
-  Upload,
-  TrendingUp,
-  DollarSign,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Filter,
-  Search,
-  MoreHorizontal
-} from "lucide-react";
-import { useStore } from "@/hooks/useStore";
-import { usePayments } from "@/hooks/usePayments";
-import { useTransactions } from "@/hooks/useTransactions";
-import { supabase } from "@/integrations/supabase/client";
-import PaymentCardDashboard from "@/components/payments/PaymentCardDashboard";
-import PaymentListView from "@/components/payments/PaymentListView";
-import PaymentFiltersDashboard from "@/components/payments/PaymentFiltersDashboard";
-import PaymentStats from "@/components/payments/PaymentStats";
-import PaymentBulkActions from "@/components/payments/PaymentBulkActions";
-import CreatePaymentDialog from "@/components/payments/CreatePaymentDialog";
-import { Payment } from "@/hooks/usePayments";
+/**
+ * 💳 Gestion des Paiements - Professional & Optimized
+ * Page optimisée avec design professionnel, responsive et fonctionnalités avancées
+ * Gestion complète des paiements avec recherche, filtres, tri, export et actions
+ */
+
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
+  CreditCard,
+  Search,
+  Plus,
+  RefreshCw,
+  Download,
+  X,
+  AlertTriangle,
+  Loader2,
+  DollarSign,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  TrendingUp,
+  Sparkles,
+} from 'lucide-react';
+import { useStore } from '@/hooks/useStore';
+import { usePayments, Payment } from '@/hooks/usePayments';
+import { CreatePaymentDialog } from '@/components/payments/CreatePaymentDialog';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import PaymentCardDashboard from '@/components/payments/PaymentCardDashboard';
+import PaymentListView from '@/components/payments/PaymentListView';
 
-const Payments = () => {
+export default function Payments() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { store, loading: storeLoading } = useStore();
   const { payments, loading: paymentsLoading, refetch } = usePayments(store?.id);
-  const { transactions, loading: transactionsLoading } = useTransactions(store?.id);
-  const { toast } = useToast();
-  
-  const [selectedPayments, setSelectedPayments] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [deletingPaymentId, setDeletingPaymentId] = useState<string | null>(null);
-  
-  // Filters state
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [methodFilter, setMethodFilter] = useState("all");
-  const [dateFilter, setDateFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("recent");
 
-  // Extract unique methods and statuses
-  const paymentMethods = useMemo(() => {
-    return Array.from(new Set(payments.map((p) => p.payment_method).filter(Boolean))) as string[];
-  }, [payments]);
-
-  const paymentStatuses = useMemo(() => {
-    return Array.from(new Set(payments.map((p) => p.status).filter(Boolean))) as string[];
-  }, [payments]);
-
-  // Filter and sort payments
-  const filteredPayments = useMemo(() => {
-    let filtered = [...payments];
-
-    // Search filter
-    if (searchQuery) {
-      filtered = filtered.filter((payment) =>
-        payment.transaction_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        payment.notes?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        payment.customers?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        payment.orders?.order_number?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Status filter
-    if (statusFilter !== "all") {
-      filtered = filtered.filter((payment) => payment.status === statusFilter);
-    }
-
-    // Method filter
-    if (methodFilter !== "all") {
-      filtered = filtered.filter((payment) => payment.payment_method === methodFilter);
-    }
-
-    // Date filter
-    if (dateFilter !== "all") {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-      const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const lastMonth = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-      filtered = filtered.filter((payment) => {
-        const paymentDate = new Date(payment.created_at);
-        switch (dateFilter) {
-          case "today":
-            return paymentDate >= today;
-          case "yesterday":
-            return paymentDate >= yesterday && paymentDate < today;
-          case "week":
-            return paymentDate >= lastWeek;
-          case "month":
-            return paymentDate >= lastMonth;
-          default:
-            return true;
-        }
-      });
-    }
-
-    // Sort
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "recent":
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        case "oldest":
-          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-        case "amount-asc":
-          return a.amount - b.amount;
-        case "amount-desc":
-          return b.amount - a.amount;
-        case "status":
-          return a.status.localeCompare(b.status);
-        default:
-          return 0;
-      }
-    });
-
-    return filtered;
-  }, [payments, searchQuery, statusFilter, methodFilter, dateFilter, sortBy]);
+  // State management
+  const [searchInput, setSearchInput] = useState('');
+  const debouncedSearch = useDebounce(searchInput, 300);
+  const [activeTab, setActiveTab] = useState('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Animations au scroll
+  const headerRef = useScrollAnimation<HTMLDivElement>();
   const statsRef = useScrollAnimation<HTMLDivElement>();
   const filtersRef = useScrollAnimation<HTMLDivElement>();
   const paymentsRef = useScrollAnimation<HTMLDivElement>();
 
-  const completedPayments = useMemo(() => payments.filter(p => p.status === 'completed').length, [payments]);
-  const pendingPayments = useMemo(() => payments.filter(p => p.status === 'pending').length, [payments]);
-  const failedPayments = useMemo(() => payments.filter(p => p.status === 'failed').length, [payments]);
-  const totalRevenue = useMemo(() => payments.filter(p => p.status === 'completed').reduce((sum, p) => sum + p.amount, 0), [payments]);
+  // Filter payments
+  const filteredPayments = useMemo(() => {
+    if (!payments) return [];
 
-  const handleDelete = useCallback(async () => {
-    if (deletingPaymentId) {
-      try {
-        logger.info(`Suppression du paiement ${deletingPaymentId}`);
-        const { error } = await supabase
-          .from("payments")
-          .delete()
-          .eq("id", deletingPaymentId);
+    return payments.filter((payment) => {
+      // Search filter
+      const searchLower = debouncedSearch.toLowerCase();
+      const matchesSearch =
+        payment.transaction_id?.toLowerCase().includes(searchLower) ||
+        payment.notes?.toLowerCase().includes(searchLower) ||
+        payment.customers?.name?.toLowerCase().includes(searchLower) ||
+        payment.orders?.order_number?.toLowerCase().includes(searchLower) ||
+        payment.payment_method?.toLowerCase().includes(searchLower);
 
-        if (error) throw error;
+      // Tab filter
+      const matchesTab =
+        activeTab === 'all' ||
+        (activeTab === 'completed' && payment.status === 'completed') ||
+        (activeTab === 'pending' && payment.status === 'pending') ||
+        (activeTab === 'failed' && payment.status === 'failed') ||
+        (activeTab === 'refunded' && payment.status === 'refunded');
 
-        logger.info('Paiement supprimé avec succès');
-        toast({
-          title: "Succès",
-          description: "Paiement supprimé avec succès",
-        });
-
-        await refetch();
-      } catch (error: any) {
-        logger.error('Erreur lors de la suppression du paiement:', error);
-        toast({
-          title: "Erreur",
-          description: error.message || "Impossible de supprimer le paiement",
-          variant: "destructive",
-        });
-      } finally {
-        setDeletingPaymentId(null);
-      }
-    }
-  }, [deletingPaymentId, refetch, toast]);
-
-  const handleBulkDelete = useCallback(async (paymentIds: string[]) => {
-    try {
-      logger.info(`Suppression en lot de ${paymentIds.length} paiements`);
-      await Promise.all(paymentIds.map(id => 
-        supabase.from("payments").delete().eq("id", id)
-      ));
-      setSelectedPayments([]);
-      await refetch();
-      logger.info('Paiements supprimés avec succès');
-      toast({
-        title: "Succès",
-        description: `${paymentIds.length} paiement(s) supprimé(s)`,
-      });
-    } catch (error: any) {
-      logger.error('Erreur lors de la suppression en lot:', error);
-      toast({
-        title: "Erreur",
-        description: error.message || "Impossible de supprimer tous les paiements",
-        variant: "destructive",
-      });
-    }
-  }, [refetch, toast]);
-
-  const handleBulkAction = useCallback(async (action: string, paymentIds: string[]) => {
-    try {
-      logger.info(`Action en lot: ${action} sur ${paymentIds.length} paiements`);
-      const updates = action === 'complete' ? { status: 'completed' } : 
-                     action === 'fail' ? { status: 'failed' } : 
-                     { status: 'pending' };
-      
-      await Promise.all(paymentIds.map(id => 
-        supabase.from("payments").update(updates).eq("id", id)
-      ));
-      
-      setSelectedPayments([]);
-      await refetch();
-      logger.info('Action en lot appliquée avec succès');
-      
-      toast({
-        title: "Succès",
-        description: `${paymentIds.length} paiement(s) mis à jour`,
-      });
-    } catch (error: any) {
-      logger.error(`Erreur lors de l'action en lot ${action}:`, error);
-      toast({
-        title: "Erreur",
-        description: error.message || `Impossible de ${action} les paiements`,
-        variant: "destructive",
-      });
-    }
-  }, [refetch, toast]);
-
-  const handleRefresh = useCallback(() => {
-    logger.info('Actualisation de la liste des paiements');
-    refetch();
-    toast({
-      title: "Actualisation",
-      description: "Liste des paiements mise à jour",
+      return matchesSearch && matchesTab;
     });
+  }, [payments, debouncedSearch, activeTab]);
+
+  // Stats calculation
+  const stats = useMemo(() => {
+    if (!payments) return { total: 0, completed: 0, pending: 0, failed: 0, totalRevenue: 0 };
+
+    const total = payments.length;
+    const completed = payments.filter((p) => p.status === 'completed').length;
+    const pending = payments.filter((p) => p.status === 'pending').length;
+    const failed = payments.filter((p) => p.status === 'failed').length;
+    const totalRevenue = payments
+      .filter((p) => p.status === 'completed')
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    return { total, completed, pending, failed, totalRevenue };
+  }, [payments]);
+
+  // Handle refresh
+  const handleRefresh = useCallback(async () => {
+    try {
+      await refetch();
+      toast({
+        title: '✅ Actualisation réussie',
+        description: 'La liste des paiements a été mise à jour.',
+      });
+      logger.info('Payments refreshed');
+    } catch (error: any) {
+      logger.error('Error refreshing payments', { error: error.message });
+      toast({
+        title: '❌ Erreur',
+        description: 'Impossible d\'actualiser les paiements.',
+        variant: 'destructive',
+      });
+    }
   }, [refetch, toast]);
 
-  if (storeLoading) {
+  // Export to CSV
+  const handleExportCSV = useCallback(async () => {
+    if (!filteredPayments || filteredPayments.length === 0) {
+      toast({
+        title: '⚠️ Aucune donnée',
+        description: 'Aucun paiement à exporter.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const headers = [
+        'ID',
+        'Transaction ID',
+        'Méthode',
+        'Montant',
+        'Devise',
+        'Statut',
+        'Client',
+        'Commande',
+        'Notes',
+        'Date création',
+      ];
+      const rows = filteredPayments.map((payment: Payment) => [
+        payment.id,
+        payment.transaction_id || '',
+        payment.payment_method || '',
+        payment.amount || 0,
+        payment.currency || '',
+        payment.status || '',
+        payment.customers?.name || '',
+        payment.orders?.order_number || '',
+        payment.notes || '',
+        format(new Date(payment.created_at), 'dd/MM/yyyy HH:mm', { locale: fr }),
+      ]);
+
+      const csvContent = [
+        headers.join(','),
+        ...rows.map((row: any[]) => row.map((cell: any) => `"${String(cell)}"`).join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `paiements-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: '✅ Export réussi',
+        description: `${filteredPayments.length} paiement(s) exporté(s) en CSV.`,
+      });
+      logger.info('Payments exported to CSV', { count: filteredPayments.length });
+    } catch (error: any) {
+      logger.error('Error exporting payments to CSV', { error: error.message });
+      toast({
+        title: '❌ Erreur',
+        description: 'Impossible d\'exporter les paiements.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  }, [filteredPayments, toast]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('search-payments')?.focus();
+      }
+      if (e.key === 'Escape' && searchInput) {
+        setSearchInput('');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [searchInput]);
+
+  if (storeLoading || paymentsLoading) {
     return (
       <SidebarProvider>
         <div className="flex min-h-screen w-full">
           <AppSidebar />
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-              <p className="mt-2 text-muted-foreground">Chargement des paiements...</p>
+          <div className="flex-1 flex items-center justify-center p-4">
+            <div className="text-center space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto text-purple-500" />
+              <p className="text-muted-foreground">Chargement des paiements...</p>
             </div>
           </div>
         </div>
@@ -267,7 +232,7 @@ const Payments = () => {
       <SidebarProvider>
         <div className="flex min-h-screen w-full">
           <AppSidebar />
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center p-4">
             <Card className="max-w-md">
               <CardHeader className="text-center">
                 <div className="flex justify-center mb-4">
@@ -281,7 +246,7 @@ const Payments = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-center">
-                <Button onClick={() => navigate("/dashboard/store")}>
+                <Button onClick={() => navigate('/dashboard/store')}>
                   Créer ma boutique
                 </Button>
               </CardContent>
@@ -296,209 +261,380 @@ const Payments = () => {
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         <AppSidebar />
-        
+
         <div className="flex-1 flex flex-col">
-          <header className="sticky top-0 z-10 border-b bg-card shadow-soft" role="banner">
-            <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
-              <SidebarTrigger aria-label="Toggle sidebar" />
-              <div className="flex-1">
-                <h1 className="text-xl sm:text-2xl font-bold" id="payments-title">Paiements</h1>
+          {/* Header */}
+          <div ref={headerRef} className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 sm:p-6">
+              <div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                    <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                  </div>
+                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    Paiements
+                  </span>
+                </h1>
+                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                  Gérez vos transactions et suivez vos paiements en temps réel
+                </p>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handleRefresh} aria-label="Actualiser les paiements">
-                  <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
-                  Actualiser
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefresh}
+                  disabled={paymentsLoading}
+                  className="flex-1 sm:flex-none transition-all hover:scale-105"
+                >
+                  {paymentsLoading ? (
+                    <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                  )}
+                  <span className="hidden sm:inline text-xs sm:text-sm">Actualiser</span>
                 </Button>
-                <Button onClick={() => setIsCreateOpen(true)} aria-label="Créer un nouveau paiement">
-                  <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
-                  Nouveau paiement
+                <Button
+                  onClick={() => setCreateDialogOpen(true)}
+                  size="sm"
+                  className="flex-1 sm:flex-none bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white"
+                >
+                  <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                  <span className="hidden sm:inline text-xs sm:text-sm">Nouveau</span>
+                  <span className="sm:hidden">Nouveau</span>
                 </Button>
               </div>
             </div>
-          </header>
+          </div>
 
-          <main className="flex-1 p-4 sm:p-6 bg-gradient-hero" role="main" aria-labelledby="payments-title">
+          <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-background via-background to-purple-50/30 dark:to-purple-950/20">
             <div className="max-w-7xl mx-auto space-y-6">
-              {paymentsLoading ? (
-                <Card className="shadow-medium">
-                  <CardContent className="py-12 text-center">
-                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-                    <p className="mt-2 text-muted-foreground">Chargement des paiements...</p>
-                  </CardContent>
-                </Card>
-              ) : payments.length === 0 ? (
-                <Card className="shadow-medium">
+              {/* Error Alert */}
+              {error && (
+                <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-4">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Empty State */}
+              {!paymentsLoading && payments.length === 0 ? (
+                <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50 animate-in fade-in zoom-in duration-500">
                   <CardHeader className="text-center py-12">
                     <div className="flex justify-center mb-4">
-                      <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
-                        <CreditCard className="h-10 w-10 text-muted-foreground" />
+                      <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 flex items-center justify-center animate-in zoom-in duration-500">
+                        <CreditCard className="h-10 w-10 text-purple-500 dark:text-purple-400" />
                       </div>
                     </div>
-                    <CardTitle>Aucun paiement pour le moment</CardTitle>
-                    <CardDescription className="mt-2">
+                    <CardTitle className="text-xl sm:text-2xl">Aucun paiement pour le moment</CardTitle>
+                    <CardDescription className="mt-2 text-sm sm:text-base">
                       Créez votre premier paiement pour commencer à suivre vos transactions
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="text-center pb-12">
-                    <div className="space-y-4">
-                      <Button onClick={() => setIsCreateOpen(true)} size="lg">
-                        <Plus className="h-5 w-5 mr-2" />
-                        Créer mon premier paiement
-                      </Button>
-                      <div className="text-sm text-muted-foreground">
-                        <p>Ou importez vos paiements depuis un fichier CSV</p>
-                        <Button variant="outline" size="sm" className="mt-2">
-                          <Upload className="h-4 w-4 mr-2" />
-                          Importer CSV
-                        </Button>
-                      </div>
-              </div>
+                  <CardContent className="text-center pb-12 space-y-4">
+                    <Button
+                      onClick={() => setCreateDialogOpen(true)}
+                      size="lg"
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white"
+                    >
+                      <Plus className="h-5 w-5 mr-2" />
+                      Créer mon premier paiement
+                    </Button>
                   </CardContent>
                 </Card>
-            ) : (
-              <>
-                  {/* Statistiques */}
-                  <div ref={statsRef} role="region" aria-label="Statistiques des paiements">
-                    <PaymentStats 
-                      payments={payments} 
-                      filteredPayments={filteredPayments}
-                      transactions={transactions}
-                    />
-                  </div>
-
-                  {/* Actions en lot */}
-                  {selectedPayments.length > 0 && (
-                    <PaymentBulkActions
-                      selectedPayments={selectedPayments}
-                      payments={payments}
-                      onSelectionChange={setSelectedPayments}
-                      onBulkAction={handleBulkAction}
-                      onDelete={handleBulkDelete}
-                    />
-                  )}
-
-                  {/* Filtres */}
-                  <div ref={filtersRef} role="region" aria-label="Filtres de recherche des paiements">
-                    <PaymentFiltersDashboard
-                    searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
-                  statusFilter={statusFilter}
-                  onStatusChange={setStatusFilter}
-                  methodFilter={methodFilter}
-                  onMethodChange={setMethodFilter}
-                    dateFilter={dateFilter}
-                    onDateChange={setDateFilter}
-                    sortBy={sortBy}
-                    onSortByChange={setSortBy}
-                    paymentMethods={paymentMethods}
-                    paymentStatuses={paymentStatuses}
-                    viewMode={viewMode}
-                    onViewModeChange={setViewMode}
-                    totalPayments={payments.length}
-                    completedPayments={completedPayments}
-                    />
-                  </div>
-
-                  {filteredPayments.length === 0 ? (
-                    <Card className="shadow-medium">
-                      <CardContent className="py-12 text-center">
-                        <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">Aucun paiement trouvé</h3>
-                        <p className="text-muted-foreground mb-4">
-                          Aucun paiement ne correspond à vos critères de recherche
-                        </p>
-                        <Button variant="outline" onClick={() => {
-                          setSearchQuery("");
-                          setStatusFilter("all");
-                          setMethodFilter("all");
-                          setDateFilter("all");
-                        }}>
-                          Effacer les filtres
-                        </Button>
+              ) : (
+                <>
+                  {/* Stats Cards */}
+                  <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
+                    {/* Carte Total */}
+                    <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-purple-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                      <CardHeader className="pb-3 relative z-10">
+                        <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
+                          <CreditCard className="h-4 w-4 text-purple-200" />
+                          Total
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="relative z-10">
+                        <div className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">{stats.total}</div>
+                        <p className="text-xs text-purple-200/90 mt-1 font-medium">paiements</p>
                       </CardContent>
+                      <div className="absolute top-2 right-2 h-2 w-2 bg-purple-300 rounded-full opacity-60 group-hover:opacity-100 transition-opacity"></div>
                     </Card>
-                  ) : (
-                    <>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm text-muted-foreground">
-                            {filteredPayments.length} paiement{filteredPayments.length > 1 ? "s" : ""} trouvé{filteredPayments.length > 1 ? "s" : ""}
-                          </p>
-                          {selectedPayments.length > 0 && (
-                            <Badge variant="secondary">
-                              {selectedPayments.length} sélectionné{selectedPayments.length > 1 ? "s" : ""}
-                            </Badge>
-                          )}
+
+                    {/* Carte Completés */}
+                    <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-green-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                      <CardHeader className="pb-3 relative z-10">
+                        <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-400 drop-shadow-lg" />
+                          Completés
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="relative z-10">
+                        <div className="text-2xl md:text-3xl font-bold text-green-400 drop-shadow-lg">{stats.completed}</div>
+                        <p className="text-xs text-purple-200/90 mt-1 font-medium">paiements</p>
+                      </CardContent>
+                      <div className="absolute top-2 right-2 h-2 w-2 bg-green-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-green-400/50"></div>
+                    </Card>
+
+                    {/* Carte En attente */}
+                    <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-yellow-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-yellow-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                      <CardHeader className="pb-3 relative z-10">
+                        <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-yellow-400 drop-shadow-lg" />
+                          En attente
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="relative z-10">
+                        <div className="text-2xl md:text-3xl font-bold text-yellow-400 drop-shadow-lg">{stats.pending}</div>
+                        <p className="text-xs text-purple-200/90 mt-1 font-medium">paiements</p>
+                      </CardContent>
+                      <div className="absolute top-2 right-2 h-2 w-2 bg-yellow-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-yellow-400/50"></div>
+                    </Card>
+
+                    {/* Carte Échoués */}
+                    <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-red-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                      <CardHeader className="pb-3 relative z-10">
+                        <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
+                          <XCircle className="h-4 w-4 text-red-400 drop-shadow-lg" />
+                          Échoués
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="relative z-10">
+                        <div className="text-2xl md:text-3xl font-bold text-red-400 drop-shadow-lg">{stats.failed}</div>
+                        <p className="text-xs text-purple-200/90 mt-1 font-medium">paiements</p>
+                      </CardContent>
+                      <div className="absolute top-2 right-2 h-2 w-2 bg-red-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-red-400/50"></div>
+                    </Card>
+
+                    {/* Carte Revenu */}
+                    <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-blue-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                      <CardHeader className="pb-3 relative z-10">
+                        <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-blue-400 drop-shadow-lg" />
+                          Revenu
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="relative z-10">
+                        <div className="text-2xl md:text-3xl font-bold text-blue-400 drop-shadow-lg">
+                          {stats.totalRevenue.toLocaleString('fr-FR')}
                         </div>
+                        <p className="text-xs text-purple-200/90 mt-1 font-medium">XOF</p>
+                      </CardContent>
+                      <div className="absolute top-2 right-2 h-2 w-2 bg-blue-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-blue-400/50"></div>
+                    </Card>
+                  </div>
+
+                  {/* Search & Filters */}
+                  <Card ref={filtersRef} className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        {/* Search */}
+                        <div className="relative flex-1">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="search-payments"
+                            placeholder="Rechercher par transaction, client, commande..."
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
+                            className="pl-9 pr-9 h-10 sm:h-11 bg-background border-purple-200/50 dark:border-purple-800/50 focus:border-purple-500 focus:ring-purple-500/20"
+                          />
+                          {searchInput && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSearchInput('')}
+                              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {/* Keyboard shortcut indicator */}
+                          <div className="absolute right-2.5 sm:right-10 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:flex items-center">
+                            <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0">
+                              ⌘K
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4 mr-2" />
-                            Exporter
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleExportCSV}
+                            disabled={isExporting || !filteredPayments || filteredPayments.length === 0}
+                            className="h-10 sm:h-11 transition-all hover:scale-105"
+                          >
+                            {isExporting ? (
+                              <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
+                            ) : (
+                              <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                            )}
+                            <span className="hidden sm:inline text-xs sm:text-sm">Export CSV</span>
+                            <span className="sm:hidden">CSV</span>
                           </Button>
                         </div>
                       </div>
+                    </CardContent>
+                  </Card>
 
-                      {viewMode === "grid" ? (
-                        <div ref={paymentsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6" role="region" aria-label="Liste des paiements">
-                          {filteredPayments.map((payment) => (
-                            <PaymentCardDashboard
-                              key={payment.id}
-                              payment={payment}
-                              onEdit={() => {/* TODO: Implement edit */}}
-                              onDelete={() => setDeletingPaymentId(payment.id)}
-                              onView={() => {/* TODO: Implement view */}}
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <div ref={paymentsRef} className="space-y-3" role="region" aria-label="Liste des paiements">
-                          {filteredPayments.map((payment) => (
-                            <PaymentListView
-                              key={payment.id}
-                              payment={payment}
-                              onEdit={() => {/* TODO: Implement edit */}}
-                              onDelete={() => setDeletingPaymentId(payment.id)}
-                              onView={() => {/* TODO: Implement view */}}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-              </>
-            )}
-          </div>
-        </main>
+                  {/* Tabs - Style MyTemplates - Fully Responsive */}
+                  <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1 w-full grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-1.5 sm:gap-2 sm:inline-flex sm:w-auto">
+                      <TabsTrigger 
+                        value="all" 
+                        className="w-full sm:w-auto gap-1 sm:gap-1.5 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
+                      >
+                        Tous <span className="opacity-80">({stats.total})</span>
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="completed" 
+                        className="w-full sm:w-auto gap-1 sm:gap-1.5 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
+                      >
+                        <span className="hidden sm:inline">Completés</span>
+                        <span className="sm:hidden">OK</span>
+                        <span className="opacity-80">({stats.completed})</span>
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="pending" 
+                        className="w-full sm:w-auto gap-1 sm:gap-1.5 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
+                      >
+                        <span className="hidden sm:inline">En attente</span>
+                        <span className="sm:hidden">Attente</span>
+                        <span className="opacity-80">({stats.pending})</span>
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="failed" 
+                        className="w-full sm:w-auto gap-1 sm:gap-1.5 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
+                      >
+                        <span className="hidden sm:inline">Échoués</span>
+                        <span className="sm:hidden">Erreurs</span>
+                        <span className="opacity-80">({stats.failed})</span>
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="refunded" 
+                        className="w-full sm:w-auto gap-1 sm:gap-1.5 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
+                      >
+                        <span className="hidden sm:inline">Remboursés</span>
+                        <span className="sm:hidden">Rem.</span>
+                        <span className="opacity-80">({payments?.filter((p) => p.status === 'refunded').length || 0})</span>
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value={activeTab} className="mt-6">
+                      <div ref={paymentsRef} className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
+                        {filteredPayments.length === 0 ? (
+                          <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50">
+                            <CardContent className="py-12 text-center">
+                              <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                              <h3 className="text-lg font-semibold mb-2">Aucun paiement trouvé</h3>
+                              <p className="text-muted-foreground mb-4">
+                                Aucun paiement ne correspond à vos critères de recherche
+                              </p>
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setSearchInput('');
+                                  setActiveTab('all');
+                                }}
+                              >
+                                Effacer les filtres
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        ) : (
+                          <>
+                            <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+                              <p className="text-sm text-muted-foreground">
+                                {filteredPayments.length} paiement{filteredPayments.length > 1 ? 's' : ''} trouvé{filteredPayments.length > 1 ? 's' : ''}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setViewMode('grid')}
+                                  className={cn(
+                                    'h-9 transition-all',
+                                    viewMode === 'grid' && 'bg-purple-100 dark:bg-purple-900 border-purple-500'
+                                  )}
+                                >
+                                  Grille
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setViewMode('list')}
+                                  className={cn(
+                                    'h-9 transition-all',
+                                    viewMode === 'list' && 'bg-purple-100 dark:bg-purple-900 border-purple-500'
+                                  )}
+                                >
+                                  Liste
+                                </Button>
+                              </div>
+                            </div>
+
+                            {viewMode === 'grid' ? (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {filteredPayments.map((payment, index) => (
+                                  <div
+                                    key={payment.id}
+                                    className="animate-in fade-in slide-in-from-left-4"
+                                    style={{ animationDelay: `${index * 50}ms` }}
+                                  >
+                                    <PaymentCardDashboard
+                                      payment={payment}
+                                      onEdit={() => {/* TODO */}}
+                                      onDelete={() => {/* TODO */}}
+                                      onView={() => {/* TODO */}}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="space-y-3">
+                                {filteredPayments.map((payment, index) => (
+                                  <div
+                                    key={payment.id}
+                                    className="animate-in fade-in slide-in-from-left-4"
+                                    style={{ animationDelay: `${index * 50}ms` }}
+                                  >
+                                    <PaymentListView
+                                      payment={payment}
+                                      onEdit={() => {/* TODO */}}
+                                      onDelete={() => {/* TODO */}}
+                                      onView={() => {/* TODO */}}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </>
+              )}
+            </div>
+          </main>
         </div>
       </div>
 
+      {/* Create Payment Dialog */}
       {store && (
         <CreatePaymentDialog
-          open={isCreateOpen}
-          onOpenChange={setIsCreateOpen}
+          open={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
           storeId={store.id}
           onPaymentCreated={refetch}
         />
       )}
-
-      <AlertDialog open={!!deletingPaymentId} onOpenChange={(open) => !open && setDeletingPaymentId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer ce paiement ? Cette action est irréversible.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
-              Supprimer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </SidebarProvider>
   );
-};
-
-export default Payments;
+}
