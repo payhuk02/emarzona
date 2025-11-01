@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '@/hooks/useStore';
 import { usePayments, Payment } from '@/hooks/usePayments';
-import { CreatePaymentDialog } from '@/components/payments/CreatePaymentDialog';
+import CreatePaymentDialog from '@/components/payments/CreatePaymentDialog';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
