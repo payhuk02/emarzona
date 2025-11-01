@@ -546,73 +546,90 @@ export default function BookingsManagement() {
             </div>
           </div>
 
-          {/* Stats Cards avec animations */}
+          {/* Stats Cards avec animations - Design Violet Professionnel */}
           <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
-            <Card className="border-2 hover:border-primary/50 transition-all hover:shadow-lg hover:scale-105 bg-gradient-to-br from-background to-muted/50">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4" />
+            {/* Carte Total */}
+            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-purple-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
+              {/* Effet de brillance au hover */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <CardHeader className="pb-3 relative z-10">
+                <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-purple-200" />
                   Total
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl md:text-3xl font-bold">{stats.total}</div>
-                <p className="text-xs text-muted-foreground mt-1">réservations</p>
+              <CardContent className="relative z-10">
+                <div className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">{stats.total}</div>
+                <p className="text-xs text-purple-200/90 mt-1 font-medium">réservations</p>
               </CardContent>
+              {/* Point lumineux décoratif */}
+              <div className="absolute top-2 right-2 h-2 w-2 bg-purple-300 rounded-full opacity-60 group-hover:opacity-100 transition-opacity"></div>
             </Card>
 
-            <Card className="border-2 hover:border-green-500/50 transition-all hover:shadow-lg hover:scale-105 bg-gradient-to-br from-green-50/50 to-background dark:from-green-950/20">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+            {/* Carte Confirmées */}
+            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-green-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <CardHeader className="pb-3 relative z-10">
+                <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-400 drop-shadow-lg" />
                   Confirmées
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl md:text-3xl font-bold text-green-600">{stats.confirmed}</div>
-                <p className="text-xs text-muted-foreground mt-1">réservations</p>
+              <CardContent className="relative z-10">
+                <div className="text-2xl md:text-3xl font-bold text-green-400 drop-shadow-lg">{stats.confirmed}</div>
+                <p className="text-xs text-purple-200/90 mt-1 font-medium">réservations</p>
               </CardContent>
+              <div className="absolute top-2 right-2 h-2 w-2 bg-green-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-green-400/50"></div>
             </Card>
 
-            <Card className="border-2 hover:border-yellow-500/50 transition-all hover:shadow-lg hover:scale-105 bg-gradient-to-br from-yellow-50/50 to-background dark:from-yellow-950/20">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-yellow-600" />
+            {/* Carte En attente */}
+            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-yellow-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-yellow-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <CardHeader className="pb-3 relative z-10">
+                <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-yellow-400 drop-shadow-lg" />
                   En attente
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl md:text-3xl font-bold text-yellow-600">{stats.pending}</div>
-                <p className="text-xs text-muted-foreground mt-1">réservations</p>
+              <CardContent className="relative z-10">
+                <div className="text-2xl md:text-3xl font-bold text-yellow-400 drop-shadow-lg">{stats.pending}</div>
+                <p className="text-xs text-purple-200/90 mt-1 font-medium">réservations</p>
               </CardContent>
+              <div className="absolute top-2 right-2 h-2 w-2 bg-yellow-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-yellow-400/50"></div>
             </Card>
 
-            <Card className="border-2 hover:border-red-500/50 transition-all hover:shadow-lg hover:scale-105 bg-gradient-to-br from-red-50/50 to-background dark:from-red-950/20">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <XCircle className="h-4 w-4 text-red-600" />
+            {/* Carte Annulées */}
+            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-red-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <CardHeader className="pb-3 relative z-10">
+                <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
+                  <XCircle className="h-4 w-4 text-red-400 drop-shadow-lg" />
                   Annulées
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl md:text-3xl font-bold text-red-600">{stats.cancelled}</div>
-                <p className="text-xs text-muted-foreground mt-1">réservations</p>
+              <CardContent className="relative z-10">
+                <div className="text-2xl md:text-3xl font-bold text-red-400 drop-shadow-lg">{stats.cancelled}</div>
+                <p className="text-xs text-purple-200/90 mt-1 font-medium">réservations</p>
               </CardContent>
+              <div className="absolute top-2 right-2 h-2 w-2 bg-red-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-red-400/50"></div>
             </Card>
 
-            <Card className="border-2 hover:border-blue-500/50 transition-all hover:shadow-lg hover:scale-105 bg-gradient-to-br from-blue-50/50 to-background dark:from-blue-950/20">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-blue-600" />
+            {/* Carte Revenu */}
+            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-blue-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <CardHeader className="pb-3 relative z-10">
+                <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-blue-400 drop-shadow-lg" />
                   Revenu
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl md:text-3xl font-bold text-blue-600">
+              <CardContent className="relative z-10">
+                <div className="text-2xl md:text-3xl font-bold text-blue-400 drop-shadow-lg">
                   {stats.totalRevenue.toLocaleString('fr-FR')}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">XOF</p>
+                <p className="text-xs text-purple-200/90 mt-1 font-medium">XOF</p>
               </CardContent>
+              <div className="absolute top-2 right-2 h-2 w-2 bg-blue-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-blue-400/50"></div>
             </Card>
           </div>
 
