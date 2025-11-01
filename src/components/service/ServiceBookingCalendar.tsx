@@ -284,19 +284,34 @@ export const ServiceBookingCalendar = ({
         <div className="flex items-center justify-between flex-wrap gap-4">
           {/* Navigation */}
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={goToBack}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={goToBack}
+              className="border-foreground/20 text-foreground hover:bg-foreground/10 hover:text-foreground font-medium"
+            >
               ← Préc.
             </Button>
-            <Button variant="outline" size="sm" onClick={goToToday}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={goToToday}
+              className="border-foreground/20 text-foreground hover:bg-foreground/10 hover:text-foreground font-medium"
+            >
               Aujourd'hui
             </Button>
-            <Button variant="outline" size="sm" onClick={goToNext}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={goToNext}
+              className="border-foreground/20 text-foreground hover:bg-foreground/10 hover:text-foreground font-medium"
+            >
               Suiv. →
             </Button>
           </div>
 
           {/* Label */}
-          <div className="text-lg font-semibold">
+          <div className="text-lg font-semibold text-foreground">
             {label()}
           </div>
 
@@ -308,6 +323,11 @@ export const ServiceBookingCalendar = ({
                 variant={toolbar.view === v ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => toolbar.onView(v)}
+                className={
+                  toolbar.view === v
+                    ? 'font-medium'
+                    : 'border-foreground/20 text-foreground hover:bg-foreground/10 hover:text-foreground font-medium'
+                }
               >
                 {v === 'month' ? 'Mois' : v === 'week' ? 'Semaine' : 'Jour'}
               </Button>
