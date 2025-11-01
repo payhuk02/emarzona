@@ -28,6 +28,7 @@ import {
   Loader2,
   Warehouse,
   TrendingUp,
+  Sparkles,
 } from 'lucide-react';
 import {
   useInventoryItems,
@@ -276,124 +277,83 @@ export default function InventoryDashboard() {
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
-        <main className="flex-1 p-4 md:p-6 space-y-6 overflow-y-auto">
-          {/* Header avec animation */}
-          <div ref={headerRef} className="space-y-2 animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 via-purple-500 to-purple-600 bg-clip-text text-transparent">
+        <main className="flex-1 overflow-auto">
+          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+          {/* Header avec animation - Style MyTemplates */}
+          <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
+            <div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                  <Package className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                </div>
+                <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   Gestion d'Inventaire
-                </h1>
-                <p className="text-muted-foreground mt-2 text-sm md:text-base">
-                  Suivez et gérez vos stocks en temps réel
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={handleExportCSV}
-                  variant="outline"
-                  size="sm"
-                  disabled={isExporting || filteredItems.length === 0}
-                  className="transition-all hover:scale-105"
-                >
-                  {isExporting ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Download className="h-4 w-4 mr-2" />
-                  )}
-                  <span className="hidden sm:inline">Export CSV</span>
-                </Button>
-                <Button
-                  onClick={handleRefresh}
-                  size="sm"
-                  className="transition-all hover:scale-105"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Rafraîchir</span>
-                </Button>
-              </div>
+                </span>
+              </h1>
+              <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                Suivez et gérez vos stocks en temps réel
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handleExportCSV}
+                variant="outline"
+                size="sm"
+                disabled={isExporting || filteredItems.length === 0}
+                className="h-9 sm:h-10 transition-all hover:scale-105"
+              >
+                {isExporting ? (
+                  <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
+                ) : (
+                  <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                )}
+                <span className="hidden sm:inline text-xs sm:text-sm">Export CSV</span>
+                <span className="sm:hidden text-xs">Export</span>
+              </Button>
+              <Button
+                onClick={handleRefresh}
+                size="sm"
+                className="h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                <span className="hidden sm:inline text-xs sm:text-sm">Rafraîchir</span>
+              </Button>
             </div>
           </div>
 
-          {/* Stats Cards avec animations - Design Violet Professionnel */}
-          <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
-            {/* Carte Articles */}
-            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-purple-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <CardContent className="p-4 md:p-6 relative z-10">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs md:text-sm font-semibold text-purple-100 mb-1">Articles</p>
-                    <p className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">{stats.total_items}</p>
-                  </div>
-                  <Package className="h-6 w-6 md:h-8 md:w-8 text-purple-200 drop-shadow-lg" />
-                </div>
-              </CardContent>
-              <div className="absolute top-2 right-2 h-2 w-2 bg-purple-300 rounded-full opacity-60 group-hover:opacity-100 transition-opacity"></div>
-            </Card>
-
-            {/* Carte Quantité Totale */}
-            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-blue-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <CardContent className="p-4 md:p-6 relative z-10">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs md:text-sm font-semibold text-purple-100 mb-1">Quantité Totale</p>
-                    <p className="text-2xl md:text-3xl font-bold text-blue-400 drop-shadow-lg">{stats.total_quantity}</p>
-                  </div>
-                  <BarChart3 className="h-6 w-6 md:h-8 md:w-8 text-blue-400 drop-shadow-lg" />
-                </div>
-              </CardContent>
-              <div className="absolute top-2 right-2 h-2 w-2 bg-blue-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-blue-400/50"></div>
-            </Card>
-
-            {/* Carte Valeur Totale */}
-            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-green-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <CardContent className="p-4 md:p-6 relative z-10">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs md:text-sm font-semibold text-purple-100 mb-1">Valeur Totale</p>
-                    <p className="text-2xl md:text-3xl font-bold text-green-400 drop-shadow-lg">
-                      {stats.total_value.toLocaleString('fr-FR')}
-                    </p>
-                    <p className="text-xs text-purple-200/90 mt-1 font-medium">XOF</p>
-                  </div>
-                  <DollarSign className="h-6 w-6 md:h-8 md:w-8 text-green-400 drop-shadow-lg" />
-                </div>
-              </CardContent>
-              <div className="absolute top-2 right-2 h-2 w-2 bg-green-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-green-400/50"></div>
-            </Card>
-
-            {/* Carte Stock Faible */}
-            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-yellow-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-yellow-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <CardContent className="p-4 md:p-6 relative z-10">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs md:text-sm font-semibold text-purple-100 mb-1">Stock Faible</p>
-                    <p className="text-2xl md:text-3xl font-bold text-yellow-400 drop-shadow-lg">{stats.low_stock_count}</p>
-                  </div>
-                  <AlertTriangle className="h-6 w-6 md:h-8 md:w-8 text-yellow-400 drop-shadow-lg" />
-                </div>
-              </CardContent>
-              <div className="absolute top-2 right-2 h-2 w-2 bg-yellow-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-yellow-400/50"></div>
-            </Card>
-
-            {/* Carte Rupture */}
-            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-red-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <CardContent className="p-4 md:p-6 relative z-10">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs md:text-sm font-semibold text-purple-100 mb-1">Rupture</p>
-                    <p className="text-2xl md:text-3xl font-bold text-red-400 drop-shadow-lg">{stats.out_of_stock_count}</p>
-                  </div>
-                  <AlertTriangle className="h-6 w-6 md:h-8 md:w-8 text-red-400 drop-shadow-lg" />
-                </div>
-              </CardContent>
-              <div className="absolute top-2 right-2 h-2 w-2 bg-red-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-red-400/50"></div>
-            </Card>
+          {/* Stats Cards - Style MyTemplates (Purple-Pink Gradient) */}
+          <div 
+            ref={statsRef}
+            className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 animate-in fade-in slide-in-from-bottom-4 duration-700"
+          >
+            {[
+              { label: 'Articles', value: stats.total_items, icon: Package, color: "from-purple-600 to-pink-600" },
+              { label: 'Quantité Totale', value: stats.total_quantity, icon: BarChart3, color: "from-blue-600 to-cyan-600" },
+              { label: 'Valeur Totale', value: `${stats.total_value.toLocaleString('fr-FR')} XOF`, icon: DollarSign, color: "from-green-600 to-emerald-600" },
+              { label: 'Stock Faible', value: stats.low_stock_count, icon: AlertTriangle, color: "from-yellow-600 to-orange-600" },
+              { label: 'Rupture', value: stats.out_of_stock_count, icon: AlertTriangle, color: "from-red-600 to-rose-600" },
+            ].map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <Card
+                  key={stat.label}
+                  className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
+                    <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
+                      <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      {stat.label}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-3 sm:p-4 pt-0">
+                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                      {stat.value}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
           {/* Alerts */}
@@ -409,54 +369,68 @@ export default function InventoryDashboard() {
             </Alert>
           )}
 
-          {/* Search & Filters avec animation */}
-          <div ref={filtersRef} className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500 delay-200">
-            <Card>
-              <CardContent className="p-4 md:p-6">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="search-inventory"
-                      placeholder="Rechercher par nom de produit ou SKU... ⌘K"
-                      value={searchInput}
-                      onChange={(e) => setSearchInput(e.target.value)}
-                      className="pl-10 pr-10 w-full"
-                    />
-                    {searchInput && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
-                        onClick={() => setSearchInput('')}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
+          {/* Search & Filters - Style MyTemplates */}
+          <Card ref={filtersRef} className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                {/* Search */}
+                <div className="flex-1 relative">
+                  <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
+                  <Input
+                    id="search-inventory"
+                    placeholder="Rechercher par nom de produit ou SKU..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    className="pl-8 sm:pl-10 pr-8 sm:pr-20 h-9 sm:h-10 text-xs sm:text-sm"
+                    aria-label="Rechercher"
+                  />
+                  {searchInput && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 sm:h-8 sm:w-8"
+                      onClick={() => setSearchInput('')}
+                      aria-label="Effacer"
+                    >
+                      <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                    </Button>
+                  )}
+                  {/* Keyboard shortcut indicator */}
+                  <div className="absolute right-2.5 sm:right-10 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:flex items-center">
+                    <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0">
+                      ⌘K
+                    </Badge>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Raccourcis clavier */}
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Keyboard className="h-3 w-3" />
-              <span className="hidden sm:inline">Raccourcis: ⌘K (recherche), Esc (effacer)</span>
-            </div>
-
-            {/* Tabs */}
+            {/* Tabs - Style MyTemplates */}
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="w-full sm:w-auto">
-                <TabsTrigger value="all" className="flex-1 sm:flex-none">
+              <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1 w-full sm:w-auto">
+                <TabsTrigger 
+                  value="all" 
+                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                >
                   Tous ({stats.total_items})
                 </TabsTrigger>
-                <TabsTrigger value="ok" className="flex-1 sm:flex-none">
+                <TabsTrigger 
+                  value="ok" 
+                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                >
                   Stock OK
                 </TabsTrigger>
-                <TabsTrigger value="low" className="flex-1 sm:flex-none">
+                <TabsTrigger 
+                  value="low" 
+                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                >
                   Stock Faible ({stats.low_stock_count})
                 </TabsTrigger>
-                <TabsTrigger value="out" className="flex-1 sm:flex-none">
+                <TabsTrigger 
+                  value="out" 
+                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                >
                   Rupture ({stats.out_of_stock_count})
                 </TabsTrigger>
               </TabsList>
@@ -501,6 +475,7 @@ export default function InventoryDashboard() {
             onOpenChange={setAdjustDialogOpen}
             item={selectedItem}
           />
+          </div>
         </main>
       </div>
     </SidebarProvider>

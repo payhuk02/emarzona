@@ -5,8 +5,7 @@
  */
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -14,8 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -34,14 +33,12 @@ import {
   Calendar,
   Clock,
   Users,
-  Filter,
   Download,
   RefreshCw,
   Search,
   X,
   Grid3x3,
   List,
-  Keyboard,
   CheckCircle2,
   XCircle,
   AlertCircle,
@@ -52,12 +49,28 @@ import {
   Phone,
   Mail,
   Loader2,
-  Eye,
-  Edit,
-  Trash2,
   Plus,
 } from 'lucide-react';
 import { ServiceBookingCalendar, BookingEvent } from '@/components/service';
+
+// Extension du type BookingEvent pour inclure email et phone
+interface ExtendedBookingEventResource {
+  customerId?: string;
+  customerName?: string;
+  staffId?: string;
+  staffName?: string;
+  participants?: number;
+  status?: string;
+  price?: number;
+  customerEmail?: string;
+  customerPhone?: string;
+  bookingDate?: string;
+  bookingTime?: string;
+}
+
+interface ExtendedBookingEvent extends BookingEvent {
+  resource?: ExtendedBookingEventResource;
+}
 import { useToast } from '@/hooks/use-toast';
 import { format, addHours, startOfDay, endOfDay, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -75,19 +88,17 @@ type ViewMode = 'grid' | 'list';
 type CalendarView = 'month' | 'week' | 'day';
 
 export default function BookingsManagement() {
-  const { t } = useTranslation();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   
   // State management
-  const [selectedEvent, setSelectedEvent] = useState<BookingEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<ExtendedBookingEvent | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const debouncedSearch = useDebounce(searchInput, 300);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [calendarView, setCalendarView] = useState<CalendarView>('week');
+  const [calendarView] = useState<CalendarView>('week');
   const [error, setError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -110,18 +121,32 @@ export default function BookingsManagement() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Récupérer le store de l'utilisateur
+      // Récupérer le store de l'utilisateur via stores
       const { data: profile } = await supabase
         .from('profiles')
-        .select('store_id')
+        .select('id')
         .eq('user_id', user.id)
         .single();
 
-      if (!profile?.store_id) {
+      if (!profile) {
         return [];
       }
 
-      const { data, error } = await supabase
+      // Récupérer le store_id depuis stores table
+      const { data: storeData } = await supabase
+        .from('stores')
+        .select('id')
+        .eq('owner_id', profile.id)
+        .maybeSingle();
+
+      const storeId = storeData?.id;
+
+      if (!storeId) {
+        return [];
+      }
+
+      // Utiliser any pour les tables non typées dans Supabase
+      const { data, error } = await (supabase as any)
         .from('service_bookings')
         .select(`
           *,
@@ -141,7 +166,7 @@ export default function BookingsManagement() {
 
       // Filtrer par store_id via service_products
       const filtered = data?.filter((booking: any) => {
-        return booking.service_product?.some((sp: any) => sp.store_id === profile.store_id);
+        return booking.service_product?.some((sp: any) => sp.store_id === storeId);
       }) || [];
 
       return filtered;
@@ -154,7 +179,8 @@ export default function BookingsManagement() {
   const { data: availabilities } = useQuery({
     queryKey: ['service-availabilities'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Utiliser any pour les tables non typées dans Supabase
+      const { data, error } = await (supabase as any)
         .from('service_availability')
         .select(`
           *,
@@ -174,14 +200,26 @@ export default function BookingsManagement() {
   });
 
   // Transform bookings to calendar events
-  const events = useMemo((): BookingEvent[] => {
-    const bookingEvents: BookingEvent[] = [];
+  const events = useMemo((): ExtendedBookingEvent[] => {
+    const bookingEvents: ExtendedBookingEvent[] = [];
 
     if (bookings) {
       bookings.forEach((booking: any) => {
         try {
           const start = parseISO(`${booking.booking_date}T${booking.start_time || booking.booking_time || '00:00:00'}`);
           const end = parseISO(`${booking.booking_date}T${booking.end_time || booking.booking_time || '00:00:00'}`);
+
+          const eventResource: ExtendedBookingEventResource = {
+            customerId: booking.customer_id,
+            customerName: booking.customer?.full_name,
+            customerEmail: booking.customer?.email,
+            customerPhone: booking.customer?.phone,
+            participants: booking.participants_count || booking.participants || 1,
+            status: booking.status,
+            price: booking.total_price,
+            bookingDate: booking.booking_date,
+            bookingTime: booking.start_time || booking.booking_time,
+          };
 
           bookingEvents.push({
             id: booking.id,
@@ -190,17 +228,7 @@ export default function BookingsManagement() {
             end,
             type: booking.status === 'confirmed' || booking.status === 'completed' ? 'booked' : 
                   booking.status === 'cancelled' ? 'unavailable' : 'available',
-            resource: {
-              customerId: booking.customer_id,
-              customerName: booking.customer?.full_name,
-              customerEmail: booking.customer?.email,
-              customerPhone: booking.customer?.phone,
-              participants: booking.participants_count || booking.participants || 1,
-              status: booking.status,
-              price: booking.total_price,
-              bookingDate: booking.booking_date,
-              bookingTime: booking.start_time || booking.booking_time,
-            },
+            resource: eventResource,
           });
         } catch (err) {
           logger.error('Error parsing booking date', { booking, error: err });
@@ -306,7 +334,7 @@ export default function BookingsManagement() {
   }, [bookings]);
 
   // Handle event click
-  const handleSelectEvent = useCallback((event: BookingEvent) => {
+  const handleSelectEvent = useCallback((event: ExtendedBookingEvent) => {
     setSelectedEvent(event);
     setIsDialogOpen(true);
     logger.info('Booking selected', { bookingId: event.id });
@@ -435,7 +463,7 @@ export default function BookingsManagement() {
 
       const csvContent = [
         headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ...rows.map((row: any[]) => row.map((cell: any) => `"${cell}"`).join(','))
       ].join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -520,214 +548,172 @@ export default function BookingsManagement() {
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
-        <main className="flex-1 p-4 md:p-6 space-y-6 overflow-y-auto">
-          {/* Header avec animation */}
-          <div ref={headerRef} className="space-y-2 animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
-                  Gestion des réservations
-                </h1>
-                <p className="text-muted-foreground mt-2 text-sm md:text-base">
-                  Gérez vos réservations de services et disponibilités
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => refetch()}
-                  variant="outline"
-                  size="sm"
-                  className="transition-all hover:scale-105"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Actualiser
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats Cards avec animations - Design Violet Professionnel */}
-          <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
-            {/* Carte Total */}
-            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-purple-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
-              {/* Effet de brillance au hover */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <CardHeader className="pb-3 relative z-10">
-                <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4 text-purple-200" />
-                  Total
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">{stats.total}</div>
-                <p className="text-xs text-purple-200/90 mt-1 font-medium">réservations</p>
-              </CardContent>
-              {/* Point lumineux décoratif */}
-              <div className="absolute top-2 right-2 h-2 w-2 bg-purple-300 rounded-full opacity-60 group-hover:opacity-100 transition-opacity"></div>
-            </Card>
-
-            {/* Carte Confirmées */}
-            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-green-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <CardHeader className="pb-3 relative z-10">
-                <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-400 drop-shadow-lg" />
-                  Confirmées
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-2xl md:text-3xl font-bold text-green-400 drop-shadow-lg">{stats.confirmed}</div>
-                <p className="text-xs text-purple-200/90 mt-1 font-medium">réservations</p>
-              </CardContent>
-              <div className="absolute top-2 right-2 h-2 w-2 bg-green-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-green-400/50"></div>
-            </Card>
-
-            {/* Carte En attente */}
-            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-yellow-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-yellow-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <CardHeader className="pb-3 relative z-10">
-                <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-yellow-400 drop-shadow-lg" />
-                  En attente
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-2xl md:text-3xl font-bold text-yellow-400 drop-shadow-lg">{stats.pending}</div>
-                <p className="text-xs text-purple-200/90 mt-1 font-medium">réservations</p>
-              </CardContent>
-              <div className="absolute top-2 right-2 h-2 w-2 bg-yellow-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-yellow-400/50"></div>
-            </Card>
-
-            {/* Carte Annulées */}
-            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-red-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <CardHeader className="pb-3 relative z-10">
-                <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
-                  <XCircle className="h-4 w-4 text-red-400 drop-shadow-lg" />
-                  Annulées
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-2xl md:text-3xl font-bold text-red-400 drop-shadow-lg">{stats.cancelled}</div>
-                <p className="text-xs text-purple-200/90 mt-1 font-medium">réservations</p>
-              </CardContent>
-              <div className="absolute top-2 right-2 h-2 w-2 bg-red-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-red-400/50"></div>
-            </Card>
-
-            {/* Carte Revenu */}
-            <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-blue-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <CardHeader className="pb-3 relative z-10">
-                <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-blue-400 drop-shadow-lg" />
-                  Revenu
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-2xl md:text-3xl font-bold text-blue-400 drop-shadow-lg">
-                  {stats.totalRevenue.toLocaleString('fr-FR')}
+        <main className="flex-1 overflow-auto">
+          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+          {/* Header avec animation - Style MyTemplates */}
+          <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                  <Calendar className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                 </div>
-                <p className="text-xs text-purple-200/90 mt-1 font-medium">XOF</p>
-              </CardContent>
-              <div className="absolute top-2 right-2 h-2 w-2 bg-blue-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-blue-400/50"></div>
-            </Card>
-          </div>
-
-          {/* Filters et Actions avec animation */}
-          <div ref={filtersRef} className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between animate-in fade-in slide-in-from-right-4 duration-500 delay-200">
-            {/* Recherche */}
-            <div className="relative flex-1 w-full sm:max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="search-input"
-                placeholder="Rechercher (client, service, email...) ⌘K"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-10 pr-10 w-full"
-              />
-              {searchInput && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
-                  onClick={() => setSearchInput('')}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
+                <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Gestion des réservations
+                </span>
+              </h1>
+              <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+              Gérez vos réservations de services et disponibilités
+            </p>
             </div>
-
-            {/* Filtres */}
-            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[140px]">
-                  <SelectValue placeholder="Statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les statuts</SelectItem>
-                  <SelectItem value="pending">En attente</SelectItem>
-                  <SelectItem value="confirmed">Confirmées</SelectItem>
-                  <SelectItem value="completed">Terminées</SelectItem>
-                  <SelectItem value="cancelled">Annulées</SelectItem>
-                  <SelectItem value="no_show">Absents</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={dateFilter} onValueChange={setDateFilter}>
-                <SelectTrigger className="w-full sm:w-[140px]">
-                  <SelectValue placeholder="Période" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Toutes les dates</SelectItem>
-                  <SelectItem value="today">Aujourd'hui</SelectItem>
-                  <SelectItem value="week">Cette semaine</SelectItem>
-                  <SelectItem value="month">Ce mois</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Mode vue */}
-              <div className="flex items-center border rounded-md">
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="rounded-r-none"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="rounded-l-none border-l"
-                >
-                  <Grid3x3 className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Actions */}
+            <div className="flex items-center gap-2">
               <Button
-                onClick={handleExportCSV}
-                variant="outline"
+                onClick={() => refetch()}
                 size="sm"
-                disabled={isExporting || filteredBookings.length === 0}
-                className="transition-all hover:scale-105"
+                className="h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
-                {isExporting ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4 mr-2" />
-                )}
-                <span className="hidden sm:inline">Exporter</span>
+                <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                <span className="hidden sm:inline text-xs sm:text-sm">Actualiser</span>
               </Button>
             </div>
           </div>
 
-          {/* Raccourcis clavier */}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground animate-in fade-in duration-500 delay-300">
-            <Keyboard className="h-3 w-3" />
-            <span className="hidden sm:inline">Raccourcis: ⌘K (recherche), ⌘G (vue)</span>
+          {/* Stats Cards - Style MyTemplates (Purple-Pink Gradient) */}
+          <div 
+            ref={statsRef}
+            className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 animate-in fade-in slide-in-from-bottom-4 duration-700"
+          >
+            {[
+              { label: 'Total', value: stats.total, icon: CalendarDays, color: "from-purple-600 to-pink-600", subtitle: 'réservations' },
+              { label: 'Confirmées', value: stats.confirmed, icon: CheckCircle2, color: "from-green-600 to-emerald-600", subtitle: 'réservations' },
+              { label: 'En attente', value: stats.pending, icon: AlertCircle, color: "from-yellow-600 to-orange-600", subtitle: 'réservations' },
+              { label: 'Annulées', value: stats.cancelled, icon: XCircle, color: "from-red-600 to-rose-600", subtitle: 'réservations' },
+              { label: 'Revenu', value: `${stats.totalRevenue.toLocaleString('fr-FR')} XOF`, icon: DollarSign, color: "from-blue-600 to-cyan-600", subtitle: '' },
+            ].map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <Card
+                  key={stat.label}
+                  className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
+                    <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
+                      <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      {stat.label}
+                </CardTitle>
+              </CardHeader>
+                  <CardContent className="p-3 sm:p-4 pt-0">
+                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                      {stat.value}
+                    </div>
+                    {stat.subtitle && (
+                      <p className="text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
+                    )}
+              </CardContent>
+            </Card>
+              );
+            })}
           </div>
+
+          {/* Filters et Actions - Style MyTemplates */}
+          <Card ref={filtersRef} className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                {/* Recherche */}
+                <div className="flex-1 relative">
+                  <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
+                  <Input
+                    id="search-input"
+                    placeholder="Rechercher (client, service, email...)"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    className="pl-8 sm:pl-10 pr-8 sm:pr-20 h-9 sm:h-10 text-xs sm:text-sm"
+                    aria-label="Rechercher"
+                  />
+                  {searchInput && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 sm:h-8 sm:w-8"
+                      onClick={() => setSearchInput('')}
+                      aria-label="Effacer"
+                    >
+                      <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                    </Button>
+                  )}
+                  {/* Keyboard shortcut indicator */}
+                  <div className="absolute right-2.5 sm:right-10 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:flex items-center">
+                    <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0">
+                      ⌘K
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Filtres */}
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full sm:w-[160px] h-9 sm:h-10 text-xs sm:text-sm">
+                    <SelectValue placeholder="Statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les statuts</SelectItem>
+                    <SelectItem value="pending">En attente</SelectItem>
+                    <SelectItem value="confirmed">Confirmées</SelectItem>
+                    <SelectItem value="completed">Terminées</SelectItem>
+                    <SelectItem value="cancelled">Annulées</SelectItem>
+                    <SelectItem value="no_show">Absents</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={dateFilter} onValueChange={setDateFilter}>
+                  <SelectTrigger className="w-full sm:w-[160px] h-9 sm:h-10 text-xs sm:text-sm">
+                    <SelectValue placeholder="Période" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes les dates</SelectItem>
+                    <SelectItem value="today">Aujourd'hui</SelectItem>
+                    <SelectItem value="week">Cette semaine</SelectItem>
+                    <SelectItem value="month">Ce mois</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Mode vue */}
+                <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
+                  <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1">
+                    <TabsTrigger 
+                      value="list" 
+                      className="gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                    >
+                      <List className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">Liste</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="grid" 
+                      className="gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                    >
+                      <Grid3x3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">Grille</span>
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+
+          {/* Actions */}
+                <Button
+                  onClick={handleExportCSV}
+                  variant="outline"
+                  size="sm"
+                  disabled={isExporting || filteredBookings.length === 0}
+                  className="h-9 sm:h-10 transition-all hover:scale-105"
+                >
+                  {isExporting ? (
+                    <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
+                  ) : (
+                    <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                  )}
+                  <span className="hidden sm:inline text-xs sm:text-sm">Exporter</span>
+            </Button>
+          </div>
+            </CardContent>
+          </Card>
 
           {/* Error Alert */}
           {error && (
@@ -740,14 +726,14 @@ export default function BookingsManagement() {
           {/* Calendar/List View */}
           <div ref={calendarRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
             {viewMode === 'grid' ? (
-              <ServiceBookingCalendar
-                events={events}
-                onSelectEvent={handleSelectEvent}
-                onSelectSlot={handleSelectSlot}
+          <ServiceBookingCalendar
+            events={events}
+            onSelectEvent={handleSelectEvent}
+            onSelectSlot={handleSelectSlot}
                 defaultView={calendarView}
-                enableSelection={true}
-                showLegend={true}
-              />
+            enableSelection={true}
+            showLegend={true}
+          />
             ) : (
               <Card>
                 <CardHeader>
@@ -1039,6 +1025,7 @@ export default function BookingsManagement() {
               )}
             </DialogContent>
           </Dialog>
+          </div>
         </main>
       </div>
     </SidebarProvider>
