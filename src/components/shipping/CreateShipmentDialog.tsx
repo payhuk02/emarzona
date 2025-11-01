@@ -2,7 +2,7 @@
  * Create Shipment Dialog
  * Date: 28 octobre 2025
  * 
- * Dialog pour créer une nouvelle expédition FedEx
+ * Dialog pour créer une nouvelle expédition
  */
 
 import { useState } from 'react';
@@ -26,6 +26,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCreateFedexShipment } from '@/hooks/shipping/useFedexShipping';
 import { Package, MapPin, Settings } from 'lucide-react';
+import { COUNTRIES } from '@/lib/countries';
 
 interface CreateShipmentDialogProps {
   open: boolean;
@@ -137,7 +138,7 @@ export function CreateShipmentDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            Nouvelle expédition FedEx
+            Nouvelle expédition
           </DialogTitle>
           <DialogDescription>
             Créez une nouvelle expédition et générez l'étiquette d'envoi
@@ -224,11 +225,12 @@ export function CreateShipmentDialog({
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="BF">Burkina Faso</SelectItem>
-                    <SelectItem value="CI">Côte d'Ivoire</SelectItem>
-                    <SelectItem value="SN">Sénégal</SelectItem>
-                    <SelectItem value="ML">Mali</SelectItem>
+                  <SelectContent className="max-h-[300px]">
+                    {COUNTRIES.map((country) => (
+                      <SelectItem key={country.code} value={country.code}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -310,11 +312,12 @@ export function CreateShipmentDialog({
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="BF">Burkina Faso</SelectItem>
-                    <SelectItem value="CI">Côte d'Ivoire</SelectItem>
-                    <SelectItem value="SN">Sénégal</SelectItem>
-                    <SelectItem value="ML">Mali</SelectItem>
+                  <SelectContent className="max-h-[300px]">
+                    {COUNTRIES.map((country) => (
+                      <SelectItem key={country.code} value={country.code}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
