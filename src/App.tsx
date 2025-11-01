@@ -14,6 +14,7 @@ import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 import { CrispChat } from "@/components/chat/CrispChat";
 import { Require2FABanner } from "@/components/auth/Require2FABanner";
 import { AffiliateLinkTracker } from "@/components/affiliate/AffiliateLinkTracker";
+import { ReferralTracker } from "@/components/referral/ReferralTracker";
 import { Suspense, lazy, useEffect } from "react";
 import { initSentry } from "@/lib/sentry";
 import { initWebVitals } from "@/lib/web-vitals";
@@ -184,6 +185,7 @@ const AppContent = () => {
       <Require2FABanner position="top" />
       <ScrollToTop />
       <AffiliateLinkTracker />
+      <ReferralTracker />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* --- Routes publiques --- */}

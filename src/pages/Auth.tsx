@@ -17,6 +17,7 @@ import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { SEOMeta } from "@/components/seo/SEOMeta";
 import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { logger } from "@/lib/logger";
+import { getStoredReferralCode, clearStoredReferralCode } from "@/components/referral/ReferralTracker";
 
 const Auth = () => {
   const { t } = useTranslation();
@@ -162,6 +163,39 @@ const Auth = () => {
       if (signUpError) throw signUpError;
 
       if (data.user) {
+        // Traiter le code de parrainage si présent
+        const referralCode = getStoredReferralCode();
+        if (referralCode && data.user.id) {
+          try {
+            // Trouver le parrain via son code de parrainage
+            const { data: referrerProfile } = await supabase
+              .from('profiles')
+              .select('user_id')
+              .eq('referral_code', referralCode)
+              .single();
+
+            if (referrerProfile && referrerProfile.user_id !== data.user.id) {
+              // Créer la relation de parrainage
+              const { createReferralRelation } = await import('@/lib/referral-helpers');
+              await createReferralRelation(referrerProfile.user_id, data.user.id, referralCode);
+              
+              // Nettoyer le code stocké
+              clearStoredReferralCode();
+              
+              logger.info('Referral relation created on signup', { 
+                referrerId: referrerProfile.user_id, 
+                referredId: data.user.id 
+              });
+            }
+          } catch (referralError: any) {
+            // Ne pas bloquer l'inscription si l'erreur est sur le parrainage
+            logger.error('Error processing referral on signup', { 
+              error: referralError.message,
+              referralCode 
+            });
+          }
+        }
+
         toast({
           title: t('auth.signup.success'),
           description: t('auth.signup.successDescription'),
