@@ -12,15 +12,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  CreditCard,
+import { 
+  CreditCard, 
   Search,
-  Plus,
-  RefreshCw,
-  Download,
+  Plus, 
+  RefreshCw, 
+  Download, 
   X,
   AlertTriangle,
   Loader2,
@@ -28,8 +27,6 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  TrendingUp,
-  Sparkles,
 } from 'lucide-react';
 import { useStore } from '@/hooks/useStore';
 import { usePayments, Payment } from '@/hooks/usePayments';
@@ -57,7 +54,6 @@ export default function Payments() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -177,7 +173,7 @@ export default function Payments() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
+      
       toast({
         title: '✅ Export réussi',
         description: `${filteredPayments.length} paiement(s) exporté(s) en CSV.`,
@@ -261,7 +257,7 @@ export default function Payments() {
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         <AppSidebar />
-
+        
         <div className="flex-1 flex flex-col">
           {/* Header */}
           <div ref={headerRef} className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -309,14 +305,6 @@ export default function Payments() {
 
           <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-background via-background to-purple-50/30 dark:to-purple-950/20">
             <div className="max-w-7xl mx-auto space-y-6">
-              {/* Error Alert */}
-              {error && (
-                <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-4">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
               {/* Empty State */}
               {!paymentsLoading && payments.length === 0 ? (
                 <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50 animate-in fade-in zoom-in duration-500">
@@ -337,13 +325,13 @@ export default function Payments() {
                       size="lg"
                       className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white"
                     >
-                      <Plus className="h-5 w-5 mr-2" />
-                      Créer mon premier paiement
-                    </Button>
+                        <Plus className="h-5 w-5 mr-2" />
+                        Créer mon premier paiement
+                      </Button>
                   </CardContent>
                 </Card>
-              ) : (
-                <>
+            ) : (
+              <>
                   {/* Stats Cards */}
                   <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
                     {/* Carte Total */}
@@ -459,7 +447,7 @@ export default function Payments() {
                               ⌘K
                             </Badge>
                           </div>
-                        </div>
+                  </div>
 
                         {/* Actions */}
                         <div className="flex items-center gap-2">
@@ -528,14 +516,14 @@ export default function Payments() {
 
                     <TabsContent value={activeTab} className="mt-6">
                       <div ref={paymentsRef} className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
-                        {filteredPayments.length === 0 ? (
+                  {filteredPayments.length === 0 ? (
                           <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50">
-                            <CardContent className="py-12 text-center">
-                              <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                              <h3 className="text-lg font-semibold mb-2">Aucun paiement trouvé</h3>
-                              <p className="text-muted-foreground mb-4">
-                                Aucun paiement ne correspond à vos critères de recherche
-                              </p>
+                      <CardContent className="py-12 text-center">
+                        <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold mb-2">Aucun paiement trouvé</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Aucun paiement ne correspond à vos critères de recherche
+                        </p>
                               <Button
                                 variant="outline"
                                 onClick={() => {
@@ -543,14 +531,14 @@ export default function Payments() {
                                   setActiveTab('all');
                                 }}
                               >
-                                Effacer les filtres
-                              </Button>
-                            </CardContent>
-                          </Card>
-                        ) : (
-                          <>
+                          Effacer les filtres
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <>
                             <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
-                              <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground">
                                 {filteredPayments.length} paiement{filteredPayments.length > 1 ? 's' : ''} trouvé{filteredPayments.length > 1 ? 's' : ''}
                               </p>
                               <div className="flex items-center gap-2">
@@ -575,9 +563,9 @@ export default function Payments() {
                                   )}
                                 >
                                   Liste
-                                </Button>
-                              </div>
-                            </div>
+                          </Button>
+                        </div>
+                      </div>
 
                             {viewMode === 'grid' ? (
                               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -587,16 +575,16 @@ export default function Payments() {
                                     className="animate-in fade-in slide-in-from-left-4"
                                     style={{ animationDelay: `${index * 50}ms` }}
                                   >
-                                    <PaymentCardDashboard
-                                      payment={payment}
+                            <PaymentCardDashboard
+                              payment={payment}
                                       onEdit={() => {/* TODO */}}
                                       onDelete={() => {/* TODO */}}
                                       onView={() => {/* TODO */}}
                                     />
                                   </div>
-                                ))}
-                              </div>
-                            ) : (
+                          ))}
+                        </div>
+                      ) : (
                               <div className="space-y-3">
                                 {filteredPayments.map((payment, index) => (
                                   <div
@@ -604,25 +592,25 @@ export default function Payments() {
                                     className="animate-in fade-in slide-in-from-left-4"
                                     style={{ animationDelay: `${index * 50}ms` }}
                                   >
-                                    <PaymentListView
-                                      payment={payment}
+                            <PaymentListView
+                              payment={payment}
                                       onEdit={() => {/* TODO */}}
                                       onDelete={() => {/* TODO */}}
                                       onView={() => {/* TODO */}}
                                     />
                                   </div>
-                                ))}
-                              </div>
-                            )}
-                          </>
-                        )}
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
                       </div>
                     </TabsContent>
                   </Tabs>
-                </>
-              )}
-            </div>
-          </main>
+              </>
+            )}
+          </div>
+        </main>
         </div>
       </div>
 
