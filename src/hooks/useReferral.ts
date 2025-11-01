@@ -152,18 +152,10 @@ export const useReferral = () => {
       
       if (!user) return;
 
+      // Récupérer d'abord la liste des referrals
       const { data: referralsData, error } = await supabase
         .from('referrals')
-        .select(`
-          id,
-          referred_id,
-          created_at,
-          status,
-          referred:referred_id (
-            email,
-            full_name
-          )
-        `)
+        .select('id, referred_id, created_at, status')
         .eq('referrer_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -172,22 +164,53 @@ export const useReferral = () => {
         throw error;
       }
 
-      // Enrichir avec les statistiques de base
-      const referralsWithStats = (referralsData || []).map((ref: any) => {
+      if (!referralsData || referralsData.length === 0) {
+        setReferrals([]);
+        return;
+      }
+
+      // Récupérer les profils des filleuls
+      const referredIds = referralsData.map((r: any) => r.referred_id);
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, first_name, last_name')
+        .in('user_id', referredIds);
+
+      if (profilesError) {
+        logger.error('Error fetching profiles', { error: profilesError.message });
+        // Continuer même si erreur sur les profils
+      }
+
+      // Créer un map pour accéder rapidement aux profils
+      const profilesMap = new Map();
+      (profilesData || []).forEach((profile: any) => {
+        profilesMap.set(profile.user_id, profile);
+      });
+
+      // Récupérer les emails depuis auth.users via une fonction RPC ou directement
+      // Pour l'instant, on va utiliser les profils disponibles
+      const referralsWithStats = referralsData.map((ref: any) => {
+        const profile = profilesMap.get(ref.referred_id);
+        const fullName = profile
+          ? [profile.first_name, profile.last_name].filter(Boolean).join(' ') || profile.display_name
+          : undefined;
+
         return {
           id: ref.id,
           referred_id: ref.referred_id,
           created_at: ref.created_at,
           status: ref.status,
           user: {
-            email: ref.referred?.email || '',
-            name: ref.referred?.full_name || undefined,
+            email: '', // Email sera récupéré depuis auth.users si nécessaire
+            name: fullName,
           },
-          total_orders: 0, // Sera calculé plus tard si nécessaire
-          total_spent: 0, // Sera calculé plus tard si nécessaire
+          total_orders: 0,
+          total_spent: 0,
         };
       });
 
+      // Enrichir avec les emails depuis auth.users (si possible via une vue ou fonction)
+      // Pour l'instant, on garde cette structure simple
       setReferrals(referralsWithStats);
     } catch (error: any) {
       logger.error('Error fetching referrals', { error: error.message });
