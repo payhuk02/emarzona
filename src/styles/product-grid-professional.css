@@ -66,13 +66,10 @@
   animation-delay: 0.4s;
 }
 
-/* Hover effects avancés */
+/* Hover effects avancés - Ombre retirée sur demande */
 .product-card-professional:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.12),
-    0 0 0 1px rgba(59, 130, 246, 0.1),
-    0 0 40px rgba(59, 130, 246, 0.05);
+  /* Ombre retirée pour meilleure visibilité de l'image */
 }
 
 .product-card-professional:hover .product-image-overlay {

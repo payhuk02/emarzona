@@ -176,7 +176,7 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
   );
 
   return (
-    <Card className="product-card-professional group relative overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 rounded-lg">
+    <Card className="product-card-professional group relative overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300 hover:-translate-y-2 rounded-lg">
       {/* Image avec overlay et badges */}
       <div className="product-image-container relative overflow-hidden">
         <OptimizedImage
@@ -184,7 +184,7 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
           alt={product.name}
           width={1280}
           height={720}
-          className="product-image w-full h-[32rem] md:h-[40rem] lg:h-[44rem] object-cover rounded-t-lg"
+          className="product-image w-full h-[36rem] md:h-[48rem] lg:h-[56rem] object-cover rounded-t-lg"
           priority={false}
         />
         <div className="product-image-overlay" aria-hidden="true"></div>
