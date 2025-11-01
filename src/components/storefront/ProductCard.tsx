@@ -184,7 +184,7 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
           alt={product.name}
           width={1280}
           height={720}
-          className="product-image w-full h-[28rem] md:h-[32rem] lg:h-[36rem] object-cover rounded-t-lg"
+          className="product-image w-full h-[32rem] md:h-[40rem] lg:h-[44rem] object-cover rounded-t-lg"
           priority={false}
         />
         <div className="product-image-overlay" aria-hidden="true"></div>
