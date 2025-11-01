@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -70,7 +70,31 @@ export default function PaymentManagementList() {
   const { data: orders, isLoading, error, refetch } = useQuery({
     queryKey: ['payment-management-orders', user?.id, store?.id],
     queryFn: async () => {
-      let query = supabase
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) throw new Error('Not authenticated');
+
+      // Get user profile and store
+      let storeId = store?.id;
+      
+      if (!storeId && authUser?.id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', authUser.id)
+          .single();
+
+        if (profile) {
+          const { data: storeData } = await supabase
+            .from('stores')
+            .select('id')
+            .eq('owner_id', profile.id)
+            .maybeSingle();
+          
+          storeId = storeData?.id;
+        }
+      }
+
+      let query = (supabase as any)
         .from('orders')
         .select(`
           *,
@@ -85,36 +109,35 @@ export default function PaymentManagementList() {
             quantity,
             unit_price,
             total_price
-          ),
-          secured_payments (
-            id,
-            status,
-            amount,
-            escrow_released_at
           )
         `)
         .order('created_at', { ascending: false });
 
-      // Filter by store if store exists
-      if (store?.id) {
-        query = query.eq('store_id', store.id);
-      } else if (user?.id) {
-        query = query.or(`buyer_id.eq.${user.id},store_id.in.(select id from stores where user_id.eq.${user.id})`);
+      // Filter by store if available
+      if (storeId) {
+        query = query.eq('store_id', storeId);
+      } else if (authUser?.id) {
+        // Fallback: filter by buyer_id
+        query = query.eq('buyer_id', authUser.id);
       }
 
-      const { data, error } = await query;
+      const { data, error: queryError } = await query;
 
-      if (error) throw error;
+      if (queryError) {
+        logger.error('Error fetching payment management orders', { error: queryError.message });
+        throw queryError;
+      }
 
       // Filtrer les commandes avec paiements avancés
-      return data?.filter((order: any) => {
-        const hasAdvancedPayment = order.order_items?.some((item: any) => {
-          // Check if order has percentage or escrow payment options
-          return true; // Simplified for now - would check product payment_options
-        });
-        const hasSecuredPayment = order.secured_payments && order.secured_payments.length > 0;
-        return hasAdvancedPayment || hasSecuredPayment;
+      const filtered = data?.filter((order: any) => {
+        const hasPercentagePayment = (order.percentage_paid || 0) > 0 && (order.percentage_paid || 0) < 100;
+        const hasRemainingAmount = (order.remaining_amount || 0) > 0;
+        // Also include orders with payment_status pending that might have advanced payment
+        const hasAdvancedPaymentStatus = order.payment_status === 'pending' || order.payment_status === 'partial';
+        return hasPercentagePayment || hasRemainingAmount || hasAdvancedPaymentStatus;
       }) || [];
+
+      return filtered;
     },
     enabled: !!user?.id || !!store?.id,
   });
@@ -126,24 +149,24 @@ export default function PaymentManagementList() {
     return orders.filter((order: any) => {
       // Search filter
       const searchLower = debouncedSearch.toLowerCase();
-      const matchesSearch =
+    const matchesSearch =
         order.order_number?.toLowerCase().includes(searchLower) ||
         order.order_items?.[0]?.product_name?.toLowerCase().includes(searchLower) ||
         order.customers?.name?.toLowerCase().includes(searchLower) ||
         order.customers?.email?.toLowerCase().includes(searchLower);
 
       // Tab filter - simplified logic
-      const paymentType = 'percentage'; // Would get from product payment_options
-      const securedPayment = order.secured_payments?.[0];
-      
-      const matchesTab =
-        activeTab === 'all' ||
-        (activeTab === 'percentage' && paymentType === 'percentage') ||
-        (activeTab === 'escrow' && securedPayment) ||
-        (activeTab === 'pending' && securedPayment?.status === 'pending');
+      const hasPercentagePayment = (order.percentage_paid || 0) > 0 && (order.percentage_paid || 0) < 100;
+      const hasRemainingAmount = (order.remaining_amount || 0) > 0;
 
-      return matchesSearch && matchesTab;
-    });
+    const matchesTab =
+      activeTab === 'all' ||
+        (activeTab === 'percentage' && hasPercentagePayment) ||
+        (activeTab === 'escrow' && (order.payment_status === 'pending' || order.payment_status === 'partial')) ||
+        (activeTab === 'pending' && (order.payment_status === 'pending' || hasRemainingAmount));
+
+    return matchesSearch && matchesTab;
+  });
   }, [orders, debouncedSearch, activeTab]);
 
   // Stats calculation
@@ -152,24 +175,25 @@ export default function PaymentManagementList() {
 
     const total = orders.length;
     const percentage = orders.filter((o: any) => {
-      // Check for percentage payment type
-      return true; // Simplified
+      const hasPercentage = (o.percentage_paid || 0) > 0 && (o.percentage_paid || 0) < 100;
+      return hasPercentage;
     }).length;
     const escrow = orders.filter((o: any) => {
-      return o.secured_payments && o.secured_payments.length > 0;
+      // Check if order has escrow/delivery_secured payment type
+      return o.payment_status === 'pending' || o.payment_status === 'partial';
     }).length;
     const pending = orders.filter((o: any) => {
-      return o.secured_payments?.some((p: any) => p.status === 'pending');
+      return o.payment_status === 'pending' || (o.remaining_amount || 0) > 0;
     }).length;
 
     return { total, percentage, escrow, pending };
   }, [orders]);
 
   const getPaymentTypeBadge = (order: any) => {
-    const securedPayment = order.secured_payments?.[0];
-    const hasPercentage = true; // Would check product payment_options
+    const hasPercentage = (order.percentage_paid || 0) > 0 && (order.percentage_paid || 0) < 100;
+    const isEscrow = order.payment_status === 'pending' || order.payment_status === 'partial';
     
-    if (securedPayment) {
+    if (isEscrow) {
       return (
         <Badge variant="default" className="bg-purple-600 hover:bg-purple-700">
           <Shield className="h-3 w-3 mr-1" />
@@ -194,21 +218,18 @@ export default function PaymentManagementList() {
   };
 
   const getStatusBadge = (order: any) => {
-    const securedPayment = order.secured_payments?.[0];
+    const hasRemaining = (order.remaining_amount || 0) > 0;
+    const paymentStatus = order.payment_status;
     
-    if (!securedPayment) {
-      return <Badge variant="outline">Aucun</Badge>;
-    }
-
-    if (securedPayment.status === 'released') {
+    if (paymentStatus === 'completed' || !hasRemaining) {
       return (
         <Badge variant="default" className="bg-green-600 hover:bg-green-700">
           <CheckCircle className="h-3 w-3 mr-1" />
-          Libéré
+          Complété
         </Badge>
       );
     }
-    if (securedPayment.status === 'pending') {
+    if (paymentStatus === 'pending' || hasRemaining) {
       return (
         <Badge variant="secondary" className="bg-yellow-600 hover:bg-yellow-700">
           <Clock className="h-3 w-3 mr-1" />
@@ -216,7 +237,7 @@ export default function PaymentManagementList() {
         </Badge>
       );
     }
-    return <Badge variant="outline">{securedPayment.status}</Badge>;
+    return <Badge variant="outline">{paymentStatus || 'N/A'}</Badge>;
   };
 
   // Export to CSV
@@ -247,9 +268,9 @@ export default function PaymentManagementList() {
         format(new Date(order.created_at), 'dd/MM/yyyy', { locale: fr }),
         order.customers?.name || '',
         order.order_items?.[0]?.product_name || 'N/A',
-        order.secured_payments?.[0] ? 'Escrow' : 'Pourcentage',
+        (order.percentage_paid || 0) > 0 ? 'Pourcentage' : 'Escrow',
         order.total_amount || 0,
-        order.secured_payments?.[0]?.status || 'N/A',
+        order.payment_status || 'N/A',
         format(new Date(order.created_at), 'dd/MM/yyyy HH:mm', { locale: fr }),
       ]);
 
@@ -363,7 +384,7 @@ export default function PaymentManagementList() {
         <AppSidebar />
 
         <div className="flex-1 flex flex-col">
-          {/* Header */}
+            {/* Header */}
           <div ref={headerRef} className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 sm:p-6">
               <div>
@@ -395,12 +416,12 @@ export default function PaymentManagementList() {
                   <span className="hidden sm:inline text-xs sm:text-sm">Actualiser</span>
                 </Button>
               </div>
+              </div>
             </div>
-          </div>
 
           <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-background via-background to-purple-50/30 dark:to-purple-950/20">
             <div className="max-w-7xl mx-auto space-y-6">
-              {/* Stats Cards */}
+            {/* Stats Cards */}
               <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
                 {/* Carte Total */}
                 <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-purple-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
@@ -426,13 +447,13 @@ export default function PaymentManagementList() {
                       <Percent className="h-4 w-4 text-blue-400 drop-shadow-lg" />
                       Paiements Pourcentage
                     </CardTitle>
-                  </CardHeader>
+                </CardHeader>
                   <CardContent className="relative z-10">
                     <div className="text-2xl md:text-3xl font-bold text-blue-400 drop-shadow-lg">{stats.percentage}</div>
                     <p className="text-xs text-purple-200/90 mt-1 font-medium">commandes</p>
-                  </CardContent>
+                </CardContent>
                   <div className="absolute top-2 right-2 h-2 w-2 bg-blue-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-blue-400/50"></div>
-                </Card>
+              </Card>
 
                 {/* Carte Escrow */}
                 <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-green-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
@@ -442,13 +463,13 @@ export default function PaymentManagementList() {
                       <Shield className="h-4 w-4 text-green-400 drop-shadow-lg" />
                       Paiements Escrow
                     </CardTitle>
-                  </CardHeader>
+                </CardHeader>
                   <CardContent className="relative z-10">
                     <div className="text-2xl md:text-3xl font-bold text-green-400 drop-shadow-lg">{stats.escrow}</div>
                     <p className="text-xs text-purple-200/90 mt-1 font-medium">commandes</p>
-                  </CardContent>
+                </CardContent>
                   <div className="absolute top-2 right-2 h-2 w-2 bg-green-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-green-400/50"></div>
-                </Card>
+              </Card>
 
                 {/* Carte En attente */}
                 <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-yellow-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-yellow-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
@@ -458,14 +479,14 @@ export default function PaymentManagementList() {
                       <Clock className="h-4 w-4 text-yellow-400 drop-shadow-lg" />
                       En attente
                     </CardTitle>
-                  </CardHeader>
+                </CardHeader>
                   <CardContent className="relative z-10">
                     <div className="text-2xl md:text-3xl font-bold text-yellow-400 drop-shadow-lg">{stats.pending}</div>
                     <p className="text-xs text-purple-200/90 mt-1 font-medium">paiements</p>
-                  </CardContent>
+                </CardContent>
                   <div className="absolute top-2 right-2 h-2 w-2 bg-yellow-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-yellow-400/50"></div>
-                </Card>
-              </div>
+              </Card>
+            </div>
 
               {/* Search & Filters */}
               <Card ref={filtersRef} className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
@@ -522,7 +543,7 @@ export default function PaymentManagementList() {
               </Card>
 
               {/* Tabs - Fully Responsive */}
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                  <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1 w-full grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 sm:inline-flex sm:w-auto">
                   <TabsTrigger 
                     value="all" 
@@ -554,7 +575,7 @@ export default function PaymentManagementList() {
                     <span className="sm:hidden">Attente</span>
                     <span className="opacity-80">({stats.pending})</span>
                   </TabsTrigger>
-                </TabsList>
+                    </TabsList>
 
                 <TabsContent value={activeTab} className="mt-6">
                   <div ref={tableRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
@@ -580,8 +601,8 @@ export default function PaymentManagementList() {
                     ) : (
                       <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50 overflow-hidden">
                         <div className="overflow-x-auto">
-                          <Table>
-                            <TableHeader>
+                  <Table>
+                    <TableHeader>
                               <TableRow className="bg-muted/50">
                                 <TableHead className="font-semibold">N° Commande</TableHead>
                                 <TableHead className="font-semibold hidden sm:table-cell">Date</TableHead>
@@ -591,18 +612,18 @@ export default function PaymentManagementList() {
                                 <TableHead className="font-semibold hidden lg:table-cell">Montant</TableHead>
                                 <TableHead className="font-semibold">Statut</TableHead>
                                 <TableHead className="font-semibold text-right">Actions</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                               {filteredOrders.map((order: any, index: number) => (
                                 <TableRow
                                   key={order.id}
                                   className="animate-in fade-in slide-in-from-left-4"
                                   style={{ animationDelay: `${index * 50}ms` }}
                                 >
-                                  <TableCell className="font-medium">
-                                    {order.order_number}
-                                  </TableCell>
+                          <TableCell className="font-medium">
+                            {order.order_number}
+                          </TableCell>
                                   <TableCell className="hidden sm:table-cell">
                                     {format(new Date(order.created_at), 'dd/MM/yyyy', { locale: fr })}
                                   </TableCell>
@@ -612,34 +633,34 @@ export default function PaymentManagementList() {
                                   <TableCell>
                                     {order.order_items?.[0]?.product_name || 'N/A'}
                                   </TableCell>
-                                  <TableCell>{getPaymentTypeBadge(order)}</TableCell>
+                          <TableCell>{getPaymentTypeBadge(order)}</TableCell>
                                   <TableCell className="hidden lg:table-cell">
                                     {order.total_amount?.toLocaleString('fr-FR')} XOF
                                   </TableCell>
-                                  <TableCell>{getStatusBadge(order)}</TableCell>
-                                  <TableCell className="text-right">
-                                    <Button
-                                      size="sm"
-                                      onClick={() => navigate(`/payments/${order.id}/manage`)}
+                          <TableCell>{getStatusBadge(order)}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              size="sm"
+                              onClick={() => navigate(`/payments/${order.id}/manage`)}
                                       className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white"
-                                    >
+                            >
                                       <span className="hidden sm:inline">Gérer</span>
                                       <span className="sm:hidden">⚙</span>
                                       <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-1" />
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                         </div>
                       </Card>
                     )}
                   </div>
                 </TabsContent>
               </Tabs>
-            </div>
-          </main>
+          </div>
+        </main>
         </div>
       </div>
     </SidebarProvider>
