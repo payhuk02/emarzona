@@ -11,6 +11,7 @@ import type {
   SendGridResponse,
 } from '@/types/email';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 const SENDGRID_API_KEY = import.meta.env.VITE_SENDGRID_API_KEY;
 const SENDGRID_API_URL = 'https://api.sendgrid.com/v3/mail/send';
@@ -25,7 +26,9 @@ export const sendEmail = async (payload: SendEmailPayload): Promise<{
 }> => {
   try {
     if (!SENDGRID_API_KEY) {
-      console.warn('⚠️  SendGrid API Key non configurée. Email non envoyé.');
+      logger.warn('SendGrid API Key non configurée. Email non envoyé.', {
+        payload: { to: payload.to, subject: payload.subject },
+      });
       return {
         success: false,
         error: 'SendGrid API Key not configured',
@@ -124,7 +127,10 @@ export const sendEmail = async (payload: SendEmailPayload): Promise<{
       messageId: messageId || undefined,
     };
   } catch (error: any) {
-    console.error('❌ Error sending email:', error);
+    logger.error('Error sending email', {
+      error: error.message,
+      payload: { to: payload.to, subject: payload.subject },
+    });
     return {
       success: false,
       error: error.message,
@@ -165,13 +171,21 @@ export const getTemplate = async (
       .maybeSingle();
 
     if (error) {
-      console.error('Error fetching template:', error);
+      logger.error('Error fetching template', {
+        error: error.message,
+        slug,
+        productType,
+      });
       return null;
     }
 
     return data as EmailTemplate;
   } catch (error) {
-    console.error('Error in getTemplate:', error);
+    logger.error('Error in getTemplate', {
+      error: error instanceof Error ? error.message : String(error),
+      slug,
+      productType,
+    });
     return null;
   }
 };
@@ -189,10 +203,16 @@ const logEmail = async (logData: any) => {
       });
 
     if (error) {
-      console.error('Error logging email:', error);
+      logger.error('Error logging email', {
+        error: error.message,
+        emailData: { to, subject, templateId },
+      });
     }
   } catch (error) {
-    console.error('Error in logEmail:', error);
+    logger.error('Error in logEmail', {
+      error: error instanceof Error ? error.message : String(error),
+      emailData: { to, subject, templateId },
+    });
   }
 };
 

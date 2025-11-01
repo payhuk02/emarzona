@@ -237,7 +237,10 @@ export const CreateDigitalProductWizard = ({
       localStorage.setItem('digital-product-draft', JSON.stringify(dataToSave));
       logger.info('Brouillon auto-sauvegardé', { step: currentStep });
     } catch (error) {
-      console.error('Auto-save error:', error);
+      logger.error('Auto-save error', {
+        error: error instanceof Error ? error.message : String(error),
+        step: currentStep,
+      });
     } finally {
       setIsAutoSaving(false);
     }
@@ -254,7 +257,9 @@ export const CreateDigitalProductWizard = ({
         setFormData(draft);
         logger.info('Brouillon chargé depuis localStorage');
       } catch (error) {
-        console.error('Error loading draft:', error);
+        logger.error('Error loading draft', {
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
   }, []);
@@ -519,7 +524,11 @@ export const CreateDigitalProductWizard = ({
           });
 
         if (affiliateError) {
-          console.error('Affiliate settings error:', affiliateError);
+          logger.error('Affiliate settings error', {
+            error: affiliateError.message,
+            code: affiliateError.code,
+            productId: createdProduct?.id,
+          });
         }
       }
 

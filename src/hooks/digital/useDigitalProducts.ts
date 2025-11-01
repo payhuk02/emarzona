@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 /**
  * Produit digital complet
@@ -60,7 +61,10 @@ export const useDigitalProducts = (storeId?: string) => {
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
         if (authError) {
-          console.error('Erreur auth:', authError);
+          logger.error('Erreur auth', {
+            error: authError.message,
+            code: authError.status,
+          });
           throw new Error('Erreur d\'authentification: ' + authError.message);
         }
         if (!user) {
@@ -78,7 +82,11 @@ export const useDigitalProducts = (storeId?: string) => {
             .eq('store_id', storeId);
 
           if (productsError) {
-            console.error('Erreur lors de la récupération des products:', productsError);
+            logger.error('Erreur lors de la récupération des products', {
+              error: productsError.message,
+              code: productsError.code,
+              storeId,
+            });
             throw new Error('Erreur lors de la récupération des produits: ' + productsError.message);
           }
           productIds = products?.map(p => p.id) || [];
@@ -90,7 +98,11 @@ export const useDigitalProducts = (storeId?: string) => {
             .eq('user_id', user.id);
 
           if (storesError) {
-            console.error('Erreur lors de la récupération des stores:', storesError);
+            logger.error('Erreur lors de la récupération des stores', {
+              error: storesError.message,
+              code: storesError.code,
+              userId: user.id,
+            });
             throw new Error('Erreur lors de la récupération des boutiques: ' + storesError.message);
           }
 
@@ -102,20 +114,29 @@ export const useDigitalProducts = (storeId?: string) => {
               .in('store_id', storeIds);
 
             if (productsError) {
-              console.error('Erreur lors de la récupération des products pour les stores:', productsError);
+              logger.error('Erreur lors de la récupération des products pour les stores', {
+                error: productsError.message,
+                code: productsError.code,
+                storeIds: storeIds.length,
+              });
               throw new Error('Erreur lors de la récupération des produits: ' + productsError.message);
             }
             productIds = products?.map(p => p.id) || [];
           } else {
             // Pas de stores, retourner un tableau vide (pas une erreur)
-            console.log('Aucune boutique trouvée pour l\'utilisateur');
+            logger.debug('Aucune boutique trouvée pour l\'utilisateur', {
+              userId: user.id,
+            });
             return [];
           }
         }
 
         // Si aucun product_id trouvé, retourner un tableau vide (pas une erreur)
         if (productIds.length === 0) {
-          console.log('Aucun produit trouvé pour les stores sélectionnés');
+          logger.debug('Aucun produit trouvé pour les stores sélectionnés', {
+            storeId,
+            productIdsLength: 0,
+          });
           return [];
         }
 
@@ -143,7 +164,10 @@ export const useDigitalProducts = (storeId?: string) => {
         
         // Si la jointure avec la clé explicite ne fonctionne pas, essayer sans
         if (error && error.code === 'PGRST116') {
-          console.warn('Tentative avec syntaxe alternative de jointure');
+          logger.warn('Tentative avec syntaxe alternative de jointure', {
+            errorCode: error.code,
+            productIdsLength: productIds.length,
+          });
           const { data: altData, error: altError } = await supabase
             .from('digital_products')
             .select(`
@@ -164,7 +188,11 @@ export const useDigitalProducts = (storeId?: string) => {
             .order('created_at', { ascending: false });
           
           if (altError) {
-            console.error('Erreur avec syntaxe alternative:', altError);
+            logger.error('Erreur avec syntaxe alternative', {
+              error: altError.message,
+              code: altError.code,
+              productIdsLength: productIds.length,
+            });
             throw new Error('Erreur lors du chargement des produits digitaux: ' + altError.message);
           }
           
@@ -191,11 +219,11 @@ export const useDigitalProducts = (storeId?: string) => {
         }
         
         if (error) {
-          console.error('Erreur lors de la récupération des digital_products:', error);
-          console.error('Détails:', {
+          logger.error('Erreur lors de la récupération des digital_products', {
             code: error.code,
             message: error.message,
             details: error.details,
+            productIdsLength: productIds.length,
             hint: error.hint,
             productIds: productIds.length
           });

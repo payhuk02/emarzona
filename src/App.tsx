@@ -17,6 +17,7 @@ import { Suspense, lazy, useEffect } from "react";
 import { initSentry } from "@/lib/sentry";
 import { initWebVitals } from "@/lib/web-vitals";
 import * as Sentry from "@sentry/react";
+import { logger } from "@/lib/logger";
 
 // Composant de chargement pour le lazy loading
 const LoadingFallback = () => (
@@ -340,7 +341,7 @@ const queryClient = new QueryClient({
         await queryClient.cancelQueries();
       },
       onError: (error) => {
-        console.error('[Mutation Error]', error);
+        logger.error('Mutation Error', { error });
         // Rollback optimistic update on error
       },
       onSettled: () => {

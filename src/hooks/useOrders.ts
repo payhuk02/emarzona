@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 export interface Order {
   id: string;
@@ -76,7 +77,10 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
       if (queryError) {
         // Ne pas afficher de toast si c'est juste que la table n'existe pas encore
         if (queryError.code === '42P01' || queryError.message?.includes('does not exist')) {
-          console.warn('Table orders n\'existe pas encore');
+          logger.warn('Table orders n\'existe pas encore', {
+            code: queryError.code,
+            message: queryError.message,
+          });
           setOrders([]);
           setTotalCount(0);
           return;
@@ -88,7 +92,11 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
       setTotalCount(count || 0);
       setError(null);
     } catch (err: any) {
-      console.error('Erreur lors de la récupération des commandes:', err);
+      logger.error('Erreur lors de la récupération des commandes', {
+        error: err.message,
+        code: err.code,
+        filters: { storeId, status, paymentStatus },
+      });
       setError(err);
       // Afficher un toast uniquement pour les erreurs critiques
       if (err.message && !err.message.includes('does not exist')) {

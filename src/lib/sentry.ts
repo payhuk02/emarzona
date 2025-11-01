@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/react';
+import { logger } from './logger';
 
 /**
  * Configuration de Sentry pour le monitoring d'erreurs
@@ -9,7 +10,9 @@ export const initSentry = () => {
   
   // Ne pas initialiser Sentry en développement si pas de DSN configuré
   if (!SENTRY_DSN) {
-    console.warn('⚠️  Sentry DSN non configuré. Error tracking désactivé.');
+    logger.warn('Sentry DSN non configuré. Error tracking désactivé.', {
+      environment: ENV,
+    });
     return;
   }
 
@@ -60,7 +63,10 @@ export const initSentry = () => {
     ],
   });
   
-  console.log('✅ Sentry initialisé avec succès');
+  logger.info('Sentry initialisé avec succès', {
+    environment: ENV,
+    tracesSampleRate: ENV === 'production' ? 0.1 : 1.0,
+  });
 };
 
 /**
@@ -151,7 +157,10 @@ export const createSpan = (
 ): any => {
   // Dans Sentry v8+, startSpan doit être utilisé directement
   // Cette fonction est conservée pour compatibilité mais deprecated
-  console.warn('createSpan is deprecated, use Sentry.startSpan directly');
+  logger.warn('createSpan is deprecated, use Sentry.startSpan directly', {
+    operation,
+    description,
+  });
   return {
     setStatus: () => {},
     finish: () => {},

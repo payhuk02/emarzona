@@ -53,6 +53,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
+import { logger } from "@/lib/logger";
 
 // Menu organisé par sections
 const menuSections = [
@@ -450,7 +451,9 @@ export function AppSidebar() {
       });
       navigate("/");
     } catch (error) {
-      console.error('Logout error:', error);
+      logger.error('Logout error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       toast({
         title: "Erreur",
         description: "Impossible de se déconnecter",

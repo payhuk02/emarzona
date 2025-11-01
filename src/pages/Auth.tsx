@@ -16,6 +16,7 @@ import payhukLogo from "@/assets/payhuk-logo.png";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { SEOMeta } from "@/components/seo/SEOMeta";
 import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { logger } from "@/lib/logger";
 
 const Auth = () => {
   const { t } = useTranslation();
@@ -106,7 +107,10 @@ const Auth = () => {
         description: t('auth.forgotPassword.successDescription', `Un email de réinitialisation a été envoyé à ${resetEmail}. Vérifiez votre boîte de réception.`),
       });
     } catch (error: any) {
-      console.error('Reset password error:', error);
+      logger.error('Reset password error', {
+        error: error.message,
+        email: resetEmail,
+      });
       setResetError(error.message || t('auth.forgotPassword.error', 'Une erreur est survenue lors de l\'envoi de l\'email'));
       toast({
         title: t('auth.forgotPassword.errorTitle', 'Erreur'),
@@ -165,7 +169,10 @@ const Auth = () => {
         navigate("/dashboard");
       }
     } catch (error: any) {
-      console.error('Signup error:', error);
+      logger.error('Signup error', {
+        error: error.message,
+        email: formData.email,
+      });
       setError(error.message || t('auth.signup.error'));
     } finally {
       setIsLoading(false);
@@ -203,7 +210,10 @@ const Auth = () => {
         navigate("/dashboard");
       }
     } catch (error: any) {
-      console.error('Login error:', error);
+      logger.error('Login error', {
+        error: error.message,
+        email: formData.email,
+      });
       if (error.message.includes('Invalid login credentials')) {
         setError(t('auth.login.error'));
       } else {

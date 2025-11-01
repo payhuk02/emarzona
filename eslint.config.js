@@ -5,7 +5,18 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  { 
+    ignores: [
+      "dist",
+      "node_modules",
+      "build",
+      ".vercel",
+      "**/*.config.{js,ts}",
+      "scripts/**",
+      "supabase/**",
+      "*.d.ts"
+    ]
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -29,6 +40,17 @@ export default tseslint.config(
           "caughtErrorsIgnorePattern": "^_"
         }
       ],
+      // Bloquer console.* pour forcer l'utilisation du logger
+      // IMPORTANT: Utilisez logger.* de @/lib/logger au lieu de console.*
+      // Le logger envoie automatiquement les erreurs à Sentry en production
+      "no-console": "error", // Aucun console.* autorisé - utilisez logger.*
+    },
+  },
+  // Exception pour console-guard.ts qui DOIT utiliser console.* pour les remplacer
+  {
+    files: ["src/lib/console-guard.ts"],
+    rules: {
+      "no-console": "off", // Console.* nécessaire dans ce fichier
     },
   },
 );
