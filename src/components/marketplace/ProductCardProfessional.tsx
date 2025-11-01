@@ -12,6 +12,7 @@ import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { useMarketplaceFavorites } from "@/hooks/useMarketplaceFavorites";
+import "@/styles/product-grid-professional.css";
 
 interface ProductCardProfessionalProps {
   product: {
@@ -202,17 +203,18 @@ const ProductCardProfessional = ({
   };
 
   return (
-    <Card className="group relative overflow-hidden bg-white border border-gray-200 hover:border-gray-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 rounded-lg" role="article" aria-label={`Produit: ${product.name}`}>
+    <Card className="product-card-professional group relative overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 rounded-lg" role="article" aria-label={`Produit: ${product.name}`}>
       {/* Image avec overlay et badges - OPTIMISÉE ET EXTRA AGRANDIE */}
-      <div className="relative">
+      <div className="product-image-container relative overflow-hidden">
         <OptimizedImage
           src={product.image_url || '/placeholder-image.png'}
           alt={product.name}
           width={1280}
           height={720}
-          className="w-full h-80 object-cover rounded-t-lg"
+          className="product-image w-full h-80 object-cover rounded-t-lg"
           priority={false}
         />
+        <div className="product-image-overlay" aria-hidden="true"></div>
         
         {/* Overlay avec badge promotionnel seulement */}
         {hasPromo && (
@@ -401,7 +403,7 @@ const ProductCardProfessional = ({
           <Button
             variant="outline"
             size="sm"
-            className="flex-1 h-10 px-3 text-sm border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="product-action-button flex-1 h-10 px-3 text-sm border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             asChild
           >
             <Link 
@@ -419,7 +421,7 @@ const ProductCardProfessional = ({
             onClick={handleBuyNow}
             disabled={loading}
             size="sm"
-            className="flex-1 h-10 px-3 text-sm bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 shadow-sm hover:shadow-md"
+            className="product-action-button flex-1 h-10 px-3 text-sm bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 shadow-sm hover:shadow-md"
             aria-label={loading ? `Traitement de l'achat de ${product.name} en cours` : `Acheter ${product.name} pour ${formatPrice(price)} ${product.currency || 'FCFA'}`}
           >
             <div className="flex items-center justify-center gap-1.5 truncate w-full">

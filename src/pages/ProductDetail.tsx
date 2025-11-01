@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { ShoppingCart, Star, ArrowLeft, CheckCircle2, Package, HelpCircle, ClipboardList, Download, Clock, RefreshCw, DollarSign, Gift, Lock, AlertTriangle, CalendarClock, Shield, AlertCircle } from "lucide-react";
 import ProductCard from "@/components/marketplace/ProductCard";
+import { ProductGrid } from "@/components/ui/ProductGrid";
 import StoreFooter from "@/components/storefront/StoreFooter";
 import { useProducts } from "@/hooks/useProducts";
 import { sanitizeHTML } from "@/lib/html-sanitizer";
@@ -653,16 +654,21 @@ const ProductDetails = () => {
             {relatedProducts.length > 0 && (
               <div role="region" aria-labelledby="related-products-heading">
                 <h2 id="related-products-heading" className="text-2xl font-bold mb-6">Produits similaires</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6" role="list" aria-label="Liste de produits similaires">
-                  {relatedProducts.map((related) => (
-                    <div key={related.id} role="listitem">
+                <ProductGrid>
+                  {relatedProducts.map((related, index) => (
+                    <div 
+                      key={related.id} 
+                      role="listitem"
+                      className="animate-in fade-in slide-in-from-bottom-4"
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
                       <ProductCard
                         product={related}
                         storeSlug={store.slug}
                       />
                     </div>
                   ))}
-                </div>
+                </ProductGrid>
               </div>
             )}
           </div>

@@ -1,0 +1,281 @@
+/* ============================================================
+   PRODUCT GRID - PROFESSIONAL STYLES
+   Grille responsive optimisée: 1 mobile, 3 tablette, 2 desktop
+   ============================================================ */
+
+/* Animations d'entrée */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Container de la grille */
+.products-grid-mobile,
+.products-grid-tablet,
+.products-grid-desktop {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Carte produit avec animations */
+.product-card-professional {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInUp 0.5s ease-out backwards;
+}
+
+.product-card-professional:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.product-card-professional:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.product-card-professional:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.product-card-professional:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+/* Hover effects avancés */
+.product-card-professional:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(59, 130, 246, 0.1),
+    0 0 40px rgba(59, 130, 246, 0.05);
+}
+
+.product-card-professional:hover .product-image-overlay {
+  opacity: 1;
+}
+
+.product-card-professional:hover .product-image {
+  transform: scale(1.1);
+}
+
+/* Image avec effet parallaxe au hover */
+.product-image-container {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.product-image {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.product-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+/* Badges avec animation */
+.product-badge {
+  animation: scaleIn 0.4s ease-out backwards;
+  backdrop-filter: blur(8px);
+}
+
+.product-badge-promo {
+  animation-delay: 0.2s;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+}
+
+/* Boutons d'action avec effets */
+.product-action-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-action-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.product-action-button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.product-action-button:active {
+  transform: scale(0.95);
+}
+
+/* Skeleton loading amélioré */
+.product-skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.dark .product-skeleton {
+  background: linear-gradient(
+    90deg,
+    #2a2a2a 25%,
+    #3a3a3a 50%,
+    #2a2a2a 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* Rating stars avec animation */
+.product-rating-star {
+  transition: transform 0.2s ease;
+}
+
+.product-rating-star:hover {
+  transform: scale(1.2) rotate(15deg);
+}
+
+/* Tags avec effet hover */
+.product-tag {
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.product-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Prix avec animation au changement */
+.product-price {
+  transition: all 0.3s ease;
+}
+
+.product-price-old {
+  position: relative;
+}
+
+.product-price-old::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: currentColor;
+  transform: translateY(-50%);
+  animation: lineThrough 0.5s ease-out;
+}
+
+@keyframes lineThrough {
+  from {
+    transform: translateY(-50%) scaleX(0);
+  }
+  to {
+    transform: translateY(-50%) scaleX(1);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .product-card-professional {
+    margin-bottom: 1.5rem;
+  }
+  
+  .product-card-professional:hover {
+    transform: translateY(-4px);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .product-card-professional {
+    /* Optimisé pour tablette - 3 colonnes */
+  }
+}
+
+@media (min-width: 1025px) {
+  .product-card-professional {
+    /* Optimisé pour desktop - 2 colonnes */
+  }
+}
+
+/* Performance optimizations */
+.product-card-professional,
+.product-image,
+.product-action-button {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Loading states */
+.product-card-loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.product-card-loading .product-image {
+  filter: blur(4px);
+}
+
+/* Accessibility improvements */
+.product-card-professional:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 4px;
+}
+
+/* Print styles */
+@media print {
+  .product-card-professional {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+

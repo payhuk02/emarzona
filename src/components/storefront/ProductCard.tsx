@@ -9,7 +9,6 @@ import {
   Download, 
   Crown, 
   Sparkles, 
-  Tag, 
   Package, 
   Zap,
   RefreshCw,
@@ -28,6 +27,7 @@ import { initiateMonerooPayment } from "@/lib/moneroo-payment";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { safeRedirect } from "@/lib/url-validator";
+import "@/styles/product-grid-professional.css";
 
 interface ProductCardProps {
   product: Product;
@@ -39,10 +39,10 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const { toast } = useToast();
 
-  const price = product.promotional_price ?? product.price;
-  const hasPromo = product.promotional_price && product.promotional_price < product.price;
+  const price = (product as any).promotional_price ?? product.price;
+  const hasPromo = (product as any).promotional_price && (product as any).promotional_price < product.price;
   const discountPercent = hasPromo
-    ? Math.round(((product.price - product.promotional_price!) / product.price) * 100)
+    ? Math.round(((product.price - (product as any).promotional_price!) / product.price) * 100)
     : 0;
 
   // Vérifier si le produit est nouveau (< 7 jours)
@@ -70,8 +70,8 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
   const getShortDescription = (): string | undefined => {
     let rawText = '';
     
-    if (product.short_description && product.short_description.trim()) {
-      rawText = product.short_description;
+    if ((product as any).short_description && (product as any).short_description.trim()) {
+      rawText = (product as any).short_description;
     } else if (product.description && product.description.trim()) {
       rawText = product.description;
     } else {
@@ -141,8 +141,8 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
         }
       });
 
-      if (result.success && result.paymentUrl) {
-        safeRedirect(result.paymentUrl, () => {
+      if (result.success && result.checkout_url) {
+        safeRedirect(result.checkout_url, () => {
           toast({
             title: "Erreur",
             description: "URL de paiement invalide. Veuillez réessayer.",
@@ -150,7 +150,7 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
           });
         });
       } else {
-        throw new Error(result.error || "Échec de l'initialisation du paiement");
+        throw new Error("Échec de l'initialisation du paiement");
       }
     } catch (error: any) {
       toast({
@@ -176,17 +176,18 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
   );
 
   return (
-    <Card className="group relative overflow-hidden bg-white border border-gray-200 hover:border-gray-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 rounded-lg">
+    <Card className="product-card-professional group relative overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 rounded-lg">
       {/* Image avec overlay et badges */}
-      <div className="relative">
+      <div className="product-image-container relative overflow-hidden">
         <OptimizedImage
           src={product.image_url || '/placeholder-image.png'}
           alt={product.name}
           width={1280}
           height={720}
-          className="w-full h-64 object-cover rounded-t-lg"
+          className="product-image w-full h-64 object-cover rounded-t-lg"
           priority={false}
         />
+        <div className="product-image-overlay" aria-hidden="true"></div>
         
         {/* Overlay avec badge promotionnel */}
         {hasPromo && (
@@ -237,7 +238,7 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
             </Badge>
           )}
           
-          {product.is_featured && (
+          {(product as any).is_featured && (
             <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 shadow-lg">
               <Crown className="h-3 w-3 mr-1" />
               Vedette
@@ -306,27 +307,27 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
             </Badge>
           )}
           
-          {product.pricing_model && (
+          {(product as any).pricing_model && (
             <Badge variant="secondary" className="text-xs bg-indigo-100 text-indigo-800 border-0">
-              {product.pricing_model === 'subscription' && (
+              {(product as any).pricing_model === 'subscription' && (
                 <>
                   <RefreshCw className="h-3 w-3 mr-1" />
                   Abonnement
                 </>
               )}
-              {product.pricing_model === 'one-time' && (
+              {(product as any).pricing_model === 'one-time' && (
                 <>
                   <DollarSign className="h-3 w-3 mr-1" />
                   Achat unique
                 </>
               )}
-              {product.pricing_model === 'free' && (
+              {(product as any).pricing_model === 'free' && (
                 <>
                   <Gift className="h-3 w-3 mr-1" />
                   Gratuit
                 </>
               )}
-              {product.pricing_model === 'pay-what-you-want' && (
+              {(product as any).pricing_model === 'pay-what-you-want' && (
                 <>
                   <DollarSign className="h-3 w-3 mr-1" />
                   Prix libre
@@ -337,11 +338,11 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
         </div>
 
         {/* Badge fichiers téléchargeables */}
-        {product.downloadable_files && Array.isArray(product.downloadable_files) && product.downloadable_files.length > 0 && (
+        {(product as any).downloadable_files && Array.isArray((product as any).downloadable_files) && (product as any).downloadable_files.length > 0 && (
           <div className="mb-3">
             <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-700 border-green-500/20">
               <Download className="h-3 w-3 mr-1" />
-              {product.downloadable_files.length} fichier{product.downloadable_files.length > 1 ? 's' : ''}
+              {(product as any).downloadable_files.length} fichier{(product as any).downloadable_files.length > 1 ? 's' : ''}
             </Badge>
           </div>
         )}
@@ -368,10 +369,10 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
             </span>
           </div>
           
-          {product.purchases_count !== undefined && (
+          {(product as any).purchases_count !== undefined && (
             <div className="flex items-center gap-1 text-sm text-gray-500">
               <TrendingUp className="h-4 w-4" />
-              <span>{product.purchases_count || 0}</span>
+              <span>{(product as any).purchases_count || 0}</span>
             </div>
           )}
         </div>
@@ -381,12 +382,12 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
           <Button
             variant="outline"
             size="sm"
-            className="flex-1 h-10 border-gray-300 hover:bg-gray-50 hover:border-gray-400 text-gray-700 hover:text-gray-900"
+            className="product-action-button flex-1 h-10 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
             asChild
           >
             <Link 
               to={`/stores/${storeSlug}/products/${product.slug}`}
-              className="flex items-center justify-center gap-1.5 text-gray-700 hover:text-gray-900"
+              className="flex items-center justify-center gap-1.5"
             >
               <Eye className="h-4 w-4" />
               <span className="font-medium">Voir</span>
@@ -397,7 +398,7 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
             onClick={handleBuyNow}
             disabled={loading}
             size="sm"
-            className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium shadow-sm"
+            className="product-action-button flex-1 h-10 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium shadow-sm hover:shadow-md"
           >
             <div className="flex items-center justify-center gap-1.5">
               {loading ? (
