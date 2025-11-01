@@ -13,6 +13,7 @@ import { useCreatePhysicalOrder, type CreatePhysicalOrderOptions } from './useCr
 import { useCreateServiceOrder, type CreateServiceOrderOptions } from './useCreateServiceOrder';
 import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
+import { logger } from '@/lib/logger';
 
 /**
  * Options génériques pour créer une commande
@@ -99,7 +100,7 @@ export const useCreateOrder = () => {
       switch (productType) {
         case 'digital': {
           // Récupérer le digital_product_id
-          const { data: digitalProduct } = await supabase
+          const { data: digitalProduct } = await (supabase as any)
             .from('digital_products')
             .select('id')
             .eq('product_id', productId)
@@ -125,7 +126,7 @@ export const useCreateOrder = () => {
 
         case 'physical': {
           // Récupérer le physical_product_id
-          const { data: physicalProduct } = await supabase
+          const { data: physicalProduct } = await (supabase as any)
             .from('physical_products')
             .select('id')
             .eq('product_id', productId)
@@ -155,7 +156,7 @@ export const useCreateOrder = () => {
 
         case 'service': {
           // Récupérer le service_product_id
-          const { data: serviceProduct } = await supabase
+          const { data: serviceProduct } = await (supabase as any)
             .from('service_products')
             .select('id')
             .eq('product_id', productId)
@@ -303,7 +304,7 @@ export const useCreateOrder = () => {
     },
 
     onError: (error: Error) => {
-      console.error('Order creation error:', error);
+      logger.error('Order creation error', { error: error.message });
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de créer la commande',
