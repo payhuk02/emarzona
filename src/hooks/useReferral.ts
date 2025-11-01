@@ -254,29 +254,25 @@ export const useReferral = () => {
         throw error;
       }
 
-      // Enrichir avec les emails des filleuls
-      const enrichedCommissions = await Promise.all(
-        (commissionsData || []).map(async (comm) => {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('email')
-            .eq('user_id', comm.referred_id)
-            .single()
-            .catch(() => ({ data: null }));
+      // Enrichir avec les données de base (sans email pour l'instant car profiles n'a pas email)
+      const enrichedCommissions = (commissionsData || []).map((comm: any) => ({
+        id: comm.id,
+        commission_amount: comm.commission_amount,
+        total_amount: comm.total_amount,
+        status: comm.status,
+        created_at: comm.created_at,
+        paid_at: comm.paid_at,
+        order_id: comm.order_id,
+        referred_id: comm.referred_id,
+        order: {
+          order_number: comm.orders?.order_number || undefined,
+        },
+        referred: {
+          email: undefined, // Email non disponible directement depuis profiles
+        },
+      }));
 
-          return {
-            ...comm,
-            order: {
-              order_number: (comm.orders as any)?.order_number || undefined,
-            },
-            referred: {
-              email: profileData?.email || undefined,
-            },
-          };
-        })
-      );
-
-      setCommissions(enrichedCommissions as any);
+      setCommissions(enrichedCommissions);
     } catch (error: any) {
       logger.error('Error fetching commissions', { error: error.message });
       toast({

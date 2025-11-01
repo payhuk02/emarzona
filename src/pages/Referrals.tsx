@@ -540,9 +540,9 @@ const Referrals = () => {
                             <TableCell className="font-medium">
                               <div className="flex flex-col">
                                 <span className="text-sm sm:text-base">
-                                  {ref.user?.name || ref.user?.email || "Utilisateur"}
+                                  {ref.user?.name || ref.user?.email || `Filleul #${index + 1}`}
                                 </span>
-                                {ref.user?.name && (
+                                {ref.user?.name && ref.user?.email && (
                                   <span className="text-xs text-muted-foreground sm:hidden">
                                     {ref.user.email}
                                   </span>
@@ -665,7 +665,7 @@ const Referrals = () => {
                               </div>
                             </TableCell>
                             <TableCell className="hidden sm:table-cell">
-                              {comm.referred?.email || "N/A"}
+                              {comm.referred?.email || `Utilisateur ${comm.referred_id?.substring(0, 8)}` || "N/A"}
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
                               <Badge variant="outline">
