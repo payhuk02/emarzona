@@ -475,9 +475,9 @@ export default function InventoryDashboard() {
             onOpenChange={setAdjustDialogOpen}
             item={selectedItem}
           />
-          </div>
-        </main>
-      </div>
-    </SidebarProvider>
+        </div>
+      </main>
+    </div>
+  </SidebarProvider>
   );
 }
