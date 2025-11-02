@@ -16,7 +16,7 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table";
-import { ShoppingCart, Star, ArrowLeft, CheckCircle2, Package, HelpCircle, ClipboardList, Download, Clock, RefreshCw, DollarSign, Gift, Lock, AlertTriangle, CalendarClock, Shield, AlertCircle } from "lucide-react";
+import { ShoppingCart, Star, ArrowLeft, CheckCircle2, Package, HelpCircle, ClipboardList, Download, Clock, RefreshCw, DollarSign, Gift, Lock, AlertTriangle, CalendarClock, Shield, AlertCircle, Eye } from "lucide-react";
 import ProductCard from "@/components/marketplace/ProductCard";
 import { ProductGrid } from "@/components/ui/ProductGrid";
 import StoreFooter from "@/components/storefront/StoreFooter";
@@ -91,8 +91,37 @@ const ProductDetails = () => {
         setError("Produit introuvable ou non disponible");
         logger.warn(`Produit introuvable: ${productSlug} dans la boutique ${foundStore.name}`);
       } else {
-        setProduct(productData[0]);
-        logger.info(`Produit chargé: ${productData[0].name} (${productSlug})`);
+        const product = productData[0];
+        
+        // Fetch related preview/paid products if they exist
+        let freeProduct = null;
+        let paidProduct = null;
+        
+        if (product.free_product_id) {
+          const { data: freeData } = await supabase
+            .from("products")
+            .select("*")
+            .eq("id", product.free_product_id)
+            .single();
+          freeProduct = freeData;
+        }
+        
+        if (product.paid_product_id) {
+          const { data: paidData } = await supabase
+            .from("products")
+            .select("*")
+            .eq("id", product.paid_product_id)
+            .single();
+          paidProduct = paidData;
+        }
+        
+        setProduct({
+          ...product,
+          free_product: freeProduct,
+          paid_product: paidProduct,
+        });
+        
+        logger.info(`Produit chargé: ${product.name} (${productSlug})`);
       }
     } catch (error: any) {
       logger.error("Erreur lors du chargement du produit:", error);
@@ -367,7 +396,7 @@ const ProductDetails = () => {
 
                   {/* 🎯 NOUVEAU: Modèle de tarification */}
                   {product.pricing_model && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {product.pricing_model === 'subscription' && (
                         <Badge variant="outline" className="text-sm bg-blue-500/10 text-blue-700 border-blue-500/20">
                           <RefreshCw className="h-3 w-3 mr-1" />
@@ -392,9 +421,73 @@ const ProductDetails = () => {
                           Prix libre
                         </Badge>
                       )}
+                      {/* Badge Preview Gratuit */}
+                      {product.is_free_preview && (
+                        <Badge variant="outline" className="text-sm bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-700 border-purple-500/20">
+                          <Eye className="h-3 w-3 mr-1" />
+                          Version Preview Gratuite
+                        </Badge>
+                      )}
+                      {/* Badge si produit payant a un preview */}
+                      {product.free_product && !product.is_free_preview && (
+                        <Badge variant="outline" className="text-sm bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-700 border-green-500/20">
+                          <Gift className="h-3 w-3 mr-1" />
+                          Version Preview Disponible
+                        </Badge>
+                      )}
                     </div>
                   )}
                 </div>
+
+                {/* Lien vers produit preview ou payant */}
+                {product.is_free_preview && product.paid_product && (
+                  <div className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800">
+                    <div className="flex items-start gap-3">
+                      <Gift className="h-5 w-5 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-purple-900 dark:text-purple-100 mb-1">
+                          Version Preview Gratuite
+                        </p>
+                        {product.preview_content_description && (
+                          <p className="text-sm text-purple-800 dark:text-purple-200 mb-3">
+                            {product.preview_content_description}
+                          </p>
+                        )}
+                        <Link
+                          to={`/${slug}/${product.paid_product.slug}`}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-colors font-medium text-sm"
+                        >
+                          <Package className="h-4 w-4" />
+                          Accéder à la version complète ({product.paid_product.price.toLocaleString()} {product.paid_product.currency})
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Lien vers preview gratuit si produit payant */}
+                {product.free_product && !product.is_free_preview && (
+                  <div className="p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800">
+                    <div className="flex items-start gap-3">
+                      <Eye className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-green-900 dark:text-green-100 mb-1">
+                          Version Preview Gratuite Disponible
+                        </p>
+                        <p className="text-sm text-green-800 dark:text-green-200 mb-3">
+                          Téléchargez gratuitement un aperçu de ce produit avant d'acheter la version complète.
+                        </p>
+                        <Link
+                          to={`/${slug}/${product.free_product.slug}`}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-colors font-medium text-sm"
+                        >
+                          <Gift className="h-4 w-4" />
+                          Télécharger la version preview gratuite
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* ⏰ NOUVEAU: Countdown promo */}
                 {product.sale_end_date && (

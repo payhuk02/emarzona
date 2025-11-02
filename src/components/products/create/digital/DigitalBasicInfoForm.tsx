@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CurrencySelect } from '@/components/ui/currency-select';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Check, X } from 'lucide-react';
+import { RefreshCw, Check, X, Gift, Info } from 'lucide-react';
 import { generateSlug } from '@/lib/store-utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useState } from 'react';
@@ -281,8 +281,131 @@ export const DigitalBasicInfoForm = ({
               </p>
             )}
           </div>
+
+          {/* Modèle de tarification */}
+          <div className="space-y-2">
+            <Label htmlFor="pricing_model">
+              Modèle de tarification <span className="text-destructive">*</span>
+            </Label>
+            <Select
+              value={formData.pricing_model || 'one-time'}
+              onValueChange={(value) => {
+                updateFormData({ 
+                  pricing_model: value,
+                  price: value === 'free' ? 0 : (formData.price || 0)
+                });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionnez un modèle" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="one-time">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Achat unique</span>
+                    <span className="text-xs text-muted-foreground">
+                      Paiement une seule fois, accès permanent
+                    </span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="subscription">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Abonnement</span>
+                    <span className="text-xs text-muted-foreground">
+                      Paiement récurrent (mensuel/annuel)
+                    </span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="free">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Gratuit</span>
+                    <span className="text-xs text-muted-foreground">
+                      Produit téléchargeable gratuitement
+                    </span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="pay-what-you-want">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Prix libre</span>
+                    <span className="text-xs text-muted-foreground">
+                      L'acheteur choisit le montant (minimum possible)
+                    </span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            {formData.pricing_model === 'free' && (
+              <p className="text-sm text-blue-600 flex items-center gap-2">
+                <Info className="h-4 w-4" />
+                Ce produit sera accessible gratuitement par tous les visiteurs
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
+
+      {/* Produit Preview Gratuit */}
+      {formData.pricing_model !== 'free' && (
+        <Card className="border-2 border-dashed border-purple-300 dark:border-purple-700">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Gift className="h-5 w-5 text-purple-500" />
+              Produit Preview Gratuit
+            </CardTitle>
+            <CardDescription>
+              Créez une version gratuite qui présente un aperçu du contenu payant
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="create_free_preview"
+                checked={formData.create_free_preview || false}
+                onChange={(e) => updateFormData({ create_free_preview: e.target.checked })}
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="create_free_preview" className="font-medium cursor-pointer">
+                Créer automatiquement un produit gratuit preview
+              </Label>
+            </div>
+
+            {formData.create_free_preview && (
+              <div className="space-y-3 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                <div className="space-y-2">
+                  <Label htmlFor="preview_content_description">
+                    Description du contenu preview
+                  </Label>
+                  <Textarea
+                    id="preview_content_description"
+                    placeholder="Ex: Contient les 3 premiers chapitres sur 10 du guide complet. Inclut les bases et une introduction aux concepts avancés."
+                    value={formData.preview_content_description || ''}
+                    onChange={(e) => updateFormData({ preview_content_description: e.target.value })}
+                    rows={3}
+                    maxLength={500}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {formData.preview_content_description?.length || 0} / 500 caractères
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-2 p-2 rounded bg-white dark:bg-gray-800">
+                  <Info className="h-4 w-4 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                  <div className="text-xs text-muted-foreground">
+                    <p className="font-semibold mb-1">Comment ça fonctionne :</p>
+                    <ul className="list-disc list-inside space-y-1 ml-2">
+                      <li>Un produit gratuit sera créé avec le nom "{formData.name || 'Votre produit'} - Version Preview Gratuite"</li>
+                      <li>Seuls les fichiers marqués comme "preview" seront inclus dans le produit gratuit</li>
+                      <li>Les visiteurs pourront télécharger gratuitement le preview</li>
+                      <li>Un lien vers la version complète payante sera affiché sur le preview</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Image URL */}
       <div className="space-y-2">

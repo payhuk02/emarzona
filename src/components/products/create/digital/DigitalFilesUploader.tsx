@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Upload, File, X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Upload, File, X, CheckCircle2, AlertCircle, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -228,17 +228,45 @@ export const DigitalFilesUploader = ({
               {formData.downloadable_files.map((file: any, index: number) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 border rounded-lg"
+                  className="flex items-center justify-between p-3 border rounded-lg space-x-3"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-1">
                     <File className="h-5 w-5 text-muted-foreground" />
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm font-medium">{file.name}</p>
                       <p className="text-xs text-muted-foreground">
                         {formatFileSize(file.size)}
                       </p>
                     </div>
                   </div>
+                  
+                  {/* Toggle Preview (only if create_free_preview is enabled) */}
+                  {formData.create_free_preview && (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id={`is_preview_${index}`}
+                        checked={file.is_preview || false}
+                        onChange={(e) => {
+                          const newFiles = [...formData.downloadable_files];
+                          newFiles[index] = {
+                            ...newFiles[index],
+                            is_preview: e.target.checked,
+                            requires_purchase: !e.target.checked,
+                          };
+                          updateFormData({ downloadable_files: newFiles });
+                        }}
+                        className="rounded border-gray-300"
+                      />
+                      <Label 
+                        htmlFor={`is_preview_${index}`} 
+                        className="text-xs cursor-pointer text-muted-foreground"
+                      >
+                        Preview gratuit
+                      </Label>
+                    </div>
+                  )}
+                  
                   <Button
                     variant="ghost"
                     size="sm"
@@ -248,6 +276,11 @@ export const DigitalFilesUploader = ({
                   </Button>
                 </div>
               ))}
+              {formData.create_free_preview && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  💡 Les fichiers cochés "Preview gratuit" seront inclus dans le produit preview gratuit
+                </p>
+              )}
             </div>
           )}
         </CardContent>

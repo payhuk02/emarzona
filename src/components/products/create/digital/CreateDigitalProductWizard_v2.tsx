@@ -423,9 +423,10 @@ export const CreateDigitalProductWizard = ({
           short_description: formData.short_description,
           category: formData.category,
           product_type: 'digital',
-          price: formData.price,
+          price: formData.pricing_model === 'free' ? 0 : formData.price,
           promotional_price: formData.promotional_price,
           currency: formData.currency,
+          pricing_model: formData.pricing_model || 'one-time',
           image_url: formData.image_url,
           licensing_type: formData.licensing_type || 'standard',
           license_terms: formData.license_terms || null,
@@ -498,8 +499,8 @@ export const CreateDigitalProductWizard = ({
           file_size_mb: file.size / (1024 * 1024),
           order_index: index,
           is_main: index === 0,
-          is_preview: index === 0,
-          requires_purchase: true,
+          is_preview: file.is_preview || false,
+          requires_purchase: file.requires_purchase !== false && !file.is_preview,
           version: '1.0',
         }));
 
@@ -535,6 +536,29 @@ export const CreateDigitalProductWizard = ({
             code: affiliateError.code,
             productId: createdProduct?.id,
           });
+        }
+      }
+
+      // 6. Create free preview product if requested
+      if (formData.create_free_preview && !isDraft) {
+        try {
+          logger.info('Creating free preview product', { paidProductId: product.id });
+          
+          const { data: previewProductId, error: previewError } = await supabase
+            .rpc('create_free_preview_product', {
+              p_paid_product_id: product.id,
+              p_preview_content_description: formData.preview_content_description || null,
+            });
+
+          if (previewError) {
+            logger.error('Error creating preview product', { error: previewError.message });
+            // Ne pas faire échouer la création du produit principal si le preview échoue
+          } else {
+            logger.info('Free preview product created', { previewProductId });
+          }
+        } catch (error: any) {
+          logger.error('Exception creating preview product', { error: error.message });
+          // Ne pas faire échouer la création du produit principal
         }
       }
 
