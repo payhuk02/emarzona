@@ -154,6 +154,11 @@ export const CreateServiceWizard = ({
     name: '',
     description: '',
     price: 0,
+    currency: 'XOF',
+    promotional_price: undefined,
+    pricing_model: 'one-time',
+    create_free_preview: false,
+    preview_content_description: '',
     category_id: null,
     tags: [],
     images: [],
@@ -455,8 +460,10 @@ export const CreateServiceWizard = ({
         name: formData.name,
         slug,
         description: formData.description,
-        price: formData.price || 0,
-        currency: 'XOF',
+        price: formData.pricing_model === 'free' ? 0 : (formData.price || 0),
+        currency: formData.currency || 'XOF',
+        promotional_price: formData.promotional_price || null,
+        pricing_model: formData.pricing_model || 'one-time',
         product_type: 'service',
         category_id: formData.category_id,
         image_url: formData.images?.[0] || null,
@@ -587,6 +594,29 @@ export const CreateServiceWizard = ({
 
       if (affiliateError) {
         console.error('Affiliate settings error:', affiliateError);
+      }
+    }
+
+    // 8. Create free preview service if requested
+    if (formData.create_free_preview && !isDraft && formData.pricing_model !== 'free') {
+      try {
+        logger.info('Creating free preview service', { paidProductId: product.id });
+        
+        const { data: previewServiceId, error: previewError } = await supabase
+          .rpc('create_free_preview_service', {
+            p_paid_product_id: product.id,
+            p_preview_content_description: formData.preview_content_description || null,
+          });
+
+        if (previewError) {
+          logger.error('Error creating preview service', { error: previewError.message });
+          // Ne pas faire échouer la création du service principal si le preview échoue
+        } else {
+          logger.info('Free preview service created', { previewServiceId });
+        }
+      } catch (error: any) {
+        logger.error('Exception creating preview service', { error: error.message });
+        // Ne pas faire échouer la création du service principal
       }
     }
 

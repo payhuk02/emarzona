@@ -26,6 +26,11 @@ import {
   Check,
   Heart,
   Share2,
+  Gift,
+  Eye,
+  Package,
+  RefreshCw,
+  DollarSign,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -42,39 +47,63 @@ export default function ServiceDetail() {
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const [participants, setParticipants] = useState(1);
 
-  // Fetch service data
-  const { data: service, isLoading } = useQuery({
-    queryKey: ['service', serviceId],
-    queryFn: async () => {
-      const { data: productData, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('id', serviceId)
-        .single();
+      // Fetch service data with preview/paid relationships
+      const { data: service, isLoading } = useQuery({
+        queryKey: ['service', serviceId],
+        queryFn: async () => {
+          const { data: productData, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', serviceId)
+            .single();
 
-      if (error) throw error;
+          if (error) throw error;
 
-      // Fetch service details
-      const { data: serviceData } = await supabase
-        .from('service_products')
-        .select('*')
-        .eq('product_id', serviceId)
-        .single();
+          // Récupérer les produits preview/paid si ils existent
+          let freeProduct = null;
+          let paidProduct = null;
+          
+          if (productData?.free_product_id) {
+            const { data: freeData } = await supabase
+              .from('products')
+              .select('*')
+              .eq('id', productData.free_product_id)
+              .single();
+            freeProduct = freeData;
+          }
+          
+          if (productData?.paid_product_id) {
+            const { data: paidData } = await supabase
+              .from('products')
+              .select('*')
+              .eq('id', productData.paid_product_id)
+              .single();
+            paidProduct = paidData;
+          }
 
-      // Fetch staff
-      const { data: staff } = await supabase
-        .from('service_staff_members')
-        .select('*')
-        .eq('service_product_id', serviceData?.id);
+          // Fetch service details
+          const { data: serviceData } = await supabase
+            .from('service_products')
+            .select('*')
+            .eq('product_id', serviceId)
+            .single();
 
-      return {
-        ...productData,
-        service: serviceData,
-        staff: staff || [],
-      };
-    },
-    enabled: !!serviceId,
-  });
+          // Fetch staff
+          const { data: staff } = await supabase
+            .from('service_staff_members')
+            .select('*')
+            .eq('service_product_id', serviceData?.id);
+
+          return {
+            ...productData,
+            free_product: freeProduct,
+            paid_product: paidProduct,
+            service: serviceData,
+            staff: staff || [],
+          };
+        },
+        enabled: !!serviceId,
+      });
 
   const handleBooking = () => {
     if (!selectedDate || !selectedSlot) {
@@ -255,8 +284,104 @@ export default function ServiceDetail() {
                       Prix par personne
                     </CardDescription>
                   )}
+                  
+                  {/* Modèle de tarification */}
+                  {service?.pricing_model && (
+                    <div className="flex items-center gap-2 flex-wrap mt-3">
+                      {service.pricing_model === 'subscription' && (
+                        <Badge variant="outline" className="text-sm bg-blue-500/10 text-blue-700 border-blue-500/20">
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                          Abonnement
+                        </Badge>
+                      )}
+                      {service.pricing_model === 'one-time' && (
+                        <Badge variant="outline" className="text-sm bg-purple-500/10 text-purple-700 border-purple-500/20">
+                          <DollarSign className="h-3 w-3 mr-1" />
+                          Paiement unique
+                        </Badge>
+                      )}
+                      {service.pricing_model === 'free' && (
+                        <Badge variant="outline" className="text-sm bg-green-500/10 text-green-700 border-green-500/20">
+                          <Gift className="h-3 w-3 mr-1" />
+                          Gratuit
+                        </Badge>
+                      )}
+                      {service.pricing_model === 'pay-what-you-want' && (
+                        <Badge variant="outline" className="text-sm bg-orange-500/10 text-orange-700 border-orange-500/20">
+                          <DollarSign className="h-3 w-3 mr-1" />
+                          Prix libre
+                        </Badge>
+                      )}
+                      {/* Badge Preview Gratuit */}
+                      {service.is_free_preview && (
+                        <Badge variant="outline" className="text-sm bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-700 border-purple-500/20">
+                          <Eye className="h-3 w-3 mr-1" />
+                          Version Preview Gratuite
+                        </Badge>
+                      )}
+                      {/* Badge si service payant a un preview */}
+                      {service.free_product && !service.is_free_preview && (
+                        <Badge variant="outline" className="text-sm bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-700 border-green-500/20">
+                          <Gift className="h-3 w-3 mr-1" />
+                          Version Preview Disponible
+                        </Badge>
+                      )}
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {/* Lien vers service preview ou payant */}
+                  {service?.is_free_preview && service?.paid_product && (
+                    <div className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800">
+                      <div className="flex items-start gap-3">
+                        <Gift className="h-5 w-5 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="font-semibold text-purple-900 dark:text-purple-100 mb-1">
+                            Version Preview Gratuite
+                          </p>
+                          {service.preview_content_description && (
+                            <p className="text-sm text-purple-800 dark:text-purple-200 mb-3">
+                              {service.preview_content_description}
+                            </p>
+                          )}
+                          <Button
+                            onClick={() => navigate(`/services/${service.paid_product.slug || service.paid_product.id}`)}
+                            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                            size="sm"
+                          >
+                            <Package className="h-4 w-4 mr-2" />
+                            Accéder à la version complète ({service.paid_product.price.toLocaleString()} {service.paid_product.currency})
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Lien vers preview gratuit si service payant */}
+                  {service?.free_product && !service?.is_free_preview && (
+                    <div className="p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800">
+                      <div className="flex items-start gap-3">
+                        <Eye className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="font-semibold text-green-900 dark:text-green-100 mb-1">
+                            Version Preview Gratuite Disponible
+                          </p>
+                          <p className="text-sm text-green-800 dark:text-green-200 mb-3">
+                            Réservez gratuitement un aperçu du service avant de commander la version complète.
+                          </p>
+                          <Button
+                            onClick={() => navigate(`/services/${service.free_product.slug || service.free_product.id}`)}
+                            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                            size="sm"
+                            variant="outline"
+                          >
+                            <Gift className="h-4 w-4 mr-2" />
+                            Essayer gratuitement
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {/* Participants (if group) */}
                   {isGroup && (
                     <div>

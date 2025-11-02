@@ -18,8 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencySelect } from '@/components/ui/currency-select';
 import { AIContentGenerator } from '@/components/products/AIContentGenerator';
-import { ImagePlus, X, Loader2 } from 'lucide-react';
+import { ImagePlus, X, Loader2, Gift, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { uploadToSupabaseStorage } from '@/utils/uploadToSupabase';
 import type { ServiceProductFormData } from '@/types/service-product';
@@ -169,22 +171,184 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
         />
       </div>
 
-      {/* Price */}
-      <div className="space-y-2">
-        <Label htmlFor="price">Prix (XOF) *</Label>
-        <Input
-          id="price"
-          type="number"
-          min="0"
-          step="1"
-          placeholder="25000"
-          value={data.price || ''}
-          onChange={(e) => onUpdate({ price: parseFloat(e.target.value) || 0 })}
-        />
-        <p className="text-xs text-muted-foreground">
-          Prix de base du service (peut être modifié selon la durée)
-        </p>
-      </div>
+      {/* Tarification */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Tarification</CardTitle>
+          <CardDescription>
+            Définissez le prix de votre service
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="price">
+                Prix <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="price"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="25000"
+                value={data.price || ''}
+                onChange={(e) => onUpdate({ price: parseFloat(e.target.value) || 0 })}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="currency">Devise</Label>
+              <CurrencySelect
+                value={data.currency || 'XOF'}
+                onValueChange={(value) => onUpdate({ currency: value })}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="promotional_price">Prix promotionnel (optionnel)</Label>
+            <Input
+              id="promotional_price"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              value={data.promotional_price || ''}
+              onChange={(e) => onUpdate({ promotional_price: parseFloat(e.target.value) || undefined })}
+            />
+            {data.promotional_price && data.price && data.promotional_price < data.price && (
+              <p className="text-sm text-green-600">
+                Réduction de {Math.round(((data.price - data.promotional_price) / data.price) * 100)}%
+              </p>
+            )}
+          </div>
+
+          {/* Modèle de tarification */}
+          <div className="space-y-2">
+            <Label htmlFor="pricing_model">
+              Modèle de tarification <span className="text-red-500">*</span>
+            </Label>
+            <Select
+              value={data.pricing_model || 'one-time'}
+              onValueChange={(value) => {
+                onUpdate({ pricing_model: value });
+                if (value === 'free') {
+                  onUpdate({ price: 0 });
+                }
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionnez un modèle" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="one-time">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Paiement unique</span>
+                    <span className="text-xs text-muted-foreground">
+                      Prix fixe pour une réservation
+                    </span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="subscription">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Abonnement</span>
+                    <span className="text-xs text-muted-foreground">
+                      Service disponible via abonnement récurrent
+                    </span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="free">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Gratuit</span>
+                    <span className="text-xs text-muted-foreground">
+                      Service accessible gratuitement
+                    </span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="pay-what-you-want">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Prix libre</span>
+                    <span className="text-xs text-muted-foreground">
+                      Le client choisit le montant (minimum possible)
+                    </span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            {data.pricing_model === 'free' && (
+              <p className="text-sm text-blue-600 flex items-center gap-2">
+                <Info className="h-4 w-4" />
+                Ce service sera accessible gratuitement par tous les visiteurs
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Service Preview Gratuit */}
+      {data.pricing_model !== 'free' && (
+        <Card className="border-2 border-dashed border-purple-300 dark:border-purple-700">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Gift className="h-5 w-5 text-purple-500" />
+              Service Preview Gratuit
+            </CardTitle>
+            <CardDescription>
+              Créez une version gratuite qui présente un aperçu du service payant
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="create_free_preview"
+                checked={data.create_free_preview || false}
+                onChange={(e) => onUpdate({ create_free_preview: e.target.checked })}
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="create_free_preview" className="font-medium cursor-pointer">
+                Créer automatiquement un service gratuit preview
+              </Label>
+            </div>
+
+            {data.create_free_preview && (
+              <div className="space-y-3 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                <div className="space-y-2">
+                  <Label htmlFor="preview_content_description">
+                    Description du contenu preview
+                  </Label>
+                  <Textarea
+                    id="preview_content_description"
+                    placeholder="Ex: Consultation gratuite de 15 minutes pour discuter de vos besoins. Le service complet dure 60 minutes."
+                    value={data.preview_content_description || ''}
+                    onChange={(e) => onUpdate({ preview_content_description: e.target.value })}
+                    rows={3}
+                    maxLength={500}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {data.preview_content_description?.length || 0} / 500 caractères
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-2 p-2 rounded bg-white dark:bg-gray-800">
+                  <Info className="h-4 w-4 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                  <div className="text-xs text-muted-foreground">
+                    <p className="font-semibold mb-1">Comment ça fonctionne :</p>
+                    <ul className="list-disc list-inside space-y-1 ml-2">
+                      <li>Un service gratuit sera créé avec le nom "{data.name || 'Votre service'} - Version Preview Gratuite"</li>
+                      <li>La durée sera automatiquement réduite (15min au lieu de 60min par exemple)</li>
+                      <li>Les clients pourront réserver gratuitement le preview</li>
+                      <li>Un lien vers la version complète payante sera affiché sur le preview</li>
+                      <li>Les créneaux de disponibilité seront copiés depuis le service payant</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Images */}
       <div className="space-y-2">
