@@ -21,6 +21,7 @@ DECLARE
   v_commission_amount NUMERIC;
   v_customer_email TEXT;
   v_customer_user_id UUID;
+  v_commission_rate NUMERIC := 0.02;
 BEGIN
   -- Ne traiter que si le paiement est complété
   IF NEW.status != 'completed' THEN
