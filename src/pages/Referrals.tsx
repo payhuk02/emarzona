@@ -62,13 +62,21 @@ const Referrals = () => {
   const headerRef = useScrollAnimation();
   const statsRef = useScrollAnimation();
 
+  // Charger les données quand on change d'onglet
   useEffect(() => {
-    if (activeTab === "referrals") {
-      refetchReferrals();
-    } else if (activeTab === "commissions") {
-      refetchCommissions();
+    if (activeTab === "referrals" && !referralsLoading) {
+      // Ne recharger que si on n'est pas déjà en train de charger
+      if (referrals.length === 0 && !referralsLoading) {
+        refetchReferrals();
+      }
+    } else if (activeTab === "commissions" && !commissionsLoading) {
+      // Ne recharger que si on n'est pas déjà en train de charger
+      if (commissions.length === 0 && !commissionsLoading) {
+        refetchCommissions();
+      }
     }
-  }, [activeTab, refetchReferrals, refetchCommissions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]); // Seulement dépendre de activeTab pour éviter les boucles
 
   const copyToClipboard = async () => {
     if (!data?.referralLink) return;

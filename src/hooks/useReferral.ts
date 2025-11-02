@@ -181,7 +181,7 @@ export const useReferral = () => {
     }
   };
 
-  const fetchReferrals = async () => {
+  const fetchReferrals = useCallback(async () => {
     try {
       setReferralsLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
@@ -387,9 +387,9 @@ export const useReferral = () => {
     } finally {
       setReferralsLoading(false);
     }
-  };
+  }, []);
 
-  const fetchCommissions = async () => {
+  const fetchCommissions = useCallback(async () => {
     try {
       setCommissionsLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
@@ -448,7 +448,7 @@ export const useReferral = () => {
     } finally {
       setCommissionsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchReferralData();
