@@ -491,7 +491,7 @@ export const CreateServiceWizard = ({
     if (productError) throw productError;
 
     // 3. Create service_product
-    const { error: serviceError } = await supabase
+    const { data: serviceProduct, error: serviceError } = await supabase
       .from('service_products')
       .insert({
         product_id: product.id,
@@ -514,14 +514,17 @@ export const CreateServiceWizard = ({
         buffer_time_after: formData.buffer_time_after || 0,
         max_bookings_per_day: formData.max_bookings_per_day,
         advance_booking_days: formData.advance_booking_days || 30,
-      });
+      })
+      .select()
+      .single();
 
     if (serviceError) throw serviceError;
 
     // 4. Create staff members
     if (formData.staff_members && formData.staff_members.length > 0) {
       const staffData = formData.staff_members.map((member: any) => ({
-        service_id: product.id,
+        service_product_id: serviceProduct.id,
+        store_id: store.id,
         name: member.name,
         role: member.role,
         bio: member.bio,
@@ -541,12 +544,12 @@ export const CreateServiceWizard = ({
     // 5. Create availability slots
     if (formData.availability_slots && formData.availability_slots.length > 0) {
       const slotsData = formData.availability_slots.map((slot: any) => ({
-        service_id: product.id,
+        service_product_id: serviceProduct.id,
         day_of_week: slot.day_of_week,
         start_time: slot.start_time,
         end_time: slot.end_time,
-        is_available: slot.is_available !== false,
-        max_bookings_per_slot: slot.max_bookings_per_slot,
+        staff_member_id: slot.staff_member_id || null,
+        is_active: slot.is_available !== false,
       }));
 
       const { error: slotsError } = await supabase
@@ -559,11 +562,12 @@ export const CreateServiceWizard = ({
     // 6. Create resources
     if (formData.resources && formData.resources.length > 0) {
       const resourcesData = formData.resources.map((resource: any) => ({
-        service_id: product.id,
+        service_product_id: serviceProduct.id,
         name: resource.name,
-        type: resource.type,
-        quantity_available: resource.quantity_available,
-        location: resource.location,
+        description: resource.description,
+        resource_type: resource.type || 'other',
+        quantity: resource.quantity_available || 1,
+        is_required: resource.is_required !== false,
       }));
 
       const { error: resourcesError } = await supabase
