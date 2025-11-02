@@ -89,20 +89,16 @@ BEGIN
   END IF;
 
   -- Récupérer le taux de commission depuis platform_settings (défaut 2%)
-  DECLARE
-    v_commission_rate NUMERIC := 0.02;
-  BEGIN
-    SELECT referral_commission_rate INTO v_commission_rate
-    FROM platform_settings
-    LIMIT 1;
-    
-    IF v_commission_rate IS NULL THEN
-      v_commission_rate := 0.02;
-    END IF;
-  END;
+  SELECT COALESCE(referral_commission_rate, 2.00) / 100.0 INTO v_commission_rate
+  FROM platform_settings
+  LIMIT 1;
+  
+  IF v_commission_rate IS NULL THEN
+    v_commission_rate := 0.02;
+  END IF;
 
   -- Calculer la commission
-  v_commission_amount := NEW.amount * (v_commission_rate / 100.0);
+  v_commission_amount := NEW.amount * v_commission_rate;
 
   -- Créer la commission de parrainage
   INSERT INTO referral_commissions (
@@ -122,7 +118,7 @@ BEGIN
     NEW.id,
     NEW.order_id,
     NEW.amount,
-    v_commission_rate,
+    v_commission_rate * 100.0,  -- Stocker en pourcentage (ex: 2.00 pour 2%)
     v_commission_amount,
     'pending'  -- En attente de validation/paiment
   );
