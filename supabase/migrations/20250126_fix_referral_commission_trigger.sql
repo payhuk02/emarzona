@@ -1,13 +1,14 @@
 -- Migration pour corriger le calcul de commission de parrainage
--- Modifie le trigger pour calculer la commission basée sur l'ACHETEUR parrainé,
--- plutôt que sur le vendeur parrainé (logique plus courante)
+-- Récompense le parrain lorsqu'un acheteur achète le produit du filleul (vendeur)
+-- Logique: User A parraine User B → User B vend produit → User C achète → User A reçoit commission
 -- Date: 2025-01-26
 
 -- Supprimer l'ancien trigger
 DROP TRIGGER IF EXISTS calculate_referral_commission_trigger ON public.payments;
 
 -- Fonction pour calculer la commission de parrainage (2%)
--- BASÉE SUR L'ACHETEUR (customer) PARRAINÉ
+-- BASÉE SUR LE FILLEUL VENDEUR (seller)
+-- Récompense le parrain quand son filleul (vendeur) réalise une vente
 CREATE OR REPLACE FUNCTION public.calculate_referral_commission()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -19,8 +20,7 @@ DECLARE
   v_referred_id UUID;
   v_referral_id UUID;
   v_commission_amount NUMERIC;
-  v_customer_email TEXT;
-  v_customer_user_id UUID;
+  v_store_user_id UUID;
   v_commission_rate NUMERIC := 0.02;
 BEGIN
   -- Ne traiter que si le paiement est complété
@@ -28,41 +28,27 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  -- Si pas d'order_id, on ne peut pas identifier l'acheteur
-  IF NEW.order_id IS NULL THEN
+  -- Si pas de store_id, on ne peut pas identifier le vendeur
+  IF NEW.store_id IS NULL THEN
     RETURN NEW;
   END IF;
 
-  -- Récupérer l'email du customer depuis la commande
-  SELECT c.email INTO v_customer_email
-  FROM orders o
-  INNER JOIN customers c ON o.customer_id = c.id
-  WHERE o.id = NEW.order_id
-  LIMIT 1;
+  -- Récupérer l'utilisateur propriétaire du store (le vendeur/filleul potentiel)
+  SELECT user_id INTO v_store_user_id
+  FROM stores
+  WHERE id = NEW.store_id;
 
-  -- Si pas d'email, on ne peut pas continuer
-  IF v_customer_email IS NULL THEN
+  -- Si pas de vendeur trouvé, on ne peut pas continuer
+  IF v_store_user_id IS NULL THEN
     RETURN NEW;
   END IF;
 
-  -- Trouver l'user_id correspondant à cet email
-  -- Comme cette fonction est SECURITY DEFINER, on peut accéder directement à auth.users
-  SELECT id INTO v_customer_user_id
-  FROM auth.users
-  WHERE email = v_customer_email
-  LIMIT 1;
-
-  -- Si pas d'user_id trouvé, on ne peut pas continuer
-  IF v_customer_user_id IS NULL THEN
-    RETURN NEW;
-  END IF;
-
-  -- Vérifier si l'acheteur a été parrainé (referred_by dans profiles)
+  -- Vérifier si le vendeur (filleul) a été parrainé (referred_by dans profiles)
   SELECT referred_by INTO v_referrer_id
   FROM profiles
-  WHERE user_id = v_customer_user_id;
+  WHERE user_id = v_store_user_id;
 
-  -- Si l'acheteur n'a pas de parrain, pas de commission
+  -- Si le vendeur n'a pas de parrain, pas de commission
   IF v_referrer_id IS NULL THEN
     RETURN NEW;
   END IF;
@@ -71,7 +57,7 @@ BEGIN
   SELECT id INTO v_referral_id
   FROM referrals
   WHERE referrer_id = v_referrer_id 
-    AND referred_id = v_customer_user_id
+    AND referred_id = v_store_user_id
     AND status = 'active'
   LIMIT 1;
 
@@ -115,7 +101,7 @@ BEGIN
   ) VALUES (
     v_referral_id,
     v_referrer_id,
-    v_customer_user_id,
+    v_store_user_id,  -- Le filleul vendeur
     NEW.id,
     NEW.order_id,
     NEW.amount,
@@ -141,5 +127,5 @@ WHEN (NEW.status = 'completed')
 EXECUTE FUNCTION public.calculate_referral_commission();
 
 -- Commentaires
-COMMENT ON FUNCTION public.calculate_referral_commission() IS 'Calcule la commission de parrainage (2%) basée sur l''acheteur parrainé qui effectue un achat. La commission est créée quand un client parrainé fait un achat et que le paiement est complété.';
+COMMENT ON FUNCTION public.calculate_referral_commission() IS 'Calcule la commission de parrainage (2%) basée sur le filleul vendeur. Récompense le parrain lorsqu''un acheteur achète le produit de son filleul (vendeur). La commission est créée quand le paiement est complété.';
 
