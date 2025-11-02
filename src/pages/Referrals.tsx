@@ -62,18 +62,18 @@ const Referrals = () => {
   const headerRef = useScrollAnimation();
   const statsRef = useScrollAnimation();
 
-  // Charger les données quand on change d'onglet
+  // Charger les données une seule fois quand on change d'onglet
+  const [hasLoadedReferrals, setHasLoadedReferrals] = useState(false);
+  const [hasLoadedCommissions, setHasLoadedCommissions] = useState(false);
+
   useEffect(() => {
-    if (activeTab === "referrals" && !referralsLoading) {
-      // Ne recharger que si on n'est pas déjà en train de charger
-      if (referrals.length === 0 && !referralsLoading) {
-        refetchReferrals();
-      }
-    } else if (activeTab === "commissions" && !commissionsLoading) {
-      // Ne recharger que si on n'est pas déjà en train de charger
-      if (commissions.length === 0 && !commissionsLoading) {
-        refetchCommissions();
-      }
+    // Charger les données seulement si l'onglet est actif ET que les données n'ont pas déjà été chargées
+    if (activeTab === "referrals" && !hasLoadedReferrals && !referralsLoading) {
+      refetchReferrals();
+      setHasLoadedReferrals(true);
+    } else if (activeTab === "commissions" && !hasLoadedCommissions && !commissionsLoading) {
+      refetchCommissions();
+      setHasLoadedCommissions(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]); // Seulement dépendre de activeTab pour éviter les boucles
