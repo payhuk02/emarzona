@@ -186,75 +186,154 @@ export const useReferral = () => {
       setReferralsLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       
-      if (!user) return;
-
-      // Récupérer d'abord la liste des referrals
-      const { data: referralsData, error } = await supabase
-        .from('referrals')
-        .select('id, referred_id, created_at, status')
-        .eq('referrer_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        logger.error('Error fetching referrals list', { error: error.message });
-        throw error;
-      }
-
-      if (!referralsData || referralsData.length === 0) {
+      if (!user) {
         setReferrals([]);
+        setReferralsLoading(false);
         return;
       }
 
-      // Récupérer les profils des filleuls
-      const referredIds = referralsData.map((r: any) => r.referred_id);
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('user_id, display_name, first_name, last_name')
-        .in('user_id', referredIds);
+      logger.info('Fetching referrals', { referrerId: user.id });
 
-      if (profilesError) {
-        logger.error('Error fetching profiles', { error: profilesError.message });
-        // Continuer même si erreur sur les profils
+      // Option 1: Récupérer depuis referrals table
+      const { data: referralsData, error: referralsError } = await supabase
+        .from('referrals')
+        .select('id, referred_id, created_at, status, referral_code')
+        .eq('referrer_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (referralsError) {
+        logger.error('Error fetching referrals list', { error: referralsError.message });
+        throw referralsError;
       }
 
-      // Créer un map pour accéder rapidement aux profils
-      const profilesMap = new Map();
-      (profilesData || []).forEach((profile: any) => {
-        profilesMap.set(profile.user_id, profile);
-      });
+      logger.info('Referrals fetched', { count: referralsData?.length || 0 });
 
-      // Récupérer les emails depuis auth.users via une fonction RPC ou directement
-      // Pour l'instant, on va utiliser les profils disponibles
-      const referralsWithStats = referralsData.map((ref: any) => {
-        const profile = profilesMap.get(ref.referred_id);
-        const fullName = profile
-          ? [profile.first_name, profile.last_name].filter(Boolean).join(' ') || profile.display_name
-          : undefined;
+      // Si pas de données, retourner tableau vide
+      if (!referralsData || referralsData.length === 0) {
+        logger.info('No referrals found for user', { userId: user.id });
+        setReferrals([]);
+        setReferralsLoading(false);
+        return;
+      }
 
-        return {
-          id: ref.id,
-          referred_id: ref.referred_id,
-          created_at: ref.created_at,
-          status: ref.status,
-          user: {
-            email: '', // Email sera récupéré depuis auth.users si nécessaire
-            name: fullName,
-          },
-          total_orders: 0,
-          total_spent: 0,
-        };
-      });
+      // Option 2: Utiliser la colonne referred_by dans profiles (alternative)
+      // C'est plus direct car profiles.referred_by = referrer_id
+      const { data: referredProfilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, first_name, last_name, created_at')
+        .eq('referred_by', user.id)
+        .order('created_at', { ascending: false });
 
-      // Enrichir avec les emails depuis auth.users (si possible via une vue ou fonction)
-      // Pour l'instant, on garde cette structure simple
-      setReferrals(referralsWithStats);
+      if (profilesError) {
+        logger.error('Error fetching referred profiles', { error: profilesError.message });
+        // Continuer avec les données de referrals si profiles échoue
+      }
+
+      logger.info('Referred profiles fetched', { count: referredProfilesData?.length || 0 });
+
+      // Combiner les données : utiliser referredProfilesData comme source principale
+      // car elle contient directement les profils parrainés
+      const referralsList: ReferralUser[] = [];
+
+      // Si on a des profils via referred_by, les utiliser
+      if (referredProfilesData && referredProfilesData.length > 0) {
+        // Trouver la correspondance dans referrals pour chaque profil
+        for (const profile of referredProfilesData) {
+          const referral = referralsData.find((r: any) => r.referred_id === profile.user_id);
+          
+          const fullName = [profile.first_name, profile.last_name]
+            .filter(Boolean)
+            .join(' ') || profile.display_name || undefined;
+
+          // Récupérer les commandes du filleul pour calculer total_orders et total_spent
+          let totalOrders = 0;
+          let totalSpent = 0;
+
+          try {
+            // Chercher le customer_id via l'email de l'utilisateur
+            // Note: On ne peut pas accéder directement à auth.users, donc on utilise les données disponibles
+            const { data: ordersData } = await supabase
+              .from('orders')
+              .select('id, total_amount')
+              .eq('customer_id', (await supabase
+                .from('customers')
+                .select('id')
+                .eq('email', '') // Email non disponible directement
+                .single()
+                .catch(() => ({ data: null }))).data?.id || null)
+              .catch(() => ({ data: [] }));
+
+            // Pour l'instant, on laisse à 0 car on ne peut pas récupérer l'email directement
+            totalOrders = 0;
+            totalSpent = 0;
+          } catch (orderError) {
+            logger.debug('Could not fetch orders for referred user', { userId: profile.user_id });
+          }
+
+          referralsList.push({
+            id: referral?.id || `temp-${profile.user_id}`,
+            referred_id: profile.user_id,
+            created_at: referral?.created_at || profile.created_at || new Date().toISOString(),
+            status: referral?.status || 'active',
+            user: {
+              email: '', // Email non disponible via profiles
+              name: fullName,
+            },
+            total_orders: totalOrders,
+            total_spent: totalSpent,
+          });
+        }
+      } else {
+        // Fallback : utiliser les données de referrals directement
+        // Récupérer les profils correspondants
+        const referredIds = referralsData.map((r: any) => r.referred_id);
+        
+        if (referredIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('user_id, display_name, first_name, last_name')
+            .in('user_id', referredIds);
+
+          const profilesMap = new Map();
+          (profilesData || []).forEach((profile: any) => {
+            profilesMap.set(profile.user_id, profile);
+          });
+
+          for (const ref of referralsData) {
+            const profile = profilesMap.get(ref.referred_id);
+            const fullName = profile
+              ? [profile.first_name, profile.last_name].filter(Boolean).join(' ') || profile.display_name
+              : undefined;
+
+            referralsList.push({
+              id: ref.id,
+              referred_id: ref.referred_id,
+              created_at: ref.created_at,
+              status: ref.status,
+              user: {
+                email: '',
+                name: fullName || `Utilisateur ${ref.referred_id.substring(0, 8)}`,
+              },
+              total_orders: 0,
+              total_spent: 0,
+            });
+          }
+        }
+      }
+
+      logger.info('Referrals list prepared', { count: referralsList.length });
+      setReferrals(referralsList);
     } catch (error: any) {
-      logger.error('Error fetching referrals', { error: error.message });
+      logger.error('Error fetching referrals', { 
+        error: error.message,
+        stack: error.stack 
+      });
       toast({
         title: "Erreur",
-        description: "Impossible de charger la liste des filleuls",
+        description: error.message || "Impossible de charger la liste des filleuls",
         variant: "destructive",
       });
+      setReferrals([]); // Assurer que l'état est défini même en cas d'erreur
     } finally {
       setReferralsLoading(false);
     }
