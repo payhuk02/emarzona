@@ -12,21 +12,25 @@ export const ReferralTracker = () => {
   useEffect(() => {
     const referralCode = searchParams.get('ref');
     
-    if (referralCode) {
+    // Ne traiter que si le code existe et n'est pas vide
+    if (referralCode && referralCode.trim() !== '') {
       try {
         // Stocker le code de parrainage dans localStorage
-        localStorage.setItem('referral_code', referralCode);
+        localStorage.setItem('referral_code', referralCode.trim());
         
         // Optionnel : stocker aussi dans sessionStorage pour une session
-        sessionStorage.setItem('referral_code', referralCode);
+        sessionStorage.setItem('referral_code', referralCode.trim());
         
-        logger.info('Referral code tracked', { code: referralCode });
+        logger.info('Referral code tracked', { code: referralCode.trim() });
         
         // Nettoyer l'URL pour ne pas laisser le paramètre visible
         // (On garde le paramètre pour que l'utilisateur puisse le voir s'il le souhaite)
       } catch (error: any) {
         logger.error('Error tracking referral code', { error: error.message });
       }
+    } else if (referralCode === '') {
+      // Si ref= existe mais est vide, ne rien faire
+      logger.debug('Empty referral code in URL, ignoring');
     }
   }, [searchParams]);
 

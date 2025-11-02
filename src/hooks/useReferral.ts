@@ -76,6 +76,42 @@ export const useReferral = () => {
         throw new Error('Profil non trouvé');
       }
 
+      // Si le code de parrainage est manquant, le générer via RPC
+      if (!profileData.referral_code) {
+        logger.warn('Referral code missing, generating one', { userId: user.id });
+        
+        // Générer un code via la fonction Supabase
+        const { data: newCode, error: generateError } = await supabase
+          .rpc('generate_referral_code');
+
+        if (!generateError && newCode) {
+          // Mettre à jour le profil avec le nouveau code
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ referral_code: newCode })
+            .eq('user_id', user.id);
+
+          if (!updateError) {
+            profileData.referral_code = newCode;
+            logger.info('Referral code generated and saved', { userId: user.id, code: newCode });
+          } else {
+            logger.error('Error updating profile with referral code', { error: updateError.message });
+          }
+        } else {
+          // Fallback : générer un code côté client si la fonction RPC échoue
+          const fallbackCode = `REF${user.id.substring(0, 8).toUpperCase()}`;
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ referral_code: fallbackCode })
+            .eq('user_id', user.id);
+
+          if (!updateError) {
+            profileData.referral_code = fallbackCode;
+            logger.info('Fallback referral code generated', { userId: user.id, code: fallbackCode });
+          }
+        }
+      }
+
       // Récupérer le taux de commission depuis les paramètres de la plateforme
       const { data: platformSettings } = await supabase
         .from('platform_settings')

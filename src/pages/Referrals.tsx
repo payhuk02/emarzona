@@ -394,9 +394,21 @@ const Referrals = () => {
                     <Input
                       type="text"
                       readOnly
-                      value={loading ? "Chargement..." : data?.referralLink || ""}
+                      value={
+                        loading
+                          ? "Chargement..."
+                          : data?.referralLink && data.referralLink.includes('?ref=')
+                            ? data.referralLink
+                            : data?.referralLink || "Génération du code..."
+                      }
+                      placeholder="Génération du code de parrainage..."
                       className="w-full px-4 py-3 bg-muted rounded-lg font-mono text-xs sm:text-sm border-2 border-border focus:outline-none focus:border-purple-500 transition-colors"
                     />
+                    {data?.referralCode && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Votre code : <span className="font-mono font-semibold">{data.referralCode}</span>
+                      </p>
+                    )}
                   </div>
                   <Button
                     onClick={copyToClipboard}
