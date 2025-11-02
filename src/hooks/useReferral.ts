@@ -235,7 +235,79 @@ export const useReferral = () => {
       // car elle contient directement les profils parrainés
       const referralsList: ReferralUser[] = [];
 
-      // Si on a des profils via referred_by, les utiliser
+      // Récupérer les emails via RPC si disponible
+      const referredIds = referredProfilesData && referredProfilesData.length > 0
+        ? referredProfilesData.map((p: any) => p.user_id)
+        : referralsData.map((r: any) => r.referred_id);
+
+      let emailsMap = new Map<string, string>();
+      
+      if (referredIds.length > 0) {
+        try {
+          const { data: emailsData, error: emailsError } = await supabase
+            .rpc('get_users_emails', { p_user_ids: referredIds });
+
+          if (!emailsError && emailsData) {
+            emailsData.forEach((item: any) => {
+              if (item.user_id && item.email) {
+                emailsMap.set(item.user_id, item.email);
+              }
+            });
+            logger.info('Emails fetched via RPC', { count: emailsMap.size });
+          }
+        } catch (rpcError: any) {
+          logger.debug('RPC get_users_emails not available or failed', { error: rpcError.message });
+        }
+      }
+
+      // Récupérer les statistiques des commandes pour chaque filleul
+      // Utiliser customers table pour trouver les commandes
+      const ordersStatsMap = new Map<string, { orders: number; spent: number }>();
+
+      if (referredIds.length > 0) {
+        try {
+          // Récupérer les customers correspondants via user_id si possible
+          // Note: customers.user_id peut exister ou on peut utiliser email
+          for (const userId of referredIds) {
+            const email = emailsMap.get(userId);
+            if (email) {
+              const { data: customerData } = await supabase
+                .from('customers')
+                .select('id')
+                .eq('email', email)
+                .limit(1)
+                .single()
+                .catch(() => ({ data: null }));
+
+              if (customerData?.id) {
+                const { data: ordersData } = await supabase
+                  .from('orders')
+                  .select('id, total_amount, status')
+                  .eq('customer_id', customerData.id)
+                  .catch(() => ({ data: [] }));
+
+                if (ordersData && ordersData.length > 0) {
+                  const completedOrders = ordersData.filter((o: any) => 
+                    o.status === 'completed' || o.status === 'delivered'
+                  );
+                  const totalSpent = completedOrders.reduce(
+                    (sum: number, o: any) => sum + Number(o.total_amount || 0), 
+                    0
+                  );
+                  ordersStatsMap.set(userId, {
+                    orders: completedOrders.length,
+                    spent: totalSpent,
+                  });
+                }
+              }
+            }
+          }
+        } catch (ordersError: any) {
+          logger.debug('Could not fetch orders stats', { error: ordersError.message });
+        }
+      }
+
+      // Si on a des profils via referred_by, les utiliser (source principale)
       if (referredProfilesData && referredProfilesData.length > 0) {
         // Trouver la correspondance dans referrals pour chaque profil
         for (const profile of referredProfilesData) {
@@ -245,30 +317,8 @@ export const useReferral = () => {
             .filter(Boolean)
             .join(' ') || profile.display_name || undefined;
 
-          // Récupérer les commandes du filleul pour calculer total_orders et total_spent
-          let totalOrders = 0;
-          let totalSpent = 0;
-
-          try {
-            // Chercher le customer_id via l'email de l'utilisateur
-            // Note: On ne peut pas accéder directement à auth.users, donc on utilise les données disponibles
-            const { data: ordersData } = await supabase
-              .from('orders')
-              .select('id, total_amount')
-              .eq('customer_id', (await supabase
-                .from('customers')
-                .select('id')
-                .eq('email', '') // Email non disponible directement
-                .single()
-                .catch(() => ({ data: null }))).data?.id || null)
-              .catch(() => ({ data: [] }));
-
-            // Pour l'instant, on laisse à 0 car on ne peut pas récupérer l'email directement
-            totalOrders = 0;
-            totalSpent = 0;
-          } catch (orderError) {
-            logger.debug('Could not fetch orders for referred user', { userId: profile.user_id });
-          }
+          const stats = ordersStatsMap.get(profile.user_id) || { orders: 0, spent: 0 };
+          const email = emailsMap.get(profile.user_id) || '';
 
           referralsList.push({
             id: referral?.id || `temp-${profile.user_id}`,
@@ -276,48 +326,48 @@ export const useReferral = () => {
             created_at: referral?.created_at || profile.created_at || new Date().toISOString(),
             status: referral?.status || 'active',
             user: {
-              email: '', // Email non disponible via profiles
+              email,
               name: fullName,
             },
-            total_orders: totalOrders,
-            total_spent: totalSpent,
+            total_orders: stats.orders,
+            total_spent: stats.spent,
           });
         }
-      } else {
+      } else if (referralsData && referralsData.length > 0) {
         // Fallback : utiliser les données de referrals directement
         // Récupérer les profils correspondants
-        const referredIds = referralsData.map((r: any) => r.referred_id);
-        
-        if (referredIds.length > 0) {
-          const { data: profilesData } = await supabase
-            .from('profiles')
-            .select('user_id, display_name, first_name, last_name')
-            .in('user_id', referredIds);
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, first_name, last_name')
+          .in('user_id', referredIds)
+          .catch(() => ({ data: [] }));
 
-          const profilesMap = new Map();
-          (profilesData || []).forEach((profile: any) => {
-            profilesMap.set(profile.user_id, profile);
+        const profilesMap = new Map();
+        (profilesData || []).forEach((profile: any) => {
+          profilesMap.set(profile.user_id, profile);
+        });
+
+        for (const ref of referralsData) {
+          const profile = profilesMap.get(ref.referred_id);
+          const fullName = profile
+            ? [profile.first_name, profile.last_name].filter(Boolean).join(' ') || profile.display_name
+            : undefined;
+
+          const stats = ordersStatsMap.get(ref.referred_id) || { orders: 0, spent: 0 };
+          const email = emailsMap.get(ref.referred_id) || '';
+
+          referralsList.push({
+            id: ref.id,
+            referred_id: ref.referred_id,
+            created_at: ref.created_at,
+            status: ref.status,
+            user: {
+              email,
+              name: fullName || `Utilisateur ${ref.referred_id.substring(0, 8)}`,
+            },
+            total_orders: stats.orders,
+            total_spent: stats.spent,
           });
-
-          for (const ref of referralsData) {
-            const profile = profilesMap.get(ref.referred_id);
-            const fullName = profile
-              ? [profile.first_name, profile.last_name].filter(Boolean).join(' ') || profile.display_name
-              : undefined;
-
-            referralsList.push({
-              id: ref.id,
-              referred_id: ref.referred_id,
-              created_at: ref.created_at,
-              status: ref.status,
-              user: {
-                email: '',
-                name: fullName || `Utilisateur ${ref.referred_id.substring(0, 8)}`,
-              },
-              total_orders: 0,
-              total_spent: 0,
-            });
-          }
         }
       }
 
