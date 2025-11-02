@@ -34,6 +34,8 @@ interface CreateFullCourseData {
   price: number;
   currency: string;
   promotional_price?: number;
+  licensing_type?: 'standard' | 'plr' | 'copyrighted';
+  license_terms?: string;
   
   // Données du cours
   level: string;
@@ -114,6 +116,8 @@ export const useCreateFullCourse = () => {
             price: data.price,
             currency: data.currency,
             promotional_price: data.promotional_price || null,
+            licensing_type: data.licensing_type || 'standard',
+            license_terms: data.license_terms || null,
             is_active: true,
             is_draft: false,
             // SEO
