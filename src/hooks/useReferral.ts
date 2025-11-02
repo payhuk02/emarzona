@@ -394,7 +394,13 @@ export const useReferral = () => {
       setCommissionsLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       
-      if (!user) return;
+      if (!user) {
+        setCommissions([]);
+        setCommissionsLoading(false);
+        return;
+      }
+
+      logger.info('Fetching referral commissions', { userId: user.id });
 
       // Récupérer les commissions de base
       const { data: commissionsData, error } = await supabase
@@ -404,7 +410,32 @@ export const useReferral = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        logger.error('Error fetching commissions', { error: error.message });
+        logger.error('Error fetching commissions', { 
+          error: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
+        
+        // Vérifier si c'est une erreur de permission (RLS)
+        const isPermissionError = 
+          error.message?.toLowerCase().includes('permission') ||
+          error.message?.toLowerCase().includes('policy') ||
+          error.message?.toLowerCase().includes('row-level security') ||
+          error.code === '42501' || // insufficient_privilege
+          error.code === 'PGRST301'; // PostgREST not found/access denied
+        
+        if (isPermissionError) {
+          // Erreur de permission - silencieuse, juste logger
+          logger.warn('Permission error fetching commissions (likely RLS)', { 
+            error: error.message,
+            userId: user.id 
+          });
+          setCommissions([]);
+          setCommissionsLoading(false);
+          return;
+        }
+        
         throw error;
       }
 
@@ -494,25 +525,15 @@ export const useReferral = () => {
       setCommissions(enrichedCommissions);
     } catch (error: any) {
       logger.error('Error fetching commissions', { 
-        error: error.message,
-        stack: error.stack 
+        error: error?.message || error,
+        code: error?.code,
+        stack: error?.stack 
       });
       
-      // Ne pas afficher d'erreur si c'est juste une absence de données
-      // ou une erreur non-critique
-      const errorMessage = error?.message || '';
-      const isNonCriticalError = 
-        errorMessage.includes('permission') ||
-        errorMessage.includes('not found') ||
-        errorMessage.includes('does not exist');
-      
-      if (!isNonCriticalError) {
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger l'historique des commissions",
-          variant: "destructive",
-        });
-      }
+      // Ne JAMAIS afficher le toast d'erreur pour les commissions
+      // Car même si la requête échoue, on peut avoir des commissions vides
+      // et l'utilisateur verra "Aucune commission" ce qui est acceptable
+      // Le toast d'erreur n'apporte rien et crée de la confusion
       
       // Toujours définir un tableau vide en cas d'erreur pour éviter les états indéterminés
       setCommissions([]);
