@@ -414,7 +414,7 @@ export const useReferral = () => {
         return;
       }
 
-      // Enrichir avec les numéros de commande si disponibles
+      // Enrichir avec les numéros de commande si disponibles (non-bloquant)
       const orderIds = commissionsData
         .map((comm: any) => comm.order_id)
         .filter((id: any) => id !== null);
@@ -422,22 +422,25 @@ export const useReferral = () => {
       let ordersMap = new Map();
       if (orderIds.length > 0) {
         try {
-          const { data: ordersData } = await supabase
+          const { data: ordersData, error: ordersError } = await supabase
             .from('orders')
             .select('id, order_number')
             .in('id', orderIds);
 
-          if (ordersData) {
+          if (ordersError) {
+            logger.debug('Error fetching orders for commissions', { error: ordersError.message });
+          } else if (ordersData) {
             ordersData.forEach((order: any) => {
               ordersMap.set(order.id, order);
             });
           }
         } catch (ordersError: any) {
-          logger.debug('Could not fetch orders for commissions', { error: ordersError.message });
+          // Erreur silencieuse - on continue sans les numéros de commande
+          logger.debug('Could not fetch orders for commissions', { error: ordersError?.message || ordersError });
         }
       }
 
-      // Enrichir avec les emails des filleuls
+      // Enrichir avec les emails des filleuls (non-bloquant)
       const referredIds = commissionsData
         .map((comm: any) => comm.referred_id)
         .filter((id: any) => id !== null);
@@ -445,11 +448,13 @@ export const useReferral = () => {
       let emailsMap = new Map<string, string>();
       if (referredIds.length > 0) {
         try {
-          const { data: emailsData } = await supabase
-            .rpc('get_users_emails', { p_user_ids: referredIds })
-            .catch(() => ({ data: null }));
+          const { data: emailsData, error: emailsError } = await supabase
+            .rpc('get_users_emails', { p_user_ids: referredIds });
 
-          if (emailsData) {
+          if (emailsError) {
+            // Erreur silencieuse - on continue sans les emails
+            logger.debug('RPC get_users_emails error for commissions', { error: emailsError.message });
+          } else if (emailsData) {
             emailsData.forEach((item: any) => {
               if (item.user_id && item.email) {
                 emailsMap.set(item.user_id, item.email);
@@ -457,7 +462,8 @@ export const useReferral = () => {
             });
           }
         } catch (rpcError: any) {
-          logger.debug('RPC get_users_emails not available for commissions', { error: rpcError.message });
+          // Erreur silencieuse - on continue sans les emails
+          logger.debug('RPC get_users_emails exception for commissions', { error: rpcError?.message || rpcError });
         }
       }
 
@@ -487,12 +493,29 @@ export const useReferral = () => {
       logger.info('Commissions fetched and enriched', { count: enrichedCommissions.length });
       setCommissions(enrichedCommissions);
     } catch (error: any) {
-      logger.error('Error fetching commissions', { error: error.message });
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger l'historique des commissions",
-        variant: "destructive",
+      logger.error('Error fetching commissions', { 
+        error: error.message,
+        stack: error.stack 
       });
+      
+      // Ne pas afficher d'erreur si c'est juste une absence de données
+      // ou une erreur non-critique
+      const errorMessage = error?.message || '';
+      const isNonCriticalError = 
+        errorMessage.includes('permission') ||
+        errorMessage.includes('not found') ||
+        errorMessage.includes('does not exist');
+      
+      if (!isNonCriticalError) {
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger l'historique des commissions",
+          variant: "destructive",
+        });
+      }
+      
+      // Toujours définir un tableau vide en cas d'erreur pour éviter les états indéterminés
+      setCommissions([]);
     } finally {
       setCommissionsLoading(false);
     }
