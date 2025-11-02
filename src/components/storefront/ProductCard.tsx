@@ -352,10 +352,19 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
           </div>
         )}
 
-        {/* Licensing short note */}
+        {/* Licensing details (amélioré) */}
         {(product as any).licensing_type && (
-          <div className="mb-3">
-            <span className="text-xs text-gray-600">
+          <div className="mb-3 flex items-center gap-2">
+            <Shield className={`h-3.5 w-3.5 flex-shrink-0 ${
+              (product as any).licensing_type === 'plr' ? 'text-emerald-500' : 
+              (product as any).licensing_type === 'copyrighted' ? 'text-red-500' : 
+              'text-blue-500'
+            }`} />
+            <span className={`text-xs font-medium ${
+              (product as any).licensing_type === 'plr' ? 'text-emerald-700 dark:text-emerald-400' : 
+              (product as any).licensing_type === 'copyrighted' ? 'text-red-700 dark:text-red-400' : 
+              'text-blue-700 dark:text-blue-400'
+            }`}>
               {(product as any).licensing_type === 'plr' ? 'Licence PLR (droits de label privé)' : (product as any).licensing_type === 'copyrighted' ? 'Protégé par droit d\'auteur' : 'Licence standard'}
             </span>
           </div>
