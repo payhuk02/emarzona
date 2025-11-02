@@ -396,21 +396,10 @@ export const useReferral = () => {
       
       if (!user) return;
 
+      // Récupérer les commissions de base
       const { data: commissionsData, error } = await supabase
         .from('referral_commissions')
-        .select(`
-          id,
-          commission_amount,
-          total_amount,
-          status,
-          created_at,
-          paid_at,
-          order_id,
-          referred_id,
-          orders:order_id (
-            order_number
-          )
-        `)
+        .select('id, commission_amount, total_amount, status, created_at, paid_at, order_id, referred_id, commission_rate')
         .eq('referrer_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -419,24 +408,83 @@ export const useReferral = () => {
         throw error;
       }
 
-      // Enrichir avec les données de base (sans email pour l'instant car profiles n'a pas email)
-      const enrichedCommissions = (commissionsData || []).map((comm: any) => ({
-        id: comm.id,
-        commission_amount: comm.commission_amount,
-        total_amount: comm.total_amount,
-        status: comm.status,
-        created_at: comm.created_at,
-        paid_at: comm.paid_at,
-        order_id: comm.order_id,
-        referred_id: comm.referred_id,
-        order: {
-          order_number: comm.orders?.order_number || undefined,
-        },
-        referred: {
-          email: undefined, // Email non disponible directement depuis profiles
-        },
-      }));
+      // Si pas de données, retourner tableau vide
+      if (!commissionsData || commissionsData.length === 0) {
+        setCommissions([]);
+        return;
+      }
 
+      // Enrichir avec les numéros de commande si disponibles
+      const orderIds = commissionsData
+        .map((comm: any) => comm.order_id)
+        .filter((id: any) => id !== null);
+
+      let ordersMap = new Map();
+      if (orderIds.length > 0) {
+        try {
+          const { data: ordersData } = await supabase
+            .from('orders')
+            .select('id, order_number')
+            .in('id', orderIds);
+
+          if (ordersData) {
+            ordersData.forEach((order: any) => {
+              ordersMap.set(order.id, order);
+            });
+          }
+        } catch (ordersError: any) {
+          logger.debug('Could not fetch orders for commissions', { error: ordersError.message });
+        }
+      }
+
+      // Enrichir avec les emails des filleuls
+      const referredIds = commissionsData
+        .map((comm: any) => comm.referred_id)
+        .filter((id: any) => id !== null);
+
+      let emailsMap = new Map<string, string>();
+      if (referredIds.length > 0) {
+        try {
+          const { data: emailsData } = await supabase
+            .rpc('get_users_emails', { p_user_ids: referredIds })
+            .catch(() => ({ data: null }));
+
+          if (emailsData) {
+            emailsData.forEach((item: any) => {
+              if (item.user_id && item.email) {
+                emailsMap.set(item.user_id, item.email);
+              }
+            });
+          }
+        } catch (rpcError: any) {
+          logger.debug('RPC get_users_emails not available for commissions', { error: rpcError.message });
+        }
+      }
+
+      // Construire les commissions enrichies
+      const enrichedCommissions = commissionsData.map((comm: any) => {
+        const order = ordersMap.get(comm.order_id);
+        const email = emailsMap.get(comm.referred_id) || '';
+
+        return {
+          id: comm.id,
+          commission_amount: Number(comm.commission_amount || 0),
+          total_amount: Number(comm.total_amount || 0),
+          status: comm.status,
+          created_at: comm.created_at,
+          paid_at: comm.paid_at,
+          order_id: comm.order_id,
+          referred_id: comm.referred_id,
+          order: {
+            order_number: order?.order_number || undefined,
+          },
+          referred: {
+            email: email,
+          },
+        };
+      });
+
+      logger.info('Commissions fetched and enriched', { count: enrichedCommissions.length });
       setCommissions(enrichedCommissions);
     } catch (error: any) {
       logger.error('Error fetching commissions', { error: error.message });
