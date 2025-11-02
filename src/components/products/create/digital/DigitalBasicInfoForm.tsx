@@ -307,6 +307,105 @@ export const DigitalBasicInfoForm = ({
           </div>
         )}
       </div>
+
+      {/* Licensing Type (PLR / Copyright) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Type de licence et droits</CardTitle>
+          <CardDescription>
+            Définissez les droits d'utilisation et de commercialisation de votre produit
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="licensing_type">
+              Type de licence <span className="text-destructive">*</span>
+            </Label>
+            <Select
+              value={formData.licensing_type || 'standard'}
+              onValueChange={(value) => updateFormData({ licensing_type: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionnez un type de licence" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="standard">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Licence standard</span>
+                    <span className="text-xs text-muted-foreground">
+                      Utilisation personnelle uniquement, pas de revente
+                    </span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="plr">
+                  <div className="flex flex-col">
+                    <span className="font-medium">PLR (Private Label Rights)</span>
+                    <span className="text-xs text-muted-foreground">
+                      Droits de label privé - Peut être revendu avec modifications
+                    </span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="copyrighted">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Protégé par droit d'auteur</span>
+                    <span className="text-xs text-muted-foreground">
+                      Copyright strict - Aucune utilisation commerciale sans autorisation
+                    </span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-muted-foreground">
+              Le type de licence définit comment votre produit peut être utilisé par les acheteurs
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="license_terms">
+              Conditions de licence (optionnel)
+            </Label>
+            <Textarea
+              id="license_terms"
+              placeholder="Détails supplémentaires sur les conditions d'utilisation, restrictions, permissions..."
+              value={formData.license_terms || ''}
+              onChange={(e) => updateFormData({ license_terms: e.target.value })}
+              rows={4}
+              maxLength={1000}
+            />
+            <p className="text-sm text-muted-foreground">
+              {formData.license_terms?.length || 0} / 1000 caractères
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Ces conditions seront visibles sur la page du produit pour informer les acheteurs
+            </p>
+          </div>
+
+          {/* Info badges */}
+          <div className="flex flex-wrap gap-2 mt-4">
+            {formData.licensing_type === 'plr' && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+                <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-xs">
+                  ✓ PLR : Les acheteurs peuvent revendre ce produit avec modifications
+                </span>
+              </div>
+            )}
+            {formData.licensing_type === 'copyrighted' && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <span className="text-red-600 dark:text-red-400 font-semibold text-xs">
+                  © Copyright : Utilisation personnelle uniquement, pas de revente
+                </span>
+              </div>
+            )}
+            {formData.licensing_type === 'standard' && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                <span className="text-blue-600 dark:text-blue-400 font-semibold text-xs">
+                  ℹ Licence standard : Utilisation personnelle uniquement
+                </span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -194,6 +194,10 @@ export const CreateDigitalProductWizard = ({
     // FAQs
     faqs: [],
     
+    // Licensing (PLR / Copyright)
+    licensing_type: 'standard',
+    license_terms: '',
+    
     // Metadata
     product_type: 'digital',
     is_active: true,
@@ -423,6 +427,8 @@ export const CreateDigitalProductWizard = ({
           promotional_price: formData.promotional_price,
           currency: formData.currency,
           image_url: formData.image_url,
+          licensing_type: formData.licensing_type || 'standard',
+          license_terms: formData.license_terms || null,
           is_active: !isDraft,
           is_draft: isDraft,
           // SEO fields
