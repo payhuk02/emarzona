@@ -10,7 +10,7 @@ export const useCourseDetail = (slug: string) => {
   return useQuery({
     queryKey: ['course-detail', slug],
     queryFn: async () => {
-      // 1. Récupérer le produit par slug
+      // 1. Récupérer le produit par slug avec relations preview/paid
       const { data: product, error: productError } = await supabase
         .from('products')
         .select('*')
@@ -18,6 +18,28 @@ export const useCourseDetail = (slug: string) => {
         .eq('product_type', 'course')
         .eq('is_active', true)
         .single();
+
+      // Récupérer les produits preview/paid si ils existent
+      let freeProduct = null;
+      let paidProduct = null;
+      
+      if (product?.free_product_id) {
+        const { data: freeData } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', product.free_product_id)
+          .single();
+        freeProduct = freeData;
+      }
+      
+      if (product?.paid_product_id) {
+        const { data: paidData } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', product.paid_product_id)
+          .single();
+        paidProduct = paidData;
+      }
 
       if (productError) {
         throw new Error(`Cours non trouvé: ${productError.message}`);
@@ -112,7 +134,11 @@ export const useCourseDetail = (slug: string) => {
       }
 
       return {
-        product,
+        product: {
+          ...product,
+          free_product: freeProduct,
+          paid_product: paidProduct,
+        },
         course,
         sections: sectionsWithLessons,
         store,

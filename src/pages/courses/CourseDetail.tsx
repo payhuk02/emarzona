@@ -25,7 +25,12 @@ import {
   TrendingUp,
   Target,
   Lightbulb,
-  Shield
+  Shield,
+  Gift,
+  Eye,
+  Package,
+  RefreshCw,
+  DollarSign
 } from 'lucide-react';
 import { useCourseDetail } from '@/hooks/courses/useCourseDetail';
 import { VideoPlayer } from '@/components/courses/player/VideoPlayer';
@@ -451,7 +456,51 @@ const CourseDetail = () => {
             <Card className="sticky top-4">
               <CardContent className="p-6">
                 {/* Prix */}
-                <div className="mb-6">
+                <div className="mb-6 space-y-3">
+                  {/* Modèle de tarification */}
+                  {product.pricing_model && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {product.pricing_model === 'subscription' && (
+                        <Badge variant="outline" className="text-sm bg-blue-500/10 text-blue-700 border-blue-500/20">
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                          Abonnement
+                        </Badge>
+                      )}
+                      {product.pricing_model === 'one-time' && (
+                        <Badge variant="outline" className="text-sm bg-purple-500/10 text-purple-700 border-purple-500/20">
+                          <DollarSign className="h-3 w-3 mr-1" />
+                          Achat unique
+                        </Badge>
+                      )}
+                      {product.pricing_model === 'free' && (
+                        <Badge variant="outline" className="text-sm bg-green-500/10 text-green-700 border-green-500/20">
+                          <Gift className="h-3 w-3 mr-1" />
+                          Gratuit
+                        </Badge>
+                      )}
+                      {product.pricing_model === 'pay-what-you-want' && (
+                        <Badge variant="outline" className="text-sm bg-orange-500/10 text-orange-700 border-orange-500/20">
+                          <DollarSign className="h-3 w-3 mr-1" />
+                          Prix libre
+                        </Badge>
+                      )}
+                      {/* Badge Preview Gratuit */}
+                      {product.is_free_preview && (
+                        <Badge variant="outline" className="text-sm bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-700 border-purple-500/20">
+                          <Eye className="h-3 w-3 mr-1" />
+                          Version Preview Gratuite
+                        </Badge>
+                      )}
+                      {/* Badge si cours payant a un preview */}
+                      {product.free_product && !product.is_free_preview && (
+                        <Badge variant="outline" className="text-sm bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-700 border-green-500/20">
+                          <Gift className="h-3 w-3 mr-1" />
+                          Version Preview Disponible
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+
                   {product.promotional_price && product.promotional_price < product.price ? (
                     <div>
                       <div className="flex items-baseline gap-2">
@@ -472,6 +521,59 @@ const CourseDetail = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Lien vers cours preview ou payant */}
+                {product.is_free_preview && product.paid_product && (
+                  <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800">
+                    <div className="flex items-start gap-3">
+                      <Gift className="h-5 w-5 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-purple-900 dark:text-purple-100 mb-1">
+                          Version Preview Gratuite
+                        </p>
+                        {product.preview_content_description && (
+                          <p className="text-sm text-purple-800 dark:text-purple-200 mb-3">
+                            {product.preview_content_description}
+                          </p>
+                        )}
+                        <Button
+                          onClick={() => navigate(`/courses/${product.paid_product.slug}`)}
+                          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                          size="sm"
+                        >
+                          <Package className="h-4 w-4 mr-2" />
+                          Accéder à la version complète ({product.paid_product.price.toLocaleString()} {product.paid_product.currency})
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Lien vers preview gratuit si cours payant */}
+                {product.free_product && !product.is_free_preview && (
+                  <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800">
+                    <div className="flex items-start gap-3">
+                      <Eye className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-green-900 dark:text-green-100 mb-1">
+                          Version Preview Gratuite Disponible
+                        </p>
+                        <p className="text-sm text-green-800 dark:text-green-200 mb-3">
+                          Inscrivez-vous gratuitement au preview avant d'acheter la version complète.
+                        </p>
+                        <Button
+                          onClick={() => navigate(`/courses/${product.free_product.slug}`)}
+                          className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                          size="sm"
+                          variant="outline"
+                        >
+                          <Gift className="h-4 w-4 mr-2" />
+                          Essayer gratuitement
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* CTA Button */}
                 {isEnrolled ? (

@@ -34,6 +34,9 @@ interface CreateFullCourseData {
   price: number;
   currency: string;
   promotional_price?: number;
+  pricing_model?: 'one-time' | 'subscription' | 'free' | 'pay-what-you-want';
+  create_free_preview?: boolean;
+  preview_content_description?: string;
   licensing_type?: 'standard' | 'plr' | 'copyrighted';
   license_terms?: string;
   
@@ -113,9 +116,10 @@ export const useCreateFullCourse = () => {
             description: data.description,
             category: data.category,
             product_type: 'course',
-            price: data.price,
+            price: data.pricing_model === 'free' ? 0 : data.price,
             currency: data.currency,
             promotional_price: data.promotional_price || null,
+            pricing_model: data.pricing_model || 'one-time',
             licensing_type: data.licensing_type || 'standard',
             license_terms: data.license_terms || null,
             is_active: true,
@@ -290,6 +294,29 @@ export const useCreateFullCourse = () => {
 
         console.log('🎉 COURS CRÉÉ AVEC SUCCÈS !');
         console.log(`📊 Résumé: ${data.sections.length} sections, ${totalCreatedLessons} leçons`);
+
+        // ÉTAPE 7 : Créer le cours preview gratuit si demandé
+        if (data.create_free_preview && data.pricing_model !== 'free') {
+          try {
+            console.log('🎁 Création du cours preview gratuit...');
+            
+            const { data: previewCourseId, error: previewError } = await supabase
+              .rpc('create_free_preview_course', {
+                p_paid_product_id: product.id,
+                p_preview_content_description: data.preview_content_description || null,
+              });
+
+            if (previewError) {
+              console.error('❌ Erreur création cours preview:', previewError);
+              console.warn('⚠️ Le cours payant a été créé mais le preview gratuit a échoué');
+            } else {
+              console.log('✅ Cours preview gratuit créé:', previewCourseId);
+            }
+          } catch (error: any) {
+            console.error('💥 Exception création cours preview:', error);
+            // Ne pas faire échouer la création du cours principal
+          }
+        }
 
         return {
           product,

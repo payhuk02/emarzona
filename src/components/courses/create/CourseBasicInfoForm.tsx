@@ -6,7 +6,8 @@ import { RichTextEditorPro } from "@/components/ui/rich-text-editor-pro";
 import { AIContentGenerator } from "@/components/products/AIContentGenerator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Info } from "lucide-react";
+import { CurrencySelect } from "@/components/ui/currency-select";
+import { Info, Gift } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface CourseBasicInfoFormProps {
@@ -20,8 +21,14 @@ interface CourseBasicInfoFormProps {
     category: string;
     licensing_type?: string;
     license_terms?: string;
+    price?: number;
+    currency?: string;
+    promotional_price?: number;
+    pricing_model?: string;
+    create_free_preview?: boolean;
+    preview_content_description?: string;
   };
-  onChange: (field: string, value: string) => void;
+  onChange: (field: string, value: any) => void;
   errors?: Record<string, string>;
 }
 
@@ -361,6 +368,185 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
           </div>
         </CardContent>
       </Card>
+
+      {/* Tarification */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Tarification</CardTitle>
+          <CardDescription>
+            Définissez le prix de votre cours
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="price">
+                Prix <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="price"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={formData.price || ''}
+                onChange={(e) => onChange('price', parseFloat(e.target.value) || 0)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="currency">Devise</Label>
+              <CurrencySelect
+                value={formData.currency || 'XOF'}
+                onValueChange={(value) => onChange('currency', value)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="promotional_price">Prix promotionnel (optionnel)</Label>
+            <Input
+              id="promotional_price"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              value={formData.promotional_price || ''}
+              onChange={(e) => onChange('promotional_price', parseFloat(e.target.value) || undefined)}
+            />
+            {formData.promotional_price && formData.price && formData.promotional_price < formData.price && (
+              <p className="text-sm text-green-600">
+                Réduction de {Math.round(((formData.price - formData.promotional_price) / formData.price) * 100)}%
+              </p>
+            )}
+          </div>
+
+          {/* Modèle de tarification */}
+          <div className="space-y-2">
+            <Label htmlFor="pricing_model">
+              Modèle de tarification <span className="text-red-500">*</span>
+            </Label>
+            <Select
+              value={formData.pricing_model || 'one-time'}
+              onValueChange={(value) => {
+                onChange('pricing_model', value);
+                if (value === 'free') {
+                  onChange('price', 0);
+                }
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionnez un modèle" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="one-time">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Achat unique</span>
+                    <span className="text-xs text-muted-foreground">
+                      Paiement une seule fois, accès permanent
+                    </span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="subscription">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Abonnement</span>
+                    <span className="text-xs text-muted-foreground">
+                      Paiement récurrent (mensuel/annuel)
+                    </span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="free">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Gratuit</span>
+                    <span className="text-xs text-muted-foreground">
+                      Cours accessible gratuitement
+                    </span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="pay-what-you-want">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Prix libre</span>
+                    <span className="text-xs text-muted-foreground">
+                      L'étudiant choisit le montant (minimum possible)
+                    </span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            {formData.pricing_model === 'free' && (
+              <p className="text-sm text-blue-600 flex items-center gap-2">
+                <Info className="h-4 w-4" />
+                Ce cours sera accessible gratuitement par tous les visiteurs
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Produit Preview Gratuit */}
+      {formData.pricing_model !== 'free' && (
+        <Card className="border-2 border-dashed border-purple-300 dark:border-purple-700">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Gift className="h-5 w-5 text-purple-500" />
+              Cours Preview Gratuit
+            </CardTitle>
+            <CardDescription>
+              Créez une version gratuite qui présente un aperçu du contenu payant
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="create_free_preview"
+                checked={formData.create_free_preview || false}
+                onChange={(e) => onChange('create_free_preview', e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="create_free_preview" className="font-medium cursor-pointer">
+                Créer automatiquement un cours gratuit preview
+              </Label>
+            </div>
+
+            {formData.create_free_preview && (
+              <div className="space-y-3 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                <div className="space-y-2">
+                  <Label htmlFor="preview_content_description">
+                    Description du contenu preview
+                  </Label>
+                  <Textarea
+                    id="preview_content_description"
+                    placeholder="Ex: Contient les 2 premiers chapitres sur 10 du cours complet. Inclut les bases et une introduction aux concepts avancés."
+                    value={formData.preview_content_description || ''}
+                    onChange={(e) => onChange('preview_content_description', e.target.value)}
+                    rows={3}
+                    maxLength={500}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {formData.preview_content_description?.length || 0} / 500 caractères
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-2 p-2 rounded bg-white dark:bg-gray-800">
+                  <Info className="h-4 w-4 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                  <div className="text-xs text-muted-foreground">
+                    <p className="font-semibold mb-1">Comment ça fonctionne :</p>
+                    <ul className="list-disc list-inside space-y-1 ml-2">
+                      <li>Un cours gratuit sera créé avec le nom "{formData.title || 'Votre cours'} - Version Preview Gratuite"</li>
+                      <li>Seules les leçons marquées comme "preview" dans le curriculum seront incluses dans le cours gratuit</li>
+                      <li>Les étudiants pourront s'inscrire gratuitement au preview</li>
+                      <li>Un lien vers la version complète payante sera affiché sur le preview</li>
+                      <li>Dans l'étape "Curriculum", cochez "Preview gratuit" pour chaque leçon que vous souhaitez inclure dans la version gratuite</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
