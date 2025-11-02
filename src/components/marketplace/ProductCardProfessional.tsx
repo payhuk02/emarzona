@@ -227,17 +227,22 @@ const ProductCardProfessional = ({
           </div>
         )}
 
-        {/* Badge Licensing (PLR / Copyrighted) */}
+        {/* Badge Licensing (PLR / Copyrighted) - Amélioré pour meilleure visibilité */}
         {product && (product as any).licensing_type && (
-          <div className="absolute top-3 left-3 flex flex-col gap-1">
+          <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
             {(product as any).licensing_type === 'plr' && (
-              <Badge className="bg-emerald-100 text-emerald-800 border-0" aria-label="Licence: PLR - Private Label Rights" title="PLR (Private Label Rights) : peut être modifié et revendu selon conditions">
-                <Shield className="h-3 w-3 mr-1" /> PLR
+              <Badge className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-all hover:scale-105" aria-label="Licence: PLR - Private Label Rights" title="PLR (Private Label Rights) : peut être modifié et revendu selon conditions">
+                <Shield className="h-3.5 w-3.5 mr-1.5" /> PLR
               </Badge>
             )}
             {(product as any).licensing_type === 'copyrighted' && (
-              <Badge className="bg-red-100 text-red-800 border-0" aria-label="Produit protégé par droit d'auteur" title="Protégé par droit d'auteur : revente/modification non autorisées">
-                <Shield className="h-3 w-3 mr-1" /> Droit d'auteur
+              <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white border-0 shadow-lg hover:shadow-xl transition-all hover:scale-105" aria-label="Produit protégé par droit d'auteur" title="Protégé par droit d'auteur : revente/modification non autorisées">
+                <Shield className="h-3.5 w-3.5 mr-1.5" /> Droit d'auteur
+              </Badge>
+            )}
+            {(product as any).licensing_type === 'standard' && (
+              <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all hover:scale-105" aria-label="Licence standard" title="Licence standard : utilisation personnelle uniquement">
+                <Shield className="h-3.5 w-3.5 mr-1.5" /> Standard
               </Badge>
             )}
           </div>
@@ -360,10 +365,19 @@ const ProductCardProfessional = ({
           </div>
         )}
         
-        {/* Licensing details (short) */}
+        {/* Licensing details (short) - Amélioré */}
         {(product as any).licensing_type && (
-          <div className="mb-3">
-            <span className="text-xs text-gray-600">
+          <div className="mb-3 flex items-center gap-2">
+            <Shield className={`h-3.5 w-3.5 flex-shrink-0 ${
+              (product as any).licensing_type === 'plr' ? 'text-emerald-500' : 
+              (product as any).licensing_type === 'copyrighted' ? 'text-red-500' : 
+              'text-blue-500'
+            }`} />
+            <span className={`text-xs font-medium ${
+              (product as any).licensing_type === 'plr' ? 'text-emerald-700' : 
+              (product as any).licensing_type === 'copyrighted' ? 'text-red-700' : 
+              'text-blue-700'
+            }`}>
               {(product as any).licensing_type === 'plr' ? 'Licence PLR (droits de label privé)' : (product as any).licensing_type === 'copyrighted' ? 'Protégé par droit d\'auteur' : 'Licence standard'}
             </span>
           </div>
