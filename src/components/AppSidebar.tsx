@@ -296,6 +296,26 @@ const menuSections = [
     ]
   },
   {
+    label: "Systèmes & Intégrations",
+    items: [
+      {
+        title: "Webhooks",
+        url: "/dashboard/webhooks",
+        icon: Webhook,
+      },
+      {
+        title: "Programme de Fidélité",
+        url: "/dashboard/loyalty",
+        icon: Star,
+      },
+      {
+        title: "Cartes Cadeaux",
+        url: "/dashboard/gift-cards",
+        icon: Gift,
+      },
+    ]
+  },
+  {
     label: "Configuration",
     items: [
       {

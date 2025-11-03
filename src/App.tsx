@@ -263,6 +263,9 @@ const AppContent = () => {
           <Route path="/dashboard/seo" element={<ProtectedRoute><SEOAnalyzer /></ProtectedRoute>} />
           <Route path="/dashboard/products/new" element={<ProtectedRoute><CreateProduct /></ProtectedRoute>} />
           <Route path="/dashboard/products/:id/edit" element={<ProtectedRoute><EditProduct /></ProtectedRoute>} />
+          <Route path="/dashboard/webhooks" element={<ProtectedRoute><AdminWebhookManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/loyalty" element={<ProtectedRoute><AdminLoyaltyManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/gift-cards" element={<ProtectedRoute><AdminGiftCardManagement /></ProtectedRoute>} />
 
           {/* --- Routes Affiliation --- */}
           <Route path="/dashboard/affiliates" element={<ProtectedRoute><StoreAffiliates /></ProtectedRoute>} />

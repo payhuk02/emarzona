@@ -1,6 +1,7 @@
 /**
  * Page wrapper pour CustomerMyGiftCards - Route directe
  * Permet d'accéder directement aux cartes cadeaux depuis la sidebar
+ * Note: CustomerMyGiftCards est un composant simple sans layout, donc on ajoute le layout ici
  */
 
 import { SidebarProvider } from '@/components/ui/sidebar';

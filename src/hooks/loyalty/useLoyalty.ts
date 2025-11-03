@@ -61,18 +61,36 @@ export const useMyLoyaltyPoints = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      const { data, error } = await supabase
+      // Récupérer les points de fidélité sans jointure avec stores pour éviter les problèmes RLS
+      const { data: pointsData, error: pointsError } = await supabase
         .from('loyalty_points')
         .select(`
           *,
-          store:stores(id, name, slug),
           current_tier:loyalty_tiers(*)
         `)
         .eq('customer_id', user.id)
         .order('updated_at', { ascending: false });
 
-      if (error) throw error;
-      return (data || []) as LoyaltyPoints[];
+      if (pointsError) throw pointsError;
+      if (!pointsData || pointsData.length === 0) return [];
+
+      // Récupérer les informations des stores séparément pour chaque store_id unique
+      const storeIds = [...new Set(pointsData.map(p => p.store_id))];
+      const { data: storesData } = await supabase
+        .from('stores')
+        .select('id, name, slug')
+        .in('id', storeIds);
+
+      // Combiner les données
+      const pointsWithStores = pointsData.map(point => {
+        const store = storesData?.find(s => s.id === point.store_id);
+        return {
+          ...point,
+          store: store || null,
+        } as LoyaltyPoints;
+      });
+
+      return pointsWithStores;
     },
   });
 };
@@ -190,10 +208,13 @@ export const useLoyaltyRewardRedemptions = (
   storeId: string | undefined,
   customerId?: string
 ) => {
+  const { user } = useAuth();
+  
   return useQuery({
-    queryKey: ['loyalty-redemptions', storeId, customerId],
+    queryKey: ['loyalty-redemptions', storeId, customerId || user?.id],
     queryFn: async () => {
-      if (!storeId) return [];
+      const userId = customerId || user?.id;
+      if (!userId) return [];
 
       let query = supabase
         .from('loyalty_reward_redemptions')
@@ -201,12 +222,13 @@ export const useLoyaltyRewardRedemptions = (
           *,
           reward:loyalty_rewards(*)
         `)
-        .eq('store_id', storeId)
+        .eq('customer_id', userId)
         .order('created_at', { ascending: false })
         .limit(50);
 
-      if (customerId) {
-        query = query.eq('customer_id', customerId);
+      // Si storeId est fourni, filtrer par store
+      if (storeId) {
+        query = query.eq('store_id', storeId);
       }
 
       const { data, error } = await query;
@@ -214,7 +236,7 @@ export const useLoyaltyRewardRedemptions = (
       if (error) throw error;
       return (data || []) as LoyaltyRewardRedemption[];
     },
-    enabled: !!storeId,
+    enabled: !!(customerId || user?.id),
   });
 };
 
