@@ -82,6 +82,7 @@ const CustomerMyCourses = lazy(() => import("./pages/customer/MyCourses"));
 const CustomerMyProfile = lazy(() => import("./pages/customer/MyProfile"));
 const CustomerMyWishlist = lazy(() => import("./pages/customer/CustomerMyWishlist"));
 const CustomerMyInvoices = lazy(() => import("./pages/customer/CustomerMyInvoices"));
+const CustomerMyReturns = lazy(() => import("./pages/customer/CustomerMyReturns"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const KYC = lazy(() => import("./pages/KYC"));
 const AdminKYC = lazy(() => import("./pages/AdminKYC"));
@@ -114,6 +115,7 @@ const AdminCourses = lazy(() => import("./pages/admin/AdminCourses"));
 const AdminSecurity = lazy(() => import("./pages/admin/AdminSecurity"));
 const AdminAudit = lazy(() => import("./pages/admin/AdminAudit"));
 const AdminTaxManagement = lazy(() => import("./pages/admin/AdminTaxManagement"));
+const AdminReturnManagement = lazy(() => import("./pages/admin/AdminReturnManagement"));
 
 // Pages Affiliation - Lazy loading
 const StoreAffiliates = lazy(() => import("./pages/StoreAffiliates"));
@@ -218,6 +220,7 @@ const AppContent = () => {
           <Route path="/account/profile" element={<ProtectedRoute><CustomerMyProfile /></ProtectedRoute>} />
           <Route path="/account/wishlist" element={<ProtectedRoute><CustomerMyWishlist /></ProtectedRoute>} />
           <Route path="/account/invoices" element={<ProtectedRoute><CustomerMyInvoices /></ProtectedRoute>} />
+          <Route path="/account/returns" element={<ProtectedRoute><CustomerMyReturns /></ProtectedRoute>} />
           
           <Route path="/stores/:slug" element={<Storefront />} />
           <Route path="/stores/:slug/products/:productSlug" element={<ProductDetail />} />
@@ -336,6 +339,7 @@ const AppContent = () => {
           <Route path="/admin/security" element={<ProtectedRoute><AdminSecurity /></ProtectedRoute>} />
           <Route path="/admin/audit" element={<ProtectedRoute><AdminAudit /></ProtectedRoute>} />
           <Route path="/admin/taxes" element={<ProtectedRoute><AdminTaxManagement /></ProtectedRoute>} />
+          <Route path="/admin/returns" element={<ProtectedRoute><AdminReturnManagement /></ProtectedRoute>} />
           <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
           <Route path="/admin/templates" element={<ProtectedRoute><AdminTemplates /></ProtectedRoute>} />
           <Route path="/admin/templates-premium" element={<ProtectedRoute><AdminTemplatesPremium /></ProtectedRoute>} />

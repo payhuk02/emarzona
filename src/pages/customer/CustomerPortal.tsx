@@ -33,6 +33,7 @@ import {
   Heart,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import CustomerMyReturns from './CustomerMyReturns';
 
 interface CustomerStats {
   totalOrders: number;
@@ -209,6 +210,7 @@ export default function CustomerPortal() {
                 <TabsTrigger value="downloads">Téléchargements</TabsTrigger>
                 <TabsTrigger value="courses">Mes Cours</TabsTrigger>
                 <TabsTrigger value="wishlist">Ma Wishlist</TabsTrigger>
+          <TabsTrigger value="returns">Mes Retours</TabsTrigger>
                 <TabsTrigger value="profile">Mon Profil</TabsTrigger>
               </TabsList>
 
@@ -370,6 +372,9 @@ export default function CustomerPortal() {
                 <div className="text-center py-8">
                   <p className="text-muted-foreground mb-4">Redirection vers Ma Wishlist...</p>
                 </div>
+              </TabsContent>
+              <TabsContent value="returns">
+                <CustomerMyReturns />
               </TabsContent>
               <TabsContent value="profile">
                 <div className="text-center py-8">

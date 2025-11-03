@@ -36,11 +36,13 @@ import {
   Sparkles,
   Loader2,
   Keyboard,
+  Ruler,
 } from 'lucide-react';
 import { PhysicalBasicInfoForm } from './PhysicalBasicInfoForm';
 import { PhysicalVariantsBuilder } from './PhysicalVariantsBuilder';
 import { PhysicalInventoryConfig } from './PhysicalInventoryConfig';
 import { PhysicalShippingConfig } from './PhysicalShippingConfig';
+import { PhysicalSizeChartSelector } from './PhysicalSizeChartSelector';
 import { PhysicalAffiliateSettings } from './PhysicalAffiliateSettings';
 import { PhysicalSEOAndFAQs } from './PhysicalSEOAndFAQs';
 import { PhysicalPreview } from './PhysicalPreview';
@@ -89,27 +91,34 @@ const STEPS = [
   },
   {
     id: 5,
+    title: 'Guide des Tailles',
+    description: 'Size chart (optionnel)',
+    icon: Ruler,
+    component: null, // Sera géré directement dans le wizard
+  },
+  {
+    id: 6,
     title: 'Affiliation',
     description: 'Commission, affiliés (optionnel)',
     icon: Users,
     component: PhysicalAffiliateSettings,
   },
   {
-    id: 6,
+    id: 7,
     title: 'SEO & FAQs',
     description: 'Référencement, questions',
     icon: Search,
     component: PhysicalSEOAndFAQs,
   },
   {
-    id: 7,
+    id: 8,
     title: 'Options de Paiement',
     description: 'Complet, partiel, escrow',
     icon: CreditCard,
     component: PaymentOptionsForm,
   },
   {
-    id: 8,
+    id: 9,
     title: 'Aperçu & Validation',
     description: 'Vérifier et publier',
     icon: Eye,
@@ -211,11 +220,14 @@ export const CreatePhysicalProductWizard = ({
     },
     faqs: [],
     
-    // Payment Options (Step 7)
+    // Payment Options (Step 8)
     payment: {
       payment_type: 'full', // 'full' | 'percentage' | 'delivery_secured'
       percentage_rate: 30, // Pour paiement partiel (10-90%)
     },
+    
+    // Size Chart (Step 5)
+    size_chart_id: null as string | null,
     
     // Meta
     is_active: true,
@@ -533,7 +545,22 @@ export const CreatePhysicalProductWizard = ({
       if (variantsError) throw variantsError;
     }
 
-    // 5. Create inventory
+    // 5. Link size chart if selected
+    if (formData.size_chart_id) {
+      const { error: sizeChartError } = await supabase
+        .from('product_size_charts')
+        .insert({
+          product_id: product.id,
+          size_chart_id: formData.size_chart_id,
+        });
+
+      if (sizeChartError) {
+        logger.error('Error linking size chart:', sizeChartError);
+        // Ne pas faire échouer la création si le size chart échoue
+      }
+    }
+
+    // 6. Create inventory
     const { error: inventoryError } = await supabase
       .from('physical_product_inventory')
       .insert({
@@ -911,7 +938,16 @@ export const CreatePhysicalProductWizard = ({
             </CardDescription>
           </CardHeader>
           <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
-            <CurrentStepComponent {...getStepProps()} />
+            {currentStep === 5 ? (
+              <PhysicalSizeChartSelector
+                selectedSizeChartId={formData.size_chart_id || undefined}
+                onSelectSizeChart={(sizeChartId) => {
+                  handleUpdateFormData({ size_chart_id: sizeChartId });
+                }}
+              />
+            ) : CurrentStepComponent ? (
+              <CurrentStepComponent {...getStepProps()} />
+            ) : null}
           </CardContent>
         </Card>
 

@@ -33,6 +33,7 @@ import { useToast } from '@/hooks/use-toast';
 import { VariantSelector } from '@/components/physical/VariantSelector';
 import { InventoryStockIndicator } from '@/components/physical/InventoryStockIndicator';
 import { ShippingInfoDisplay } from '@/components/physical/ShippingInfoDisplay';
+import { SizeChartDisplay } from '@/components/physical/SizeChartDisplay';
 import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummary';
 import { ProductImages } from '@/components/shared';
 
@@ -74,11 +75,20 @@ export default function PhysicalProductDetail() {
         .select('*')
         .eq('physical_product_id', physicalData?.id);
 
+      // Fetch size chart
+      const { data: sizeChartMapping } = await supabase
+        .from('product_size_charts')
+        .select('size_chart_id')
+        .eq('product_id', productId)
+        .limit(1)
+        .single();
+
       return {
         ...productData,
         physical: physicalData,
         variants: variants || [],
         inventory: inventory || [],
+        size_chart_id: sizeChartMapping?.size_chart_id || null,
       };
     },
     enabled: !!productId,
@@ -286,6 +296,14 @@ export default function PhysicalProductDetail() {
           )}
 
           <Separator className="my-12" />
+
+          {/* Size Chart */}
+          {product?.size_chart_id && (
+            <>
+              <SizeChartDisplay sizeChartId={product.size_chart_id} />
+              <Separator className="my-12" />
+            </>
+          )}
 
           {/* Reviews */}
           <ProductReviewsSummary productId={productId!} />
