@@ -44,7 +44,8 @@ import {
   Crown,
   DollarSign,
   Loader2,
-  Rocket
+  Rocket,
+  Package
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -55,6 +56,8 @@ import AdvancedFilters from "@/components/marketplace/AdvancedFilters";
 import ProductComparison from "@/components/marketplace/ProductComparison";
 import FavoritesManager from "@/components/marketplace/FavoritesManager";
 import ProductCardProfessional from "@/components/marketplace/ProductCardProfessional";
+import { BundleCard } from "@/components/marketplace/BundleCard";
+import { useActiveBundles } from "@/hooks/digital/useDigitalBundles";
 import { logger } from '@/lib/logger';
 import { Product, FilterState, PaginationState } from '@/types/marketplace';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
@@ -66,6 +69,9 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 const Marketplace = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
+  
+  // Récupérer les bundles actifs pour affichage
+  const { data: activeBundles } = useActiveBundles(6);
   
   // Hook personnalisé pour favoris synchronisés
   const {
@@ -1121,6 +1127,40 @@ const Marketplace = () => {
           </div>
         </div>
       </section>
+
+      {/* Section Bundles (si disponibles) */}
+      {activeBundles && activeBundles.length > 0 && (
+        <section className="py-8 px-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Package className="h-6 w-6 text-purple-600" />
+                  Bundles Exclusifs
+                </h2>
+                <p className="text-muted-foreground mt-1">
+                  Offres groupées à prix réduit - Économisez jusqu'à {activeBundles.length > 0 ? Math.max(...activeBundles.map(b => b.savings_percentage || 0)) : 0}%
+                </p>
+              </div>
+              <Link to="/marketplace?type=bundle">
+                <Button variant="outline">
+                  Voir tous les bundles
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
+            <ProductGrid>
+              {activeBundles.slice(0, 6).map((bundle: any) => (
+                <BundleCard
+                  key={bundle.id}
+                  bundle={bundle}
+                  storeSlug={bundle.stores?.slug || 'default'}
+                />
+              ))}
+            </ProductGrid>
+          </div>
+        </section>
+      )}
 
       {/* Liste des produits */}
       <section 

@@ -145,6 +145,8 @@ const NotificationSettings = lazy(() => import("./pages/settings/NotificationSet
 const DigitalProductsList = lazy(() => import("./pages/digital/DigitalProductsList"));
 const DigitalProductDetail = lazy(() => import("./pages/digital/DigitalProductDetail"));
 const MyDownloads = lazy(() => import("./pages/digital/MyDownloads"));
+const CreateBundle = lazy(() => import("./pages/digital/CreateBundle"));
+const BundleDetail = lazy(() => import("./pages/digital/BundleDetail"));
 const MyLicenses = lazy(() => import("./pages/digital/MyLicenses"));
 const LicenseManagement = lazy(() => import("./pages/digital/LicenseManagement"));
 const DigitalProductAnalytics = lazy(() => import("./pages/digital/DigitalProductAnalytics"));
@@ -269,6 +271,8 @@ const AppContent = () => {
           <Route path="/dashboard/digital-products" element={<ProtectedRoute><DigitalProductsList /></ProtectedRoute>} />
           <Route path="/digital/:productId" element={<DigitalProductDetail />} />
           <Route path="/dashboard/my-downloads" element={<ProtectedRoute><MyDownloads /></ProtectedRoute>} />
+          <Route path="/dashboard/digital-products/bundles/create" element={<ProtectedRoute><CreateBundle /></ProtectedRoute>} />
+          <Route path="/bundles/:bundleId" element={<BundleDetail />} />
           <Route path="/dashboard/my-licenses" element={<ProtectedRoute><MyLicenses /></ProtectedRoute>} />
           <Route path="/dashboard/licenses/manage/:id" element={<ProtectedRoute><LicenseManagement /></ProtectedRoute>} />
           <Route path="/dashboard/license-management" element={<ProtectedRoute><MyLicenses /></ProtectedRoute>} />
