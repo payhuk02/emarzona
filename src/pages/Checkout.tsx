@@ -57,7 +57,7 @@ interface ShippingAddress {
 export default function Checkout() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { items, summary, isLoading: cartLoading } = useCart();
+  const { items, summary, isLoading: cartLoading, appliedCoupon } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState<ShippingAddress>({
     full_name: '',
@@ -245,6 +245,28 @@ export default function Checkout() {
         .insert(orderItems);
 
       if (itemsError) throw itemsError;
+
+      // Enregistrer l'utilisation du coupon si un coupon a été appliqué
+      if (appliedCoupon && appliedCoupon.promotionId) {
+        try {
+          const { data: sessionId } = await supabase.auth.getSession();
+          await supabase.rpc('record_coupon_usage', {
+            promotion_id_param: appliedCoupon.promotionId,
+            order_id_param: order.id,
+            discount_amount_param: appliedCoupon.discountAmount,
+            original_amount_param: summary.subtotal + taxAmount,
+            final_amount_param: finalTotal,
+            session_id_param: sessionId?.session?.access_token || null,
+          });
+
+          // Retirer le coupon après utilisation
+          localStorage.removeItem('applied_coupon');
+          sessionStorage.removeItem('applied_coupon');
+        } catch (couponError) {
+          logger.error('Error recording coupon usage:', couponError);
+          // Ne pas bloquer la commande si l'enregistrement du coupon échoue
+        }
+      }
 
       // Initier le paiement Moneroo
       const paymentResult = await initiateMonerooPayment({

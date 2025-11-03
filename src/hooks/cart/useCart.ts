@@ -76,20 +76,53 @@ export function useCart() {
     staleTime: 1000 * 60, // 1 minute
   });
 
+  // Récupérer le coupon appliqué depuis localStorage
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+
+  useEffect(() => {
+    const savedCoupon = localStorage.getItem('applied_coupon');
+    if (savedCoupon) {
+      try {
+        const coupon = JSON.parse(savedCoupon);
+        // Vérifier que le coupon n'est pas expiré (24h)
+        const appliedAt = new Date(coupon.appliedAt);
+        const now = new Date();
+        const hoursDiff = (now.getTime() - appliedAt.getTime()) / (1000 * 60 * 60);
+        
+        if (hoursDiff < 24) {
+          setAppliedCoupon(coupon);
+        } else {
+          localStorage.removeItem('applied_coupon');
+          sessionStorage.removeItem('applied_coupon');
+          setAppliedCoupon(null);
+        }
+      } catch (e) {
+        localStorage.removeItem('applied_coupon');
+        sessionStorage.removeItem('applied_coupon');
+        setAppliedCoupon(null);
+      }
+    }
+  }, []);
+
   // Calculer le summary
+  const subtotal = items.reduce((sum, item) => {
+    const itemPrice = (item.unit_price - (item.discount_amount || 0)) * item.quantity;
+    return sum + itemPrice;
+  }, 0);
+
+  // Calculer la réduction du coupon
+  const couponDiscount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+
   const summary: CartSummary = {
-    subtotal: items.reduce((sum, item) => {
-      const itemPrice = (item.unit_price - (item.discount_amount || 0)) * item.quantity;
-      return sum + itemPrice;
-    }, 0),
-    discount_amount: items.reduce((sum, item) => (item.discount_amount || 0) * item.quantity, 0),
+    subtotal,
+    discount_amount: couponDiscount + items.reduce((sum, item) => (item.discount_amount || 0) * item.quantity, 0),
     tax_amount: 0, // Calculé côté checkout selon pays
     shipping_amount: 0, // Calculé côté checkout selon adresse
     total: 0,
     item_count: items.length,
   };
 
-  summary.total = summary.subtotal + summary.tax_amount + summary.shipping_amount;
+  summary.total = Math.max(0, summary.subtotal - summary.discount_amount + summary.tax_amount + summary.shipping_amount);
 
   /**
    * Ajouter un produit au panier
@@ -299,24 +332,62 @@ export function useCart() {
    */
   const applyCoupon = useMutation({
     mutationFn: async (couponCode: string) => {
-      // TODO: Vérifier validité du coupon dans table coupons
-      // Pour l'instant, placeholder
-      const { error } = await supabase
-        .from('cart_items')
-        .update({ coupon_code: couponCode })
-        .or(`user_id.eq.${user?.id},session_id.eq.${sessionId}`);
+      if (items.length === 0) {
+        throw new Error('Votre panier est vide');
+      }
 
-      if (error) throw error;
-      return { valid: true, message: 'Coupon appliqué' };
+      // Récupérer les IDs et types de produits du panier
+      const productIds = items.map(item => item.product_id).filter(Boolean);
+      const productTypes = items.map(item => item.product_type).filter(Boolean);
+
+      // Appeler la fonction RPC de validation
+      const { data: validationResult, error } = await supabase
+        .rpc('validate_coupon', {
+          coupon_code: couponCode.toUpperCase().trim(),
+          cart_subtotal: summary.subtotal,
+          product_ids: productIds.length > 0 ? productIds : null,
+          product_types: productTypes.length > 0 ? productTypes : null,
+        });
+
+      if (error) {
+        logger.error('Error validating coupon:', error);
+        throw error;
+      }
+
+      if (!validationResult || !validationResult.valid) {
+        throw new Error(validationResult?.error || 'Code coupon invalide');
+      }
+
+      const promotion = validationResult.promotion;
+
+      // Stocker le coupon appliqué dans localStorage et session
+      const couponData = {
+        code: couponCode.toUpperCase().trim(),
+        promotionId: promotion.id,
+        discountAmount: parseFloat(promotion.discount_amount),
+        discountType: promotion.discount_type,
+        discountValue: parseFloat(promotion.discount_value),
+        appliedAt: new Date().toISOString(),
+      };
+
+      localStorage.setItem('applied_coupon', JSON.stringify(couponData));
+      sessionStorage.setItem('applied_coupon', JSON.stringify(couponData));
+
+      return {
+        valid: true,
+        promotion,
+        message: 'Coupon appliqué avec succès',
+      };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
       toast({
         title: '✅ Coupon appliqué',
-        description: 'La remise a été appliquée',
+        description: `${data.promotion.discount_amount.toLocaleString('fr-FR')} XOF de réduction appliquée`,
       });
     },
     onError: (error: any) => {
+      logger.error('Error applying coupon:', error);
       toast({
         title: '❌ Coupon invalide',
         description: error.message || 'Ce code promo n\'est pas valide',
@@ -324,6 +395,20 @@ export function useCart() {
       });
     },
   });
+
+  /**
+   * Retirer le coupon appliqué
+   */
+  const removeCoupon = useCallback(() => {
+    localStorage.removeItem('applied_coupon');
+    sessionStorage.removeItem('applied_coupon');
+    setAppliedCoupon(null);
+    queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+    toast({
+      title: 'Coupon retiré',
+      description: 'Le coupon a été retiré de votre panier',
+    });
+  }, [queryClient, toast]);
 
   return {
     items,
@@ -335,6 +420,8 @@ export function useCart() {
     removeItem: removeItem.mutateAsync,
     clearCart: clearCart.mutateAsync,
     applyCoupon: applyCoupon.mutateAsync,
+    removeCoupon,
+    appliedCoupon,
     itemCount: items.length,
     isEmpty: items.length === 0,
   };

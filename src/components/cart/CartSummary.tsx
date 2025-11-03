@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ShoppingBag, Ticket, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Ticket, ArrowRight, X } from 'lucide-react';
 import { useState } from 'react';
 import { useCart } from '@/hooks/cart/useCart';
 import { useToast } from '@/hooks/use-toast';
@@ -20,7 +20,7 @@ interface CartSummaryProps {
 }
 
 export function CartSummary({ summary, onCheckout }: CartSummaryProps) {
-  const { applyCoupon, isLoading } = useCart();
+  const { applyCoupon, removeCoupon, appliedCoupon, isLoading } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState('');
@@ -75,30 +75,59 @@ export function CartSummary({ summary, onCheckout }: CartSummaryProps) {
       <CardContent className="space-y-4">
         {/* Code promo */}
         <div className="space-y-2">
-          <label className="text-sm font-medium flex items-center gap-2">
-            <Ticket className="h-4 w-4" />
-            Code promo
-          </label>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Entrez le code"
-              value={couponCode}
-              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleApplyCoupon();
-                }
-              }}
-              disabled={applyingCoupon || isLoading}
-            />
-            <Button
-              onClick={handleApplyCoupon}
-              disabled={applyingCoupon || isLoading || !couponCode.trim()}
-              variant="outline"
-            >
-              Appliquer
-            </Button>
-          </div>
+          {appliedCoupon ? (
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Ticket className="h-4 w-4 text-green-600" />
+                Code promo appliqué
+              </label>
+              <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div>
+                  <div className="font-medium text-green-700 dark:text-green-400">
+                    {appliedCoupon.code}
+                  </div>
+                  <div className="text-xs text-green-600 dark:text-green-500">
+                    -{appliedCoupon.discountAmount.toLocaleString('fr-FR')} XOF
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={removeCoupon}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Ticket className="h-4 w-4" />
+                Code promo
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Entrez le code"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleApplyCoupon();
+                    }
+                  }}
+                  disabled={applyingCoupon || isLoading}
+                />
+                <Button
+                  onClick={handleApplyCoupon}
+                  disabled={applyingCoupon || isLoading || !couponCode.trim()}
+                  variant="outline"
+                >
+                  Appliquer
+                </Button>
+              </div>
+            </>
+          )}
         </div>
 
         <Separator />

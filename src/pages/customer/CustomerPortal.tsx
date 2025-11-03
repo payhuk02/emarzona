@@ -30,6 +30,7 @@ import {
   MapPin,
   CreditCard,
   ArrowRight,
+  Heart,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -207,6 +208,7 @@ export default function CustomerPortal() {
                 <TabsTrigger value="orders">Commandes</TabsTrigger>
                 <TabsTrigger value="downloads">Téléchargements</TabsTrigger>
                 <TabsTrigger value="courses">Mes Cours</TabsTrigger>
+                <TabsTrigger value="wishlist">Ma Wishlist</TabsTrigger>
                 <TabsTrigger value="profile">Mon Profil</TabsTrigger>
               </TabsList>
 
@@ -308,6 +310,25 @@ export default function CustomerPortal() {
                     </CardContent>
                   </Card>
 
+                  {/* Ma Wishlist */}
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/account/wishlist')}>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Heart className="h-5 w-5 text-red-500" />
+                        Ma Wishlist
+                      </CardTitle>
+                      <CardDescription>
+                        Consultez vos produits favoris
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button variant="outline" className="w-full justify-between">
+                        Voir ma wishlist
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+
                   {/* Mon Profil */}
                   <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/account/profile')}>
                     <CardHeader>
@@ -343,6 +364,11 @@ export default function CustomerPortal() {
               <TabsContent value="courses">
                 <div className="text-center py-8">
                   <p className="text-muted-foreground mb-4">Redirection vers Mes Cours...</p>
+                </div>
+              </TabsContent>
+              <TabsContent value="wishlist">
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground mb-4">Redirection vers Ma Wishlist...</p>
                 </div>
               </TabsContent>
               <TabsContent value="profile">

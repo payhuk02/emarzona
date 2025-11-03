@@ -80,6 +80,7 @@ const CustomerMyOrders = lazy(() => import("./pages/customer/MyOrders"));
 const CustomerMyDownloads = lazy(() => import("./pages/customer/MyDownloads"));
 const CustomerMyCourses = lazy(() => import("./pages/customer/MyCourses"));
 const CustomerMyProfile = lazy(() => import("./pages/customer/MyProfile"));
+const CustomerMyWishlist = lazy(() => import("./pages/customer/CustomerMyWishlist"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const KYC = lazy(() => import("./pages/KYC"));
 const AdminKYC = lazy(() => import("./pages/AdminKYC"));
@@ -208,6 +209,7 @@ const AppContent = () => {
           <Route path="/account/downloads" element={<ProtectedRoute><CustomerMyDownloads /></ProtectedRoute>} />
           <Route path="/account/courses" element={<ProtectedRoute><CustomerMyCourses /></ProtectedRoute>} />
           <Route path="/account/profile" element={<ProtectedRoute><CustomerMyProfile /></ProtectedRoute>} />
+          <Route path="/account/wishlist" element={<ProtectedRoute><CustomerMyWishlist /></ProtectedRoute>} />
           
           <Route path="/stores/:slug" element={<Storefront />} />
           <Route path="/stores/:slug/products/:productSlug" element={<ProductDetail />} />
