@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
+import { logger } from '@/lib/logger';
 
 /**
  * Options pour créer une commande digital
@@ -49,6 +50,12 @@ export interface CreateDigitalOrderOptions {
   
   /** Durée de validité licence en jours */
   licenseExpiryDays?: number;
+
+  /** ID de la carte cadeau à utiliser (optionnel) */
+  giftCardId?: string;
+
+  /** Montant de la carte cadeau à utiliser (optionnel) */
+  giftCardAmount?: number;
 }
 
 /**
@@ -128,6 +135,8 @@ export const useCreateDigitalOrder = () => {
         licenseType = 'single',
         maxActivations = 1,
         licenseExpiryDays,
+        giftCardId,
+        giftCardAmount = 0,
       } = options;
 
       // 1. Récupérer les détails du produit
@@ -208,11 +217,15 @@ export const useCreateDigitalOrder = () => {
         licenseId = license.id;
       }
 
-      // 4. Générer un numéro de commande
+      // 4. Calculer le montant final (après carte cadeau si applicable)
+      const baseAmount = product.promotional_price || product.price;
+      const finalAmount = Math.max(0, baseAmount - (giftCardAmount || 0));
+
+      // 5. Générer un numéro de commande
       const { data: orderNumberData } = await supabase.rpc('generate_order_number');
       const orderNumber = orderNumberData || `ORD-${Date.now()}`;
 
-      // 5. Créer la commande
+      // 6. Créer la commande
       // Récupérer le cookie d'affiliation s'il existe
       const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
@@ -222,11 +235,11 @@ export const useCreateDigitalOrder = () => {
           store_id: storeId,
           customer_id: customerId,
           order_number: orderNumber,
-          total_amount: product.promotional_price || product.price,
+          total_amount: finalAmount,
           currency: product.currency,
           payment_status: 'pending',
           status: 'pending',
-          affiliate_tracking_cookie: affiliateTrackingCookie, // Inclure le cookie d'affiliation
+          affiliate_tracking_cookie: affiliateTrackingCookie,
         })
         .select('*')
         .single();
@@ -235,7 +248,46 @@ export const useCreateDigitalOrder = () => {
         throw new Error('Erreur lors de la création de la commande');
       }
 
-      // Déclencher webhook order.created (asynchrone, ne bloque pas)
+      // 7. Rédimer la carte cadeau si applicable (APRÈS création commande)
+      if (giftCardId && giftCardAmount && giftCardAmount > 0) {
+        try {
+          const { data: redeemResult, error: redeemError } = await supabase.rpc('redeem_gift_card', {
+            p_gift_card_id: giftCardId,
+            p_order_id: order.id,
+            p_amount: giftCardAmount,
+          });
+
+          if (redeemError) {
+            logger.error('Error redeeming gift card:', redeemError);
+            // Ne pas bloquer la commande
+          } else if (redeemResult && redeemResult.length > 0 && !redeemResult[0].success) {
+            logger.error('Gift card redemption failed:', redeemResult[0].message);
+            // Ne pas bloquer la commande
+          }
+        } catch (giftCardError) {
+          logger.error('Error in gift card redemption:', giftCardError);
+          // Ne pas bloquer la commande
+        }
+      }
+
+      // 8. Créer automatiquement la facture
+      try {
+        const { data: invoiceId, error: invoiceError } = await supabase.rpc('create_invoice_from_order', {
+          p_order_id: order.id,
+        });
+
+        if (invoiceError) {
+          logger.error('Error creating invoice:', invoiceError);
+          // Ne pas bloquer la commande si la facture échoue
+        } else {
+          logger.info(`Invoice created: ${invoiceId}`);
+        }
+      } catch (invoiceErr) {
+        logger.error('Error in invoice creation:', invoiceErr);
+        // Ne pas bloquer la commande
+      }
+
+      // 9. Déclencher webhook order.created (asynchrone, ne bloque pas)
       import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
         triggerOrderCreatedWebhook(order.id, {
           store_id: order.store_id,
@@ -249,7 +301,7 @@ export const useCreateDigitalOrder = () => {
         }).catch(console.error);
       });
 
-      // 6. Créer l'order_item avec les références spécialisées
+      // 10. Créer l'order_item avec les références spécialisées
       const { data: orderItem, error: orderItemError } = await supabase
         .from('order_items')
         .insert({
@@ -274,13 +326,13 @@ export const useCreateDigitalOrder = () => {
         throw new Error('Erreur lors de la création de l\'élément de commande');
       }
 
-      // 7. Initier le paiement Moneroo
+      // 11. Initier le paiement Moneroo
       const paymentResult = await initiateMonerooPayment({
         storeId,
         productId,
         orderId: order.id,
         customerId,
-        amount: product.promotional_price || product.price,
+        amount: finalAmount,
         currency: product.currency,
         description: `Achat: ${product.name}`,
         customerEmail,
@@ -298,7 +350,7 @@ export const useCreateDigitalOrder = () => {
         throw new Error('Erreur lors de l\'initialisation du paiement');
       }
 
-      // 8. Retourner le résultat
+      // 12. Retourner le résultat
       return {
         orderId: order.id,
         orderItemId: orderItem.id,

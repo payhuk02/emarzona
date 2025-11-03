@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
+import { logger } from '@/lib/logger';
 
 /**
  * Options pour créer une commande service
@@ -53,6 +54,12 @@ export interface CreateServiceOrderOptions {
   
   /** Notes de réservation */
   notes?: string;
+
+  /** ID de la carte cadeau à utiliser (optionnel) */
+  giftCardId?: string;
+
+  /** Montant de la carte cadeau à utiliser (optionnel) */
+  giftCardAmount?: number;
 }
 
 /**
@@ -115,6 +122,8 @@ export const useCreateServiceOrder = () => {
         staffId,
         numberOfParticipants = 1,
         notes,
+        giftCardId,
+        giftCardAmount = 0,
       } = options;
 
       // 1. Récupérer les détails du produit (avec payment_options)
@@ -269,6 +278,9 @@ export const useCreateServiceOrder = () => {
       }
       // Si 'full', amountToPay = totalPrice (déjà défini)
 
+      // Appliquer la carte cadeau si applicable
+      const finalAmountToPay = Math.max(0, amountToPay - (giftCardAmount || 0));
+
       // 8. Générer un numéro de commande
       const { data: orderNumberData } = await supabase.rpc('generate_order_number');
       const orderNumber = orderNumberData || `ORD-${Date.now()}`;
@@ -283,14 +295,14 @@ export const useCreateServiceOrder = () => {
           store_id: storeId,
           customer_id: customerId,
           order_number: orderNumber,
-          total_amount: totalPrice,
+          total_amount: totalPrice - (giftCardAmount || 0), // Montant final après gift card
           currency: product.currency,
           payment_status: 'pending',
           status: 'pending',
           payment_type: paymentType,
           percentage_paid: percentagePaid,
           remaining_amount: remainingAmount,
-          affiliate_tracking_cookie: affiliateTrackingCookie, // Inclure le cookie d'affiliation
+          affiliate_tracking_cookie: affiliateTrackingCookie,
         })
         .select('*')
         .single();
@@ -305,7 +317,46 @@ export const useCreateServiceOrder = () => {
         throw new Error('Erreur lors de la création de la commande');
       }
 
-      // Déclencher webhook order.created (asynchrone, ne bloque pas)
+      // 9a. Rédimer la carte cadeau si applicable (APRÈS création commande)
+      if (giftCardId && giftCardAmount && giftCardAmount > 0) {
+        try {
+          const { data: redeemResult, error: redeemError } = await supabase.rpc('redeem_gift_card', {
+            p_gift_card_id: giftCardId,
+            p_order_id: order.id,
+            p_amount: giftCardAmount,
+          });
+
+          if (redeemError) {
+            logger.error('Error redeeming gift card:', redeemError);
+            // Ne pas bloquer la commande
+          } else if (redeemResult && redeemResult.length > 0 && !redeemResult[0].success) {
+            logger.error('Gift card redemption failed:', redeemResult[0].message);
+            // Ne pas bloquer la commande
+          }
+        } catch (giftCardError) {
+          logger.error('Error in gift card redemption:', giftCardError);
+          // Ne pas bloquer la commande
+        }
+      }
+
+      // 9b. Créer automatiquement la facture
+      try {
+        const { data: invoiceId, error: invoiceError } = await supabase.rpc('create_invoice_from_order', {
+          p_order_id: order.id,
+        });
+
+        if (invoiceError) {
+          logger.error('Error creating invoice:', invoiceError);
+          // Ne pas bloquer la commande si la facture échoue
+        } else {
+          logger.info(`Invoice created: ${invoiceId}`);
+        }
+      } catch (invoiceErr) {
+        logger.error('Error in invoice creation:', invoiceErr);
+        // Ne pas bloquer la commande
+      }
+
+      // 10. Déclencher webhook order.created (asynchrone, ne bloque pas)
       import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
         triggerOrderCreatedWebhook(order.id, {
           store_id: order.store_id,
@@ -319,7 +370,7 @@ export const useCreateServiceOrder = () => {
         }).catch(console.error);
       });
 
-      // 10. Créer l'order_item avec les références spécialisées
+      // 11. Créer l'order_item avec les références spécialisées
       const { data: orderItem, error: orderItemError } = await supabase
         .from('order_items')
         .insert({
@@ -390,7 +441,7 @@ export const useCreateServiceOrder = () => {
         productId,
         orderId: order.id,
         customerId,
-        amount: amountToPay,
+        amount: finalAmountToPay,
         currency: product.currency,
         description: paymentDescription,
         customerEmail,
