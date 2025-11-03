@@ -268,8 +268,12 @@ export default function Checkout() {
         throw new Error('Impossible d\'initialiser le paiement');
       }
 
-      // Vider le panier après création commande
-      // (on le fait après redirection pour éviter problèmes)
+      // Marquer le panier comme récupéré (pour abandoned cart recovery)
+      try {
+        await markCartRecovered();
+      } catch (err) {
+        logger.error('Error marking cart as recovered:', err);
+      }
       
       // Rediriger vers Moneroo
       safeRedirect(paymentResult.checkout_url, () => {
