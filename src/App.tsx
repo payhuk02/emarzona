@@ -83,6 +83,8 @@ const CustomerMyProfile = lazy(() => import("./pages/customer/MyProfile"));
 const CustomerMyWishlist = lazy(() => import("./pages/customer/CustomerMyWishlist"));
 const CustomerMyInvoices = lazy(() => import("./pages/customer/CustomerMyInvoices"));
 const CustomerMyReturns = lazy(() => import("./pages/customer/CustomerMyReturns"));
+const CustomerLoyaltyPage = lazy(() => import("./pages/customer/CustomerLoyaltyPage"));
+const CustomerMyGiftCardsPage = lazy(() => import("./pages/customer/CustomerMyGiftCardsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const KYC = lazy(() => import("./pages/KYC"));
 const AdminKYC = lazy(() => import("./pages/AdminKYC"));
@@ -224,6 +226,8 @@ const AppContent = () => {
           <Route path="/account/wishlist" element={<ProtectedRoute><CustomerMyWishlist /></ProtectedRoute>} />
           <Route path="/account/invoices" element={<ProtectedRoute><CustomerMyInvoices /></ProtectedRoute>} />
           <Route path="/account/returns" element={<ProtectedRoute><CustomerMyReturns /></ProtectedRoute>} />
+          <Route path="/account/loyalty" element={<ProtectedRoute><CustomerLoyaltyPage /></ProtectedRoute>} />
+          <Route path="/account/gift-cards" element={<ProtectedRoute><CustomerMyGiftCardsPage /></ProtectedRoute>} />
           
           <Route path="/stores/:slug" element={<Storefront />} />
           <Route path="/stores/:slug/products/:productSlug" element={<ProductDetail />} />
