@@ -18,6 +18,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 // Progress component (fallback if not exists)
 const Progress = ({ value }: { value: number }) => (
   <div className="w-full bg-secondary rounded-full h-2">
@@ -27,7 +29,6 @@ const Progress = ({ value }: { value: number }) => (
     />
   </div>
 );
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -107,11 +108,23 @@ export default function MyCourses() {
 
           // Get completed lessons count
           const { count: completedLessons } = await supabase
-            .from('course_lesson_completions')
+            .from('course_lesson_progress')
             .select('*', { count: 'exact', head: true })
             .eq('user_id', user.id)
-            .eq('course_id', enrollment.course_id)
-            .eq('completed', true);
+            .eq('is_completed', true)
+            .in('lesson_id',
+              await supabase
+                .from('course_lessons')
+                .select('id')
+                .in('section_id',
+                  await supabase
+                    .from('course_sections')
+                    .select('id')
+                    .eq('course_id', enrollment.course_id)
+                    .then(({ data }) => data?.map(s => s.id) || [])
+                )
+                .then(({ data }) => data?.map(l => l.id) || [])
+            );
 
           const total = totalLessons || 0;
           const completed = completedLessons || 0;
