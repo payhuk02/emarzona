@@ -67,7 +67,7 @@ export default function Checkout() {
     address_line2: '',
     city: '',
     postal_code: '',
-    country: 'CI', // Côte d'Ivoire par défaut
+    country: 'BF', // Burkina Faso par défaut
     state: '',
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof ShippingAddress, string>>>({});
@@ -92,16 +92,16 @@ export default function Checkout() {
     }
   }, [user]);
 
-  // Calculer taxes (exemple : TVA 18% pour CI)
-  const taxRate = 0.18; // 18% TVA pour Côte d'Ivoire
+  // Calculer taxes (exemple : TVA 18% pour BF)
+  const taxRate = 0.18; // 18% TVA pour Burkina Faso
   const taxAmount = useMemo(() => {
     return summary.subtotal * taxRate;
   }, [summary.subtotal, taxRate]);
 
-  // Calculer shipping (exemple simple : 5000 XOF pour CI, 15000 pour autres)
+  // Calculer shipping (exemple simple : 5000 XOF pour BF, 15000 pour autres)
   const shippingAmount = useMemo(() => {
-    if (formData.country === 'CI') {
-      return 5000; // Frais de livraison Côte d'Ivoire
+    if (formData.country === 'BF') {
+      return 5000; // Frais de livraison Burkina Faso
     }
     return 15000; // International
   }, [formData.country]);
@@ -500,10 +500,10 @@ export default function Checkout() {
                           onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
                           className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${formErrors.country ? 'border-red-500' : ''}`}
                         >
+                          <option value="BF">Burkina Faso</option>
                           <option value="CI">Côte d'Ivoire</option>
                           <option value="SN">Sénégal</option>
                           <option value="ML">Mali</option>
-                          <option value="BF">Burkina Faso</option>
                           <option value="BJ">Bénin</option>
                           <option value="TG">Togo</option>
                           <option value="GN">Guinée</option>
@@ -608,7 +608,7 @@ export default function Checkout() {
                       </div>
 
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Taxes (TVA 18%)</span>
+                        <span className="text-muted-foreground">Taxes (TVA 18% - BF)</span>
                         <span>{taxAmount.toLocaleString('fr-FR')} XOF</span>
                       </div>
                     </div>
