@@ -33,6 +33,14 @@ import {
   Palette,
   Layout,
   Sparkles,
+  User,
+  Heart,
+  Receipt,
+  RotateCcw,
+  Webhook,
+  Gift,
+  Star,
+  Percent,
 } from "lucide-react";
 import payhukLogo from "@/assets/payhuk-logo.png";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
@@ -74,6 +82,51 @@ const menuSections = [
         title: "Marketplace",
         url: "/marketplace",
         icon: ShoppingCart,
+      },
+    ]
+  },
+  {
+    label: "Mon Compte",
+    items: [
+      {
+        title: "Portail Client",
+        url: "/account",
+        icon: User,
+      },
+      {
+        title: "Mes Commandes",
+        url: "/account/orders",
+        icon: ShoppingCart,
+      },
+      {
+        title: "Mes Téléchargements",
+        url: "/account/downloads",
+        icon: Download,
+      },
+      {
+        title: "Mes Cours",
+        url: "/account/courses",
+        icon: GraduationCap,
+      },
+      {
+        title: "Ma Liste de Souhaits",
+        url: "/account/wishlist",
+        icon: Heart,
+      },
+      {
+        title: "Mes Factures",
+        url: "/account/invoices",
+        icon: Receipt,
+      },
+      {
+        title: "Mes Retours",
+        url: "/account/returns",
+        icon: RotateCcw,
+      },
+      {
+        title: "Mon Profil",
+        url: "/account/profile",
+        icon: User,
       },
     ]
   },
@@ -337,6 +390,11 @@ const adminMenuSections = [
         url: "/admin/shipping",
         icon: Truck,
       },
+      {
+        title: "Retours",
+        url: "/admin/returns",
+        icon: RotateCcw,
+      },
     ]
   },
   {
@@ -353,9 +411,34 @@ const adminMenuSections = [
         icon: CreditCard,
       },
       {
+        title: "Taxes",
+        url: "/admin/taxes",
+        icon: Percent,
+      },
+      {
         title: "Litiges",
         url: "/admin/disputes",
         icon: Scale,
+      },
+    ]
+  },
+  {
+    label: "Systèmes & Intégrations",
+    items: [
+      {
+        title: "Webhooks",
+        url: "/admin/webhooks",
+        icon: Webhook,
+      },
+      {
+        title: "Programme de Fidélité",
+        url: "/admin/loyalty",
+        icon: Star,
+      },
+      {
+        title: "Cartes Cadeaux",
+        url: "/admin/gift-cards",
+        icon: Gift,
       },
     ]
   },

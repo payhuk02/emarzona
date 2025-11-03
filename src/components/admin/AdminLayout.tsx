@@ -34,6 +34,11 @@ import {
   Layout,
   Key,
   Shield,
+  RotateCcw,
+  Webhook,
+  Gift,
+  Star,
+  Percent,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -66,6 +71,7 @@ const menuSections = [
       { icon: BoxIcon, label: 'Commandes', path: '/admin/orders' },
       { icon: Warehouse, label: 'Inventaire', path: '/admin/inventory' },
       { icon: Truck, label: 'Expéditions', path: '/admin/shipping' },
+      { icon: RotateCcw, label: 'Retours', path: '/admin/returns' },
     ]
   },
   {
@@ -73,7 +79,16 @@ const menuSections = [
     items: [
       { icon: DollarSign, label: 'Revenus', path: '/admin/revenue' },
       { icon: CreditCard, label: 'Paiements', path: '/admin/payments' },
+      { icon: Percent, label: 'Taxes', path: '/admin/taxes' },
       { icon: Scale, label: 'Litiges', path: '/admin/disputes' },
+    ]
+  },
+  {
+    label: 'Systèmes & Intégrations',
+    items: [
+      { icon: Webhook, label: 'Webhooks', path: '/admin/webhooks' },
+      { icon: Star, label: 'Programme de Fidélité', path: '/admin/loyalty' },
+      { icon: Gift, label: 'Cartes Cadeaux', path: '/admin/gift-cards' },
     ]
   },
   {
