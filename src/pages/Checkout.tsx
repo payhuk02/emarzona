@@ -12,7 +12,7 @@
  * - Support 4 types produits
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -92,11 +92,27 @@ export default function Checkout() {
     }
   }, [user]);
 
-  // Calculer taxes (exemple : TVA 18% pour BF)
-  const taxRate = 0.18; // 18% TVA pour Burkina Faso
+  // Calculer taxes automatiquement selon le pays (estimation avant création commande)
+  // Le calcul précis se fera via la fonction RPC lors de la création de la commande
+  const taxRate = useMemo(() => {
+    // TVA par défaut selon le pays
+    const defaultRates: Record<string, number> = {
+      'BF': 0.18, // Burkina Faso
+      'CI': 0.18, // Côte d'Ivoire
+      'SN': 0.18, // Sénégal
+      'ML': 0.18, // Mali
+      'NE': 0.19, // Niger
+      'TG': 0.18, // Togo
+      'BJ': 0.18, // Bénin
+    };
+    return defaultRates[formData.country] || 0.18;
+  }, [formData.country]);
+
   const taxAmount = useMemo(() => {
-    return summary.subtotal * taxRate;
-  }, [summary.subtotal, taxRate]);
+    // Calculer sur le montant après remise
+    const taxableAmount = summary.subtotal - summary.discount_amount;
+    return taxableAmount * taxRate;
+  }, [summary.subtotal, summary.discount_amount, taxRate]);
 
   // Calculer shipping (exemple simple : 5000 XOF pour BF, 15000 pour autres)
   const shippingAmount = useMemo(() => {
@@ -245,6 +261,23 @@ export default function Checkout() {
         .insert(orderItems);
 
       if (itemsError) throw itemsError;
+
+      // Créer automatiquement la facture
+      try {
+        const { data: invoiceId, error: invoiceError } = await supabase.rpc('create_invoice_from_order', {
+          p_order_id: order.id,
+        });
+
+        if (invoiceError) {
+          logger.error('Error creating invoice:', invoiceError);
+          // Ne pas bloquer la commande si la facture échoue
+        } else {
+          logger.info(`Invoice created: ${invoiceId}`);
+        }
+      } catch (invoiceErr) {
+        logger.error('Error in invoice creation:', invoiceErr);
+        // Ne pas bloquer la commande
+      }
 
       // Enregistrer l'utilisation du coupon si un coupon a été appliqué
       if (appliedCoupon && appliedCoupon.promotionId) {
