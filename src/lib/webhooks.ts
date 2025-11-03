@@ -5,7 +5,7 @@
  * depuis les événements clés de l'application.
  */
 
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import type { WebhookEventType } from '@/types/webhooks';
 
 /**
