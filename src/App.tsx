@@ -75,6 +75,8 @@ const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const Marketplace = lazy(() => import("./pages/Marketplace"));
 const Cart = lazy(() => import("./pages/Cart"));
 const Checkout = lazy(() => import("./pages/Checkout"));
+const CustomerPortal = lazy(() => import("./pages/customer/CustomerPortal"));
+const MyOrders = lazy(() => import("./pages/customer/MyOrders"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const KYC = lazy(() => import("./pages/KYC"));
 const AdminKYC = lazy(() => import("./pages/AdminKYC"));
@@ -196,6 +198,11 @@ const AppContent = () => {
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+          
+          {/* --- Routes Customer Portal --- */}
+          <Route path="/account" element={<ProtectedRoute><CustomerPortal /></ProtectedRoute>} />
+          <Route path="/account/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+          
           <Route path="/stores/:slug" element={<Storefront />} />
           <Route path="/stores/:slug/products/:productSlug" element={<ProductDetail />} />
           
