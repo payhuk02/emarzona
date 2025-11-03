@@ -131,21 +131,6 @@ const menuSections = [
     ]
   },
   {
-    label: "Récompenses & Avantages",
-    items: [
-      {
-        title: "Programme de Fidélité",
-        url: "/account/loyalty",
-        icon: Star,
-      },
-      {
-        title: "Mes Cartes Cadeaux",
-        url: "/account/gift-cards",
-        icon: Gift,
-      },
-    ]
-  },
-  {
     label: "Produits & Cours",
     items: [
       {
