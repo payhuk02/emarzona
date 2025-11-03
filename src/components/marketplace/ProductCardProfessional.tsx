@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Star, Heart, Eye, CheckCircle, Clock, TrendingUp, Loader2, BarChart3, Download, Shield } from "lucide-react";
+import { ShoppingCart, Star, Heart, Eye, CheckCircle, Clock, TrendingUp, Loader2, BarChart3, Download, Shield, ShoppingBag } from "lucide-react";
 import { initiateMonerooPayment } from "@/lib/moneroo-payment";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { useMarketplaceFavorites } from "@/hooks/useMarketplaceFavorites";
+import { useCart } from "@/hooks/cart/useCart";
 import "@/styles/product-grid-professional.css";
 
 interface ProductCardProfessionalProps {
@@ -56,6 +57,7 @@ const ProductCardProfessional = ({
 }: ProductCardProfessionalProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { addItem } = useCart();
   
   // Hook centralisé pour favoris synchronisés
   const { favorites, toggleFavorite } = useMarketplaceFavorites();
@@ -174,6 +176,28 @@ const ProductCardProfessional = ({
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddToCart = async () => {
+    if (!product.store_id) {
+      toast({
+        title: "Erreur",
+        description: "Boutique non disponible",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await addItem({
+        product_id: product.id,
+        product_type: (product.product_type || 'digital') as any,
+        quantity: 1,
+      });
+    } catch (error: any) {
+      logger.error("Erreur lors de l'ajout au panier:", error);
+      // Error already handled in hook
     }
   };
 
@@ -413,29 +437,42 @@ const ProductCardProfessional = ({
         </div>
 
         {/* Boutons d'action - OPTIMISÉS SANS DÉBORDEMENT */}
-        <div className="flex gap-3 mt-5" role="group" aria-label="Actions du produit">
-          <Button
-            variant="outline"
-            size="sm"
-            className="product-action-button flex-1 h-10 px-3 text-sm border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            asChild
-          >
-            <Link 
-              to={`/stores/${storeSlug}/products/${product.slug}`}
-              aria-label={`Voir les détails de ${product.name}`}
-              className="flex items-center justify-center gap-1.5 truncate"
+        <div className="flex flex-col gap-2 mt-5" role="group" aria-label="Actions du produit">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="product-action-button flex-1 h-10 px-3 text-sm border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              asChild
             >
-              <Eye className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-              <span className="hidden lg:inline truncate">Voir</span>
-              <span className="lg:hidden truncate">Voir</span>
-            </Link>
-          </Button>
+              <Link 
+                to={`/stores/${storeSlug}/products/${product.slug}`}
+                aria-label={`Voir les détails de ${product.name}`}
+                className="flex items-center justify-center gap-1.5 truncate"
+              >
+                <Eye className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                <span className="hidden lg:inline truncate">Voir</span>
+                <span className="lg:hidden truncate">Voir</span>
+              </Link>
+            </Button>
+            
+            <Button
+              onClick={handleAddToCart}
+              disabled={loading}
+              size="sm"
+              variant="outline"
+              className="product-action-button h-10 px-3 text-sm border-purple-300 dark:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-400 dark:hover:border-purple-500 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
+              aria-label={`Ajouter ${product.name} au panier`}
+            >
+              <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+            </Button>
+          </div>
           
           <Button
             onClick={handleBuyNow}
             disabled={loading}
             size="sm"
-            className="product-action-button flex-1 h-10 px-3 text-sm bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 shadow-sm hover:shadow-md"
+            className="product-action-button w-full h-10 px-3 text-sm bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 active:from-blue-800 active:to-purple-800 text-white font-medium transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
             aria-label={loading ? `Traitement de l'achat de ${product.name} en cours` : `Acheter ${product.name} pour ${formatPrice(price)} ${product.currency || 'FCFA'}`}
           >
             <div className="flex items-center justify-center gap-1.5 truncate w-full">
@@ -447,7 +484,7 @@ const ProductCardProfessional = ({
               ) : (
                 <>
                   <ShoppingCart className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-                  <span className="truncate">Acheter</span>
+                  <span className="truncate">Acheter maintenant</span>
                 </>
               )}
             </div>
