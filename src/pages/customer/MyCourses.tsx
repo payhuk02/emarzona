@@ -19,16 +19,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-// Progress component (fallback if not exists)
-const Progress = ({ value }: { value: number }) => (
-  <div className="w-full bg-secondary rounded-full h-2">
-    <div
-      className="bg-primary rounded-full h-2 transition-all"
-      style={{ width: `${value}%` }}
-    />
-  </div>
-);
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -46,6 +36,16 @@ import {
   Calendar,
   BarChart3,
 } from 'lucide-react';
+
+// Progress component (fallback if not exists)
+const Progress = ({ value }: { value: number }) => (
+  <div className="w-full bg-secondary rounded-full h-2">
+    <div
+      className="bg-primary rounded-full h-2 transition-all"
+      style={{ width: `${value}%` }}
+    />
+  </div>
+);
 
 interface CourseEnrollment {
   id: string;
