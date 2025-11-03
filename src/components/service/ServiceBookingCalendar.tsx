@@ -86,6 +86,8 @@ interface ServiceBookingCalendarProps {
   events: BookingEvent[];
   onSelectSlot?: (slotInfo: { start: Date; end: Date }) => void;
   onSelectEvent?: (event: BookingEvent) => void;
+  onEventDrop?: (event: BookingEvent, newStart: Date, newEnd: Date) => void;
+  onEventResize?: (event: BookingEvent, newStart: Date, newEnd: Date) => void;
   defaultView?: View;
   minTime?: Date;
   maxTime?: Date;
@@ -93,6 +95,7 @@ interface ServiceBookingCalendarProps {
   timeslots?: number; // Nombre de slots par heure (default: 2)
   className?: string;
   enableSelection?: boolean;
+  enableDragDrop?: boolean;
   showLegend?: boolean;
 }
 
@@ -100,6 +103,8 @@ export const ServiceBookingCalendar = ({
   events,
   onSelectSlot,
   onSelectEvent,
+  onEventDrop,
+  onEventResize,
   defaultView = Views.WEEK,
   minTime = new Date(0, 0, 0, 8, 0, 0), // 8:00 AM
   maxTime = new Date(0, 0, 0, 20, 0, 0), // 8:00 PM
@@ -107,6 +112,7 @@ export const ServiceBookingCalendar = ({
   timeslots = 2,
   className,
   enableSelection = true,
+  enableDragDrop = false,
   showLegend = true,
 }: ServiceBookingCalendarProps) => {
   const [view, setView] = useState<View>(defaultView);
@@ -251,6 +257,29 @@ export const ServiceBookingCalendar = ({
     }
   }, [onSelectEvent]);
 
+  // Handle event drop (drag & drop)
+  const handleEventDrop = useCallback(({ event, start, end }: any) => {
+    if (enableDragDrop && onEventDrop) {
+      // Vérifier que la nouvelle position est valide
+      const now = new Date();
+      if (start < now) {
+        return;
+      }
+
+      // Convertir en BookingEvent
+      const bookingEvent = event as BookingEvent;
+      onEventDrop(bookingEvent, start, end);
+    }
+  }, [enableDragDrop, onEventDrop]);
+
+  // Handle event resize
+  const handleEventResize = useCallback(({ event, start, end }: any) => {
+    if (enableDragDrop && onEventResize) {
+      const bookingEvent = event as BookingEvent;
+      onEventResize(bookingEvent, start, end);
+    }
+  }, [enableDragDrop, onEventResize]);
+
   // Toolbar customization
   const CustomToolbar = (toolbar: any) => {
     const goToBack = () => {
@@ -382,7 +411,11 @@ export const ServiceBookingCalendar = ({
             dayPropGetter={dayPropGetter}
             onSelectSlot={handleSelectSlot}
             onSelectEvent={handleSelectEvent}
+            onEventDrop={handleEventDrop}
+            onEventResize={handleEventResize}
             selectable={enableSelection}
+            resizable={enableDragDrop}
+            draggableAccessor={() => enableDragDrop}
             min={minTime}
             max={maxTime}
             step={step}

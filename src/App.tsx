@@ -151,6 +151,9 @@ const MyLicenses = lazy(() => import("./pages/digital/MyLicenses"));
 const LicenseManagement = lazy(() => import("./pages/digital/LicenseManagement"));
 const DigitalProductAnalytics = lazy(() => import("./pages/digital/DigitalProductAnalytics"));
 
+// Pages Services - Lazy loading
+const RecurringBookingsManagement = lazy(() => import("./pages/service/RecurringBookingsManagement"));
+
 // Pages Advanced Systems - Lazy loading
 const OrderMessaging = lazy(() => import("./pages/orders/OrderMessaging"));
 const PaymentManagement = lazy(() => import("./pages/payments/PaymentManagement"));
@@ -278,6 +281,9 @@ const AppContent = () => {
           <Route path="/dashboard/license-management" element={<ProtectedRoute><MyLicenses /></ProtectedRoute>} />
           <Route path="/dashboard/digital/analytics/:productId" element={<ProtectedRoute><DigitalProductAnalytics /></ProtectedRoute>} />
           
+          {/* --- Routes Services --- */}
+          <Route path="/dashboard/services/recurring-bookings" element={<ProtectedRoute><RecurringBookingsManagement /></ProtectedRoute>} />
+
           {/* --- Routes Templates --- */}
           <Route path="/dashboard/my-templates" element={<ProtectedRoute><MyTemplates /></ProtectedRoute>} />
 
