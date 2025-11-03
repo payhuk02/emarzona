@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useUser } from '@/hooks/useUser';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   useRecurringBookingPatterns,
   useUpdateRecurringBookingPattern,
@@ -53,7 +53,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 
 export default function RecurringBookingsManagement() {
-  const { user } = useUser();
+  const { user } = useAuth();
   const { toast } = useToast();
   const { data: patterns, isLoading } = useRecurringBookingPatterns(user?.id);
   const updatePattern = useUpdateRecurringBookingPattern();
