@@ -29,6 +29,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 import { safeRedirect } from '@/lib/url-validator';
 import { logger } from '@/lib/logger';
+import GiftCardInput from '@/components/checkout/GiftCardInput';
 import {
   ShoppingBag,
   User,
@@ -59,6 +60,45 @@ export default function Checkout() {
   const { toast } = useToast();
   const { items, summary, isLoading: cartLoading, appliedCoupon } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // State pour la carte cadeau
+  const [appliedGiftCard, setAppliedGiftCard] = useState<{
+    id: string;
+    balance: number;
+    code: string;
+  } | null>(null);
+  
+  // State pour charger le store_id (nécessaire pour la carte cadeau)
+  const [storeId, setStoreId] = useState<string | null>(null);
+  
+  // Charger le store_id du premier produit si disponible
+  useEffect(() => {
+    if (items.length > 0 && !storeId) {
+      supabase
+        .from('products')
+        .select('store_id')
+        .eq('id', items[0].product_id)
+        .single()
+        .then(({ data }) => {
+          if (data?.store_id) {
+            setStoreId(data.store_id);
+          }
+        });
+    }
+  }, [items, storeId]);
+  
+  // Charger la carte cadeau depuis localStorage si disponible
+  useEffect(() => {
+    const savedGiftCard = localStorage.getItem('applied_gift_card');
+    if (savedGiftCard) {
+      try {
+        const giftCard = JSON.parse(savedGiftCard);
+        setAppliedGiftCard(giftCard);
+      } catch (e) {
+        localStorage.removeItem('applied_gift_card');
+      }
+    }
+  }, []);
   const [formData, setFormData] = useState<ShippingAddress>({
     full_name: '',
     email: '',
@@ -108,10 +148,23 @@ export default function Checkout() {
     return defaultRates[formData.country] || 0.18;
   }, [formData.country]);
 
+  // Montant à utiliser de la carte cadeau (calculé après taxes et shipping)
+  const giftCardAmount = useMemo(() => {
+    if (!appliedGiftCard || !appliedGiftCard.balance) return 0;
+    
+    // Montant total avant carte cadeau : subtotal - coupons + taxes + shipping
+    const baseAmount = summary.subtotal - summary.discount_amount;
+    const amountWithTaxesAndShipping = baseAmount + (baseAmount * taxRate) + shippingAmount;
+    
+    // Utiliser le maximum possible de la carte cadeau (mais pas plus que le montant dû)
+    return Math.min(appliedGiftCard.balance, amountWithTaxesAndShipping);
+  }, [appliedGiftCard, summary.subtotal, summary.discount_amount, taxRate, shippingAmount]);
+
   const taxAmount = useMemo(() => {
-    // Calculer sur le montant après remise
+    // Calculer sur le montant après remise (mais avant carte cadeau pour simplifier)
+    // La carte cadeau sera appliquée après le calcul des taxes
     const taxableAmount = summary.subtotal - summary.discount_amount;
-    return taxableAmount * taxRate;
+    return Math.max(0, taxableAmount * taxRate);
   }, [summary.subtotal, summary.discount_amount, taxRate]);
 
   // Calculer shipping (exemple simple : 5000 XOF pour BF, 15000 pour autres)
@@ -124,8 +177,9 @@ export default function Checkout() {
 
   // Total final
   const finalTotal = useMemo(() => {
-    return summary.subtotal + taxAmount + shippingAmount - summary.discount_amount;
-  }, [summary, taxAmount, shippingAmount]);
+    const baseAmount = summary.subtotal + taxAmount + shippingAmount - summary.discount_amount;
+    return Math.max(0, baseAmount - giftCardAmount);
+  }, [summary, taxAmount, shippingAmount, giftCardAmount]);
 
   // Validation formulaire
   const validateForm = (): boolean => {
@@ -298,6 +352,40 @@ export default function Checkout() {
         } catch (couponError) {
           logger.error('Error recording coupon usage:', couponError);
           // Ne pas bloquer la commande si l'enregistrement du coupon échoue
+        }
+      }
+
+      // Rédimer la carte cadeau si une carte a été appliquée
+      if (appliedGiftCard && giftCardAmount > 0) {
+        try {
+          const { data: redeemResult, error: redeemError } = await supabase.rpc('redeem_gift_card', {
+            p_gift_card_id: appliedGiftCard.id,
+            p_order_id: order.id,
+            p_amount: giftCardAmount,
+          });
+
+          if (redeemError) {
+            logger.error('Error redeeming gift card:', redeemError);
+            toast({
+              title: 'Attention',
+              description: 'La carte cadeau n\'a pas pu être utilisée, mais la commande a été créée.',
+              variant: 'destructive',
+            });
+          } else if (redeemResult && redeemResult.length > 0 && !redeemResult[0].success) {
+            logger.error('Gift card redemption failed:', redeemResult[0].message);
+            toast({
+              title: 'Attention',
+              description: redeemResult[0].message || 'La carte cadeau n\'a pas pu être utilisée.',
+              variant: 'destructive',
+            });
+          } else {
+            // Succès - retirer la carte cadeau du localStorage
+            localStorage.removeItem('applied_gift_card');
+            setAppliedGiftCard(null);
+          }
+        } catch (giftCardError) {
+          logger.error('Error in gift card redemption:', giftCardError);
+          // Ne pas bloquer la commande si la rédemption échoue
         }
       }
 
@@ -579,6 +667,34 @@ export default function Checkout() {
                         )}
                       </div>
                     </div>
+
+                    {/* Carte cadeau */}
+                    {storeId && (
+                      <div className="space-y-2 mt-4">
+                        <GiftCardInput
+                          storeId={storeId}
+                          onApply={(giftCardId, balance, code) => {
+                            setAppliedGiftCard({
+                              id: giftCardId,
+                              balance,
+                              code: code || '',
+                            });
+                            localStorage.setItem('applied_gift_card', JSON.stringify({
+                              id: giftCardId,
+                              balance,
+                              code: code || '',
+                            }));
+                          }}
+                          onRemove={() => {
+                            setAppliedGiftCard(null);
+                            localStorage.removeItem('applied_gift_card');
+                          }}
+                          appliedGiftCardId={appliedGiftCard?.id || null}
+                          appliedGiftCardBalance={appliedGiftCard?.balance || null}
+                          appliedGiftCardCode={appliedGiftCard?.code || null}
+                        />
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -654,6 +770,13 @@ export default function Checkout() {
                         <div className="flex justify-between text-green-600">
                           <span>Remise</span>
                           <span>-{summary.discount_amount.toLocaleString('fr-FR')} XOF</span>
+                        </div>
+                      )}
+
+                      {appliedGiftCard && giftCardAmount > 0 && (
+                        <div className="flex justify-between text-green-600">
+                          <span>Carte cadeau ({appliedGiftCard.code})</span>
+                          <span>-{giftCardAmount.toLocaleString('fr-FR')} XOF</span>
                         </div>
                       )}
 

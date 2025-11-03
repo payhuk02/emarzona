@@ -26,7 +26,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -48,8 +47,6 @@ import {
   useCreateLoyaltyReward,
 } from '@/hooks/loyalty/useLoyalty';
 import {
-  LoyaltyTier,
-  LoyaltyReward,
   LoyaltyTierType,
   LoyaltyRewardType,
   CreateLoyaltyTierForm,
@@ -58,23 +55,15 @@ import {
 import {
   Award,
   Plus,
-  Edit,
-  Trash2,
-  Search,
-  Star,
   TrendingUp,
   Users,
   Gift,
-  BarChart3,
-  Settings,
   Sparkles,
-  Trophy,
   Coins,
 } from 'lucide-react';
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useToast } from '@/hooks/use-toast';
 
 const TIER_TYPES: { value: LoyaltyTierType; label: string; color: string }[] = [
   { value: 'bronze', label: 'Bronze', color: '#CD7F32' },
@@ -94,13 +83,16 @@ const REWARD_TYPES: { value: LoyaltyRewardType; label: string }[] = [
 
 export default function AdminLoyaltyManagement() {
   const { store, loading: storeLoading } = useStore();
-  const { data: tiers, isLoading: tiersLoading } = useLoyaltyTiers(store?.id);
-  const { data: rewards, isLoading: rewardsLoading } = useLoyaltyRewards(store?.id);
-  const { data: stats } = useLoyaltyStats(store?.id);
-  const { data: transactions } = useLoyaltyTransactions(store?.id);
+  
+  // Alias pour compatibilité
+  const currentStore = store;
+  
+  const { data: tiers, isLoading: tiersLoading } = useLoyaltyTiers(currentStore?.id);
+  const { data: rewards, isLoading: rewardsLoading } = useLoyaltyRewards(currentStore?.id);
+  const { data: stats } = useLoyaltyStats(currentStore?.id);
+  const { data: transactions } = useLoyaltyTransactions(currentStore?.id);
   const createTier = useCreateLoyaltyTier();
   const createReward = useCreateLoyaltyReward();
-  const { toast } = useToast();
 
   const [isTierDialogOpen, setIsTierDialogOpen] = useState(false);
   const [isRewardDialogOpen, setIsRewardDialogOpen] = useState(false);
@@ -126,17 +118,16 @@ export default function AdminLoyaltyManagement() {
     description: '',
     reward_type: 'discount',
     points_cost: 100,
-    display_order: 0,
   });
 
   const handleCreateTier = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!store?.id) return;
+    if (!currentStore?.id) return;
 
     try {
       await createTier.mutateAsync({
         ...tierFormData,
-        store_id: store.id,
+        store_id: currentStore.id,
       });
       setIsTierDialogOpen(false);
       setTierFormData({
@@ -159,12 +150,12 @@ export default function AdminLoyaltyManagement() {
 
   const handleCreateReward = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!store?.id) return;
+    if (!currentStore?.id) return;
 
     try {
       await createReward.mutateAsync({
         ...rewardFormData,
-        store_id: store.id,
+        store_id: currentStore.id,
       });
       setIsRewardDialogOpen(false);
       setRewardFormData({
@@ -172,7 +163,6 @@ export default function AdminLoyaltyManagement() {
         description: '',
         reward_type: 'discount',
         points_cost: 100,
-        display_order: 0,
       });
     } catch (error) {
       // Error handled by hook
@@ -201,7 +191,7 @@ export default function AdminLoyaltyManagement() {
     );
   }
 
-  if (!store) {
+  if (!currentStore) {
     return (
       <SidebarProvider>
         <AppSidebar />

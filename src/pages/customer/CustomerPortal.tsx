@@ -35,6 +35,7 @@ import {
 import { useState, useEffect } from 'react';
 import CustomerMyReturns from './CustomerMyReturns';
 import CustomerLoyalty from './CustomerLoyalty';
+import CustomerMyGiftCards from './CustomerMyGiftCards';
 
 interface CustomerStats {
   totalOrders: number;
@@ -212,6 +213,7 @@ export default function CustomerPortal() {
                 <TabsTrigger value="courses">Mes Cours</TabsTrigger>
                 <TabsTrigger value="wishlist">Ma Wishlist</TabsTrigger>
                 <TabsTrigger value="loyalty">Fidélité</TabsTrigger>
+                <TabsTrigger value="gift-cards">Cartes Cadeaux</TabsTrigger>
                 <TabsTrigger value="returns">Mes Retours</TabsTrigger>
                 <TabsTrigger value="profile">Mon Profil</TabsTrigger>
               </TabsList>
@@ -377,6 +379,9 @@ export default function CustomerPortal() {
               </TabsContent>
               <TabsContent value="loyalty">
                 <CustomerLoyalty />
+              </TabsContent>
+              <TabsContent value="gift-cards">
+                <CustomerMyGiftCards />
               </TabsContent>
               <TabsContent value="returns">
                 <CustomerMyReturns />
