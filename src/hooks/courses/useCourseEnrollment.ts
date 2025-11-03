@@ -145,6 +145,30 @@ export const useCreateEnrollment = () => {
       if (courseName && courseSlug) {
         await notifyCourseEnrollment(user.id, courseName, courseSlug);
       }
+
+      // Déclencher webhook course.enrolled (asynchrone, ne bloque pas)
+      import('@/lib/webhooks').then(({ triggerCourseEnrolledWebhook }) => {
+        // Récupérer le store_id depuis le produit
+        supabase
+          .from('products')
+          .select('store_id')
+          .eq('id', productId)
+          .single()
+          .then(({ data: product }) => {
+            triggerCourseEnrolledWebhook(
+              data.id,
+              {
+                course_id: courseId,
+                user_id: user.id,
+                progress_percentage: 0,
+                status: 'active',
+                enrolled_at: data.enrollment_date || data.created_at,
+              },
+              product?.store_id
+            ).catch(console.error);
+          })
+          .catch(console.error);
+      });
       
       return data as CourseEnrollment;
     },

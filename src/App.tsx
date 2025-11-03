@@ -116,6 +116,7 @@ const AdminSecurity = lazy(() => import("./pages/admin/AdminSecurity"));
 const AdminAudit = lazy(() => import("./pages/admin/AdminAudit"));
 const AdminTaxManagement = lazy(() => import("./pages/admin/AdminTaxManagement"));
 const AdminReturnManagement = lazy(() => import("./pages/admin/AdminReturnManagement"));
+const AdminWebhookManagement = lazy(() => import("./pages/admin/AdminWebhookManagement"));
 
 // Pages Affiliation - Lazy loading
 const StoreAffiliates = lazy(() => import("./pages/StoreAffiliates"));
@@ -340,6 +341,7 @@ const AppContent = () => {
           <Route path="/admin/audit" element={<ProtectedRoute><AdminAudit /></ProtectedRoute>} />
           <Route path="/admin/taxes" element={<ProtectedRoute><AdminTaxManagement /></ProtectedRoute>} />
           <Route path="/admin/returns" element={<ProtectedRoute><AdminReturnManagement /></ProtectedRoute>} />
+          <Route path="/admin/webhooks" element={<ProtectedRoute><AdminWebhookManagement /></ProtectedRoute>} />
           <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
           <Route path="/admin/templates" element={<ProtectedRoute><AdminTemplates /></ProtectedRoute>} />
           <Route path="/admin/templates-premium" element={<ProtectedRoute><AdminTemplatesPremium /></ProtectedRoute>} />

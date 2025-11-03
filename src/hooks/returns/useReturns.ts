@@ -196,6 +196,23 @@ export function useCreateReturn() {
         throw error;
       }
 
+      // Déclencher webhook return.created (asynchrone, ne bloque pas)
+      import('@/lib/webhooks').then(({ triggerReturnCreatedWebhook }) => {
+        triggerReturnCreatedWebhook(
+          data.id,
+          {
+            order_item_id: data.order_item_id || '',
+            customer_id: data.customer_id,
+            store_id: data.store_id,
+            return_number: data.return_number || '',
+            return_reason: data.return_reason,
+            status: data.status,
+            refund_amount: data.refund_amount || 0,
+            created_at: data.created_at,
+          }
+        ).catch(console.error);
+      });
+
       return data as ProductReturn;
     },
     onSuccess: () => {

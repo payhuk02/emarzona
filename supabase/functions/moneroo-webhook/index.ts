@@ -66,31 +66,74 @@ serve(async (req) => {
 
       // Update associated payment if exists
       if (transaction.payment_id) {
-        const { error: paymentError } = await supabase
+        const { data: payment, error: paymentError } = await supabase
           .from('payments')
           .update({
             status: 'completed',
             transaction_id: transaction_id,
           })
-          .eq('id', transaction.payment_id);
+          .eq('id', transaction.payment_id)
+          .select('*, order_id, store_id')
+          .single();
 
         if (paymentError) {
           console.error('Error updating payment:', paymentError);
+        } else if (payment) {
+          // Déclencher webhook payment.completed
+          await supabase.rpc('trigger_webhook', {
+            p_event_type: 'payment.completed',
+            p_event_id: payment.id,
+            p_event_data: {
+              payment: {
+                id: payment.id,
+                order_id: payment.order_id,
+                transaction_id: transaction_id,
+                amount: transaction.amount,
+                currency: transaction.currency,
+                status: 'completed',
+                payment_method: transaction.payment_method || 'moneroo',
+                created_at: payment.created_at,
+              },
+            },
+            p_store_id: payment.store_id,
+          }).catch((err) => console.error('Webhook error:', err));
         }
       }
 
       // Update associated order if exists
       if (transaction.order_id) {
-        const { error: orderError } = await supabase
+        const { data: order, error: orderError } = await supabase
           .from('orders')
           .update({
             payment_status: 'paid',
             status: 'confirmed',
           })
-          .eq('id', transaction.order_id);
+          .eq('id', transaction.order_id)
+          .select('*')
+          .single();
 
         if (orderError) {
           console.error('Error updating order:', orderError);
+        } else if (order) {
+          // Déclencher webhook order.completed
+          await supabase.rpc('trigger_webhook', {
+            p_event_type: 'order.completed',
+            p_event_id: order.id,
+            p_event_data: {
+              order: {
+                id: order.id,
+                store_id: order.store_id,
+                customer_id: order.customer_id,
+                order_number: order.order_number,
+                status: 'confirmed',
+                total_amount: order.total_amount,
+                currency: order.currency,
+                payment_status: 'paid',
+                created_at: order.created_at,
+              },
+            },
+            p_store_id: order.store_id,
+          }).catch((err) => console.error('Webhook error:', err));
         }
       }
     } else if (mappedStatus === 'failed') {

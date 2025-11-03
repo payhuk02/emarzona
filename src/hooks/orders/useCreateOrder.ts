@@ -245,11 +245,27 @@ export const useCreateOrder = () => {
               status: 'pending',
               affiliate_tracking_cookie: affiliateTrackingCookie, // Inclure le cookie d'affiliation
             })
-            .select('id')
+            .select('*')
             .single();
 
           if (orderError || !order) {
             throw new Error('Erreur lors de la création de la commande');
+          }
+
+          // Déclencher webhook order.created (asynchrone, ne bloque pas)
+          if (order) {
+            import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
+              triggerOrderCreatedWebhook(order.id, {
+                store_id: order.store_id,
+                customer_id: order.customer_id,
+                order_number: order.order_number,
+                status: order.status,
+                total_amount: order.total_amount,
+                currency: order.currency,
+                payment_status: order.payment_status,
+                created_at: order.created_at,
+              }).catch(console.error);
+            });
           }
 
           // Créer order_item générique

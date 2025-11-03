@@ -222,6 +222,23 @@ export const useCreateServiceOrder = () => {
         throw new Error('Erreur lors de la création de la réservation');
       }
 
+      // Déclencher webhook service.booking_created (asynchrone, ne bloque pas)
+      import('@/lib/webhooks').then(({ triggerServiceBookingCreatedWebhook }) => {
+        triggerServiceBookingCreatedWebhook(
+          booking.id,
+          {
+            product_id: productId,
+            user_id: customerId,
+            scheduled_date: booking.scheduled_date || new Date(bookingDateTime).toISOString().split('T')[0],
+            scheduled_start_time: booking.scheduled_start_time || new Date(bookingDateTime).toISOString(),
+            scheduled_end_time: booking.scheduled_end_time || endDateTime,
+            status: booking.status || 'pending',
+            created_at: booking.created_at || new Date().toISOString(),
+          },
+          storeId
+        ).catch(console.error);
+      });
+
       // 7. Calculer le prix (peut dépendre du nombre de participants ou de la durée)
       let totalPrice = product.promotional_price || product.price;
       
@@ -275,7 +292,7 @@ export const useCreateServiceOrder = () => {
           remaining_amount: remainingAmount,
           affiliate_tracking_cookie: affiliateTrackingCookie, // Inclure le cookie d'affiliation
         })
-        .select('id')
+        .select('*')
         .single();
 
       if (orderError || !order) {
@@ -287,6 +304,20 @@ export const useCreateServiceOrder = () => {
           
         throw new Error('Erreur lors de la création de la commande');
       }
+
+      // Déclencher webhook order.created (asynchrone, ne bloque pas)
+      import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
+        triggerOrderCreatedWebhook(order.id, {
+          store_id: order.store_id,
+          customer_id: order.customer_id,
+          order_number: order.order_number,
+          status: order.status,
+          total_amount: order.total_amount,
+          currency: order.currency,
+          payment_status: order.payment_status,
+          created_at: order.created_at,
+        }).catch(console.error);
+      });
 
       // 10. Créer l'order_item avec les références spécialisées
       const { data: orderItem, error: orderItemError } = await supabase
