@@ -124,6 +124,7 @@ const AdminGiftCardManagement = lazy(() => import("./pages/admin/AdminGiftCardMa
 const AdminSuppliersManagement = lazy(() => import("./pages/admin/AdminSuppliersManagement"));
 const AdminWarehousesManagement = lazy(() => import("./pages/admin/AdminWarehousesManagement"));
 const AdminProductKitsManagement = lazy(() => import("./pages/admin/AdminProductKitsManagement"));
+const AdminDemandForecasting = lazy(() => import("./pages/admin/AdminDemandForecasting"));
 
 // Pages Affiliation - Lazy loading
 const StoreAffiliates = lazy(() => import("./pages/StoreAffiliates"));
@@ -272,6 +273,7 @@ const AppContent = () => {
           <Route path="/dashboard/suppliers" element={<ProtectedRoute><AdminSuppliersManagement /></ProtectedRoute>} />
           <Route path="/dashboard/warehouses" element={<ProtectedRoute><AdminWarehousesManagement /></ProtectedRoute>} />
           <Route path="/dashboard/product-kits" element={<ProtectedRoute><AdminProductKitsManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/demand-forecasting" element={<ProtectedRoute><AdminDemandForecasting /></ProtectedRoute>} />
 
           {/* --- Routes Affiliation --- */}
           <Route path="/dashboard/affiliates" element={<ProtectedRoute><StoreAffiliates /></ProtectedRoute>} />
@@ -362,6 +364,7 @@ const AppContent = () => {
           <Route path="/admin/suppliers" element={<ProtectedRoute><AdminSuppliersManagement /></ProtectedRoute>} />
           <Route path="/admin/warehouses" element={<ProtectedRoute><AdminWarehousesManagement /></ProtectedRoute>} />
           <Route path="/admin/product-kits" element={<ProtectedRoute><AdminProductKitsManagement /></ProtectedRoute>} />
+          <Route path="/admin/demand-forecasting" element={<ProtectedRoute><AdminDemandForecasting /></ProtectedRoute>} />
           <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
           <Route path="/admin/templates" element={<ProtectedRoute><AdminTemplates /></ProtectedRoute>} />
           <Route path="/admin/templates-premium" element={<ProtectedRoute><AdminTemplatesPremium /></ProtectedRoute>} />
