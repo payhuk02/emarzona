@@ -71,3 +71,34 @@ export {
   type LeaderboardEntry,
 } from './useGamification';
 
+// Hook useAssignments
+export {
+  useCourseAssignments,
+  useAssignment,
+  useAssignmentSubmissions,
+  useStudentAssignmentSubmission,
+  useStudentAssignments,
+  useAssignmentGradingHistory,
+  useCreateAssignment,
+  useSubmitAssignment,
+  useGradeAssignment,
+  useUpdateAssignment,
+  useDeleteAssignment,
+  type CourseAssignment,
+  type AssignmentSubmission,
+  type AssignmentGrading,
+  type CreateAssignmentData,
+  type SubmitAssignmentData,
+  type GradeAssignmentData,
+} from './useAssignments';
+
+// Hook useDripContent
+export {
+  useCheckSectionUnlock,
+  useUnlockedSections,
+  useNextUnlockDate,
+  useSectionUnlockStatus,
+  type SectionUnlockStatus,
+  type UnlockedSections,
+} from './useDripContent';
+

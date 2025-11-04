@@ -447,6 +447,8 @@ const CourseDetail = () => {
               sections={sections}
               isEnrolled={isEnrolled}
               currentLessonId={currentLesson?.id}
+              enrollmentId={enrollment?.id}
+              courseId={course.id}
               onLessonClick={handleLessonClick}
             />
 

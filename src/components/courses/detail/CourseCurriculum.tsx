@@ -17,6 +17,7 @@ import {
   FileText
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { SectionLockIndicator } from '@/components/courses/drip';
 
 interface Lesson {
   id: string;
@@ -43,6 +44,8 @@ interface CourseCurriculumProps {
   sections: Section[];
   isEnrolled: boolean;
   currentLessonId?: string;
+  enrollmentId?: string;
+  courseId?: string;
   onLessonClick: (lesson: Lesson) => void;
 }
 
@@ -50,6 +53,8 @@ export const CourseCurriculum = ({
   sections, 
   isEnrolled, 
   currentLessonId,
+  enrollmentId,
+  courseId,
   onLessonClick 
 }: CourseCurriculumProps) => {
   const [openSections, setOpenSections] = useState<string[]>(
@@ -127,8 +132,16 @@ export const CourseCurriculum = ({
                     <Badge variant="outline" className="shrink-0">
                       Section {sectionIndex + 1}
                     </Badge>
-                    <div>
-                      <h3 className="font-semibold">{section.title}</h3>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{section.title}</h3>
+                        {isEnrolled && enrollmentId && (
+                          <SectionLockIndicator
+                            sectionId={section.id}
+                            enrollmentId={enrollmentId}
+                          />
+                        )}
+                      </div>
                       {section.description && (
                         <p className="text-sm text-muted-foreground mt-1">
                           {section.description}
