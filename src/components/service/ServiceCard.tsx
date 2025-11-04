@@ -38,7 +38,7 @@ interface ServiceCardProps {
   showActions?: boolean;
 }
 
-export const ServiceCard = ({
+const ServiceCard = ({
   service,
   onEdit,
   onDelete,
@@ -227,7 +227,7 @@ interface ServicesGridProps {
   showActions?: boolean;
 }
 
-export const ServicesGrid = ({
+const ServicesGrid = ({
   services,
   loading,
   onEdit,
@@ -280,3 +280,5 @@ export const ServicesGrid = ({
   );
 };
 
+export default ServiceCard;
+export { ServicesGrid };

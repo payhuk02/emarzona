@@ -142,3 +142,5 @@ export const ServiceCalendar = ({
   );
 };
 
+export default ServiceCalendar;
+

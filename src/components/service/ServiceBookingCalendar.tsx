@@ -99,7 +99,7 @@ interface ServiceBookingCalendarProps {
   showLegend?: boolean;
 }
 
-export const ServiceBookingCalendar = ({
+const ServiceBookingCalendar = ({
   events,
   onSelectSlot,
   onSelectEvent,
@@ -440,3 +440,4 @@ export const ServiceBookingCalendar = ({
   );
 };
 
+export default ServiceBookingCalendar;

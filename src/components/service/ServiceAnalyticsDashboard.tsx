@@ -22,7 +22,7 @@ interface ServiceAnalyticsDashboardProps {
   serviceId: string;
 }
 
-export const ServiceAnalyticsDashboard = ({
+const ServiceAnalyticsDashboard = ({
   serviceId,
 }: ServiceAnalyticsDashboardProps) => {
   // TODO: Implement actual data fetching with React Query
@@ -160,3 +160,4 @@ export const ServiceAnalyticsDashboard = ({
   );
 };
 
+export default ServiceAnalyticsDashboard;
