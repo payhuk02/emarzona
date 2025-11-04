@@ -41,6 +41,17 @@ import {
   Gift,
   Star,
   Percent,
+  Repeat,
+  GanttChart,
+  Boxes,
+  TrendingUp,
+  DollarSign as DollarSignIcon,
+  PackageSearch,
+  Factory,
+  Building2,
+  BarChart,
+  Layers,
+  FileBarChart,
 } from "lucide-react";
 import payhukLogo from "@/assets/payhuk-logo.png";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
@@ -109,6 +120,11 @@ const menuSections = [
         icon: GraduationCap,
       },
       {
+        title: "Créer un Cours",
+        url: "/dashboard/courses/new",
+        icon: GraduationCap,
+      },
+      {
         title: "Ma Liste de Souhaits",
         url: "/account/wishlist",
         icon: Heart,
@@ -158,6 +174,16 @@ const menuSections = [
         url: "/dashboard/my-licenses",
         icon: Key,
       },
+      {
+        title: "Bundles Produits",
+        url: "/dashboard/digital-products/bundles/create",
+        icon: Layers,
+      },
+      {
+        title: "Analytics Digitaux",
+        url: "/dashboard/digital-products",
+        icon: BarChart,
+      },
     ]
   },
   {
@@ -199,6 +225,16 @@ const menuSections = [
         icon: Calendar,
       },
       {
+        title: "Calendrier Avancé",
+        url: "/dashboard/advanced-calendar",
+        icon: GanttChart,
+      },
+      {
+        title: "Réservations Récurrentes",
+        url: "/dashboard/recurring-bookings",
+        icon: Repeat,
+      },
+      {
         title: "Inventaire",
         url: "/dashboard/inventory",
         icon: Warehouse,
@@ -207,6 +243,36 @@ const menuSections = [
         title: "Expéditions",
         url: "/dashboard/shipping",
         icon: Truck,
+      },
+      {
+        title: "Expéditions Batch",
+        url: "/dashboard/batch-shipping",
+        icon: PackageSearch,
+      },
+      {
+        title: "Kits Produits",
+        url: "/dashboard/product-kits",
+        icon: Boxes,
+      },
+      {
+        title: "Prévisions Demande",
+        url: "/dashboard/demand-forecasting",
+        icon: TrendingUp,
+      },
+      {
+        title: "Optimisation Coûts",
+        url: "/dashboard/cost-optimization",
+        icon: DollarSignIcon,
+      },
+      {
+        title: "Fournisseurs",
+        url: "/dashboard/suppliers",
+        icon: Factory,
+      },
+      {
+        title: "Entrepôts",
+        url: "/dashboard/warehouses",
+        icon: Building2,
       },
     ]
   },
@@ -356,6 +422,21 @@ const adminMenuSections = [
         icon: GraduationCap,
       },
       {
+        title: "Produits Digitaux",
+        url: "/dashboard/digital-products",
+        icon: Download,
+      },
+      {
+        title: "Produits Physiques",
+        url: "/dashboard/products",
+        icon: Package,
+      },
+      {
+        title: "Services",
+        url: "/dashboard/bookings",
+        icon: Calendar,
+      },
+      {
         title: "Avis",
         url: "/admin/reviews",
         icon: FileText,
@@ -414,6 +495,46 @@ const adminMenuSections = [
         title: "Retours",
         url: "/admin/returns",
         icon: RotateCcw,
+      },
+      {
+        title: "Calendrier Avancé",
+        url: "/dashboard/advanced-calendar",
+        icon: GanttChart,
+      },
+      {
+        title: "Réservations Récurrentes",
+        url: "/dashboard/recurring-bookings",
+        icon: Repeat,
+      },
+      {
+        title: "Kits Produits",
+        url: "/dashboard/product-kits",
+        icon: Boxes,
+      },
+      {
+        title: "Prévisions Demande",
+        url: "/dashboard/demand-forecasting",
+        icon: TrendingUp,
+      },
+      {
+        title: "Optimisation Coûts",
+        url: "/dashboard/cost-optimization",
+        icon: DollarSignIcon,
+      },
+      {
+        title: "Expéditions Batch",
+        url: "/dashboard/batch-shipping",
+        icon: PackageSearch,
+      },
+      {
+        title: "Fournisseurs",
+        url: "/dashboard/suppliers",
+        icon: Factory,
+      },
+      {
+        title: "Entrepôts",
+        url: "/dashboard/warehouses",
+        icon: Building2,
       },
     ]
   },

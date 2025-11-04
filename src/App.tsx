@@ -127,6 +127,8 @@ const AdminProductKitsManagement = lazy(() => import("./pages/admin/AdminProduct
 const AdminDemandForecasting = lazy(() => import("./pages/admin/AdminDemandForecasting"));
 const AdminCostOptimization = lazy(() => import("./pages/admin/AdminCostOptimization"));
 const AdminBatchShipping = lazy(() => import("./pages/admin/AdminBatchShipping"));
+const AdvancedCalendarPage = lazy(() => import("./pages/service/AdvancedCalendarPage"));
+const RecurringBookingsPage = lazy(() => import("./pages/service/RecurringBookingsPage"));
 
 // Pages Affiliation - Lazy loading
 const StoreAffiliates = lazy(() => import("./pages/StoreAffiliates"));
@@ -326,6 +328,8 @@ const AppContent = () => {
           <Route path="/dashboard/shipping" element={<ProtectedRoute><ShippingDashboard /></ProtectedRoute>} />
           <Route path="/dashboard/inventory" element={<ProtectedRoute><InventoryDashboard /></ProtectedRoute>} />
           <Route path="/dashboard/bookings" element={<ProtectedRoute><BookingsManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/advanced-calendar" element={<ProtectedRoute><AdvancedCalendarPage /></ProtectedRoute>} />
+          <Route path="/dashboard/recurring-bookings" element={<ProtectedRoute><RecurringBookingsPage /></ProtectedRoute>} />
 
           {/* --- Routes Product Details (Physical, Services) --- */}
           <Route path="/physical/:productId" element={<PhysicalProductDetail />} />
