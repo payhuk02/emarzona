@@ -33,7 +33,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { useCourseDetail } from '@/hooks/courses/useCourseDetail';
-import { VideoPlayer } from '@/components/courses/player/VideoPlayer';
+import { VideoPlayerWithNotes } from '@/components/courses/player/VideoPlayerWithNotes';
 import { CourseCurriculum } from '@/components/courses/detail/CourseCurriculum';
 import { CourseProgressBar } from '@/components/courses/detail/CourseProgressBar';
 import { LessonCompletionButton } from '@/components/courses/player/LessonCompletionButton';
@@ -310,36 +310,16 @@ const CourseDetail = () => {
             {/* Video Player */}
             {displayLesson && (
               <div className="space-y-4">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                  {/* Video Player - 2/3 width */}
-                  <div className="lg:col-span-2">
-                    <VideoPlayer
-                      videoType={displayLesson.video_type}
-                      videoUrl={displayLesson.video_url}
-                      title={displayLesson.title}
-                      productId={product.id}
-                      enrollmentId={isEnrolled ? enrollment?.id : undefined}
-                      lessonId={displayLesson.id}
-                    />
-                  </div>
-                  
-                  {/* Notes Panel - 1/3 width (si inscrit) */}
-                  {isEnrolled && enrollment && (
-                    <div className="lg:col-span-1">
-                      <NotesPanel
-                        enrollmentId={enrollment.id}
-                        lessonId={displayLesson.id}
-                        courseId={course.id}
-                        currentTimeSeconds={0}
-                        onTimestampClick={(seconds) => {
-                          // TODO: Naviguer vers le timestamp dans la vidéo
-                          console.log('Navigate to timestamp:', seconds);
-                        }}
-                        className="h-full"
-                      />
-                    </div>
-                  )}
-                </div>
+                <VideoPlayerWithNotes
+                  videoType={displayLesson.video_type}
+                  videoUrl={displayLesson.video_url}
+                  title={displayLesson.title}
+                  productId={product.id}
+                  enrollmentId={isEnrolled ? enrollment?.id : undefined}
+                  lessonId={displayLesson.id}
+                  courseId={course.id}
+                  isEnrolled={isEnrolled}
+                />
                 
                 {/* Message "Reprendre où on s'est arrêté" */}
                 {isEnrolled && lastViewedLesson && displayLesson?.id === lastViewedLesson.id && !currentLesson && (

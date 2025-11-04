@@ -23,6 +23,8 @@ interface VideoPlayerProps {
   lessonId?: string;
   onEnded?: () => void;
   onTimeUpdate?: (currentTime: number) => void;
+  onSeekTo?: (seconds: number) => void; // Callback pour navigation par timestamp
+  currentTime?: number; // Temps actuel pour synchronisation externe
 }
 
 export const VideoPlayer = ({ 
@@ -33,7 +35,9 @@ export const VideoPlayer = ({
   enrollmentId,
   lessonId,
   onEnded,
-  onTimeUpdate 
+  onTimeUpdate,
+  onSeekTo,
+  currentTime
 }: VideoPlayerProps) => {
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -65,6 +69,13 @@ export const VideoPlayer = ({
       }
     }
   }, [progress, videoType]);
+
+  // Navigation externe vers un timestamp (depuis NotesPanel)
+  useEffect(() => {
+    if (currentTime !== undefined && videoRef.current && videoType === 'upload') {
+      videoRef.current.currentTime = currentTime;
+    }
+  }, [currentTime, videoType]);
 
   // Sauvegarder la position toutes les 10 secondes
   useEffect(() => {
