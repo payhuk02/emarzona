@@ -6,29 +6,39 @@
 
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Circle } from 'lucide-react';
-import { useMarkLessonComplete, useLessonProgress } from '@/hooks/courses/useCourseProgress';
+import { useLessonProgress } from '@/hooks/courses/useCourseProgress';
+import { useMarkLessonCompleteWithPoints } from '@/hooks/courses/useGamification';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LessonCompletionButtonProps {
   enrollmentId: string;
   lessonId: string;
   variant?: 'default' | 'outline' | 'ghost';
   showText?: boolean;
+  points?: number; // Points à attribuer (défaut: 10)
 }
 
 export const LessonCompletionButton = ({ 
   enrollmentId, 
   lessonId, 
   variant = 'default',
-  showText = true 
+  showText = true,
+  points = 10
 }: LessonCompletionButtonProps) => {
   const { data: progress, isLoading } = useLessonProgress(enrollmentId, lessonId);
-  const markComplete = useMarkLessonComplete();
+  const { user } = useAuth();
+  const markComplete = useMarkLessonCompleteWithPoints();
 
   const isCompleted = progress?.is_completed || false;
 
   const handleToggleComplete = () => {
-    if (!isCompleted) {
-      markComplete.mutate({ enrollmentId, lessonId });
+    if (!isCompleted && user) {
+      markComplete.mutate({ 
+        enrollmentId, 
+        lessonId,
+        userId: user.id,
+        points
+      });
     }
   };
 

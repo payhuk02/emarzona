@@ -37,6 +37,7 @@ import { VideoPlayer } from '@/components/courses/player/VideoPlayer';
 import { CourseCurriculum } from '@/components/courses/detail/CourseCurriculum';
 import { CourseProgressBar } from '@/components/courses/detail/CourseProgressBar';
 import { LessonCompletionButton } from '@/components/courses/player/LessonCompletionButton';
+import { PointsDisplay, BadgesDisplay, Leaderboard, AchievementsDisplay } from '@/components/courses/gamification';
 import { CourseSchema, minutesToISO8601 } from '@/components/seo/CourseSchema';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { HelpCircle } from 'lucide-react';
@@ -448,10 +449,42 @@ const CourseDetail = () => {
               currentLessonId={currentLesson?.id}
               onLessonClick={handleLessonClick}
             />
+
+            {/* Gamification Section (si inscrit) */}
+            {isEnrolled && enrollment && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <AchievementsDisplay
+                    enrollmentId={enrollment.id}
+                    courseId={course.id}
+                    showLocked={false}
+                  />
+                  <Leaderboard
+                    courseId={course.id}
+                    limit={10}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* Gamification - Points & Badges (si inscrit) */}
+            {isEnrolled && enrollment && (
+              <>
+                <PointsDisplay 
+                  enrollmentId={enrollment.id}
+                  compact={false}
+                />
+                <BadgesDisplay
+                  enrollmentId={enrollment.id}
+                  courseId={course.id}
+                  showLocked={false}
+                />
+              </>
+            )}
+
             {/* Enrollment Card */}
             <Card className="sticky top-4">
               <CardContent className="p-6">

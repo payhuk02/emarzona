@@ -49,3 +49,25 @@ export {
   type ReportConfig,
 } from './useCourseReports';
 
+// Hook useGamification
+export {
+  useStudentPoints,
+  useStudentBadges,
+  useStudentAchievements,
+  useCourseBadges,
+  useCourseAchievements,
+  usePointsHistory,
+  useCourseLeaderboard,
+  useAwardPoints,
+  useMarkLessonCompleteWithPoints,
+  useCreateBadge,
+  useCreateAchievement,
+  type StudentPoints,
+  type CourseBadge,
+  type StudentBadge,
+  type CourseAchievement,
+  type StudentAchievement,
+  type PointsHistory,
+  type LeaderboardEntry,
+} from './useGamification';
+
