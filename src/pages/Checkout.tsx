@@ -33,7 +33,6 @@ import GiftCardInput from '@/components/checkout/GiftCardInput';
 import CouponInput from '@/components/checkout/CouponInput';
 import {
   ShoppingBag,
-  User,
   MapPin,
   Phone,
   Mail,
@@ -59,7 +58,7 @@ interface ShippingAddress {
 export default function Checkout() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { items, summary, isLoading: cartLoading, appliedCoupon } = useCart();
+  const { items, summary, isLoading: cartLoading, appliedCoupon: appliedCouponLegacy } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   
   // State pour la carte cadeau
@@ -69,8 +68,8 @@ export default function Checkout() {
     code: string;
   } | null>(null);
   
-  // State pour le coupon
-  const [appliedCoupon, setAppliedCoupon] = useState<{
+  // State pour le coupon (nouveau système)
+  const [appliedCouponCode, setAppliedCouponCode] = useState<{
     id: string;
     discountAmount: number;
     code: string;
@@ -80,6 +79,15 @@ export default function Checkout() {
   const [storeId, setStoreId] = useState<string | null>(null);
   const [customerId, setCustomerId] = useState<string | null>(null);
   
+  // Récupérer l'utilisateur pour pré-remplir le formulaire
+  const { data: user } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    },
+  });
+
   // Charger le store_id et customer_id du premier produit si disponible
   useEffect(() => {
     if (items.length > 0 && !storeId) {
@@ -136,15 +144,6 @@ export default function Checkout() {
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof ShippingAddress, string>>>({});
 
-  // Récupérer l'utilisateur pour pré-remplir le formulaire
-  const { data: user } = useQuery({
-    queryKey: ['current-user'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      return user;
-    },
-  });
-
   // Pré-remplir avec données utilisateur si disponible
   useMemo(() => {
     if (user?.email && !formData.email) {
@@ -172,11 +171,26 @@ export default function Checkout() {
     return defaultRates[formData.country] || 0.18;
   }, [formData.country]);
 
+  // Calculer shipping (exemple simple : 5000 XOF pour BF, 15000 pour autres)
+  const shippingAmount = useMemo(() => {
+    if (formData.country === 'BF') {
+      return 5000; // Frais de livraison Burkina Faso
+    }
+    return 15000; // International
+  }, [formData.country]);
+
   // Montant du coupon (calculé avant taxes et shipping)
   const couponDiscountAmount = useMemo(() => {
-    if (!appliedCoupon || !appliedCoupon.discountAmount) return 0;
-    return appliedCoupon.discountAmount;
-  }, [appliedCoupon]);
+    if (!appliedCouponCode || !appliedCouponCode.discountAmount) return 0;
+    return appliedCouponCode.discountAmount;
+  }, [appliedCouponCode]);
+
+  const taxAmount = useMemo(() => {
+    // Calculer sur le montant après remise et coupon (mais avant carte cadeau pour simplifier)
+    // La carte cadeau sera appliquée après le calcul des taxes
+    const taxableAmount = summary.subtotal - summary.discount_amount - couponDiscountAmount;
+    return Math.max(0, taxableAmount * taxRate);
+  }, [summary.subtotal, summary.discount_amount, couponDiscountAmount, taxRate]);
 
   // Montant à utiliser de la carte cadeau (calculé après taxes et shipping)
   const giftCardAmount = useMemo(() => {
@@ -189,21 +203,6 @@ export default function Checkout() {
     // Utiliser le maximum possible de la carte cadeau (mais pas plus que le montant dû)
     return Math.min(appliedGiftCard.balance, amountWithTaxesAndShipping);
   }, [appliedGiftCard, summary.subtotal, summary.discount_amount, couponDiscountAmount, taxRate, shippingAmount]);
-
-  const taxAmount = useMemo(() => {
-    // Calculer sur le montant après remise et coupon (mais avant carte cadeau pour simplifier)
-    // La carte cadeau sera appliquée après le calcul des taxes
-    const taxableAmount = summary.subtotal - summary.discount_amount - couponDiscountAmount;
-    return Math.max(0, taxableAmount * taxRate);
-  }, [summary.subtotal, summary.discount_amount, couponDiscountAmount, taxRate]);
-
-  // Calculer shipping (exemple simple : 5000 XOF pour BF, 15000 pour autres)
-  const shippingAmount = useMemo(() => {
-    if (formData.country === 'BF') {
-      return 5000; // Frais de livraison Burkina Faso
-    }
-    return 15000; // International
-  }, [formData.country]);
 
   // Total final
   const finalTotal = useMemo(() => {
@@ -286,13 +285,6 @@ export default function Checkout() {
         return;
       }
 
-      // Créer la commande dans la base de données
-      const { data: store } = await supabase
-        .from('stores')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
       // Pour l'instant, utiliser le store_id du premier produit
       // TODO: Gérer multi-stores dans une commande
       const firstProduct = items[0];
@@ -348,23 +340,23 @@ export default function Checkout() {
 
       // Créer automatiquement la facture
       try {
-        const { data: invoiceId, error: invoiceError } = await supabase.rpc('create_invoice_from_order', {
+        const { data: invoiceId, error: invoiceError } = await supabase.rpc('create_invoice_from_order' as any, {
           p_order_id: order.id,
         });
 
         if (invoiceError) {
-          logger.error('Error creating invoice:', invoiceError);
+          logger.error('Error creating invoice:', invoiceError as any);
           // Ne pas bloquer la commande si la facture échoue
         } else {
           logger.info(`Invoice created: ${invoiceId}`);
         }
       } catch (invoiceErr) {
-        logger.error('Error in invoice creation:', invoiceErr);
+        logger.error('Error in invoice creation:', invoiceErr as any);
         // Ne pas bloquer la commande
       }
 
-      // Appliquer le coupon si un coupon a été appliqué
-      if (appliedCoupon && appliedCoupon.id && couponDiscountAmount > 0) {
+      // Appliquer le coupon si un coupon a été appliqué (nouveau système)
+      if (appliedCouponCode && appliedCouponCode.id && couponDiscountAmount > 0) {
         try {
           // Récupérer le customer_id si pas encore chargé
           let finalCustomerId = customerId;
@@ -382,28 +374,28 @@ export default function Checkout() {
           }
 
           if (finalCustomerId) {
-            await supabase.rpc('apply_coupon_to_order', {
-              p_coupon_id: appliedCoupon.id,
+            await supabase.rpc('apply_coupon_to_order' as any, {
+              p_coupon_id: appliedCouponCode.id,
               p_order_id: order.id,
               p_customer_id: finalCustomerId,
               p_discount_amount: couponDiscountAmount,
             });
-            logger.info('Coupon applied to order', { couponId: appliedCoupon.id, orderId: order.id });
+            logger.info('Coupon applied to order', { couponId: appliedCouponCode.id, orderId: order.id });
           }
         } catch (couponError) {
-          logger.error('Error applying coupon:', couponError);
+          logger.error('Error applying coupon:', couponError as any);
           // Ne pas bloquer la commande si le coupon échoue
         }
       }
 
       // Enregistrer l'utilisation du coupon legacy si un coupon a été appliqué
-      if (appliedCoupon && appliedCoupon.promotionId) {
+      if (appliedCouponLegacy && (appliedCouponLegacy as any).promotionId) {
         try {
           const { data: sessionId } = await supabase.auth.getSession();
-          await supabase.rpc('record_coupon_usage', {
-            promotion_id_param: appliedCoupon.promotionId,
+          await supabase.rpc('record_coupon_usage' as any, {
+            promotion_id_param: (appliedCouponLegacy as any).promotionId,
             order_id_param: order.id,
-            discount_amount_param: appliedCoupon.discountAmount,
+            discount_amount_param: (appliedCouponLegacy as any).discountAmount,
             original_amount_param: summary.subtotal + taxAmount,
             final_amount_param: finalTotal,
             session_id_param: sessionId?.session?.access_token || null,
@@ -413,7 +405,7 @@ export default function Checkout() {
           localStorage.removeItem('applied_coupon');
           sessionStorage.removeItem('applied_coupon');
         } catch (couponError) {
-          logger.error('Error recording coupon usage:', couponError);
+          logger.error('Error recording coupon usage:', couponError as any);
           // Ne pas bloquer la commande si l'enregistrement du coupon échoue
         }
       }
@@ -421,24 +413,24 @@ export default function Checkout() {
       // Rédimer la carte cadeau si une carte a été appliquée
       if (appliedGiftCard && giftCardAmount > 0) {
         try {
-          const { data: redeemResult, error: redeemError } = await supabase.rpc('redeem_gift_card', {
+          const { data: redeemResult, error: redeemError } = await supabase.rpc('redeem_gift_card' as any, {
             p_gift_card_id: appliedGiftCard.id,
             p_order_id: order.id,
             p_amount: giftCardAmount,
           });
 
           if (redeemError) {
-            logger.error('Error redeeming gift card:', redeemError);
+            logger.error('Error redeeming gift card:', redeemError as any);
             toast({
               title: 'Attention',
               description: 'La carte cadeau n\'a pas pu être utilisée, mais la commande a été créée.',
               variant: 'destructive',
             });
-          } else if (redeemResult && redeemResult.length > 0 && !redeemResult[0].success) {
-            logger.error('Gift card redemption failed:', redeemResult[0].message);
+          } else if (redeemResult && Array.isArray(redeemResult) && redeemResult.length > 0 && !(redeemResult[0] as any).success) {
+            logger.error('Gift card redemption failed:', (redeemResult[0] as any).message);
             toast({
               title: 'Attention',
-              description: redeemResult[0].message || 'La carte cadeau n\'a pas pu être utilisée.',
+              description: (redeemResult[0] as any).message || 'La carte cadeau n\'a pas pu être utilisée.',
               variant: 'destructive',
             });
           } else {
@@ -447,7 +439,7 @@ export default function Checkout() {
             setAppliedGiftCard(null);
           }
         } catch (giftCardError) {
-          logger.error('Error in gift card redemption:', giftCardError);
+          logger.error('Error in gift card redemption:', giftCardError as any);
           // Ne pas bloquer la commande si la rédemption échoue
         }
       }
@@ -475,11 +467,7 @@ export default function Checkout() {
       }
 
       // Marquer le panier comme récupéré (pour abandoned cart recovery)
-      try {
-        await markCartRecovered();
-      } catch (err) {
-        logger.error('Error marking cart as recovered:', err);
-      }
+      // TODO: Implémenter markCartRecovered si nécessaire
       
       // Rediriger vers Moneroo
       safeRedirect(paymentResult.checkout_url, () => {
@@ -741,7 +729,7 @@ export default function Checkout() {
                           customerId={customerId || undefined}
                           orderAmount={summary.subtotal}
                           onApply={(couponId, discountAmount, code) => {
-                            setAppliedCoupon({
+                            setAppliedCouponCode({
                               id: couponId,
                               discountAmount,
                               code: code || '',
@@ -753,12 +741,12 @@ export default function Checkout() {
                             }));
                           }}
                           onRemove={() => {
-                            setAppliedCoupon(null);
+                            setAppliedCouponCode(null);
                             localStorage.removeItem('applied_coupon');
                           }}
-                          appliedCouponId={appliedCoupon?.id || null}
-                          appliedCouponCode={appliedCoupon?.code || null}
-                          appliedDiscountAmount={appliedCoupon?.discountAmount || null}
+                          appliedCouponId={appliedCouponCode?.id || null}
+                          appliedCouponCode={appliedCouponCode?.code || null}
+                          appliedDiscountAmount={appliedCouponCode?.discountAmount || null}
                         />
                       </div>
                     )}
@@ -868,9 +856,9 @@ export default function Checkout() {
                         </div>
                       )}
 
-                      {appliedCoupon && couponDiscountAmount > 0 && (
+                      {appliedCouponCode && couponDiscountAmount > 0 && (
                         <div className="flex justify-between text-green-600">
-                          <span>Code promo ({appliedCoupon.code})</span>
+                          <span>Code promo ({appliedCouponCode.code})</span>
                           <span>-{couponDiscountAmount.toLocaleString('fr-FR')} XOF</span>
                         </div>
                       )}
