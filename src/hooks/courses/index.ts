@@ -117,3 +117,36 @@ export {
   type CreateNoteData,
 } from './useCourseNotes';
 
+// Hook useCohorts
+export {
+  useCourseCohorts,
+  useCohort,
+  useCohortMembers,
+  useStudentCohorts,
+  useCohortDiscussions,
+  useCreateCohort,
+  useAddCohortMember,
+  useRemoveCohortMember,
+  useAutoAssignCohorts,
+  type CourseCohort,
+  type CohortMember,
+  type CohortDiscussion,
+  type CohortInvitation,
+  type CreateCohortData,
+} from './useCohorts';
+
+// Hook useLiveSessions
+export {
+  useCourseLiveSessions,
+  useUpcomingSessions,
+  useSessionRegistrations,
+  useSessionQuestions,
+  useCreateLiveSession,
+  useRegisterForSession,
+  useUpdateSessionStatus,
+  type LiveSession,
+  type SessionRegistration,
+  type SessionQuestion,
+  type CreateLiveSessionData,
+} from './useLiveSessions';
+
