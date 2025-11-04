@@ -121,6 +121,7 @@ const AdminReturnManagement = lazy(() => import("./pages/admin/AdminReturnManage
 const AdminWebhookManagement = lazy(() => import("./pages/admin/AdminWebhookManagement"));
 const AdminLoyaltyManagement = lazy(() => import("./pages/admin/AdminLoyaltyManagement"));
 const AdminGiftCardManagement = lazy(() => import("./pages/admin/AdminGiftCardManagement"));
+const AdminSuppliersManagement = lazy(() => import("./pages/admin/AdminSuppliersManagement"));
 
 // Pages Affiliation - Lazy loading
 const StoreAffiliates = lazy(() => import("./pages/StoreAffiliates"));
@@ -266,6 +267,7 @@ const AppContent = () => {
           <Route path="/dashboard/webhooks" element={<ProtectedRoute><AdminWebhookManagement /></ProtectedRoute>} />
           <Route path="/dashboard/loyalty" element={<ProtectedRoute><AdminLoyaltyManagement /></ProtectedRoute>} />
           <Route path="/dashboard/gift-cards" element={<ProtectedRoute><AdminGiftCardManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/suppliers" element={<ProtectedRoute><AdminSuppliersManagement /></ProtectedRoute>} />
 
           {/* --- Routes Affiliation --- */}
           <Route path="/dashboard/affiliates" element={<ProtectedRoute><StoreAffiliates /></ProtectedRoute>} />
@@ -353,6 +355,7 @@ const AppContent = () => {
           <Route path="/admin/webhooks" element={<ProtectedRoute><AdminWebhookManagement /></ProtectedRoute>} />
           <Route path="/admin/loyalty" element={<ProtectedRoute><AdminLoyaltyManagement /></ProtectedRoute>} />
           <Route path="/admin/gift-cards" element={<ProtectedRoute><AdminGiftCardManagement /></ProtectedRoute>} />
+          <Route path="/admin/suppliers" element={<ProtectedRoute><AdminSuppliersManagement /></ProtectedRoute>} />
           <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
           <Route path="/admin/templates" element={<ProtectedRoute><AdminTemplates /></ProtectedRoute>} />
           <Route path="/admin/templates-premium" element={<ProtectedRoute><AdminTemplatesPremium /></ProtectedRoute>} />
