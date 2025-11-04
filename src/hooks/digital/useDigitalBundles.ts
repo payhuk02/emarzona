@@ -165,6 +165,38 @@ export const useDigitalBundle = (bundleId: string | undefined) => {
 };
 
 /**
+ * useActiveBundles - Récupère les bundles actifs (pour marketplace)
+ */
+export const useActiveBundles = (limit: number = 6, storeId?: string) => {
+  return useQuery({
+    queryKey: ['activeBundles', storeId, limit],
+    queryFn: async () => {
+      let query = supabase
+        .from('digital_product_bundles')
+        .select('*')
+        .eq('is_active', true)
+        .eq('is_draft', false)
+        .order('display_order', { ascending: true })
+        .order('total_sales', { ascending: false })
+        .limit(limit);
+
+      if (storeId) {
+        query = query.eq('store_id', storeId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        logger.error('Error fetching active bundles', { error, storeId });
+        throw error;
+      }
+
+      return (data || []) as DigitalProductBundle[];
+    },
+  });
+};
+
+/**
  * useFeaturedBundles - Récupère les bundles mis en avant
  */
 export const useFeaturedBundles = (storeId?: string, limit: number = 6) => {
