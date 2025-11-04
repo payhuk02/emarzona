@@ -38,6 +38,10 @@ import { CourseCurriculum } from '@/components/courses/detail/CourseCurriculum';
 import { CourseProgressBar } from '@/components/courses/detail/CourseProgressBar';
 import { LessonCompletionButton } from '@/components/courses/player/LessonCompletionButton';
 import { PointsDisplay, BadgesDisplay, Leaderboard, AchievementsDisplay } from '@/components/courses/gamification';
+import { NotesPanel } from '@/components/courses/notes';
+import { CohortsList } from '@/components/courses/cohorts';
+import { AssignmentsList } from '@/components/courses/assignments';
+import { LiveSessionsList } from '@/components/courses/live';
 import { CourseSchema, minutesToISO8601 } from '@/components/seo/CourseSchema';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { HelpCircle } from 'lucide-react';
@@ -305,15 +309,37 @@ const CourseDetail = () => {
 
             {/* Video Player */}
             {displayLesson && (
-              <div>
-                <VideoPlayer
-                  videoType={displayLesson.video_type}
-                  videoUrl={displayLesson.video_url}
-                  title={displayLesson.title}
-                  productId={product.id}
-                  enrollmentId={isEnrolled ? enrollment?.id : undefined}
-                  lessonId={displayLesson.id}
-                />
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  {/* Video Player - 2/3 width */}
+                  <div className="lg:col-span-2">
+                    <VideoPlayer
+                      videoType={displayLesson.video_type}
+                      videoUrl={displayLesson.video_url}
+                      title={displayLesson.title}
+                      productId={product.id}
+                      enrollmentId={isEnrolled ? enrollment?.id : undefined}
+                      lessonId={displayLesson.id}
+                    />
+                  </div>
+                  
+                  {/* Notes Panel - 1/3 width (si inscrit) */}
+                  {isEnrolled && enrollment && (
+                    <div className="lg:col-span-1">
+                      <NotesPanel
+                        enrollmentId={enrollment.id}
+                        lessonId={displayLesson.id}
+                        courseId={course.id}
+                        currentTimeSeconds={0}
+                        onTimestampClick={(seconds) => {
+                          // TODO: Naviguer vers le timestamp dans la vidéo
+                          console.log('Navigate to timestamp:', seconds);
+                        }}
+                        className="h-full"
+                      />
+                    </div>
+                  )}
+                </div>
                 
                 {/* Message "Reprendre où on s'est arrêté" */}
                 {isEnrolled && lastViewedLesson && displayLesson?.id === lastViewedLesson.id && !currentLesson && (
@@ -451,6 +477,58 @@ const CourseDetail = () => {
               courseId={course.id}
               onLessonClick={handleLessonClick}
             />
+
+            {/* Assignments Section (si inscrit) */}
+            {isEnrolled && enrollment && (
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-orange-600" />
+                    Devoirs
+                  </h2>
+                  <AssignmentsList 
+                    courseId={course.id}
+                    enrollmentId={enrollment.id}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Cohorts Section (si inscrit) */}
+            {isEnrolled && enrollment && (
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-blue-600" />
+                    Mes Groupes
+                  </h2>
+                  <CohortsList 
+                    courseId={course.id}
+                    onCohortClick={(cohort) => {
+                      // TODO: Naviguer vers la page du cohort
+                      console.log('Navigate to cohort:', cohort.id);
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Live Sessions Section (si inscrit) */}
+            {isEnrolled && enrollment && user && (
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <PlayCircle className="w-5 h-5 text-green-600" />
+                    Sessions en Direct
+                  </h2>
+                  <LiveSessionsList 
+                    courseId={course.id}
+                    enrollmentId={enrollment.id}
+                    userId={user.id}
+                  />
+                </CardContent>
+              </Card>
+            )}
 
             {/* Gamification Section (si inscrit) */}
             {isEnrolled && enrollment && (
