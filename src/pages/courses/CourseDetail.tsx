@@ -353,6 +353,14 @@ const CourseDetail = () => {
               </div>
             )}
 
+            {/* Prérequis (si inscrit) */}
+            {isEnrolled && enrollment && (
+              <PrerequisitesList
+                courseId={course.id}
+                enrollmentId={enrollment.id}
+              />
+            )}
+
             {/* Description */}
             <Card>
               <CardContent className="p-6">

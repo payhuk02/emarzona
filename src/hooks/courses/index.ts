@@ -150,3 +150,32 @@ export {
   type CreateLiveSessionData,
 } from './useLiveSessions';
 
+// Hook useLearningPaths
+export {
+  useLearningPaths,
+  useLearningPath,
+  useStudentLearningPaths,
+  usePathEnrollment,
+  useCreateLearningPath,
+  useAddCourseToPath,
+  useEnrollInPath,
+  useUpdatePathProgress,
+  type LearningPath,
+  type PathCourse,
+  type PathEnrollment,
+  type CreateLearningPathData,
+  type AddCourseToPathData,
+} from './useLearningPaths';
+
+// Hook usePrerequisites
+export {
+  useCoursePrerequisites,
+  usePrerequisiteValidations,
+  useCheckCourseAccess,
+  useValidatePrerequisite,
+  useCreatePrerequisite,
+  type CoursePrerequisite,
+  type PrerequisiteValidation,
+  type CreatePrerequisiteData,
+} from './usePrerequisites';
+
