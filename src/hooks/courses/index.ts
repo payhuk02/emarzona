@@ -102,3 +102,18 @@ export {
   type UnlockedSections,
 } from './useDripContent';
 
+// Hook useCourseNotes
+export {
+  useLessonNotes,
+  useCourseNotes,
+  useLessonBookmarks,
+  useAddNote,
+  useUpdateNote,
+  useDeleteNote,
+  useAddBookmark,
+  useDeleteBookmark,
+  type CourseNote,
+  type CourseBookmark,
+  type CreateNoteData,
+} from './useCourseNotes';
+
