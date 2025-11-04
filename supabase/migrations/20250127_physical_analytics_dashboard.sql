@@ -38,8 +38,10 @@ SELECT
   SUM(oi.quantity) FILTER (
     WHERE o.created_at >= CURRENT_DATE - INTERVAL '30 days'
   ) as units_sold_last_30_days,
-  COALESCE(SUM(oi.total_price), SUM(oi.unit_price * oi.quantity), 0) FILTER (
-    WHERE o.created_at >= CURRENT_DATE - INTERVAL '30 days'
+  COALESCE(
+    SUM(oi.total_price) FILTER (WHERE o.created_at >= CURRENT_DATE - INTERVAL '30 days'),
+    SUM(oi.unit_price * oi.quantity) FILTER (WHERE o.created_at >= CURRENT_DATE - INTERVAL '30 days'),
+    0
   ) as revenue_last_30_days,
   
   COUNT(DISTINCT oi.order_id) FILTER (
