@@ -36,6 +36,10 @@ import { useState, useEffect } from 'react';
 import CustomerMyReturns from './CustomerMyReturns';
 import CustomerLoyalty from './CustomerLoyalty';
 import CustomerMyGiftCards from './CustomerMyGiftCards';
+import { DownloadsTab } from '@/components/customer/DownloadsTab';
+import { LicensesTab } from '@/components/customer/LicensesTab';
+import { UpdatesTab } from '@/components/customer/UpdatesTab';
+import { FavoritesTab } from '@/components/customer/FavoritesTab';
 
 interface CustomerStats {
   totalOrders: number;
@@ -206,12 +210,14 @@ export default function CustomerPortal() {
 
             {/* Sections principales */}
             <Tabs defaultValue="overview" className="space-y-4">
-              <TabsList>
+              <TabsList className="flex-wrap">
                 <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
                 <TabsTrigger value="orders">Commandes</TabsTrigger>
                 <TabsTrigger value="downloads">Téléchargements</TabsTrigger>
+                <TabsTrigger value="licenses">Licences</TabsTrigger>
+                <TabsTrigger value="updates">Mises à jour</TabsTrigger>
                 <TabsTrigger value="courses">Mes Cours</TabsTrigger>
-                <TabsTrigger value="wishlist">Ma Wishlist</TabsTrigger>
+                <TabsTrigger value="wishlist">Favoris</TabsTrigger>
                 <TabsTrigger value="loyalty">Fidélité</TabsTrigger>
                 <TabsTrigger value="gift-cards">Cartes Cadeaux</TabsTrigger>
                 <TabsTrigger value="returns">Mes Retours</TabsTrigger>
@@ -363,9 +369,7 @@ export default function CustomerPortal() {
                 </div>
               </TabsContent>
               <TabsContent value="downloads">
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">Redirection vers Mes Téléchargements...</p>
-                </div>
+                <DownloadsTab />
               </TabsContent>
               <TabsContent value="courses">
                 <div className="text-center py-8">
@@ -373,9 +377,7 @@ export default function CustomerPortal() {
                 </div>
               </TabsContent>
               <TabsContent value="wishlist">
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">Redirection vers Ma Wishlist...</p>
-                </div>
+                <FavoritesTab />
               </TabsContent>
               <TabsContent value="loyalty">
                 <CustomerLoyalty />
@@ -390,6 +392,14 @@ export default function CustomerPortal() {
                 <div className="text-center py-8">
                   <p className="text-muted-foreground mb-4">Redirection vers Mon Profil...</p>
                 </div>
+              </TabsContent>
+              
+              {/* Nouveaux onglets */}
+              <TabsContent value="licenses">
+                <LicensesTab />
+              </TabsContent>
+              <TabsContent value="updates">
+                <UpdatesTab />
               </TabsContent>
             </Tabs>
           </div>

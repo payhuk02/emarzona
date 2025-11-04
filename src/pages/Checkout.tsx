@@ -30,6 +30,7 @@ import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 import { safeRedirect } from '@/lib/url-validator';
 import { logger } from '@/lib/logger';
 import GiftCardInput from '@/components/checkout/GiftCardInput';
+import CouponInput from '@/components/checkout/CouponInput';
 import {
   ShoppingBag,
   User,
@@ -68,10 +69,18 @@ export default function Checkout() {
     code: string;
   } | null>(null);
   
-  // State pour charger le store_id (nécessaire pour la carte cadeau)
-  const [storeId, setStoreId] = useState<string | null>(null);
+  // State pour le coupon
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    id: string;
+    discountAmount: number;
+    code: string;
+  } | null>(null);
   
-  // Charger le store_id du premier produit si disponible
+  // State pour charger le store_id (nécessaire pour la carte cadeau et coupon)
+  const [storeId, setStoreId] = useState<string | null>(null);
+  const [customerId, setCustomerId] = useState<string | null>(null);
+  
+  // Charger le store_id et customer_id du premier produit si disponible
   useEffect(() => {
     if (items.length > 0 && !storeId) {
       supabase
@@ -85,7 +94,22 @@ export default function Checkout() {
           }
         });
     }
-  }, [items, storeId]);
+    
+    // Charger le customer_id si utilisateur connecté
+    if (user?.email && !customerId && storeId) {
+      supabase
+        .from('customers')
+        .select('id')
+        .eq('store_id', storeId)
+        .eq('email', user.email)
+        .single()
+        .then(({ data }) => {
+          if (data?.id) {
+            setCustomerId(data.id);
+          }
+        });
+    }
+  }, [items, storeId, user, customerId]);
   
   // Charger la carte cadeau depuis localStorage si disponible
   useEffect(() => {
@@ -148,24 +172,30 @@ export default function Checkout() {
     return defaultRates[formData.country] || 0.18;
   }, [formData.country]);
 
+  // Montant du coupon (calculé avant taxes et shipping)
+  const couponDiscountAmount = useMemo(() => {
+    if (!appliedCoupon || !appliedCoupon.discountAmount) return 0;
+    return appliedCoupon.discountAmount;
+  }, [appliedCoupon]);
+
   // Montant à utiliser de la carte cadeau (calculé après taxes et shipping)
   const giftCardAmount = useMemo(() => {
     if (!appliedGiftCard || !appliedGiftCard.balance) return 0;
     
-    // Montant total avant carte cadeau : subtotal - coupons + taxes + shipping
-    const baseAmount = summary.subtotal - summary.discount_amount;
+    // Montant total avant carte cadeau : subtotal - coupon - discount existant + taxes + shipping
+    const baseAmount = summary.subtotal - summary.discount_amount - couponDiscountAmount;
     const amountWithTaxesAndShipping = baseAmount + (baseAmount * taxRate) + shippingAmount;
     
     // Utiliser le maximum possible de la carte cadeau (mais pas plus que le montant dû)
     return Math.min(appliedGiftCard.balance, amountWithTaxesAndShipping);
-  }, [appliedGiftCard, summary.subtotal, summary.discount_amount, taxRate, shippingAmount]);
+  }, [appliedGiftCard, summary.subtotal, summary.discount_amount, couponDiscountAmount, taxRate, shippingAmount]);
 
   const taxAmount = useMemo(() => {
-    // Calculer sur le montant après remise (mais avant carte cadeau pour simplifier)
+    // Calculer sur le montant après remise et coupon (mais avant carte cadeau pour simplifier)
     // La carte cadeau sera appliquée après le calcul des taxes
-    const taxableAmount = summary.subtotal - summary.discount_amount;
+    const taxableAmount = summary.subtotal - summary.discount_amount - couponDiscountAmount;
     return Math.max(0, taxableAmount * taxRate);
-  }, [summary.subtotal, summary.discount_amount, taxRate]);
+  }, [summary.subtotal, summary.discount_amount, couponDiscountAmount, taxRate]);
 
   // Calculer shipping (exemple simple : 5000 XOF pour BF, 15000 pour autres)
   const shippingAmount = useMemo(() => {
@@ -177,9 +207,9 @@ export default function Checkout() {
 
   // Total final
   const finalTotal = useMemo(() => {
-    const baseAmount = summary.subtotal + taxAmount + shippingAmount - summary.discount_amount;
+    const baseAmount = summary.subtotal + taxAmount + shippingAmount - summary.discount_amount - couponDiscountAmount;
     return Math.max(0, baseAmount - giftCardAmount);
-  }, [summary, taxAmount, shippingAmount, giftCardAmount]);
+  }, [summary, taxAmount, shippingAmount, couponDiscountAmount, giftCardAmount]);
 
   // Validation formulaire
   const validateForm = (): boolean => {
@@ -333,7 +363,40 @@ export default function Checkout() {
         // Ne pas bloquer la commande
       }
 
-      // Enregistrer l'utilisation du coupon si un coupon a été appliqué
+      // Appliquer le coupon si un coupon a été appliqué
+      if (appliedCoupon && appliedCoupon.id && couponDiscountAmount > 0) {
+        try {
+          // Récupérer le customer_id si pas encore chargé
+          let finalCustomerId = customerId;
+          if (!finalCustomerId && user?.email && storeId) {
+            const { data: customer } = await supabase
+              .from('customers')
+              .select('id')
+              .eq('store_id', storeId)
+              .eq('email', user.email)
+              .single();
+            
+            if (customer) {
+              finalCustomerId = customer.id;
+            }
+          }
+
+          if (finalCustomerId) {
+            await supabase.rpc('apply_coupon_to_order', {
+              p_coupon_id: appliedCoupon.id,
+              p_order_id: order.id,
+              p_customer_id: finalCustomerId,
+              p_discount_amount: couponDiscountAmount,
+            });
+            logger.info('Coupon applied to order', { couponId: appliedCoupon.id, orderId: order.id });
+          }
+        } catch (couponError) {
+          logger.error('Error applying coupon:', couponError);
+          // Ne pas bloquer la commande si le coupon échoue
+        }
+      }
+
+      // Enregistrer l'utilisation du coupon legacy si un coupon a été appliqué
       if (appliedCoupon && appliedCoupon.promotionId) {
         try {
           const { data: sessionId } = await supabase.auth.getSession();
@@ -668,6 +731,38 @@ export default function Checkout() {
                       </div>
                     </div>
 
+                    {/* Code promo */}
+                    {storeId && items.length > 0 && (
+                      <div className="space-y-2 mt-4">
+                        <CouponInput
+                          storeId={storeId}
+                          productId={items[0].product_id}
+                          productType={items[0].product_type}
+                          customerId={customerId || undefined}
+                          orderAmount={summary.subtotal}
+                          onApply={(couponId, discountAmount, code) => {
+                            setAppliedCoupon({
+                              id: couponId,
+                              discountAmount,
+                              code: code || '',
+                            });
+                            localStorage.setItem('applied_coupon', JSON.stringify({
+                              id: couponId,
+                              discountAmount,
+                              code: code || '',
+                            }));
+                          }}
+                          onRemove={() => {
+                            setAppliedCoupon(null);
+                            localStorage.removeItem('applied_coupon');
+                          }}
+                          appliedCouponId={appliedCoupon?.id || null}
+                          appliedCouponCode={appliedCoupon?.code || null}
+                          appliedDiscountAmount={appliedCoupon?.discountAmount || null}
+                        />
+                      </div>
+                    )}
+
                     {/* Carte cadeau */}
                     {storeId && (
                       <div className="space-y-2 mt-4">
@@ -768,8 +863,15 @@ export default function Checkout() {
 
                       {summary.discount_amount > 0 && (
                         <div className="flex justify-between text-green-600">
-                          <span>Remise</span>
+                          <span>Remise panier</span>
                           <span>-{summary.discount_amount.toLocaleString('fr-FR')} XOF</span>
+                        </div>
+                      )}
+
+                      {appliedCoupon && couponDiscountAmount > 0 && (
+                        <div className="flex justify-between text-green-600">
+                          <span>Code promo ({appliedCoupon.code})</span>
+                          <span>-{couponDiscountAmount.toLocaleString('fr-FR')} XOF</span>
                         </div>
                       )}
 

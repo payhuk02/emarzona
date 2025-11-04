@@ -73,5 +73,7 @@ export {
 // Re-export existing hooks
 export * from './useLicenseManagement';
 export * from './useProductVersions';
+export * from './useProductVersionRollback';
+export * from './useProductUpdates';
 export * from './useSecureDownload';
 

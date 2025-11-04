@@ -6,6 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 // =====================================================
 // TYPES
@@ -227,26 +228,92 @@ export const useGenerateDownloadLink = () => {
 
       if (fileError) throw fileError;
 
-      // Check if user has access via order_items
-      const { data: hasAccess, error: accessError } = await supabase
+      // ⚠️ CRITIQUE: Vérifier explicitement l'accès avec paiement confirmé
+      // Vérification par email
+      const { data: hasAccessByEmail, error: accessErrorByEmail } = await supabase
         .from('order_items')
         .select(`
           id,
           orders!inner (
             id,
             payment_status,
+            status,
             customers!inner (
+              id,
               email
             )
           )
         `)
         .eq('product_id', file.digital_product.product_id)
-        .eq('orders.payment_status', 'paid')
+        .eq('orders.payment_status', 'paid') // ⚠️ CRITIQUE: Paiement confirmé
+        .eq('orders.status', 'completed') // Commande complétée
         .eq('orders.customers.email', user.email)
         .limit(1);
 
-      if (accessError || !hasAccess || hasAccess.length === 0) {
-        throw new Error('No access to this file');
+      // Vérification alternative par customer_id pour plus de sécurité
+      let hasAccessByCustomer = null;
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('email', user.email)
+        .limit(1);
+
+      if (customer && customer.length > 0) {
+        const { data: hasAccessByCustomerId } = await supabase
+          .from('order_items')
+          .select(`
+            id,
+            orders!inner (
+              id,
+              payment_status,
+              status,
+              customer_id
+            )
+          `)
+          .eq('product_id', file.digital_product.product_id)
+          .eq('orders.payment_status', 'paid') // ⚠️ CRITIQUE: Paiement confirmé
+          .eq('orders.status', 'completed') // Commande complétée
+          .eq('orders.customer_id', customer[0].id)
+          .limit(1);
+
+        hasAccessByCustomer = hasAccessByCustomerId;
+      }
+
+      // Utiliser les résultats de l'une ou l'autre vérification
+      const hasAccess = hasAccessByEmail || hasAccessByCustomer;
+      const accessError = accessErrorByEmail;
+
+      if (accessError) {
+        logger.error('Error checking download access in useGenerateDownloadLink', {
+          error: accessError,
+          fileId: params.fileId,
+          userId: user.id,
+        });
+        throw new Error('Erreur lors de la vérification d\'accès');
+      }
+
+      if (!hasAccess || hasAccess.length === 0) {
+        logger.warn('User attempted download without paid access', {
+          fileId: params.fileId,
+          userId: user.id,
+          userEmail: user.email,
+        });
+        throw new Error('Accès non autorisé. Veuillez d\'abord acheter ce produit.');
+      }
+
+      // Vérification supplémentaire: s'assurer que le paiement est bien confirmé
+      const orderItem = hasAccess[0];
+      const paymentStatus = orderItem?.orders?.payment_status;
+      const orderStatus = orderItem?.orders?.status;
+
+      if (paymentStatus !== 'paid' || orderStatus !== 'completed') {
+        logger.warn('User attempted download with unconfirmed payment', {
+          fileId: params.fileId,
+          userId: user.id,
+          paymentStatus,
+          orderStatus,
+        });
+        throw new Error('Le paiement n\'a pas été confirmé. Veuillez réessayer plus tard.');
       }
 
       // Generate signed URL
@@ -266,7 +333,10 @@ export const useGenerateDownloadLink = () => {
         fileSize: file.file_size_mb,
       };
     },
+    staleTime: 30 * 60 * 1000, // Cache 30 minutes
+    cacheTime: 60 * 60 * 1000, // Garder en cache 1 heure
     onError: (error: any) => {
+      logger.error('Error generating download link', { error, fileId: params.fileId });
       toast({
         title: 'Erreur',
         description: error.message,

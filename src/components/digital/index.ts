@@ -131,3 +131,15 @@ export { VersionManagementDashboard } from './VersionManagementDashboard';
 export { DownloadProtectionDashboard } from './DownloadProtectionDashboard';
 export { SecureDownloadButton } from './SecureDownloadButton';
 
+// Bundles
+export {
+  DigitalBundleCard,
+  DigitalBundlesGrid,
+} from './DigitalBundleCard';
+
+// Subscriptions
+export {
+  DigitalSubscriptionCard,
+  DigitalSubscriptionsGrid,
+} from './DigitalSubscriptionCard';
+

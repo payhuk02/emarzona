@@ -91,9 +91,19 @@ export const DigitalProductsList = () => {
   const filtersRef = useScrollAnimation<HTMLDivElement>();
   const productsRef = useScrollAnimation<HTMLDivElement>();
 
-  // Data fetching avec jointure sur products
+  // Data fetching avec jointure sur products et pagination côté serveur
   // Si pas de store, le hook récupérera tous les produits de tous les stores de l'utilisateur
-  const { data: productsData, isLoading, error, refetch } = useDigitalProducts(store?.id);
+  const { data: productsResponse, isLoading, error, refetch } = useDigitalProducts(store?.id, {
+    page: currentPage,
+    itemsPerPage,
+    sortBy: sortBy as 'recent' | 'downloads' | 'price-asc' | 'price-desc' | 'name',
+    sortOrder: sortBy.includes('desc') || sortBy === 'downloads' || sortBy === 'recent' ? 'desc' : 'asc',
+  });
+  
+  // Extraire les données et métadonnées de pagination
+  const productsData = productsResponse?.data || productsResponse || [];
+  const totalProducts = productsResponse?.total || (Array.isArray(productsResponse) ? productsResponse.length : 0);
+  const totalPagesFromServer = productsResponse?.totalPages || totalPages;
   
   // Log pour débogage
   useEffect(() => {
@@ -116,10 +126,14 @@ export const DigitalProductsList = () => {
 
   /**
    * Filter and sort products with useMemo for performance
+   * Note: Avec pagination côté serveur, le filtrage de base est fait côté serveur
+   * Ici on fait seulement le filtrage par recherche et type
    */
   const filteredProducts = useMemo(() => {
-    if (!products) return [];
+    if (!products || products.length === 0) return [];
 
+    // Si on a une réponse paginée, les produits sont déjà filtrés côté serveur
+    // On applique seulement les filtres locaux (recherche, type, statut)
     let filtered = products.filter((p) => {
       const product = 'product' in p ? p.product : p;
       
@@ -169,14 +183,21 @@ export const DigitalProductsList = () => {
   }, [products, searchQuery, filterType, sortBy, statusFilter]);
 
   /**
-   * Pagination
+   * Pagination - Maintenant gérée côté serveur
+   * Les produits sont déjà paginés, on utilise directement productsData
    */
   const paginatedProducts = useMemo(() => {
+    // Si la pagination est côté serveur, utiliser directement les données
+    if (productsResponse && 'data' in productsResponse) {
+      return productsResponse.data || [];
+    }
+    // Fallback: pagination côté client si nécessaire
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filteredProducts.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredProducts, currentPage, itemsPerPage]);
+  }, [productsResponse, filteredProducts, currentPage, itemsPerPage]);
 
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  // Utiliser totalPages depuis le serveur ou calculer côté client
+  const totalPages = productsResponse?.totalPages || Math.ceil(filteredProducts.length / itemsPerPage);
 
   /**
    * Calculate stats with useMemo

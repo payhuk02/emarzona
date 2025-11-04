@@ -51,12 +51,28 @@ export interface DigitalProductData {
 }
 
 /**
+ * Options de pagination pour useDigitalProducts
+ */
+export interface DigitalProductsPaginationOptions {
+  page?: number;
+  itemsPerPage?: number;
+  sortBy?: 'recent' | 'downloads' | 'price-asc' | 'price-desc' | 'name';
+  sortOrder?: 'asc' | 'desc';
+}
+
+/**
  * useDigitalProducts - Hook pour lister les produits digitaux
  * Avec jointure sur products pour avoir toutes les infos
+ * Support pagination côté serveur pour performance optimale
  */
-export const useDigitalProducts = (storeId?: string) => {
+export const useDigitalProducts = (
+  storeId?: string,
+  paginationOptions?: DigitalProductsPaginationOptions
+) => {
+  const { page = 1, itemsPerPage = 12, sortBy = 'recent', sortOrder = 'desc' } = paginationOptions || {};
+
   return useQuery({
-    queryKey: ['digitalProducts', storeId],
+    queryKey: ['digitalProducts', storeId, page, itemsPerPage, sortBy, sortOrder],
     queryFn: async () => {
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -123,27 +139,58 @@ export const useDigitalProducts = (storeId?: string) => {
             }
             productIds = products?.map(p => p.id) || [];
           } else {
-            // Pas de stores, retourner un tableau vide (pas une erreur)
+            // Pas de stores, retourner structure paginée vide
             logger.debug('Aucune boutique trouvée pour l\'utilisateur', {
               userId: user.id,
             });
-            return [];
+            return {
+              data: [],
+              total: 0,
+              page,
+              itemsPerPage,
+              totalPages: 0,
+            };
           }
         }
 
-        // Si aucun product_id trouvé, retourner un tableau vide (pas une erreur)
+        // Si aucun product_id trouvé, retourner structure paginée vide
         if (productIds.length === 0) {
           logger.debug('Aucun produit trouvé pour les stores sélectionnés', {
             storeId,
             productIdsLength: 0,
           });
-          return [];
+          return {
+            data: [],
+            total: 0,
+            page,
+            itemsPerPage,
+            totalPages: 0,
+          };
         }
 
-        // Étape 2: Obtenir les digital_products avec jointure sur products
+        // Étape 2: Obtenir le total d'abord (pour pagination)
+        const { count: totalCount, error: countError } = await supabase
+          .from('digital_products')
+          .select('*', { count: 'exact', head: true })
+          .in('product_id', productIds);
+
+        if (countError) {
+          logger.error('Erreur lors du comptage des produits digitaux', {
+            error: countError.message,
+            productIdsLength: productIds.length,
+          });
+        }
+
+        // Étape 3: Obtenir les digital_products avec jointure sur products
         // Utiliser la syntaxe de jointure Supabase avec la clé étrangère explicite
         // Note: La colonne est 'image_url', pas 'primary_image_url'
-        const { data, error } = await supabase
+        
+        // Calculer le range pour pagination côté serveur
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage - 1;
+
+        // Construire la requête avec tri
+        let query = supabase
           .from('digital_products')
           .select(`
             *,
@@ -159,8 +206,31 @@ export const useDigitalProducts = (storeId?: string) => {
               store_id
             )
           `)
-          .in('product_id', productIds)
-          .order('created_at', { ascending: false });
+          .in('product_id', productIds);
+
+        // Appliquer le tri selon sortBy
+        switch (sortBy) {
+          case 'recent':
+            query = query.order('created_at', { ascending: sortOrder === 'asc' });
+            break;
+          case 'downloads':
+            query = query.order('total_downloads', { ascending: sortOrder === 'asc' });
+            break;
+          case 'price-asc':
+          case 'price-desc':
+          case 'name':
+            // Pour le tri par prix/nom, on doit trier côté client car c'est dans products
+            // On laisse le tri par défaut (created_at) et on triera après
+            query = query.order('created_at', { ascending: false });
+            break;
+          default:
+            query = query.order('created_at', { ascending: false });
+        }
+
+        // Appliquer pagination côté serveur
+        query = query.range(startIndex, endIndex);
+
+        const { data, error } = await query;
         
         // Si la jointure avec la clé explicite ne fonctionne pas, essayer sans
         if (error && error.code === 'PGRST116') {
@@ -209,13 +279,55 @@ export const useDigitalProducts = (storeId?: string) => {
               }
             }
 
+            // Validation : si pas de produit associé, logger un warning
+            if (!product) {
+              logger.warn('Digital product without associated product (alt query)', {
+                digitalProductId: item.id,
+                productId: item.product_id,
+              });
+              return null;
+            }
+
+            // Validation : vérifier que le produit a les champs essentiels
+            if (!product.id || !product.name) {
+              logger.warn('Digital product with invalid product data (alt query)', {
+                digitalProductId: item.id,
+                productId: product.id,
+                hasName: !!product.name,
+              });
+              return null;
+            }
+
             return {
               ...item,
               product: product,
             };
-          }).filter((item: any) => item.product !== null);
+          }).filter((item: any) => item !== null && item.product !== null);
           
-          return mappedAltData as any[];
+          // Tri côté client pour prix et nom
+          if (sortBy === 'price-asc' || sortBy === 'price-desc' || sortBy === 'name') {
+            mappedAltData.sort((a, b) => {
+              const productA = a.product;
+              const productB = b.product;
+              
+              if (sortBy === 'price-asc') {
+                return (productA?.price || 0) - (productB?.price || 0);
+              } else if (sortBy === 'price-desc') {
+                return (productB?.price || 0) - (productA?.price || 0);
+              } else if (sortBy === 'name') {
+                return (productA?.name || '').localeCompare(productB?.name || '');
+              }
+              return 0;
+            });
+          }
+          
+          return {
+            data: mappedAltData as any[],
+            total: totalCount || 0,
+            page,
+            itemsPerPage,
+            totalPages: Math.ceil((totalCount || 0) / itemsPerPage),
+          };
         }
         
         if (error) {
@@ -244,13 +356,56 @@ export const useDigitalProducts = (storeId?: string) => {
             }
           }
 
+          // Validation : si pas de produit associé, logger un warning
+          if (!product) {
+            logger.warn('Digital product without associated product', {
+              digitalProductId: item.id,
+              productId: item.product_id,
+            });
+            return null; // Retourner null pour filtrage
+          }
+
+          // Validation : vérifier que le produit a les champs essentiels
+          if (!product.id || !product.name) {
+            logger.warn('Digital product with invalid product data', {
+              digitalProductId: item.id,
+              productId: product.id,
+              hasName: !!product.name,
+            });
+            return null;
+          }
+
           return {
             ...item,
-            product: product, // Peut être null si pas de relation
+            product: product,
           };
-        }).filter((item: any) => item.product !== null); // Filtrer les items sans produit associé
+        }).filter((item: any) => item !== null && item.product !== null); // Filtrer les items sans produit associé
 
-        return mappedData as any[];
+        // Tri côté client pour prix et nom (car les données sont dans products)
+        if (sortBy === 'price-asc' || sortBy === 'price-desc' || sortBy === 'name') {
+          mappedData.sort((a, b) => {
+            const productA = a.product;
+            const productB = b.product;
+            
+            if (sortBy === 'price-asc') {
+              return (productA?.price || 0) - (productB?.price || 0);
+            } else if (sortBy === 'price-desc') {
+              return (productB?.price || 0) - (productA?.price || 0);
+            } else if (sortBy === 'name') {
+              return (productA?.name || '').localeCompare(productB?.name || '');
+            }
+            return 0;
+          });
+        }
+
+        // Retourner avec métadonnées de pagination
+        return {
+          data: mappedData as any[],
+          total: totalCount || 0,
+          page,
+          itemsPerPage,
+          totalPages: Math.ceil((totalCount || 0) / itemsPerPage),
+        };
       } catch (error: any) {
         console.error('Erreur dans useDigitalProducts:', error);
         // Re-lancer l'erreur avec un message plus clair
@@ -567,30 +722,97 @@ export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      // Check if user has purchased this product via order_items
-      const { data: orderItems, error } = await supabase
+      // Étape 1: Récupérer le product_id depuis digital_products
+      const { data: digitalProduct, error: digitalError } = await supabase
+        .from('digital_products')
+        .select('product_id')
+        .eq('id', digitalProductId)
+        .single();
+
+      if (digitalError || !digitalProduct) {
+        logger.warn('Digital product not found', { digitalProductId });
+        return { hasAccess: false, purchaseCount: 0, paymentStatus: 'unknown' };
+      }
+
+      // Étape 2: Vérifier l'accès via order_items avec vérification explicite du paiement
+      // Vérification par email
+      const { data: orderItemsByEmail, error: emailError } = await supabase
         .from('order_items')
         .select(`
           id,
           orders!inner (
             id,
             payment_status,
+            status,
             customers!inner (
+              id,
               email
             )
           )
         `)
-        .eq('product_id', digitalProductId)
-        .eq('orders.payment_status', 'paid')
-        .eq('orders.customers.email', user.email);
+        .eq('product_id', digitalProduct.product_id)
+        .eq('orders.payment_status', 'paid') // ⚠️ CRITIQUE: Vérification explicite paiement
+        .eq('orders.status', 'completed') // Status commande doit être complété
+        .eq('orders.customers.email', user.email)
+        .limit(1);
 
-      if (error) throw error;
+      // Vérification alternative par customer_id si disponible
+      let orderItemsByCustomer = null;
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('email', user.email)
+        .limit(1);
+
+      if (customer && customer.length > 0) {
+        const { data: orderItemsByCustomerId } = await supabase
+          .from('order_items')
+          .select(`
+            id,
+            orders!inner (
+              id,
+              payment_status,
+              status,
+              customer_id
+            )
+          `)
+          .eq('product_id', digitalProduct.product_id)
+          .eq('orders.payment_status', 'paid') // ⚠️ CRITIQUE: Vérification explicite paiement
+          .eq('orders.status', 'completed')
+          .eq('orders.customer_id', customer[0].id)
+          .limit(1);
+
+        orderItemsByCustomer = orderItemsByCustomerId;
+      }
+
+      // Utiliser les résultats de l'une ou l'autre vérification
+      const orderItems = orderItemsByEmail || orderItemsByCustomer;
+      const error = emailError;
+
+      if (error) {
+        logger.error('Error checking download access', { error, digitalProductId });
+        throw error;
+      }
 
       const hasAccess = orderItems && orderItems.length > 0;
+      const paymentStatus = orderItems && orderItems.length > 0 
+        ? orderItems[0].orders?.payment_status || 'unknown'
+        : 'not_paid';
+
+      // Log pour debugging
+      if (!hasAccess) {
+        logger.debug('User does not have download access', {
+          digitalProductId,
+          userId: user.id,
+          userEmail: user.email,
+          paymentStatus,
+        });
+      }
 
       return {
         hasAccess,
         purchaseCount: orderItems?.length || 0,
+        paymentStatus, // Retourner le statut pour debug
       };
     },
     enabled: !!digitalProductId,

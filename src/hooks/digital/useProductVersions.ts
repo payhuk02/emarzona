@@ -33,6 +33,16 @@ export interface ProductVersion {
   customers_notified: number;
   created_at: string;
   updated_at: string;
+  // Beta & Rollback support
+  is_beta?: boolean;
+  rollback_threshold_percentage?: number;
+  rollback_min_downloads?: number;
+  rollback_status?: 'none' | 'monitoring' | 'rolled_back' | 'rollback_failed';
+  rolled_back_at?: string;
+  rollback_reason?: string;
+  rollback_metrics?: Record<string, any>;
+  previous_version_id?: string;
+  rolled_back_to_version_id?: string;
 }
 
 export interface CreateVersionInput {
@@ -54,6 +64,11 @@ export interface CreateVersionInput {
   is_security_update?: boolean;
   minimum_version?: string;
   notify_customers?: boolean;
+  // Beta & Rollback support
+  is_beta?: boolean;
+  rollback_threshold_percentage?: number;
+  rollback_min_downloads?: number;
+  previous_version_id?: string;
 }
 
 // ============================================================================
