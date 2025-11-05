@@ -274,12 +274,30 @@ export function useTurnoverReport(storeId: string, periodDays: number = 30) {
 
       if (error) throw error;
 
-      // TODO: Fetch actual sales data from orders
-      // For now, using mock calculations
+      // Fetch actual sales data from orders
+
+      // Fetch order items for these products in the period
+      const periodStart = new Date();
+      periodStart.setDate(periodStart.getDate() - periodDays);
+      
+      const productIds = (products || []).map(p => p.id);
+      const { data: orderItems } = await supabase
+        .from('order_items')
+        .select('product_id, quantity, created_at')
+        .in('product_id', productIds.length > 0 ? productIds : [''])
+        .eq('product_type', 'physical')
+        .gte('created_at', periodStart.toISOString());
+
+      // Group sales by product_id
+      const salesMap = new Map<string, number>();
+      (orderItems || []).forEach(item => {
+        const existing = salesMap.get(item.product_id) || 0;
+        salesMap.set(item.product_id, existing + (item.quantity || 0));
+      });
 
       const reportProducts: TurnoverReport['products'] = (products || []).map((p) => {
         const avg_stock = p.total_quantity || 0;
-        const total_sold = 0; // TODO: Calculate from orders in period
+        const total_sold = salesMap.get(p.id) || 0;
         const turnover_ratio = avg_stock > 0 ? total_sold / avg_stock : 0;
         const turnover_days = turnover_ratio > 0 ? periodDays / turnover_ratio : 0;
 
@@ -328,13 +346,31 @@ export function useLowStockForecast(storeId: string, forecastDays: number = 30) 
 
       if (error) throw error;
 
-      // TODO: Calculate actual avg_daily_sales from orders
+      // Fetch order items for sales calculation
+      const periodStart = new Date();
+      periodStart.setDate(periodStart.getDate() - forecastDays);
+      
+      const productIds = (products || []).map(p => p.id);
+      const { data: orderItems } = await supabase
+        .from('order_items')
+        .select('product_id, quantity, created_at')
+        .in('product_id', productIds.length > 0 ? productIds : [''])
+        .eq('product_type', 'physical')
+        .gte('created_at', periodStart.toISOString());
+
+      // Group sales by product_id
+      const salesMap = new Map<string, number>();
+      (orderItems || []).forEach(item => {
+        const existing = salesMap.get(item.product_id) || 0;
+        salesMap.set(item.product_id, existing + (item.quantity || 0));
+      });
 
       const forecastProducts: LowStockForecast['products'] = (products || [])
         .filter((p) => (p.total_quantity || 0) > 0)
         .map((p) => {
           const current_quantity = p.total_quantity || 0;
-          const avg_daily_sales = 0.5; // TODO: Calculate from actual sales
+          const total_sold = salesMap.get(p.id) || 0;
+          const avg_daily_sales = forecastDays > 0 ? total_sold / forecastDays : 0;
           const estimated_days_remaining =
             avg_daily_sales > 0 ? current_quantity / avg_daily_sales : 9999;
           const estimated_stockout_date = new Date(

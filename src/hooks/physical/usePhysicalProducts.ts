@@ -32,11 +32,47 @@ export function usePhysicalProducts(storeId: string) {
 
       if (error) throw error;
 
-      // Calculate sales stats (this would come from orders table in production)
+      // Calculate sales stats from orders
+      const productIds = (data || []).map(p => p.id);
+      
+      if (productIds.length > 0) {
+        // Fetch order items for these products
+        const { data: orderItems, error: orderItemsError } = await supabase
+          .from('order_items')
+          .select('product_id, quantity, unit_price, total_price')
+          .in('product_id', productIds)
+          .eq('product_type', 'physical');
+
+        if (!orderItemsError && orderItems) {
+          // Group by product_id and calculate stats
+          const salesMap = new Map<string, { quantity: number; revenue: number }>();
+          
+          orderItems.forEach(item => {
+            const existing = salesMap.get(item.product_id) || { quantity: 0, revenue: 0 };
+            existing.quantity += item.quantity || 0;
+            existing.revenue += item.total_price || item.unit_price * (item.quantity || 0);
+            salesMap.set(item.product_id, existing);
+          });
+
+          // Merge stats with products
+          const productsWithStats: PhysicalProduct[] = (data || []).map((product) => {
+            const sales = salesMap.get(product.id) || { quantity: 0, revenue: 0 };
+            return {
+              ...product,
+              total_quantity_sold: sales.quantity,
+              total_revenue: sales.revenue,
+            };
+          });
+
+          return productsWithStats;
+        }
+      }
+
+      // Fallback if no orders found
       const productsWithStats: PhysicalProduct[] = (data || []).map((product) => ({
         ...product,
-        total_quantity_sold: 0, // TODO: Calculate from orders
-        total_revenue: 0, // TODO: Calculate from orders
+        total_quantity_sold: 0,
+        total_revenue: 0,
       }));
 
       return productsWithStats;

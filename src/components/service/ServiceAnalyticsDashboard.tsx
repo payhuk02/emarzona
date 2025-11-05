@@ -7,6 +7,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Calendar,
   TrendingUp,
@@ -17,6 +18,10 @@ import {
   XCircle,
   BarChart3,
 } from 'lucide-react';
+import { useBookingStats, useServiceBookings } from '@/hooks/service/useBookings';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useMemo } from 'react';
 
 interface ServiceAnalyticsDashboardProps {
   serviceId: string;
@@ -25,19 +30,124 @@ interface ServiceAnalyticsDashboardProps {
 const ServiceAnalyticsDashboard = ({
   serviceId,
 }: ServiceAnalyticsDashboardProps) => {
-  // TODO: Implement actual data fetching with React Query
-  // For now, display placeholder UI
+  // Get booking stats for the last 30 days
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const today = new Date().toISOString().split('T')[0];
+  const startDate = thirtyDaysAgo.toISOString().split('T')[0];
 
-  const stats = {
-    totalBookings: 0,
-    revenue: 0,
-    averageBookingValue: 0,
-    completedBookings: 0,
-    canceledBookings: 0,
-    upcomingBookings: 0,
-    averageRating: 0,
-    occupancyRate: 0,
-  };
+  const { data: bookingStats, isLoading: isLoadingStats } = useBookingStats(
+    serviceId,
+    startDate,
+    today
+  );
+
+  // Get all bookings for calculations
+  const { data: allBookings, isLoading: isLoadingBookings } = useServiceBookings(serviceId);
+
+  // Get upcoming bookings
+  const { data: upcomingBookings } = useQuery({
+    queryKey: ['upcoming-bookings', serviceId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('service_bookings')
+        .select('*')
+        .eq('product_id', serviceId)
+        .eq('status', 'confirmed')
+        .gte('booking_date', today)
+        .order('booking_date', { ascending: true })
+        .limit(100);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!serviceId,
+  });
+
+  // Get average rating from reviews
+  const { data: averageRating } = useQuery({
+    queryKey: ['service-rating', serviceId],
+    queryFn: async () => {
+      const { data: product } = await supabase
+        .from('products')
+        .select('id')
+        .eq('id', serviceId)
+        .single();
+
+      if (!product) return 0;
+
+      const { data: reviews, error } = await supabase
+        .from('product_reviews')
+        .select('rating')
+        .eq('product_id', product.id);
+
+      if (error || !reviews || reviews.length === 0) return 0;
+
+      const sum = reviews.reduce((acc, r) => acc + (r.rating || 0), 0);
+      return sum / reviews.length;
+    },
+    enabled: !!serviceId,
+  });
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    const stats = bookingStats || {
+      total: 0,
+      completed: 0,
+      cancelled: 0,
+      revenue: 0,
+    };
+
+    const bookings = allBookings || [];
+    const upcoming = upcomingBookings || [];
+
+    // Calculate average booking value
+    const completedBookingsPrices = bookings
+      .filter(b => b.status === 'completed' && b.total_price)
+      .map(b => b.total_price || 0);
+    const averageBookingValue = completedBookingsPrices.length > 0
+      ? completedBookingsPrices.reduce((sum, price) => sum + price, 0) / completedBookingsPrices.length
+      : 0;
+
+    // Calculate occupancy rate (completed / total available slots)
+    // This is a simplified calculation - could be enhanced with actual availability data
+    const occupancyRate = bookings.length > 0
+      ? Math.round((stats.completed / bookings.length) * 100)
+      : 0;
+
+    return {
+      totalBookings: stats.total,
+      revenue: stats.revenue || 0,
+      averageBookingValue,
+      completedBookings: stats.completed,
+      canceledBookings: stats.cancelled,
+      upcomingBookings: upcoming.length,
+      averageRating: averageRating || 0,
+      occupancyRate,
+    };
+  }, [bookingStats, allBookings, upcomingBookings, averageRating]);
+
+  const isLoading = isLoadingStats || isLoadingBookings;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardHeader className="space-y-0 pb-2">
+                <Skeleton className="h-4 w-24 mb-2" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -51,7 +161,7 @@ const ServiceAnalyticsDashboard = ({
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalBookings}</div>
             <p className="text-xs text-muted-foreground">
-              +0% par rapport au mois dernier
+              {stats.completedBookings} complétées
             </p>
           </CardContent>
         </Card>
@@ -62,9 +172,9 @@ const ServiceAnalyticsDashboard = ({
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.revenue.toLocaleString()} XOF</div>
+            <div className="text-2xl font-bold">{Math.round(stats.revenue).toLocaleString()} XOF</div>
             <p className="text-xs text-muted-foreground">
-              Valeur moyenne: {stats.averageBookingValue.toLocaleString()} XOF
+              Moyenne: {Math.round(stats.averageBookingValue).toLocaleString()} XOF
             </p>
           </CardContent>
         </Card>
@@ -88,9 +198,9 @@ const ServiceAnalyticsDashboard = ({
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.averageRating.toFixed(1)}/5</div>
+            <div className="text-2xl font-bold">{stats.averageRating > 0 ? stats.averageRating.toFixed(1) : 'N/A'}/5</div>
             <p className="text-xs text-muted-foreground">
-              Basé sur 0 avis
+              {stats.averageRating > 0 ? 'Basé sur les avis clients' : 'Aucun avis pour le moment'}
             </p>
           </CardContent>
         </Card>
@@ -132,9 +242,9 @@ const ServiceAnalyticsDashboard = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium">Durée moyenne</span>
+                <span className="text-sm font-medium">Réservations à venir</span>
               </div>
-              <span className="text-sm font-bold">60 min</span>
+              <span className="text-sm font-bold">{stats.upcomingBookings}</span>
             </div>
           </div>
         </CardContent>

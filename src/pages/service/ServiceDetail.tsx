@@ -31,6 +31,7 @@ import {
   Package,
   RefreshCw,
   DollarSign,
+  Loader2,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -38,14 +39,20 @@ import { ServiceCalendar } from '@/components/service/ServiceCalendar';
 import { TimeSlotPicker } from '@/components/service/TimeSlotPicker';
 import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummary';
 import { StaffCard } from '@/components/shared';
+import { useCreateServiceOrder } from '@/hooks/orders/useCreateServiceOrder';
+import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
 
 export default function ServiceDetail() {
   const { serviceId } = useParams<{ serviceId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const createServiceOrder = useCreateServiceOrder();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const [participants, setParticipants] = useState(1);
+  const [isBooking, setIsBooking] = useState(false);
 
       // Fetch service data with preview/paid relationships
       const { data: service, isLoading } = useQuery({
@@ -105,7 +112,7 @@ export default function ServiceDetail() {
         enabled: !!serviceId,
       });
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     if (!selectedDate || !selectedSlot) {
       toast({
         title: '⚠️ Sélection incomplète',
@@ -115,11 +122,91 @@ export default function ServiceDetail() {
       return;
     }
 
-    // TODO: Implement booking logic
-    toast({
-      title: '✅ Réservation confirmée !',
-      description: `${service?.name} le ${selectedDate.toLocaleDateString()}`,
-    });
+    if (!service || !service.service) {
+      toast({
+        title: '❌ Erreur',
+        description: 'Service non trouvé',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!user?.email) {
+      toast({
+        title: '❌ Authentification requise',
+        description: 'Veuillez vous connecter pour réserver',
+        variant: 'destructive',
+      });
+      navigate('/login');
+      return;
+    }
+
+    setIsBooking(true);
+
+    try {
+      // Construire le bookingDateTime
+      const bookingDate = new Date(selectedDate);
+      const [hours, minutes] = selectedSlot.time.split(':').map(Number);
+      bookingDate.setHours(hours, minutes, 0, 0);
+      const bookingDateTime = bookingDate.toISOString();
+
+      // Vérifier que la date n'est pas dans le passé
+      if (bookingDate < new Date()) {
+        toast({
+          title: '❌ Date invalide',
+          description: 'La date et l\'heure sélectionnées sont dans le passé',
+          variant: 'destructive',
+        });
+        setIsBooking(false);
+        return;
+      }
+
+      // Récupérer le store_id du produit
+      const storeId = service.store_id;
+      if (!storeId) {
+        throw new Error('Store ID manquant');
+      }
+
+      // Créer la commande et la réservation
+      const result = await createServiceOrder.mutateAsync({
+        serviceProductId: service.service.id,
+        productId: serviceId!,
+        storeId,
+        customerEmail: user.email,
+        customerName: user.user_metadata?.full_name || user.email,
+        bookingDateTime,
+        numberOfParticipants: participants,
+        durationMinutes: service.service.duration_minutes,
+        notes: `Réservation via ServiceDetail - ${selectedDate.toLocaleDateString('fr-FR')}`,
+      });
+
+      logger.info('Réservation créée avec succès', {
+        bookingId: result.bookingId,
+        transactionId: result.transactionId,
+      });
+
+      // Rediriger vers Moneroo pour le paiement
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+      } else {
+        // Si pas de paiement requis (service gratuit)
+        toast({
+          title: '✅ Réservation confirmée !',
+          description: `Votre réservation pour ${service.name} a été confirmée`,
+        });
+        // Rediriger vers la page de confirmation ou les réservations
+        navigate('/dashboard/my-bookings');
+      }
+    } catch (error: any) {
+      logger.error('Erreur lors de la réservation', error);
+      toast({
+        title: '❌ Erreur de réservation',
+        description: error.message || 'Une erreur est survenue lors de la réservation',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsBooking(false);
+    }
   };
 
   if (isLoading) {
@@ -459,11 +546,18 @@ export default function ServiceDetail() {
                     onClick={handleBooking}
                     className="w-full"
                     size="lg"
-                    disabled={!selectedDate || !selectedSlot}
+                    disabled={!selectedDate || !selectedSlot || isBooking}
                   >
-                    {!selectedDate || !selectedSlot
-                      ? 'Sélectionnez une date et un créneau'
-                      : 'Réserver maintenant'}
+                    {isBooking ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Création de la réservation...
+                      </>
+                    ) : !selectedDate || !selectedSlot ? (
+                      'Sélectionnez une date et un créneau'
+                    ) : (
+                      'Réserver maintenant'
+                    )}
                   </Button>
 
                   <Separator />

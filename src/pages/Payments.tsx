@@ -14,6 +14,28 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
 import { 
   CreditCard, 
   Search,
@@ -27,6 +49,9 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
+  Eye,
+  Edit,
+  Trash2,
 } from 'lucide-react';
 import { useStore } from '@/hooks/useStore';
 import { usePayments, Payment } from '@/hooks/usePayments';
@@ -40,6 +65,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import PaymentCardDashboard from '@/components/payments/PaymentCardDashboard';
 import PaymentListView from '@/components/payments/PaymentListView';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Payments() {
   const navigate = useNavigate();
@@ -54,6 +80,24 @@ export default function Payments() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  
+  // Payment actions state
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Edit form state
+  const [editFormData, setEditFormData] = useState({
+    payment_method: '',
+    amount: '',
+    currency: 'XOF',
+    status: '',
+    transaction_id: '',
+    notes: '',
+  });
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -101,6 +145,99 @@ export default function Payments() {
 
     return { total, completed, pending, failed, totalRevenue };
   }, [payments]);
+
+  // Handle view payment
+  const handleViewPayment = useCallback((payment: Payment) => {
+    setSelectedPayment(payment);
+    setViewDialogOpen(true);
+  }, []);
+
+  // Handle edit payment
+  const handleEditPayment = useCallback((payment: Payment) => {
+    setSelectedPayment(payment);
+    setEditFormData({
+      payment_method: payment.payment_method,
+      amount: payment.amount.toString(),
+      currency: payment.currency,
+      status: payment.status,
+      transaction_id: payment.transaction_id || '',
+      notes: payment.notes || '',
+    });
+    setEditDialogOpen(true);
+  }, []);
+
+  // Handle update payment
+  const handleUpdatePayment = useCallback(async () => {
+    if (!selectedPayment) return;
+
+    setIsUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('payments')
+        .update({
+          payment_method: editFormData.payment_method,
+          amount: parseFloat(editFormData.amount),
+          currency: editFormData.currency,
+          status: editFormData.status,
+          transaction_id: editFormData.transaction_id || null,
+          notes: editFormData.notes || null,
+        })
+        .eq('id', selectedPayment.id);
+
+      if (error) throw error;
+
+      toast({
+        title: '✅ Succès',
+        description: 'Paiement mis à jour avec succès',
+      });
+
+      await refetch();
+      setEditDialogOpen(false);
+      setSelectedPayment(null);
+    } catch (error: any) {
+      logger.error('Erreur lors de la mise à jour du paiement', error);
+      toast({
+        title: '❌ Erreur',
+        description: error.message || 'Impossible de mettre à jour le paiement',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  }, [selectedPayment, editFormData, toast, refetch]);
+
+  // Handle delete payment
+  const handleDeletePayment = useCallback(async () => {
+    if (!selectedPayment) return;
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('payments')
+        .delete()
+        .eq('id', selectedPayment.id);
+
+      if (error) throw error;
+
+      toast({
+        title: '✅ Succès',
+        description: 'Paiement supprimé avec succès',
+      });
+
+      await refetch();
+      setDeleteDialogOpen(false);
+      setSelectedPayment(null);
+    } catch (error: any) {
+      logger.error('Erreur lors de la suppression du paiement', error);
+      toast({
+        title: '❌ Erreur',
+        description: error.message || 'Impossible de supprimer le paiement',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [selectedPayment, toast, refetch]);
 
   // Handle refresh
   const handleRefresh = useCallback(async () => {
@@ -577,10 +714,13 @@ export default function Payments() {
                                   >
                             <PaymentCardDashboard
                               payment={payment}
-                                      onEdit={() => {/* TODO */}}
-                                      onDelete={() => {/* TODO */}}
-                                      onView={() => {/* TODO */}}
-                                    />
+                              onEdit={() => handleEditPayment(payment)}
+                              onDelete={() => {
+                                setSelectedPayment(payment);
+                                setDeleteDialogOpen(true);
+                              }}
+                              onView={() => handleViewPayment(payment)}
+                            />
                                   </div>
                           ))}
                         </div>
@@ -594,10 +734,13 @@ export default function Payments() {
                                   >
                             <PaymentListView
                               payment={payment}
-                                      onEdit={() => {/* TODO */}}
-                                      onDelete={() => {/* TODO */}}
-                                      onView={() => {/* TODO */}}
-                                    />
+                              onEdit={() => handleEditPayment(payment)}
+                              onDelete={() => {
+                                setSelectedPayment(payment);
+                                setDeleteDialogOpen(true);
+                              }}
+                              onView={() => handleViewPayment(payment)}
+                            />
                                   </div>
                           ))}
                         </div>
@@ -613,6 +756,242 @@ export default function Payments() {
         </main>
         </div>
       </div>
+
+      {/* View Payment Dialog */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Détails du paiement</DialogTitle>
+            <DialogDescription>
+              Informations complètes sur ce paiement
+            </DialogDescription>
+          </DialogHeader>
+          {selectedPayment && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Montant</Label>
+                  <p className="text-lg font-semibold">
+                    {selectedPayment.amount.toLocaleString()} {selectedPayment.currency}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Statut</Label>
+                  <Badge
+                    variant={
+                      selectedPayment.status === 'completed' ? 'default' :
+                      selectedPayment.status === 'pending' ? 'secondary' :
+                      selectedPayment.status === 'failed' ? 'destructive' : 'outline'
+                    }
+                  >
+                    {selectedPayment.status}
+                  </Badge>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Méthode de paiement</Label>
+                  <p>{selectedPayment.payment_method}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">ID Transaction</Label>
+                  <p className="font-mono text-sm">{selectedPayment.transaction_id || 'N/A'}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Client</Label>
+                  <p>{selectedPayment.customers?.name || 'N/A'}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Commande</Label>
+                  <p>{selectedPayment.orders?.order_number || 'N/A'}</p>
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-muted-foreground">Date de création</Label>
+                  <p>{format(new Date(selectedPayment.created_at), 'PPpp', { locale: fr })}</p>
+                </div>
+                {selectedPayment.notes && (
+                  <div className="col-span-2">
+                    <Label className="text-muted-foreground">Notes</Label>
+                    <p className="text-sm">{selectedPayment.notes}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewDialogOpen(false)}>
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Payment Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Modifier le paiement</DialogTitle>
+            <DialogDescription>
+              Modifiez les informations de ce paiement
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="payment_method">Méthode de paiement</Label>
+                <Select
+                  value={editFormData.payment_method}
+                  onValueChange={(value) =>
+                    setEditFormData({ ...editFormData, payment_method: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cash">Espèces</SelectItem>
+                    <SelectItem value="card">Carte bancaire</SelectItem>
+                    <SelectItem value="mobile_money">Mobile Money</SelectItem>
+                    <SelectItem value="bank_transfer">Virement bancaire</SelectItem>
+                    <SelectItem value="check">Chèque</SelectItem>
+                    <SelectItem value="other">Autre</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="amount">Montant</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  value={editFormData.amount}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, amount: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="currency">Devise</Label>
+                <Select
+                  value={editFormData.currency}
+                  onValueChange={(value) =>
+                    setEditFormData({ ...editFormData, currency: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="XOF">XOF</SelectItem>
+                    <SelectItem value="EUR">EUR</SelectItem>
+                    <SelectItem value="USD">USD</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="status">Statut</Label>
+                <Select
+                  value={editFormData.status}
+                  onValueChange={(value) =>
+                    setEditFormData({ ...editFormData, status: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">En attente</SelectItem>
+                    <SelectItem value="completed">Complété</SelectItem>
+                    <SelectItem value="failed">Échoué</SelectItem>
+                    <SelectItem value="refunded">Remboursé</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="transaction_id">ID Transaction</Label>
+                <Input
+                  id="transaction_id"
+                  value={editFormData.transaction_id}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, transaction_id: e.target.value })
+                  }
+                  placeholder="Optionnel"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                value={editFormData.notes}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, notes: e.target.value })
+                }
+                placeholder="Notes supplémentaires..."
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEditDialogOpen(false)}
+              disabled={isUpdating}
+            >
+              Annuler
+            </Button>
+            <Button onClick={handleUpdatePayment} disabled={isUpdating}>
+              {isUpdating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Enregistrement...
+                </>
+              ) : (
+                'Enregistrer'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Payment Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer le paiement ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. Le paiement sera définitivement supprimé.
+              {selectedPayment && (
+                <div className="mt-2 p-2 bg-muted rounded">
+                  <p className="font-medium">
+                    {selectedPayment.amount.toLocaleString()} {selectedPayment.currency}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedPayment.transaction_id || 'Sans ID transaction'}
+                  </p>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeletePayment}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Suppression...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Supprimer
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Create Payment Dialog */}
       {store && (

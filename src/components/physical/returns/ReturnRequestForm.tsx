@@ -3,7 +3,7 @@
  * Formulaire pour les clients pour demander un retour
  */
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -11,8 +11,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCreateReturn, type CreateReturnData } from '@/hooks/physical/useReturns';
-import { Upload, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Upload, AlertCircle, CheckCircle2, X, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { uploadToSupabaseStorage } from '@/utils/uploadToSupabase';
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 interface ReturnRequestFormProps {
   orderId: string;
@@ -40,6 +43,83 @@ export const ReturnRequestForm = ({
   const [refundMethod, setRefundMethod] = useState<'original_payment' | 'store_credit' | 'exchange'>('original_payment');
   const [customerNotes, setCustomerNotes] = useState('');
   const [photos, setPhotos] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Get current user ID for upload path
+  const getUserId = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    return user?.id || 'anonymous';
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const userId = await getUserId();
+      const uploadPromises = Array.from(files).map(async (file, index) => {
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          throw new Error(`${file.name} n'est pas une image valide`);
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          throw new Error(`${file.name} est trop volumineux (max 5MB)`);
+        }
+
+        const { url, error } = await uploadToSupabaseStorage(file, {
+          bucket: 'product-images',
+          path: `returns/${userId}`,
+          filePrefix: 'return-photo',
+          maxSizeBytes: 5 * 1024 * 1024,
+          allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+          onProgress: (progress) => {
+            const totalProgress = ((index + progress / 100) / files.length) * 100;
+            setUploadProgress(Math.round(totalProgress));
+          },
+        });
+
+        if (error) throw new Error(error);
+        if (!url) throw new Error('Upload échoué');
+
+        return url;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      const validUrls = uploadedUrls.filter((url): url is string => url !== null);
+
+      if (validUrls.length > 0) {
+        setPhotos(prev => [...prev, ...validUrls]);
+        toast({
+          title: '✅ Photos uploadées',
+          description: `${validUrls.length} photo(s) ajoutée(s) avec succès`,
+        });
+      }
+    } catch (error: any) {
+      logger.error('Erreur upload photos retour', error);
+      toast({
+        title: '❌ Erreur d\'upload',
+        description: error.message || 'Impossible de télécharger les photos',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    setPhotos(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,11 +257,58 @@ export const ReturnRequestForm = ({
                 Les photos aident à traiter votre retour plus rapidement. Montrez le produit et tout dommage éventuel.
               </AlertDescription>
             </Alert>
-            {/* TODO: Implémenter upload photos */}
-            <Button type="button" variant="outline" className="w-full">
-              <Upload className="h-4 w-4 mr-2" />
-              Ajouter des photos
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handlePhotoUpload}
+              className="hidden"
+              disabled={uploading}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Upload en cours... {uploadProgress}%
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Ajouter des photos
+                </>
+              )}
             </Button>
+            
+            {/* Photo previews */}
+            {photos.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {photos.map((photo, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={photo}
+                      alt={`Photo ${index + 1}`}
+                      className="w-full h-24 object-cover rounded border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => handleRemovePhoto(index)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Notes */}

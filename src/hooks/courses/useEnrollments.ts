@@ -235,7 +235,20 @@ export const useEnrollments = () => {
           enrollments.length > 0
             ? enrollments.reduce((sum, e) => sum + e.progress, 0) / enrollments.length
             : 0,
-        avg_completion_time: 0, // TODO: Calculer depuis created_at et completed_at
+        avg_completion_time: (() => {
+          // Calculate average completion time in days
+          const completed = enrollments.filter(e => e.status === 'completed' && e.completed_at);
+          if (completed.length === 0) return 0;
+          
+          const totalDays = completed.reduce((sum, e) => {
+            const enrolled = new Date(e.enrolled_at || e.created_at).getTime();
+            const completed = new Date(e.completed_at!).getTime();
+            const days = (completed - enrolled) / (1000 * 60 * 60 * 24);
+            return sum + days;
+          }, 0);
+          
+          return Math.round(totalDays / completed.length);
+        })(),
         by_status: {} as Record<EnrollmentStatus, number>,
       };
 

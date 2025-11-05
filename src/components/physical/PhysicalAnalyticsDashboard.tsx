@@ -7,6 +7,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   ShoppingCart,
   TrendingUp,
@@ -17,6 +18,10 @@ import {
   AlertTriangle,
   BarChart3,
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useMemo } from 'react';
+import { usePhysicalProduct } from '@/hooks/physical/usePhysicalProducts';
 
 interface PhysicalAnalyticsDashboardProps {
   productId: string;
@@ -25,19 +30,115 @@ interface PhysicalAnalyticsDashboardProps {
 export const PhysicalAnalyticsDashboard = ({
   productId,
 }: PhysicalAnalyticsDashboardProps) => {
-  // TODO: Implement actual data fetching with React Query
-  // For now, display placeholder UI
+  // Get product data
+  const { data: product, isLoading: isLoadingProduct } = usePhysicalProduct(productId);
 
-  const stats = {
-    totalSales: 0,
-    revenue: 0,
-    averageOrderValue: 0,
-    stockLevel: 0,
-    lowStockItems: 0,
-    shippedOrders: 0,
-    pendingOrders: 0,
-    conversionRate: 0,
-  };
+  // Get orders for this product (last 30 days)
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const startDate = thirtyDaysAgo.toISOString().split('T')[0];
+
+  const { data: orders, isLoading: isLoadingOrders } = useQuery({
+    queryKey: ['product-orders', productId, startDate],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('order_items')
+        .select(`
+          *,
+          order:orders(
+            id,
+            order_number,
+            status,
+            total_amount,
+            created_at,
+            shipping_status
+          )
+        `)
+        .eq('product_id', productId)
+        .gte('order.created_at', startDate);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!productId,
+  });
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    const orderItems = orders || [];
+    
+    // Get unique orders
+    const uniqueOrders = new Map();
+    orderItems.forEach(item => {
+      if (item.order && !uniqueOrders.has(item.order.id)) {
+        uniqueOrders.set(item.order.id, item.order);
+      }
+    });
+    
+    const ordersList = Array.from(uniqueOrders.values());
+    
+    // Calculate metrics
+    const totalSales = orderItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    const revenue = ordersList
+      .filter(o => o.status === 'completed' || o.status === 'shipped')
+      .reduce((sum, o) => sum + (o.total_amount || 0), 0);
+    
+    const completedOrders = ordersList.filter(o => 
+      o.status === 'completed' || o.status === 'shipped'
+    );
+    const averageOrderValue = completedOrders.length > 0
+      ? revenue / completedOrders.length
+      : 0;
+
+    const shippedOrders = ordersList.filter(o => 
+      o.shipping_status === 'shipped' || o.shipping_status === 'delivered'
+    ).length;
+    
+    const pendingOrders = ordersList.filter(o => 
+      o.status === 'pending' || o.status === 'processing'
+    ).length;
+
+    // Stock level
+    const stockLevel = product?.total_quantity || 0;
+    const lowStockThreshold = product?.low_stock_threshold || 10;
+    const lowStockItems = stockLevel <= lowStockThreshold ? 1 : 0;
+
+    // Conversion rate (simplified - would need view data)
+    const conversionRate = 0; // TODO: Calculate from product views
+
+    return {
+      totalSales,
+      revenue,
+      averageOrderValue,
+      stockLevel,
+      lowStockItems,
+      shippedOrders,
+      pendingOrders,
+      conversionRate,
+    };
+  }, [orders, product]);
+
+  const isLoading = isLoadingProduct || isLoadingOrders;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardHeader className="space-y-0 pb-2">
+                <Skeleton className="h-4 w-24 mb-2" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -51,7 +152,7 @@ export const PhysicalAnalyticsDashboard = ({
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalSales}</div>
             <p className="text-xs text-muted-foreground">
-              +0% par rapport au mois dernier
+              Unités vendues (30 derniers jours)
             </p>
           </CardContent>
         </Card>
@@ -62,9 +163,9 @@ export const PhysicalAnalyticsDashboard = ({
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.revenue.toLocaleString()} XOF</div>
+            <div className="text-2xl font-bold">{Math.round(stats.revenue).toLocaleString()} XOF</div>
             <p className="text-xs text-muted-foreground">
-              Panier moyen: {stats.averageOrderValue.toLocaleString()} XOF
+              Panier moyen: {Math.round(stats.averageOrderValue).toLocaleString()} XOF
             </p>
           </CardContent>
         </Card>
@@ -80,10 +181,11 @@ export const PhysicalAnalyticsDashboard = ({
               {stats.lowStockItems > 0 && (
                 <>
                   <AlertTriangle className="h-3 w-3 text-yellow-600" />
-                  {stats.lowStockItems} produit(s) en stock faible
+                  Stock faible - Réapprovisionnement recommandé
                 </>
               )}
-              {stats.lowStockItems === 0 && 'Stock optimal'}
+              {stats.lowStockItems === 0 && stats.stockLevel > 0 && 'Stock optimal'}
+              {stats.stockLevel === 0 && 'Rupture de stock'}
             </p>
           </CardContent>
         </Card>

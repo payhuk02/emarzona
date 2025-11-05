@@ -116,7 +116,14 @@ export const useDigitalProductAnalytics = (productId: string, dateRange: { from:
         total_downloads: totalDownloads,
         unique_downloaders: uniqueDownloaders,
         total_revenue: product.product.price * totalDownloads, // Simplified, should be from orders
-        conversion_rate: 0, // TODO: Calculate from product_views
+        conversion_rate: (() => {
+          // Calculate conversion rate (purchases / views)
+          // This would require product_views table or tracking
+          // For now, approximate from orders vs downloads
+          const totalViews = downloads.length; // Using downloads as proxy for views
+          const purchases = licenses.filter(l => l.status === 'active').length;
+          return totalViews > 0 ? (purchases / totalViews) * 100 : 0;
+        })(),
         average_download_size_mb: product.main_file_size_mb || 0,
         failed_downloads: failedDownloads,
         success_rate: successRate,

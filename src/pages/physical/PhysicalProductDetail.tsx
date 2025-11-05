@@ -27,6 +27,7 @@ import {
   Star,
   Check,
   X,
+  Loader2,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -36,13 +37,17 @@ import { ShippingInfoDisplay } from '@/components/physical/ShippingInfoDisplay';
 import { SizeChartDisplay } from '@/components/physical/SizeChartDisplay';
 import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummary';
 import { ProductImages } from '@/components/shared';
+import { useCart } from '@/hooks/cart/useCart';
+import { logger } from '@/lib/logger';
 
 export default function PhysicalProductDetail() {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { addItem } = useCart();
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   // Fetch product data
   const { data: product, isLoading } = useQuery({
@@ -94,12 +99,74 @@ export default function PhysicalProductDetail() {
     enabled: !!productId,
   });
 
-  const handleAddToCart = () => {
-    // TODO: Implement cart functionality
-    toast({
-      title: '🛒 Ajouté au panier',
-      description: `${product?.name} x${quantity}`,
-    });
+  const handleAddToCart = async () => {
+    if (!product) {
+      toast({
+        title: '❌ Erreur',
+        description: 'Produit non trouvé',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Vérifier le stock
+    const availableStock = selectedVariant
+      ? product?.inventory?.find((inv: any) => inv.variant_id === selectedVariant.id)?.quantity || 0
+      : product?.physical?.total_stock || 0;
+
+    if (availableStock < quantity) {
+      toast({
+        title: '❌ Stock insuffisant',
+        description: `Il ne reste que ${availableStock} unité(s) en stock`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Vérifier si un variant est requis mais non sélectionné
+    if (product.variants && product.variants.length > 0 && !selectedVariant) {
+      toast({
+        title: '⚠️ Variante requise',
+        description: 'Veuillez sélectionner une variante',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsAddingToCart(true);
+
+    try {
+      await addItem({
+        product_id: productId!,
+        product_type: 'physical',
+        quantity,
+        variant_id: selectedVariant?.id || undefined,
+        variant_name: selectedVariant?.name || undefined,
+        metadata: {
+          store_id: product.store_id,
+          physical_product_id: product.physical?.id,
+          selected_at: new Date().toISOString(),
+        },
+      });
+
+      logger.info('Produit ajouté au panier', {
+        productId,
+        variantId: selectedVariant?.id,
+        quantity,
+      });
+
+      // Optionnel : Rediriger vers le panier ou réinitialiser la quantité
+      setQuantity(1);
+    } catch (error: any) {
+      logger.error('Erreur lors de l\'ajout au panier', error);
+      toast({
+        title: '❌ Erreur',
+        description: error.message || 'Impossible d\'ajouter au panier',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
   const images = product?.images || [product?.image_url] || [];
@@ -221,10 +288,19 @@ export default function PhysicalProductDetail() {
                   onClick={handleAddToCart}
                   className="w-full"
                   size="lg"
-                  disabled={stockQuantity === 0}
+                  disabled={stockQuantity === 0 || isAddingToCart}
                 >
-                  <ShoppingCart className="h-5 w-5 mr-2" />
-                  {stockQuantity === 0 ? 'Rupture de stock' : 'Ajouter au panier'}
+                  {isAddingToCart ? (
+                    <>
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      Ajout en cours...
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-5 w-5 mr-2" />
+                      {stockQuantity === 0 ? 'Rupture de stock' : 'Ajouter au panier'}
+                    </>
+                  )}
                 </Button>
 
                 <div className="grid grid-cols-2 gap-2">
