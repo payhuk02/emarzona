@@ -3,6 +3,8 @@
  * Service pour intégration API FedEx
  */
 
+import { logger } from '@/lib/logger';
+
 export interface FedExRateRequest {
   from: {
     country: string;
@@ -134,7 +136,7 @@ class FedExService {
       const data = await response.json();
       return data.rates || [];
     } catch (error) {
-      console.error('FedEx getRates error:', error);
+      logger.error('FedEx getRates error', { error, request });
       throw error;
     }
   }
@@ -181,7 +183,7 @@ class FedExService {
         currency: data.currency,
       };
     } catch (error) {
-      console.error('FedEx createLabel error:', error);
+      logger.error('FedEx createLabel error', { error, request });
       throw error;
     }
   }

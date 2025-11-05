@@ -11,7 +11,7 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import { Calendar, dateFnsLocalizer, View, Views } from 'react-big-calendar';
+import { Calendar, dateFnsLocalizer, View, Views, ToolbarProps, Event as RBEvent } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay, addHours, startOfDay, endOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -258,7 +258,7 @@ const ServiceBookingCalendar = ({
   }, [onSelectEvent]);
 
   // Handle event drop (drag & drop)
-  const handleEventDrop = useCallback(({ event, start, end }: any) => {
+  const handleEventDrop = useCallback(({ event, start, end }: { event: RBEvent; start: Date; end: Date }) => {
     if (enableDragDrop && onEventDrop) {
       // Vérifier que la nouvelle position est valide
       const now = new Date();
@@ -273,7 +273,7 @@ const ServiceBookingCalendar = ({
   }, [enableDragDrop, onEventDrop]);
 
   // Handle event resize
-  const handleEventResize = useCallback(({ event, start, end }: any) => {
+  const handleEventResize = useCallback(({ event, start, end }: { event: RBEvent; start: Date; end: Date }) => {
     if (enableDragDrop && onEventResize) {
       const bookingEvent = event as BookingEvent;
       onEventResize(bookingEvent, start, end);
@@ -281,7 +281,7 @@ const ServiceBookingCalendar = ({
   }, [enableDragDrop, onEventResize]);
 
   // Toolbar customization
-  const CustomToolbar = (toolbar: any) => {
+  const CustomToolbar = (toolbar: ToolbarProps) => {
     const goToBack = () => {
       toolbar.onNavigate('PREV');
     };
@@ -426,9 +426,9 @@ const ServiceBookingCalendar = ({
             }}
             formats={{
               timeGutterFormat: 'HH:mm',
-              eventTimeRangeFormat: ({ start, end }: any) =>
+              eventTimeRangeFormat: ({ start, end }: { start: Date; end: Date }) =>
                 `${format(start, 'HH:mm')} - ${format(end, 'HH:mm')}`,
-              agendaTimeRangeFormat: ({ start, end }: any) =>
+              agendaTimeRangeFormat: ({ start, end }: { start: Date; end: Date }) =>
                 `${format(start, 'HH:mm')} - ${format(end, 'HH:mm')}`,
             }}
           />

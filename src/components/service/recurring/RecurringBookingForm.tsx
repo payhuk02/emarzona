@@ -108,7 +108,7 @@ export default function RecurringBookingForm({
           {/* Pattern de récurrence */}
           <div className="space-y-2">
             <Label>Type de récurrence</Label>
-            <Select value={pattern} onValueChange={(value: any) => setPattern(value)}>
+            <Select value={pattern} onValueChange={(value: 'daily' | 'weekly' | 'monthly' | 'custom') => setPattern(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -182,7 +182,7 @@ export default function RecurringBookingForm({
           {/* Fin de récurrence */}
           <div className="space-y-2">
             <Label>Fin de la récurrence</Label>
-            <Select value={endType} onValueChange={(value: any) => setEndType(value)}>
+            <Select value={endType} onValueChange={(value: 'date' | 'count' | 'never') => setEndType(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

@@ -37,7 +37,14 @@ export interface ServiceProduct {
   average_rating: number;
   created_at: string;
   updated_at: string;
-  product?: any;
+  product?: {
+    id: string;
+    name: string;
+    description?: string;
+    price: number;
+    status: string;
+    [key: string]: unknown;
+  };
 }
 
 /**

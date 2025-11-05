@@ -117,7 +117,7 @@ export const useCalendarBookings = (
       }
 
       // Récupérer le staff séparément
-      const staffIds = [...new Set((data || []).map((b: any) => b.staff_member_id).filter(Boolean))];
+      const staffIds = [...new Set((data || []).map((b) => b.staff_member_id).filter(Boolean))];
       
       const { data: staffMembers } = staffIds.length > 0
         ? await supabase
@@ -127,7 +127,7 @@ export const useCalendarBookings = (
         : { data: [] };
 
       // Transformer en format calendrier
-      const bookings: CalendarBooking[] = (data || []).map((booking: any) => {
+      const bookings: CalendarBooking[] = (data || []).map((booking) => {
         const scheduledDate = new Date(booking.scheduled_date);
         const startTime = booking.scheduled_start_time?.split(':') || ['9', '0'];
         const endTime = booking.scheduled_end_time?.split(':') || ['10', '0'];
@@ -138,16 +138,16 @@ export const useCalendarBookings = (
         const end = new Date(scheduledDate);
         end.setHours(parseInt(endTime[0]), parseInt(endTime[1]), 0, 0);
 
-        const staff = staffMembers?.find((s: any) => s.id === booking.staff_member_id);
+        const staff = staffMembers?.find((s) => s.id === booking.staff_member_id);
 
         return {
           id: booking.id,
-          title: `${(booking.product as any)?.name || 'Service'}`,
+          title: `${(booking.product as { name?: string })?.name || 'Service'}`,
           start,
           end,
           status: booking.status || 'pending',
           serviceId: booking.product_id,
-          serviceName: (booking.product as any)?.name || 'Service',
+          serviceName: (booking.product as { name?: string })?.name || 'Service',
           customerId: booking.user_id,
           customerName: 'Client', // À améliorer avec RPC pour récupérer depuis auth.users
           customerEmail: '',

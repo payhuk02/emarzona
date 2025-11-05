@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { logger } from '@/lib/logger';
 import { 
   BookOpen, 
   Clock, 
@@ -494,7 +495,7 @@ const CourseDetail = () => {
                     courseId={course.id}
                     onCohortClick={(cohort) => {
                       // TODO: Naviguer vers la page du cohort
-                      console.log('Navigate to cohort:', cohort.id);
+                      logger.debug('Navigate to cohort', { cohortId: cohort.id });
                     }}
                   />
                 </CardContent>

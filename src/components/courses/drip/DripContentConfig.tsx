@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format, addDays, addWeeks, isAfter } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 interface DripContentConfigProps {
   courseId: string;
@@ -108,7 +109,7 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
             .eq('id', item.sectionId);
 
           if (sectionError) {
-            console.error('Error updating section', sectionError);
+            logger.error('Error updating section', { error: sectionError, sectionId: item.sectionId });
           }
         }
       } else {
@@ -119,7 +120,7 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
           .eq('course_id', course.id);
 
         if (unlockError) {
-          console.error('Error unlocking sections', unlockError);
+          logger.error('Error unlocking sections', { error: unlockError, courseId: course.id });
         }
       }
 
@@ -133,11 +134,12 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
       });
 
       onSuccess?.();
-    } catch (error: any) {
-      console.error('Error saving drip content config', error);
+    } catch (error: unknown) {
+      logger.error('Error saving drip content config', { error, courseId });
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de sauvegarder la configuration';
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de sauvegarder la configuration',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {

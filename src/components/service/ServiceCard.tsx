@@ -30,9 +30,10 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { ServiceProduct } from '@/hooks/service';
+import type { Product } from '@/types/product';
 
 interface ServiceCardProps {
-  service: ServiceProduct & { product?: any };
+  service: ServiceProduct & { product?: Product };
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   showActions?: boolean;
@@ -220,7 +221,7 @@ const ServiceCard = ({
  * Grid of Service Cards
  */
 interface ServicesGridProps {
-  services: (ServiceProduct & { product?: any })[];
+  services: (ServiceProduct & { product?: Product })[];
   loading?: boolean;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;

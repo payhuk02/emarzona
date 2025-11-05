@@ -9,6 +9,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { logger } from '@/lib/logger';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Button } from '@/components/ui/button';
@@ -108,7 +109,7 @@ export const DigitalProductsList = () => {
   // Log pour débogage
   useEffect(() => {
     if (error) {
-      console.error('Erreur dans DigitalProductsList:', {
+      logger.error('Erreur dans DigitalProductsList', {
         error,
         storeId: store?.id,
         hasStore: !!store,

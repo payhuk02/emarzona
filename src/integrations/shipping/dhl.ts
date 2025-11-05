@@ -3,6 +3,8 @@
  * Service pour intégration API DHL
  */
 
+import { logger } from '@/lib/logger';
+
 export interface DHLRateRequest {
   from: {
     country: string;
@@ -139,7 +141,7 @@ class DHLService {
       const data = await response.json();
       return data.rates || [];
     } catch (error) {
-      console.error('DHL getRates error:', error);
+      logger.error('DHL getRates error', { error, request });
       throw error;
     }
   }
@@ -183,7 +185,7 @@ class DHLService {
         currency: data.currency,
       };
     } catch (error) {
-      console.error('DHL createLabel error:', error);
+      logger.error('DHL createLabel error', { error, request });
       throw error;
     }
   }
@@ -218,7 +220,7 @@ class DHLService {
       const data = await response.json();
       return data.events || [];
     } catch (error) {
-      console.error('DHL trackShipment error:', error);
+      logger.error('DHL trackShipment error', { error, trackingNumber });
       throw error;
     }
   }

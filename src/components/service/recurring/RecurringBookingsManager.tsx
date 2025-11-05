@@ -34,7 +34,7 @@ import {
   Trash2,
   Eye,
 } from 'lucide-react';
-import { useRecurringSeries, useCancelRecurringSeries, useRecurringBookingsBySeries } from '@/hooks/services/useRecurringBookings';
+import { useRecurringSeries, useCancelRecurringSeries, useRecurringBookingsBySeries, type RecurringBookingSeries } from '@/hooks/services/useRecurringBookings';
 import { useStore } from '@/hooks/useStore';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -131,7 +131,7 @@ export default function RecurringBookingsManager() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {series.map((s: any) => (
+                {series.map((s: RecurringBookingSeries) => (
                   <TableRow key={s.id}>
                     <TableCell>
                       <div className="font-medium">
@@ -216,7 +216,7 @@ export default function RecurringBookingsManager() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {bookings.map((booking: any) => (
+                  {bookings.map((booking) => (
                     <TableRow key={booking.id}>
                       <TableCell>
                         {format(new Date(booking.scheduled_date), 'PPP', { locale: fr })}

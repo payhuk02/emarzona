@@ -283,7 +283,7 @@ export const useCreateRecurringBooking = () => {
         description: `${data.generatedCount} réservation(s) générée(s) avec succès`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       logger.error('Error in useCreateRecurringBooking', { error });
       toast({
         title: '❌ Erreur',
@@ -324,7 +324,7 @@ export const useCancelRecurringSeries = () => {
         description: `${data} réservation(s) annulée(s)`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       logger.error('Error in useCancelRecurringSeries', { error });
       toast({
         title: '❌ Erreur',
@@ -371,7 +371,7 @@ export const useUpdateRecurringSeries = () => {
         description: 'La série récurrente a été modifiée',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       logger.error('Error in useUpdateRecurringSeries', { error });
       toast({
         title: '❌ Erreur',
