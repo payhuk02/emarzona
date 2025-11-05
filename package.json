@@ -42,7 +42,9 @@
     "verify:responsive": "node scripts/verify-product-display.js",
     "verify:all": "npm run verify:responsive && npm run audit:responsive",
     "analyze:bundle": "npm run build && node scripts/analyze-bundle.js",
-    "build:analyze": "npm run build -- --mode analyze"
+    "build:analyze": "npm run build -- --mode analyze",
+    "issues:create": "powershell -ExecutionPolicy Bypass -File scripts/create-github-issues.ps1",
+    "issues:create:bash": "bash scripts/create-github-issues.sh"
   },
   "vercel": {
     "buildCommand": "npm run build",
