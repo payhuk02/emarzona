@@ -122,11 +122,18 @@ const Landing = () => {
         <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 flex items-center justify-between gap-2 sm:gap-4">
           <div className="relative flex items-center justify-start gap-1.5 sm:gap-2 flex-shrink-0">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-6 sm:relative sm:left-auto sm:top-auto sm:translate-y-0 sm:h-8 sm:w-8 z-0">
-              <img
-                src={platformLogo}
-                alt="Emarzona"
-                width={32}
-                height={32}
+              {platformLogo ? (
+                <img
+                  src={platformLogo}
+                  alt="Emarzona"
+                  width={32}
+                  height={32}
+                />
+              ) : (
+                <div className="h-full w-full bg-primary rounded flex items-center justify-center">
+                  <span className="text-xs font-bold text-primary-foreground">E</span>
+                </div>
+              )}
                 className="h-full w-full opacity-60 sm:opacity-100"
                 loading="eager"
               />
@@ -880,14 +887,20 @@ const Landing = () => {
           <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-12">
             <div className="col-span-1 xs:col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
-                <img
-                  src={platformLogo}
-                  alt="Emarzona"
-                  width={32}
-                  height={32}
-                  className="h-8 w-8"
-                  loading="eager"
-                />
+                {platformLogo ? (
+                  <img
+                    src={platformLogo}
+                    alt="Emarzona"
+                    width={32}
+                    height={32}
+                    className="h-8 w-8"
+                    loading="eager"
+                  />
+                ) : (
+                  <div className="h-8 w-8 bg-primary rounded flex items-center justify-center">
+                    <span className="text-xs font-bold text-primary-foreground">E</span>
+                  </div>
+                )}
                 <span className="text-lg md:text-xl font-bold text-foreground">Emarzona</span>
               </div>
               <p className="text-muted-foreground text-sm leading-relaxed">

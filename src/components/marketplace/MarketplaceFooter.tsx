@@ -13,7 +13,13 @@ const MarketplaceFooter = () => {
           {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <img src={platformLogo} alt="Emarzona" className="h-8 w-8" />
+              {platformLogo ? (
+                <img src={platformLogo} alt="Emarzona" className="h-8 w-8" />
+              ) : (
+                <div className="h-8 w-8 bg-primary rounded flex items-center justify-center">
+                  <span className="text-sm font-bold text-primary-foreground">E</span>
+                </div>
+              )}
               <span className="text-xl sm:text-2xl font-bold">Emarzona</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-4 max-w-xs">

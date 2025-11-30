@@ -14,7 +14,9 @@ export const DynamicFavicon = () => {
   const previousUrlRef = useRef<string | null>(null);
 
   // Utiliser le favicon personnalisé s'il existe, sinon le logo light, sinon le favicon par défaut
-  const faviconUrl = favicon || logoLight || '/favicon.ico';
+  // Si logoLight est null, utiliser uniquement le favicon par défaut pour éviter le clignotement
+  // Note: logoLight peut être null si aucun logo personnalisé n'est configuré
+  const faviconUrl = favicon || (logoLight ? logoLight : '/favicon.ico');
 
   useEffect(() => {
     // Éviter les mises à jour inutiles

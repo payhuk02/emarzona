@@ -286,12 +286,19 @@ const Auth = () => {
         <div className="flex justify-center mb-6 sm:mb-8">
           <Link to="/" className="relative inline-flex items-center gap-2 mb-4 sm:mb-6" aria-label="Retour à l'accueil">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-8 sm:relative sm:left-auto sm:top-auto sm:translate-y-0 sm:h-10 sm:w-10 z-0">
-              <img
-                src={platformLogo}
-                alt="Emarzona Logo"
-                width={40}
-                height={40}
-                className="h-full w-full opacity-60 sm:opacity-100"
+              {platformLogo ? (
+                <img
+                  src={platformLogo}
+                  alt="Emarzona Logo"
+                  width={40}
+                  height={40}
+                  className="h-full w-full opacity-60 sm:opacity-100"
+                />
+              ) : (
+                <div className="h-full w-full bg-primary rounded flex items-center justify-center opacity-60 sm:opacity-100">
+                  <span className="text-sm font-bold text-primary-foreground">E</span>
+                </div>
+              )}
                 loading="eager"
               />
             </div>

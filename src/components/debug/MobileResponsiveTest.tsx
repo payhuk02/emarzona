@@ -163,11 +163,17 @@ export const MobileResponsiveTest = () => {
             <div className="space-y-2">
               <h4 className="font-medium">Logo Marketplace</h4>
               <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted/50">
-                <img 
-                  src={payhukLogo} 
-                  alt="Emarzona" 
-                  className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 object-contain" 
-                />
+                {platformLogo ? (
+                  <img 
+                    src={platformLogo} 
+                    alt="Emarzona" 
+                    className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 object-contain" 
+                  />
+                ) : (
+                  <div className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 bg-muted rounded flex items-center justify-center">
+                    <span className="text-xs font-bold text-muted-foreground">E</span>
+                  </div>
+                )}
                 <span className="text-sm font-medium">Emarzona</span>
               </div>
               <div className="flex items-center gap-2">

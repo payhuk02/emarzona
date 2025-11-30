@@ -2,15 +2,17 @@
  * Hook pour obtenir le logo de la plateforme selon le thème
  * Utilise les logos personnalisés depuis la configuration si disponibles
  * Optimisé pour éviter les flashs et garantir la stabilité
+ * 
+ * IMPORTANT: Ne retourne que les logos personnalisés configurés.
+ * Si aucun logo n'est configuré, retourne null pour éviter le clignotement.
  */
 
 import { useMemo, useState, useEffect } from 'react';
 import { usePlatformCustomizationContext } from '@/contexts/PlatformCustomizationContext';
-import payhukLogo from '@/assets/payhuk-logo.png';
 
 /**
  * Obtient le logo approprié selon le thème actuel
- * @returns URL du logo (light ou dark) ou logo par défaut
+ * @returns URL du logo (light ou dark) ou null si non configuré
  */
 export const usePlatformLogo = () => {
   const { customizationData } = usePlatformCustomizationContext();
@@ -29,12 +31,11 @@ export const usePlatformLogo = () => {
         img.src = logoUrl;
         img.onload = () => setIsLogoLoaded(true);
         img.onerror = () => {
-          // Si le logo personnalisé ne charge pas, on garde le logo par défaut
           setIsLogoLoaded(false);
         };
       });
     } else {
-      setIsLogoLoaded(true); // Logo par défaut toujours disponible
+      setIsLogoLoaded(true);
     }
   }, [customizationData?.design?.logo]);
 
@@ -42,9 +43,10 @@ export const usePlatformLogo = () => {
     // Vérifier si un logo personnalisé est configuré (light ou dark)
     const hasCustomLogo = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
     
-    // Si aucun logo personnalisé n'est configuré, utiliser le logo par défaut
+    // Si aucun logo personnalisé n'est configuré, retourner null
+    // Cela évite le clignotement avec l'ancien logo
     if (!hasCustomLogo) {
-      return payhukLogo;
+      return null;
     }
 
     // Déterminer le thème actuel de manière stable
@@ -64,7 +66,6 @@ export const usePlatformLogo = () => {
 
     // Retourner le logo approprié
     // Priorité : logo personnalisé selon thème > logo light > logo dark
-    // Note: Si un logo personnalisé est configuré, on ne retourne JAMAIS le logo par défaut
     if (shouldUseDark && customizationData.design.logo.dark) {
       return customizationData.design.logo.dark;
     } else if (!shouldUseDark && customizationData.design.logo.light) {
@@ -72,8 +73,7 @@ export const usePlatformLogo = () => {
     }
 
     // Fallback : utiliser le logo light s'il existe, sinon dark
-    // Si aucun des deux n'existe, cela signifie que hasCustomLogo était faux, donc on ne devrait jamais arriver ici
-    return customizationData.design.logo.light || customizationData.design.logo.dark || payhukLogo;
+    return customizationData.design.logo.light || customizationData.design.logo.dark || null;
   }, [customizationData]);
 
   // Retourner le logo (sera stable une fois chargé)
@@ -85,7 +85,7 @@ export const usePlatformLogo = () => {
  */
 export const usePlatformLogoLight = () => {
   const { customizationData } = usePlatformCustomizationContext();
-  return customizationData?.design?.logo?.light || payhukLogo;
+  return customizationData?.design?.logo?.light || null;
 };
 
 /**
@@ -93,7 +93,7 @@ export const usePlatformLogoLight = () => {
  */
 export const usePlatformLogoDark = () => {
   const { customizationData } = usePlatformCustomizationContext();
-  return customizationData?.design?.logo?.dark || payhukLogo;
+  return customizationData?.design?.logo?.dark || null;
 };
 
 /**
