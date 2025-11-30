@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Twitter, Linkedin, Mail, Phone } from "lucide-react";
-import payhukLogo from "@/assets/payhuk-logo.png";
+import { usePlatformLogo } from "@/hooks/usePlatformLogo";
 
 const MarketplaceFooter = () => {
   const currentYear = new Date().getFullYear();
+  const platformLogo = usePlatformLogo();
 
   return (
     <footer className="bg-gradient-dark border-t border-border py-8 sm:py-12">
@@ -12,7 +13,7 @@ const MarketplaceFooter = () => {
           {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <img src={payhukLogo} alt="Emarzona" className="h-8 w-8" />
+              <img src={platformLogo} alt="Emarzona" className="h-8 w-8" />
               <span className="text-xl sm:text-2xl font-bold">Emarzona</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-4 max-w-xs">

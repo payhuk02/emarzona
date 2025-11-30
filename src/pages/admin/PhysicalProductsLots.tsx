@@ -16,42 +16,73 @@ import { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useStoreContext } from '@/contexts/StoreContext';
+import { logger } from '@/lib/logger';
 
 export default function PhysicalProductsLots() {
   const [selectedProductId, setSelectedProductId] = useState<string>('');
 
-  // Get current user's store
-  const { data: store, isLoading: storeLoading } = useQuery({
-    queryKey: ['current-user-store'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Non authentifié');
-
-      const { data, error } = await supabase
-        .from('stores')
-        .select('id, name')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
+  // Get current user's store from context (évite l'erreur 406)
+  const { selectedStore: store, loading: storeLoading } = useStoreContext();
 
   // Get physical products for selection
-  const { data: products, isLoading: productsLoading } = useQuery({
-    queryKey: ['store-physical-products', store?.id],
+  const { data: products, isLoading: productsLoading, error: productsError } = useQuery({
+    queryKey: ['store-physical-products-lots', store?.id],
     queryFn: async () => {
       if (!store?.id) return [];
 
-      const { data, error } = await supabase
-        .from('physical_products')
-        .select('id, product:products!inner(id, name, store_id)')
-        .eq('product.store_id', store.id)
-        .limit(100);
+      try {
+        // Étape 1 : Récupérer les produits physiques depuis products avec product_type = 'physical'
+        const { data: storeProducts, error: productsError } = await supabase
+          .from('products')
+          .select('id, name')
+          .eq('store_id', store.id)
+          .eq('product_type', 'physical')
+          .limit(100);
 
-      if (error) throw error;
-      return data || [];
+        if (productsError) {
+          logger.error('Error fetching products', { error: productsError, storeId: store.id });
+          throw productsError;
+        }
+
+        if (!storeProducts || storeProducts.length === 0) return [];
+
+        const productIds = storeProducts.map(p => p.id);
+
+        // Étape 2 : Récupérer les physical_products correspondants
+        const { data: physicalProducts, error: physicalError } = await supabase
+          .from('physical_products')
+          .select('id, product_id')
+          .in('product_id', productIds)
+          .limit(100);
+
+        if (physicalError) {
+          logger.error('Error fetching physical products', { error: physicalError, productIds });
+          // Si on ne peut pas récupérer les physical_products, retourner quand même les produits
+          return storeProducts.map((p: any) => ({
+            id: p.id, // Utiliser product_id comme id temporaire
+            product: {
+              id: p.id,
+              name: p.name
+            }
+          }));
+        }
+
+        // Combiner les données : physical_products avec leurs produits
+        return (physicalProducts || []).map((pp: any) => {
+          const productInfo = storeProducts.find((p: any) => p.id === pp.product_id);
+          return {
+            id: pp.id,
+            product: {
+              id: pp.product_id,
+              name: productInfo?.name || `Produit ${pp.product_id?.slice(0, 8) || pp.id.slice(0, 8)}`
+            }
+          };
+        });
+      } catch (error) {
+        logger.error('Error in physical products query', { error, storeId: store.id });
+        throw error;
+      }
     },
     enabled: !!store?.id,
   });
@@ -61,10 +92,13 @@ export default function PhysicalProductsLots() {
       <SidebarProvider>
         <div className="flex min-h-screen w-full overflow-x-hidden">
           <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-64 w-full" />
+          <main className="flex-1 overflow-auto bg-background">
+            <div className="container mx-auto p-3 sm:p-4 md:p-5 lg:p-6 space-y-4 sm:space-y-6">
+              <Skeleton className="h-10 sm:h-12 lg:h-14 w-full" />
+              <div className="space-y-3 sm:space-y-4">
+                <Skeleton className="h-12 sm:h-14 w-full" />
+                <Skeleton className="h-64 sm:h-80 lg:h-96 w-full" />
+              </div>
             </div>
           </main>
         </div>
@@ -77,9 +111,17 @@ export default function PhysicalProductsLots() {
       <SidebarProvider>
         <div className="flex min-h-screen w-full overflow-x-hidden">
           <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-3 sm:p-4 lg:p-6 flex items-center justify-center min-h-[400px]">
-              <p className="text-muted-foreground">Chargement...</p>
+          <main className="flex-1 overflow-auto bg-background">
+            <div className="container mx-auto p-3 sm:p-4 md:p-5 lg:p-6 flex items-center justify-center min-h-[400px] sm:min-h-[500px]">
+              <div className="text-center space-y-2 sm:space-y-3">
+                <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-4 border-primary border-t-transparent mx-auto"></div>
+                <p className="text-sm sm:text-base text-muted-foreground">Chargement...</p>
+                {productsError && (
+                  <p className="text-xs sm:text-sm text-destructive mt-2">
+                    Erreur lors du chargement des produits
+                  </p>
+                )}
+              </div>
             </div>
           </main>
         </div>
@@ -91,42 +133,44 @@ export default function PhysicalProductsLots() {
     <SidebarProvider>
       <div className="flex min-h-screen w-full overflow-x-hidden">
         <AppSidebar />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+        <main className="flex-1 overflow-auto bg-background">
+          <div className="container mx-auto p-3 sm:p-4 md:p-5 lg:p-6 space-y-4 sm:space-y-6">
             {/* Header - Responsive & Animated */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
-              <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                    <Package className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl xs:text-2xl sm:text-3xl lg:text-4xl font-bold flex flex-col xs:flex-row xs:items-center gap-2 mb-1 sm:mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500 flex-shrink-0">
+                      <Package className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                    </div>
+                    <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent break-words">
+                      Gestion des Lots et Expiration
+                    </span>
                   </div>
-                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Gestion des Lots et Expiration
-                  </span>
                 </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground mt-1 sm:mt-2">
                   Gérez les lots de produits avec dates d'expiration et rotation FIFO/LIFO/FEFO
                 </p>
               </div>
             </div>
 
-            <Tabs defaultValue="alerts" className="space-y-4 sm:space-y-6">
-              <TabsList className="grid w-full grid-cols-2 h-auto p-1 bg-muted/50 backdrop-blur-sm">
+            <Tabs defaultValue="alerts" className="space-y-4 sm:space-y-6 w-full">
+              <TabsList className="grid w-full grid-cols-2 h-auto p-1 bg-muted/50 backdrop-blur-sm gap-1">
                 <TabsTrigger 
                   value="alerts"
-                  className="text-xs sm:text-sm px-2 sm:px-4 py-2 min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  className="text-xs sm:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 min-h-[44px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2"
                 >
-                  <AlertTriangle className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Alertes d'Expiration</span>
-                  <span className="xs:hidden">Alertes</span>
+                  <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span className="hidden xs:inline truncate">Alertes d'Expiration</span>
+                  <span className="xs:hidden truncate">Alertes</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="lots"
-                  className="text-xs sm:text-sm px-2 sm:px-4 py-2 min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  className="text-xs sm:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 min-h-[44px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2"
                 >
-                  <Package className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Gestion des Lots</span>
-                  <span className="xs:hidden">Lots</span>
+                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span className="hidden xs:inline truncate">Gestion des Lots</span>
+                  <span className="xs:hidden truncate">Lots</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -134,30 +178,54 @@ export default function PhysicalProductsLots() {
                 <ExpirationAlerts />
               </TabsContent>
 
-              <TabsContent value="lots" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
-                <div className="space-y-4 sm:space-y-6">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                    <Label className="text-xs sm:text-sm whitespace-nowrap">Sélectionner un Produit</Label>
-                    <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                      <SelectTrigger className="w-full sm:w-[300px] min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm">
-                        <SelectValue placeholder="Choisir un produit..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {products?.map((product: any) => (
-                          <SelectItem key={product.id} value={product.id}>
-                            {product.product?.name || `Produit ${product.id.slice(0, 8)}`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+              <TabsContent value="lots" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6 w-full">
+                <div className="space-y-4 sm:space-y-6 w-full">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full">
+                    <Label className="text-xs sm:text-sm whitespace-nowrap flex-shrink-0 pt-2 sm:pt-0">
+                      Sélectionner un Produit
+                    </Label>
+                    <div className="flex-1 w-full sm:w-auto min-w-0">
+                      <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                        <SelectTrigger className="w-full sm:w-[300px] md:w-[350px] min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm touch-manipulation">
+                          <SelectValue placeholder="Choisir un produit..." />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[300px]">
+                          {products && products.length > 0 ? (
+                            products.map((product: any) => (
+                              <SelectItem 
+                                key={product.id} 
+                                value={product.id}
+                                className="text-xs sm:text-sm"
+                              >
+                                {product.product?.name || `Produit ${product.id.slice(0, 8)}`}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="p-4 text-center text-sm text-muted-foreground">
+                              Aucun produit physique trouvé
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
+                  {productsError && (
+                    <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+                      <p className="text-sm text-destructive">
+                        Erreur lors du chargement des produits : {productsError instanceof Error ? productsError.message : 'Erreur inconnue'}
+                      </p>
+                    </div>
+                  )}
+
                   {selectedProductId ? (
-                    <LotsManager physicalProductId={selectedProductId} />
+                    <div className="w-full">
+                      <LotsManager physicalProductId={selectedProductId} />
+                    </div>
                   ) : (
-                    <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg border-border/50 bg-card/50 backdrop-blur-sm">
-                      <div className="text-center p-6">
-                        <Package className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
+                    <div className="flex items-center justify-center h-64 sm:h-80 border-2 border-dashed rounded-lg border-border/50 bg-card/50 backdrop-blur-sm w-full">
+                      <div className="text-center p-4 sm:p-6 max-w-md">
+                        <Package className="h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 mx-auto text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
                         <p className="text-sm sm:text-base text-muted-foreground">
                           Sélectionnez un produit pour gérer ses lots
                         </p>

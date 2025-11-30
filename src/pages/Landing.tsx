@@ -21,7 +21,7 @@ import {
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useRef } from "react";
-import payhukLogo from "@/assets/payhuk-logo.png";
+import { usePlatformLogo } from "@/hooks/usePlatformLogo";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import testimonial1 from "@/assets/testimonial-1.jpg";
 import testimonial2 from "@/assets/testimonial-2.jpg";
@@ -44,6 +44,7 @@ import { usePageCustomization } from "@/hooks/usePageCustomization";
 const Landing = () => {
   const { t } = useTranslation();
   const { getValue, getColor, getImage } = usePageCustomization('landing');
+  const platformLogo = usePlatformLogo();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showCountries, setShowCountries] = useState(false);
   const [animatedStats, setAnimatedStats] = useState({
@@ -122,7 +123,7 @@ const Landing = () => {
           <div className="relative flex items-center justify-start gap-1.5 sm:gap-2 flex-shrink-0">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-6 sm:relative sm:left-auto sm:top-auto sm:translate-y-0 sm:h-8 sm:w-8 z-0">
               <img
-                src={payhukLogo}
+                src={platformLogo}
                 alt="Emarzona"
                 width={32}
                 height={32}
@@ -880,7 +881,7 @@ const Landing = () => {
             <div className="col-span-1 xs:col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
                 <OptimizedImage
-                  src={payhukLogo}
+                  src={platformLogo}
                   alt="Emarzona"
                   width={32}
                   height={32}

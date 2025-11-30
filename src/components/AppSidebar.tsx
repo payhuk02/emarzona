@@ -59,7 +59,7 @@ import {
   Scale,
   Headphones,
 } from "@/components/icons";
-import payhukLogo from "@/assets/payhuk-logo.png";
+import { usePlatformLogo } from "@/hooks/usePlatformLogo";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import {
@@ -843,6 +843,7 @@ export function AppSidebar() {
   const { toast } = useToast();
   const { isAdmin } = useAdmin();
   const { stores, selectedStoreId, switchStore, canCreateStore, loading: storesLoading } = useStoreContext();
+  const platformLogo = usePlatformLogo();
   const isCollapsed = state === "collapsed";
   // Détecte si on est sur une page admin
   const isOnAdminPage = location.pathname.startsWith('/admin');
@@ -870,13 +871,13 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
+    <Sidebar collapsible="icon" className="border-r bg-white dark:bg-white">
       <SidebarContent>
         {/* Logo */}
         <div className="p-3 sm:p-4 border-b">
           <div className="flex items-center gap-2">
             <img 
-              src={payhukLogo} 
+              src={platformLogo} 
               alt="Emarzona" 
               className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 object-contain"
               loading="eager" 

@@ -5,6 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { StoreProvider } from "@/contexts/StoreContext";
+import { PlatformCustomizationProvider } from "@/contexts/PlatformCustomizationContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ScrollToTop } from "@/components/navigation/ScrollToTop";
 import { LoadingBar } from "@/components/navigation/LoadingBar";
@@ -652,8 +653,10 @@ const App = () => (
       >
         <AuthProvider>
           <StoreProvider>
-            <AppInitializer queryClient={queryClient} />
-            <AppContent />
+            <PlatformCustomizationProvider>
+              <AppInitializer queryClient={queryClient} />
+              <AppContent />
+            </PlatformCustomizationProvider>
           </StoreProvider>
         </AuthProvider>
       </BrowserRouter>

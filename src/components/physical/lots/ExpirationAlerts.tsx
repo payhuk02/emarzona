@@ -80,9 +80,14 @@ export function ExpirationAlerts() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-64 w-full" />
+      <div className="space-y-4 sm:space-y-6 w-full">
+        <Skeleton className="h-10 sm:h-12 w-full" />
+        <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-24 sm:h-28 w-full" />
+          ))}
+        </div>
+        <Skeleton className="h-64 sm:h-80 w-full" />
       </div>
     );
   }

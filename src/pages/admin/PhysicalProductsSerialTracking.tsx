@@ -17,42 +17,73 @@ import { Label } from '@/components/ui/label';
 import { WarrantyClaimsManager } from '@/components/physical/serial-tracking/WarrantyClaimsManager';
 import { RepairsManager } from '@/components/physical/serial-tracking/RepairsManager';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useStoreContext } from '@/contexts/StoreContext';
+import { logger } from '@/lib/logger';
 
 export default function PhysicalProductsSerialTracking() {
   const [selectedProductId, setSelectedProductId] = useState<string>('');
 
-  // Get current user's store
-  const { data: store, isLoading: storeLoading } = useQuery({
-    queryKey: ['current-user-store'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Non authentifié');
-
-      const { data, error } = await supabase
-        .from('stores')
-        .select('id, name')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
+  // Get current user's store from context (évite l'erreur 406)
+  const { selectedStore: store, loading: storeLoading } = useStoreContext();
 
   // Get physical products for selection
-  const { data: products, isLoading: productsLoading } = useQuery({
-    queryKey: ['store-physical-products', store?.id],
+  const { data: products, isLoading: productsLoading, error: productsError } = useQuery({
+    queryKey: ['store-physical-products-serial', store?.id],
     queryFn: async () => {
       if (!store?.id) return [];
 
-      const { data, error } = await supabase
-        .from('physical_products')
-        .select('id, product:products!inner(id, name, store_id)')
-        .eq('product.store_id', store.id)
-        .limit(100);
+      try {
+        // Étape 1 : Récupérer les produits physiques depuis products avec product_type = 'physical'
+        const { data: storeProducts, error: productsError } = await supabase
+          .from('products')
+          .select('id, name')
+          .eq('store_id', store.id)
+          .eq('product_type', 'physical')
+          .limit(100);
 
-      if (error) throw error;
-      return data || [];
+        if (productsError) {
+          logger.error('Error fetching products', { error: productsError, storeId: store.id });
+          throw productsError;
+        }
+
+        if (!storeProducts || storeProducts.length === 0) return [];
+
+        const productIds = storeProducts.map(p => p.id);
+
+        // Étape 2 : Récupérer les physical_products correspondants
+        const { data: physicalProducts, error: physicalError } = await supabase
+          .from('physical_products')
+          .select('id, product_id')
+          .in('product_id', productIds)
+          .limit(100);
+
+        if (physicalError) {
+          logger.error('Error fetching physical products', { error: physicalError, productIds });
+          // Si on ne peut pas récupérer les physical_products, retourner quand même les produits
+          return storeProducts.map((p: any) => ({
+            id: p.id, // Utiliser product_id comme id temporaire
+            product: {
+              id: p.id,
+              name: p.name
+            }
+          }));
+        }
+
+        // Combiner les données : physical_products avec leurs produits
+        return (physicalProducts || []).map((pp: any) => {
+          const productInfo = storeProducts.find((p: any) => p.id === pp.product_id);
+          return {
+            id: pp.id,
+            product: {
+              id: pp.product_id,
+              name: productInfo?.name || `Produit ${pp.product_id?.slice(0, 8) || pp.id.slice(0, 8)}`
+            }
+          };
+        });
+      } catch (error) {
+        logger.error('Error in physical products query', { error, storeId: store.id });
+        throw error;
+      }
     },
     enabled: !!store?.id,
   });
@@ -62,10 +93,13 @@ export default function PhysicalProductsSerialTracking() {
       <SidebarProvider>
         <div className="flex min-h-screen w-full overflow-x-hidden">
           <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-64 w-full" />
+          <main className="flex-1 overflow-auto bg-background">
+            <div className="container mx-auto p-3 sm:p-4 md:p-5 lg:p-6 space-y-4 sm:space-y-6">
+              <Skeleton className="h-10 sm:h-12 lg:h-14 w-full" />
+              <div className="space-y-3 sm:space-y-4">
+                <Skeleton className="h-12 sm:h-14 w-full" />
+                <Skeleton className="h-64 sm:h-80 lg:h-96 w-full" />
+              </div>
             </div>
           </main>
         </div>
@@ -78,9 +112,17 @@ export default function PhysicalProductsSerialTracking() {
       <SidebarProvider>
         <div className="flex min-h-screen w-full overflow-x-hidden">
           <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-3 sm:p-4 lg:p-6 flex items-center justify-center min-h-[400px]">
-              <p className="text-muted-foreground">Chargement...</p>
+          <main className="flex-1 overflow-auto bg-background">
+            <div className="container mx-auto p-3 sm:p-4 md:p-5 lg:p-6 flex items-center justify-center min-h-[400px] sm:min-h-[500px]">
+              <div className="text-center space-y-2 sm:space-y-3">
+                <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-4 border-primary border-t-transparent mx-auto"></div>
+                <p className="text-sm sm:text-base text-muted-foreground">Chargement...</p>
+                {productsError && (
+                  <p className="text-xs sm:text-sm text-destructive mt-2">
+                    Erreur lors du chargement des produits
+                  </p>
+                )}
+              </div>
             </div>
           </main>
         </div>

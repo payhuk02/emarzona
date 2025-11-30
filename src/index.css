@@ -112,13 +112,14 @@ All colors MUST be HSL.
     --shadow-large: 0 16px 64px -8px hsl(220 100% 5% / 0.6);
     --shadow-glow: 0 0 50px hsl(210 100% 65% / 0.4);
 
-    --sidebar-background: 24 9.8% 10%;
+    /* Sidebar toujours en thème clair même en mode sombre */
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 0%;
     --sidebar-primary: 25 95% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 25 9.1% 14.9%;
+    --sidebar-accent: 33 100% 96.5%;
     --sidebar-accent-foreground: 0 0% 0%;
-    --sidebar-border: 24 9.8% 15%;
+    --sidebar-border: 20 5.9% 90%;
     --sidebar-ring: 25 95% 53%;
   }
 }
@@ -128,11 +129,21 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
-  /* TEMPORAIRE : Force les couleurs de la sidebar en NOIR pour tous les modes */
-  /* Isolation du mode clair pour tester - FORCE NOIR sur TOUT */
+  /* Force le sidebar à toujours avoir un fond clair */
   [data-sidebar="sidebar"] {
+    --sidebar-background: 0 0% 100% !important;
     --sidebar-foreground: 0 0% 0% !important;
     --sidebar-accent-foreground: 0 0% 0% !important;
+    background-color: hsl(var(--sidebar-background)) !important;
+    color: black !important;
+  }
+
+  /* Force le fond clair même en mode sombre */
+  .dark [data-sidebar="sidebar"] {
+    --sidebar-background: 0 0% 100% !important;
+    --sidebar-foreground: 0 0% 0% !important;
+    --sidebar-accent-foreground: 0 0% 0% !important;
+    background-color: hsl(var(--sidebar-background)) !important;
     color: black !important;
   }
 

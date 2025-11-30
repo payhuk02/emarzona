@@ -95,9 +95,14 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-64 w-full" />
+      <div className="space-y-4 sm:space-y-6 w-full">
+        <Skeleton className="h-10 sm:h-12 w-full" />
+        <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-24 sm:h-28 w-full" />
+          ))}
+        </div>
+        <Skeleton className="h-64 sm:h-80 w-full" />
       </div>
     );
   }
@@ -180,31 +185,31 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
       {/* Tabs - Responsive */}
       <div ref={tabsRef} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
         <Tabs defaultValue="all" className="space-y-4 sm:space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto p-1 bg-muted/50 backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto p-1 bg-muted/50 backdrop-blur-sm gap-1">
             <TabsTrigger 
               value="all"
-              className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+              className="text-xs sm:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 min-h-[44px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
             >
               Tous ({lots?.length || 0})
             </TabsTrigger>
             <TabsTrigger 
               value="active"
-              className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+              className="text-xs sm:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 min-h-[44px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
             >
               Actifs ({activeLots.length})
             </TabsTrigger>
             <TabsTrigger 
               value="expiring"
-              className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+              className="text-xs sm:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 min-h-[44px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2"
             >
-              <AlertTriangle className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Expirent bientôt</span>
-              <span className="xs:hidden">Expirent</span>
-              ({expiringSoonLots.length})
+              <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span className="hidden xs:inline truncate">Expirent bientôt</span>
+              <span className="xs:hidden truncate">Expirent</span>
+              <span className="flex-shrink-0">({expiringSoonLots.length})</span>
             </TabsTrigger>
             <TabsTrigger 
               value="expired"
-              className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+              className="text-xs sm:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 min-h-[44px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
             >
               Expirés ({expiredLots.length})
             </TabsTrigger>

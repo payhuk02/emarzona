@@ -6,11 +6,12 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X, ShoppingBag, Store, UserCircle } from "lucide-react";
 import { ThemeToggle } from "@/components/navigation/ThemeToggle";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
-import payhukLogo from "@/assets/payhuk-logo.png";
+import { usePlatformLogo } from "@/hooks/usePlatformLogo";
 
 const MarketplaceHeader = () => {
   const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const platformLogo = usePlatformLogo();
 
   return (
     <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur-md shadow-soft transition-all duration-300">
@@ -18,7 +19,7 @@ const MarketplaceHeader = () => {
         <div className="flex h-14 sm:h-16 items-center justify-between gap-3">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity">
-            <img src={payhukLogo} alt="Emarzona" className="h-7 w-7 sm:h-8 sm:w-8" />
+            <img src={platformLogo} alt="Emarzona" className="h-7 w-7 sm:h-8 sm:w-8" />
             <span className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">Emarzona</span>
           </Link>
 
