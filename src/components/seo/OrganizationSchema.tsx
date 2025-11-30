@@ -12,7 +12,7 @@ export const OrganizationSchema = () => {
     name: 'Emarzona',
     alternateName: 'Emarzona - Plateforme de ecommerce et marketing',
     url: 'https://emarzona.com',
-    logo: 'https://emarzona.com/assets/payhuk-logo.png',
+    logo: 'https://emarzona.com/assets/emarzona-logo.png',
     description: 'Plateforme de ecommerce et marketing. Solution SaaS E-commerce pour la vente de produits digitaux, physiques, services et cours en ligne',
     
     // Contact

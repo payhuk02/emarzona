@@ -76,7 +76,7 @@ const MarketplaceHeader = () => {
                   {/* Header */}
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-2">
-                      <img src={payhukLogo} alt="Emarzona" className="h-7 w-7" />
+                      <img src={platformLogo} alt="Emarzona" className="h-7 w-7" />
                       <span className="text-xl font-bold">Emarzona</span>
                     </div>
                     <Button

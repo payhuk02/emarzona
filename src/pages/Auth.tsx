@@ -12,8 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import payhukLogo from "@/assets/payhuk-logo.png";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { usePlatformLogo } from "@/hooks/usePlatformLogo";
 import { SEOMeta } from "@/components/seo/SEOMeta";
 import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { logger } from "@/lib/logger";
@@ -23,6 +23,7 @@ import { usePageCustomization } from "@/hooks/usePageCustomization";
 const Auth = () => {
   const { t } = useTranslation();
   const { getValue } = usePageCustomization('auth');
+  const platformLogo = usePlatformLogo();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [showPassword, setShowPassword] = useState({ login: false, signup: false });
@@ -286,7 +287,7 @@ const Auth = () => {
           <Link to="/" className="relative inline-flex items-center gap-2 mb-4 sm:mb-6" aria-label="Retour à l'accueil">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-8 sm:relative sm:left-auto sm:top-auto sm:translate-y-0 sm:h-10 sm:w-10 z-0">
               <img
-                src={payhukLogo}
+                src={platformLogo}
                 alt="Emarzona Logo"
                 width={40}
                 height={40}

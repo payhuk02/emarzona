@@ -28,7 +28,7 @@ export const WebsiteSchema = () => {
       "name": "Emarzona",
       "logo": {
         "@type": "ImageObject",
-        "url": `${window.location.origin}/payhuk-logo.png`
+        "url": `${window.location.origin}/assets/emarzona-logo.png`
       }
     }
   };

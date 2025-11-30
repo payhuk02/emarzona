@@ -22,7 +22,7 @@ import { CurrencyRatesInitializer } from "@/components/currency/CurrencyRatesIni
 import React, { Suspense, lazy, useEffect } from "react";
 import { initSentry } from "@/lib/sentry";
 import { initWebVitals } from "@/lib/web-vitals";
-import * as Sentry from "@sentry/react";
+import { ErrorBoundary as SentryErrorBoundary } from "@sentry/react";
 import { logger } from "@/lib/logger";
 import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
 import { startAlertMonitoring } from "@/lib/sentry-alerts";
@@ -395,7 +395,7 @@ const AppContent = () => {
 
   return (
     <ErrorBoundary>
-      <Sentry.ErrorBoundary 
+      <SentryErrorBoundary 
         fallback={<ErrorFallbackComponent />} 
         showDialog
       >
@@ -631,7 +631,7 @@ const AppContent = () => {
       </Suspense>
       <CookieConsentBanner />
       <CrispChat />
-      </Sentry.ErrorBoundary>
+      </SentryErrorBoundary>
     </ErrorBoundary>
   );
 };

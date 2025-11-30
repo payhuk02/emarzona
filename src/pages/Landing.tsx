@@ -880,13 +880,13 @@ const Landing = () => {
           <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-12">
             <div className="col-span-1 xs:col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
-                <OptimizedImage
+                <img
                   src={platformLogo}
                   alt="Emarzona"
                   width={32}
                   height={32}
                   className="h-8 w-8"
-                  loading="lazy"
+                  loading="eager"
                 />
                 <span className="text-lg md:text-xl font-bold text-foreground">Emarzona</span>
               </div>

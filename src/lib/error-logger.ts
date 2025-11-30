@@ -3,7 +3,7 @@
  * Capture, formate et envoie les erreurs à différents services
  */
 
-import * as Sentry from '@sentry/react';
+import { captureException, captureMessage } from '@sentry/react';
 
 // Sauvegarder les méthodes originales de la console pour éviter les boucles infinies
 // avec console-guard.ts
@@ -84,7 +84,7 @@ export function logError(error: Error, context: ErrorLogContext = {}): void {
 
   // Sentry (production)
   if (process.env.NODE_ENV === 'production') {
-    Sentry.captureException(error, {
+    captureException(error, {
       level: context.level === 'app' ? 'fatal' : 'error',
       contexts: {
         error_context: context as Record<string, unknown>,
@@ -134,7 +134,7 @@ export function logWarning(message: string, context: ErrorLogContext = {}): void
   }
 
   if (process.env.NODE_ENV === 'production') {
-    Sentry.captureMessage(message, {
+    captureMessage(message, {
       level: 'warning',
       contexts: {
         warning_context: context as Record<string, unknown>,
@@ -152,7 +152,7 @@ export function logInfo(message: string, data?: Record<string, unknown>): void {
   }
 
   if (process.env.NODE_ENV === 'production' && data) {
-    Sentry.captureMessage(message, {
+    captureMessage(message, {
       level: 'info',
       extra: data,
     });
