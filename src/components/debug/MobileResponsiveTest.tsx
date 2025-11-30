@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle2, AlertCircle, Smartphone, Monitor, Tablet } from 'lucide-react';
-import payhukLogo from '@/assets/payhuk-logo.png';
+import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 
 export const MobileResponsiveTest = () => {
+  const platformLogo = usePlatformLogo();
   const [screenSize, setScreenSize] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 0,
     height: typeof window !== 'undefined' ? window.innerHeight : 0,
@@ -144,7 +145,7 @@ export const MobileResponsiveTest = () => {
               <h4 className="font-medium">Logo Sidebar</h4>
               <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted/50">
                 <img 
-                  src={payhukLogo} 
+                  src={platformLogo} 
                   alt="Emarzona" 
                   className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 object-contain" 
                 />

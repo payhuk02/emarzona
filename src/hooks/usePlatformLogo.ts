@@ -39,8 +39,11 @@ export const usePlatformLogo = () => {
   }, [customizationData?.design?.logo]);
 
   const logo = useMemo(() => {
-    // Si pas de données de personnalisation, utiliser le logo par défaut
-    if (!customizationData?.design?.logo) {
+    // Vérifier si un logo personnalisé est configuré (light ou dark)
+    const hasCustomLogo = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
+    
+    // Si aucun logo personnalisé n'est configuré, utiliser le logo par défaut
+    if (!hasCustomLogo) {
       return payhukLogo;
     }
 
@@ -59,18 +62,18 @@ export const usePlatformLogo = () => {
       shouldUseDark = isDark || window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
 
-    // Retourner le logo approprié ou le logo par défaut
-    // Priorité : logo personnalisé selon thème > logo light > logo dark > logo par défaut
+    // Retourner le logo approprié
+    // Priorité : logo personnalisé selon thème > logo light > logo dark
+    // Note: Si un logo personnalisé est configuré, on ne retourne JAMAIS le logo par défaut
     if (shouldUseDark && customizationData.design.logo.dark) {
       return customizationData.design.logo.dark;
     } else if (!shouldUseDark && customizationData.design.logo.light) {
       return customizationData.design.logo.light;
     }
 
-    // Fallback : utiliser le logo light s'il existe, sinon dark, sinon par défaut
-    return customizationData.design.logo.light || 
-           customizationData.design.logo.dark || 
-           payhukLogo;
+    // Fallback : utiliser le logo light s'il existe, sinon dark
+    // Si aucun des deux n'existe, cela signifie que hasCustomLogo était faux, donc on ne devrait jamais arriver ici
+    return customizationData.design.logo.light || customizationData.design.logo.dark || payhukLogo;
   }, [customizationData]);
 
   // Retourner le logo (sera stable une fois chargé)
