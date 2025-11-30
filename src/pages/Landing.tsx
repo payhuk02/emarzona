@@ -128,11 +128,11 @@ const Landing = () => {
                   alt="Emarzona"
                   width={32}
                   height={32}
-                  className="h-full w-full opacity-60 sm:opacity-100"
+                  className="h-full w-full opacity-60 sm:opacity-100 flex-shrink-0 object-contain"
                   loading="eager"
                 />
               ) : (
-                <div className="h-full w-full bg-primary rounded flex items-center justify-center opacity-60 sm:opacity-100">
+                <div className="h-full w-full bg-primary rounded flex items-center justify-center opacity-60 sm:opacity-100 flex-shrink-0">
                   <span className="text-xs font-bold text-primary-foreground">E</span>
                 </div>
               )}
@@ -892,11 +892,11 @@ const Landing = () => {
                     alt="Emarzona"
                     width={32}
                     height={32}
-                    className="h-8 w-8"
+                    className="h-8 w-8 flex-shrink-0 object-contain"
                     loading="eager"
                   />
                 ) : (
-                  <div className="h-8 w-8 bg-primary rounded flex items-center justify-center">
+                  <div className="h-8 w-8 bg-primary rounded flex items-center justify-center flex-shrink-0">
                     <span className="text-xs font-bold text-primary-foreground">E</span>
                   </div>
                 )}

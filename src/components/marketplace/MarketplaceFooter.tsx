@@ -14,9 +14,16 @@ const MarketplaceFooter = () => {
           <div className="sm:col-span-2 lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
               {platformLogo ? (
-                <img src={platformLogo} alt="Emarzona" className="h-8 w-8" />
+                <img 
+                  src={platformLogo} 
+                  alt="Emarzona" 
+                  width={32}
+                  height={32}
+                  className="h-8 w-8 flex-shrink-0 object-contain"
+                  loading="eager"
+                />
               ) : (
-                <div className="h-8 w-8 bg-primary rounded flex items-center justify-center">
+                <div className="h-8 w-8 bg-primary rounded flex items-center justify-center flex-shrink-0">
                   <span className="text-sm font-bold text-primary-foreground">E</span>
                 </div>
               )}

@@ -292,11 +292,11 @@ const Auth = () => {
                   alt="Emarzona Logo"
                   width={40}
                   height={40}
-                  className="h-full w-full opacity-60 sm:opacity-100"
+                  className="h-full w-full opacity-60 sm:opacity-100 flex-shrink-0 object-contain"
                   loading="eager"
                 />
               ) : (
-                <div className="h-full w-full bg-primary rounded flex items-center justify-center opacity-60 sm:opacity-100">
+                <div className="h-full w-full bg-primary rounded flex items-center justify-center opacity-60 sm:opacity-100 flex-shrink-0">
                   <span className="text-sm font-bold text-primary-foreground">E</span>
                 </div>
               )}

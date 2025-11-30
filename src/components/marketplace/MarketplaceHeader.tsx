@@ -20,9 +20,16 @@ const MarketplaceHeader = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity">
             {platformLogo ? (
-              <img src={platformLogo} alt="Emarzona" className="h-7 w-7 sm:h-8 sm:w-8" />
+              <img 
+                src={platformLogo} 
+                alt="Emarzona" 
+                width={32}
+                height={32}
+                className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 object-contain"
+                loading="eager"
+              />
             ) : (
-              <div className="h-7 w-7 sm:h-8 sm:w-8 bg-primary rounded flex items-center justify-center">
+              <div className="h-7 w-7 sm:h-8 sm:w-8 bg-primary rounded flex items-center justify-center flex-shrink-0">
                 <span className="text-xs sm:text-sm font-bold text-primary-foreground">E</span>
               </div>
             )}
@@ -83,9 +90,16 @@ const MarketplaceHeader = () => {
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-2">
                       {platformLogo ? (
-                        <img src={platformLogo} alt="Emarzona" className="h-7 w-7" />
+                        <img 
+                          src={platformLogo} 
+                          alt="Emarzona" 
+                          width={28}
+                          height={28}
+                          className="h-7 w-7 flex-shrink-0 object-contain"
+                          loading="eager"
+                        />
                       ) : (
-                        <div className="h-7 w-7 bg-primary rounded flex items-center justify-center">
+                        <div className="h-7 w-7 bg-primary rounded flex items-center justify-center flex-shrink-0">
                           <span className="text-xs font-bold text-primary-foreground">E</span>
                         </div>
                       )}
