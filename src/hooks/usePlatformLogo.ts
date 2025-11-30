@@ -10,6 +10,8 @@
 import { useMemo, useState, useEffect } from 'react';
 import { usePlatformCustomizationContext } from '@/contexts/PlatformCustomizationContext';
 
+const LOGO_CACHE_KEY = 'platform-logo-cache';
+
 /**
  * Obtient le logo approprié selon le thème actuel
  * @returns URL du logo (light ou dark) ou null si non configuré
@@ -19,11 +21,43 @@ export const usePlatformLogo = () => {
   const [isLogoLoaded, setIsLogoLoaded] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
+  // Charger le logo depuis le cache localStorage au montage (pour mobile)
+  useEffect(() => {
+    try {
+      const cachedLogo = localStorage.getItem(LOGO_CACHE_KEY);
+      if (cachedLogo) {
+        const cached = JSON.parse(cachedLogo);
+        // Utiliser le cache si les données ne sont pas encore chargées
+        if (!customizationData?.design?.logo?.light && !customizationData?.design?.logo?.dark) {
+          const isDark = document.documentElement.classList.contains('dark') || 
+                        window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const cachedUrl = isDark && cached.dark ? cached.dark : cached.light || cached.dark;
+          if (cachedUrl) {
+            setLogoUrl(cachedUrl);
+          }
+        }
+      }
+    } catch (error) {
+      // Ignorer les erreurs de cache
+    }
+  }, []);
+
   // Précharger le logo personnalisé pour éviter les flashs
   useEffect(() => {
     const hasCustomLogo = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
     
     if (hasCustomLogo) {
+      // Sauvegarder dans le cache localStorage pour mobile
+      try {
+        localStorage.setItem(LOGO_CACHE_KEY, JSON.stringify({
+          light: customizationData.design.logo.light || null,
+          dark: customizationData.design.logo.dark || null,
+          timestamp: Date.now(),
+        }));
+      } catch (error) {
+        // Ignorer les erreurs localStorage
+      }
+
       // Déterminer le thème actuel de manière stable
       const isDark = document.documentElement.classList.contains('dark');
       const theme = customizationData?.design?.theme || 'auto';
@@ -68,6 +102,12 @@ export const usePlatformLogo = () => {
     } else {
       setIsLogoLoaded(true);
       setLogoUrl(null);
+      // Nettoyer le cache si aucun logo n'est configuré
+      try {
+        localStorage.removeItem(LOGO_CACHE_KEY);
+      } catch (error) {
+        // Ignorer les erreurs localStorage
+      }
     }
   }, [customizationData?.design?.logo, customizationData?.design?.theme]);
 
