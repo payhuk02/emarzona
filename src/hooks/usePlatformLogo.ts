@@ -60,10 +60,29 @@ export const usePlatformLogo = () => {
           
           // Utiliser le cache seulement si les données réelles ne sont pas encore chargées
           if (!hasRealData && (cached.light || cached.dark)) {
-            const cachedUrl = getLogoUrl(cached, cached.theme);
+            const cachedUrl = getLogoUrl(cached, cached.theme || 'auto');
             if (cachedUrl && isMounted) {
-              setLogoUrl(cachedUrl);
-              setIsLoading(false);
+              // Précharger l'image depuis le cache pour vérifier qu'elle est accessible
+              const img = new Image();
+              img.src = cachedUrl;
+              img.onload = () => {
+                if (isMounted) {
+                  setLogoUrl(cachedUrl);
+                  setIsLoading(false);
+                }
+              };
+              img.onerror = () => {
+                // Si l'image du cache ne charge pas, on ne l'utilise pas
+                if (isMounted) {
+                  setIsLoading(false);
+                  setLogoUrl(null);
+                }
+              };
+              // Si l'image est déjà en cache navigateur
+              if (img.complete && isMounted) {
+                setLogoUrl(cachedUrl);
+                setIsLoading(false);
+              }
               return true;
             }
           }
