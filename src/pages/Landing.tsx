@@ -128,15 +128,14 @@ const Landing = () => {
                   alt="Emarzona"
                   width={32}
                   height={32}
+                  className="h-full w-full opacity-60 sm:opacity-100"
+                  loading="eager"
                 />
               ) : (
-                <div className="h-full w-full bg-primary rounded flex items-center justify-center">
+                <div className="h-full w-full bg-primary rounded flex items-center justify-center opacity-60 sm:opacity-100">
                   <span className="text-xs font-bold text-primary-foreground">E</span>
                 </div>
               )}
-                className="h-full w-full opacity-60 sm:opacity-100"
-                loading="eager"
-              />
             </div>
             <span className="relative z-10 pl-7 sm:pl-0 text-lg sm:text-xl md:text-2xl font-bold text-foreground">
               Emarzona
