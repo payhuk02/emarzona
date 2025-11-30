@@ -293,14 +293,13 @@ const Auth = () => {
                   width={40}
                   height={40}
                   className="h-full w-full opacity-60 sm:opacity-100"
+                  loading="eager"
                 />
               ) : (
                 <div className="h-full w-full bg-primary rounded flex items-center justify-center opacity-60 sm:opacity-100">
                   <span className="text-sm font-bold text-primary-foreground">E</span>
                 </div>
               )}
-                loading="eager"
-              />
             </div>
             <span className="relative z-10 pl-9 sm:pl-0 text-2xl sm:text-3xl font-bold">
               Emarzona
