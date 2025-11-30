@@ -7,7 +7,7 @@
  * Si aucun logo n'est configuré, retourne null pour éviter le clignotement.
  */
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { usePlatformCustomizationContext } from '@/contexts/PlatformCustomizationContext';
 
 const LOGO_CACHE_KEY = 'platform-logo-cache';
@@ -18,98 +18,160 @@ const LOGO_CACHE_KEY = 'platform-logo-cache';
  */
 export const usePlatformLogo = () => {
   const { customizationData } = usePlatformCustomizationContext();
-  const [isLogoLoaded, setIsLogoLoaded] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const preloadImageRef = useRef<HTMLImageElement | null>(null);
 
-  // Charger le logo depuis le cache localStorage au montage (pour mobile)
-  useEffect(() => {
-    try {
-      const cachedLogo = localStorage.getItem(LOGO_CACHE_KEY);
-      if (cachedLogo) {
-        const cached = JSON.parse(cachedLogo);
-        // Utiliser le cache si les données ne sont pas encore chargées
-        if (!customizationData?.design?.logo?.light && !customizationData?.design?.logo?.dark) {
-          const isDark = document.documentElement.classList.contains('dark') || 
-                        window.matchMedia('(prefers-color-scheme: dark)').matches;
-          const cachedUrl = isDark && cached.dark ? cached.dark : cached.light || cached.dark;
-          if (cachedUrl) {
-            setLogoUrl(cachedUrl);
-          }
-        }
-      }
-    } catch (error) {
-      // Ignorer les erreurs de cache
-    }
-  }, []);
-
-  // Précharger le logo personnalisé pour éviter les flashs
-  useEffect(() => {
-    const hasCustomLogo = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
-    
-    if (hasCustomLogo) {
-      // Sauvegarder dans le cache localStorage pour mobile
-      try {
-        localStorage.setItem(LOGO_CACHE_KEY, JSON.stringify({
-          light: customizationData.design.logo.light || null,
-          dark: customizationData.design.logo.dark || null,
-          timestamp: Date.now(),
-        }));
-      } catch (error) {
-        // Ignorer les erreurs localStorage
-      }
-
-      // Déterminer le thème actuel de manière stable
-      const isDark = document.documentElement.classList.contains('dark');
-      const theme = customizationData?.design?.theme || 'auto';
-
+  // Fonction pour déterminer l'URL du logo selon le thème
+  const getLogoUrl = useMemo(() => {
+    return (logoData: { light?: string | null; dark?: string | null }, theme?: string) => {
+      const isDark = document.documentElement.classList.contains('dark') || 
+                    window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
       let shouldUseDark = false;
-
       if (theme === 'dark') {
         shouldUseDark = true;
       } else if (theme === 'light') {
         shouldUseDark = false;
-      } else if (theme === 'auto') {
-        // Suivre les préférences système de manière stable
-        shouldUseDark = isDark || window.matchMedia('(prefers-color-scheme: dark)').matches;
+      } else if (theme === 'auto' || !theme) {
+        shouldUseDark = isDark;
       }
 
-      // Déterminer l'URL du logo à utiliser
-      let selectedLogoUrl: string | null = null;
-      if (shouldUseDark && customizationData.design.logo.dark) {
-        selectedLogoUrl = customizationData.design.logo.dark;
-      } else if (!shouldUseDark && customizationData.design.logo.light) {
-        selectedLogoUrl = customizationData.design.logo.light;
+      if (shouldUseDark && logoData.dark) {
+        return logoData.dark;
+      } else if (!shouldUseDark && logoData.light) {
+        return logoData.light;
+      }
+      return logoData.light || logoData.dark || null;
+    };
+  }, []);
+
+  // Charger le logo depuis le cache ou les données réelles
+  useEffect(() => {
+    let isMounted = true;
+
+    // 1. Essayer de charger depuis le cache localStorage (pour mobile)
+    const loadFromCache = () => {
+      try {
+        const cachedLogo = localStorage.getItem(LOGO_CACHE_KEY);
+        if (cachedLogo) {
+          const cached = JSON.parse(cachedLogo);
+          const hasRealData = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
+          
+          // Utiliser le cache seulement si les données réelles ne sont pas encore chargées
+          if (!hasRealData && (cached.light || cached.dark)) {
+            const cachedUrl = getLogoUrl(cached, cached.theme);
+            if (cachedUrl && isMounted) {
+              setLogoUrl(cachedUrl);
+              setIsLoading(false);
+              return true;
+            }
+          }
+        }
+      } catch (error) {
+        // Ignorer les erreurs de cache
+      }
+      return false;
+    };
+
+    // 2. Charger depuis les données réelles
+    const loadFromData = () => {
+      const hasCustomLogo = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
+      
+      if (hasCustomLogo) {
+        // Sauvegarder dans le cache pour les prochains chargements
+        try {
+          localStorage.setItem(LOGO_CACHE_KEY, JSON.stringify({
+            light: customizationData.design.logo.light || null,
+            dark: customizationData.design.logo.dark || null,
+            theme: customizationData.design.theme || 'auto',
+            timestamp: Date.now(),
+          }));
+        } catch (error) {
+          // Ignorer les erreurs localStorage
+        }
+
+        const selectedLogoUrl = getLogoUrl(
+          customizationData.design.logo,
+          customizationData.design.theme
+        );
+
+        if (selectedLogoUrl) {
+          // Précharger le logo pour éviter les flashs
+          if (preloadImageRef.current) {
+            preloadImageRef.current = null;
+          }
+
+          const img = new Image();
+          preloadImageRef.current = img;
+          img.src = selectedLogoUrl;
+          
+          img.onload = () => {
+            if (isMounted && preloadImageRef.current === img) {
+              setLogoUrl(selectedLogoUrl);
+              setIsLoading(false);
+            }
+          };
+          
+          img.onerror = () => {
+            if (isMounted && preloadImageRef.current === img) {
+              setLogoUrl(null);
+              setIsLoading(false);
+            }
+          };
+
+          // Si l'image est déjà en cache du navigateur, onload peut ne pas se déclencher
+          if (img.complete) {
+            if (isMounted && preloadImageRef.current === img) {
+              setLogoUrl(selectedLogoUrl);
+              setIsLoading(false);
+            }
+          }
+        } else {
+          if (isMounted) {
+            setLogoUrl(null);
+            setIsLoading(false);
+          }
+        }
       } else {
-        selectedLogoUrl = customizationData.design.logo.light || customizationData.design.logo.dark || null;
-      }
-
-      if (selectedLogoUrl) {
-        // Précharger le logo pour éviter les flashs
-        const img = new Image();
-        img.src = selectedLogoUrl;
-        img.onload = () => {
-          setIsLogoLoaded(true);
-          setLogoUrl(selectedLogoUrl);
-        };
-        img.onerror = () => {
-          setIsLogoLoaded(false);
+        // Aucun logo configuré
+        if (isMounted) {
           setLogoUrl(null);
-        };
-      } else {
-        setIsLogoLoaded(true);
+          setIsLoading(false);
+          // Nettoyer le cache si aucun logo n'est configuré
+          try {
+            localStorage.removeItem(LOGO_CACHE_KEY);
+          } catch (error) {
+            // Ignorer les erreurs localStorage
+          }
+        }
+      }
+    };
+
+    // Stratégie de chargement :
+    // 1. Si les données réelles sont disponibles, les utiliser
+    // 2. Sinon, utiliser le cache
+    const hasRealData = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
+    
+    if (hasRealData) {
+      loadFromData();
+    } else {
+      const cacheLoaded = loadFromCache();
+      if (!cacheLoaded) {
+        setIsLoading(false);
         setLogoUrl(null);
       }
-    } else {
-      setIsLogoLoaded(true);
-      setLogoUrl(null);
-      // Nettoyer le cache si aucun logo n'est configuré
-      try {
-        localStorage.removeItem(LOGO_CACHE_KEY);
-      } catch (error) {
-        // Ignorer les erreurs localStorage
-      }
     }
-  }, [customizationData?.design?.logo, customizationData?.design?.theme]);
+
+    return () => {
+      isMounted = false;
+      if (preloadImageRef.current) {
+        preloadImageRef.current.onload = null;
+        preloadImageRef.current.onerror = null;
+        preloadImageRef.current = null;
+      }
+    };
+  }, [customizationData?.design?.logo, customizationData?.design?.theme, getLogoUrl]);
 
   // Écouter les changements de thème système pour mettre à jour le logo
   useEffect(() => {
@@ -117,25 +179,31 @@ export const usePlatformLogo = () => {
     if (theme === 'auto') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleChange = () => {
-        // Forcer la mise à jour du logo en déclenchant un re-render
+        // Forcer la mise à jour du logo en recalculant l'URL
         const hasCustomLogo = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
-        if (hasCustomLogo) {
-          const isDark = document.documentElement.classList.contains('dark') || mediaQuery.matches;
-          let selectedLogoUrl: string | null = null;
-          if (isDark && customizationData?.design?.logo?.dark) {
-            selectedLogoUrl = customizationData.design.logo.dark;
-          } else if (!isDark && customizationData?.design?.logo?.light) {
-            selectedLogoUrl = customizationData.design.logo.light;
-          } else {
-            selectedLogoUrl = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark || null;
-          }
+        if (hasCustomLogo && customizationData?.design?.logo) {
+          const selectedLogoUrl = getLogoUrl(customizationData.design.logo, theme);
           setLogoUrl(selectedLogoUrl);
+        } else {
+          // Essayer depuis le cache
+          try {
+            const cachedLogo = localStorage.getItem(LOGO_CACHE_KEY);
+            if (cachedLogo) {
+              const cached = JSON.parse(cachedLogo);
+              if (cached.light || cached.dark) {
+                const cachedUrl = getLogoUrl(cached, cached.theme || 'auto');
+                setLogoUrl(cachedUrl);
+              }
+            }
+          } catch (error) {
+            // Ignorer les erreurs
+          }
         }
       };
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
-  }, [customizationData?.design?.logo, customizationData?.design?.theme]);
+  }, [customizationData?.design?.logo, customizationData?.design?.theme, getLogoUrl]);
 
   // Retourner le logo (sera stable une fois chargé)
   return logoUrl;
