@@ -210,13 +210,27 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp', 'image/x-icon'];
     const maxSize = type === 'favicon' ? 1024 * 100 : 1024 * 1024 * 2; // 100KB pour favicon, 2MB pour logos
 
-    if (!allowedTypes.includes(file.type)) {
-      toast({
-        title: 'Format non supporté',
-        description: 'Veuillez utiliser PNG, JPG, SVG, WebP ou ICO',
-        variant: 'destructive',
-      });
-      return;
+    // Vérifier le type MIME du fichier
+    if (!file.type || !allowedTypes.includes(file.type)) {
+      // Si le type MIME n'est pas détecté, essayer de le déterminer depuis l'extension
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
+      const extToMime: Record<string, string> = {
+        'png': 'image/png',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'svg': 'image/svg+xml',
+        'webp': 'image/webp',
+        'ico': 'image/x-icon',
+      };
+      
+      if (!fileExt || !extToMime[fileExt]) {
+        toast({
+          title: 'Format non supporté',
+          description: 'Veuillez utiliser PNG, JPG, SVG, WebP ou ICO',
+          variant: 'destructive',
+        });
+        return;
+      }
     }
 
     if (file.size > maxSize) {
@@ -232,37 +246,189 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
 
     try {
       // Générer un nom de fichier unique
-      const fileExt = file.name.split('.').pop();
-      const fileName = `platform-assets/logos/${type}-${Date.now()}.${fileExt}`;
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'png';
+      // S'assurer que le chemin ne contient pas de duplication
+      const fileName = `logos/${type}-${Date.now()}.${fileExt}`;
 
-      // Upload vers Supabase Storage
-      const { data, error: uploadError } = await supabase.storage
-        .from('platform-assets')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: true, // Remplacer si existe déjà
+      // Vérifier que le fichier est bien un File
+      if (!(file instanceof File)) {
+        throw new Error('Le fichier n\'est pas valide. Type: ' + typeof file);
+      }
+
+      // Vérifier que le fichier a bien un contenu
+      if (file.size === 0) {
+        throw new Error('Le fichier est vide');
+      }
+
+      // Vérifier que le type MIME est valide ou le déterminer depuis l'extension
+      const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp', 'image/x-icon', 'image/vnd.microsoft.icon'];
+      let fileType = file.type;
+      
+      // Si le type MIME n'est pas valide, le déterminer depuis l'extension
+      if (!fileType || !allowedMimeTypes.includes(fileType)) {
+        const extToMime: Record<string, string> = {
+          'png': 'image/png',
+          'jpg': 'image/jpeg',
+          'jpeg': 'image/jpeg',
+          'svg': 'image/svg+xml',
+          'webp': 'image/webp',
+          'ico': 'image/x-icon',
+        };
+        fileType = fileExt ? extToMime[fileExt] || 'image/png' : 'image/png';
+      }
+
+      // Vérifier les permissions de l'utilisateur avant l'upload
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Utilisateur non authentifié');
+      }
+
+      // Vérifier que l'utilisateur est admin
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_super_admin, role')
+        .eq('user_id', user.id)
+        .single();
+
+      const isAdmin = profile?.is_super_admin || profile?.role === 'admin' || user.email === 'contact@edigit-agence.com';
+      
+      if (!isAdmin) {
+        throw new Error('Permissions insuffisantes. Seuls les administrateurs peuvent uploader des logos.');
+      }
+
+      logger.debug('Uploading logo', { 
+        fileName, 
+        originalFileType: file.type,
+        correctedFileType: fileType,
+        fileSize: file.size,
+        bucket: 'platform-assets',
+        fileExt,
+        fileOriginalName: file.name,
+        isFile: file instanceof File,
+        constructor: file.constructor.name,
+        userId: user.id,
+        isAdmin
+      });
+
+      // Obtenir la session pour l'authentification
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Session expirée. Veuillez vous reconnecter.');
+      }
+
+      // Utiliser XMLHttpRequest directement pour avoir plus de contrôle
+      // Cette approche est utilisée dans uploadToSupabase.ts et fonctionne bien
+      const projectUrl = supabase.supabaseUrl;
+      const uploadUrl = `${projectUrl}/storage/v1/object/platform-assets/${fileName}`;
+
+      const uploadData = await new Promise<{ path: string }>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const progress = (e.loaded / e.total) * 100;
+            logger.debug('Upload progress', { progress, loaded: e.loaded, total: e.total });
+          }
         });
 
-      if (uploadError) throw uploadError;
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              resolve({ path: response.path || fileName });
+            } catch {
+              resolve({ path: fileName });
+            }
+          } else {
+            try {
+              const error = JSON.parse(xhr.responseText);
+              reject(new Error(error.message || error.error || `Erreur upload: ${xhr.statusText} (${xhr.status})`));
+            } catch {
+              reject(new Error(`Erreur upload: ${xhr.statusText} (${xhr.status})`));
+            }
+          }
+        });
+
+        xhr.addEventListener('error', () => {
+          reject(new Error('Erreur réseau lors de l\'upload'));
+        });
+
+        xhr.addEventListener('abort', () => {
+          reject(new Error('Upload annulé'));
+        });
+
+        xhr.open('POST', uploadUrl);
+        xhr.setRequestHeader('Authorization', `Bearer ${session.access_token}`);
+        xhr.setRequestHeader('Content-Type', fileType); // CRITIQUE : Forcer le Content-Type
+        xhr.setRequestHeader('x-upsert', 'true'); // Permettre le remplacement
+        xhr.setRequestHeader('cache-control', '3600');
+
+        xhr.send(file);
+      });
+
+      // Si on arrive ici, l'upload a réussi
+      logger.info('Logo uploaded successfully', { 
+        fileName, 
+        path: uploadData.path,
+        fileType: fileType,
+        fileSize: file.size
+      });
 
       // Récupérer l'URL publique
       const { data: { publicUrl } } = supabase.storage
         .from('platform-assets')
         .getPublicUrl(fileName);
 
+      logger.debug('Public URL generated', { 
+        publicUrl, 
+        fileName,
+        type 
+      });
+
       // Sauvegarder l'URL dans la configuration
-      await save('design', {
+      const logoData = {
         ...customizationData?.design,
         logo: {
           ...customizationData?.design?.logo,
           [type]: publicUrl,
         },
+      };
+
+      logger.debug('Saving logo URL to configuration', { 
+        type, 
+        publicUrl: publicUrl.substring(0, 80) + '...',
+        hasExistingLogo: !!customizationData?.design?.logo,
+        existingLogos: {
+          light: !!customizationData?.design?.logo?.light,
+          dark: !!customizationData?.design?.logo?.dark,
+          favicon: !!customizationData?.design?.logo?.favicon,
+        }
       });
 
-      toast({
-        title: '✅ Logo téléchargé',
-        description: `Le logo ${type} a été téléchargé avec succès`,
-      });
+      const saveResult = await save('design', logoData);
+
+      if (saveResult) {
+        logger.info('Logo URL saved successfully', { 
+          type, 
+          publicUrl: publicUrl.substring(0, 80) + '...',
+          saved: true
+        });
+        toast({
+          title: '✅ Logo téléchargé',
+          description: `Le logo ${type} a été téléchargé et sauvegardé avec succès`,
+        });
+      } else {
+        logger.warn('Logo uploaded but save may have failed', { 
+          type, 
+          publicUrl: publicUrl.substring(0, 80) + '...',
+          saveResult 
+        });
+        toast({
+          title: '⚠️ Logo téléchargé',
+          description: `Le logo ${type} a été téléchargé. Vérifiez que la sauvegarde s'est bien effectuée.`,
+          variant: 'default',
+        });
+      }
 
       if (onChange) onChange();
     } catch (error) {
@@ -280,10 +446,24 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
 
   const handleLogoFileSelect = (type: 'light' | 'dark' | 'favicon', event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      handleLogoUpload(type, file);
+    if (!file) {
+      return;
     }
-    // Reset input
+
+    // Vérifier que c'est bien un File object
+    if (!(file instanceof File)) {
+      toast({
+        title: '❌ Erreur',
+        description: 'Le fichier sélectionné n\'est pas valide',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Appeler handleLogoUpload avec le fichier
+    handleLogoUpload(type, file);
+
+    // Reset input pour permettre de sélectionner le même fichier à nouveau
     if (event.target) {
       event.target.value = '';
     }

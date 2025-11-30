@@ -41,7 +41,6 @@ import {
   Globe,
   User,
   Download,
-  BookOpen,
   Heart,
   Bell,
   RotateCcw,
