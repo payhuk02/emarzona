@@ -126,4 +126,5 @@ export {
   ExternalLink,
   MousePointerClick,
   Link,
+  Workflow,
 } from 'lucide-react';

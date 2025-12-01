@@ -25,5 +25,5 @@ export * from './TemplateBlockLibrary';
 export * from './TemplatePreview';
 export * from './ABTestSetup';
 export * from './ABTestResults';
-export * from './UnsubscribePage';
+// UnsubscribePage est exporté depuis src/pages/UnsubscribePage.tsx, pas depuis ici
 

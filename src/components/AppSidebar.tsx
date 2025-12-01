@@ -58,8 +58,8 @@ import {
   Wallet,
   Scale,
   Headphones,
+  Workflow,
 } from "@/components/icons";
-import { Workflow } from "lucide-react";
 import { usePlatformLogo } from "@/hooks/usePlatformLogo";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
