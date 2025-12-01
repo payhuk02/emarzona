@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useSpaceInputFix } from "@/hooks/useSpaceInputFix";
 
 interface CreatePromotionDialogProps {
   open: boolean;

@@ -35,29 +35,14 @@
     <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     <link rel="dns-prefetch" href="https://www.google-analytics.com" />
     
-    <!-- ✅ Google Fonts avec preconnect optimisé et preload -->
+    <!-- ✅ Google Fonts avec preconnect optimisé -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Preload des fonts critiques pour améliorer FCP -->
-    <link
-      rel="preload"
-      href="https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
+    <!-- Font loading optimisé avec display=swap pour éviter les warnings de preload -->
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
-      media="print"
-      onload="this.media='all'"
     />
-    <noscript>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet"
-      />
-    </noscript>
     
     <!-- Note: Preload de main.tsx retiré car Vite le gère automatiquement -->
 
