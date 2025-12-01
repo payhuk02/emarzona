@@ -1,10 +1,10 @@
 /**
  * Types TypeScript pour le système de Panier
  * Date: 26 Janvier 2025
- * Support: Produits digitaux, physiques, services, cours
+ * Support: Produits digitaux, physiques, services, cours, œuvres d'artistes
  */
 
-export type ProductType = 'digital' | 'physical' | 'service' | 'course';
+export type ProductType = 'digital' | 'physical' | 'service' | 'course' | 'artist';
 
 export interface CartItem {
   id?: string;

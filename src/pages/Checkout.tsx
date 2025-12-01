@@ -287,8 +287,10 @@ export default function Checkout() {
   // 1. Calculer les remises sur les items uniquement (sans coupons)
   const itemDiscounts = items.reduce((total, item) => total + ((item.discount_amount || 0) * item.quantity), 0);
 
-  // 2. Montant du coupon du nouveau système
-  const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+  // 2. Montant du coupon du nouveau système - Extraction explicite pour garantir la détection
+  const couponDiscount = appliedCouponCode && appliedCouponCode.discountAmount 
+    ? Number(appliedCouponCode.discountAmount) 
+    : 0;
   
   // 3. Total des remises : remises items + coupon
   const totalDiscounts = itemDiscounts + couponDiscount;
@@ -312,8 +314,22 @@ export default function Checkout() {
     return Math.min(appliedGiftCard.balance, subtotalWithShipping);
   })();
 
-  // 9. Total final
+  // 9. Total final - Calculé directement avec toutes les valeurs primitives pour garantir la mise à jour
   const finalTotal = Math.max(0, subtotalWithShipping - giftCardAmount);
+
+  // Debug: Afficher dans la console pour vérifier les calculs (à retirer en production si nécessaire)
+  useEffect(() => {
+    if (appliedCouponCode) {
+      console.log('[Checkout] Coupon appliqué:', {
+        couponCode: appliedCouponCode.code,
+        discountAmount: couponDiscount,
+        subtotal: summary.subtotal,
+        totalDiscounts,
+        subtotalAfterDiscounts,
+        finalTotal
+      });
+    }
+  }, [appliedCouponCode?.id, appliedCouponCode?.discountAmount, couponDiscount, summary.subtotal, totalDiscounts, subtotalAfterDiscounts, finalTotal]);
 
   // Validation formulaire
   const validateForm = (): boolean => {
