@@ -1,12 +1,12 @@
 # ============================================================
 # Cursor Rules - Configuration professionnelle pour app SaaS
-# Projet : Payhuk
+# Projet : Emarzona
 # Auteur : Intelli / payhuk02
 # Objectif : Rendre le développement guidé, stable et intelligent
 # ============================================================
 
 project:
-  name: Payhuk SaaS Platform
+  name: Emarzona SaaS Platform
   description: >
     Application web SaaS haut de gamme de E-commerce de Produits digitaux, physiques et services et aussi pour la gestion des paiements,
     des transactions et des utilisateurs, avec intégration Supabase, Moneroo/PayDunya,

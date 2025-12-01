@@ -12,7 +12,7 @@ import { usePlatformCustomizationContext } from '@/contexts/PlatformCustomizatio
 
 const LOGO_CACHE_KEY = 'platform-logo-cache';
 // Logo Emarzona par défaut (toujours disponible)
-const DEFAULT_LOGO = '/payhuk-logo.png';
+const DEFAULT_LOGO = '/emarzona-logo.png';
 
 /**
  * Obtient le logo approprié selon le thème actuel
