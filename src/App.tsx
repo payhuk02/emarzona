@@ -158,6 +158,7 @@ const MyTasks = lazy(() => import("./pages/MyTasks"));
 const Orders = lazy(() => import("./pages/Orders"));
 const Customers = lazy(() => import("./pages/Customers"));
 const Promotions = lazy(() => import("./pages/Promotions"));
+const UnifiedPromotionsPage = lazy(() => import("./pages/promotions/UnifiedPromotionsPage").then(m => ({ default: m.UnifiedPromotionsPage })));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const Payments = lazy(() => import("./pages/Payments"));
 const Withdrawals = lazy(() => import("./pages/Withdrawals"));
@@ -472,7 +473,7 @@ const AppContent = () => {
           <Route path="/dashboard/advanced-orders" element={<ProtectedRoute><AdvancedOrderManagement /></ProtectedRoute>} />
           <Route path="/dashboard/advanced-orders-test" element={<ProtectedRoute><AdvancedOrderManagementSimple /></ProtectedRoute>} />
           <Route path="/dashboard/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
-          <Route path="/dashboard/promotions" element={<ProtectedRoute><Promotions /></ProtectedRoute>} />
+          <Route path="/dashboard/promotions" element={<ProtectedRoute><UnifiedPromotionsPage /></ProtectedRoute>} />
           <Route path="/dashboard/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           <Route path="/dashboard/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
           <Route path="/dashboard/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />

@@ -428,11 +428,6 @@ const menuSections = [
         icon: Tag,
       },
       {
-        title: "Promotions Produits Physiques",
-        url: "/dashboard/physical-promotions",
-        icon: Percent,
-      },
-      {
         title: "Parrainage",
         url: "/dashboard/referrals",
         icon: UserPlus,
