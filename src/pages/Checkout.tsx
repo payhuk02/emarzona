@@ -279,10 +279,13 @@ export default function Checkout() {
   }, [formData.country]);
 
   // Montant du coupon (calculé avant taxes et shipping)
-  // Utiliser useMemo avec les bonnes dépendances pour garantir la réactivité
+  // Extraire les valeurs primitives pour garantir la détection des changements par React
+  const couponDiscountValue = appliedCouponCode?.discountAmount ?? 0;
+  const couponId = appliedCouponCode?.id ?? null;
+  
   const couponDiscountAmount = useMemo(() => {
-    return appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
-  }, [appliedCouponCode?.discountAmount, appliedCouponCode?.id]);
+    return couponDiscountValue ? Number(couponDiscountValue) : 0;
+  }, [couponDiscountValue, couponId]);
 
   const taxAmount = useMemo(() => {
     // Calculer sur le montant après remise et coupon (mais avant carte cadeau pour simplifier)
@@ -304,6 +307,7 @@ export default function Checkout() {
   }, [appliedGiftCard, summary.subtotal, summary.discount_amount, couponDiscountAmount, taxRate, shippingAmount]);
 
   // Total final - Calculé après toutes les réductions (panier, coupon, carte cadeau)
+  // Utiliser directement les valeurs primitives dans les dépendances pour garantir la détection
   const finalTotal = useMemo(() => {
     // Calculer le montant de base : sous-total - réductions du panier - réduction du coupon
     const subtotalAfterDiscounts = summary.subtotal - summary.discount_amount - couponDiscountAmount;
@@ -321,7 +325,11 @@ export default function Checkout() {
   }, [
     summary.subtotal, 
     summary.discount_amount, 
-    couponDiscountAmount, // Utiliser la valeur calculée dans useMemo
+    couponDiscountAmount,
+    couponDiscountValue,
+    couponId,
+    appliedCouponCode?.discountAmount ?? 0, // Ajouter aussi directement pour garantir
+    appliedCouponCode?.id ?? null, // Ajouter aussi directement pour garantir
     taxAmount, 
     shippingAmount, 
     giftCardAmount
