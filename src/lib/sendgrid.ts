@@ -1,7 +1,7 @@
 /**
  * Bibliothèque SendGrid - Email Marketing Universel
  * Date : 27 octobre 2025
- * Supporte: Digital, Physical, Service, Course
+ * Supporte: Digital, Physical, Service, Course, Artist
  */
 
 import type {
@@ -399,6 +399,52 @@ export const sendCourseEnrollmentConfirmation = async (params: {
       certificate_available: params.certificateAvailable,
       licensing_type: params.licensingType,
       license_terms: params.licenseTerms,
+    },
+  });
+};
+
+/**
+ * Envoyer email de confirmation - Œuvre d'Artiste
+ */
+export const sendArtistProductConfirmation = async (params: {
+  userEmail: string;
+  userName: string;
+  userId?: string;
+  orderId: string;
+  productId: string;
+  productName: string;
+  artistName: string;
+  editionNumber?: string;
+  totalEditions?: number;
+  certificateAvailable: boolean;
+  authenticityCertificateLink?: string;
+  shippingAddress?: string;
+  deliveryDate?: string;
+  trackingNumber?: string;
+  trackingLink?: string;
+}) => {
+  return sendEmail({
+    templateSlug: 'order-confirmation-artist',
+    to: params.userEmail,
+    toName: params.userName,
+    userId: params.userId,
+    productType: 'artist',
+    productId: params.productId,
+    productName: params.productName,
+    orderId: params.orderId,
+    variables: {
+      user_name: params.userName,
+      order_id: params.orderId,
+      product_name: params.productName,
+      artist_name: params.artistName,
+      edition_number: params.editionNumber,
+      total_editions: params.totalEditions,
+      certificate_available: params.certificateAvailable,
+      authenticity_certificate_link: params.authenticityCertificateLink,
+      shipping_address: params.shippingAddress,
+      delivery_date: params.deliveryDate,
+      tracking_number: params.trackingNumber,
+      tracking_link: params.trackingLink,
     },
   });
 };

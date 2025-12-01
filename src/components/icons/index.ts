@@ -47,6 +47,7 @@ export {
 export {
   MessageSquare,
   Search,
+  Mail,
 } from 'lucide-react';
 
 // Icônes de contenu

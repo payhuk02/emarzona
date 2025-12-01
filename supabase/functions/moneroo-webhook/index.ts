@@ -69,6 +69,87 @@ async function verifyWebhookSignature(
   }
 }
 
+/**
+ * Envoie les emails de confirmation de commande après paiement
+ */
+async function sendOrderConfirmationEmail(supabase: any, order: any): Promise<void> {
+  try {
+    // Récupérer les informations du client
+    let customerEmail = order.customer_email;
+    let customerName = order.customer_name || 'Client';
+    let customerId = order.customer_id;
+
+    // Si pas d'email dans l'order, chercher dans la table customers
+    if (!customerEmail && order.customer_id) {
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('email, name, full_name')
+        .eq('id', order.customer_id)
+        .single();
+
+      if (customer) {
+        customerEmail = customer.email;
+        customerName = customer.full_name || customer.name || 'Client';
+      }
+    }
+
+    // Si toujours pas d'email, chercher dans auth.users via profiles
+    if (!customerEmail && order.customer_id) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, full_name, first_name, last_name')
+        .eq('id', order.customer_id)
+        .single();
+
+      if (profile) {
+        const { data: user } = await supabase.auth.admin.getUserById(order.customer_id);
+        if (user?.user?.email) {
+          customerEmail = user.user.email;
+          customerName = profile.full_name || 
+                        `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
+                        'Client';
+        }
+      }
+    }
+
+    // Si on a toujours pas d'email, on ne peut pas envoyer d'email
+    if (!customerEmail) {
+      console.warn(`Cannot send confirmation email for order ${order.id}: no customer email found`);
+      return;
+    }
+
+    // Appeler l'Edge Function pour envoyer les emails
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-order-confirmation-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+      },
+      body: JSON.stringify({
+        order_id: order.id,
+        customer_email: customerEmail,
+        customer_name: customerName,
+        customer_id: customerId,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to send order confirmation emails for order ${order.id}:`, errorText);
+      throw new Error(`Email service returned ${response.status}: ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log(`Order confirmation emails sent for order ${order.id}:`, result);
+  } catch (error) {
+    console.error(`Error sending order confirmation emails for order ${order.id}:`, error);
+    // Ne pas propager l'erreur pour ne pas bloquer le webhook
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -344,6 +425,14 @@ serve(async (req) => {
               p_order_id: order.id,
             }).catch((err) => {
               console.error('Error checking multi-store group completion:', err);
+            });
+          }
+
+          // 🆕 Envoyer les emails de confirmation de commande
+          if (order) {
+            await sendOrderConfirmationEmail(supabase, order).catch((err) => {
+              console.error('Error sending order confirmation emails:', err);
+              // Ne pas bloquer le webhook si l'envoi d'email échoue
             });
           }
         }

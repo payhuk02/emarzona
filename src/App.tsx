@@ -159,6 +159,12 @@ const Orders = lazy(() => import("./pages/Orders"));
 const Customers = lazy(() => import("./pages/Customers"));
 const Promotions = lazy(() => import("./pages/Promotions"));
 const UnifiedPromotionsPage = lazy(() => import("./pages/promotions/UnifiedPromotionsPage").then(m => ({ default: m.UnifiedPromotionsPage })));
+const EmailCampaignsPage = lazy(() => import("./pages/emails/EmailCampaignsPage").then(m => ({ default: m.EmailCampaignsPage })));
+const EmailSequencesPage = lazy(() => import("./pages/emails/EmailSequencesPage").then(m => ({ default: m.EmailSequencesPage })));
+const EmailSegmentsPage = lazy(() => import("./pages/emails/EmailSegmentsPage").then(m => ({ default: m.EmailSegmentsPage })));
+const EmailAnalyticsPage = lazy(() => import("./pages/emails/EmailAnalyticsPage").then(m => ({ default: m.EmailAnalyticsPage })));
+const EmailWorkflowsPage = lazy(() => import("./pages/emails/EmailWorkflowsPage").then(m => ({ default: m.EmailWorkflowsPage })));
+const EmailTemplateEditorPage = lazy(() => import("./pages/emails/EmailTemplateEditorPage").then(m => ({ default: m.EmailTemplateEditorPage })));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const Payments = lazy(() => import("./pages/Payments"));
 const Withdrawals = lazy(() => import("./pages/Withdrawals"));
@@ -330,6 +336,9 @@ const AdminAccessibilityReport = lazy(() => import("./pages/admin/AdminAccessibi
 // Page de test i18n (à supprimer en production)
 const I18nTest = lazy(() => import("./pages/I18nTest"));
 
+// Routes Email publiques
+const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
+
 // Composant de redirection pour l'ancienne route
 const OldProductRouteRedirect = () => {
   const { slug, productSlug } = useParams<{ slug: string; productSlug: string }>();
@@ -456,6 +465,9 @@ const AppContent = () => {
           <Route path="/legal/privacy" element={<PrivacyPolicy />} />
           <Route path="/legal/cookies" element={<CookiePolicy />} />
           <Route path="/legal/refund" element={<RefundPolicy />} />
+          
+          {/* --- Routes Email (publiques) --- */}
+          <Route path="/unsubscribe" element={<UnsubscribePage />} />
 
           {/* --- Routes Moneroo --- */}
           <Route path="/payment/success" element={<PaymentSuccess />} />
@@ -474,6 +486,12 @@ const AppContent = () => {
           <Route path="/dashboard/advanced-orders-test" element={<ProtectedRoute><AdvancedOrderManagementSimple /></ProtectedRoute>} />
           <Route path="/dashboard/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
           <Route path="/dashboard/promotions" element={<ProtectedRoute><UnifiedPromotionsPage /></ProtectedRoute>} />
+          <Route path="/dashboard/emails/campaigns" element={<ProtectedRoute><EmailCampaignsPage /></ProtectedRoute>} />
+          <Route path="/dashboard/emails/sequences" element={<ProtectedRoute><EmailSequencesPage /></ProtectedRoute>} />
+          <Route path="/dashboard/emails/segments" element={<ProtectedRoute><EmailSegmentsPage /></ProtectedRoute>} />
+          <Route path="/dashboard/emails/analytics" element={<ProtectedRoute><EmailAnalyticsPage /></ProtectedRoute>} />
+          <Route path="/dashboard/emails/workflows" element={<ProtectedRoute><EmailWorkflowsPage /></ProtectedRoute>} />
+          <Route path="/dashboard/emails/templates/editor" element={<ProtectedRoute><EmailTemplateEditorPage /></ProtectedRoute>} />
           <Route path="/dashboard/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           <Route path="/dashboard/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
           <Route path="/dashboard/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />

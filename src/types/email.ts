@@ -1,10 +1,10 @@
 /**
  * Types TypeScript pour le système d'Email Marketing Universel
  * Date : 27 octobre 2025
- * Supporte: Digital, Physical, Service, Course
+ * Supporte: Digital, Physical, Service, Course, Artist
  */
 
-export type ProductType = 'digital' | 'physical' | 'service' | 'course';
+export type ProductType = 'digital' | 'physical' | 'service' | 'course' | 'artist';
 
 export type EmailCategory = 'transactional' | 'marketing' | 'notification';
 
@@ -211,6 +211,22 @@ export interface CourseEmailVariables {
   instructor_name: string;
   course_duration?: string;
   certificate_available?: boolean;
+}
+
+// Artist Product
+export interface ArtistProductEmailVariables {
+  user_name: string;
+  order_id: string;
+  product_name: string;
+  artist_name: string;
+  edition_number?: string;
+  total_editions?: number;
+  certificate_available: boolean;
+  authenticity_certificate_link?: string;
+  shipping_address?: string;
+  delivery_date?: string;
+  tracking_number?: string;
+  tracking_link?: string;
 }
 
 // ============================================================

@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.email_templates (
   category TEXT NOT NULL, -- 'transactional' | 'marketing' | 'notification'
   
   -- Type de produit (universel)
-  product_type TEXT, -- 'digital' | 'physical' | 'service' | 'course' | NULL (tous)
+  product_type TEXT, -- 'digital' | 'physical' | 'service' | 'course' | 'artist' | 'artist' | NULL (tous)
   
   -- Contenu template
   subject JSONB NOT NULL, -- Multilingue : {"fr": "Sujet FR", "en": "Subject EN"}
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS public.email_logs (
   text_content TEXT,
   
   -- Contexte métier (universel)
-  product_type TEXT, -- 'digital' | 'physical' | 'service' | 'course'
+  product_type TEXT, -- 'digital' | 'physical' | 'service' | 'course' | 'artist'
   product_id UUID,
   product_name TEXT,
   order_id UUID,

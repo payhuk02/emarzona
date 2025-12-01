@@ -59,6 +59,7 @@ import {
   Scale,
   Headphones,
 } from "@/components/icons";
+import { Workflow } from "lucide-react";
 import { usePlatformLogo } from "@/hooks/usePlatformLogo";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
@@ -426,6 +427,36 @@ const menuSections = [
         title: "Promotions",
         url: "/dashboard/promotions",
         icon: Tag,
+      },
+      {
+        title: "Campagnes Email",
+        url: "/dashboard/emails/campaigns",
+        icon: Mail,
+      },
+      {
+        title: "Séquences Email",
+        url: "/dashboard/emails/sequences",
+        icon: Mail,
+      },
+      {
+        title: "Segments d'Audience",
+        url: "/dashboard/emails/segments",
+        icon: Users,
+      },
+      {
+        title: "Analytics Email",
+        url: "/dashboard/emails/analytics",
+        icon: BarChart3,
+      },
+      {
+        title: "Workflows Email",
+        url: "/dashboard/emails/workflows",
+        icon: Workflow,
+      },
+      {
+        title: "Éditeur Templates",
+        url: "/dashboard/emails/templates/editor",
+        icon: FileText,
       },
       {
         title: "Parrainage",
