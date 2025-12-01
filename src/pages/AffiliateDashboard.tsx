@@ -44,6 +44,13 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useToast } from '@/hooks/use-toast';
 import { RegistrationDialog } from '@/components/affiliate/RegistrationDialog';
 import { ShortLinkManager } from '@/components/affiliate/ShortLinkManager';
+import { AffiliatePerformanceCharts } from '@/components/affiliate/AffiliatePerformanceCharts';
+import { useAffiliateDailyStatsSeparated } from '@/hooks/useAffiliateDailyStats';
+import { 
+  exportCommissionsToCSV, 
+  exportLinksToCSV 
+} from '@/lib/affiliate-export';
+import { Download } from 'lucide-react';
 
 // Composant mémorisé pour les liens d'affiliation
 const AffiliateLinkCard = memo(({ link, index }: { link: any, index: number }) => {
@@ -295,6 +302,12 @@ const AffiliateDashboard = () => {
   const [showRegisterDialog, setShowRegisterDialog] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [showCreateLinkDialog, setShowCreateLinkDialog] = useState(false);
+  const [chartPeriod, setChartPeriod] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
+  
+  // Récupérer les statistiques journalières pour les graphiques
+  const daysMap = { '7d': 7, '30d': 30, '90d': 90, '1y': 365 };
+  const { clicksData, salesData, commissionsData, loading: dailyStatsLoading } = 
+    useAffiliateDailyStatsSeparated(affiliate?.id, daysMap[chartPeriod]);
 
   const handleRegister = useCallback(async (registrationData: {
     email: string;
@@ -635,7 +648,7 @@ const AffiliateDashboard = () => {
             {/* Tabs Content */}
             <div ref={tabsRef}>
               <Tabs defaultValue="links" className="space-y-4 sm:space-y-6">
-                <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 backdrop-blur-sm">
+                <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-muted/50 backdrop-blur-sm">
                   <TabsTrigger 
                     value="links"
                     className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
@@ -671,6 +684,14 @@ const AffiliateDashboard = () => {
                       {withdrawals.length}
                     </Badge>
                   </TabsTrigger>
+                  <TabsTrigger 
+                    value="performance"
+                    className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  >
+                    <BarChart3 className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden xs:inline">Performance</span>
+                    <span className="xs:hidden">Stats</span>
+                  </TabsTrigger>
                 </TabsList>
 
                 {/* Mes liens */}
@@ -689,15 +710,43 @@ const AffiliateDashboard = () => {
                             )}
                           </CardDescription>
                         </div>
-                        <Button 
-                          className="gap-2 w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                          size="sm"
-                          onClick={() => setShowCreateLinkDialog(true)}
-                        >
-                          <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                          <span className="hidden sm:inline">Créer un lien</span>
-                          <span className="sm:hidden">Créer</span>
-                        </Button>
+                        <div className="flex gap-2">
+                          {links.length > 0 && (
+                            <Button 
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                try {
+                                  exportLinksToCSV(linksWithConversionRates);
+                                  toast({
+                                    title: "Export réussi",
+                                    description: `${links.length} lien(s) exporté(s) en CSV`,
+                                  });
+                                } catch (error: any) {
+                                  toast({
+                                    title: "Erreur d'export",
+                                    description: error?.message || "Impossible d'exporter les liens",
+                                    variant: "destructive",
+                                  });
+                                }
+                              }}
+                              className="gap-2"
+                            >
+                              <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                              <span className="hidden sm:inline">Exporter CSV</span>
+                              <span className="sm:hidden">CSV</span>
+                            </Button>
+                          )}
+                          <Button 
+                            className="gap-2 w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                            size="sm"
+                            onClick={() => setShowCreateLinkDialog(true)}
+                          >
+                            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            <span className="hidden sm:inline">Créer un lien</span>
+                            <span className="sm:hidden">Créer</span>
+                          </Button>
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="p-3 sm:p-4 pt-0">
@@ -739,15 +788,45 @@ const AffiliateDashboard = () => {
                 <TabsContent value="commissions" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
                   <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                     <CardHeader className="p-3 sm:p-4">
-                      <CardTitle className="text-base sm:text-lg">Historique des commissions</CardTitle>
-                      <CardDescription className="text-xs sm:text-sm">
-                        Suivez l'état de vos commissions
-                        {commissionsPagination && commissionsPagination.total > 0 && (
-                          <span className="ml-2">
-                            ({commissionsPagination.total} commission{commissionsPagination.total > 1 ? 's' : ''})
-                          </span>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className="text-base sm:text-lg">Historique des commissions</CardTitle>
+                          <CardDescription className="text-xs sm:text-sm">
+                            Suivez l'état de vos commissions
+                            {commissionsPagination && commissionsPagination.total > 0 && (
+                              <span className="ml-2">
+                                ({commissionsPagination.total} commission{commissionsPagination.total > 1 ? 's' : ''})
+                              </span>
+                            )}
+                          </CardDescription>
+                        </div>
+                        {commissions.length > 0 && (
+                          <Button 
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              try {
+                                exportCommissionsToCSV(commissions);
+                                toast({
+                                  title: "Export réussi",
+                                  description: `${commissions.length} commission(s) exportée(s) en CSV`,
+                                });
+                              } catch (error: any) {
+                                toast({
+                                  title: "Erreur d'export",
+                                  description: error?.message || "Impossible d'exporter les commissions",
+                                  variant: "destructive",
+                                });
+                              }
+                            }}
+                            className="gap-2"
+                          >
+                            <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            <span className="hidden sm:inline">Exporter CSV</span>
+                            <span className="sm:hidden">CSV</span>
+                          </Button>
                         )}
-                      </CardDescription>
+                      </div>
                     </CardHeader>
                     <CardContent className="p-0 sm:p-4">
                       {commissionsLoading ? (
@@ -877,6 +956,18 @@ const AffiliateDashboard = () => {
                       )}
                     </CardContent>
                   </Card>
+                </TabsContent>
+
+                {/* Performance et Graphiques */}
+                <TabsContent value="performance" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+                  <AffiliatePerformanceCharts
+                    clicksData={clicksData}
+                    salesData={salesData}
+                    commissionsData={commissionsData}
+                    period={chartPeriod}
+                    onPeriodChange={setChartPeriod}
+                    loading={dailyStatsLoading}
+                  />
                 </TabsContent>
               </Tabs>
             </div>
