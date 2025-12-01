@@ -13,7 +13,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart, Eye, Percent, MessageSquare, Store, CheckCircle, TrendingUp, Shield } from 'lucide-react';
-import { OptimizedImage } from '@/components/ui/OptimizedImage';
+import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { UnifiedProductCardProps, DigitalProduct } from '@/types/unified-product';
 import {
   getProductKeyInfo,
@@ -77,20 +77,10 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
       {/* Image Section - Prend plus d'espace, contenu repoussé en bas */}
       <div className="relative w-full overflow-hidden bg-muted/30 flex-grow min-h-[250px] sm:min-h-[300px]">
         {productImage ? (
-          <OptimizedImage
+          <ResponsiveProductImage
             src={productImage}
             alt={product.name}
-            width={1000}
-            height={562}
-            className="w-full h-auto object-contain product-image"
-            preset="productImage"
-            responsive={true}
-            sizes={{
-              mobile: 400,
-              tablet: 800,
-              desktop: 1000
-            }}
-            quality={90}
+            className="w-full h-full object-cover product-image"
             priority={true}
           />
         ) : (

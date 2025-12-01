@@ -22,7 +22,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bell, DollarSign, Package, Trash2, ExternalLink, TrendingDown, RefreshCw, Loader2, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { OptimizedImage } from '@/components/ui/OptimizedImage';
+import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { logger } from '@/lib/logger';
@@ -383,11 +383,9 @@ export default function PriceStockAlerts() {
                                         className="flex-shrink-0 self-start"
                                       >
                                         <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg overflow-hidden bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20">
-                                          <OptimizedImage
+                                          <ResponsiveProductImage
                                             src={product.image_url}
                                             alt={product.name}
-                                            width={96}
-                                            height={96}
                                             className="w-full h-full object-cover"
                                           />
                                         </div>
@@ -518,11 +516,9 @@ export default function PriceStockAlerts() {
                                         className="flex-shrink-0 self-start"
                                       >
                                         <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg overflow-hidden bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20">
-                                          <OptimizedImage
+                                          <ResponsiveProductImage
                                             src={product.image_url}
                                             alt={product.name}
-                                            width={96}
-                                            height={96}
                                             className="w-full h-full object-cover"
                                           />
                                         </div>

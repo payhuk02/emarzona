@@ -23,7 +23,7 @@ import StoreFooter from "@/components/storefront/StoreFooter";
 import { useProductsOptimized } from "@/hooks/useProductsOptimized";
 import { sanitizeProductDescription } from "@/lib/html-sanitizer";
 import { ProductImageGallery } from "@/components/ui/ProductImageGallery";
-import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { ResponsiveProductImage } from "@/components/ui/ResponsiveProductImage";
 import { CountdownTimer } from "@/components/ui/countdown-timer";
 import { CustomFieldsDisplay } from "@/components/products/CustomFieldsDisplay";
 import { ProductVariantSelector } from "@/components/products/ProductVariantSelector";
@@ -463,21 +463,11 @@ const ProductDetails = () => {
                       <div className="flex-1 lg:w-[75%]">
                         <div className="rounded-lg overflow-hidden border border-border shadow-sm bg-transparent product-image-container">
                           {currentImage && (
-                            <OptimizedImage
+                            <ResponsiveProductImage
                               src={currentImage}
                               alt={product.name}
-                              width={1200}
-                              height={675}
                               className="w-full h-auto object-contain max-h-[500px] sm:max-h-[600px] md:max-h-[700px] lg:max-h-[800px] product-image cursor-pointer transition-opacity duration-300"
                               priority={selectedImageIndex === 0}
-                              preset="productImage"
-                              responsive={true}
-                              sizes={{
-                                mobile: 400,
-                                tablet: 800,
-                                desktop: 1200
-                              }}
-                              quality={90}
                             />
                           )}
                         </div>
@@ -499,21 +489,11 @@ const ProductDetails = () => {
                               )}
                               aria-label={`Voir l'image ${index + 1} de ${product.name}`}
                             >
-                              <OptimizedImage
+                              <ResponsiveProductImage
                                 src={imageUrl}
                                 alt={`${product.name} - Miniature ${index + 1}`}
-                                width={150}
-                                height={150}
                                 className="w-full h-full object-cover product-image"
                                 priority={index < 3}
-                                preset="productImage"
-                                responsive={true}
-                                sizes={{
-                                  mobile: 100,
-                                  tablet: 150,
-                                  desktop: 150
-                                }}
-                                quality={85}
                               />
                             </button>
                           ))}
