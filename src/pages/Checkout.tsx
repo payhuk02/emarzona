@@ -303,11 +303,22 @@ export default function Checkout() {
     return Math.min(appliedGiftCard.balance, amountWithTaxesAndShipping);
   }, [appliedGiftCard, summary.subtotal, summary.discount_amount, couponDiscountAmount, taxRate, shippingAmount]);
 
-  // Total final
+  // Total final - Calculé après toutes les réductions (panier, coupon, carte cadeau)
   const finalTotal = useMemo(() => {
-    const baseAmount = summary.subtotal + taxAmount + shippingAmount - summary.discount_amount - couponDiscountAmount;
-    return Math.max(0, baseAmount - giftCardAmount);
-  }, [summary, taxAmount, shippingAmount, couponDiscountAmount, giftCardAmount]);
+    // Calculer le montant de base : sous-total - réductions du panier - réduction du coupon
+    const subtotalAfterDiscounts = summary.subtotal - summary.discount_amount - couponDiscountAmount;
+    
+    // Ajouter les taxes (calculées sur le montant après réductions)
+    const subtotalWithTaxes = subtotalAfterDiscounts + taxAmount;
+    
+    // Ajouter les frais de livraison
+    const subtotalWithShipping = subtotalWithTaxes + shippingAmount;
+    
+    // Appliquer la carte cadeau en dernier
+    const finalAmount = Math.max(0, subtotalWithShipping - giftCardAmount);
+    
+    return finalAmount;
+  }, [summary.subtotal, summary.discount_amount, taxAmount, shippingAmount, couponDiscountAmount, giftCardAmount]);
 
   // Validation formulaire
   const validateForm = (): boolean => {
