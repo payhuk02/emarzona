@@ -278,38 +278,40 @@ export default function Checkout() {
     return 15000; // International
   }, [formData.country]);
 
-  // Montant du coupon (calculé avant taxes et shipping)
-  // Extraire les valeurs primitives pour garantir la détection des changements par React
-  const couponDiscountValue = appliedCouponCode?.discountAmount ?? 0;
-  const couponId = appliedCouponCode?.id ?? null;
+  // Calculer les remises sur les items uniquement (sans coupons)
+  // summary.discount_amount peut contenir un coupon de l'ancien système, donc on calcule séparément
+  const itemDiscounts = useMemo(() => {
+    return items.reduce((total, item) => total + ((item.discount_amount || 0) * item.quantity), 0);
+  }, [items]);
+
+  // Montant du coupon du nouveau système (calculé directement pour garantir la mise à jour)
+  // Cette valeur se met à jour automatiquement quand appliedCouponCode change
+  const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
   
-  const couponDiscountAmount = useMemo(() => {
-    return couponDiscountValue ? Number(couponDiscountValue) : 0;
-  }, [couponDiscountValue, couponId]);
+  // Total des remises : remises sur les items + coupon du nouveau système
+  // On n'utilise PAS summary.discount_amount car il peut contenir un coupon de l'ancien système
+  const totalDiscounts = itemDiscounts + couponDiscount;
 
   const taxAmount = useMemo(() => {
-    // Calculer sur le montant après remise et coupon (mais avant carte cadeau pour simplifier)
-    // La carte cadeau sera appliquée après le calcul des taxes
-    const taxableAmount = summary.subtotal - summary.discount_amount - couponDiscountAmount;
+    // Calculer sur le montant après remises items et coupon (mais avant carte cadeau)
+    const taxableAmount = summary.subtotal - totalDiscounts;
     return Math.max(0, taxableAmount * taxRate);
-  }, [summary.subtotal, summary.discount_amount, couponDiscountAmount, taxRate]);
+  }, [summary.subtotal, totalDiscounts, taxRate]);
 
   // Montant à utiliser de la carte cadeau (calculé après taxes et shipping)
   const giftCardAmount = useMemo(() => {
     if (!appliedGiftCard || !appliedGiftCard.balance) return 0;
     
-    // Montant total avant carte cadeau : subtotal - coupon - discount existant + taxes + shipping
-    const baseAmount = summary.subtotal - summary.discount_amount - couponDiscountAmount;
+    // Montant total avant carte cadeau : subtotal - remises + taxes + shipping
+    const baseAmount = summary.subtotal - totalDiscounts;
     const amountWithTaxesAndShipping = baseAmount + (baseAmount * taxRate) + shippingAmount;
     
     // Utiliser le maximum possible de la carte cadeau (mais pas plus que le montant dû)
     return Math.min(appliedGiftCard.balance, amountWithTaxesAndShipping);
-  }, [appliedGiftCard, summary.subtotal, summary.discount_amount, couponDiscountAmount, taxRate, shippingAmount]);
+  }, [appliedGiftCard, summary.subtotal, totalDiscounts, taxRate, shippingAmount]);
 
   // Total final - Calculé directement pour garantir la mise à jour en temps réel
-  // Calculer directement sans useMemo pour éviter tous les problèmes de dépendances
-  const couponDiscount = Number(couponDiscountValue) || 0;
-  const subtotalAfterDiscounts = summary.subtotal - summary.discount_amount - couponDiscount;
+  const subtotalAfterDiscounts = summary.subtotal - totalDiscounts;
   const subtotalWithTaxes = subtotalAfterDiscounts + taxAmount;
   const subtotalWithShipping = subtotalWithTaxes + shippingAmount;
   const finalTotal = Math.max(0, subtotalWithShipping - giftCardAmount);
@@ -409,7 +411,7 @@ export default function Checkout() {
           shippingAmount,
           appliedCoupon: appliedCouponCode ? {
             id: appliedCouponCode.id,
-            discountAmount: couponDiscountAmount,
+            discountAmount: couponDiscount,
             code: appliedCouponCode.code,
             storeId: storeId || undefined, // Si le coupon est spécifique à une boutique
           } : undefined,
@@ -524,7 +526,7 @@ export default function Checkout() {
       }
 
       // Enregistrer l'utilisation de la promotion unifiée si un code promo a été appliqué
-      if (appliedCouponCode && appliedCouponCode.id && couponDiscountAmount > 0) {
+      if (appliedCouponCode && appliedCouponCode.id && couponDiscount > 0) {
         try {
           // Récupérer le customer_id si pas encore chargé
           let finalCustomerId = customerId;
@@ -553,7 +555,7 @@ export default function Checkout() {
               order_id: order.id,
               customer_id: finalCustomerId || null,
               user_id: user?.id || null,
-              discount_amount: couponDiscountAmount,
+              discount_amount: couponDiscount,
               order_total_before_discount: orderTotalBefore,
               order_total_after_discount: orderTotalAfter,
             });
@@ -1071,10 +1073,10 @@ export default function Checkout() {
                                   <span>-{group.discount_amount.toLocaleString('fr-FR')} XOF</span>
                                 </div>
                               )}
-                              {appliedCouponCode && couponDiscountAmount > 0 && (
+                              {appliedCouponCode && couponDiscount > 0 && (
                                 <div className="flex justify-between text-green-600">
                                   <span>Code promo ({appliedCouponCode.code}):</span>
-                                  <span>-{couponDiscountAmount.toLocaleString('fr-FR')} XOF</span>
+                                  <span>-{couponDiscount.toLocaleString('fr-FR')} XOF</span>
                                 </div>
                               )}
                               <div className="flex justify-between font-semibold pt-1 border-t">
@@ -1092,17 +1094,17 @@ export default function Checkout() {
                         </Alert>
                         <Separator />
                         <div className="space-y-2 text-sm pt-2">
-                          {appliedCouponCode && couponDiscountAmount > 0 && (
+                          {appliedCouponCode && couponDiscount > 0 && (
                             <div className="flex justify-between text-green-600">
                               <span>Code promo ({appliedCouponCode.code}):</span>
-                              <span>-{couponDiscountAmount.toLocaleString('fr-FR')} XOF</span>
+                              <span>-{couponDiscount.toLocaleString('fr-FR')} XOF</span>
                             </div>
                           )}
                           <div className="flex justify-between items-center text-lg font-bold pt-2 border-t">
                             <span>Total Général:</span>
                             <span className="text-2xl text-primary">
                               {Math.max(0, Array.from(storeGroups.values())
-                                .reduce((sum, group) => sum + group.total, 0) - (appliedCouponCode ? couponDiscountAmount : 0))
+                                .reduce((sum, group) => sum + group.total, 0) - (appliedCouponCode ? couponDiscount : 0))
                                 .toLocaleString('fr-FR')} XOF
                             </span>
                           </div>
@@ -1234,17 +1236,17 @@ export default function Checkout() {
                             <span>{summary.subtotal.toLocaleString('fr-FR')} XOF</span>
                           </div>
 
-                          {summary.discount_amount > 0 && (
+                          {itemDiscounts > 0 && (
                             <div className="flex justify-between text-green-600">
                               <span>Remise panier</span>
-                              <span>-{summary.discount_amount.toLocaleString('fr-FR')} XOF</span>
+                              <span>-{itemDiscounts.toLocaleString('fr-FR')} XOF</span>
                             </div>
                           )}
 
-                          {appliedCouponCode && couponDiscountAmount > 0 && (
+                          {appliedCouponCode && couponDiscount > 0 && (
                             <div className="flex justify-between text-green-600">
                               <span>Code promo ({appliedCouponCode.code})</span>
-                              <span>-{couponDiscountAmount.toLocaleString('fr-FR')} XOF</span>
+                              <span>-{couponDiscount.toLocaleString('fr-FR')} XOF</span>
                             </div>
                           )}
 
