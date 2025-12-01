@@ -32,6 +32,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { cn } from '@/lib/utils';
 
 export default function WarehousesManagement() {

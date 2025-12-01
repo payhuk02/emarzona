@@ -3,24 +3,33 @@
  * Utilise les logos personnalisés depuis la configuration si disponibles
  * Optimisé pour éviter les flashs et garantir la stabilité
  * 
- * IMPORTANT: Ne retourne que les logos personnalisés configurés.
- * Si aucun logo n'est configuré, retourne null pour éviter le clignotement.
+ * IMPORTANT: Retourne toujours un logo (personnalisé ou par défaut).
+ * Si aucun logo personnalisé n'est configuré, retourne le logo Emarzona par défaut.
  */
 
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { usePlatformCustomizationContext } from '@/contexts/PlatformCustomizationContext';
 
 const LOGO_CACHE_KEY = 'platform-logo-cache';
+// Logo Emarzona par défaut (toujours disponible)
+const DEFAULT_LOGO = '/payhuk-logo.png';
 
 /**
  * Obtient le logo approprié selon le thème actuel
- * @returns URL du logo (light ou dark) ou null si non configuré
+ * @returns URL du logo (personnalisé ou par défaut, jamais null)
  */
 export const usePlatformLogo = () => {
   const { customizationData } = usePlatformCustomizationContext();
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string>(DEFAULT_LOGO);
   const [isLoading, setIsLoading] = useState(true);
   const preloadImageRef = useRef<HTMLImageElement | null>(null);
+
+  // Précharger le logo par défaut dès le montage du composant
+  useEffect(() => {
+    const img = new Image();
+    img.src = DEFAULT_LOGO;
+    // Pas besoin d'attendre le chargement, le logo par défaut est déjà défini dans useState
+  }, []);
 
   // Fonction pour déterminer l'URL du logo selon le thème
   const getLogoUrl = useMemo(() => {
@@ -42,7 +51,7 @@ export const usePlatformLogo = () => {
       } else if (!shouldUseDark && logoData.light) {
         return logoData.light;
       }
-      return logoData.light || logoData.dark || null;
+      return logoData.light || logoData.dark || DEFAULT_LOGO;
     };
   }, []);
 
@@ -72,10 +81,10 @@ export const usePlatformLogo = () => {
                 }
               };
               img.onerror = () => {
-                // Si l'image du cache ne charge pas, on ne l'utilise pas
+                // Si l'image du cache ne charge pas, utiliser le logo par défaut
                 if (isMounted) {
                   setIsLoading(false);
-                  setLogoUrl(null);
+                  setLogoUrl(DEFAULT_LOGO);
                 }
               };
               // Si l'image est déjà en cache navigateur
@@ -133,8 +142,9 @@ export const usePlatformLogo = () => {
           };
           
           img.onerror = () => {
+            // Si le logo personnalisé ne charge pas, utiliser le logo par défaut
             if (isMounted && preloadImageRef.current === img) {
-              setLogoUrl(null);
+              setLogoUrl(DEFAULT_LOGO);
               setIsLoading(false);
             }
           };
@@ -147,17 +157,18 @@ export const usePlatformLogo = () => {
             }
           }
         } else {
+          // Si aucun logo valide n'est trouvé, utiliser le logo par défaut
           if (isMounted) {
-            setLogoUrl(null);
+            setLogoUrl(DEFAULT_LOGO);
             setIsLoading(false);
           }
         }
       } else {
-        // Aucun logo configuré
+        // Aucun logo personnalisé configuré, utiliser le logo par défaut
         if (isMounted) {
-          setLogoUrl(null);
+          setLogoUrl(DEFAULT_LOGO);
           setIsLoading(false);
-          // Nettoyer le cache si aucun logo n'est configuré
+          // Nettoyer le cache si aucun logo personnalisé n'est configuré
           try {
             localStorage.removeItem(LOGO_CACHE_KEY);
           } catch (error) {
@@ -177,8 +188,9 @@ export const usePlatformLogo = () => {
     } else {
       const cacheLoaded = loadFromCache();
       if (!cacheLoaded) {
+        // Aucun logo personnalisé ni cache, utiliser le logo par défaut
         setIsLoading(false);
-        setLogoUrl(null);
+        setLogoUrl(DEFAULT_LOGO);
       }
     }
 
@@ -204,18 +216,23 @@ export const usePlatformLogo = () => {
           const selectedLogoUrl = getLogoUrl(customizationData.design.logo, theme);
           setLogoUrl(selectedLogoUrl);
         } else {
-          // Essayer depuis le cache
+          // Essayer depuis le cache, sinon utiliser le logo par défaut
           try {
             const cachedLogo = localStorage.getItem(LOGO_CACHE_KEY);
             if (cachedLogo) {
               const cached = JSON.parse(cachedLogo);
               if (cached.light || cached.dark) {
                 const cachedUrl = getLogoUrl(cached, cached.theme || 'auto');
-                setLogoUrl(cachedUrl);
+                setLogoUrl(cachedUrl || DEFAULT_LOGO);
+              } else {
+                setLogoUrl(DEFAULT_LOGO);
               }
+            } else {
+              setLogoUrl(DEFAULT_LOGO);
             }
           } catch (error) {
-            // Ignorer les erreurs
+            // En cas d'erreur, utiliser le logo par défaut
+            setLogoUrl(DEFAULT_LOGO);
           }
         }
       };
@@ -233,7 +250,7 @@ export const usePlatformLogo = () => {
  */
 export const usePlatformLogoLight = () => {
   const { customizationData } = usePlatformCustomizationContext();
-  return customizationData?.design?.logo?.light || null;
+  return customizationData?.design?.logo?.light || DEFAULT_LOGO;
 };
 
 /**
@@ -241,7 +258,7 @@ export const usePlatformLogoLight = () => {
  */
 export const usePlatformLogoDark = () => {
   const { customizationData } = usePlatformCustomizationContext();
-  return customizationData?.design?.logo?.dark || null;
+  return customizationData?.design?.logo?.dark || DEFAULT_LOGO;
 };
 
 /**
