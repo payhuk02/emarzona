@@ -5,33 +5,37 @@
  * Composant pour saisir et valider un code promo dans le checkout
  */
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle2, XCircle, X, Tag } from 'lucide-react';
-import { useValidateCoupon, useApplyCoupon } from '@/hooks/digital/useCoupons';
+import { useValidateUnifiedPromotion } from '@/hooks/physical/usePromotions';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CouponInputProps {
   storeId?: string;
-  productId?: string;
+  productId?: string; // Legacy: pour un seul produit
+  productIds?: string[]; // Nouveau: liste de produits du panier
   productType?: string;
   customerId?: string;
   orderAmount: number;
-  onApply: (couponId: string, discountAmount: number, code: string) => void;
+  onApply: (promotionId: string, discountAmount: number, code: string) => void;
   onRemove: () => void;
   appliedCouponId?: string | null;
   appliedCouponCode?: string | null;
   appliedDiscountAmount?: number | null;
+  isFirstOrder?: boolean; // Pour les promotions "nouveaux clients"
 }
 
 export const CouponInput = ({
   storeId,
   productId,
+  productIds: productIdsProp,
   productType,
   customerId,
   orderAmount,
@@ -40,24 +44,80 @@ export const CouponInput = ({
   appliedCouponId,
   appliedCouponCode,
   appliedDiscountAmount,
+  isFirstOrder = false,
 }: CouponInputProps) => {
   const [couponCode, setCouponCode] = useState('');
+  const [categoryIds, setCategoryIds] = useState<string[]>([]);
+  const [collectionIds, setCollectionIds] = useState<string[]>([]);
   const { toast } = useToast();
 
-  // Validation du coupon (se déclenche quand on tape)
-  const { data: validation, isLoading: isValidating } = useValidateCoupon(
+  // Déterminer la liste de produits à utiliser
+  const productIds = useMemo(() => {
+    if (productIdsProp && productIdsProp.length > 0) {
+      return productIdsProp;
+    }
+    if (productId) {
+      return [productId];
+    }
+    return [];
+  }, [productIdsProp, productId]);
+
+  // Charger les catégories et collections des produits du panier
+  useEffect(() => {
+    if (productIds.length === 0) {
+      setCategoryIds([]);
+      setCollectionIds([]);
+      return;
+    }
+
+    const loadProductData = async () => {
+      try {
+        // Charger les catégories
+        const { data: products } = await supabase
+          .from('products')
+          .select('category_id')
+          .in('id', productIds);
+
+        if (products) {
+          const categories = products
+            .map(p => p.category_id)
+            .filter((id): id is string => id !== null && id !== undefined);
+          setCategoryIds([...new Set(categories)]);
+        }
+
+        // Charger les collections
+        const { data: collections } = await supabase
+          .from('collection_products')
+          .select('collection_id')
+          .in('product_id', productIds);
+
+        if (collections) {
+          const collectionsList = collections
+            .map(c => c.collection_id)
+            .filter((id): id is string => id !== null && id !== undefined);
+          setCollectionIds([...new Set(collectionsList)]);
+        }
+      } catch (error) {
+        console.error('Error loading product categories/collections:', error);
+      }
+    };
+
+    loadProductData();
+  }, [productIds]);
+
+  // Validation du coupon avec le système unifié
+  const { data: validation, isLoading: isValidating } = useValidateUnifiedPromotion(
     couponCode || undefined,
     {
-      productId,
-      productType,
       storeId,
-      customerId,
+      productIds: productIds.length > 0 ? productIds : undefined,
+      categoryIds: categoryIds.length > 0 ? categoryIds : undefined,
+      collectionIds: collectionIds.length > 0 ? collectionIds : undefined,
       orderAmount,
+      customerId,
+      isFirstOrder,
     }
   );
-
-  // Application du coupon
-  const applyCoupon = useApplyCoupon();
 
   const handleApply = async () => {
     if (!couponCode.trim()) {
@@ -72,13 +132,13 @@ export const CouponInput = ({
     if (!validation || !validation.valid) {
       toast({
         title: 'Code invalide',
-        description: validation?.message || 'Ce code promo n\'est pas valide',
+        description: validation?.message || validation?.error || 'Ce code promo n\'est pas valide',
         variant: 'destructive',
       });
       return;
     }
 
-    if (!validation.coupon_id || !validation.discount_amount) {
+    if (!validation.promotion_id || !validation.discount_amount) {
       toast({
         title: 'Erreur',
         description: 'Impossible d\'appliquer ce code promo',
@@ -87,9 +147,9 @@ export const CouponInput = ({
       return;
     }
 
-    // Appeler onApply avec les données du coupon
+    // Appeler onApply avec les données de la promotion
     onApply(
-      validation.coupon_id,
+      validation.promotion_id,
       validation.discount_amount,
       validation.code || couponCode.toUpperCase()
     );
@@ -181,15 +241,15 @@ export const CouponInput = ({
         </div>
         <Button
           onClick={handleApply}
-          disabled={!validation?.valid || isValidating || applyCoupon.isPending}
+          disabled={!validation?.valid || isValidating}
           variant="outline"
-          aria-label={applyCoupon.isPending ? "Application du code promo en cours" : "Appliquer le code promo"}
+          aria-label="Appliquer le code promo"
           aria-describedby={validation?.valid ? "coupon-valid" : undefined}
         >
-          {applyCoupon.isPending ? (
+          {isValidating ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              <span className="sr-only">Application en cours</span>
+              <span className="sr-only">Validation en cours</span>
             </>
           ) : (
             'Appliquer'

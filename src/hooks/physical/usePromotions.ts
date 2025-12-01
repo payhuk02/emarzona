@@ -57,6 +57,14 @@ export interface PromotionValidationResult {
   valid: boolean;
   discount_amount: number;
   error?: string;
+  message?: string;
+  promotion_id?: string;
+  code?: string;
+  name?: string;
+  discount_type?: 'percentage' | 'fixed_amount';
+  discount_value?: number;
+  order_total_before?: number;
+  order_total_after?: number;
 }
 
 // =====================================================
@@ -156,7 +164,85 @@ export const useProductPromotions = (productId?: string, variantId?: string) => 
 };
 
 /**
- * Validate promotion code
+ * Validate promotion code using the unified validation RPC function
+ * This uses validate_unified_promotion which handles all validation logic server-side
+ */
+export const useValidateUnifiedPromotion = (
+  code: string | undefined,
+  options?: {
+    storeId?: string;
+    productIds?: string[];
+    categoryIds?: string[];
+    collectionIds?: string[];
+    orderAmount?: number;
+    customerId?: string;
+    isFirstOrder?: boolean;
+  }
+) => {
+  return useQuery({
+    queryKey: ['validate-unified-promotion', code, options],
+    queryFn: async () => {
+      if (!code || code.trim() === '') {
+        return {
+          valid: false,
+          error: 'code_empty',
+          message: 'Veuillez entrer un code promo',
+        } as PromotionValidationResult;
+      }
+
+      const { data, error } = await supabase.rpc('validate_unified_promotion', {
+        p_code: code.toUpperCase().trim(),
+        p_store_id: options?.storeId || null,
+        p_product_ids: options?.productIds || null,
+        p_category_ids: options?.categoryIds || null,
+        p_collection_ids: options?.collectionIds || null,
+        p_order_amount: options?.orderAmount || 0,
+        p_customer_id: options?.customerId || null,
+        p_is_first_order: options?.isFirstOrder || false,
+      });
+
+      if (error) {
+        logger.error('Error validating unified promotion', { error, code });
+        return {
+          valid: false,
+          discount_amount: 0,
+          error: 'validation_error',
+          message: error.message || 'Erreur lors de la validation',
+        } as PromotionValidationResult;
+      }
+
+      const result = data as any;
+      
+      // Map the RPC result to PromotionValidationResult format
+      if (result.valid === false) {
+        return {
+          valid: false,
+          discount_amount: 0,
+          error: 'invalid_code',
+          message: result.error || 'Code promotionnel invalide',
+        } as PromotionValidationResult;
+      }
+
+      return {
+        valid: true,
+        promotion_id: result.promotion_id,
+        discount_amount: Number(result.discount_amount) || 0,
+        discount_type: result.discount_type,
+        discount_value: Number(result.discount_value) || 0,
+        order_total_before: Number(result.order_total_before) || 0,
+        order_total_after: Number(result.order_total_after) || 0,
+        code: result.code,
+        name: result.name,
+      } as PromotionValidationResult;
+    },
+    enabled: !!code && code.trim() !== '',
+    staleTime: 0, // Always validate again
+  });
+};
+
+/**
+ * Validate promotion code (legacy client-side validation)
+ * @deprecated Use useValidateUnifiedPromotion instead for better performance and server-side validation
  */
 export const useValidatePromotionCode = () => {
   const { toast } = useToast();

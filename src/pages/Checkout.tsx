@@ -81,6 +81,7 @@ export default function Checkout() {
   // State pour charger le store_id (nécessaire pour la carte cadeau et coupon)
   const [storeId, setStoreId] = useState<string | null>(null);
   const [customerId, setCustomerId] = useState<string | null>(null);
+  const [isFirstOrder, setIsFirstOrder] = useState<boolean>(false);
   
   // State pour le provider de paiement sélectionné
   const [selectedPaymentProvider, setSelectedPaymentProvider] = useState<'moneroo' | 'paydunya'>('moneroo');
@@ -187,22 +188,35 @@ export default function Checkout() {
     }
   }, []);
 
-  // Charger le customer_id si utilisateur connecté
+  // Charger le customer_id et vérifier si c'est la première commande
   useEffect(() => {
-    if (user?.email && !customerId && storeId) {
+    if (user?.email && storeId) {
       supabase
         .from('customers')
         .select('id')
         .eq('store_id', storeId)
         .eq('email', user.email)
         .single()
-        .then(({ data }) => {
-          if (data?.id) {
-            setCustomerId(data.id);
+        .then(({ data: customer }) => {
+          if (customer?.id) {
+            setCustomerId(customer.id);
+            
+            // Vérifier si c'est la première commande
+            supabase
+              .from('orders')
+              .select('id', { count: 'exact', head: true })
+              .eq('customer_id', customer.id)
+              .in('payment_status', ['completed', 'pending'])
+              .then(({ count }) => {
+                setIsFirstOrder(count === 0);
+              });
+          } else {
+            // Nouveau client = première commande
+            setIsFirstOrder(true);
           }
         });
     }
-  }, [user, storeId, customerId]);
+  }, [user, storeId]);
   
   // Charger la carte cadeau depuis localStorage si disponible
   useEffect(() => {
@@ -504,7 +518,7 @@ export default function Checkout() {
         // Ne pas bloquer la commande
       }
 
-      // Appliquer le coupon si un coupon a été appliqué (nouveau système)
+      // Enregistrer l'utilisation de la promotion unifiée si un code promo a été appliqué
       if (appliedCouponCode && appliedCouponCode.id && couponDiscountAmount > 0) {
         try {
           // Récupérer le customer_id si pas encore chargé
@@ -522,23 +536,38 @@ export default function Checkout() {
             }
           }
 
-          if (finalCustomerId) {
-            const { applyCouponToOrder } = await import('@/lib/supabase-rpc');
-            const { error: applyError } = await applyCouponToOrder({
-              p_coupon_id: appliedCouponCode.id,
-              p_order_id: order.id,
-              p_customer_id: finalCustomerId,
-              p_discount_amount: couponDiscountAmount,
+          // Calculer les montants avant et après réduction
+          const orderTotalBefore = summary.subtotal + taxAmount + shippingAmount;
+          const orderTotalAfter = finalTotal;
+
+          // Enregistrer l'utilisation dans promotion_usage (système unifié)
+          const { error: usageError } = await supabase
+            .from('promotion_usage')
+            .insert({
+              promotion_id: appliedCouponCode.id,
+              order_id: order.id,
+              customer_id: finalCustomerId || null,
+              user_id: user?.id || null,
+              discount_amount: couponDiscountAmount,
+              order_total_before_discount: orderTotalBefore,
+              order_total_after_discount: orderTotalAfter,
             });
-            if (applyError) {
-              logger.error('Error applying coupon:', { error: applyError });
-            } else {
-              logger.info('Coupon applied to order', { couponId: appliedCouponCode.id, orderId: order.id });
-            }
+
+          if (usageError) {
+            logger.error('Error recording promotion usage:', { error: usageError });
+          } else {
+            // Mettre à jour le compteur current_uses de la promotion
+            await supabase.rpc('increment_promotion_usage', {
+              p_promotion_id: appliedCouponCode.id,
+            }).catch((err) => {
+              logger.warn('Error incrementing promotion usage counter:', { error: err });
+            });
+
+            logger.info('Promotion usage recorded', { promotionId: appliedCouponCode.id, orderId: order.id });
           }
-        } catch (couponError) {
-          logger.error('Error applying coupon:', { error: couponError });
-          // Ne pas bloquer la commande si le coupon échoue
+        } catch (promotionError) {
+          logger.error('Error recording promotion usage:', { error: promotionError });
+          // Ne pas bloquer la commande si l'enregistrement échoue
         }
       }
 
@@ -1156,20 +1185,21 @@ export default function Checkout() {
                           </div>
                           <CouponInput
                             storeId={storeId || undefined}
-                            productId={items[0]?.product_id}
-                            productType={items[0]?.product_type}
+                            productIds={items.map(item => item.product_id)}
                             customerId={customerId || undefined}
                             orderAmount={summary.subtotal}
-                            onApply={(couponId, discountAmount, code) => {
+                            isFirstOrder={isFirstOrder}
+                            onApply={(promotionId, discountAmount, code) => {
                               setAppliedCouponCode({
-                                id: couponId,
+                                id: promotionId,
                                 discountAmount,
                                 code: code || '',
                               });
                               localStorage.setItem('applied_coupon', JSON.stringify({
-                                id: couponId,
+                                id: promotionId,
                                 discountAmount,
                                 code: code || '',
+                                appliedAt: new Date().toISOString(),
                               }));
                               toast({
                                 title: '✅ Code promo appliqué',
