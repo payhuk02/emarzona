@@ -67,9 +67,12 @@ import { useStore } from '@/hooks/useStore';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
+import { PromotionScopeSelector } from '@/components/promotions/PromotionScopeSelector';
+import { useToast } from '@/hooks/use-toast';
 
 export const PromotionsManager: React.FC = () => {
   const { store } = useStore();
+  const { toast } = useToast();
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const { data: promotions = [], isLoading } = usePromotions(store?.id);
   const createMutation = useCreatePromotion();
@@ -156,6 +159,34 @@ export const PromotionsManager: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!store?.id) return;
+
+    // Validation : vérifier qu'au moins un élément est sélectionné si nécessaire
+    if (formData.applies_to === 'specific_products' && formData.product_ids.length === 0) {
+      toast({
+        title: "Erreur de validation",
+        description: "Veuillez sélectionner au moins un produit",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.applies_to === 'categories' && formData.category_ids.length === 0) {
+      toast({
+        title: "Erreur de validation",
+        description: "Veuillez sélectionner au moins une catégorie",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.applies_to === 'collections' && formData.collection_ids.length === 0) {
+      toast({
+        title: "Erreur de validation",
+        description: "Veuillez sélectionner au moins une collection",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const promotionData = {
       ...formData,
@@ -646,7 +677,16 @@ export const PromotionsManager: React.FC = () => {
               <Label htmlFor="applies_to">S'applique à *</Label>
               <Select
                 value={formData.applies_to}
-                onValueChange={(value: any) => setFormData({ ...formData, applies_to: value })}
+                onValueChange={(value: any) => {
+                  // Réinitialiser les sélections quand on change le type
+                  setFormData({
+                    ...formData,
+                    applies_to: value,
+                    product_ids: [],
+                    category_ids: [],
+                    collection_ids: [],
+                  });
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -659,6 +699,20 @@ export const PromotionsManager: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Sélecteur de produits/catégories/collections */}
+            {formData.applies_to !== 'all_products' && store?.id && (
+              <PromotionScopeSelector
+                appliesTo={formData.applies_to}
+                selectedProductIds={formData.product_ids}
+                selectedCategoryIds={formData.category_ids}
+                selectedCollectionIds={formData.collection_ids}
+                onProductIdsChange={(ids) => setFormData({ ...formData, product_ids: ids })}
+                onCategoryIdsChange={(ids) => setFormData({ ...formData, category_ids: ids })}
+                onCollectionIdsChange={(ids) => setFormData({ ...formData, collection_ids: ids })}
+                storeId={store.id}
+              />
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">

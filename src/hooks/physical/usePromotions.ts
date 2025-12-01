@@ -166,10 +166,14 @@ export const useValidatePromotionCode = () => {
       code,
       customerId,
       orderAmount,
+      productIds,
+      categoryIds,
     }: {
       code: string;
       customerId?: string;
       orderAmount?: number;
+      productIds?: string[];
+      categoryIds?: string[];
     }): Promise<PromotionValidationResult> => {
       const now = new Date().toISOString();
 
@@ -226,6 +230,71 @@ export const useValidatePromotionCode = () => {
           discount_amount: 0,
           error: `Montant minimum de commande requis: ${promo.min_purchase_amount} XOF`,
         };
+      }
+
+      // Vérifier que les produits du panier correspondent à la promotion
+      if (productIds && productIds.length > 0) {
+        // Si la promotion s'applique à des produits spécifiques
+        if (promo.applies_to === 'specific_products' && promo.product_ids && promo.product_ids.length > 0) {
+          const hasMatchingProduct = productIds.some(id => promo.product_ids?.includes(id));
+          if (!hasMatchingProduct) {
+            return {
+              valid: false,
+              discount_amount: 0,
+              error: 'Ce code promotionnel ne s\'applique pas aux produits de votre panier.',
+            };
+          }
+        }
+
+        // Si la promotion s'applique à des catégories
+        if (promo.applies_to === 'categories' && promo.category_ids && promo.category_ids.length > 0) {
+          // Récupérer les catégories des produits du panier
+          const { data: products } = await supabase
+            .from('products')
+            .select('category_id, category')
+            .in('id', productIds);
+
+          if (products) {
+            const productCategoryIds = products
+              .map(p => p.category_id)
+              .filter(Boolean) as string[];
+            
+            const productCategories = products
+              .map(p => p.category)
+              .filter(Boolean) as string[];
+
+            // Vérifier si au moins un produit appartient à une catégorie sélectionnée
+            const hasMatchingCategory = 
+              productCategoryIds.some(id => promo.category_ids?.includes(id)) ||
+              (categoryIds && categoryIds.some(id => promo.category_ids?.includes(id)));
+
+            if (!hasMatchingCategory && promo.category_ids.length > 0) {
+              return {
+                valid: false,
+                discount_amount: 0,
+                error: 'Ce code promotionnel ne s\'applique pas aux catégories de produits de votre panier.',
+              };
+            }
+          }
+        }
+
+        // Si la promotion s'applique à des collections
+        if (promo.applies_to === 'collections' && promo.collection_ids && promo.collection_ids.length > 0) {
+          // Récupérer les collections des produits du panier
+          const { data: collectionProducts } = await supabase
+            .from('collection_products')
+            .select('collection_id')
+            .in('product_id', productIds)
+            .in('collection_id', promo.collection_ids);
+
+          if (!collectionProducts || collectionProducts.length === 0) {
+            return {
+              valid: false,
+              discount_amount: 0,
+              error: 'Ce code promotionnel ne s\'applique pas aux collections de produits de votre panier.',
+            };
+          }
+        }
       }
 
       // Calculate discount (will be calculated based on order items)
