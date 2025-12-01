@@ -23,7 +23,7 @@ import {
   MessageSquare
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { ResponsiveProductImage } from "@/components/ui/ResponsiveProductImage";
 import { initiateMonerooPayment } from "@/lib/moneroo-payment";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -197,15 +197,11 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     >
       {/* Image avec overlay et badges - Prend plus d'espace, contenu repoussé en bas */}
       <div className="product-image-container relative overflow-hidden bg-muted/30 flex-grow">
-        <OptimizedImage
+        <ResponsiveProductImage
           src={product.image_url || '/placeholder-image.png'}
           alt={product.name}
-          width={1400}
-          height={787}
-          className="product-image w-full h-full object-cover"
+          className="w-full h-full product-image"
           priority={true}
-          preset="productImage"
-          responsive={true}
         />
         <div className="product-image-overlay" aria-hidden="true"></div>
         

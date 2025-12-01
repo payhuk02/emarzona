@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { safeRedirect } from "@/lib/url-validator";
 import { ProductBanner } from "@/components/ui/ResponsiveProductImage";
-import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { ResponsiveProductImage } from "@/components/ui/ResponsiveProductImage";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { useMarketplaceFavorites } from "@/hooks/useMarketplaceFavorites";
@@ -241,15 +241,11 @@ const ProductCardProfessionalComponent = ({
     <Card className="product-card-professional group relative overflow-hidden bg-white dark:bg-gray-800 transition-all duration-300 hover:-translate-y-2 rounded-lg flex flex-col min-h-[500px] md:min-h-[600px] lg:min-h-[700px] shadow-sm hover:shadow-lg" style={{ willChange: 'transform' }} role="article" aria-label={`Produit: ${product.name}`}>
       {/* Image avec overlay et badges - Prend plus d'espace, contenu repoussé en bas */}
       <div className="product-image-container relative overflow-hidden bg-muted/30 flex-grow">
-        <OptimizedImage
+        <ResponsiveProductImage
           src={product.image_url || '/placeholder-image.png'}
           alt={product.name}
-          width={1400}
-          height={787}
-          className="product-image w-full h-full object-cover"
+          className="w-full h-full"
           priority={false}
-          preset="productImage"
-          responsive={true}
         />
         <div className="product-image-overlay" aria-hidden="true"></div>
         

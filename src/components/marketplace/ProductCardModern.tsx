@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { safeRedirect } from "@/lib/url-validator";
-import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { ResponsiveProductImage } from "@/components/ui/ResponsiveProductImage";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { useMarketplaceFavorites } from "@/hooks/useMarketplaceFavorites";
@@ -261,21 +261,11 @@ const ProductCardModernComponent = ({
       {/* Image Container - Prend plus d'espace, contenu repoussé en bas */}
       <div className="relative overflow-hidden bg-muted/30 flex-grow min-h-[250px] sm:min-h-[300px]">
         <Link to={`/stores/${currentStoreSlug}/products/${product.slug}`} className="block w-full h-full">
-          <OptimizedImage
+          <ResponsiveProductImage
             src={product.image_url || '/placeholder-image.png'}
             alt={product.name}
-            width={1000}
-            height={562}
-            className="w-full h-full object-cover product-image"
+            className="w-full h-full product-image"
             priority={true}
-            preset="productImage"
-            responsive={true}
-            sizes={{
-              mobile: 400,
-              tablet: 800,
-              desktop: 1000
-            }}
-            quality={90}
           />
         </Link>
         
