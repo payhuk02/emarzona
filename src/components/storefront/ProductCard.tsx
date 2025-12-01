@@ -202,7 +202,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
           alt={product.name}
           width={1400}
           height={787}
-          className="product-image w-full h-auto object-contain"
+          className="product-image w-full h-full object-cover"
           priority={true}
           preset="productImage"
           responsive={true}

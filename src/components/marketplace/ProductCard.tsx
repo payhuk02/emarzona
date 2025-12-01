@@ -141,11 +141,11 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
       aria-describedby={`product-description-${product.id}`}
     >
       {/* Bannière produit - 60% de la hauteur de la carte */}
-      <div className="product-card-container flex-[0.6] min-h-[300px] md:min-h-[360px] lg:min-h-[420px] relative overflow-hidden">
+      <div className="product-card-container flex-[0.6] min-h-[300px] md:min-h-[360px] lg:min-h-[420px] relative overflow-hidden w-full">
         <ProductBanner
           src={product.image_url}
           alt={`Image du produit ${product.name}`}
-          className="w-full h-full product-banner object-contain"
+          className="w-full h-full product-banner"
           fallbackIcon={<ShoppingCart className="h-16 w-16 opacity-20" />}
           badges={
             <div className="flex flex-col gap-1">

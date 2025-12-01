@@ -115,7 +115,7 @@ export const ResponsiveProductImage = ({
           width={1280}
           height={720}
           className={cn(
-            "w-full h-auto object-contain",
+            "w-full h-full object-cover",
             "product-image",
             isLoaded ? "opacity-100" : "opacity-100"
           )}
@@ -126,7 +126,7 @@ export const ResponsiveProductImage = ({
           sizes={sizes}
           style={{
             // Prévenir le CLS (Cumulative Layout Shift)
-            aspectRatio: '16/9',
+            // aspectRatio retiré car géré par le conteneur parent
             // Qualité d'affichage optimisée - Images nettes et centrées
             imageRendering: 'high-quality',
             // Centrage parfait de l'image

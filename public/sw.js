@@ -59,6 +59,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Ignorer les requêtes vers des domaines externes (Google Fonts, APIs externes, etc.)
+  // Ces requêtes doivent être gérées directement par le navigateur pour respecter la CSP
+  const externalDomains = [
+    'fonts.googleapis.com',
+    'fonts.gstatic.com',
+    'api.exchangerate-api.com',
+    'www.googletagmanager.com',
+    'www.google-analytics.com',
+  ];
+  
+  if (externalDomains.some(domain => url.hostname === domain || url.hostname.endsWith('.' + domain))) {
+    return; // Laisser le navigateur gérer ces requêtes directement
+  }
+
+  // Ignorer les requêtes cross-origin (sauf celles déjà gérées ci-dessus)
+  // Le service worker ne devrait intercepter que les requêtes same-origin
+  if (url.origin !== self.location.origin && !url.hostname.includes('supabase.co')) {
+    return;
+  }
+
   // Stratégie Cache First pour les assets statiques (JS, CSS, fonts)
   if (
     url.pathname.startsWith('/assets/') ||
