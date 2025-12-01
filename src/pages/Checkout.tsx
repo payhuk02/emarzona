@@ -306,34 +306,13 @@ export default function Checkout() {
     return Math.min(appliedGiftCard.balance, amountWithTaxesAndShipping);
   }, [appliedGiftCard, summary.subtotal, summary.discount_amount, couponDiscountAmount, taxRate, shippingAmount]);
 
-  // Total final - Calculé après toutes les réductions (panier, coupon, carte cadeau)
-  // Utiliser directement les valeurs primitives dans les dépendances pour garantir la détection
-  const finalTotal = useMemo(() => {
-    // Calculer le montant de base : sous-total - réductions du panier - réduction du coupon
-    const subtotalAfterDiscounts = summary.subtotal - summary.discount_amount - couponDiscountAmount;
-    
-    // Ajouter les taxes (calculées sur le montant après réductions)
-    const subtotalWithTaxes = subtotalAfterDiscounts + taxAmount;
-    
-    // Ajouter les frais de livraison
-    const subtotalWithShipping = subtotalWithTaxes + shippingAmount;
-    
-    // Appliquer la carte cadeau en dernier
-    const finalAmount = Math.max(0, subtotalWithShipping - giftCardAmount);
-    
-    return finalAmount;
-  }, [
-    summary.subtotal, 
-    summary.discount_amount, 
-    couponDiscountAmount,
-    couponDiscountValue,
-    couponId,
-    appliedCouponCode?.discountAmount ?? 0, // Ajouter aussi directement pour garantir
-    appliedCouponCode?.id ?? null, // Ajouter aussi directement pour garantir
-    taxAmount, 
-    shippingAmount, 
-    giftCardAmount
-  ]);
+  // Total final - Calculé directement pour garantir la mise à jour en temps réel
+  // Calculer directement sans useMemo pour éviter tous les problèmes de dépendances
+  const couponDiscount = Number(couponDiscountValue) || 0;
+  const subtotalAfterDiscounts = summary.subtotal - summary.discount_amount - couponDiscount;
+  const subtotalWithTaxes = subtotalAfterDiscounts + taxAmount;
+  const subtotalWithShipping = subtotalWithTaxes + shippingAmount;
+  const finalTotal = Math.max(0, subtotalWithShipping - giftCardAmount);
 
   // Validation formulaire
   const validateForm = (): boolean => {
