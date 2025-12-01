@@ -17,8 +17,8 @@ import { logger } from './logger';
 const ALLOWED_PAYMENT_DOMAINS = [
   'moneroo.io',
   'paydunya.com',
-  'payhula.com',
-  'payhula.vercel.app',
+  'emarzona.com',
+  'emarzona.vercel.app',
   'localhost', // Dev only
   '127.0.0.1', // Dev only
 ];

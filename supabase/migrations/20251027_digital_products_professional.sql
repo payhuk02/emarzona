@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK DIGITAL PRODUCTS SYSTEM - PROFESSIONAL GRADE
+-- EMARZONA DIGITAL PRODUCTS SYSTEM - PROFESSIONAL GRADE
 -- Date: 27 Octobre 2025
 -- Inspiré de : Gumroad, Stripe, Paddle, Lemonsqueezy
 -- Description: Système complet pour produits digitaux haut de gamme

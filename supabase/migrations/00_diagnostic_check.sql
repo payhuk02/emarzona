@@ -1,5 +1,5 @@
 -- =====================================================
--- SCRIPT DE DIAGNOSTIC - PAYHUK DATABASE
+-- SCRIPT DE DIAGNOSTIC - EMARZONA DATABASE
 -- Date: 28 Octobre 2025
 -- Usage: Exécuter ce script pour diagnostiquer l'état de la DB
 -- =====================================================
@@ -12,7 +12,7 @@ DO $$
 BEGIN
   RAISE NOTICE '';
   RAISE NOTICE '========================================';
-  RAISE NOTICE '📊 DIAGNOSTIC PAYHUK DATABASE';
+  RAISE NOTICE '📊 DIAGNOSTIC EMARZONA DATABASE';
   RAISE NOTICE '========================================';
   RAISE NOTICE '';
 END $$;

@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK COST OPTIMIZATION & MARGIN ANALYSIS SYSTEM
+-- EMARZONA COST OPTIMIZATION & MARGIN ANALYSIS SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système d'analyse des coûts, marges et optimisation des prix
 -- Version: 1.0

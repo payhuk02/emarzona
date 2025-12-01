@@ -13,7 +13,7 @@ interface CacheItem<T> {
 }
 
 class CacheManager {
-  private readonly prefix = 'payhuk_cache_';
+  private readonly prefix = 'emarzona_cache_';
 
   /**
    * Stocke une donnée dans le cache avec une durée d'expiration

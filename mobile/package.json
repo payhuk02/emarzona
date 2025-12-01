@@ -1,7 +1,7 @@
 {
-  "name": "payhuk-mobile",
+  "name": "emarzona-mobile",
   "version": "1.0.0",
-  "description": "Payhuk Mobile App - React Native",
+  "description": "Emarzona Mobile App - React Native",
   "main": "index.js",
   "scripts": {
     "android": "react-native run-android",

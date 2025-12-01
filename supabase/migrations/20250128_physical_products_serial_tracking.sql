@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK PHYSICAL PRODUCTS - SERIAL NUMBERS & TRACKING
+-- EMARZONA PHYSICAL PRODUCTS - SERIAL NUMBERS & TRACKING
 -- Date: 28 Janvier 2025
 -- Description: Système de numéros de série et traçabilité complète
 -- =====================================================

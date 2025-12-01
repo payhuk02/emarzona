@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK MULTI-CURRENCY SYSTEM
+-- EMARZONA MULTI-CURRENCY SYSTEM
 -- Date: 28 Janvier 2025
 -- Description: Système de gestion multi-devises avec taux de change et prix régionaux
 -- Version: 1.0

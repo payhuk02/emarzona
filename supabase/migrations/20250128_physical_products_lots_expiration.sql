@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK PHYSICAL PRODUCTS - LOT & EXPIRATION MANAGEMENT
+-- EMARZONA PHYSICAL PRODUCTS - LOT & EXPIRATION MANAGEMENT
 -- Date: 28 Janvier 2025
 -- Description: Système de gestion des lots et dates d'expiration avec FIFO/LIFO
 -- =====================================================

@@ -24,6 +24,25 @@ export const usePlatformLogo = () => {
   const [isLoading, setIsLoading] = useState(true);
   const preloadImageRef = useRef<HTMLImageElement | null>(null);
 
+  // Nettoyer le cache au montage si il contient l'ancien logo Payhuk
+  useEffect(() => {
+    try {
+      const cachedLogo = localStorage.getItem(LOGO_CACHE_KEY);
+      if (cachedLogo) {
+        const cached = JSON.parse(cachedLogo);
+        const hasPayhukReference = 
+          (cached.light && (cached.light.includes('payhuk') || cached.light.includes('Payhuk'))) ||
+          (cached.dark && (cached.dark.includes('payhuk') || cached.dark.includes('Payhuk')));
+        
+        if (hasPayhukReference) {
+          localStorage.removeItem(LOGO_CACHE_KEY);
+        }
+      }
+    } catch (error) {
+      // Ignorer les erreurs
+    }
+  }, []);
+
   // Précharger le logo par défaut dès le montage du composant
   useEffect(() => {
     const img = new Image();
@@ -59,6 +78,25 @@ export const usePlatformLogo = () => {
   useEffect(() => {
     let isMounted = true;
 
+    // Nettoyer le cache si il contient l'ancien logo Payhuk
+    try {
+      const cachedLogo = localStorage.getItem(LOGO_CACHE_KEY);
+      if (cachedLogo) {
+        const cached = JSON.parse(cachedLogo);
+        // Vérifier si le cache contient des références à Payhuk
+        const hasPayhukReference = 
+          (cached.light && (cached.light.includes('payhuk') || cached.light.includes('Payhuk'))) ||
+          (cached.dark && (cached.dark.includes('payhuk') || cached.dark.includes('Payhuk')));
+        
+        if (hasPayhukReference) {
+          // Nettoyer le cache si il contient l'ancien logo
+          localStorage.removeItem(LOGO_CACHE_KEY);
+        }
+      }
+    } catch (error) {
+      // Ignorer les erreurs de cache
+    }
+
     // 1. Essayer de charger depuis le cache localStorage (pour mobile)
     const loadFromCache = () => {
       try {
@@ -67,10 +105,29 @@ export const usePlatformLogo = () => {
           const cached = JSON.parse(cachedLogo);
           const hasRealData = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
           
+          // Vérifier que le cache ne contient pas l'ancien logo Payhuk
+          const hasPayhukReference = 
+            (cached.light && (cached.light.includes('payhuk') || cached.light.includes('Payhuk'))) ||
+            (cached.dark && (cached.dark.includes('payhuk') || cached.dark.includes('Payhuk')));
+          
+          if (hasPayhukReference) {
+            // Nettoyer le cache et utiliser le logo par défaut
+            localStorage.removeItem(LOGO_CACHE_KEY);
+            return false;
+          }
+          
           // Utiliser le cache seulement si les données réelles ne sont pas encore chargées
           if (!hasRealData && (cached.light || cached.dark)) {
             const cachedUrl = getLogoUrl(cached, cached.theme || 'auto');
             if (cachedUrl && isMounted) {
+              // Vérifier que l'URL ne contient pas Payhuk
+              if (cachedUrl.includes('payhuk') || cachedUrl.includes('Payhuk')) {
+                localStorage.removeItem(LOGO_CACHE_KEY);
+                setLogoUrl(DEFAULT_LOGO);
+                setIsLoading(false);
+                return false;
+              }
+              
               // Précharger l'image depuis le cache pour vérifier qu'elle est accessible
               const img = new Image();
               img.src = cachedUrl;

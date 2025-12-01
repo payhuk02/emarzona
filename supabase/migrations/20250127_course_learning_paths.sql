@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK COURSES LEARNING PATHS SYSTEM
+-- EMARZONA COURSES LEARNING PATHS SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système de parcours d'apprentissage (Learning Paths)
 --              Permet de créer des parcours guidés à travers plusieurs cours

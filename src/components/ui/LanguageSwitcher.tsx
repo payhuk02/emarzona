@@ -39,7 +39,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     i18n.changeLanguage(langCode);
     
     // Sauvegarder dans localStorage
-    localStorage.setItem('payhuk_language', langCode);
+    localStorage.setItem('emarzona_language', langCode);
     
     // Mettre à jour l'attribut lang du document
     document.documentElement.lang = langCode;
@@ -102,7 +102,7 @@ export const LanguageSwitcherCompact: React.FC<{ className?: string }> = ({ clas
     const nextLang = AVAILABLE_LANGUAGES[nextIndex];
     
     i18n.changeLanguage(nextLang.code);
-    localStorage.setItem('payhuk_language', nextLang.code);
+    localStorage.setItem('emarzona_language', nextLang.code);
     document.documentElement.lang = nextLang.code;
   };
 

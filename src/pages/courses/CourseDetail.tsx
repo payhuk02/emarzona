@@ -199,11 +199,11 @@ const CourseDetail = () => {
         description={product.short_description || product.description || ''}
         provider={{
           name: store?.name || 'Emarzona',
-          url: `https://payhula.vercel.app/stores/${store?.slug}`,
+          url: `https://emarzona.vercel.app/stores/${store?.slug}`,
         }}
         instructor={{
           name: store?.name || 'Instructeur',
-          url: `https://payhula.vercel.app/stores/${store?.slug}`,
+          url: `https://emarzona.vercel.app/stores/${store?.slug}`,
         }}
         price={product.promotional_price || product.price}
         currency={product.currency}
@@ -217,7 +217,7 @@ const CourseDetail = () => {
           count: course.total_reviews || 0,
         }}
         image={product.image_url || ''}
-        url={`https://payhula.vercel.app/courses/${product.slug}`}
+        url={`https://emarzona.vercel.app/courses/${product.slug}`}
       />
 
       {/* Hero Section */}

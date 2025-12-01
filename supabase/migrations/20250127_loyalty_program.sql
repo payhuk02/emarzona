@@ -1,7 +1,7 @@
 -- ============================================================================
 -- MIGRATION: Loyalty Program System
 -- Date: 2025-01-27
--- Author: Payhula Team
+-- Author: Emarzona Team
 -- Description: Système complet de fidélité avec points, tiers, et récompenses
 --              Permet aux stores de fidéliser leurs clients
 -- ============================================================================

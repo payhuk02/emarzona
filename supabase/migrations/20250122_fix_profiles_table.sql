@@ -1,5 +1,5 @@
 -- Migration pour corriger et améliorer la table profiles
--- Payhuk - Système de profil avancé et fonctionnel
+-- Emarzona - Système de profil avancé et fonctionnel
 
 -- Vérifier et corriger la structure de la table profiles
 CREATE TABLE IF NOT EXISTS public.profiles (

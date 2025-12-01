@@ -2,7 +2,7 @@
 -- Migration : Système de liens courts d'affiliation
 -- Date : 31/01/2025
 -- Description : Permet de créer des liens courts pour les liens d'affiliation
---               Format: payhuk.com/aff/ABC123
+--               Format: emarzona.com/aff/ABC123
 -- =========================================================
 
 -- Activer l'extension pgcrypto si nécessaire
@@ -46,7 +46,7 @@ CREATE INDEX IF NOT EXISTS idx_affiliate_short_links_is_active ON public.affilia
 CREATE INDEX IF NOT EXISTS idx_affiliate_short_links_custom_alias ON public.affiliate_short_links(custom_alias) WHERE custom_alias IS NOT NULL;
 
 -- Comments
-COMMENT ON TABLE public.affiliate_short_links IS 'Liens courts pour les liens d''affiliation (ex: payhuk.com/aff/ABC123)';
+COMMENT ON TABLE public.affiliate_short_links IS 'Liens courts pour les liens d''affiliation (ex: emarzona.com/aff/ABC123)';
 COMMENT ON COLUMN public.affiliate_short_links.short_code IS 'Code court unique (6-8 caractères alphanumériques)';
 COMMENT ON COLUMN public.affiliate_short_links.custom_alias IS 'Alias personnalisé optionnel pour un code plus mémorable';
 

@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK PHYSICAL PRODUCTS - ADVANCED IMPROVEMENTS
+-- EMARZONA PHYSICAL PRODUCTS - ADVANCED IMPROVEMENTS
 -- Date: 28 Janvier 2025
 -- Description: Améliorations avancées pour produits physiques
 -- - Gestion multi-entrepôts

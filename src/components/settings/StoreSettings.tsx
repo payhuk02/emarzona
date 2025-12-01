@@ -356,7 +356,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
                 <div className="space-y-2">
                   <Label htmlFor="slug">URL de la boutique</Label>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">payhula.com/stores/</span>
+                    <span className="text-sm text-muted-foreground">emarzona.com/stores/</span>
                   <Input
                       id="slug"
                       value={newStoreData.slug}

@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK COURSES ASSIGNMENTS SYSTEM
+-- EMARZONA COURSES ASSIGNMENTS SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système complet de devoirs/assignments pour cours en ligne
 --              Avec upload fichiers, notation, feedback

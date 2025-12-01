@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK COURSES ADVANCED PREREQUISITES SYSTEM
+-- EMARZONA COURSES ADVANCED PREREQUISITES SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système de prérequis avancés avec validation automatique
 --              Permet de définir des prérequis (cours, quiz, assignments) et

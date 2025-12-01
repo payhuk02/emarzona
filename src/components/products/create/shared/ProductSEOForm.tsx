@@ -270,7 +270,7 @@ export const ProductSEOForm = ({
                   {data.meta_title || productName || 'Titre du produit'}
                 </div>
                 <div className="text-green-700 text-sm">
-                  payhuk.com › produits › ...
+                  emarzona.com › produits › ...
                 </div>
                 <div className="text-sm text-muted-foreground mt-1">
                   {data.meta_description || 'Description du produit qui apparaîtra dans les résultats de recherche...'}
@@ -360,7 +360,7 @@ export const ProductSEOForm = ({
                     {data.og_description || 'Description du produit pour les réseaux sociaux'}
                   </div>
                   <div className="text-xs text-muted-foreground mt-2">
-                    payhuk.com
+                    emarzona.com
                   </div>
                 </div>
               </div>

@@ -1,7 +1,7 @@
 -- =====================================================
 -- CONFIGURATION COMPLÈTE DU STORAGE POUR VIDÉOS
 -- Date : 27 octobre 2025
--- Auteur : Intelli / payhuk02
+-- Auteur : Intelli / emarzona
 -- 
 -- ⚠️  EXÉCUTER CE SCRIPT VIA LE DASHBOARD SUPABASE
 -- =====================================================

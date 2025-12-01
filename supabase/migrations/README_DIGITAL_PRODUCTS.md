@@ -329,5 +329,5 @@ En cas de problème :
 
 **Last Updated:** 29 Octobre 2025  
 **Maintainer:** Payhula Team  
-**Project:** Payhuk SaaS Platform
+**Project:** Emarzona SaaS Platform
 

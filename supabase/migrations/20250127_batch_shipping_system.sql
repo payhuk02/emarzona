@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK BATCH SHIPPING SYSTEM
+-- EMARZONA BATCH SHIPPING SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système de traitement par lots pour expéditions et génération d'étiquettes multiples
 -- Version: 1.0

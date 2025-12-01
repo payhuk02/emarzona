@@ -64,7 +64,7 @@ export class FlutterwaveProvider extends BasePaymentProvider {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          tx_ref: `payhuk_${Date.now()}_${request.orderId || ''}`,
+          tx_ref: `emarzona_${Date.now()}_${request.orderId || ''}`,
           amount: request.amount,
           currency: request.currency,
           redirect_url: request.returnUrl || `${window.location.origin}/payments/success`,

@@ -59,7 +59,7 @@ VITE_SENDGRID_API_KEY=your_sendgrid_api_key
 # CDN (OPTIONNEL - Phase 1 Optimisations)
 # ==============================================
 VITE_CDN_ENABLED=false
-VITE_CDN_BASE_URL=https://cdn.payhuk.com
+VITE_CDN_BASE_URL=https://cdn.emarzona.com
 VITE_CDN_PROVIDER=cloudflare
 VITE_CDN_IMAGE_OPTIMIZATION=true
 VITE_CDN_VIDEO_OPTIMIZATION=true

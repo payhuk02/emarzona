@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK DIGITAL PRODUCT SUBSCRIPTIONS SYSTEM
+-- EMARZONA DIGITAL PRODUCT SUBSCRIPTIONS SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système complet pour produits digitaux avec abonnements récurrents
 -- =====================================================

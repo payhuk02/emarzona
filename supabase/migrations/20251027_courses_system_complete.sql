@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK COURSES SYSTEM - COMPLETE MIGRATION
+-- EMARZONA COURSES SYSTEM - COMPLETE MIGRATION
 -- Date: 27 Octobre 2025
 -- Description: Système complet LMS pour cours en ligne
 -- Version: 1.0

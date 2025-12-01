@@ -1,7 +1,7 @@
 -- ============================================================================
 -- TESTS DE VALIDATION - DIGITAL PRODUCTS SYSTEM
 -- Date: 2025-10-29
--- Projet: Payhuk SaaS Platform
+-- Projet: Emarzona SaaS Platform
 -- Description: Tests complets pour valider l'installation des migrations
 -- ============================================================================
 

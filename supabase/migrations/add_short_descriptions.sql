@@ -14,7 +14,7 @@ SET short_description = CASE
       ELSE description
     END
   ELSE
-    name || ' - Découvrez ce produit sur Payhuk.'
+    name || ' - Découvrez ce produit sur Emarzona.'
 END
 WHERE 
   (short_description IS NULL OR short_description = '' OR LENGTH(TRIM(short_description)) = 0)

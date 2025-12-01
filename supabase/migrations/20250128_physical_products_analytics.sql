@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK PHYSICAL PRODUCTS - ADVANCED ANALYTICS
+-- EMARZONA PHYSICAL PRODUCTS - ADVANCED ANALYTICS
 -- Date: 28 Janvier 2025
 -- Description: Système d'analytics et rapports avancés pour produits physiques
 -- =====================================================

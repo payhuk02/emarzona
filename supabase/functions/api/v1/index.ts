@@ -1,5 +1,5 @@
 /**
- * API Publique Payhuk - Edge Function
+ * API Publique Emarzona - Edge Function
  * Date: 28 Janvier 2025
  * 
  * Point d'entrée principal de l'API publique

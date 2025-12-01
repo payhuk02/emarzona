@@ -200,7 +200,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Commentaires
-COMMENT ON TABLE public.api_keys IS 'Clés API pour l''API publique Payhuk';
+COMMENT ON TABLE public.api_keys IS 'Clés API pour l''API publique Emarzona';
 COMMENT ON FUNCTION generate_api_key IS 'Génère une nouvelle clé API';
 COMMENT ON FUNCTION create_api_key IS 'Crée une nouvelle clé API et retourne la clé (affichée une seule fois)';
 COMMENT ON FUNCTION verify_api_key IS 'Vérifie une clé API et retourne les permissions associées';

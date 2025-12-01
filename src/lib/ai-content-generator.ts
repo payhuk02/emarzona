@@ -359,7 +359,7 @@ ${price ? `## Prix exceptionnel\n\nPour seulement ${price.toLocaleString()} XOF,
     name.toLowerCase(),
     type === 'digital' ? 'produit numérique' : type === 'physical' ? 'produit physique' : 'service',
     category?.toLowerCase() || '',
-    'payhuk',
+    'emarzona',
     'boutique en ligne',
     'acheter',
     ...(features?.slice(0, 3) || []).map(f => f.toLowerCase()),
@@ -392,7 +392,7 @@ export const generateKeywordSuggestions = (productInfo: ProductInfo): string[] =
     ...base,
     ...typeKeywords[type],
     category?.toLowerCase() || '',
-    'payhuk',
+    'emarzona',
     'en ligne',
   ].filter(Boolean);
 };

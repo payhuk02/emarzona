@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK PHYSICAL PRODUCTS ANALYTICS DASHBOARD
+-- EMARZONA PHYSICAL PRODUCTS ANALYTICS DASHBOARD
 -- Date: 27 Janvier 2025
 -- Description: Vues et fonctions pour dashboard analytics produits physiques
 --              KPIs, tendances, rapports

@@ -1,7 +1,7 @@
 -- ============================================================================
 -- MIGRATION: Webhooks System Professional
 -- Date: 2025-01-27
--- Author: Payhula Team
+-- Author: Emarzona Team
 -- Description: Système complet de webhooks pour intégrations tierces
 --              Permet aux vendeurs de recevoir des notifications en temps réel
 -- ============================================================================
@@ -311,7 +311,7 @@ BEGIN
     jsonb_build_object(
       'test', true,
       'timestamp', now(),
-      'message', 'This is a test webhook from Payhula'
+      'message', 'This is a test webhook from Emarzona'
     ),
     v_webhook.url,
     'pending'

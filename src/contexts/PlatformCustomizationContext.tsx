@@ -35,6 +35,17 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
   const [previewMode, setPreviewMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Nettoyer le cache Payhuk au montage du provider
+  useEffect(() => {
+    try {
+      const { clearPayhukLogoCache, clearAllPayhukReferences } = require('@/utils/clearPayhukLogoCache');
+      clearPayhukLogoCache();
+      clearAllPayhukReferences();
+    } catch (error) {
+      // Ignorer les erreurs
+    }
+  }, []);
+
   useEffect(() => {
     const initialize = async () => {
       try {

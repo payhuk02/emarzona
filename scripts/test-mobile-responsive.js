@@ -4,7 +4,7 @@
 const mobileResponsiveTests = {
   // Test du logo dans la sidebar
   sidebarLogo: {
-    selector: '.sidebar img[alt="Payhuk"]',
+    selector: '.sidebar img[alt="Emarzona"]',
     expectedClasses: ['h-8', 'w-8', 'flex-shrink-0'],
     mobileIssues: [
       'Logo trop petit sur mobile',
@@ -15,7 +15,7 @@ const mobileResponsiveTests = {
 
   // Test du logo dans le header marketplace
   marketplaceLogo: {
-    selector: 'header img[alt="Payhuk"]',
+    selector: 'header img[alt="Emarzona"]',
     expectedClasses: ['h-7', 'w-7', 'sm:h-8', 'sm:w-8'],
     mobileIssues: [
       'Logo marketplace trop petit',

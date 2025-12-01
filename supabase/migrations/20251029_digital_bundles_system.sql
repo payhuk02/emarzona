@@ -1,7 +1,7 @@
 -- ============================================================================
 -- MIGRATION: Digital Product Bundles System
 -- Date: 2025-10-29
--- Author: Payhula Team
+-- Author: Emarzona Team
 -- Description: Système de bundles pour produits digitaux
 --              Permet de créer des packs de plusieurs produits digitaux
 -- ============================================================================

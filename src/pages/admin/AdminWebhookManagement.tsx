@@ -864,7 +864,7 @@ export default function AdminWebhookManagement() {
                         value={formData.url}
                         onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                         required
-                        placeholder="https://votre-domaine.com/webhooks/payhula"
+                        placeholder="https://votre-domaine.com/webhooks/emarzona"
                         className="h-9 sm:h-10 text-xs sm:text-sm"
                       />
                     </div>

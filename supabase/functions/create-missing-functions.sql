@@ -1,5 +1,5 @@
 -- =====================================================
--- CRÉATION DES FONCTIONS MANQUANTES POUR PAYHUK
+-- CRÉATION DES FONCTIONS MANQUANTES POUR EMARZONA
 -- =====================================================
 -- Ce fichier contient les fonctions manquantes détectées
 -- lors de la vérification de la base de données Supabase

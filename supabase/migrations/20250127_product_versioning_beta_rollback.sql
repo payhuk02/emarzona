@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK PRODUCT VERSIONING - BETA & ROLLBACK SUPPORT
+-- EMARZONA PRODUCT VERSIONING - BETA & ROLLBACK SUPPORT
 -- Date: 27 Janvier 2025
 -- Description: Amélioration du système de versioning avec support Beta et Rollback automatique
 -- =====================================================

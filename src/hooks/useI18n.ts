@@ -14,7 +14,7 @@ export function useI18n() {
 
   const changeLanguage = useCallback((lang: LanguageCode) => {
     i18n.changeLanguage(lang);
-    localStorage.setItem('payhuk_language', lang);
+    localStorage.setItem('emarzona_language', lang);
     document.documentElement.lang = lang;
   }, [i18n]);
 

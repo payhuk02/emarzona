@@ -171,7 +171,7 @@ const EditProductDialogComponent = ({
                   <div className="max-w-[260px] text-xs">
                     Utilisez 1280×720 (ratio 16:9) pour un rendu optimal.
                     <a
-                      href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                      href="https://github.com/payhuk02/emarzona/blob/main/docs/MEDIA_GUIDELINES.md"
                       target="_blank"
                       rel="noreferrer"
                       className="text-blue-600 underline ml-1"

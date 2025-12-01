@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS public.email_templates (
   
   -- Configuration SendGrid
   sendgrid_template_id TEXT, -- ID template SendGrid (si utilisé)
-  from_email TEXT DEFAULT 'noreply@payhuk.com',
-  from_name TEXT DEFAULT 'Payhuk',
+  from_email TEXT DEFAULT 'noreply@emarzona.com',
+  from_name TEXT DEFAULT 'Emarzona',
   reply_to TEXT,
   
   -- Statut
@@ -294,8 +294,8 @@ VALUES (
   'Email de bienvenue utilisateur',
   'transactional',
   NULL, -- Universel
-  '{"fr": "Bienvenue sur Payhuk ! 🎉", "en": "Welcome to Payhuk! 🎉"}',
-  '{"fr": "<h1>Bienvenue {{user_name}} !</h1><p>Merci de rejoindre Payhuk...</p>", "en": "<h1>Welcome {{user_name}}!</h1><p>Thank you for joining Payhuk...</p>"}',
+  '{"fr": "Bienvenue sur Emarzona ! 🎉", "en": "Welcome to Emarzona! 🎉"}',
+  '{"fr": "<h1>Bienvenue {{user_name}} !</h1><p>Merci de rejoindre Emarzona...</p>", "en": "<h1>Welcome {{user_name}}!</h1><p>Thank you for joining Emarzona...</p>"}',
   '["{{user_name}}", "{{user_email}}"]'::jsonb,
   TRUE,
   TRUE

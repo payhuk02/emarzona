@@ -211,7 +211,7 @@ export const StoreSEOSettings: React.FC<StoreSEOSettingsProps> = ({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">Google</Badge>
-                <span className="text-xs text-muted-foreground">payhula.com</span>
+                <span className="text-xs text-muted-foreground">emarzona.com</span>
               </div>
               <h3 className="text-lg text-blue-600 hover:underline cursor-pointer">
                 {metaTitle || 'Titre SEO de votre boutique'}

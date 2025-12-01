@@ -193,7 +193,7 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                     <div className="max-w-[260px] text-xs">
                       Utilisez des images 1280×720 (16:9), idéalement WebP.
                       <a
-                        href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                        href="https://github.com/payhuk02/emarzona/blob/main/docs/MEDIA_GUIDELINES.md"
                         target="_blank"
                         rel="noreferrer"
                         className="text-blue-600 underline ml-1"
@@ -265,7 +265,7 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                     <div className="max-w-[260px] text-xs">
                       Chaque image devrait être en 1280×720 (16:9) pour un rendu optimal.
                       <a
-                        href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                        href="https://github.com/payhuk02/emarzona/blob/main/docs/MEDIA_GUIDELINES.md"
                         target="_blank"
                         rel="noreferrer"
                         className="text-blue-600 underline ml-1"

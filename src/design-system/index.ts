@@ -1,5 +1,5 @@
 /**
- * 🎨 PAYHULA DESIGN SYSTEM
+ * 🎨 EMARZONA DESIGN SYSTEM
  * Design system unifié pour tous les templates
  * Inspiré de: Shopify, Systeme.io, Tailwind CSS
  * 

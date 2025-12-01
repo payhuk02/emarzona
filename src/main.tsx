@@ -15,6 +15,11 @@ import { initAccessibility } from "./lib/accessibility";
 import { logger } from "./lib/logger";
 import "./i18n/config"; // Initialiser i18n
 import { validateEnv } from "./lib/env-validator";
+import { clearPayhukLogoCache, clearAllPayhukReferences } from "./utils/clearPayhukLogoCache";
+
+// Nettoyer le cache localStorage contenant l'ancien logo Payhuk
+clearPayhukLogoCache();
+clearAllPayhukReferences();
 
 // Valider les variables d'environnement au démarrage
 try {

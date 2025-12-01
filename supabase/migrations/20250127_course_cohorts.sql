@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK COURSES COHORTS SYSTEM
+-- EMARZONA COURSES COHORTS SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système de cohorts (groupes d'étudiants) pour cours en ligne
 --              Permet de créer des groupes d'étudiants pour classes virtuelles,

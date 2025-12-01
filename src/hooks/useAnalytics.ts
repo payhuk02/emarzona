@@ -43,7 +43,7 @@ const generateSessionId = (): string => {
  * Récupère ou crée une session analytics
  */
 const getOrCreateSession = (): AnalyticsSession => {
-  const stored = sessionStorage.getItem('payhuk_analytics_session');
+  const stored = sessionStorage.getItem('emarzona_analytics_session');
   
   if (stored) {
     try {
@@ -65,7 +65,7 @@ const getOrCreateSession = (): AnalyticsSession => {
     startTime: Date.now()
   };
   
-  sessionStorage.setItem('payhuk_analytics_session', JSON.stringify(newSession));
+  sessionStorage.setItem('emarzona_analytics_session', JSON.stringify(newSession));
   return newSession;
 };
 

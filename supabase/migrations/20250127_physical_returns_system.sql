@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK PHYSICAL PRODUCTS RETURNS SYSTEM (RMA)
+-- EMARZONA PHYSICAL PRODUCTS RETURNS SYSTEM (RMA)
 -- Date: 27 Janvier 2025
 -- Description: Système complet de gestion des retours (Returns Management Authorization)
 --              Permet aux clients de demander des retours et aux admins de les gérer

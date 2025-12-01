@@ -294,5 +294,5 @@ Priority  | Action                                      | Status
 **Version:** 1.0  
 **Status:** ✅ Production Ready
 
-**Payhuk SaaS Platform** - Digital Products Database
+**Emarzona SaaS Platform** - Digital Products Database
 
