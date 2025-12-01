@@ -278,42 +278,41 @@ export default function Checkout() {
     return 15000; // International
   }, [formData.country]);
 
-  // Calculer les remises sur les items uniquement (sans coupons)
-  // summary.discount_amount peut contenir un coupon de l'ancien système, donc on calcule séparément
-  const itemDiscounts = useMemo(() => {
-    return items.reduce((total, item) => total + ((item.discount_amount || 0) * item.quantity), 0);
-  }, [items]);
+  // ============================================
+  // CALCUL DIRECT SANS USEMEMO POUR GARANTIR LA MISE À JOUR EN TEMPS RÉEL
+  // Tous les calculs sont faits directement dans le render pour éviter les problèmes
+  // de dépendances React et garantir que le total se met à jour immédiatement
+  // ============================================
 
-  // Montant du coupon du nouveau système (calculé directement pour garantir la mise à jour)
-  // Cette valeur se met à jour automatiquement quand appliedCouponCode change
+  // 1. Calculer les remises sur les items uniquement (sans coupons)
+  const itemDiscounts = items.reduce((total, item) => total + ((item.discount_amount || 0) * item.quantity), 0);
+
+  // 2. Montant du coupon du nouveau système
   const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
   
-  // Total des remises : remises sur les items + coupon du nouveau système
-  // On n'utilise PAS summary.discount_amount car il peut contenir un coupon de l'ancien système
+  // 3. Total des remises : remises items + coupon
   const totalDiscounts = itemDiscounts + couponDiscount;
 
-  const taxAmount = useMemo(() => {
-    // Calculer sur le montant après remises items et coupon (mais avant carte cadeau)
-    const taxableAmount = summary.subtotal - totalDiscounts;
-    return Math.max(0, taxableAmount * taxRate);
-  }, [summary.subtotal, totalDiscounts, taxRate]);
-
-  // Montant à utiliser de la carte cadeau (calculé après taxes et shipping)
-  const giftCardAmount = useMemo(() => {
-    if (!appliedGiftCard || !appliedGiftCard.balance) return 0;
-    
-    // Montant total avant carte cadeau : subtotal - remises + taxes + shipping
-    const baseAmount = summary.subtotal - totalDiscounts;
-    const amountWithTaxesAndShipping = baseAmount + (baseAmount * taxRate) + shippingAmount;
-    
-    // Utiliser le maximum possible de la carte cadeau (mais pas plus que le montant dû)
-    return Math.min(appliedGiftCard.balance, amountWithTaxesAndShipping);
-  }, [appliedGiftCard, summary.subtotal, totalDiscounts, taxRate, shippingAmount]);
-
-  // Total final - Calculé directement pour garantir la mise à jour en temps réel
+  // 4. Sous-total après remises
   const subtotalAfterDiscounts = summary.subtotal - totalDiscounts;
+
+  // 5. Calcul des taxes (18% sur le montant après remises)
+  const taxableAmount = subtotalAfterDiscounts;
+  const taxAmount = Math.max(0, taxableAmount * taxRate);
+
+  // 6. Montant avec taxes
   const subtotalWithTaxes = subtotalAfterDiscounts + taxAmount;
+
+  // 7. Montant avec shipping
   const subtotalWithShipping = subtotalWithTaxes + shippingAmount;
+
+  // 8. Montant à utiliser de la carte cadeau (calculé après taxes et shipping)
+  const giftCardAmount = (() => {
+    if (!appliedGiftCard || !appliedGiftCard.balance) return 0;
+    return Math.min(appliedGiftCard.balance, subtotalWithShipping);
+  })();
+
+  // 9. Total final
   const finalTotal = Math.max(0, subtotalWithShipping - giftCardAmount);
 
   // Validation formulaire
