@@ -24,7 +24,7 @@ import {
   Pie,
   Cell,
 } from "@/components/charts/LazyCharts";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 
 interface AdvancedStatsCardProps {
   title: string;
@@ -40,10 +40,10 @@ interface AdvancedStatsCardProps {
   className?: string;
 }
 
-export const AdvancedStatsCard = ({ 
+const AdvancedStatsCardComponent = ({ 
   title, 
   value, 
-  description, 
+  description,
   icon: Icon, 
   trend, 
   color = "primary",
@@ -92,6 +92,22 @@ export const AdvancedStatsCard = ({
     </Card>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const AdvancedStatsCard = React.memo(AdvancedStatsCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.title === nextProps.title &&
+    prevProps.value === nextProps.value &&
+    prevProps.description === nextProps.description &&
+    prevProps.trend?.value === nextProps.trend?.value &&
+    prevProps.trend?.label === nextProps.trend?.label &&
+    prevProps.trend?.period === nextProps.trend?.period &&
+    prevProps.color === nextProps.color &&
+    prevProps.className === nextProps.className
+  );
+});
+
+AdvancedStatsCard.displayName = 'AdvancedStatsCard';
 
 interface RevenueChartProps {
   data: Array<{
@@ -296,8 +312,8 @@ interface PerformanceMetricsProps {
   };
 }
 
-export const PerformanceMetrics = ({ metrics }: PerformanceMetricsProps) => {
-  const metricsData = [
+const PerformanceMetricsComponent = ({ metrics }: PerformanceMetricsProps) => {
+  const metricsData = useMemo(() => [
     {
       title: "Taux de Conversion",
       value: `${metrics.conversionRate}%`,
@@ -346,7 +362,7 @@ export const PerformanceMetrics = ({ metrics }: PerformanceMetricsProps) => {
       color: "indigo",
       trend: { value: 18, label: "vs mois dernier", period: "30j" }
     }
-  ];
+  ], [metrics]);
 
   return (
     <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -364,3 +380,17 @@ export const PerformanceMetrics = ({ metrics }: PerformanceMetricsProps) => {
     </div>
   );
 };
+
+// Optimisation avec React.memo
+export const PerformanceMetrics = React.memo(PerformanceMetricsComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.metrics.conversionRate === nextProps.metrics.conversionRate &&
+    prevProps.metrics.averageOrderValue === nextProps.metrics.averageOrderValue &&
+    prevProps.metrics.customerRetention === nextProps.metrics.customerRetention &&
+    prevProps.metrics.pageViews === nextProps.metrics.pageViews &&
+    prevProps.metrics.bounceRate === nextProps.metrics.bounceRate &&
+    prevProps.metrics.sessionDuration === nextProps.metrics.sessionDuration
+  );
+});
+
+PerformanceMetrics.displayName = 'PerformanceMetrics';

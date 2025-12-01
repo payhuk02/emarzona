@@ -206,8 +206,9 @@ export const OptimizedImage = ({
   // Déterminer si on doit utiliser WebP
   const useWebP = !error && isSupabaseStorageUrl(src) && webpSrc !== originalSrc;
   
-  // Sur mobile, toujours charger en eager pour éviter les disparitions lors du scroll
-  const shouldLoadEager = priority || isMobile;
+  // Charger en eager seulement si priorité ou si c'est une image LCP (première image visible)
+  // Sur mobile, utiliser lazy loading pour améliorer les performances
+  const shouldLoadEager = priority || false; // Ne plus forcer eager sur mobile
 
   return (
     <picture className={cn('relative w-full h-full bg-transparent', className)}>
@@ -229,7 +230,7 @@ export const OptimizedImage = ({
         />
       )}
       
-      {/* Image fallback - Optimisée pour mobile */}
+      {/* Image fallback - Optimisée pour mobile avec dimensions fixes pour CLS */}
       <img
         src={error ? fallback : (webpSrc || originalSrc || src || fallback)}
         alt={alt}
@@ -250,6 +251,12 @@ export const OptimizedImage = ({
         )}
         style={{
           imageRendering: 'crisp-edges',
+          // Dimensions fixes pour éviter CLS (Cumulative Layout Shift)
+          ...(width && height ? {
+            aspectRatio: `${width} / ${height}`,
+            maxWidth: '100%',
+            height: 'auto',
+          } : {}),
           minHeight: isMobile ? '200px' : undefined, // Hauteur minimum sur mobile
           position: 'relative', // S'assurer que l'image reste visible
           zIndex: 1, // S'assurer que l'image est au-dessus

@@ -36,27 +36,43 @@ export const usePrefetchRoutes = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Routes fréquentes à prefetch
+    // Routes fréquentes à prefetch (priorisées par usage)
     const frequentRoutes = [
       '/dashboard',
       '/dashboard/products',
       '/dashboard/orders',
       '/dashboard/analytics',
       '/marketplace',
+      '/cart',
+      '/account',
     ];
 
-    // Prefetch les routes au chargement de la page
-    // Note: React Router gère automatiquement le prefetch via lazy loading
-    // On peut aussi utiliser link prefetch pour les routes fréquentes
-    frequentRoutes.forEach(route => {
-      if (route !== location.pathname) {
-        // Créer un lien invisible pour prefetch
-        const link = document.createElement('link');
-        link.rel = 'prefetch';
-        link.href = route;
-        document.head.appendChild(link);
-      }
-    });
+    // Prefetch les routes au chargement de la page avec délai pour ne pas bloquer
+    // Utiliser requestIdleCallback si disponible, sinon setTimeout
+    const prefetchRoutes = () => {
+      frequentRoutes.forEach((route, index) => {
+        if (route !== location.pathname) {
+          // Délai progressif pour ne pas surcharger le réseau
+          setTimeout(() => {
+            // Créer un lien invisible pour prefetch
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = route;
+            link.as = 'document';
+            document.head.appendChild(link);
+            logger.debug(`Prefetched route: ${route}`);
+          }, index * 200); // 200ms entre chaque prefetch
+        }
+      });
+    };
+
+    // Utiliser requestIdleCallback si disponible (meilleure performance)
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(prefetchRoutes, { timeout: 2000 });
+    } else {
+      // Fallback pour navigateurs sans support
+      setTimeout(prefetchRoutes, 1000);
+    }
   }, [location.pathname]);
 };
 

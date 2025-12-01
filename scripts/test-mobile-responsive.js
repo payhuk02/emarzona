@@ -119,8 +119,8 @@ function runMobileTests() {
   
   // Vérifications spécifiques
   const specificChecks = {
-    sidebarLogoVisible: document.querySelector('.sidebar img[alt="Payhuk"]') !== null,
-    marketplaceLogoVisible: document.querySelector('header img[alt="Payhuk"]') !== null,
+    sidebarLogoVisible: document.querySelector('.sidebar img[alt="Emarzona"]') !== null,
+    marketplaceLogoVisible: document.querySelector('header img[alt="Emarzona"]') !== null,
     profileAvatarVisible: document.querySelector('.profile-settings .avatar') !== null,
     avatarUploadVisible: document.querySelector('.avatar-upload .avatar') !== null
   };

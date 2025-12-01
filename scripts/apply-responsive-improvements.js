@@ -110,13 +110,13 @@ const MobileOptimizedSidebar = () => {
         <div className="p-3 sm:p-4 border-b">
           <div className="flex items-center gap-2">
             <img 
-              src={payhukLogo} 
-              alt="Payhuk" 
+              src="/emarzona-logo.png" 
+              alt="Emarzona" 
               className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0" 
             />
             {!isCollapsed && (
               <span className="text-base sm:text-lg font-bold text-black dark:text-white">
-                Payhuk
+                Emarzona
               </span>
             )}
           </div>

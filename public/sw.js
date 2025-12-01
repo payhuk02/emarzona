@@ -3,9 +3,10 @@
  * Cache des assets statiques et support offline
  */
 
-const CACHE_NAME = 'payhula-v1';
-const STATIC_CACHE_NAME = 'payhula-static-v1';
-const DYNAMIC_CACHE_NAME = 'payhula-dynamic-v1';
+const CACHE_VERSION = 'emarzona-v2';
+const STATIC_CACHE_NAME = `emarzona-static-${CACHE_VERSION}`;
+const DYNAMIC_CACHE_NAME = `emarzona-dynamic-${CACHE_VERSION}`;
+const IMAGE_CACHE_NAME = `emarzona-images-${CACHE_VERSION}`;
 
 // Assets à mettre en cache immédiatement
 const STATIC_ASSETS = [
@@ -31,7 +32,10 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames
           .filter((name) => {
-            return name !== STATIC_CACHE_NAME && name !== DYNAMIC_CACHE_NAME;
+            return !name.startsWith('emarzona-') || 
+                   (name !== STATIC_CACHE_NAME && 
+                    name !== DYNAMIC_CACHE_NAME && 
+                    name !== IMAGE_CACHE_NAME);
           })
           .map((name) => caches.delete(name))
       );
@@ -55,18 +59,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Stratégie Cache First pour les assets statiques
+  // Stratégie Cache First pour les assets statiques (JS, CSS, fonts)
   if (
     url.pathname.startsWith('/assets/') ||
     url.pathname.startsWith('/js/') ||
     url.pathname.startsWith('/css/') ||
-    url.pathname.startsWith('/images/') ||
     url.pathname.endsWith('.js') ||
     url.pathname.endsWith('.css') ||
-    url.pathname.endsWith('.png') ||
-    url.pathname.endsWith('.jpg') ||
-    url.pathname.endsWith('.jpeg') ||
-    url.pathname.endsWith('.svg') ||
     url.pathname.endsWith('.woff') ||
     url.pathname.endsWith('.woff2')
   ) {
@@ -76,7 +75,6 @@ self.addEventListener('fetch', (event) => {
           return cachedResponse;
         }
         return fetch(request).then((response) => {
-          // Ne mettre en cache que les réponses valides
           if (response.status === 200) {
             const responseToCache = response.clone();
             caches.open(STATIC_CACHE_NAME).then((cache) => {
@@ -84,6 +82,40 @@ self.addEventListener('fetch', (event) => {
             });
           }
           return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // Stratégie Cache First avec expiration pour les images
+  if (
+    url.pathname.startsWith('/images/') ||
+    url.pathname.endsWith('.png') ||
+    url.pathname.endsWith('.jpg') ||
+    url.pathname.endsWith('.jpeg') ||
+    url.pathname.endsWith('.webp') ||
+    url.pathname.endsWith('.svg') ||
+    url.pathname.includes('/storage/v1/object/public/') // Supabase Storage
+  ) {
+    event.respondWith(
+      caches.match(request).then((cachedResponse) => {
+        if (cachedResponse) {
+          // Retourner depuis le cache immédiatement
+          return cachedResponse;
+        }
+        // Si pas en cache, fetch et mettre en cache
+        return fetch(request).then((response) => {
+          if (response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(IMAGE_CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return response;
+        }).catch(() => {
+          // En cas d'erreur, retourner une image placeholder si disponible
+          return caches.match('/placeholder.svg');
         });
       })
     );

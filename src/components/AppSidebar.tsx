@@ -60,7 +60,7 @@ import {
   Headphones,
 } from "@/components/icons";
 import { usePlatformLogo } from "@/hooks/usePlatformLogo";
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import {
   Sidebar,
@@ -80,7 +80,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useStoreContext } from "@/contexts/StoreContext";
 import { logger } from "@/lib/logger";
-import { ChevronRight, Check, Plus } from "lucide-react";
+import { ChevronRight, Check, Plus } from "@/components/icons";
 import {
   Collapsible,
   CollapsibleContent,
@@ -875,18 +875,25 @@ export function AppSidebar() {
       <SidebarContent>
         {/* Logo */}
         <div className="p-3 sm:p-4 border-b">
-          <div className="flex items-center gap-2">
+          <Link 
+            to="/dashboard" 
+            className="flex items-center gap-2"
+            aria-label="Retour au tableau de bord Emarzona"
+          >
             {platformLogo ? (
               <img 
                 src={platformLogo} 
-                alt="Emarzona" 
+                alt="Logo Emarzona" 
                 width={40}
                 height={40}
                 className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 object-contain"
                 loading="eager" 
               />
             ) : (
-              <div className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 bg-primary rounded flex items-center justify-center">
+              <div 
+                className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 bg-primary rounded flex items-center justify-center"
+                aria-hidden="true"
+              >
                 <span className="text-sm sm:text-base font-bold text-primary-foreground">E</span>
               </div>
             )}
@@ -895,13 +902,16 @@ export function AppSidebar() {
                 Emarzona
               </span>
             )}
-          </div>
+          </Link>
         </div>
 
         {/* Menu Items - Organisé par sections (masqué sur pages admin) */}
         {!isOnAdminPage && menuSections.map((section) => (
           <SidebarGroup key={section.label}>
-            <SidebarGroupLabel className="!text-black">
+            <SidebarGroupLabel 
+              className="!text-black"
+              aria-label={`Section ${section.label}`}
+            >
               {!isCollapsed && section.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -926,10 +936,13 @@ export function AppSidebar() {
                                   ? "bg-primary/20 text-primary font-semibold border-l-2 border-primary [&_*]:!text-primary"
                                   : "!text-black hover:bg-muted hover:translate-x-1"
                               }`}
+                              aria-label={`${item.title}${!isCollapsed ? ' - Menu déroulant' : ''}`}
+                              aria-expanded={!isCollapsed ? true : undefined}
                             >
                               <div className="flex items-center gap-2">
                                 <IconComponent 
                                   className="h-4 w-4 !text-black flex-shrink-0"
+                                  aria-hidden="true"
                                 />
                                 {!isCollapsed && (
                                   <span className="flex-1 font-medium !text-black">{item.title}</span>

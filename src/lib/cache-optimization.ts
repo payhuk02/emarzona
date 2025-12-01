@@ -30,11 +30,18 @@ export const createOptimizedQueryClient = (): QueryClient => {
         
         // Network mode
         networkMode: 'online', // Seulement si en ligne
+        
+        // Optimisations supplémentaires
+        structuralSharing: true, // Partage structurel pour éviter re-renders
+        notifyOnChangeProps: ['data', 'error'], // Notifier seulement sur data/error
       },
       mutations: {
         // Retry pour les mutations
         retry: 1,
         retryDelay: 1000,
+        
+        // Optimisations mutations
+        networkMode: 'online',
       },
     },
   });
@@ -73,6 +80,25 @@ export const cacheStrategies = {
   analytics: {
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
+  },
+  
+  // Produits (cache agressif car changent peu)
+  products: {
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnWindowFocus: false,
+  },
+  
+  // Commandes (changements fréquents)
+  orders: {
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  },
+  
+  // Recherche (cache court car dépend de la requête)
+  search: {
+    staleTime: 1 * 60 * 1000, // 1 minute
+    gcTime: 5 * 60 * 1000, // 5 minutes
   },
 };
 

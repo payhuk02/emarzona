@@ -12,13 +12,15 @@ import { LoadingBar } from "@/components/navigation/LoadingBar";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { usePrefetch } from "@/hooks/usePrefetch";
-import { PerformanceOptimizer } from "@/components/optimization/PerformanceOptimizer";
-import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
-import { CrispChat } from "@/components/chat/CrispChat";
-import { Require2FABanner } from "@/components/auth/Require2FABanner";
-import { AffiliateLinkTracker } from "@/components/affiliate/AffiliateLinkTracker";
-import { ReferralTracker } from "@/components/referral/ReferralTracker";
-import { CurrencyRatesInitializer } from "@/components/currency/CurrencyRatesInitializer";
+// PerformanceOptimizer - Lazy loaded (non-critique au démarrage)
+const PerformanceOptimizer = lazy(() => import("@/components/optimization/PerformanceOptimizer").then(m => ({ default: m.PerformanceOptimizer })));
+// Composants non-critiques - Lazy loaded pour réduire le bundle initial
+const CookieConsentBanner = lazy(() => import("@/components/legal/CookieConsentBanner").then(m => ({ default: m.CookieConsentBanner })));
+const CrispChat = lazy(() => import("@/components/chat/CrispChat").then(m => ({ default: m.CrispChat })));
+const Require2FABanner = lazy(() => import("@/components/auth/Require2FABanner").then(m => ({ default: m.Require2FABanner })));
+const AffiliateLinkTracker = lazy(() => import("@/components/affiliate/AffiliateLinkTracker").then(m => ({ default: m.AffiliateLinkTracker })));
+const ReferralTracker = lazy(() => import("@/components/referral/ReferralTracker").then(m => ({ default: m.ReferralTracker })));
+const CurrencyRatesInitializer = lazy(() => import("@/components/currency/CurrencyRatesInitializer").then(m => ({ default: m.CurrencyRatesInitializer })));
 import React, { Suspense, lazy, useEffect } from "react";
 import { initSentry } from "@/lib/sentry";
 import { initWebVitals } from "@/lib/web-vitals";
@@ -402,13 +404,16 @@ const AppContent = () => {
       >
         <SkipLink />
         <DynamicFavicon />
-        <PerformanceOptimizer />
-      <LoadingBar />
-      <CurrencyRatesInitializer />
-      <Require2FABanner position="top" />
-      <ScrollToTop />
-      <AffiliateLinkTracker />
-      <ReferralTracker />
+        <LoadingBar />
+        <ScrollToTop />
+        {/* Composants non-critiques lazy-loaded */}
+        <Suspense fallback={null}>
+          <PerformanceOptimizer />
+          <CurrencyRatesInitializer />
+          <Require2FABanner position="top" />
+          <AffiliateLinkTracker />
+          <ReferralTracker />
+        </Suspense>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* --- Routes publiques --- */}
@@ -631,8 +636,11 @@ const AppContent = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
-      <CookieConsentBanner />
-      <CrispChat />
+      {/* Composants non-critiques lazy-loaded - Chargés après le contenu principal */}
+      <Suspense fallback={null}>
+        <CookieConsentBanner />
+        <CrispChat />
+      </Suspense>
       </SentryErrorBoundary>
     </ErrorBoundary>
   );

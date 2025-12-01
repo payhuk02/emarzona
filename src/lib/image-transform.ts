@@ -14,6 +14,11 @@ export interface ImageTransformOptions {
   quality?: number;
   format?: 'webp' | 'jpg' | 'png' | 'avif' | 'origin';
   resize?: 'cover' | 'contain' | 'fill';
+  /**
+   * Détecter automatiquement le meilleur format (AVIF > WebP > original)
+   * @default true
+   */
+  autoFormat?: boolean;
 }
 
 export interface ResponsiveImageSizes {
@@ -47,6 +52,29 @@ export const isSupabaseStorageUrl = (url: string | undefined | null): boolean =>
  * );
  * // => 'https://project.supabase.co/storage/v1/object/public/bucket/image.jpg?width=600&quality=80&format=webp'
  */
+/**
+ * Détecte le meilleur format d'image supporté par le navigateur
+ */
+const getBestSupportedFormat = (): 'avif' | 'webp' | 'origin' => {
+  if (typeof document === 'undefined') return 'webp'; // SSR fallback
+  
+  // Vérifier le support AVIF
+  const avifSupported = document.createElement('canvas')
+    .toDataURL('image/avif')
+    .indexOf('data:image/avif') === 0;
+  
+  if (avifSupported) return 'avif';
+  
+  // Vérifier le support WebP
+  const webpSupported = document.createElement('canvas')
+    .toDataURL('image/webp')
+    .indexOf('data:image/webp') === 0;
+  
+  if (webpSupported) return 'webp';
+  
+  return 'origin';
+};
+
 export const getOptimizedImageUrl = (
   imageUrl: string | undefined | null,
   options: ImageTransformOptions = {}
@@ -57,6 +85,11 @@ export const getOptimizedImageUrl = (
   if (!isSupabaseStorageUrl(imageUrl)) {
     return imageUrl;
   }
+
+  // Détecter le meilleur format si autoFormat est activé
+  const format = options.autoFormat !== false && !options.format
+    ? getBestSupportedFormat()
+    : options.format;
 
   // Construire les paramètres de transformation
   const params = new URLSearchParams();
@@ -73,8 +106,8 @@ export const getOptimizedImageUrl = (
     params.append('quality', Math.min(100, Math.max(1, options.quality)).toString());
   }
 
-  if (options.format) {
-    params.append('format', options.format);
+  if (format && format !== 'origin') {
+    params.append('format', format);
   }
 
   if (options.resize) {

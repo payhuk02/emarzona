@@ -115,7 +115,7 @@ export default defineConfig(({ mode }) => {
       
       // Configuration release
       release: {
-        name: env.VERCEL_GIT_COMMIT_SHA || `payhuk-${Date.now()}`,
+        name: env.VERCEL_GIT_COMMIT_SHA || `emarzona-${Date.now()}`,
         deploy: {
           env: env.VERCEL_ENV || 'production',
         },
@@ -372,11 +372,47 @@ export default defineConfig(({ mode }) => {
               return 'i18n';
             }
             
+            // Dépendances utilitaires non-React - Séparer en chunks dédiés
+            // lodash - Séparer (ne dépend pas de React)
+            if (id.includes('node_modules/lodash')) {
+              return 'utils';
+            }
+            
+            // classnames/clsx - Séparer (ne dépend pas de React)
+            if (id.includes('node_modules/clsx') || id.includes('node_modules/classnames')) {
+              return 'utils';
+            }
+            
+            // nanoid - Séparer (ne dépend pas de React)
+            if (id.includes('node_modules/nanoid')) {
+              return 'utils';
+            }
+            
             // CRITIQUE: Par défaut, garder TOUTES les dépendances node_modules dans le chunk principal
             // pour éviter les erreurs React (forwardRef, createContext, useLayoutEffect, etc.)
             // Seules les dépendances explicitement identifiées comme non-React peuvent être séparées
             // Cette approche conservative garantit que React est toujours disponible
             return undefined; // Garder dans le chunk principal par défaut
+          }
+          
+          // Séparer les pages admin en chunk dédié (lazy-loaded)
+          if (id.includes('src/pages/admin')) {
+            return 'admin';
+          }
+          
+          // Séparer les composants de création de produits en chunk dédié
+          if (id.includes('src/components/products/create')) {
+            return 'product-creation';
+          }
+          
+          // Séparer les composants de marketplace en chunk dédié
+          if (id.includes('src/components/marketplace')) {
+            return 'marketplace';
+          }
+          
+          // Séparer les composants de dashboard en chunk dédié
+          if (id.includes('src/components/dashboard')) {
+            return 'dashboard';
           }
         },
         // Optimisation des noms de chunks

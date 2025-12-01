@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Star, Percent, Loader2, Shield, MessageSquare, Eye, Store, CheckCircle, TrendingUp } from "lucide-react";
+import { ShoppingCart, Star, Percent, Shield, MessageSquare, Eye, Store, CheckCircle2, TrendingUp, Loader2 } from "@/components/icons";
 import { initiateMonerooPayment } from "@/lib/moneroo-payment";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -152,21 +152,21 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
               {hasPromo && (
                 <div className="product-badge" role="img" aria-label={`Réduction de ${discountPercent}%`}>
                   <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
-                    <Percent className="h-3 w-3" /> -{discountPercent}%
+                    <Percent className="h-3 w-3" aria-hidden="true" /> -{discountPercent}%
                   </div>
                 </div>
               )}
               {(product as any).licensing_type === 'plr' && (
                 <div className="product-badge">
                   <div className="bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1" aria-label="Licence PLR" title="PLR (Private Label Rights) : peut être modifié et revendu selon conditions">
-                    <Shield className="h-3 w-3" /> PLR
+                    <Shield className="h-3 w-3" aria-hidden="true" /> PLR
                   </div>
                 </div>
               )}
               {(product as any).licensing_type === 'copyrighted' && (
                 <div className="product-badge">
                   <div className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1" aria-label="Protégé par droit d'auteur" title="Protégé par droit d'auteur : revente/modification non autorisées">
-                    <Shield className="h-3 w-3" /> Droit d'auteur
+                    <Shield className="h-3 w-3" aria-hidden="true" /> Droit d'auteur
                   </div>
                 </div>
               )}
@@ -197,7 +197,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
               <span className="text-xs sm:text-sm font-semibold text-white truncate">
                 {storeInfo.name}
               </span>
-              <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500 flex-shrink-0 -ml-2" aria-label="Vendeur vérifié" />
+              <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500 flex-shrink-0 -ml-2" aria-label="Vendeur vérifié" aria-hidden="true" />
             </div>
           )}
           {product.category && (

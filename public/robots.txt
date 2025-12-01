@@ -1,5 +1,5 @@
-# robots.txt - Payhuk SaaS E-Commerce Platform
-# Mise à jour : 26 Octobre 2025
+# robots.txt - Emarzona SaaS E-Commerce Platform
+# Mise à jour : Février 2025
 # Objectif : Optimiser le crawl des moteurs de recherche
 
 # =============================================================================
@@ -87,15 +87,15 @@ Disallow: /
 # SITEMAP
 # =============================================================================
 
-Sitemap: https://payhuk.com/sitemap.xml
-Sitemap: https://www.payhuk.com/sitemap.xml
+Sitemap: https://emarzona.com/sitemap.xml
+Sitemap: https://www.emarzona.com/sitemap.xml
 
 # =============================================================================
 # INFORMATIONS
 # =============================================================================
 
-# Contact: support@payhuk.com
-# Site: https://payhuk.com
+# Contact: support@emarzona.com
+# Site: https://emarzona.com
 # Politique de crawl : Respecter un délai de 1 seconde entre requêtes
 
 # Crawl-delay: 1

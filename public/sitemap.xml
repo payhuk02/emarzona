@@ -4,22 +4,22 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   <!-- Sitemap généré automatiquement le 2025-10-26T11:31:48.765Z -->
-  <!-- Plateforme: Payhuk SaaS E-Commerce -->
+  <!-- Plateforme: Emarzona SaaS E-Commerce -->
   
   <url>
-    <loc>https://payhuk.com/</loc>
+    <loc>https://emarzona.com/</loc>
     <lastmod>2025-10-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>1</priority>
   </url>
   <url>
-    <loc>https://payhuk.com/marketplace</loc>
+    <loc>https://emarzona.com/marketplace</loc>
     <lastmod>2025-10-26</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://payhuk.com/auth</loc>
+    <loc>https://emarzona.com/auth</loc>
     <lastmod>2025-10-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>

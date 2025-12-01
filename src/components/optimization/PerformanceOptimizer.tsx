@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { getPerformanceMonitor } from '@/lib/performance-monitor';
 
 /**
  * Composant d'optimisation des performances mobile
@@ -163,6 +164,16 @@ export const PerformanceOptimizer = () => {
   const preferences = useUserPreferences();
 
   useEffect(() => {
+    // Initialiser le monitoring des performances
+    const monitor = getPerformanceMonitor();
+    
+    // Logger le rapport de performance après 5 secondes
+    setTimeout(() => {
+      const report = monitor.getReport();
+      if (import.meta.env.DEV) {
+        console.log('📊 Performance Report:', report);
+      }
+    }, 5000);
     // Appliquer les préférences utilisateur
     if (preferences.reducedMotion) {
       document.documentElement.classList.add('reduce-motion');
