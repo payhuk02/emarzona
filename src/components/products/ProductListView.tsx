@@ -1,3 +1,4 @@
+import React from "react";
 import { Product } from "@/hooks/useProducts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -280,4 +281,12 @@ const ProductListView = ({
   );
 };
 
-export default ProductListView;
+export default React.memo(ProductListView, (prevProps, nextProps) => {
+  return (
+    prevProps.product.id === nextProps.product.id &&
+    prevProps.product.updated_at === nextProps.product.updated_at &&
+    prevProps.product.is_active === nextProps.product.is_active &&
+    prevProps.product.price === nextProps.product.price &&
+    prevProps.isSelected === nextProps.isSelected
+  );
+});

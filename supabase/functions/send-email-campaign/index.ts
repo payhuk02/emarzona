@@ -116,27 +116,15 @@ async function getRecipients(
   const recipients: Recipient[] = [];
 
   try {
-    // Fonction helper pour exclure les unsubscribed
-    const excludeUnsubscribed = (query: any) => {
-      // Exclure les emails désabonnés (all ou marketing)
-      // Utiliser une sous-requête pour vérifier l'absence dans email_unsubscribes
-      return query.not('email', 'in', 
-        `(SELECT email FROM email_unsubscribes WHERE unsubscribe_type IN ('all', 'marketing'))`
-      );
-    };
-
     switch (campaign.audience_type) {
       case 'segment':
         // Récupérer les membres du segment
         if (campaign.segment_id) {
-          // Pour les segments, on récupère via la fonction calculate_dynamic_segment_members
-          // ou depuis les membres statiques, puis on filtre les unsubscribed
           const { data: segmentMembers } = await supabase
             .from('email_segments')
             .select(`
               id,
               criteria,
-              type,
               customers:customers!inner (
                 email,
                 first_name,
@@ -148,61 +136,7 @@ async function getRecipients(
             .single();
 
           if (segmentMembers?.customers) {
-            // Filtrer les unsubscribed
-            const { data: unsubscribedEmails } = await supabase
-              .from('email_unsubscribes')
-              .select('email')
-              .in('unsubscribe_type', ['all', 'marketing']);
-
-            const unsubscribedSet = new Set(
-              (unsubscribedEmails || []).map((u: any) => u.email.toLowerCase())
-            );
-
-            segmentMembers.customers
-              .slice(offset, offset + batchSize)
-              .filter((customer: any) => !unsubscribedSet.has(customer.email?.toLowerCase()))
-              .forEach((customer: any) => {
-                recipients.push({
-                  email: customer.email,
-                  name: customer.first_name || customer.last_name 
-                    ? `${customer.first_name || ''} ${customer.last_name || ''}`.trim() 
-                    : undefined,
-                  user_id: customer.id,
-                });
-              });
-          }
-        }
-        break;
-
-      case 'list':
-        // TODO: Implémenter la récupération depuis une liste d'emails
-        // Pour l'instant, on récupère tous les clients de la boutique
-        let listQuery = supabase
-          .from('customers')
-          .select('email, first_name, last_name, id')
-          .eq('store_id', campaign.store_id);
-
-        // Exclure les unsubscribed via une sous-requête
-        // Note: Supabase ne supporte pas directement NOT IN avec sous-requête
-        // On va filtrer après récupération pour l'instant
-        const { data: customers } = await listQuery.range(offset, offset + batchSize - 1);
-
-        if (customers && customers.length > 0) {
-          // Récupérer les emails désabonnés
-          const customerEmails = customers.map((c: any) => c.email);
-          const { data: unsubscribed } = await supabase
-            .from('email_unsubscribes')
-            .select('email')
-            .in('email', customerEmails)
-            .in('unsubscribe_type', ['all', 'marketing']);
-
-          const unsubscribedSet = new Set(
-            (unsubscribed || []).map((u: any) => u.email.toLowerCase())
-          );
-
-          customers
-            .filter((customer: any) => !unsubscribedSet.has(customer.email?.toLowerCase()))
-            .forEach((customer: any) => {
+            segmentMembers.customers.slice(offset, offset + batchSize).forEach((customer: any) => {
               recipients.push({
                 email: customer.email,
                 name: customer.first_name || customer.last_name 
@@ -211,6 +145,29 @@ async function getRecipients(
                 user_id: customer.id,
               });
             });
+          }
+        }
+        break;
+
+      case 'list':
+        // TODO: Implémenter la récupération depuis une liste d'emails
+        // Pour l'instant, on récupère tous les clients de la boutique
+        const { data: customers } = await supabase
+          .from('customers')
+          .select('email, first_name, last_name, id')
+          .eq('store_id', campaign.store_id)
+          .range(offset, offset + batchSize - 1);
+
+        if (customers) {
+          customers.forEach((customer: any) => {
+            recipients.push({
+              email: customer.email,
+              name: customer.first_name || customer.last_name 
+                ? `${customer.first_name || ''} ${customer.last_name || ''}`.trim() 
+                : undefined,
+              user_id: customer.id,
+            });
+          });
         }
         break;
 
@@ -228,32 +185,19 @@ async function getRecipients(
           query = query.not('id', 'is', null); // Simplifié - à améliorer avec une vraie jointure
         }
 
-        const { data: filteredCustomers } = await query.range(offset, offset + batchSize - 1);
+        const { data: filteredCustomers } = await query
+          .range(offset, offset + batchSize - 1);
 
-        if (filteredCustomers && filteredCustomers.length > 0) {
-          // Récupérer les emails désabonnés
-          const customerEmails = filteredCustomers.map((c: any) => c.email);
-          const { data: unsubscribed } = await supabase
-            .from('email_unsubscribes')
-            .select('email')
-            .in('email', customerEmails)
-            .in('unsubscribe_type', ['all', 'marketing']);
-
-          const unsubscribedSet = new Set(
-            (unsubscribed || []).map((u: any) => u.email.toLowerCase())
-          );
-
-          filteredCustomers
-            .filter((customer: any) => !unsubscribedSet.has(customer.email?.toLowerCase()))
-            .forEach((customer: any) => {
-              recipients.push({
-                email: customer.email,
-                name: customer.first_name || customer.last_name 
-                  ? `${customer.first_name || ''} ${customer.last_name || ''}`.trim() 
-                  : undefined,
-                user_id: customer.id,
-              });
+        if (filteredCustomers) {
+          filteredCustomers.forEach((customer: any) => {
+            recipients.push({
+              email: customer.email,
+              name: customer.first_name || customer.last_name 
+                ? `${customer.first_name || ''} ${customer.last_name || ''}`.trim() 
+                : undefined,
+              user_id: customer.id,
             });
+          });
         }
         break;
     }
@@ -527,13 +471,11 @@ serve(async (req) => {
     let errorCount = 0;
 
     for (const recipient of recipients) {
-      // Note: Les unsubscribed sont déjà filtrés dans getRecipients()
-      // Cette vérification est une sécurité supplémentaire (peut être supprimée pour performance)
+      // Vérifier si l'utilisateur n'est pas désabonné
       const { data: unsubscribe } = await supabase
         .from('email_unsubscribes')
         .select('id')
-        .eq('email', recipient.email.toLowerCase())
-        .in('unsubscribe_type', ['all', 'marketing'])
+        .eq('email', recipient.email)
         .maybeSingle();
 
       if (unsubscribe) {

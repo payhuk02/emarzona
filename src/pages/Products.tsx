@@ -1,8 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
+import { MainLayout } from "@/components/layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +18,8 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Loader2,
-  AlertTriangle
+  AlertTriangle,
+  SlidersHorizontal
 } from "lucide-react";
 import { useStore } from "@/hooks/useStore";
 import { useProducts } from "@/hooks/useProducts";
@@ -58,6 +58,7 @@ import { ProductGrid } from "@/components/ui/ProductGrid";
 import { Checkbox } from "@/components/ui/checkbox";
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 // Constantes pour la pagination
 const ITEMS_PER_PAGE = 12;
@@ -78,6 +79,7 @@ const Products = () => {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [exportingCSV, setExportingCSV] = useState(false);
+  const [filtersDrawerOpen, setFiltersDrawerOpen] = useState(false);
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -113,7 +115,7 @@ const Products = () => {
   } = useProductsOptimized(store?.id, {
     page: currentPage,
     itemsPerPage,
-    sortBy: sortBy as any,
+    sortBy: sortBy as 'recent' | 'oldest' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc' | 'popular' | 'rating',
     sortOrder: sortBy.includes('desc') || sortBy === 'popular' || sortBy === 'rating' ? 'desc' : 'asc',
     searchQuery: debouncedSearchQuery,
     category: debouncedCategory === 'all' ? undefined : debouncedCategory,
@@ -243,7 +245,7 @@ const Products = () => {
           title: "Produit supprimé",
           description: "Le produit a été supprimé avec succès",
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error(error instanceof Error ? error : 'Erreur lors de la suppression du produit', { error, productId: deletingProductId });
         toast({
           title: "Erreur",
@@ -265,7 +267,7 @@ const Products = () => {
         title: "Produits supprimés",
         description: `${productIds.length} produit(s) supprimé(s) avec succès`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error(error instanceof Error ? error : 'Erreur lors de la suppression en lot', { error, productIds });
       toast({
         title: "Erreur",
@@ -287,7 +289,7 @@ const Products = () => {
         title: "Action appliquée",
         description: `${productIds.length} produit(s) ${action === 'activate' ? 'activé(s)' : 'désactivé(s)'}`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error(error instanceof Error ? error : `Erreur lors de l'action en lot ${action}`, { error, action, productIds });
       toast({
         title: "Erreur",
@@ -310,7 +312,7 @@ const Products = () => {
           title: product.is_active ? "Produit désactivé" : "Produit activé",
           description: `Le produit a été ${product.is_active ? 'désactivé' : 'activé'} avec succès`,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error(error instanceof Error ? error : 'Erreur lors du changement de statut', { error, productId });
         toast({
           title: "Erreur",
@@ -331,7 +333,7 @@ const Products = () => {
   }, [refetch, toast]);
 
   // Handlers génériques mémorisés pour les actions sur produits (utilisés dans map)
-  const handleProductEdit = useCallback((product: any) => {
+  const handleProductEdit = useCallback((product: Product) => {
     setEditingProduct(product);
   }, []);
 
@@ -415,7 +417,7 @@ const Products = () => {
     handleDuplicateProduct(productId);
   }, [handleDuplicateProduct]);
 
-  const handleProductQuickView = useCallback((product: any) => {
+  const handleProductQuickView = useCallback((product: Product) => {
     setQuickViewProduct(product);
   }, []);
 
@@ -428,7 +430,7 @@ const Products = () => {
   }, []);
 
   // Import CSV avec validation
-  const handleImportConfirmed = useCallback(async (validatedProducts: any[]) => {
+  const handleImportConfirmed = useCallback(async (validatedProducts: Product[]) => {
     try {
       // Ici, vous devriez appeler votre API pour créer les produits
       // Pour l'instant, simulons l'import
@@ -500,7 +502,7 @@ const Products = () => {
         title: "Export réussi",
         description: `${filteredProducts.length} produit(s) exporté(s)`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error(error instanceof Error ? error : 'Erreur lors de l\'export CSV', { error, count: filteredProducts.length });
       toast({
         title: "Erreur d'export",
@@ -526,63 +528,50 @@ const Products = () => {
 
   if (storeLoading) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full">
-          <AppSidebar />
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <Loader2 className="inline-block h-8 w-8 animate-spin text-primary" />
-              <p className="mt-2 text-muted-foreground">{t('products.loadingProducts')}</p>
-            </div>
+      <MainLayout layoutType="products">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Loader2 className="inline-block h-8 w-8 animate-spin text-primary" />
+            <p className="mt-2 text-muted-foreground">{t('products.loadingProducts')}</p>
           </div>
         </div>
-      </SidebarProvider>
+      </MainLayout>
     );
   }
 
   if (!store) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full">
-          <AppSidebar />
-          <div className="flex-1 flex items-center justify-center">
-            <Card className="max-w-md">
-              <CardHeader className="text-center">
-                <div className="flex justify-center mb-4">
-                  <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-                    <Package className="h-8 w-8 text-muted-foreground" />
-                  </div>
+      <MainLayout layoutType="products">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="max-w-md">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                  <Package className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <CardTitle>{t('products.createStoreFirst')}</CardTitle>
-                <CardDescription>
-                  {t('products.createStoreDescription')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-center">
-                <Button onClick={() => navigate("/dashboard/store")}>
-                  {t('products.createMyStore')}
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+              <CardTitle>{t('products.createStoreFirst')}</CardTitle>
+              <CardDescription>
+                {t('products.createStoreDescription')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Button onClick={() => navigate("/dashboard/store")}>
+                {t('products.createMyStore')}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-      </SidebarProvider>
+      </MainLayout>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-            {/* Header avec animation - Style Inventaire et Mes Cours */}
-            <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <SidebarTrigger 
-                  aria-label={t('dashboard.sidebarToggle', 'Toggle sidebar')}
-                  className="hover:bg-accent/50 transition-colors duration-200 flex-shrink-0 touch-manipulation min-h-[44px] min-w-[44px]"
-                />
+    <MainLayout layoutType="products">
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+        {/* Header avec animation - Style Inventaire et Mes Cours */}
+        <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="flex items-center gap-2 sm:gap-3">
                 <div>
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
                     <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
@@ -683,34 +672,93 @@ const Products = () => {
                     </div>
                   )}
 
-                  {/* Filtres avec animations */}
+                  {/* Filtres avec animations - Desktop visible, Mobile dans drawer */}
+                  {/* Desktop: Filtres visibles */}
                   <div 
                     ref={filtersRef} 
                     role="region" 
                     aria-label={t('products.filters.ariaLabel', 'Filtres de recherche')}
-                    className="animate-in fade-in slide-in-from-bottom-2 duration-500"
+                    className="hidden lg:block animate-in fade-in slide-in-from-bottom-2 duration-500"
                   >
                     <ProductFiltersDashboard
-                    searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
-                    searchInputRef={searchInputRef}
-                    category={category}
-                    onCategoryChange={setCategory}
-                    productType={productType}
-                    onProductTypeChange={setProductType}
-                    status={status}
-                    onStatusChange={setStatus}
-                    stockStatus={stockStatus}
-                    onStockStatusChange={setStockStatus}
-                    sortBy={sortBy}
-                    onSortByChange={setSortBy}
-                    categories={categories}
-                    productTypes={productTypes}
-                    viewMode={viewMode}
-                    onViewModeChange={setViewMode}
-                    totalProducts={products.length}
-                    activeProducts={activeProducts}
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                      searchInputRef={searchInputRef}
+                      category={category}
+                      onCategoryChange={setCategory}
+                      productType={productType}
+                      onProductTypeChange={setProductType}
+                      status={status}
+                      onStatusChange={setStatus}
+                      stockStatus={stockStatus}
+                      onStockStatusChange={setStockStatus}
+                      sortBy={sortBy}
+                      onSortByChange={setSortBy}
+                      categories={categories}
+                      productTypes={productTypes}
+                      viewMode={viewMode}
+                      onViewModeChange={setViewMode}
+                      totalProducts={products.length}
+                      activeProducts={activeProducts}
                     />
+                  </div>
+
+                  {/* Mobile/Tablet: Bouton pour ouvrir drawer */}
+                  <div className="lg:hidden">
+                    <Sheet open={filtersDrawerOpen} onOpenChange={setFiltersDrawerOpen}>
+                      <SheetTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          className="w-full min-h-[44px] touch-manipulation"
+                          aria-label="Ouvrir les filtres"
+                        >
+                          <SlidersHorizontal className="h-4 w-4 mr-2" />
+                          Filtres
+                          {(category !== "all" || productType !== "all" || status !== "all" || stockStatus !== "all" || searchQuery) && (
+                            <Badge variant="default" className="ml-2">
+                              {[category !== "all", productType !== "all", status !== "all", stockStatus !== "all", searchQuery].filter(Boolean).length}
+                            </Badge>
+                          )}
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+                        <SheetHeader>
+                          <SheetTitle>Filtres de recherche</SheetTitle>
+                          <SheetDescription>
+                            Utilisez les filtres ci-dessous pour affiner votre recherche de produits
+                          </SheetDescription>
+                        </SheetHeader>
+                        <div className="mt-6">
+                          <ProductFiltersDashboard
+                            searchQuery={searchQuery}
+                            onSearchChange={(value) => {
+                              setSearchQuery(value);
+                              // Fermer le drawer après un court délai si recherche effectuée
+                              if (value) {
+                                setTimeout(() => setFiltersDrawerOpen(false), 500);
+                              }
+                            }}
+                            searchInputRef={searchInputRef}
+                            category={category}
+                            onCategoryChange={setCategory}
+                            productType={productType}
+                            onProductTypeChange={setProductType}
+                            status={status}
+                            onStatusChange={setStatus}
+                            stockStatus={stockStatus}
+                            onStockStatusChange={setStockStatus}
+                            sortBy={sortBy}
+                            onSortByChange={setSortBy}
+                            categories={categories}
+                            productTypes={productTypes}
+                            viewMode={viewMode}
+                            onViewModeChange={setViewMode}
+                            totalProducts={products.length}
+                            activeProducts={activeProducts}
+                          />
+                        </div>
+                      </SheetContent>
+                    </Sheet>
                   </div>
 
                   {filteredProducts.length === 0 ? (
@@ -964,23 +1012,21 @@ const Products = () => {
                   )}
                 </>
               )}
-          </div>
-        </main>
-      </div>
+        </div>
 
-      {/* Edit Product Dialog */}
-      {editingProduct && (
-        <EditProductDialog
-          product={editingProduct}
-          storeSlug={store.slug}
-          open={!!editingProduct}
-          onOpenChange={(open) => !open && setEditingProduct(null)}
-          onProductUpdated={refetch}
-        />
-      )}
+        {/* Edit Product Dialog */}
+        {editingProduct && (
+          <EditProductDialog
+            product={editingProduct}
+            storeSlug={store.slug}
+            open={!!editingProduct}
+            onOpenChange={(open) => !open && setEditingProduct(null)}
+            onProductUpdated={refetch}
+          />
+        )}
 
-      {/* Delete Product Dialog */}
-      <AlertDialog open={!!deletingProductId} onOpenChange={(open) => !open && setDeletingProductId(null)}>
+        {/* Delete Product Dialog */}
+        <AlertDialog open={!!deletingProductId} onOpenChange={(open) => !open && setDeletingProductId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('products.delete.title')}</AlertDialogTitle>
@@ -995,17 +1041,17 @@ const Products = () => {
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+        </AlertDialog>
 
-      {/* Import CSV Dialog - Nouveau avec validation */}
-      <ImportCSVDialog
-        open={importDialogOpen}
-        onOpenChange={setImportDialogOpen}
-        onImportConfirmed={handleImportConfirmed}
-      />
+        {/* Import CSV Dialog - Nouveau avec validation */}
+        <ImportCSVDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          onImportConfirmed={handleImportConfirmed}
+        />
 
-      {/* Quick View Dialog */}
-      {quickViewProduct && (
+        {/* Quick View Dialog */}
+        {quickViewProduct && (
         <Dialog open={!!quickViewProduct} onOpenChange={(open) => !open && setQuickViewProduct(null)}>
           <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
@@ -1093,7 +1139,7 @@ const Products = () => {
           </DialogContent>
         </Dialog>
       )}
-    </SidebarProvider>
+    </MainLayout>
   );
 };
 

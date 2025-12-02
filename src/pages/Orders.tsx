@@ -7,8 +7,7 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
+import { MainLayout } from "@/components/layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +29,7 @@ import {
   CheckCircle2,
   Clock,
   DollarSign,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useStore } from "@/hooks/useStore";
 import { useOrders, SortColumn, SortDirection } from "@/hooks/useOrders";
@@ -44,6 +44,7 @@ import { isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 type ViewMode = 'grid' | 'list';
 
@@ -64,6 +65,7 @@ const Orders = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [error, setError] = useState<string | null>(null);
+  const [filtersDrawerOpen, setFiltersDrawerOpen] = useState(false);
 
   // Fetch orders with error handling
   const { orders, loading: ordersLoading, totalCount, error: ordersError, refetch } = useOrders(store?.id, { 
@@ -158,7 +160,7 @@ const Orders = () => {
         title: t('orders.toast.success', '✅ Export réussi'),
         description: t('orders.toast.exported', '{{count}} commande(s) exportée(s)', { count: filteredOrders.length }),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Erreur lors de l\'export CSV', error);
       toast({
         title: t('orders.toast.error', '❌ Erreur'),
@@ -248,140 +250,128 @@ const Orders = () => {
   // Loading state
   if (storeLoading) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full overflow-x-hidden">
-          <AppSidebar />
-          <main className="flex-1 p-3 sm:p-4 lg:p-6">
-            <Skeleton className="h-8 w-64 mb-6" />
-            <Skeleton className="h-96 w-full" />
-          </main>
+      <MainLayout layoutType="orders">
+        <div className="container mx-auto p-3 sm:p-4 lg:p-6">
+          <Skeleton className="h-8 w-64 mb-6" />
+          <Skeleton className="h-96 w-full" />
         </div>
-      </SidebarProvider>
+      </MainLayout>
     );
   }
 
   // No store state
   if (!store) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full overflow-x-hidden">
-          <AppSidebar />
-          <main className="flex-1 p-3 sm:p-4 lg:p-6">
-            <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-orange-500" />
-                  {t('orders.noStore.title', 'Boutique non configurée')}
-                </CardTitle>
-                <CardDescription>
-                  {t('orders.noStore.description', 'Veuillez d\'abord créer votre boutique pour gérer vos commandes.')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button onClick={() => navigate('/dashboard/store')}>
-                  {t('orders.noStore.createStore', 'Créer une boutique')}
-                </Button>
-              </CardContent>
-            </Card>
-          </main>
+      <MainLayout layoutType="orders">
+        <div className="container mx-auto p-3 sm:p-4 lg:p-6">
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-orange-500" />
+                {t('orders.noStore.title', 'Boutique non configurée')}
+              </CardTitle>
+              <CardDescription>
+                {t('orders.noStore.description', 'Veuillez d\'abord créer votre boutique pour gérer vos commandes.')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => navigate('/dashboard/store')}>
+                {t('orders.noStore.createStore', 'Créer une boutique')}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-      </SidebarProvider>
+      </MainLayout>
     );
   }
 
   // Error state
   if (error) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full overflow-x-hidden">
-          <AppSidebar />
-          <main className="flex-1 p-3 sm:p-4 lg:p-6">
-            <Card className="border-red-500/50 bg-red-50 dark:bg-red-950/30 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
-                  <AlertCircle className="h-5 w-5" />
-                  {t('orders.error.title', 'Erreur')}
-                </CardTitle>
-                <CardDescription className="text-red-700 dark:text-red-300">
-                  {error}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button onClick={handleRefresh} variant="outline">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  {t('orders.retry', 'Réessayer')}
-                </Button>
-              </CardContent>
-            </Card>
-          </main>
+      <MainLayout layoutType="orders">
+        <div className="container mx-auto p-3 sm:p-4 lg:p-6">
+          <Card className="border-red-500/50 bg-red-50 dark:bg-red-950/30 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                <AlertCircle className="h-5 w-5" />
+                {t('orders.error.title', 'Erreur')}
+              </CardTitle>
+              <CardDescription className="text-red-700 dark:text-red-300">
+                {error}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={handleRefresh} variant="outline">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                {t('orders.retry', 'Réessayer')}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-      </SidebarProvider>
+      </MainLayout>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background overflow-x-hidden">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto" role="main" aria-labelledby="orders-title">
-          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-            {/* Header - Responsive & Animated */}
-            <div 
-              ref={headerRef}
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
-              role="banner"
+    <MainLayout layoutType="orders">
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+        {/* Header - Responsive & Animated */}
+        <div 
+          ref={headerRef}
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+          role="banner"
+        >
+          <div>
+            <h1 
+              className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight mb-1 sm:mb-2 flex items-center gap-2"
+              id="orders-title"
             >
-              <div>
-                <h1 
-                  className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight mb-1 sm:mb-2 flex items-center gap-2"
-                  id="orders-title"
-                >
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm border border-blue-500/20 animate-in zoom-in duration-500">
-                    <Package className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-blue-500 dark:text-blue-400" aria-hidden="true" />
-                  </div>
-                  <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                    {t('orders.title', 'Commandes')}
-                  </span>
-                </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
-                  {t('orders.subtitle', 'Gérez toutes vos commandes et suivez leurs statuts')}
-                </p>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm border border-blue-500/20 animate-in zoom-in duration-500">
+                <Package className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-blue-500 dark:text-blue-400" aria-hidden="true" />
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={handleExportCSV} 
-                  disabled={!orders || orders.length === 0}
-                  className="min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
-                  aria-label={t('orders.export', 'Exporter')}
-                >
-                  <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                  <span className="hidden sm:inline">{t('orders.export', 'Exporter')}</span>
-                  <span className="sm:hidden">{t('orders.exportShort', 'Export')}</span>
-                </Button>
-                <Button 
-                  onClick={() => {
-                    setIsCreateDialogOpen(true);
-                    logger.info('Ouverture dialog création commande');
-                  }}
-                  className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
-                  aria-label={t('orders.new', 'Nouvelle commande')}
-                >
-                  <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                  <span className="hidden sm:inline">{t('orders.new', 'Nouvelle commande')}</span>
-                  <span className="sm:hidden">{t('orders.newShort', 'Nouveau')}</span>
-                  <Badge variant="secondary" className="ml-1.5 hidden sm:flex text-[10px]">
-                    ⌘N
-                  </Badge>
-                </Button>
-              </div>
-            </div>
+              <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                {t('orders.title', 'Commandes')}
+              </span>
+            </h1>
+            <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+              {t('orders.subtitle', 'Gérez toutes vos commandes et suivez leurs statuts')}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handleExportCSV} 
+              disabled={!orders || orders.length === 0}
+              className="min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
+              aria-label={t('orders.export', 'Exporter')}
+            >
+              <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+              <span className="hidden sm:inline">{t('orders.export', 'Exporter')}</span>
+              <span className="sm:hidden">{t('orders.exportShort', 'Export')}</span>
+            </Button>
+            <Button 
+              onClick={() => {
+                setIsCreateDialogOpen(true);
+                logger.info('Ouverture dialog création commande');
+              }}
+              className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
+              aria-label={t('orders.new', 'Nouvelle commande')}
+            >
+              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+              <span className="hidden sm:inline">{t('orders.new', 'Nouvelle commande')}</span>
+              <span className="sm:hidden">{t('orders.newShort', 'Nouveau')}</span>
+              <Badge variant="secondary" className="ml-1.5 hidden sm:flex text-[10px]">
+                ⌘N
+              </Badge>
+            </Button>
+          </div>
+        </div>
 
-            {/* Stats Cards - Responsive */}
-            <div 
-              ref={statsRef}
-              className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
-            >
+        {/* Stats Cards - Responsive */}
+        <div 
+          ref={statsRef}
+          className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
+        >
               {[
                 { 
                   label: t('orders.stats.total', 'Total'), 
@@ -429,11 +419,11 @@ const Orders = () => {
                   </Card>
                 );
               })}
-            </div>
+        </div>
 
-            {/* Search, Filters & View Toggle - Responsive */}
-            <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <CardContent className="p-3 sm:p-4">
+        {/* Search, Filters & View Toggle - Responsive */}
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <CardContent className="p-3 sm:p-4">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                   {/* Search */}
                   <div className="flex-1 relative">
@@ -505,110 +495,151 @@ const Orders = () => {
                     </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
 
-            {/* Filters */}
-            <div 
-              ref={filtersRef} 
-              role="region" 
-              aria-label={t('orders.filters.ariaLabel', 'Filtres de recherche des commandes')}
-              className="animate-in fade-in slide-in-from-bottom-4 duration-700"
-            >
-            <OrderFilters
-                searchQuery={searchInput}
-                onSearchChange={setSearchInput}
-              statusFilter={statusFilter}
-              onStatusChange={setStatusFilter}
-              paymentStatusFilter={paymentStatusFilter}
-              onPaymentStatusChange={setPaymentStatusFilter}
-              dateRange={dateRange}
-              onDateRangeChange={setDateRange}
-            />
-            </div>
+        {/* Filters - Desktop visible, Mobile dans drawer */}
+        {/* Desktop: Filtres visibles */}
+        <div 
+          ref={filtersRef} 
+          role="region" 
+          aria-label={t('orders.filters.ariaLabel', 'Filtres de recherche des commandes')}
+          className="hidden lg:block animate-in fade-in slide-in-from-bottom-4 duration-700"
+        >
+          <OrderFilters
+            searchQuery={searchInput}
+            onSearchChange={setSearchInput}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            paymentStatusFilter={paymentStatusFilter}
+            onPaymentStatusChange={setPaymentStatusFilter}
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+          />
+        </div>
 
-            {/* Orders Content */}
-            {ordersLoading ? (
-              <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-6" role="status" aria-live="polite">
-                  <div className="flex items-center justify-center gap-3 py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    <span className="text-sm text-muted-foreground">
-                      {t('orders.loading', 'Chargement des commandes...')}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : filteredOrders && filteredOrders.length > 0 ? (
-              <div 
-                ref={ordersRef} 
-                role="region" 
-                aria-label={t('orders.list.ariaLabel', 'Liste des commandes')}
-                className="animate-in fade-in slide-in-from-bottom-4 duration-700"
+        {/* Mobile/Tablet: Bouton pour ouvrir drawer */}
+        <div className="lg:hidden">
+          <Sheet open={filtersDrawerOpen} onOpenChange={setFiltersDrawerOpen}>
+            <SheetTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="w-full min-h-[44px] touch-manipulation"
+                aria-label="Ouvrir les filtres"
               >
-                <OrdersList 
-                  orders={filteredOrders} 
-                  onUpdate={refetch} 
-                  storeId={store.id}
-                  sortBy={sortBy}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                {totalCount > 10 && (
-                  <OrdersPagination
-                    currentPage={page}
-                    totalPages={totalPages}
-                    pageSize={pageSize}
-                    totalItems={totalCount}
-                    onPageChange={setPage}
-                    onPageSizeChange={(newSize) => {
-                      setPageSize(newSize);
-                      setPage(0);
-                    }}
-                  />
+                <SlidersHorizontal className="h-4 w-4 mr-2" />
+                Filtres
+                {(statusFilter !== "all" || paymentStatusFilter !== "all" || dateRange?.from) && (
+                  <Badge variant="default" className="ml-2">
+                    {[statusFilter !== "all", paymentStatusFilter !== "all", dateRange?.from].filter(Boolean).length}
+                  </Badge>
                 )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Filtres de recherche</SheetTitle>
+                <SheetDescription>
+                  Utilisez les filtres ci-dessous pour affiner votre recherche de commandes
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6">
+                <OrderFilters
+                  searchQuery={searchInput}
+                  onSearchChange={setSearchInput}
+                  statusFilter={statusFilter}
+                  onStatusChange={setStatusFilter}
+                  paymentStatusFilter={paymentStatusFilter}
+                  onPaymentStatusChange={setPaymentStatusFilter}
+                  dateRange={dateRange}
+                  onDateRangeChange={setDateRange}
+                />
               </div>
-            ) : (
-              <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
-                <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16" role="status" aria-live="polite">
-                  <Package className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" aria-hidden="true" />
-                  <h3 className="text-lg sm:text-xl font-semibold mb-2">{t('orders.empty.title', 'Aucune commande')}</h3>
-                  <p className="text-sm sm:text-base text-muted-foreground text-center mb-4 max-w-md">
-                    {searchInput || statusFilter !== "all" || paymentStatusFilter !== "all" || dateRange?.from
-                      ? t('orders.empty.noResults', 'Aucune commande ne correspond à vos critères de recherche')
-                      : t('orders.empty.description', 'Commencez par créer votre première commande')}
-                  </p>
-                  {!searchInput && statusFilter === "all" && paymentStatusFilter === "all" && !dateRange?.from && (
-                    <Button 
-                      onClick={() => {
-                        setIsCreateDialogOpen(true);
-                        logger.info('Ouverture dialog création depuis état vide');
-                      }}
-                      className="min-h-[44px] bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base"
-                      aria-label={t('orders.empty.createFirst', 'Créer votre première commande')}
-                    >
-                      <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" aria-hidden="true" />
-                      <span className="text-sm sm:text-base">{t('orders.empty.createFirst', 'Créer votre première commande')}</span>
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+            </SheetContent>
+          </Sheet>
+        </div>
 
-            {/* Keyboard Shortcuts Help - Desktop Only */}
-            <div className="hidden lg:flex items-center justify-center gap-4 p-3 border-t border-border/50 bg-muted/30 backdrop-blur-sm">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Keyboard className="h-3 w-3" aria-hidden="true" />
-                <span>{t('common.shortcuts', 'Raccourcis')}:</span>
-                <Badge variant="outline" className="text-[10px] font-mono">⌘K</Badge>
-                <span className="text-muted-foreground">{t('orders.shortcuts.search', 'Rechercher')}</span>
-                <Badge variant="outline" className="text-[10px] font-mono ml-2">⌘N</Badge>
-                <span className="text-muted-foreground">{t('orders.shortcuts.newOrder', 'Nouvelle commande')}</span>
-                <Badge variant="outline" className="text-[10px] font-mono ml-2">⌘G</Badge>
-                <span className="text-muted-foreground">{t('orders.shortcuts.toggleView', 'Basculer vue')}</span>
-                <Badge variant="outline" className="text-[10px] font-mono ml-2">Esc</Badge>
-                <span className="text-muted-foreground">{t('orders.shortcuts.clear', 'Effacer')}</span>
+        {/* Orders Content */}
+        {ordersLoading ? (
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardContent className="p-6" role="status" aria-live="polite">
+              <div className="flex items-center justify-center gap-3 py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <span className="text-sm text-muted-foreground">
+                  {t('orders.loading', 'Chargement des commandes...')}
+                </span>
               </div>
+            </CardContent>
+          </Card>
+        ) : filteredOrders && filteredOrders.length > 0 ? (
+          <div 
+            ref={ordersRef} 
+            role="region" 
+            aria-label={t('orders.list.ariaLabel', 'Liste des commandes')}
+            className="animate-in fade-in slide-in-from-bottom-4 duration-700"
+          >
+            <OrdersList 
+              orders={filteredOrders} 
+              onUpdate={refetch} 
+              storeId={store.id}
+              sortBy={sortBy}
+              sortDirection={sortDirection}
+              onSort={handleSort}
+            />
+            {totalCount > 10 && (
+              <OrdersPagination
+                currentPage={page}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={totalCount}
+                onPageChange={setPage}
+                onPageSizeChange={(newSize) => {
+                  setPageSize(newSize);
+                  setPage(0);
+                }}
+              />
+            )}
+          </div>
+        ) : (
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
+            <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16" role="status" aria-live="polite">
+              <Package className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" aria-hidden="true" />
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">{t('orders.empty.title', 'Aucune commande')}</h3>
+              <p className="text-sm sm:text-base text-muted-foreground text-center mb-4 max-w-md">
+                {searchInput || statusFilter !== "all" || paymentStatusFilter !== "all" || dateRange?.from
+                  ? t('orders.empty.noResults', 'Aucune commande ne correspond à vos critères de recherche')
+                  : t('orders.empty.description', 'Commencez par créer votre première commande')}
+              </p>
+              {!searchInput && statusFilter === "all" && paymentStatusFilter === "all" && !dateRange?.from && (
+                <Button 
+                  onClick={() => {
+                    setIsCreateDialogOpen(true);
+                    logger.info('Ouverture dialog création depuis état vide');
+                  }}
+                  className="min-h-[44px] bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base"
+                  aria-label={t('orders.empty.createFirst', 'Créer votre première commande')}
+                >
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" aria-hidden="true" />
+                  <span className="text-sm sm:text-base">{t('orders.empty.createFirst', 'Créer votre première commande')}</span>
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+          {/* Keyboard Shortcuts Help - Desktop Only */}
+          <div className="hidden lg:flex items-center justify-center gap-4 p-3 border-t border-border/50 bg-muted/30 backdrop-blur-sm">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Keyboard className="h-3 w-3" aria-hidden="true" />
+              <span>{t('common.shortcuts', 'Raccourcis')}:</span>
+              <Badge variant="outline" className="text-[10px] font-mono">⌘K</Badge>
+              <span className="text-muted-foreground">{t('orders.shortcuts.search', 'Rechercher')}</span>
+              <Badge variant="outline" className="text-[10px] font-mono ml-2">⌘N</Badge>
+              <span className="text-muted-foreground">{t('orders.shortcuts.newOrder', 'Nouvelle commande')}</span>
+              <Badge variant="outline" className="text-[10px] font-mono ml-2">⌘G</Badge>
+              <span className="text-muted-foreground">{t('orders.shortcuts.toggleView', 'Basculer vue')}</span>
+              <Badge variant="outline" className="text-[10px] font-mono ml-2">Esc</Badge>
+              <span className="text-muted-foreground">{t('orders.shortcuts.clear', 'Effacer')}</span>
             </div>
           </div>
 
@@ -622,10 +653,9 @@ const Orders = () => {
             }}
             storeId={store.id}
           />
-        </main>
-      </div>
-    </SidebarProvider>
-  );
-};
+        </div>
+      </MainLayout>
+    );
+  };
 
 export default Orders;

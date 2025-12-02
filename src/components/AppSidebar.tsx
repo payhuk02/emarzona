@@ -19,7 +19,6 @@ import {
   Target,
   Search,
   MessageSquare,
-  Mail,
   TrendingUp,
   BookOpen,
   GraduationCap,

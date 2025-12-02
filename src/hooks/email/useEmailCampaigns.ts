@@ -315,39 +315,3 @@ export const useDuplicateEmailCampaign = () => {
   });
 };
 
-/**
- * Hook pour envoyer une campagne
- */
-export const useSendEmailCampaign = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async ({
-      campaignId,
-      storeId,
-    }: {
-      campaignId: string;
-      storeId: string;
-    }): Promise<boolean> => {
-      return EmailCampaignService.sendCampaign(campaignId);
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['email-campaigns', variables.storeId] });
-      queryClient.invalidateQueries({ queryKey: ['email-campaign', variables.campaignId] });
-      toast({
-        title: 'Campagne envoyée',
-        description: 'La campagne est en cours d\'envoi. Vous pouvez suivre sa progression dans les métriques.',
-      });
-    },
-    onError: (error: any) => {
-      logger.error('Error sending campaign', { error });
-      toast({
-        title: 'Erreur',
-        description: error.message || 'Erreur lors de l\'envoi de la campagne.',
-        variant: 'destructive',
-      });
-    },
-  });
-};
-

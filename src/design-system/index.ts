@@ -121,7 +121,7 @@ export const typography = {
   fontFamily: {
     sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
     serif: ['Georgia', 'serif'],
-    mono: ['Fira Code', 'monospace'],
+    mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
   },
   
   fontSize: {

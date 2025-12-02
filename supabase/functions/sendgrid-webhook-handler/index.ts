@@ -206,61 +206,36 @@ async function updateCampaignMetrics(
 
   if (!campaign) return;
 
-  // Déterminer quelle métrique incrémenter selon le type d'événement
-  let metricKey: string | null = null;
+  const metrics = campaign.metrics || {};
+  const updates: Record<string, any> = {};
 
   switch (eventType) {
     case 'delivered':
-      metricKey = 'delivered';
+      updates['metrics.delivered'] = (metrics.delivered || 0) + 1;
       break;
     case 'open':
-      metricKey = 'opened';
+      updates['metrics.opened'] = (metrics.opened || 0) + 1;
       break;
     case 'click':
-      metricKey = 'clicked';
+      updates['metrics.clicked'] = (metrics.clicked || 0) + 1;
       break;
     case 'bounce':
     case 'dropped':
-      metricKey = 'bounced';
+      updates['metrics.bounced'] = (metrics.bounced || 0) + 1;
       break;
     case 'unsubscribe':
     case 'group_unsubscribe':
-      metricKey = 'unsubscribed';
+      updates['metrics.unsubscribed'] = (metrics.unsubscribed || 0) + 1;
       break;
   }
 
-  if (metricKey) {
-    // Utiliser la fonction RPC pour incrémenter la métrique atomiquement
-    const { error: rpcError } = await supabase.rpc('increment_campaign_metric', {
+  if (Object.keys(updates).length > 0) {
+    // Utiliser une requête SQL pour incrémenter les métriques
+    await supabase.rpc('increment_campaign_metric', {
       p_campaign_id: campaignId,
-      p_metric_key: metricKey,
+      p_metric_key: Object.keys(updates)[0],
       p_increment: 1,
     });
-
-    if (rpcError) {
-      console.error('Error incrementing campaign metric:', rpcError);
-      // Fallback: mettre à jour manuellement si la fonction RPC échoue
-      const { data: currentCampaign } = await supabase
-        .from('email_campaigns')
-        .select('metrics')
-        .eq('id', campaignId)
-        .single();
-
-      if (currentCampaign) {
-        const currentMetrics = currentCampaign.metrics || {};
-        const newValue = (currentMetrics[metricKey] || 0) + 1;
-        
-        await supabase
-          .from('email_campaigns')
-          .update({
-            metrics: {
-              ...currentMetrics,
-              [metricKey]: newValue,
-            },
-          })
-          .eq('id', campaignId);
-      }
-    }
   }
 }
 

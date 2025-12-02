@@ -8,7 +8,8 @@
 
 .store-header {
   @apply sticky top-0 z-10 border-b;
-  @apply bg-card/95 backdrop-blur-sm shadow-soft;
+  @apply bg-card/95 backdrop-blur-sm;
+  box-shadow: var(--shadow-soft);
   /* Debug: Ensure header is visible */
   position: relative;
   z-index: 10;
@@ -53,7 +54,8 @@
 }
 
 .store-card {
-  @apply shadow-soft hover:shadow-lg;
+  box-shadow: var(--shadow-soft);
+  @apply hover:shadow-lg;
   @apply transition-all duration-300;
   @apply border-border;
 }
@@ -174,7 +176,8 @@
 
 .store-image-preview {
   @apply relative rounded-xl overflow-hidden;
-  @apply border border-border shadow-soft;
+  @apply border border-border;
+  box-shadow: var(--shadow-soft);
 }
 
 .store-image-preview:hover {

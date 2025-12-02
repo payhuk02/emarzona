@@ -21,56 +21,58 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 220 30% 12%;
-    --foreground: 0 0% 98%;
+    /* Thème clair par défaut (Professionnel) */
+    --background: 0 0% 100%;
+    --foreground: 220 40% 15%;
 
-    --card: 220 25% 16%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 40% 15%;
 
-    --popover: 220 25% 16%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 40% 15%;
 
-    --primary: 210 100% 60%;
+    --primary: 217 91% 60%;        /* Bleu moderne #3B82F6 (inspiré Linear, Stripe) */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 20% 22%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96%;          /* Gris très clair moderne */
+    --secondary-foreground: 0 0% 12%; /* Noir doux */
 
-    --muted: 220 20% 20%;
-    --muted-foreground: 220 10% 65%;
+    --muted: 0 0% 98%;              /* Gris ultra clair */
+    --muted-foreground: 0 0% 45%;   /* Gris moyen */
 
-    --accent: 45 100% 60%;
-    --accent-foreground: 220 30% 12%;
+    --accent: 38 92% 50%;          /* Orange/Jaune moderne pour contraste avec primary */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 24%;
-    --input: 220 20% 24%;
-    --ring: 210 100% 60%;
+    --border: 0 0% 90%;             /* Gris clair moderne */
+    --input: 0 0% 90%;              /* Gris clair moderne */
+    --ring: 217 91% 60%;            /* Bleu moderne */
 
-    --radius: 1rem;
+    --radius: 0.5rem;               /* 8px - Border radius moderne et cohérent */
 
-    --gradient-primary: linear-gradient(135deg, hsl(210, 100%, 60%) 0%, hsl(220, 90%, 50%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(45, 100%, 60%) 0%, hsl(40, 100%, 55%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(220, 40%, 15%) 0%, hsl(220, 50%, 8%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 60%) 0%, hsl(217, 91%, 50%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(38, 92%, 50%) 0%, hsl(38, 92%, 45%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220, 50%, 12%) 0%, hsl(220, 45%, 18%) 100%);
     --gradient-dark: linear-gradient(180deg, hsl(220, 30%, 12%) 0%, hsl(220, 35%, 18%) 100%);
 
-    --shadow-soft: 0 4px 16px -2px hsl(220 100% 10% / 0.3);
-    --shadow-medium: 0 8px 32px -4px hsl(220 100% 10% / 0.4);
-    --shadow-large: 0 16px 64px -8px hsl(220 100% 10% / 0.5);
-    --shadow-glow: 0 0 40px hsl(210 100% 60% / 0.3);
+    --shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
 
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
+    /* Sidebar claire par défaut */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 25 95% 53%;
+    --sidebar-foreground: 220 40% 15%;
+    --sidebar-primary: 217 91% 60%;  /* Bleu moderne */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 33 100% 96.5%;
-    --sidebar-accent-foreground: 0 0% 0%;
-    --sidebar-border: 20 5.9% 90%;
-    --sidebar-ring: 25 95% 53%;
+    --sidebar-accent: 0 0% 96%;      /* Gris très clair */
+    --sidebar-accent-foreground: 0 0% 12%; /* Noir doux */
+    --sidebar-border: 0 0% 90%;      /* Gris clair */
+    --sidebar-ring: 217 91% 60%;    /* Bleu moderne */
   }
 
   .dark {
@@ -83,34 +85,34 @@ All colors MUST be HSL.
     --popover: 220 30% 12%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 210 100% 65%;
+    --primary: 217 91% 65%;          /* Bleu moderne plus clair pour dark mode */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 25% 18%;
+    --secondary: 0 0% 18%;           /* Gris foncé moderne */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 25% 16%;
-    --muted-foreground: 220 10% 70%;
+    --muted: 0 0% 16%;               /* Gris très foncé */
+    --muted-foreground: 0 0% 65%;    /* Gris moyen */
 
-    --accent: 45 100% 62%;
-    --accent-foreground: 220 35% 8%;
+    --accent: 38 92% 55%;           /* Orange/Jaune moderne pour contraste avec primary */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 25% 20%;
-    --input: 220 25% 20%;
-    --ring: 210 100% 65%;
+    --border: 0 0% 20%;               /* Gris foncé */
+    --input: 0 0% 20%;                /* Gris foncé */
+    --ring: 217 91% 65%;             /* Bleu moderne */
 
-    --gradient-primary: linear-gradient(135deg, hsl(210, 100%, 65%) 0%, hsl(220, 95%, 55%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(45, 100%, 62%) 0%, hsl(40, 100%, 58%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(220, 45%, 12%) 0%, hsl(220, 55%, 6%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 65%) 0%, hsl(217, 91%, 55%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(38, 92%, 55%) 0%, hsl(38, 92%, 50%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220, 50%, 12%) 0%, hsl(220, 45%, 18%) 100%);
     --gradient-dark: linear-gradient(180deg, hsl(220, 35%, 8%) 0%, hsl(220, 40%, 14%) 100%);
 
-    --shadow-soft: 0 4px 16px -2px hsl(220 100% 5% / 0.4);
-    --shadow-medium: 0 8px 32px -4px hsl(220 100% 5% / 0.5);
-    --shadow-large: 0 16px 64px -8px hsl(220 100% 5% / 0.6);
-    --shadow-glow: 0 0 50px hsl(210 100% 65% / 0.4);
+    --shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.4);
 
     /* Sidebar toujours en thème clair même en mode sombre */
     --sidebar-background: 0 0% 100%;
@@ -256,11 +258,103 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 1rem; /* 16px */
+    line-height: 1.5;
+    letter-spacing: 0;
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     overflow-x: hidden;
     max-width: 100vw;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Hiérarchie typographique moderne */
+  h1 {
+    font-size: 2.5rem; /* 40px */
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  
+  h2 {
+    font-size: 2rem; /* 32px */
+    line-height: 1.25;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  
+  h3 {
+    font-size: 1.5rem; /* 24px */
+    line-height: 1.3;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+  
+  h4 {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+  
+  h5 {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+  
+  h6 {
+    font-size: 1rem; /* 16px */
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  
+  /* Responsive typography */
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem; /* 32px */
+    }
+    h2 {
+      font-size: 1.75rem; /* 28px */
+    }
+    h3 {
+      font-size: 1.5rem; /* 24px */
+    }
+  }
+
+  /* Optimisations pour très petits écrans (< 360px) */
+  @media (max-width: 360px) {
+    h1 {
+      font-size: 1.75rem; /* 28px */
+    }
+    h2 {
+      font-size: 1.5rem; /* 24px */
+    }
+    h3 {
+      font-size: 1.25rem; /* 20px */
+    }
+    
+    /* Padding réduit pour très petits écrans */
+    .container {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    
+    /* Textes plus petits mais lisibles */
+    body {
+      font-size: 14px;
+    }
+    
+    /* Boutons compacts */
+    button {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+    }
   }
 
   #root {
@@ -297,12 +391,27 @@ All colors MUST be HSL.
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Réduction des animations pour économiser la batterie */
+  /* Réduction des animations pour l'accessibilité */
   @media (prefers-reduced-motion: reduce) {
-    * {
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    
+    /* Désactiver les animations spécifiques */
+    .animate-fade-in-up,
+    .animate-float,
+    .animate-pulse {
+      animation: none !important;
+    }
+    
+    /* Désactiver les transformations au hover */
+    *:hover {
+      transform: none !important;
     }
   }
 
@@ -324,6 +433,42 @@ All colors MUST be HSL.
     
     .gap-responsive-xs {
       gap: 0.5rem;
+    }
+  }
+
+  /* Optimisations supplémentaires pour très petits écrans (< 360px) */
+  @media (max-width: 360px) {
+    .container {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    
+    /* Textes adaptés */
+    .text-responsive-xs {
+      font-size: 0.7rem;
+      line-height: 0.95rem;
+    }
+    
+    /* Padding minimal */
+    .p-responsive-xs {
+      padding: 0.375rem;
+    }
+    
+    /* Gap minimal */
+    .gap-responsive-xs {
+      gap: 0.375rem;
+    }
+    
+    /* Cards plus compactes */
+    .card {
+      padding: 0.75rem;
+    }
+    
+    /* Boutons compacts mais touch-friendly */
+    button {
+      min-height: 40px; /* Légèrement réduit mais toujours touch-friendly */
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
     }
   }
 
@@ -847,18 +992,18 @@ All colors MUST be HSL.
     }
   }
 
-  /* Animation shimmer pour LazyImage */
+  /* Animation shimmer pour LazyImage et effets de brillance */
   @keyframes shimmer {
     0% {
-      background-position: -200% 0;
+      transform: translateX(-100%) translateY(-100%) rotate(45deg);
     }
     100% {
-      background-position: 200% 0;
+      transform: translateX(200%) translateY(200%) rotate(45deg);
     }
   }
 
   .animate-shimmer {
-    animation: shimmer 2s infinite;
+    animation: shimmer 3s infinite;
   }
 }
 

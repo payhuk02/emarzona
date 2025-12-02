@@ -33,11 +33,25 @@ import {
 import Papa from "papaparse";
 import { validateProductsImport } from "@/lib/validation/productSchemas";
 import { useToast } from "@/hooks/use-toast";
+import type { Product } from "@/hooks/useProducts";
+import type { z } from "zod";
+import type { ProductImportSchema } from "@/lib/validation/productSchemas";
+
+type ValidatedProduct = z.infer<typeof ProductImportSchema>;
+type ValidationSuccess = { index: number; data: ValidatedProduct };
+type ValidationError = { index: number; errors: Array<{ path: (string | number)[]; message: string }>; originalData: unknown };
+type ValidationResult = {
+  successes: ValidationSuccess[];
+  errors: ValidationError[];
+  total: number;
+  successCount: number;
+  errorCount: number;
+};
 
 interface ImportCSVDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onImportConfirmed: (products: any[]) => Promise<void>;
+  onImportConfirmed: (products: Product[]) => Promise<void>;
 }
 
 const ImportCSVDialogComponent = ({
@@ -50,8 +64,8 @@ const ImportCSVDialogComponent = ({
 
   const [parsing, setParsing] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [parsedData, setParsedData] = useState<any>(null);
-  const [validationResult, setValidationResult] = useState<any>(null);
+  const [parsedData, setParsedData] = useState<Papa.ParseResult<unknown> | null>(null);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [step, setStep] = useState<'upload' | 'preview'>('upload');
 
   const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,7 +116,7 @@ const ImportCSVDialogComponent = ({
 
     setImporting(true);
     try {
-      const validProducts = validationResult.successes.map((s: any) => s.data);
+      const validProducts = validationResult.successes.map((s: ValidationSuccess) => s.data) as Product[];
       await onImportConfirmed(validProducts);
       
       toast({
@@ -263,7 +277,7 @@ const ImportCSVDialogComponent = ({
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {validationResult.successes.slice(0, 10).map((item: any, idx: number) => (
+                          {validationResult.successes.slice(0, 10).map((item: ValidationSuccess, idx: number) => (
                             <TableRow key={idx}>
                               <TableCell className="font-mono text-xs">{item.index + 1}</TableCell>
                               <TableCell className="font-medium">{item.data.name}</TableCell>
@@ -308,7 +322,7 @@ const ImportCSVDialogComponent = ({
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {validationResult.errors.slice(0, 5).map((item: any, idx: number) => (
+                          {validationResult.errors.slice(0, 5).map((item: ValidationError, idx: number) => (
                             <TableRow key={idx}>
                               <TableCell className="font-mono text-xs">{item.index + 1}</TableCell>
                               <TableCell className="text-xs">
@@ -316,7 +330,7 @@ const ImportCSVDialogComponent = ({
                               </TableCell>
                               <TableCell>
                                 <div className="space-y-1">
-                                  {item.errors.slice(0, 2).map((error: any, i: number) => (
+                                  {item.errors.slice(0, 2).map((error: { path: (string | number)[]; message: string }, i: number) => (
                                     <Badge key={i} variant="destructive" className="text-xs">
                                       {error.path.join('.')}: {error.message}
                                     </Badge>

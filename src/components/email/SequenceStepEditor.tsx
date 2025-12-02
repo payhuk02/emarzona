@@ -136,15 +136,12 @@ export const SequenceStepEditor = ({
 
           <div>
             <Label htmlFor="template">Template email</Label>
-            <Select 
-              value={templateId || '__none__'} 
-              onValueChange={(value) => setTemplateId(value === '__none__' ? '' : value)}
-            >
+            <Select value={templateId} onValueChange={setTemplateId}>
               <SelectTrigger id="template">
                 <SelectValue placeholder="Sélectionner un template" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">Aucun template</SelectItem>
+                <SelectItem value="">Aucun template</SelectItem>
                 {templates?.map((template) => (
                   <SelectItem key={template.id} value={template.id}>
                     {template.name}

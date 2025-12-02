@@ -24,14 +24,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, MoreHorizontal, Eye, Edit, Trash2, Play, Pause, Copy, Calendar, Send } from 'lucide-react';
+import { Plus, MoreHorizontal, Eye, Edit, Trash2, Play, Pause, Copy, Calendar } from 'lucide-react';
 import { useEmailCampaigns } from '@/hooks/email/useEmailCampaigns';
 import {
   useDeleteEmailCampaign,
   usePauseEmailCampaign,
   useResumeEmailCampaign,
   useDuplicateEmailCampaign,
-  useSendEmailCampaign,
 } from '@/hooks/email/useEmailCampaigns';
 import { CampaignMetrics } from './CampaignMetrics';
 import type { EmailCampaign, CampaignStatus } from '@/lib/email/email-campaign-service';
@@ -86,7 +85,6 @@ export const EmailCampaignManager = ({
   const pauseCampaign = usePauseEmailCampaign();
   const resumeCampaign = useResumeEmailCampaign();
   const duplicateCampaign = useDuplicateEmailCampaign();
-  const sendCampaign = useSendEmailCampaign();
 
   const handleDelete = async () => {
     if (!campaignToDelete) return;
@@ -111,14 +109,6 @@ export const EmailCampaignManager = ({
 
   const handleDuplicate = async (campaignId: string) => {
     await duplicateCampaign.mutateAsync(campaignId);
-    refetch();
-  };
-
-  const handleSend = async (campaignId: string) => {
-    await sendCampaign.mutateAsync({
-      campaignId,
-      storeId,
-    });
     refetch();
   };
 
@@ -248,15 +238,6 @@ export const EmailCampaignManager = ({
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
                             </DropdownMenuItem>
-                            {(campaign.status === 'draft' || campaign.status === 'scheduled') && (
-                              <DropdownMenuItem
-                                onClick={() => handleSend(campaign.id)}
-                                disabled={sendCampaign.isPending || !campaign.template_id}
-                              >
-                                <Send className="h-4 w-4 mr-2" />
-                                Envoyer
-                              </DropdownMenuItem>
-                            )}
                             <DropdownMenuItem
                               onClick={() => handleDuplicate(campaign.id)}
                               disabled={duplicateCampaign.isPending}

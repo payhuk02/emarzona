@@ -378,61 +378,6 @@ export class EmailCampaignService {
       throw error;
     }
   }
-
-  /**
-   * Envoyer une campagne (appelle l'Edge Function)
-   */
-  static async sendCampaign(campaignId: string): Promise<boolean> {
-    try {
-      const campaign = await this.getCampaign(campaignId);
-      if (!campaign) {
-        throw new Error('Campaign not found');
-      }
-
-      // Vérifier que la campagne peut être envoyée
-      if (campaign.status === 'sending') {
-        throw new Error('Campaign is already being sent');
-      }
-
-      if (campaign.status === 'completed') {
-        throw new Error('Campaign is already completed');
-      }
-
-      if (campaign.status === 'cancelled') {
-        throw new Error('Cannot send a cancelled campaign');
-      }
-
-      // Vérifier qu'un template est associé
-      if (!campaign.template_id) {
-        throw new Error('Campaign must have a template to be sent');
-      }
-
-      // Appeler l'Edge Function pour envoyer la campagne
-      const { data, error } = await supabase.functions.invoke('send-email-campaign', {
-        body: {
-          campaign_id: campaignId,
-          batch_size: 100,
-          batch_index: 0,
-        },
-      });
-
-      if (error) {
-        logger.error('Error invoking send-email-campaign function', { error, campaignId });
-        throw error;
-      }
-
-      // Mettre à jour le statut de la campagne
-      await this.updateCampaign(campaignId, {
-        status: 'sending',
-      });
-
-      logger.info('Campaign sent successfully', { campaignId, data });
-      return true;
-    } catch (error: any) {
-      logger.error('EmailCampaignService.sendCampaign error', { error, campaignId });
-      throw error;
-    }
-  }
 }
 
 // Export instance singleton

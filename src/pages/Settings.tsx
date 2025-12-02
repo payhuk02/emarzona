@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { AppSidebar } from "@/components/AppSidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { MainLayout } from "@/components/layout/MainLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileSettings } from "@/components/settings/ProfileSettings";
@@ -9,6 +8,7 @@ import { StoreSettings } from "@/components/settings/StoreSettings";
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { DomainSettings } from "@/components/settings/DomainSettings";
+import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
 import { ImportExportManager } from "@/components/import-export/ImportExportManager";
 import { ProfileDebug } from "@/components/debug/ProfileDebug";
 import { ProfileTest } from "@/components/debug/ProfileTest";
@@ -42,25 +42,20 @@ const Settings = () => {
   }, [searchParams]);
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full overflow-x-hidden">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+    <MainLayout layoutType="settings">
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
             {/* Header - Responsive & Animated */}
             <div 
               ref={headerRef}
               className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
             >
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                  <SettingsIcon className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 animate-in zoom-in duration-500">
+                  <SettingsIcon className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-primary" aria-hidden="true" />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
-                    <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                      {t('settings.title')}
-                    </span>
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
+                    {t('settings.title')}
                   </h1>
                   <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
                     {t('settings.subtitle')}
@@ -71,7 +66,7 @@ const Settings = () => {
 
             {/* Tabs - Fully Responsive */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 h-auto gap-2 overflow-x-auto">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-8 h-auto gap-2 overflow-x-auto">
                 <TabsTrigger value="profile" className="text-xs sm:text-sm min-h-[44px] py-2 sm:py-2.5 lg:py-3">
                   {t('settings.tabs.profile')}
                 </TabsTrigger>
@@ -83,6 +78,9 @@ const Settings = () => {
                 </TabsTrigger>
                 <TabsTrigger value="notifications" className="text-xs sm:text-sm min-h-[44px] py-2 sm:py-2.5 lg:py-3">
                   {t('settings.tabs.notifications')}
+                </TabsTrigger>
+                <TabsTrigger value="appearance" className="text-xs sm:text-sm min-h-[44px] py-2 sm:py-2.5 lg:py-3">
+                  Apparence
                 </TabsTrigger>
                 <TabsTrigger value="import-export" className="text-xs sm:text-sm min-h-[44px] py-2 sm:py-2.5 lg:py-3">
                   Import/Export
@@ -147,6 +145,11 @@ const Settings = () => {
                 </Card>
               </TabsContent>
 
+              {/* Appearance Tab */}
+              <TabsContent value="appearance" className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <AppearanceSettings />
+              </TabsContent>
+
               {/* Import/Export Tab */}
               <TabsContent value="import-export" className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
@@ -199,9 +202,7 @@ const Settings = () => {
               </TabsContent>
             </Tabs>
           </div>
-        </main>
-      </div>
-    </SidebarProvider>
+    </MainLayout>
   );
 };
 
