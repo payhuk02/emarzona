@@ -1,4 +1,3 @@
-import React, { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +12,7 @@ import { LoadingBar } from "@/components/navigation/LoadingBar";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { usePrefetch } from "@/hooks/usePrefetch";
+import React, { Suspense, lazy, useEffect } from "react";
 // PerformanceOptimizer - Lazy loaded (non-critique au démarrage)
 const PerformanceOptimizer = lazy(() => import("@/components/optimization/PerformanceOptimizer").then(m => ({ default: m.PerformanceOptimizer })));
 // Composants non-critiques - Lazy loaded pour réduire le bundle initial
