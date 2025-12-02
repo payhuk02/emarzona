@@ -257,14 +257,14 @@ export function PhysicalSizeChartSelector({
           <Label>Size Chart existant</Label>
           <div className="flex gap-2">
             <Select
-              value={selectedSizeChartId || ''}
-              onValueChange={(value) => onSelectSizeChart(value || null)}
+              value={selectedSizeChartId || '__none__'}
+              onValueChange={(value) => onSelectSizeChart(value === '__none__' ? null : value)}
             >
               <SelectTrigger className="flex-1">
                 <SelectValue placeholder="Aucun size chart sélectionné" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Aucun size chart</SelectItem>
+                <SelectItem value="__none__">Aucun size chart</SelectItem>
                 {sizeCharts?.map((chart) => (
                   <SelectItem key={chart.id} value={chart.id}>
                     {chart.name} ({chart.system.toUpperCase()})

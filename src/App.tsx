@@ -1,3 +1,4 @@
+import React, { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,7 +22,6 @@ const Require2FABanner = lazy(() => import("@/components/auth/Require2FABanner")
 const AffiliateLinkTracker = lazy(() => import("@/components/affiliate/AffiliateLinkTracker").then(m => ({ default: m.AffiliateLinkTracker })));
 const ReferralTracker = lazy(() => import("@/components/referral/ReferralTracker").then(m => ({ default: m.ReferralTracker })));
 const CurrencyRatesInitializer = lazy(() => import("@/components/currency/CurrencyRatesInitializer").then(m => ({ default: m.CurrencyRatesInitializer })));
-import React, { Suspense, lazy, useEffect } from "react";
 import { initSentry } from "@/lib/sentry";
 import { initWebVitals } from "@/lib/web-vitals";
 import { ErrorBoundary as SentryErrorBoundary } from "@sentry/react";
@@ -115,8 +115,9 @@ const ErrorFallbackComponent = () => {
 const Landing = lazy(() => import("./pages/Landing"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => 
-  import("./pages/Dashboard").catch((error) => {
+  import("./pages/Dashboard").then(m => ({ default: m.default })).catch((error) => {
     logger.error('Erreur lors du chargement du Dashboard:', error);
+    console.error('Dashboard loading error details:', error);
     // Retourner un composant de fallback en cas d'erreur
     return {
       default: () => (
@@ -124,6 +125,7 @@ const Dashboard = lazy(() =>
           <div className="text-center space-y-4">
             <h2 className="text-xl font-semibold">Erreur de chargement</h2>
             <p className="text-muted-foreground">Impossible de charger le tableau de bord</p>
+            <p className="text-sm text-red-500">{error?.message || 'Erreur inconnue'}</p>
             <button onClick={() => window.location.reload()} className="px-4 py-2 bg-primary text-white rounded">
               Recharger
             </button>

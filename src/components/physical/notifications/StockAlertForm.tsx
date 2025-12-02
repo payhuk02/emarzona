@@ -137,14 +137,14 @@ export const StockAlertForm = ({
         <div className="space-y-2">
           <Label htmlFor="variant_id">Variante (optionnel)</Label>
           <Select
-            value={formData.variant_id}
-            onValueChange={(value) => setFormData({ ...formData, variant_id: value })}
+            value={formData.variant_id || '__none__'}
+            onValueChange={(value) => setFormData({ ...formData, variant_id: value === '__none__' ? '' : value })}
           >
             <SelectTrigger id="variant_id">
               <SelectValue placeholder="Toutes les variantes" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Toutes les variantes</SelectItem>
+              <SelectItem value="__none__">Toutes les variantes</SelectItem>
               {variants.map((variant) => (
                 <SelectItem key={variant.id} value={variant.id}>
                   {variant.name}

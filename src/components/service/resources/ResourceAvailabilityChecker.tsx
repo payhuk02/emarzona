@@ -361,12 +361,15 @@ export function ResourceAvailabilityChecker({
           {staffMembers.length > 0 && (
             <div className="space-y-2">
               <Label>Membre du staff (optionnel)</Label>
-              <Select value={staffId} onValueChange={setStaffId}>
+              <Select 
+                value={staffId || '__none__'} 
+                onValueChange={(value) => setStaffId(value === '__none__' ? '' : value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner un membre du staff" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Aucun (auto-assigné)</SelectItem>
+                  <SelectItem value="__none__">Aucun (auto-assigné)</SelectItem>
                   {staffMembers.map((staff) => (
                     <SelectItem key={staff.id} value={staff.id}>
                       {staff.name}

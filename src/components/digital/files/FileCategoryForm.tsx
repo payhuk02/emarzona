@@ -177,14 +177,14 @@ export const FileCategoryForm = ({ category, onSuccess, onCancel }: FileCategory
       <div className="space-y-2">
         <Label htmlFor="parent_category_id">Catégorie parente</Label>
         <Select
-          value={formData.parent_category_id}
-          onValueChange={(value) => setFormData({ ...formData, parent_category_id: value })}
+          value={formData.parent_category_id || '__none__'}
+          onValueChange={(value) => setFormData({ ...formData, parent_category_id: value === '__none__' ? '' : value })}
         >
           <SelectTrigger id="parent_category_id">
             <SelectValue placeholder="Aucune (catégorie racine)" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Aucune (catégorie racine)</SelectItem>
+            <SelectItem value="__none__">Aucune (catégorie racine)</SelectItem>
             {categories
               ?.filter(c => !c.parent_category_id && c.id !== category?.id)
               .map((cat) => (
