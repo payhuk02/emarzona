@@ -247,7 +247,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
           <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
             <div className="flex items-baseline gap-1.5 sm:gap-2 min-w-0 flex-1" id={`product-price-${product.id}`}>
               {priceInfo.originalPrice && (
-                <span className="text-[10px] sm:text-xs md:text-sm text-gray-500 line-through flex-shrink-0 whitespace-nowrap" aria-label={`Prix original: ${formatPrice(priceInfo.originalPrice, product.currency)}`}>
+                <span className="text-xs sm:text-sm md:text-base text-gray-600 line-through flex-shrink-0 whitespace-nowrap" aria-label={`Prix original: ${formatPrice(priceInfo.originalPrice, product.currency)}`}>
                   {formatPrice(priceInfo.originalPrice, product.currency)}
                 </span>
               )}

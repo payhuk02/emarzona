@@ -10,10 +10,6 @@ import { NotificationSettings } from "@/components/settings/NotificationSettings
 import { DomainSettings } from "@/components/settings/DomainSettings";
 import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
 import { ImportExportManager } from "@/components/import-export/ImportExportManager";
-import { ProfileDebug } from "@/components/debug/ProfileDebug";
-import { ProfileTest } from "@/components/debug/ProfileTest";
-import { DatabaseMigrationInstructions } from "@/components/debug/DatabaseMigrationInstructions";
-import { ResponsiveDesignTest } from "@/components/debug/ResponsiveDesignTest";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
@@ -66,7 +62,7 @@ const Settings = () => {
 
             {/* Tabs - Fully Responsive */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-8 h-auto gap-2 overflow-x-auto">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 h-auto gap-2 overflow-x-auto">
                 <TabsTrigger value="profile" className="text-xs sm:text-sm min-h-[44px] py-2 sm:py-2.5 lg:py-3">
                   {t('settings.tabs.profile')}
                 </TabsTrigger>
@@ -87,9 +83,6 @@ const Settings = () => {
                 </TabsTrigger>
                 <TabsTrigger value="security" className="text-xs sm:text-sm min-h-[44px] py-2 sm:py-2.5 lg:py-3">
                   {t('settings.tabs.security')}
-                </TabsTrigger>
-                <TabsTrigger value="debug" className="text-xs sm:text-sm min-h-[44px] py-2 sm:py-2.5 lg:py-3">
-                  {t('settings.tabs.debug')}
                 </TabsTrigger>
               </TabsList>
 
@@ -180,26 +173,6 @@ const Settings = () => {
                 </Card>
               </TabsContent>
 
-              {/* Debug Tab */}
-              <TabsContent value="debug" className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-                  <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
-                    <CardTitle className="text-lg sm:text-xl">{t('settings.debug.cardTitle')}</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm">
-                      {t('settings.debug.cardDescription')}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
-                    <DatabaseMigrationInstructions />
-                    <div className="mt-4 sm:mt-6">
-                      <ProfileTest />
-                    </div>
-                    <div className="mt-4 sm:mt-6">
-                      <ResponsiveDesignTest />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
             </Tabs>
           </div>
     </MainLayout>

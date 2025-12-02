@@ -61,8 +61,8 @@ export const CustomersSidebar = () => {
   ];
 
   return (
-    <aside className="hidden lg:block fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] border-r bg-background overflow-y-auto z-40">
-      <div className="p-4 space-y-4">
+    <aside className="hidden md:block fixed left-0 top-16 w-56 md:w-64 h-[calc(100vh-4rem)] border-r border-blue-800/30 bg-gradient-to-br from-slate-900 via-blue-950 to-black overflow-y-auto z-40 transition-all duration-300 scrollbar-thin">
+      <div className="p-3 sm:p-4 md:p-5 space-y-4">
         {/* Breadcrumb */}
         <Breadcrumb items={breadcrumbItems} />
 
@@ -78,10 +78,10 @@ export const CustomersSidebar = () => {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                  'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    ? 'bg-blue-600/30 text-blue-200 shadow-sm'
+                    : 'text-slate-300 hover:bg-blue-900/30 hover:text-white hover:translate-x-1'
                 )}
               >
                 <Icon className="h-4 w-4" />

@@ -159,6 +159,7 @@ const StoreTeamManagement = lazy(() => import("./pages/store/StoreTeamManagement
 const MyTasks = lazy(() => import("./pages/MyTasks"));
 const Orders = lazy(() => import("./pages/Orders"));
 const Customers = lazy(() => import("./pages/Customers"));
+const Marketing = lazy(() => import("./pages/Marketing").then(m => ({ default: m.default })));
 const Promotions = lazy(() => import("./pages/Promotions"));
 const UnifiedPromotionsPage = lazy(() => import("./pages/promotions/UnifiedPromotionsPage").then(m => ({ default: m.UnifiedPromotionsPage })));
 const EmailCampaignsPage = lazy(() => import("./pages/emails/EmailCampaignsPage").then(m => ({ default: m.EmailCampaignsPage })));
@@ -400,6 +401,11 @@ const AppContent = () => {
     initSentry();
     initWebVitals();
     
+    // Initialiser DOMPurify pour sécurité XSS
+    import('@/lib/html-sanitizer').then(({ configureDOMPurify }) => {
+      configureDOMPurify();
+    });
+    
     // Initialiser le monitoring de performance
     if (import.meta.env.PROD) {
       import('@/lib/performance-monitor').then(({ initPerformanceMonitoring }) => {
@@ -487,6 +493,7 @@ const AppContent = () => {
           <Route path="/dashboard/advanced-orders" element={<ProtectedRoute><AdvancedOrderManagement /></ProtectedRoute>} />
           <Route path="/dashboard/advanced-orders-test" element={<ProtectedRoute><AdvancedOrderManagementSimple /></ProtectedRoute>} />
           <Route path="/dashboard/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
+          <Route path="/dashboard/marketing" element={<ProtectedRoute><Marketing /></ProtectedRoute>} />
           <Route path="/dashboard/promotions" element={<ProtectedRoute><UnifiedPromotionsPage /></ProtectedRoute>} />
           <Route path="/dashboard/emails/campaigns" element={<ProtectedRoute><EmailCampaignsPage /></ProtectedRoute>} />
           <Route path="/dashboard/emails/sequences" element={<ProtectedRoute><EmailSequencesPage /></ProtectedRoute>} />

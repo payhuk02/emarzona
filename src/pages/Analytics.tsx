@@ -14,6 +14,8 @@ import { SalesChart } from "@/components/analytics/SalesChart";
 import { TopProducts } from "@/components/analytics/TopProducts";
 import { RecentOrders } from "@/components/analytics/RecentOrders";
 import { UnifiedAnalyticsDashboard } from "@/components/analytics/UnifiedAnalyticsDashboard";
+import { FunnelAnalysis } from "@/components/analytics/FunnelAnalysis";
+import { CohortAnalysis } from "@/components/analytics/CohortAnalysis";
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -233,11 +235,12 @@ const Analytics = () => {
               </Card>
             </div>
 
-            {/* Tabs pour basculer entre vue classique et vue unifiée */}
+            {/* Tabs pour basculer entre vue classique, vue unifiée et analytics avancés */}
             <Tabs defaultValue="unified" className="space-y-4">
               <TabsList>
                 <TabsTrigger value="unified">Vue Unifiée</TabsTrigger>
                 <TabsTrigger value="classic">Vue Classique</TabsTrigger>
+                <TabsTrigger value="advanced">Analytics Avancés</TabsTrigger>
               </TabsList>
 
               <TabsContent value="unified" className="space-y-4">
@@ -258,6 +261,14 @@ const Analytics = () => {
 
                 <div role="region" aria-label="Commandes récentes" className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                   <RecentOrders orders={orders?.slice(0, 5) || []} loading={isLoading} />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="advanced" className="space-y-4">
+                {/* Analytics Avancés */}
+                <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <FunnelAnalysis />
+                  <CohortAnalysis />
                 </div>
               </TabsContent>
             </Tabs>

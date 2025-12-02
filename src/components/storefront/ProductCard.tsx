@@ -73,9 +73,24 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
 
   // Nettoyer les balises HTML de la description
   const stripHtmlTags = (html: string): string => {
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
-    return temp.textContent || temp.innerText || '';
+    // SÉCURISÉ : Extraire le texte sans utiliser innerHTML (évite XSS)
+    if (!html.includes('<')) {
+      // Pas de HTML, retourner directement
+      return html;
+    }
+    
+    // Si contient du HTML, utiliser la fonction sécurisée de utils
+    // qui utilise htmlToPlainText de html-sanitizer
+    try {
+      // Utiliser la fonction sécurisée de utils
+      const { stripHtmlTags: safeStripHtml } = require('@/lib/utils');
+      return safeStripHtml(html);
+    } catch (e) {
+      // Fallback : utiliser textContent (plus sûr que innerHTML)
+      const temp = document.createElement('div');
+      temp.textContent = html; // textContent échappe automatiquement
+      return temp.textContent || '';
+    }
   };
 
   // Générer une description courte

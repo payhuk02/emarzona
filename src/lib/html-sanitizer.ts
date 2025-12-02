@@ -56,14 +56,20 @@ const PLAIN_TEXT_CONFIG: DOMPurify.Config = {
 /**
  * Nettoie le HTML d'une description de produit
  * 
- * @param html - HTML à nettoyer
- * @returns HTML nettoyé et sécurisé
+ * Permet un formatage riche mais sécurisé pour les descriptions de produits.
+ * Autorise les balises de formatage de base (p, strong, em, ul, ol, etc.) mais bloque
+ * les scripts et attributs dangereux pour prévenir les attaques XSS.
+ * 
+ * @param html - HTML à nettoyer (peut être null ou undefined)
+ * @returns HTML nettoyé et sécurisé, ou chaîne vide si html est null/undefined
  * 
  * @example
  * ```typescript
  * const clean = sanitizeProductDescription(product.description);
  * return <div dangerouslySetInnerHTML={{ __html: clean }} />;
  * ```
+ * 
+ * @see {@link PRODUCT_DESCRIPTION_CONFIG} pour la configuration de sécurité
  */
 export function sanitizeProductDescription(html: string | null | undefined): string {
   if (!html) return '';

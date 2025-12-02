@@ -61,10 +61,24 @@ const getCacheKey = (endpoint: RateLimitEndpoint, userId?: string): string => {
 
 /**
  * Vérifie si la requête est autorisée par le rate limiter
- * @param endpoint - Type d'endpoint (auth, api, webhook, default, payment, upload, search)
- * @param userId - ID de l'utilisateur (optionnel)
- * @param bypassCache - Forcer un appel serveur (par défaut: false)
- * @returns Promise avec le résultat du rate limiting
+ * 
+ * Cette fonction vérifie les limites de taux pour différents types d'endpoints.
+ * Utilise un cache local pour éviter les appels répétés au serveur.
+ * 
+ * @param endpoint - Type d'endpoint à vérifier (auth, api, webhook, default, payment, upload, search)
+ * @param userId - ID de l'utilisateur (optionnel, pour un rate limiting par utilisateur)
+ * @param bypassCache - Forcer un appel serveur même si un résultat est en cache (par défaut: false)
+ * @returns Promise avec le résultat du rate limiting (allowed, remaining, resetAt, limit)
+ * 
+ * @example
+ * ```typescript
+ * const result = await checkRateLimit('api', userId);
+ * if (result.allowed) {
+ *   // Effectuer la requête
+ * } else {
+ *   // Afficher un message d'erreur
+ * }
+ * ```
  */
 export async function checkRateLimit(
   endpoint: RateLimitEndpoint = 'default',
@@ -224,7 +238,31 @@ export function useRateLimit(endpoint: RateLimitEndpoint = 'default') {
 
 /**
  * Middleware rate limiting pour protéger les actions sensibles
- * Version améliorée avec retry et backoff
+ * 
+ * Wrapper qui vérifie le rate limit avant d'exécuter une action.
+ * Supporte le retry automatique avec exponential backoff en cas de rate limit.
+ * 
+ * @param endpoint - Type d'endpoint à protéger
+ * @param action - Fonction à exécuter si le rate limit est respecté
+ * @param options - Options de configuration
+ * @param options.userId - ID de l'utilisateur pour rate limiting personnalisé
+ * @param options.retry - Activer le retry automatique (par défaut: false)
+ * @param options.maxRetries - Nombre maximum de tentatives (par défaut: 3)
+ * @param options.retryDelay - Délai initial entre les tentatives en ms (par défaut: 1000)
+ * @returns Promise avec le résultat de l'action, ou throw une erreur si rate limit dépassé
+ * 
+ * @example
+ * ```typescript
+ * const result = await withRateLimit('payment', async () => {
+ *   return await processPayment(data);
+ * }, {
+ *   userId: user.id,
+ *   retry: true,
+ *   maxRetries: 3
+ * });
+ * ```
+ * 
+ * @throws {Error} Si le rate limit est dépassé et retry est désactivé ou maxRetries atteint
  */
 export async function withRateLimit<T>(
   endpoint: RateLimitEndpoint,

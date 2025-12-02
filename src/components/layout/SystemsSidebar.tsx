@@ -1,109 +1,91 @@
 /**
- * Products Sidebar - Sidebar contextuelle pour la section Produits & Cours
- * Design professionnel inspiré de grandes plateformes
+ * Systems Sidebar - Sidebar contextuelle pour Systèmes & Intégrations
  */
 
 import { NavLink, useLocation } from 'react-router-dom';
 import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
 import { cn } from '@/lib/utils';
 import {
-  Package,
-  GraduationCap,
-  Download,
-  Key,
-  Layers,
-  BarChart,
-  Sparkles,
+  Settings,
+  Webhook,
+  Star,
+  Gift,
 } from 'lucide-react';
 
-// Navigation des produits & cours
-const productsNavItems = [
+const systemsNavItems = [
   {
-    label: 'Produits',
-    path: '/dashboard/products',
-    icon: Package,
+    label: 'Intégrations',
+    path: '/dashboard/integrations',
+    icon: Settings,
   },
   {
-    label: 'Mes Cours',
-    path: '/dashboard/my-courses',
-    icon: GraduationCap,
+    label: 'Webhooks',
+    path: '/dashboard/webhooks',
+    icon: Webhook,
   },
   {
-    label: 'Produits Digitaux',
-    path: '/dashboard/digital-products',
-    icon: Download,
+    label: 'Webhooks Produits Digitaux',
+    path: '/dashboard/digital-webhooks',
+    icon: Webhook,
   },
   {
-    label: 'Mes Téléchargements',
-    path: '/dashboard/my-downloads',
-    icon: Download,
+    label: 'Webhooks Produits Physiques',
+    path: '/dashboard/physical-webhooks',
+    icon: Webhook,
   },
   {
-    label: 'Mes Licences',
-    path: '/dashboard/my-licenses',
-    icon: Key,
+    label: 'Programme de Fidélité',
+    path: '/dashboard/loyalty',
+    icon: Star,
   },
   {
-    label: 'Bundles Produits',
-    path: '/dashboard/digital-products/bundles/create',
-    icon: Layers,
-  },
-  {
-    label: 'Analytics Digitaux',
-    path: '/dashboard/digital-products',
-    icon: BarChart,
-  },
-  {
-    label: 'Mises à jour Digitales',
-    path: '/dashboard/digital/updates',
-    icon: Sparkles,
+    label: 'Cartes Cadeaux',
+    path: '/dashboard/gift-cards',
+    icon: Gift,
   },
 ];
 
-// Groupes de navigation pour organisation
-const productsNavGroups = [
+const systemsNavGroups = [
   {
-    label: 'Gestion',
-    items: productsNavItems.slice(0, 2),
+    label: 'Intégrations',
+    items: systemsNavItems.slice(0, 1),
   },
   {
-    label: 'Produits Digitaux',
-    items: productsNavItems.slice(2, 6),
+    label: 'Webhooks',
+    items: systemsNavItems.slice(1, 4),
   },
   {
-    label: 'Analytics',
-    items: productsNavItems.slice(6),
+    label: 'Programmes',
+    items: systemsNavItems.slice(4),
   },
 ];
 
-export const ProductsSidebar = () => {
+export const SystemsSidebar = () => {
   const location = useLocation();
 
   const getActiveSection = () => {
-    const activeItem = productsNavItems.find(
+    const activeItem = systemsNavItems.find(
       (item) =>
         location.pathname === item.path ||
-        (item.path !== '/dashboard/products' && location.pathname.startsWith(item.path))
+        location.pathname.startsWith(item.path)
     );
-    return activeItem?.label || 'Produits & Cours';
+    return activeItem?.label || 'Systèmes & Intégrations';
   };
 
   const activeSection = getActiveSection();
 
   const breadcrumbItems: BreadcrumbItem[] = [
-    { label: 'Produits & Cours', path: '/dashboard/products' },
+    { label: 'Systèmes & Intégrations', path: '/dashboard/integrations' },
     { label: activeSection },
   ];
 
   return (
     <aside className="hidden md:block fixed left-0 top-16 w-56 md:w-64 h-[calc(100vh-4rem)] border-r border-blue-800/30 bg-gradient-to-br from-slate-900 via-blue-950 to-black overflow-y-auto z-40 transition-all duration-300 scrollbar-thin">
       <div className="p-3 sm:p-4 md:p-5 space-y-4 md:space-y-6">
-        {/* Breadcrumb */}
         <Breadcrumb items={breadcrumbItems} />
 
-        {/* Navigation par groupes */}
         <nav className="space-y-6">
-          {productsNavGroups.map((group, groupIndex) => (
+          {systemsNavGroups.map((group, groupIndex) => (
             <div key={groupIndex} className="space-y-2">
               <h3 className="px-3 py-1.5 text-xs font-semibold text-blue-200/80 uppercase tracking-wider border-b border-blue-800/30">
                 {group.label}
@@ -113,8 +95,7 @@ export const ProductsSidebar = () => {
                   const Icon = item.icon;
                   const isActive =
                     location.pathname === item.path ||
-                    (item.path !== '/dashboard/products' &&
-                      location.pathname.startsWith(item.path));
+                    location.pathname.startsWith(item.path);
 
                   return (
                     <NavLink

@@ -1,50 +1,50 @@
 /**
- * Analytics Sidebar - Sidebar contextuelle pour Analytics & SEO
+ * Finance Sidebar - Sidebar contextuelle pour Finance & Paiements
  */
 
 import { NavLink, useLocation } from 'react-router-dom';
 import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
 import { cn } from '@/lib/utils';
 import {
-  BarChart3,
-  Target,
-  Search,
+  CreditCard,
+  DollarSign,
+  FileText,
 } from 'lucide-react';
 
-const analyticsNavItems = [
+const financeNavItems = [
   {
-    label: 'Statistiques',
-    path: '/dashboard/analytics',
-    icon: BarChart3,
+    label: 'Paiements',
+    path: '/dashboard/payments',
+    icon: CreditCard,
   },
   {
-    label: 'Mes Pixels',
-    path: '/dashboard/pixels',
-    icon: Target,
+    label: 'Solde à Payer',
+    path: '/dashboard/pay-balance',
+    icon: DollarSign,
   },
   {
-    label: 'Mon SEO',
-    path: '/dashboard/seo',
-    icon: Search,
+    label: 'Gestion Paiements',
+    path: '/dashboard/payment-management',
+    icon: FileText,
   },
 ];
 
-export const AnalyticsSidebar = () => {
+export const FinanceSidebar = () => {
   const location = useLocation();
 
   const getActiveSection = () => {
-    const activeItem = analyticsNavItems.find(
+    const activeItem = financeNavItems.find(
       (item) =>
         location.pathname === item.path ||
         location.pathname.startsWith(item.path)
     );
-    return activeItem?.label || 'Analytics & SEO';
+    return activeItem?.label || 'Finance & Paiements';
   };
 
   const activeSection = getActiveSection();
 
   const breadcrumbItems: BreadcrumbItem[] = [
-    { label: 'Analytics & SEO', path: '/dashboard/analytics' },
+    { label: 'Finance & Paiements', path: '/dashboard/payments' },
     { label: activeSection },
   ];
 
@@ -54,7 +54,7 @@ export const AnalyticsSidebar = () => {
         <Breadcrumb items={breadcrumbItems} />
 
         <nav className="space-y-1">
-          {analyticsNavItems.map((item) => {
+          {financeNavItems.map((item) => {
             const Icon = item.icon;
             const isActive =
               location.pathname === item.path ||
@@ -81,3 +81,4 @@ export const AnalyticsSidebar = () => {
     </aside>
   );
 };
+

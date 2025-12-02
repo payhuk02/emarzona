@@ -78,6 +78,7 @@ export const usePrefetchRoutes = () => {
 
 /**
  * Hook pour prefetch les données au hover des liens
+ * AMÉLIORÉ : Prefetch plus intelligent avec prefetch DNS et preconnect
  */
 export const usePrefetchOnHover = (options: PrefetchOptions = {}) => {
   const queryClient = useQueryClient();
@@ -85,6 +86,7 @@ export const usePrefetchOnHover = (options: PrefetchOptions = {}) => {
 
   useEffect(() => {
     const links = document.querySelectorAll('a[href]');
+    const prefetchedRoutes = new Set<string>();
     let timeoutId: NodeJS.Timeout;
 
     const handleMouseEnter = (event: Event) => {
@@ -96,12 +98,31 @@ export const usePrefetchOnHover = (options: PrefetchOptions = {}) => {
       // Prefetch la route si elle est dans la liste
       if (routes.some(route => href.includes(route))) {
         timeoutId = setTimeout(() => {
-          // Prefetch le chunk de la route
           const routePath = href.startsWith('/') ? href : `/${href}`;
+          
+          // Éviter de prefetch plusieurs fois la même route
+          if (prefetchedRoutes.has(routePath)) {
+            return;
+          }
+          
+          prefetchedRoutes.add(routePath);
           logger.debug(`Prefetching route: ${routePath}`);
           
-          // Le lazy loading de React Router gère automatiquement le prefetch
-          // On peut aussi précharger les données si nécessaire
+          // Prefetch DNS pour les domaines externes si nécessaire
+          const url = new URL(routePath, window.location.origin);
+          if (url.origin !== window.location.origin) {
+            const link = document.createElement('link');
+            link.rel = 'dns-prefetch';
+            link.href = url.origin;
+            document.head.appendChild(link);
+          }
+          
+          // Prefetch la route avec link prefetch
+          const prefetchLink = document.createElement('link');
+          prefetchLink.rel = 'prefetch';
+          prefetchLink.href = routePath;
+          prefetchLink.as = 'document';
+          document.head.appendChild(prefetchLink);
         }, delay);
       }
     };

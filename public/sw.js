@@ -146,8 +146,8 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(request)
       .then((response) => {
-        // Mettre en cache les réponses valides
-        if (response.status === 200) {
+        // Mettre en cache les réponses valides (sauf les requêtes POST/PUT/DELETE)
+        if (response.status === 200 && request.method === 'GET') {
           const responseToCache = response.clone();
           caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
             cache.put(request, responseToCache);
@@ -163,10 +163,52 @@ self.addEventListener('fetch', (event) => {
           }
           // Si pas de cache, retourner une page offline
           if (request.mode === 'navigate') {
-            return caches.match('/index.html');
+            return caches.match('/index.html').then((html) => {
+              if (html) {
+                return html;
+              }
+              // Fallback vers offline.html si disponible
+              return caches.match('/offline.html');
+            });
           }
-          return new Response('Offline', { status: 503 });
+          return new Response('Offline', { 
+            status: 503,
+            headers: { 'Content-Type': 'text/plain' }
+          });
         });
       })
   );
+});
+
+// Background Sync pour les requêtes POST/PUT/DELETE en échec
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-forms') {
+    event.waitUntil(syncForms());
+  }
+});
+
+/**
+ * Synchronise les formulaires en attente
+ */
+async function syncForms() {
+  // Récupérer les formulaires en attente depuis IndexedDB
+  // et les renvoyer au serveur
+  // (Implémentation à compléter selon les besoins)
+  console.log('[SW] Syncing forms...');
+}
+
+// Message handler pour communication avec l'app
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+  
+  if (event.data && event.data.type === 'CACHE_URLS') {
+    const urls = event.data.urls;
+    event.waitUntil(
+      caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
+        return cache.addAll(urls);
+      })
+    );
+  }
 });

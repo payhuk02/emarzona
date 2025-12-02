@@ -439,7 +439,7 @@ const ProductCardModernComponent = ({
         <div className="flex items-center justify-between gap-2 mb-2 sm:mb-3" id={`product-price-${product.id}`}>
           <div className="flex items-baseline gap-1.5 sm:gap-2 min-w-0 flex-1">
             {hasPromo && (
-              <span className="text-[10px] sm:text-xs text-gray-500 line-through flex-shrink-0 whitespace-nowrap" aria-label={`Prix original: ${formatPrice(product.price)} ${product.currency || 'XOF'}`}>
+              <span className="text-xs sm:text-sm text-gray-600 line-through flex-shrink-0 whitespace-nowrap" aria-label={`Prix original: ${formatPrice(product.price)} ${product.currency || 'XOF'}`}>
                 {formatPrice(product.price)} {product.currency || 'XOF'}
               </span>
             )}

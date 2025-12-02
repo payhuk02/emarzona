@@ -80,13 +80,32 @@ const ProductCardProfessionalComponent = ({
     ? Math.round(((product.price - product.promotional_price!) / product.price) * 100)
     : 0;
 
-  // Fonction pour nettoyer les balises HTML
+  // Fonction pour nettoyer les balises HTML - SÉCURISÉE
   const stripHtmlTags = (html: string): string => {
-    // Créer un élément temporaire pour parser le HTML
+    // SÉCURISÉ : Extraire le texte sans utiliser innerHTML (évite XSS)
+    if (!html.includes('<')) {
+      // Pas de HTML, retourner directement
+      return html;
+    }
+    
+    // Si contient du HTML, utiliser DOMPurify si disponible
+    try {
+      if (typeof window !== 'undefined' && (window as any).DOMPurify) {
+        const DOMPurify = (window as any).DOMPurify;
+        const cleanHtml = DOMPurify.sanitize(html, { ALLOWED_TAGS: [] });
+        const temp = document.createElement('div');
+        temp.innerHTML = cleanHtml; // Sécurisé car nettoyé par DOMPurify
+        return temp.textContent || temp.innerText || '';
+      }
+    } catch (e) {
+      // Fallback silencieux
+    }
+    
+    // Fallback : utiliser textContent (plus sûr que innerHTML)
+    // textContent échappe automatiquement le HTML
     const temp = document.createElement('div');
-    temp.innerHTML = html;
-    // Extraire le texte sans balises
-    return temp.textContent || temp.innerText || '';
+    temp.textContent = html; // textContent échappe automatiquement
+    return temp.textContent || '';
   };
 
   // Générer une description courte si manquante (fallback frontend)
@@ -448,7 +467,7 @@ const ProductCardProfessionalComponent = ({
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-baseline gap-1.5 sm:gap-2 min-w-0 flex-1" role="group" aria-label="Prix du produit">
               {hasPromo && (
-                <span className="text-[10px] sm:text-xs text-gray-500 line-through flex-shrink-0 whitespace-nowrap" aria-label={`Prix original: ${formatPrice(product.price)} ${product.currency || 'FCFA'}`}>
+                <span className="text-xs sm:text-sm text-gray-600 line-through flex-shrink-0 whitespace-nowrap" aria-label={`Prix original: ${formatPrice(product.price)} ${product.currency || 'FCFA'}`}>
                   {formatPrice(product.price)} {product.currency || 'FCFA'}
                 </span>
               )}

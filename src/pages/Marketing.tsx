@@ -58,7 +58,7 @@ export const Marketing = () => {
   ];
 
   return (
-    <MainLayout layoutType="default">
+    <MainLayout layoutType="marketing">
       <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         {/* Header */}
         <div className="space-y-2">
@@ -114,7 +114,7 @@ export const Marketing = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">-</div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Aucune donnée disponible
               </p>
             </CardContent>
@@ -127,7 +127,7 @@ export const Marketing = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">-</div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Aucune donnée disponible
               </p>
             </CardContent>
@@ -140,7 +140,7 @@ export const Marketing = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">-</div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Aucune donnée disponible
               </p>
             </CardContent>

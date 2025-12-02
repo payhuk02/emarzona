@@ -442,7 +442,7 @@ export default defineConfig(({ mode }) => {
     target: 'esnext', // Utiliser esnext pour un build plus rapide (Vercel supporte esnext)
     minify: 'esbuild', // Plus rapide que terser (2-3x plus rapide)
     // Chunk size warnings - optimisé pour code splitting
-    chunkSizeWarningLimit: 500, // Avertir si un chunk dépasse 500KB (code splitting activé)
+    chunkSizeWarningLimit: 300, // Avertir si un chunk dépasse 300KB (code splitting activé) - Plus strict
     reportCompressedSize: !isProduction, // Désactivé en production pour accélérer le build
     sourcemap: isProduction && hasSentryToken, // Seulement si Sentry configuré
     // Optimisations supplémentaires

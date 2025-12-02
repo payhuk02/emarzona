@@ -300,25 +300,25 @@ const Landing = () => {
                 <div className="text-base sm:text-2xl md:text-3xl lg:text-4xl font-bold text-primary mb-0.5 sm:mb-1 break-words">
                   {animatedStats.users.toLocaleString()}+
                 </div>
-                <div className="text-[11px] sm:text-xs md:text-sm text-gray-700 leading-tight">Vendeurs actifs</div>
+                <div className="text-xs sm:text-sm md:text-base text-gray-800 leading-normal">Vendeurs actifs</div>
               </div>
               <div className="bg-white/90 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 md:p-6 border border-white/30 shadow-medium">
                 <div className="text-base sm:text-2xl md:text-3xl lg:text-4xl font-bold text-accent mb-0.5 sm:mb-1 break-words">
                   {animatedStats.products.toLocaleString()}+
                 </div>
-                <div className="text-[11px] sm:text-xs md:text-sm text-gray-700 leading-tight">Produits disponibles</div>
+                <div className="text-xs sm:text-sm md:text-base text-gray-800 leading-normal">Produits disponibles</div>
               </div>
               <div className="bg-white/90 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 md:p-6 border border-white/30 shadow-medium">
                 <div className="text-base sm:text-2xl md:text-3xl lg:text-4xl font-bold text-primary mb-0.5 sm:mb-1 break-words">
                   {animatedStats.sales.toLocaleString()}+
                 </div>
-                <div className="text-[11px] sm:text-xs md:text-sm text-gray-700 leading-tight">Ventes réalisées</div>
+                <div className="text-xs sm:text-sm md:text-base text-gray-800 leading-normal">Ventes réalisées</div>
               </div>
               <div className="bg-white/90 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 md:p-6 border border-white/30 shadow-medium">
                 <div className="text-base sm:text-2xl md:text-3xl lg:text-4xl font-bold text-accent mb-0.5 sm:mb-1 break-words">
                   {animatedStats.stores}+
                 </div>
-                <div className="text-[11px] sm:text-xs md:text-sm text-gray-700 leading-tight">Boutiques créées</div>
+                <div className="text-xs sm:text-sm md:text-base text-gray-800 leading-normal">Boutiques créées</div>
               </div>
             </div>
 

@@ -23,13 +23,13 @@ All colors MUST be HSL.
   :root {
     /* Thème clair par défaut (Professionnel) */
     --background: 0 0% 100%;
-    --foreground: 220 40% 15%;
+    --foreground: 220 40% 10%; /* Plus foncé pour meilleur contraste sur fond blanc (WCAG AA) */
 
     --card: 0 0% 100%;
-    --card-foreground: 220 40% 15%;
+    --card-foreground: 220 40% 10%; /* Plus foncé pour meilleur contraste */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 40% 15%;
+    --popover-foreground: 220 40% 10%; /* Plus foncé pour meilleur contraste */
 
     --primary: 217 91% 60%;        /* Bleu moderne #3B82F6 (inspiré Linear, Stripe) */
     --primary-foreground: 0 0% 100%;
@@ -38,7 +38,7 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 12%; /* Noir doux */
 
     --muted: 0 0% 98%;              /* Gris ultra clair */
-    --muted-foreground: 0 0% 45%;   /* Gris moyen */
+    --muted-foreground: 0 0% 35%;   /* Gris foncé pour meilleur contraste sur fond blanc (WCAG AA) */
 
     --accent: 38 92% 50%;          /* Orange/Jaune moderne pour contraste avec primary */
     --accent-foreground: 0 0% 100%;
@@ -66,7 +66,7 @@ All colors MUST be HSL.
 
     /* Sidebar claire par défaut */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 40% 15%;
+    --sidebar-foreground: 220 40% 10%; /* Plus foncé pour meilleur contraste sur fond blanc */
     --sidebar-primary: 217 91% 60%;  /* Bleu moderne */
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 96%;      /* Gris très clair */
@@ -259,8 +259,8 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-size: 1rem; /* 16px */
-    line-height: 1.5;
+    font-size: 1rem; /* 16px - Taille professionnelle */
+    line-height: 1.625; /* Amélioré pour meilleure lisibilité */
     letter-spacing: 0;
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
@@ -345,9 +345,10 @@ All colors MUST be HSL.
       padding-right: 0.5rem;
     }
     
-    /* Textes plus petits mais lisibles */
+    /* Textes plus petits mais lisibles - Minimum 14px pour accessibilité */
     body {
-      font-size: 14px;
+      font-size: 0.875rem; /* 14px - Minimum recommandé WCAG */
+      line-height: 1.5;
     }
     
     /* Boutons compacts */
@@ -443,10 +444,10 @@ All colors MUST be HSL.
       padding-right: 0.5rem;
     }
     
-    /* Textes adaptés */
+    /* Textes adaptés - Minimum 12px pour lisibilité */
     .text-responsive-xs {
-      font-size: 0.7rem;
-      line-height: 0.95rem;
+      font-size: 0.75rem; /* 12px minimum */
+      line-height: 1.25rem;
     }
     
     /* Padding minimal */
@@ -539,8 +540,29 @@ All colors MUST be HSL.
   }
 
   button:focus-visible,
-  [role="button"]:focus-visible {
+  [role="button"]:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
     outline: 3px solid hsl(var(--ring));
+    outline-offset: 3px;
+    outline-style: solid;
+    border-radius: 0.25rem;
+  }
+  
+  /* Focus visible amélioré pour navigation clavier - WCAG 2.4.7 */
+  *:focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 3px;
+    outline-style: solid;
+  }
+  
+  /* Exception pour les éléments avec focus interne (inputs, etc.) */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid hsl(var(--ring));
     outline-offset: 2px;
   }
 
@@ -847,6 +869,54 @@ All colors MUST be HSL.
     transition: var(--transition-smooth);
   }
 
+  /* Micro-interactions améliorées */
+  .micro-interaction-scale {
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .micro-interaction-scale:active {
+    transform: scale(0.95);
+  }
+
+  .micro-interaction-bounce {
+    transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  
+  .micro-interaction-bounce:active {
+    transform: scale(0.9);
+  }
+
+  /* Smooth hover effects avec GPU acceleration */
+  .hover-smooth-lift {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    will-change: transform;
+  }
+  
+  .hover-smooth-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .hover-smooth-scale {
+    transition: transform 0.2s ease-out;
+    will-change: transform;
+  }
+  
+  .hover-smooth-scale:hover {
+    transform: scale(1.02);
+  }
+
+  /* Respect des préférences utilisateur (reduced motion) */
+  @media (prefers-reduced-motion: reduce) {
+    .micro-interaction-scale,
+    .micro-interaction-bounce,
+    .hover-smooth-lift,
+    .hover-smooth-scale {
+      transition: none !important;
+      transform: none !important;
+    }
+  }
+
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
@@ -1066,4 +1136,115 @@ All colors MUST be HSL.
 
 .ProseMirror u {
   @apply underline;
+}
+
+/* ============================================================
+   SCROLLBARS PERSONNALISÉES POUR SIDEBARS
+   Design professionnel et moderne
+   ============================================================ */
+
+/* Scrollbar personnalisée pour les sidebars */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.3);
+}
+
+/* Scrollbar pour Firefox */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+/* Force le dégradé bleu foncé/noir sur le sidebar principal du tableau de bord */
+[data-sidebar="sidebar"] {
+  background: linear-gradient(to bottom right, rgb(15 23 42), rgb(23 37 84), rgb(0 0 0)) !important;
+  color: rgb(203 213 225) !important; /* text-slate-300 par défaut pour meilleure visibilité */
+}
+
+/* Force la couleur de texte pour TOUS les éléments du sidebar */
+[data-sidebar="sidebar"] * {
+  color: inherit !important;
+}
+
+/* Améliore la visibilité des textes dans le sidebar - FORCE les couleurs */
+[data-sidebar="sidebar"] .text-sidebar-foreground,
+[data-sidebar="sidebar"] [class*="text-sidebar-foreground"],
+[data-sidebar="sidebar"] span:not(.sr-only):not([class*="text-white"]):not([class*="text-blue"]):not([class*="text-primary"]) {
+  color: rgb(203 213 225) !important; /* text-slate-300 */
+}
+
+[data-sidebar="sidebar"] .text-muted-foreground,
+[data-sidebar="sidebar"] [class*="text-muted-foreground"] {
+  color: rgb(148 163 184) !important; /* text-slate-400 pour meilleur contraste */
+}
+
+/* Labels de sections plus visibles */
+[data-sidebar="sidebar"] [data-sidebar="group-label"],
+[data-sidebar="sidebar"] [data-sidebar="group-label"] span {
+  color: rgb(191 219 254) !important; /* text-blue-200 pour meilleure visibilité */
+  font-weight: 600 !important;
+}
+
+/* Icônes et éléments interactifs - FORCE la couleur */
+[data-sidebar="sidebar"] svg:not([class*="text-white"]):not([class*="text-blue"]):not([class*="text-primary"]) {
+  color: rgb(203 213 225) !important; /* text-slate-300 par défaut */
+}
+
+/* Spans et textes sans classe spécifique - FORCE la couleur */
+[data-sidebar="sidebar"] span:not([class*="text-"]):not(.sr-only):not([class*="text-white"]):not([class*="text-blue"]):not([class*="text-primary"]) {
+  color: rgb(203 213 225) !important;
+}
+
+/* Liens et boutons - FORCE la couleur de texte */
+[data-sidebar="sidebar"] a:not([class*="text-white"]):not([class*="text-blue"]):not([class*="text-primary"]),
+[data-sidebar="sidebar"] button:not([class*="text-white"]):not([class*="text-blue"]):not([class*="text-primary"]) {
+  color: rgb(203 213 225) !important;
+}
+
+/* Améliore le contraste des éléments actifs */
+[data-sidebar="sidebar"] [data-active="true"],
+[data-sidebar="sidebar"] [aria-current="page"],
+[data-sidebar="sidebar"] [class*="bg-blue-600"] {
+  color: rgb(191 219 254) !important; /* text-blue-200 */
+}
+
+[data-sidebar="sidebar"] [class*="bg-blue-600"] * {
+  color: rgb(191 219 254) !important; /* text-blue-200 pour tous les enfants */
+}
+
+/* Hover states plus visibles */
+[data-sidebar="sidebar"] a:hover:not([class*="text-white"]):not([class*="text-blue"]),
+[data-sidebar="sidebar"] button:hover:not([class*="text-white"]):not([class*="text-blue"]) {
+  color: rgb(255 255 255) !important;
+}
+
+/* Menu items - FORCE la couleur de texte */
+[data-sidebar="sidebar"] [data-sidebar="menu-button"]:not([class*="text-white"]):not([class*="text-blue"]),
+[data-sidebar="sidebar"] [data-sidebar="menu-button"] span:not([class*="text-white"]):not([class*="text-blue"]) {
+  color: rgb(203 213 225) !important;
+}
+
+/* SidebarMenuButton - FORCE la couleur */
+[data-sidebar="sidebar"] button[data-sidebar="menu-button"]:not([class*="text-white"]):not([class*="text-blue"]),
+[data-sidebar="sidebar"] button[data-sidebar="menu-button"] span:not([class*="text-white"]):not([class*="text-blue"]) {
+  color: rgb(203 213 225) !important;
 }

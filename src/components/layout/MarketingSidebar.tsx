@@ -1,109 +1,118 @@
 /**
- * Products Sidebar - Sidebar contextuelle pour la section Produits & Cours
- * Design professionnel inspiré de grandes plateformes
+ * Marketing Sidebar - Sidebar contextuelle pour Marketing & Croissance
  */
 
 import { NavLink, useLocation } from 'react-router-dom';
 import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
 import { cn } from '@/lib/utils';
 import {
-  Package,
+  Users,
+  Tag,
+  Mail,
+  UserPlus,
+  TrendingUp,
   GraduationCap,
-  Download,
-  Key,
-  Layers,
-  BarChart,
-  Sparkles,
 } from 'lucide-react';
 
-// Navigation des produits & cours
-const productsNavItems = [
+const marketingNavItems = [
   {
-    label: 'Produits',
-    path: '/dashboard/products',
-    icon: Package,
+    label: 'Clients',
+    path: '/dashboard/customers',
+    icon: Users,
   },
   {
-    label: 'Mes Cours',
-    path: '/dashboard/my-courses',
+    label: 'Promotions',
+    path: '/dashboard/promotions',
+    icon: Tag,
+  },
+  {
+    label: 'Campagnes Email',
+    path: '/dashboard/emails/campaigns',
+    icon: Mail,
+  },
+  {
+    label: 'Séquences Email',
+    path: '/dashboard/emails/sequences',
+    icon: Mail,
+  },
+  {
+    label: 'Segments d\'Audience',
+    path: '/dashboard/emails/segments',
+    icon: Users,
+  },
+  {
+    label: 'Analytics Email',
+    path: '/dashboard/emails/analytics',
+    icon: TrendingUp,
+  },
+  {
+    label: 'Workflows Email',
+    path: '/dashboard/emails/workflows',
+    icon: Mail,
+  },
+  {
+    label: 'Éditeur Templates',
+    path: '/dashboard/emails/templates/editor',
+    icon: Mail,
+  },
+  {
+    label: 'Parrainage',
+    path: '/dashboard/referrals',
+    icon: UserPlus,
+  },
+  {
+    label: 'Affiliation',
+    path: '/dashboard/affiliates',
+    icon: TrendingUp,
+  },
+  {
+    label: 'Cours Promus',
+    path: '/affiliate/courses',
     icon: GraduationCap,
   },
+];
+
+const marketingNavGroups = [
   {
-    label: 'Produits Digitaux',
-    path: '/dashboard/digital-products',
-    icon: Download,
+    label: 'Clients & Promotions',
+    items: marketingNavItems.slice(0, 2),
   },
   {
-    label: 'Mes Téléchargements',
-    path: '/dashboard/my-downloads',
-    icon: Download,
+    label: 'Email Marketing',
+    items: marketingNavItems.slice(2, 8),
   },
   {
-    label: 'Mes Licences',
-    path: '/dashboard/my-licenses',
-    icon: Key,
-  },
-  {
-    label: 'Bundles Produits',
-    path: '/dashboard/digital-products/bundles/create',
-    icon: Layers,
-  },
-  {
-    label: 'Analytics Digitaux',
-    path: '/dashboard/digital-products',
-    icon: BarChart,
-  },
-  {
-    label: 'Mises à jour Digitales',
-    path: '/dashboard/digital/updates',
-    icon: Sparkles,
+    label: 'Croissance',
+    items: marketingNavItems.slice(8),
   },
 ];
 
-// Groupes de navigation pour organisation
-const productsNavGroups = [
-  {
-    label: 'Gestion',
-    items: productsNavItems.slice(0, 2),
-  },
-  {
-    label: 'Produits Digitaux',
-    items: productsNavItems.slice(2, 6),
-  },
-  {
-    label: 'Analytics',
-    items: productsNavItems.slice(6),
-  },
-];
-
-export const ProductsSidebar = () => {
+export const MarketingSidebar = () => {
   const location = useLocation();
 
   const getActiveSection = () => {
-    const activeItem = productsNavItems.find(
+    const activeItem = marketingNavItems.find(
       (item) =>
         location.pathname === item.path ||
-        (item.path !== '/dashboard/products' && location.pathname.startsWith(item.path))
+        location.pathname.startsWith(item.path)
     );
-    return activeItem?.label || 'Produits & Cours';
+    return activeItem?.label || 'Marketing & Croissance';
   };
 
   const activeSection = getActiveSection();
 
   const breadcrumbItems: BreadcrumbItem[] = [
-    { label: 'Produits & Cours', path: '/dashboard/products' },
+    { label: 'Marketing & Croissance', path: '/dashboard/marketing' },
     { label: activeSection },
   ];
 
   return (
     <aside className="hidden md:block fixed left-0 top-16 w-56 md:w-64 h-[calc(100vh-4rem)] border-r border-blue-800/30 bg-gradient-to-br from-slate-900 via-blue-950 to-black overflow-y-auto z-40 transition-all duration-300 scrollbar-thin">
       <div className="p-3 sm:p-4 md:p-5 space-y-4 md:space-y-6">
-        {/* Breadcrumb */}
         <Breadcrumb items={breadcrumbItems} />
 
-        {/* Navigation par groupes */}
         <nav className="space-y-6">
-          {productsNavGroups.map((group, groupIndex) => (
+          {marketingNavGroups.map((group, groupIndex) => (
             <div key={groupIndex} className="space-y-2">
               <h3 className="px-3 py-1.5 text-xs font-semibold text-blue-200/80 uppercase tracking-wider border-b border-blue-800/30">
                 {group.label}
@@ -113,8 +122,7 @@ export const ProductsSidebar = () => {
                   const Icon = item.icon;
                   const isActive =
                     location.pathname === item.path ||
-                    (item.path !== '/dashboard/products' &&
-                      location.pathname.startsWith(item.path));
+                    location.pathname.startsWith(item.path);
 
                   return (
                     <NavLink

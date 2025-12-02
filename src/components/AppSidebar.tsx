@@ -898,10 +898,17 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r bg-white dark:bg-white">
-      <SidebarContent>
+    <div className="[&_[data-sidebar=sidebar]]:!bg-gradient-to-br [&_[data-sidebar=sidebar]]:!from-slate-900 [&_[data-sidebar=sidebar]]:!via-blue-950 [&_[data-sidebar=sidebar]]:!to-black">
+      <Sidebar 
+        collapsible="icon" 
+        className="border-r transition-all duration-300"
+        style={{
+          '--sidebar-background': 'transparent',
+        } as React.CSSProperties}
+      >
+        <SidebarContent>
         {/* Logo */}
-        <div className="p-3 sm:p-4 border-b">
+        <div className="p-3 sm:p-4 md:p-5 border-b border-blue-800/30">
           <Link 
             to="/dashboard" 
             className="flex items-center gap-2"
@@ -925,7 +932,7 @@ export function AppSidebar() {
               </div>
             )}
             {!isCollapsed && (
-              <span className="text-base sm:text-lg font-bold !text-black truncate">
+              <span className="text-base sm:text-lg font-bold text-white truncate">
                 Emarzona
               </span>
             )}
@@ -936,10 +943,10 @@ export function AppSidebar() {
         {!isOnAdminPage && menuSections.map((section) => (
           <SidebarGroup key={section.label}>
             <SidebarGroupLabel 
-              className="!text-black"
+              className="!text-blue-200 font-semibold [&_span]:!text-blue-200"
               aria-label={`Section ${section.label}`}
             >
-              {!isCollapsed && section.label}
+              {!isCollapsed && <span className="!text-blue-200">{section.label}</span>}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -950,78 +957,75 @@ export function AppSidebar() {
                     return null;
                   }
                   
-                  // Menu spécial pour "Tableau de bord" avec sous-menu des boutiques
+                  // Menu spécial pour "Tableau de bord" avec sous-menu des boutiques - STATIQUE (toujours ouvert)
                   if (item.title === "Tableau de bord" && !storesLoading && stores.length > 0) {
                     const isDashboardActive = location.pathname === "/dashboard";
                     return (
-                      <Collapsible key={item.title} asChild defaultOpen={!isCollapsed}>
-                        <SidebarMenuItem>
-                          <CollapsibleTrigger asChild>
-                            <SidebarMenuButton
-                              className={`transition-all duration-300 group relative flex items-center justify-between w-full [&_*]:!text-black ${
-                                isDashboardActive
-                                  ? "bg-primary/20 text-primary font-semibold border-l-2 border-primary [&_*]:!text-primary"
-                                  : "!text-black hover:bg-muted hover:translate-x-1"
-                              }`}
-                              aria-label={`${item.title}${!isCollapsed ? ' - Menu déroulant' : ''}`}
-                              aria-expanded={!isCollapsed ? true : undefined}
-                            >
-                              <div className="flex items-center gap-2">
-                                <IconComponent 
-                                  className="h-4 w-4 !text-black flex-shrink-0"
-                                  aria-hidden="true"
-                                />
-                                {!isCollapsed && (
-                                  <span className="flex-1 font-medium !text-black">{item.title}</span>
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton
+                          asChild
+                          className={`transition-all duration-300 group relative flex items-center ${
+                            isDashboardActive
+                              ? "bg-blue-600/30 !text-blue-200 font-semibold border-l-2 border-blue-400 [&_*]:!text-blue-200 [&_svg]:!text-blue-200 [&_span]:!text-blue-200"
+                              : "!text-slate-300 hover:bg-blue-900/30 hover:!text-white hover:translate-x-1 [&_svg]:!text-slate-300 [&_span]:!text-slate-300"
+                          }`}
+                        >
+                          <NavLink
+                            to={item.url}
+                            end
+                            className="flex items-center gap-2 w-full"
+                          >
+                            <IconComponent 
+                              className="h-4 w-4 flex-shrink-0"
+                              aria-hidden="true"
+                            />
+                            {!isCollapsed && (
+                              <span className="flex-1 font-medium">{item.title}</span>
+                            )}
+                          </NavLink>
+                        </SidebarMenuButton>
+                        {/* Sous-menu des boutiques - TOUJOURS VISIBLE (statique) */}
+                        {!isCollapsed && (
+                          <div className="ml-4 mt-1 space-y-1">
+                            {stores.map((store) => (
+                              <Button
+                                key={store.id}
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  switchStore(store.id);
+                                  navigate("/dashboard");
+                                  toast({
+                                    title: "Boutique changée",
+                                    description: `Vous consultez maintenant les données de "${store.name}"`,
+                                  });
+                                }}
+                                className={`w-full justify-start !text-slate-300 transition-all duration-200 [&_svg]:!text-slate-300 [&_span]:!text-slate-300 ${
+                                  selectedStoreId === store.id
+                                    ? "bg-blue-600/30 !text-blue-200 font-semibold [&_*]:!text-blue-200 [&_svg]:!text-blue-200 [&_span]:!text-blue-200"
+                                    : "hover:bg-blue-900/30 hover:!text-white hover:translate-x-1 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
+                                }`}
+                              >
+                                {selectedStoreId === store.id && (
+                                  <Check className="h-3 w-3 mr-2" />
                                 )}
-                              </div>
-                              {!isCollapsed && (
-                                <ChevronRight className="h-4 w-4 !text-black transition-transform duration-200 group-data-[state=open]:rotate-90" />
-                              )}
-                            </SidebarMenuButton>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent>
-                            <div className="ml-4 mt-1 space-y-1">
-                              {stores.map((store) => (
-                                <Button
-                                  key={store.id}
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    switchStore(store.id);
-                                    navigate("/dashboard");
-                                    toast({
-                                      title: "Boutique changée",
-                                      description: `Vous consultez maintenant les données de "${store.name}"`,
-                                    });
-                                  }}
-                                  className={`w-full justify-start !text-black [&_*]:!text-black ${
-                                    selectedStoreId === store.id
-                                      ? "bg-primary/20 text-primary font-semibold [&_*]:!text-primary"
-                                      : "hover:bg-muted"
-                                  }`}
-                                >
-                                  {selectedStoreId === store.id && (
-                                    <Check className="h-3 w-3 mr-2" />
-                                  )}
-                                  <span className="truncate">{store.name}</span>
-                                </Button>
-                              ))}
-                              {canCreateStore() && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => navigate("/dashboard/store")}
-                                  className="w-full justify-start !text-black [&_*]:!text-black hover:bg-muted"
-                                >
-                                  <Plus className="h-3 w-3 mr-2" />
-                                  <span>Créer une boutique</span>
-                                </Button>
-                              )}
-                            </div>
-                          </CollapsibleContent>
-                        </SidebarMenuItem>
-                      </Collapsible>
+                                <span className="truncate">{store.name}</span>
+                              </Button>
+                            ))}
+                            {canCreateStore() && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => navigate("/dashboard/store")}
+                                className="w-full justify-start !text-slate-300 hover:bg-blue-900/30 hover:!text-white hover:translate-x-1 transition-all duration-200 [&_svg]:!text-slate-300 [&_span]:!text-slate-300 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
+                              >
+                                <Plus className="h-3 w-3 mr-2" />
+                                <span>Créer une boutique</span>
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </SidebarMenuItem>
                     );
                   }
                   
@@ -1033,18 +1037,21 @@ export function AppSidebar() {
                           to={item.url}
                           end={item.url === "/dashboard"}
                           className={({ isActive }) =>
-                            `transition-all duration-300 group relative flex items-center [&_*]:!text-black ${
+                            `transition-all duration-300 group relative flex items-center ${
                               isActive
-                                ? "bg-primary/20 text-primary font-semibold border-l-2 border-primary [&_*]:!text-primary"
-                                : "!text-black hover:bg-muted hover:translate-x-1"
+                                ? "bg-blue-600/30 !text-blue-200 font-semibold border-l-2 border-blue-400 [&_*]:!text-blue-200 [&_svg]:!text-blue-200 [&_span]:!text-blue-200"
+                                : "!text-slate-300 hover:bg-blue-900/30 hover:!text-white hover:translate-x-1 [&_svg]:!text-slate-300 [&_span]:!text-slate-300"
                             }`
                           }
                         >
                           <IconComponent 
-                            className="h-4 w-4 !text-black flex-shrink-0"
+                            className="h-4 w-4 flex-shrink-0"
+                            aria-hidden="true"
                           />
-                          {!isCollapsed && (
-                            <span className="flex-1 font-medium !text-black">{item.title}</span>
+                          {!isCollapsed ? (
+                            <span className="flex-1 font-medium">{item.title}</span>
+                          ) : (
+                            <span className="sr-only">{item.title}</span>
                           )}
                         </NavLink>
                       </SidebarMenuButton>
@@ -1065,10 +1072,11 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink
                       to="/dashboard"
-                      className="!text-black hover:bg-primary/10 hover:translate-x-1 transition-all duration-300 [&_*]:!text-black"
+                      className="!text-slate-300 hover:bg-blue-900/30 hover:!text-white hover:translate-x-1 transition-all duration-300 [&_svg]:!text-slate-300 [&_span]:!text-slate-300 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
                     >
-                      <LayoutDashboard className="h-4 w-4 !text-black" />
-                      {!isCollapsed && <span className="!text-black">← Retour Dashboard</span>}
+                      <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
+                      {!isCollapsed && <span>← Retour Dashboard</span>}
+                      {isCollapsed && <span className="sr-only">Retour au tableau de bord</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -1080,8 +1088,8 @@ export function AppSidebar() {
         {/* Admin Menu Items - Organisé par sections */}
         {isAdmin && adminMenuSections.map((section) => (
           <SidebarGroup key={section.label}>
-            <SidebarGroupLabel className="!text-black">
-              {!isCollapsed && section.label}
+            <SidebarGroupLabel className="!text-blue-200 font-semibold [&_span]:!text-blue-200">
+              {!isCollapsed && <span className="!text-blue-200">{section.label}</span>}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -1097,15 +1105,22 @@ export function AppSidebar() {
                         <NavLink
                           to={item.url}
                           className={({ isActive }) =>
-                            `transition-all duration-300 [&_*]:!text-black ${
+                            `transition-all duration-300 ${
                               isActive
-                                ? "bg-primary/20 text-primary font-semibold border-l-2 border-primary [&_*]:!text-primary"
-                                : "!text-black hover:bg-muted hover:translate-x-1"
+                                ? "bg-blue-600/30 !text-blue-200 font-semibold border-l-2 border-blue-400 [&_*]:!text-blue-200 [&_svg]:!text-blue-200 [&_span]:!text-blue-200"
+                                : "!text-slate-300 hover:bg-blue-900/30 hover:!text-white hover:translate-x-1 [&_svg]:!text-slate-300 [&_span]:!text-slate-300"
                             }`
                           }
                         >
-                          <IconComponent className="h-4 w-4 !text-black" />
-                          {!isCollapsed && <span className="!text-black">{item.title}</span>}
+                          <IconComponent 
+                            className="h-4 w-4" 
+                            aria-hidden="true"
+                          />
+                          {!isCollapsed ? (
+                            <span>{item.title}</span>
+                          ) : (
+                            <span className="sr-only">{item.title}</span>
+                          )}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -1118,7 +1133,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter className="border-t p-4 space-y-2">
+      <SidebarFooter className="border-t border-blue-800/30 p-4 space-y-2">
         {!isCollapsed && (
           <LanguageSwitcher 
             variant="default" 
@@ -1129,13 +1144,19 @@ export function AppSidebar() {
         )}
         <Button
           variant="ghost"
-          className="w-full justify-start !text-black [&_*]:!text-black"
+          className="w-full justify-start !text-slate-300 hover:bg-blue-900/30 hover:!text-white transition-all duration-200 [&_svg]:!text-slate-300 [&_span]:!text-slate-300 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
           onClick={handleLogout}
+          aria-label={isCollapsed ? "Déconnexion" : undefined}
         >
-          <LogOut className="h-4 w-4 !text-black" />
-          {!isCollapsed && <span className="!text-black">Déconnexion</span>}
+          <LogOut className="h-4 w-4" aria-hidden="true" />
+          {!isCollapsed ? (
+            <span>Déconnexion</span>
+          ) : (
+            <span className="sr-only">Déconnexion</span>
+          )}
         </Button>
       </SidebarFooter>
-    </Sidebar>
+      </Sidebar>
+    </div>
   );
 }
