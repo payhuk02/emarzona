@@ -34,12 +34,14 @@ import {
   Coins,
   Building2,
   HeadphonesIcon,
+  Palette,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useRef } from "react";
 import { usePlatformLogo } from "@/hooks/usePlatformLogo";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { OptimizedImg } from "@/components/shared/OptimizedImg";
 import testimonial1 from "@/assets/testimonial-1.jpg";
 import testimonial2 from "@/assets/testimonial-2.jpg";
 import testimonial3 from "@/assets/testimonial-3.jpg";
@@ -130,13 +132,13 @@ const Landing = () => {
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* SEO Meta Tags */}
       <SEOMeta
-        title="Emarzona - Plateforme E-commerce Complète | Produits Digitaux, Physiques, Services & Cours"
-        description="Vendez 5 types de produits sur une seule plateforme : produits digitaux, physiques, services, cours en ligne et oeuvres d'artiste. Paiements multi-devises, email marketing avancé, shipping FedEx, analytics intégrés. Démarrez gratuitement."
-        keywords="emarzona, ecommerce, plateforme e-commerce, produits digitaux, produits physiques, services, cours en ligne, paiements FCFA, PayDunya, Moneroo, email marketing, shipping FedEx"
+        title="Emarzona - Plateforme E-commerce Complète avec Marketplace | Produits Digitaux, Physiques, Services & Cours"
+        description="Vendez 5 types de produits sur une seule plateforme : produits digitaux, physiques, services, cours en ligne et oeuvres d'artiste. Créez votre boutique ou vendez sur notre Marketplace. Paiements multi-devises, email marketing avancé, shipping FedEx, analytics intégrés. Démarrez gratuitement."
+        keywords="emarzona, ecommerce, plateforme e-commerce, marketplace, produits digitaux, produits physiques, services, cours en ligne, paiements FCFA, PayDunya, Moneroo, email marketing, shipping FedEx"
         url={baseUrl}
         canonical={baseUrl}
         image={`${baseUrl}/og-landing.jpg`}
-        imageAlt="Emarzona - Plateforme de ecommerce et marketing complète"
+        imageAlt="Emarzona - Plateforme de ecommerce et marketplace complète"
         type="website"
         locale="fr_FR"
       />
@@ -150,13 +152,13 @@ const Landing = () => {
           <div className="relative flex items-center justify-start gap-1.5 sm:gap-2 flex-shrink-0">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-6 sm:relative sm:left-auto sm:top-auto sm:translate-y-0 sm:h-8 sm:w-8 z-0">
               {platformLogo ? (
-                <img
+                <OptimizedImg
                   src={platformLogo}
                   alt="Emarzona"
                   width={32}
                   height={32}
                   className="h-full w-full opacity-60 sm:opacity-100 flex-shrink-0 object-contain"
-                  loading="eager"
+                  priority={true}
                 />
               ) : (
                 <div className="h-full w-full bg-primary rounded flex items-center justify-center opacity-60 sm:opacity-100 flex-shrink-0">
@@ -277,7 +279,7 @@ const Landing = () => {
             </h1>
             
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-2 sm:px-4 break-words">
-              Produits digitaux, physiques, services, cours en ligne et oeuvres d'artiste. Tout ce dont vous avez besoin pour créer et développer votre business en ligne, avec paiements multi-devises, email marketing avancé et analytics intégrés.
+              Produits digitaux, physiques, services, cours en ligne et oeuvres d'artiste. Créez votre boutique, vendez sur notre Marketplace ou les deux ! Tout ce dont vous avez besoin pour créer et développer votre business en ligne, avec paiements multi-devises, email marketing avancé et analytics intégrés.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 px-4">
@@ -343,11 +345,11 @@ const Landing = () => {
               Vendez tout ce que vous voulez
             </h2>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-              Une plateforme unique pour gérer tous vos produits, qu'ils soient digitaux, physiques, des services ou des cours en ligne.
+              Une plateforme unique pour gérer tous vos produits : digitaux, physiques, services, cours en ligne et œuvres d'artiste. Vendez depuis votre boutique ou exposez vos produits sur notre Marketplace pour toucher plus de clients.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 md:gap-8 max-w-7xl mx-auto">
             {/* Digital Products */}
             <Card className="bg-card border-border shadow-soft hover:shadow-medium hover:scale-105 transition-smooth group">
               <CardContent className="p-6 text-center">
@@ -455,6 +457,33 @@ const Landing = () => {
                 </ul>
                         </CardContent>
                       </Card>
+
+            {/* Artist Works */}
+            <Card className="bg-card border-border shadow-soft hover:shadow-medium hover:scale-105 transition-smooth group">
+              <CardContent className="p-6 text-center">
+                <div className="h-14 w-14 rounded-xl bg-pink-500/20 flex items-center justify-center mb-4 mx-auto text-pink-600 group-hover:shadow-glow transition-smooth">
+                  <Palette className="h-7 w-7" />
+                </div>
+                <h3 className="text-lg md:text-xl font-semibold mb-2 text-foreground">Oeuvres d'Artiste</h3>
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4">
+                  Vendez vos créations artistiques : peintures, sculptures, livres, musique, designs. Gestion d'éditions limitées, certificats d'authenticité et profils artistes dédiés.
+                </p>
+                <ul className="text-left space-y-2 text-xs md:text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-pink-600 shrink-0" />
+                    <span>5 types d'artistes supportés</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-pink-600 shrink-0" />
+                    <span>Éditions limitées & originaux</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-pink-600 shrink-0" />
+                    <span>Certificats d'authenticité</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -498,8 +527,124 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Email Marketing Section */}
+      {/* Marketplace Section */}
       <section className="py-16 md:py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center max-w-6xl mx-auto">
+            <div className="order-2 md:order-1 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 bg-primary/20 px-3 md:px-4 py-2 rounded-full mb-4">
+                <ShoppingCart className="h-4 w-4 text-primary" />
+                <span className="text-xs md:text-sm font-medium text-primary">Marketplace Intégré</span>
+              </div>
+              <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-foreground">
+                Découvrez notre Marketplace
+              </h3>
+              <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
+                Explorez des milliers de produits de vendeurs vérifiés. Achetez des produits digitaux, physiques, services et cours en ligne en toute sécurité. Recherche avancée, filtres intelligents et recommandations personnalisées pour trouver exactement ce que vous cherchez.
+              </p>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-semibold text-foreground">Catalogue Complet</div>
+                    <div className="text-sm text-muted-foreground">Des milliers de produits de tous types : digitaux, physiques, services et cours</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-semibold text-foreground">Recherche Intelligente</div>
+                    <div className="text-sm text-muted-foreground">Recherche avancée avec filtres par catégorie, prix, note et disponibilité</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-semibold text-foreground">Recommandations Personnalisées</div>
+                    <div className="text-sm text-muted-foreground">Découvrez des produits adaptés à vos préférences et historique d'achat</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-semibold text-foreground">Achat Sécurisé</div>
+                    <div className="text-sm text-muted-foreground">Paiements sécurisés avec escrow, garanties et système de notation</div>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-card/50 rounded-lg p-4 border border-border">
+                  <div className="text-2xl font-bold text-primary mb-1">{animatedStats.products.toLocaleString()}+</div>
+                  <div className="text-sm text-muted-foreground">Produits disponibles</div>
+                </div>
+                <div className="bg-card/50 rounded-lg p-4 border border-border">
+                  <div className="text-2xl font-bold text-accent mb-1">{animatedStats.users.toLocaleString()}+</div>
+                  <div className="text-sm text-muted-foreground">Vendeurs vérifiés</div>
+                </div>
+              </div>
+              <Link to="/marketplace">
+                <Button className="gradient-primary text-primary-foreground font-semibold hover:scale-105 transition-smooth">
+                  Explorer la marketplace
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+            <div className="order-1 md:order-2">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-border/50 bg-gradient-to-br from-white via-slate-50/50 to-white backdrop-blur-xl">
+                <div className="p-6 space-y-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h4 className="text-lg font-bold text-foreground">Marketplace Emarzona</h4>
+                      <p className="text-sm text-muted-foreground">Découvrez nos produits</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
+                        <ShoppingCart className="h-4 w-4 text-primary-foreground" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { name: "Formation E-commerce", price: "25 000 FCFA", rating: 4.8, type: "Cours" },
+                      { name: "Template WordPress", price: "15 000 FCFA", rating: 4.9, type: "Digital" },
+                      { name: "Consultation SEO", price: "50 000 FCFA", rating: 5.0, type: "Service" },
+                    ].map((product, index) => (
+                      <div key={index} className="flex items-center gap-3 p-3 bg-card/50 rounded-lg border border-border hover:shadow-md transition-smooth">
+                        <div className="h-12 w-12 rounded-lg gradient-accent flex items-center justify-center shrink-0">
+                          <Package className="h-6 w-6 text-accent-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h5 className="font-semibold text-sm text-foreground truncate">{product.name}</h5>
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3 w-3 text-accent fill-current" />
+                              <span className="text-xs text-muted-foreground">{product.rating}</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground">{product.type}</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-sm text-primary">{product.price}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <Link to="/marketplace">
+                    <Button variant="outline" className="w-full mt-4">
+                      Voir tous les produits
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Email Marketing Section */}
+      <section className="py-16 md:py-20 bg-secondary/30">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center max-w-6xl mx-auto">
             <div className="order-2 md:order-1 text-center md:text-left">
@@ -797,14 +942,14 @@ const Landing = () => {
                           "{testimonial.content}"
                         </p>
                         <div className="flex items-center gap-3">
-                          <img
+                          <OptimizedImg
                             src={testimonial.avatar}
                             alt={`Photo de ${testimonial.name}`}
                             width={48}
                             height={48}
                             className="h-12 w-12 rounded-full object-cover ring-2 ring-primary/20 flex-shrink-0"
                             style={{ aspectRatio: '1/1' }}
-                            loading={index === 0 ? "eager" : "lazy"}
+                            priority={index === 0}
                             decoding="async"
                           />
                           <div>
@@ -1026,6 +1171,7 @@ const Landing = () => {
                     <ul className="space-y-3">
                       {[
                         "5 types de produits (Digital, Physique, Services, Cours, Oeuvres d'artiste)",
+                        "Marketplace intégré pour vendre et acheter",
                         "Paiements multi-devises (FCFA, EUR, USD, etc.)",
                         "Email marketing complet",
                         "Shipping FedEx intégré",
@@ -1119,13 +1265,13 @@ const Landing = () => {
             <div className="col-span-1 xs:col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
                 {platformLogo ? (
-                  <img
+                  <OptimizedImg
                     src={platformLogo}
                     alt="Emarzona"
                     width={32}
                     height={32}
                     className="h-8 w-8 flex-shrink-0 object-contain"
-                    loading="eager"
+                    priority={true}
                   />
                 ) : (
                   <div className="h-8 w-8 bg-primary rounded flex items-center justify-center flex-shrink-0">
@@ -1135,7 +1281,7 @@ const Landing = () => {
                 <span className="text-lg md:text-xl font-bold text-foreground">Emarzona</span>
               </div>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                La plateforme e-commerce la plus complète pour vendre produits digitaux, physiques, services et cours en ligne.
+                La plateforme e-commerce la plus complète pour vendre produits digitaux, physiques, services et cours en ligne. Créez votre boutique ou vendez sur notre Marketplace pour toucher plus de clients.
               </p>
             </div>
             

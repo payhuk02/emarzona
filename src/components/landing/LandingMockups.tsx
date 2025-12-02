@@ -744,9 +744,9 @@ export const AnalyticsMockup = () => {
             
             <CardContent className="relative p-4 md:p-5">
               <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className={`relative p-2.5 rounded-xl bg-gradient-to-br ${metric.color} shadow-lg shadow-black/10`}>
-                    <metric.icon className="h-4 w-4 md:h-5 md:w-5 text-white" />
+                <div className="flex items-center gap-3">
+                  <div className={`relative p-3 md:p-3.5 rounded-xl bg-gradient-to-br ${metric.color} shadow-lg shadow-black/10 flex-shrink-0`}>
+                    <metric.icon className="h-5 w-5 md:h-6 md:w-6 text-white" />
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent"></div>
                   </div>
                   <span className="text-xs md:text-sm font-bold text-gray-800">{metric.label}</span>
