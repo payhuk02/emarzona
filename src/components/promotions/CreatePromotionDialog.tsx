@@ -6,9 +6,24 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useSpaceInputFix } from "@/hooks/useSpaceInputFix";
+import {
+  validatePromotionData,
+  validateCodeFormat,
+  checkCodeUniqueness,
+  getErrorMessage,
+} from "@/lib/validations/promotionValidation";
+import { AlertCircle, Sparkles } from "lucide-react";
+import { PreviewPromotion } from "@/components/promotions/PreviewPromotion";
+import { generateCodeSuggestions } from "@/lib/utils/codeSuggestions";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface CreatePromotionDialogProps {
   open: boolean;
@@ -21,6 +36,10 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
   const { toast } = useToast();
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const [loading, setLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [codeValidation, setCodeValidation] = useState<{ valid: boolean; errors: string[] } | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const codeSuggestions = generateCodeSuggestions(3);
   const [formData, setFormData] = useState({
     code: "",
     description: "",
@@ -36,13 +55,52 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setValidationErrors([]);
 
     try {
+      // Validation complète des données
+      const validation = validatePromotionData({
+        code: formData.code,
+        discount_type: formData.discount_type,
+        discount_value: formData.discount_value,
+        start_date: formData.start_date || null,
+        end_date: formData.end_date || null,
+        min_purchase_amount: formData.min_purchase_amount,
+        max_uses: formData.max_uses,
+      });
+
+      if (!validation.valid) {
+        setValidationErrors(validation.errors);
+        toast({
+          title: "Erreur de validation",
+          description: validation.errors[0] || "Veuillez corriger les erreurs dans le formulaire",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Vérifier l'unicité du code
+      const normalizedCode = formData.code.trim().toUpperCase();
+      const uniquenessCheck = await checkCodeUniqueness(normalizedCode, storeId);
+      
+      if (!uniquenessCheck.unique) {
+        setValidationErrors([uniquenessCheck.error || "Ce code promo existe déjà"]);
+        toast({
+          title: "Code déjà utilisé",
+          description: uniquenessCheck.error || "Ce code promo existe déjà pour ce store",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Créer la promotion
       const { error } = await supabase
         .from('promotions')
         .insert({
           store_id: storeId,
-          code: formData.code.toUpperCase(),
+          code: normalizedCode,
           description: formData.description || null,
           discount_type: formData.discount_type,
           discount_value: Number(formData.discount_value),
@@ -64,15 +122,17 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
       onOpenChange(false);
       resetForm();
     } catch (error: any) {
+      const errorMessage = getErrorMessage(error);
+      setValidationErrors([errorMessage]);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  }, [formData, storeId, onSuccess, onOpenChange]); // Note: toast est stable
+  }, [formData, storeId, onSuccess, onOpenChange, toast]);
 
   const resetForm = () => {
     setFormData({
@@ -86,6 +146,21 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
       end_date: "",
       is_active: true,
     });
+    setValidationErrors([]);
+    setCodeValidation(null);
+  };
+
+  // Validation en temps réel du code
+  const handleCodeChange = (value: string) => {
+    const normalizedValue = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    setFormData({ ...formData, code: normalizedValue });
+    
+    if (normalizedValue.length > 0) {
+      const validation = validateCodeFormat(normalizedValue);
+      setCodeValidation(validation);
+    } else {
+      setCodeValidation(null);
+    }
   };
 
   return (
@@ -100,15 +175,62 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="code">Code promo *</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="code">Code promo *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                  >
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    Suggestions
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-2">
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold mb-2">Suggestions de codes</p>
+                    {codeSuggestions.map((suggestion, index) => (
+                      <Button
+                        key={index}
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start text-xs font-mono"
+                        onClick={() => handleCodeChange(suggestion)}
+                      >
+                        {suggestion}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
             <Input
               id="code"
               value={formData.code}
-              onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+              onChange={(e) => handleCodeChange(e.target.value)}
               onKeyDown={handleSpaceKeyDown}
               placeholder="PROMO2025"
               required
+              maxLength={20}
+              className={codeValidation && !codeValidation.valid ? "border-red-500" : ""}
+              aria-invalid={codeValidation && !codeValidation.valid}
+              aria-describedby={codeValidation && !codeValidation.valid ? "code-error" : undefined}
             />
+            {codeValidation && !codeValidation.valid && (
+              <p id="code-error" className="text-sm text-red-500">
+                {codeValidation.errors[0]}
+              </p>
+            )}
+            {codeValidation && codeValidation.valid && (
+              <p className="text-sm text-green-600">Format valide</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Alphanumérique, 3-20 caractères (ex: PROMO2025)
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -148,10 +270,20 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
                 type="number"
                 min="0"
                 max={formData.discount_type === "percentage" ? "100" : undefined}
+                step={formData.discount_type === "percentage" ? "0.01" : "1"}
                 value={formData.discount_value}
-                onChange={(e) => setFormData({ ...formData, discount_value: e.target.value })}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (formData.discount_type === "percentage" && parseFloat(value) > 100) {
+                    return; // Empêcher les valeurs > 100%
+                  }
+                  setFormData({ ...formData, discount_value: value });
+                }}
                 required
               />
+              {formData.discount_type === "percentage" && formData.discount_value && parseFloat(formData.discount_value) > 100 && (
+                <p className="text-sm text-red-500">Le pourcentage ne peut pas dépasser 100%</p>
+              )}
             </div>
           </div>
 
@@ -210,6 +342,47 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
             />
             <Label htmlFor="is_active">Activer la promotion</Label>
           </div>
+
+          {/* Toggle Preview */}
+          <div className="flex items-center justify-between pt-2 border-t">
+            <Label htmlFor="show-preview" className="cursor-pointer">
+              Aperçu de la promotion
+            </Label>
+            <Switch
+              id="show-preview"
+              checked={showPreview}
+              onCheckedChange={setShowPreview}
+            />
+          </div>
+
+          {/* Preview */}
+          {showPreview && (
+            <PreviewPromotion
+              code={formData.code}
+              description={formData.description}
+              discountType={formData.discount_type}
+              discountValue={formData.discount_value}
+              minPurchaseAmount={formData.min_purchase_amount}
+              maxUses={formData.max_uses}
+              startDate={formData.start_date || undefined}
+              endDate={formData.end_date || undefined}
+              isActive={formData.is_active}
+            />
+          )}
+
+          {/* Affichage des erreurs de validation */}
+          {validationErrors.length > 0 && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <ul className="list-disc list-inside space-y-1">
+                  {validationErrors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button

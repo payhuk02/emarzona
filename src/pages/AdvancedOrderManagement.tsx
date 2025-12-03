@@ -7,8 +7,8 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
+import { MainLayout } from "@/components/layout";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -123,10 +123,10 @@ const AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
         <div className="flex h-14 sm:h-16 items-center gap-3 sm:gap-4 px-3 sm:px-4 lg:px-6">
           <SidebarTrigger className="h-9 w-9 sm:h-10 sm:w-10" />
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight truncate">
+            <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold tracking-tight truncate">
               {t('advancedOrders.title', 'Gestion avancée des commandes')}
             </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground truncate">
+            <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground truncate">
               {t('advancedOrders.subtitle', 'Paiements sécurisés et communication client-vendeur')}
             </p>
           </div>
@@ -527,65 +527,56 @@ const AdvancedOrderManagement = () => {
   // Loading state
   if (storeLoading) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full overflow-x-hidden">
-          <AppSidebar />
-          <main className="flex-1 flex items-center justify-center p-4">
-            <div className="text-center space-y-4">
-              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-              <p className="text-sm text-muted-foreground">
-                {t('common.loading', 'Chargement...')}
-              </p>
-            </div>
-          </main>
+      <MainLayout>
+        <div className="flex items-center justify-center p-4 min-h-[calc(100vh-4rem)]">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+            <p className="text-sm text-muted-foreground">
+              {t('common.loading', 'Chargement...')}
+            </p>
+          </div>
         </div>
-      </SidebarProvider>
+      </MainLayout>
     );
   }
 
   // No store state
   if (!store) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full overflow-x-hidden">
-          <AppSidebar />
-          <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
-            <Card className="max-w-md w-full border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
-              <CardHeader className="text-center p-6 sm:p-8">
-                <div className="flex justify-center mb-4">
-                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-orange-500/10 to-amber-500/5 border border-orange-500/20 flex items-center justify-center animate-in zoom-in-95 duration-500">
-                    <Package className="h-8 w-8 sm:h-10 sm:w-10 text-orange-600 dark:text-orange-400" aria-hidden="true" />
-                  </div>
+      <MainLayout>
+        <div className="flex items-center justify-center p-4 sm:p-6 min-h-[calc(100vh-4rem)]">
+          <Card className="max-w-md w-full border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
+            <CardHeader className="text-center p-6 sm:p-8">
+              <div className="flex justify-center mb-4">
+                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-orange-500/10 to-amber-500/5 border border-orange-500/20 flex items-center justify-center animate-in zoom-in-95 duration-500">
+                  <Package className="h-8 w-8 sm:h-10 sm:w-10 text-orange-600 dark:text-orange-400" aria-hidden="true" />
                 </div>
-                <CardTitle className="text-lg sm:text-xl mb-2">
-                  {t('advancedOrders.noStore.title', 'Créez votre boutique d\'abord')}
-                </CardTitle>
-                <CardDescription className="text-sm sm:text-base">
-                  {t('advancedOrders.noStore.description', 'Vous devez créer une boutique avant de pouvoir gérer les commandes avancées')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-center p-6 sm:p-8 pt-0">
-                <Button 
-                  onClick={() => navigate('/dashboard/store')}
-                  className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                >
-                  {t('advancedOrders.noStore.createStore', 'Créer ma boutique')}
-                </Button>
-              </CardContent>
-            </Card>
-          </main>
+              </div>
+              <CardTitle className="text-lg sm:text-xl mb-2">
+                {t('advancedOrders.noStore.title', 'Créez votre boutique d\'abord')}
+              </CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                {t('advancedOrders.noStore.description', 'Vous devez créer une boutique avant de pouvoir gérer les commandes avancées')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center p-6 sm:p-8 pt-0">
+              <Button 
+                onClick={() => navigate('/dashboard/store')}
+                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                {t('advancedOrders.noStore.createStore', 'Créer ma boutique')}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-      </SidebarProvider>
+      </MainLayout>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full overflow-x-hidden bg-background">
-        <AppSidebar />
-        <AdvancedOrderContent store={store} />
-      </div>
-    </SidebarProvider>
+    <MainLayout>
+      <AdvancedOrderContent store={store} />
+    </MainLayout>
   );
 };
 

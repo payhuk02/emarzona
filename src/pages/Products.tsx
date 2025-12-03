@@ -573,7 +573,7 @@ const Products = () => {
         <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
           <div className="flex items-center gap-2 sm:gap-3">
                 <div>
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
+                  <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                     <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
                       <Package className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                     </div>
@@ -581,7 +581,7 @@ const Products = () => {
                       {t('products.title')}
                     </span>
                   </h1>
-                  <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                  <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                     Gérez vos produits et vendez plus efficacement
                   </p>
                 </div>
@@ -622,8 +622,8 @@ const Products = () => {
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                 <CardContent className="p-8 sm:p-12 text-center">
                   <Package className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4 animate-in zoom-in duration-500" />
-                  <h3 className="text-lg sm:text-xl font-semibold mb-2">{t('products.empty.title')}</h3>
-                  <p className="text-sm sm:text-base text-muted-foreground mb-4">
+                  <h3 className="text-sm sm:text-lg md:text-xl font-semibold mb-2">{t('products.empty.title')}</h3>
+                  <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-4">
                     {t('products.empty.description')}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
@@ -765,8 +765,8 @@ const Products = () => {
                     <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                       <CardContent className="p-8 sm:p-12 text-center">
                         <Package className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4 animate-in zoom-in duration-500" />
-                        <h3 className="text-lg sm:text-xl font-semibold mb-2">{t('products.empty.noResults')}</h3>
-                        <p className="text-sm sm:text-base text-muted-foreground mb-4">
+                        <h3 className="text-sm sm:text-lg md:text-xl font-semibold mb-2">{t('products.empty.noResults')}</h3>
+                        <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-4">
                           {t('products.empty.noResultsDescription')}
                         </p>
                         <Button 

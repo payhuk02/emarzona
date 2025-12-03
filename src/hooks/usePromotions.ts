@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 export interface Promotion {
   id: string;
@@ -19,40 +20,192 @@ export interface Promotion {
   updated_at: string;
 }
 
-export const usePromotions = (storeId?: string) => {
-  const [promotions, setPromotions] = useState<Promotion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+export interface PromotionsQueryOptions {
+  storeId?: string;
+  activeOnly?: boolean;
+  page?: number;
+  limit?: number;
+  search?: string;
+}
 
-  const fetchPromotions = async () => {
-    if (!storeId) {
-      setLoading(false);
-      return;
-    }
+/**
+ * Hook pour récupérer les promotions avec React Query
+ * Amélioré avec cache, pagination et filtres
+ */
+export const usePromotions = (options: PromotionsQueryOptions = {}) => {
+  const { storeId, activeOnly = false, page = 1, limit = 20, search } = options;
 
-    try {
-      const { data, error } = await supabase
+  return useQuery({
+    queryKey: ['promotions', storeId, { activeOnly, page, limit, search }],
+    queryFn: async () => {
+      if (!storeId) return { data: [], total: 0, page, limit };
+
+      let query = supabase
         .from('promotions')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setPromotions(data || []);
-    } catch (error: any) {
+      if (activeOnly) {
+        const now = new Date().toISOString();
+        query = query
+          .eq('is_active', true)
+          .or(`start_date.is.null,start_date.lte.${now}`)
+          .or(`end_date.is.null,end_date.gte.${now}`);
+      }
+
+      if (search) {
+        query = query.or(`code.ilike.%${search}%,description.ilike.%${search}%`);
+      }
+
+      // Pagination
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
+
+      if (error) {
+        logger.error('Error fetching promotions', { error, storeId });
+        throw error;
+      }
+
+      return {
+        data: (data || []) as Promotion[],
+        total: count || 0,
+        page,
+        limit,
+        totalPages: Math.ceil((count || 0) / limit),
+      };
+    },
+    enabled: !!storeId,
+    staleTime: 30000, // 30 secondes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+  });
+};
+
+/**
+ * Hook pour créer une promotion
+ */
+export const useCreatePromotion = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (promotion: Omit<Promotion, 'id' | 'created_at' | 'updated_at' | 'used_count'>) => {
+      const { data, error } = await supabase
+        .from('promotions')
+        .insert({
+          ...promotion,
+          code: promotion.code.toUpperCase().trim(),
+        })
+        .select()
+        .single();
+
+      if (error) {
+        logger.error('Error creating promotion', { error });
+        throw error;
+      }
+
+      return data as Promotion;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['promotions', data.store_id] });
+      toast({
+        title: "Succès",
+        description: "Promotion créée avec succès",
+      });
+      logger.info('Promotion created', { promotionId: data.id });
+    },
+    onError: (error: any) => {
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error.message || "Impossible de créer la promotion",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
+};
 
-  useEffect(() => {
-    fetchPromotions();
-  }, [storeId]);
+/**
+ * Hook pour mettre à jour une promotion
+ */
+export const useUpdatePromotion = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  return { promotions, loading, refetch: fetchPromotions };
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<Promotion> & { id: string }) => {
+      const updateData: any = { ...updates };
+      if (updates.code) {
+        updateData.code = updates.code.toUpperCase().trim();
+      }
+
+      const { data, error } = await supabase
+        .from('promotions')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        logger.error('Error updating promotion', { error, id });
+        throw error;
+      }
+
+      return data as Promotion;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['promotions', data.store_id] });
+      queryClient.invalidateQueries({ queryKey: ['promotion', data.id] });
+      toast({
+        title: "Succès",
+        description: "Promotion mise à jour avec succès",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de mettre à jour la promotion",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+/**
+ * Hook pour supprimer une promotion
+ */
+export const useDeletePromotion = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ id, storeId }: { id: string; storeId: string }) => {
+      const { error } = await supabase
+        .from('promotions')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        logger.error('Error deleting promotion', { error, id });
+        throw error;
+      }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['promotions', variables.storeId] });
+      toast({
+        title: "Succès",
+        description: "Promotion supprimée avec succès",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de supprimer la promotion",
+        variant: "destructive",
+      });
+    },
+  });
 };

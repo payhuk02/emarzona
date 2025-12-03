@@ -223,3 +223,4 @@ if (prefetchedRoutes.has(routePath)) return;
 
 **Impact** : La plateforme est maintenant **plus interactive, mieux documentée et avec un meilleur feedback utilisateur**, particulièrement sur mobile.
 
+

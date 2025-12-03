@@ -71,8 +71,8 @@ export const ServicesList = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold">Services</h1>
-                <p className="text-muted-foreground mt-1">
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold">Services</h1>
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
                   Gérez vos services et réservations
                 </p>
               </div>

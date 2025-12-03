@@ -37,7 +37,7 @@ function MobileHeader() {
         {/* Titre avec Icône */}
         <div className="flex-1 min-w-0 flex items-center gap-2">
           <Package className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0" aria-hidden="true" />
-          <h1 className="text-base sm:text-lg font-bold truncate text-gray-900 dark:text-gray-50">
+          <h1 className="text-sm sm:text-base md:text-lg font-bold truncate text-gray-900 dark:text-gray-50">
             Mon Portail Digital
           </h1>
         </div>
@@ -62,11 +62,11 @@ function CustomerDigitalPortalContent() {
           <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
             {/* Header - Desktop seulement */}
             <div className="hidden lg:block space-y-2">
-              <h1 className="text-3xl lg:text-4xl font-bold flex items-center gap-3 text-gray-900 dark:text-gray-50">
-                <Package className="h-8 w-8 lg:h-10 lg:w-10 text-primary flex-shrink-0" aria-hidden="true" />
+              <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-2 sm:gap-3 text-gray-900 dark:text-gray-50">
+                <Package className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 lg:h-10 lg:w-10 text-primary flex-shrink-0" aria-hidden="true" />
                 <span>Mon Portail Digital</span>
               </h1>
-              <p className="text-base text-gray-600 dark:text-gray-400">
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-gray-600 dark:text-gray-400">
                 Gérez tous vos produits digitaux, licences et téléchargements
               </p>
             </div>

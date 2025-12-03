@@ -110,8 +110,8 @@ export default function AdminInventory() {
             {/* Header */}
             <div ref={headerRef} className="flex items-center justify-between" role="banner">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight" id="admin-inventory-title">Inventaire Global</h1>
-                <p className="text-muted-foreground">
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight" id="admin-inventory-title">Inventaire Global</h1>
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                   Vue d'ensemble de l'inventaire de tous les vendeurs
                 </p>
               </div>
@@ -125,31 +125,31 @@ export default function AdminInventory() {
             <div ref={statsRef} className="grid gap-4 md:grid-cols-4" role="region" aria-label="Statistiques de l'inventaire">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Articles</CardTitle>
-                  <Package className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Total Articles</CardTitle>
+                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" aria-hidden="true" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalItems}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.totalItems}</div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Stock Faible</CardTitle>
-                  <AlertTriangle className="h-4 w-4 text-orange-500" aria-hidden="true" />
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Stock Faible</CardTitle>
+                  <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-500" aria-hidden="true" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-orange-600">{stats.lowStockItems}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold text-orange-600">{stats.lowStockItems}</div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Rupture Stock</CardTitle>
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Rupture Stock</CardTitle>
                   <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">{stats.outOfStockItems}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold text-red-600">{stats.outOfStockItems}</div>
                 </CardContent>
               </Card>
 
@@ -159,7 +159,7 @@ export default function AdminInventory() {
                   <DollarSign className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalValue.toLocaleString()} FCFA</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.totalValue.toLocaleString()} FCFA</div>
                 </CardContent>
               </Card>
             </div>

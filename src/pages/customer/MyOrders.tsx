@@ -381,11 +381,11 @@ export default function MyOrders() {
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 flex items-center justify-center">
                     <ShoppingBag className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                     Mes Commandes
                   </h1>
                 </div>
-                <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400">
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-gray-600 dark:text-gray-400">
                   Consultez toutes vos commandes et leur statut
                 </p>
               </div>
@@ -412,7 +412,7 @@ export default function MyOrders() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="p-2.5 sm:p-3 lg:p-4 pt-0 space-y-1 sm:space-y-1.5">
-                        <div className={`text-lg xs:text-xl sm:text-2xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
+                        <div className={`text-base sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
                           {stat.value}
                         </div>
                         <p className="text-[10px] xs:text-xs sm:text-sm text-muted-foreground">

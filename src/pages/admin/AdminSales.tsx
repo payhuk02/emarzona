@@ -140,10 +140,10 @@ const AdminSales = () => {
         {/* Header */}
         <div ref={headerRef} className="flex items-center justify-between" role="banner">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-sales-title">
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-sales-title">
               Gestion des ventes
             </h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-2">
               Suivi des ventes et commissions de la plateforme
             </p>
           </div>
@@ -154,16 +154,16 @@ const AdminSales = () => {
         <div ref={statsRef} className="grid gap-6 md:grid-cols-3" role="region" aria-label="Statistiques des ventes">
           <Card className="hover-scale">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground">
                 Revenu Total
               </CardTitle>
-              <DollarSign className="h-4 w-4 text-emerald-600" />
+              <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-emerald-600">
+              <div className="text-base sm:text-xl md:text-2xl font-bold text-emerald-600">
                 {formatCurrency(totalRevenue)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                 {sales?.length || 0} ventes
               </p>
             </CardContent>
@@ -171,16 +171,16 @@ const AdminSales = () => {
 
           <Card className="hover-scale">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground">
                 Commissions Totales
               </CardTitle>
-              <TrendingUp className="h-4 w-4 text-cyan-600" />
+              <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-cyan-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-cyan-600">
+              <div className="text-base sm:text-xl md:text-2xl font-bold text-cyan-600">
                 {formatCurrency(totalCommissions)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                 10% de commission
               </p>
             </CardContent>
@@ -188,16 +188,16 @@ const AdminSales = () => {
 
           <Card className="hover-scale">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground">
                 Montant Vendeurs
               </CardTitle>
-              <DollarSign className="h-4 w-4 text-blue-600" />
+              <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-base sm:text-xl md:text-2xl font-bold text-blue-600">
                 {formatCurrency(totalRevenue - totalCommissions)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                 Après commission
               </p>
             </CardContent>

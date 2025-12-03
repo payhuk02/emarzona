@@ -128,8 +128,8 @@ export default function AdminPayments() {
             <Admin2FABanner />
             {/* Header */}
             <div ref={headerRef} role="banner">
-              <h1 className="text-3xl font-bold tracking-tight" id="admin-payments-title">Paiements</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight" id="admin-payments-title">Paiements</h1>
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                 Vue d'ensemble de tous les paiements de la plateforme
               </p>
             </div>
@@ -138,21 +138,21 @@ export default function AdminPayments() {
             <div ref={statsRef} className="grid gap-4 md:grid-cols-4" role="region" aria-label="Statistiques des paiements">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Montant Total</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Montant Total</CardTitle>
+                  <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{totalAmount.toLocaleString()} FCFA</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{totalAmount.toLocaleString()} FCFA</div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Payés</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Payés</CardTitle>
+                  <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{successfulPayments}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold text-green-600">{successfulPayments}</div>
                 </CardContent>
               </Card>
 
@@ -168,11 +168,11 @@ export default function AdminPayments() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Échoués</CardTitle>
-                  <XCircle className="h-4 w-4 text-red-500" />
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Échoués</CardTitle>
+                  <XCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">{failedPayments}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold text-red-600">{failedPayments}</div>
                 </CardContent>
               </Card>
             </div>

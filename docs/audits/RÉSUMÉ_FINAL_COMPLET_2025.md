@@ -251,3 +251,4 @@ La plateforme Emarzona a été **considérablement améliorée** avec un score g
 
 **Prochaine étape** : Tests coverage 80%+ (optionnel, pour atteindre 92-95/100).
 
+

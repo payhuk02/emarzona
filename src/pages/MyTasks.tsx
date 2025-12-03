@@ -51,7 +51,7 @@ const MyTasks = () => {
                 <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 flex items-center justify-center">
                   <CheckSquare className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
                 </div>
-                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                <h1 className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold truncate bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                   Mes Tâches
                 </h1>
               </div>

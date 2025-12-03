@@ -244,7 +244,7 @@ export default function CustomerMyReturns() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Retours</p>
-                      <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      <p className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                         {stats.total}
                       </p>
                     </div>
@@ -292,7 +292,7 @@ export default function CustomerMyReturns() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Remboursé</p>
-                      <p className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                      <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                         {formatCurrency(stats.totalRefunded)}
                       </p>
                     </div>

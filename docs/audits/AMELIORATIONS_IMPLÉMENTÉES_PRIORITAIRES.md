@@ -171,3 +171,4 @@ if (DOMPurify) {
 
 **Impact** : La plateforme est maintenant **plus accessible, plus sécurisée et mieux optimisée** pour surpasser les grandes plateformes e-commerce mondiales.
 
+

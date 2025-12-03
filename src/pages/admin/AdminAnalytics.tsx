@@ -50,8 +50,8 @@ export default function AdminAnalytics() {
           <div className="container mx-auto p-6 space-y-6">
             {/* Header */}
             <div ref={headerRef} role="banner">
-              <h1 className="text-3xl font-bold tracking-tight" id="admin-analytics-title">Analytics Plateforme</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight" id="admin-analytics-title">Analytics Plateforme</h1>
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                 Vue d'ensemble des statistiques globales
               </p>
             </div>
@@ -60,14 +60,14 @@ export default function AdminAnalytics() {
             <div ref={statsRef} className="grid gap-4 md:grid-cols-4" role="region" aria-label="Statistiques principales">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Revenu Total</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Revenu Total</CardTitle>
+                  <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">
                     {stats.totalRevenue.toLocaleString()} FCFA
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
                     <TrendingUp className="inline h-3 w-3 text-green-600" /> +12.5% ce mois
                   </p>
                 </CardContent>
@@ -75,12 +75,12 @@ export default function AdminAnalytics() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Commandes</CardTitle>
-                  <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Commandes</CardTitle>
+                  <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalOrders}</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.totalOrders}</div>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
                     <TrendingUp className="inline h-3 w-3 text-green-600" /> +8.3% ce mois
                   </p>
                 </CardContent>
@@ -88,12 +88,12 @@ export default function AdminAnalytics() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Utilisateurs</CardTitle>
+                  <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalUsers}</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.totalUsers}</div>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
                     {stats.activeUsers} actifs maintenant
                   </p>
                 </CardContent>
@@ -101,12 +101,12 @@ export default function AdminAnalytics() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Boutiques</CardTitle>
-                  <Store className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Boutiques</CardTitle>
+                  <Store className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalStores}</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.totalStores}</div>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
                     +15 ce mois
                   </p>
                 </CardContent>
@@ -117,31 +117,31 @@ export default function AdminAnalytics() {
             <div className="grid gap-4 md:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Produits</CardTitle>
-                  <Package className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Produits</CardTitle>
+                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalProducts}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.totalProducts}</div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Taux Conversion</CardTitle>
-                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Taux Conversion</CardTitle>
+                  <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.conversionRate}%</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.conversionRate}%</div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Panier Moyen</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Panier Moyen</CardTitle>
+                  <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">
                     {stats.averageOrderValue.toLocaleString()} FCFA
                   </div>
                 </CardContent>

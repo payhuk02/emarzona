@@ -112,10 +112,10 @@ const AdminDashboard = () => {
       <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 animate-fade-in">
         <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" role="banner">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-dashboard-title">
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-dashboard-title">
               Tableau de bord administrateur
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-2">
+            <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-2">
               Vue d'ensemble de la plateforme
             </p>
           </div>
@@ -130,7 +130,7 @@ const AdminDashboard = () => {
           {statsCards.map((stat, index) => (
             <Card key={index} className="hover-scale border-muted/50 hover:border-primary/50 transition-all">
               <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-4 md:p-6">
-                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground">
                   {stat.title}
                 </CardTitle>
                 <div className={`p-1.5 sm:p-2 rounded-lg ${stat.bgColor}`}>
@@ -138,7 +138,7 @@ const AdminDashboard = () => {
                 </div>
               </CardHeader>
               <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                <div className={`text-xl sm:text-2xl font-bold ${stat.color}`}>
+                <div className={`text-base sm:text-xl md:text-2xl font-bold ${stat.color}`}>
                   {stat.value.toLocaleString()}
                 </div>
                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">

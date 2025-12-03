@@ -71,7 +71,7 @@ function MobileHeader() {
         {/* Titre avec Icône */}
         <div className="flex-1 min-w-0 flex items-center gap-2">
           <User className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0" aria-hidden="true" />
-          <h1 className="text-base sm:text-lg font-bold truncate text-gray-900 dark:text-gray-50">
+          <h1 className="text-sm sm:text-base md:text-lg font-bold truncate text-gray-900 dark:text-gray-50">
             Mon Espace Client
           </h1>
         </div>
@@ -221,15 +221,15 @@ export default function CustomerPortal() {
             <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
               {/* Header - Desktop seulement */}
               <div ref={headerRef} className="hidden lg:block space-y-2 animate-in fade-in slide-in-from-top-4">
-                <h1 className="text-3xl lg:text-4xl font-bold flex items-center gap-3 text-gray-900 dark:text-gray-50">
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 flex items-center justify-center">
-                    <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-2 sm:gap-3 text-gray-900 dark:text-gray-50">
+                  <div className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 flex items-center justify-center">
+                    <User className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     Mon Espace Client
                   </span>
                 </h1>
-                <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400">
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-gray-600 dark:text-gray-400">
                   Gérez vos achats, téléchargements et informations personnelles
                 </p>
               </div>
@@ -246,7 +246,7 @@ export default function CustomerPortal() {
                   </div>
                 </CardHeader>
                 <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4">
-                  <div className="text-lg xs:text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                     {stats?.totalOrders || 0}
                   </div>
                   <p className="text-[10px] xs:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-tight">Commandes passées</p>

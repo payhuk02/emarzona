@@ -162,15 +162,15 @@ export default function MyDownloads() {
             {/* Header avec animation - Style Inventory */}
             <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                    <Download className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                    <Download className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                   </div>
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     Mes Téléchargements
                   </span>
                 </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                   Accédez à tous vos produits digitaux achetés
                 </p>
               </div>
@@ -209,7 +209,7 @@ export default function MyDownloads() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-3 sm:p-4 pt-0">
-                      <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                      <div className={`text-base sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                         {stat.value}
                       </div>
                       {stat.subtitle && (
@@ -279,7 +279,7 @@ export default function MyDownloads() {
             {/* Downloads List */}
             <Card ref={listRef} className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
               <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">
+                <CardTitle className="text-sm sm:text-base md:text-lg lg:text-xl">
                   {filteredDownloads?.length || 0} {filteredDownloads?.length === 1 ? 'téléchargement' : 'téléchargements'}
                 </CardTitle>
                 <CardDescription className="text-sm sm:text-base">

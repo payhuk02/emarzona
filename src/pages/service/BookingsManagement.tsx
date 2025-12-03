@@ -594,7 +594,7 @@ export default function BookingsManagement() {
           {/* Header avec animation - Style MyTemplates */}
           <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
           <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
+              <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                 <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
                   <Calendar className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                 </div>
@@ -602,7 +602,7 @@ export default function BookingsManagement() {
                   Gestion des réservations
                 </span>
               </h1>
-              <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
               Gérez vos réservations de services et disponibilités
             </p>
             </div>
@@ -644,7 +644,7 @@ export default function BookingsManagement() {
                 </CardTitle>
               </CardHeader>
                   <CardContent className="p-3 sm:p-4 pt-0">
-                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                    <div className={`text-base sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                       {stat.value}
                     </div>
                     {stat.subtitle && (
@@ -914,7 +914,7 @@ export default function BookingsManagement() {
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-2xl">{selectedEvent?.title}</DialogTitle>
+                <DialogTitle className="text-lg sm:text-xl md:text-2xl">{selectedEvent?.title}</DialogTitle>
                 <DialogDescription>
                   {selectedEvent && (
                     <>

@@ -402,10 +402,10 @@ const AffiliateDashboard = () => {
                     <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 flex items-center justify-center mb-3 sm:mb-4 animate-in zoom-in duration-500">
                       <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500 dark:text-purple-400" />
                     </div>
-                    <CardTitle className="text-xl sm:text-2xl lg:text-3xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    <CardTitle className="text-lg sm:text-xl md:text-2xl lg:text-3xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                       Programme d'affiliation Emarzona
                     </CardTitle>
-                    <CardDescription className="text-sm sm:text-base mt-2">
+                    <CardDescription className="text-[10px] sm:text-xs md:text-sm lg:text-base mt-2">
                       Gagnez des commissions en promouvant des produits de qualité
                     </CardDescription>
                   </CardHeader>

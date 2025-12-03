@@ -67,10 +67,10 @@ export const Marketing = () => {
               <Target className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
+              <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">
                 Marketing
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                 Gérez toutes vos activités marketing en un seul endroit
               </p>
             </div>

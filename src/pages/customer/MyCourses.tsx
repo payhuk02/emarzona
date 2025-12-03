@@ -284,15 +284,15 @@ export default function MyCourses() {
           {/* Header avec animation - Style Inventaire */}
           <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                  <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+              <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                  <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                 </div>
                 <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   Mes Cours
                 </span>
               </h1>
-              <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                 Continuez votre apprentissage et suivez votre progression
               </p>
             </div>
@@ -333,7 +333,7 @@ export default function MyCourses() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-3 sm:p-4 pt-0">
-                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                    <div className={`text-base sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                       {stat.value}
                     </div>
                   </CardContent>
@@ -423,7 +423,7 @@ export default function MyCourses() {
                           <div className="p-4 rounded-full bg-muted/50 w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 flex items-center justify-center">
                             <GraduationCap className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
                           </div>
-                          <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 sm:mb-3">Aucun cours trouvé</h3>
+                          <h3 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground mb-2 sm:mb-3">Aucun cours trouvé</h3>
                           <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
                             {searchInput || activeTab !== 'all'
                               ? 'Aucun cours ne correspond à vos critères de recherche'

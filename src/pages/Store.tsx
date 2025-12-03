@@ -102,8 +102,8 @@ const Store = () => {
                         <StoreIcon className="h-10 w-10 sm:h-12 sm:w-12 text-purple-600 dark:text-purple-400" />
                       </div>
                     </div>
-                    <CardTitle className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">{t('store.empty.title')}</CardTitle>
-                    <CardDescription className="mt-4 max-w-2xl mx-auto text-sm sm:text-base lg:text-lg leading-relaxed text-muted-foreground">
+                    <CardTitle className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4">{t('store.empty.title')}</CardTitle>
+                    <CardDescription className="mt-4 max-w-2xl mx-auto text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed text-muted-foreground">
                       {t('store.empty.description')}
                     </CardDescription>
                   </CardHeader>

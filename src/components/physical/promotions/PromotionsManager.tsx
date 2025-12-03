@@ -69,6 +69,14 @@ import { fr } from 'date-fns/locale';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { PromotionScopeSelector } from '@/components/promotions/PromotionScopeSelector';
 import { useToast } from '@/hooks/use-toast';
+import {
+  validatePromotionData,
+  validateCodeFormat,
+  checkCodeUniqueness,
+  getErrorMessage,
+} from '@/lib/validations/promotionValidation';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 export const PromotionsManager: React.FC = () => {
   const { store } = useStore();
@@ -82,6 +90,8 @@ export const PromotionsManager: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPromotion, setEditingPromotion] = useState<ProductPromotion | null>(null);
   const [deletePromotionId, setDeletePromotionId] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [codeValidation, setCodeValidation] = useState<{ valid: boolean; errors: string[] } | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -152,16 +162,34 @@ export const PromotionsManager: React.FC = () => {
         is_active: true,
         is_automatic: false,
       });
+      setValidationErrors([]);
+      setCodeValidation(null);
     }
     setIsDialogOpen(true);
+  };
+
+  // Validation en temps réel du code
+  const handleCodeChange = (value: string) => {
+    const normalizedValue = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    setFormData({ ...formData, code: normalizedValue });
+    
+    if (normalizedValue.length > 0) {
+      const validation = validateCodeFormat(normalizedValue);
+      setCodeValidation(validation);
+    } else {
+      setCodeValidation(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!store?.id) return;
 
+    setValidationErrors([]);
+
     // Validation : vérifier qu'au moins un élément est sélectionné si nécessaire
     if (formData.applies_to === 'specific_products' && formData.product_ids.length === 0) {
+      setValidationErrors(["Veuillez sélectionner au moins un produit"]);
       toast({
         title: "Erreur de validation",
         description: "Veuillez sélectionner au moins un produit",
@@ -171,6 +199,7 @@ export const PromotionsManager: React.FC = () => {
     }
 
     if (formData.applies_to === 'categories' && formData.category_ids.length === 0) {
+      setValidationErrors(["Veuillez sélectionner au moins une catégorie"]);
       toast({
         title: "Erreur de validation",
         description: "Veuillez sélectionner au moins une catégorie",
@@ -180,6 +209,7 @@ export const PromotionsManager: React.FC = () => {
     }
 
     if (formData.applies_to === 'collections' && formData.collection_ids.length === 0) {
+      setValidationErrors(["Veuillez sélectionner au moins une collection"]);
       toast({
         title: "Erreur de validation",
         description: "Veuillez sélectionner au moins une collection",
@@ -188,24 +218,101 @@ export const PromotionsManager: React.FC = () => {
       return;
     }
 
+    // Validation complète des données si un code est fourni
+    if (formData.code) {
+      const validation = validatePromotionData({
+        code: formData.code,
+        discount_type: formData.discount_type,
+        discount_value: formData.discount_value,
+        start_date: formData.starts_at,
+        end_date: formData.ends_at,
+        min_purchase_amount: formData.min_purchase_amount,
+        max_uses: formData.max_uses,
+      });
+
+      if (!validation.valid) {
+        setValidationErrors(validation.errors);
+        toast({
+          title: "Erreur de validation",
+          description: validation.errors[0] || "Veuillez corriger les erreurs dans le formulaire",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Vérifier l'unicité du code
+      const normalizedCode = formData.code.trim().toUpperCase();
+      const uniquenessCheck = await checkCodeUniqueness(
+        normalizedCode,
+        store.id,
+        editingPromotion?.id,
+        "product_promotions"
+      );
+
+      if (!uniquenessCheck.unique) {
+        setValidationErrors([uniquenessCheck.error || "Ce code promo existe déjà"]);
+        toast({
+          title: "Code déjà utilisé",
+          description: uniquenessCheck.error || "Ce code promo existe déjà",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Validation supplémentaire pour discount_value
+    if (formData.discount_type === 'percentage' && formData.discount_value > 100) {
+      setValidationErrors(["Le pourcentage ne peut pas dépasser 100%"]);
+      toast({
+        title: "Erreur de validation",
+        description: "Le pourcentage ne peut pas dépasser 100%",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validation des dates
+    if (formData.ends_at && new Date(formData.starts_at) >= new Date(formData.ends_at)) {
+      setValidationErrors(["La date de fin doit être après la date de début"]);
+      toast({
+        title: "Erreur de validation",
+        description: "La date de fin doit être après la date de début",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const promotionData = {
       ...formData,
       store_id: store.id,
+      code: formData.code ? formData.code.trim().toUpperCase() : null,
       starts_at: new Date(formData.starts_at).toISOString(),
       ends_at: formData.ends_at ? new Date(formData.ends_at).toISOString() : undefined,
     };
 
-    if (editingPromotion) {
-      await updateMutation.mutateAsync({
-        id: editingPromotion.id,
-        ...promotionData,
-      });
-    } else {
-      await createMutation.mutateAsync(promotionData);
-    }
+    try {
+      if (editingPromotion) {
+        await updateMutation.mutateAsync({
+          id: editingPromotion.id,
+          ...promotionData,
+        });
+      } else {
+        await createMutation.mutateAsync(promotionData);
+      }
 
-    setIsDialogOpen(false);
-    setEditingPromotion(null);
+      setIsDialogOpen(false);
+      setEditingPromotion(null);
+      setValidationErrors([]);
+      setCodeValidation(null);
+    } catch (error: any) {
+      const errorMessage = getErrorMessage(error);
+      setValidationErrors([errorMessage]);
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDelete = async () => {
@@ -613,10 +720,27 @@ export const PromotionsManager: React.FC = () => {
                 <Input
                   id="code"
                   value={formData.code}
-                  onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                  onChange={(e) => handleCodeChange(e.target.value)}
                   onKeyDown={handleSpaceKeyDown}
                   placeholder="EXEMPLE2025"
+                  maxLength={20}
+                  className={codeValidation && !codeValidation.valid ? "border-red-500" : ""}
+                  aria-invalid={codeValidation && !codeValidation.valid}
+                  aria-describedby={codeValidation && !codeValidation.valid ? "code-error" : undefined}
                 />
+                {codeValidation && !codeValidation.valid && (
+                  <p id="code-error" className="text-sm text-red-500">
+                    {codeValidation.errors[0]}
+                  </p>
+                )}
+                {codeValidation && codeValidation.valid && (
+                  <p className="text-sm text-green-600">Format valide</p>
+                )}
+                {formData.code && (
+                  <p className="text-xs text-muted-foreground">
+                    Alphanumérique, 3-20 caractères (ex: PROMO2025)
+                  </p>
+                )}
               </div>
             </div>
 
@@ -657,15 +781,25 @@ export const PromotionsManager: React.FC = () => {
                   id="discount_value"
                   type="number"
                   min="0"
+                  max={formData.discount_type === 'percentage' ? 100 : undefined}
                   step="0.01"
                   value={formData.discount_value}
-                  onChange={(e) =>
-                    setFormData({ ...formData, discount_value: parseFloat(e.target.value) || 0 })
-                  }
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value) || 0;
+                    if (formData.discount_type === 'percentage' && value > 100) {
+                      return; // Empêcher les valeurs > 100%
+                    }
+                    setFormData({ ...formData, discount_value: value });
+                  }}
                   required
                 />
                 {formData.discount_type === 'percentage' && (
-                  <p className="text-xs text-muted-foreground">En pourcentage (ex: 10 pour 10%)</p>
+                  <>
+                    <p className="text-xs text-muted-foreground">En pourcentage (ex: 10 pour 10%)</p>
+                    {formData.discount_value > 100 && (
+                      <p className="text-sm text-red-500">Le pourcentage ne peut pas dépasser 100%</p>
+                    )}
+                  </>
                 )}
                 {formData.discount_type === 'fixed_amount' && (
                   <p className="text-xs text-muted-foreground">En XOF</p>
@@ -816,6 +950,20 @@ export const PromotionsManager: React.FC = () => {
                 Actif
               </Label>
             </div>
+
+            {/* Affichage des erreurs de validation */}
+            {validationErrors.length > 0 && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <ul className="list-disc list-inside space-y-1">
+                    {validationErrors.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
 
             <DialogFooter>
               <Button

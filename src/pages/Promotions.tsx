@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Tag, TrendingUp, Percent, Calendar } from "lucide-react";
+import { Plus, Tag, TrendingUp, Percent, Calendar, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { exportAndDownloadPromotions } from "@/lib/utils/exportPromotions";
 import { useStore } from "@/hooks/useStore";
 import { usePromotions } from "@/hooks/usePromotions";
 import { CreatePromotionDialog } from "@/components/promotions/CreatePromotionDialog";
@@ -12,39 +13,50 @@ import { PromotionsTable } from "@/components/promotions/PromotionsTable";
 import { PromotionFilters } from "@/components/promotions/PromotionFilters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const Promotions = () => {
   const { t } = useTranslation();
   const { store, loading: storeLoading } = useStore();
-  const { promotions, loading: promotionsLoading, refetch } = usePromotions(store?.id);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [discountTypeFilter, setDiscountTypeFilter] = useState<string>("");
+  const [dateFromFilter, setDateFromFilter] = useState<string>("");
+  const [dateToFilter, setDateToFilter] = useState<string>("");
+  const [page, setPage] = useState(1);
+  const limit = 20;
+  
+  // Debounce de la recherche pour éviter trop de requêtes
+  const debouncedSearch = useDebounce(searchQuery, 300);
+  
+  // Utiliser le nouveau hook avec pagination et filtres
+  const { data: promotionsData, isLoading: promotionsLoading, refetch } = usePromotions({
+    storeId: store?.id,
+    activeOnly: statusFilter === "active",
+    page,
+    limit,
+    search: debouncedSearch || undefined,
+  });
+  
+  const promotions = promotionsData?.data || [];
+  const totalPages = promotionsData?.totalPages || 0;
+  const total = promotionsData?.total || 0;
 
   // Refs for animations
   const headerRef = useScrollAnimation<HTMLDivElement>();
 
-  const filteredPromotions = useMemo(() => {
-    if (!promotions) return [];
-    
-    return promotions.filter((promo) => {
-      const matchesSearch = 
-        promo.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        promo.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = 
-        statusFilter === "all" || 
-        (statusFilter === "active" && promo.is_active) ||
-        (statusFilter === "inactive" && !promo.is_active);
-      
-      return matchesSearch && matchesStatus;
-    });
-  }, [promotions, searchQuery, statusFilter]);
+  // Réinitialiser la page quand la recherche ou le filtre change
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter]);
 
-  // Stats calculées
+  // Stats calculées (basées sur toutes les promotions, pas seulement la page actuelle)
   const stats = useMemo(() => {
-    if (!promotions) return { total: 0, active: 0, totalUses: 0, averageDiscount: 0 };
+    if (!promotions || promotions.length === 0) {
+      return { total: total, active: 0, totalUses: 0, averageDiscount: 0 };
+    }
     
-    const total = promotions.length;
     const active = promotions.filter(p => p.is_active).length;
     const totalUses = promotions.reduce((sum, p) => sum + (p.used_count || 0), 0);
     const totalDiscount = promotions.reduce((sum, p) => {
@@ -53,10 +65,10 @@ const Promotions = () => {
       }
       return sum;
     }, 0);
-    const averageDiscount = total > 0 ? totalDiscount / total : 0;
+    const averageDiscount = promotions.length > 0 ? totalDiscount / promotions.length : 0;
     
     return { total, active, totalUses, averageDiscount };
-  }, [promotions]);
+  }, [promotions, total]);
 
   if (storeLoading) {
     return (
@@ -108,15 +120,15 @@ const Promotions = () => {
               className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
             >
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                    <Tag className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                    <Tag className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                   </div>
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     {t('promotions.title')}
                   </span>
                 </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                   {t('promotions.description')}
                 </p>
               </div>
@@ -138,8 +150,8 @@ const Promotions = () => {
                   <CardContent className="p-3 sm:p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('promotions.stats.total')}</p>
-                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">{t('promotions.stats.total')}</p>
+                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                           {stats.total}
                         </p>
                       </div>
@@ -153,8 +165,8 @@ const Promotions = () => {
                   <CardContent className="p-3 sm:p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('promotions.stats.active')}</p>
-                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">{t('promotions.stats.active')}</p>
+                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                           {stats.active}
                         </p>
                       </div>
@@ -168,8 +180,8 @@ const Promotions = () => {
                   <CardContent className="p-3 sm:p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('promotions.stats.totalUses')}</p>
-                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">{t('promotions.stats.totalUses')}</p>
+                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                           {stats.totalUses}
                         </p>
                       </div>
@@ -183,8 +195,8 @@ const Promotions = () => {
                   <CardContent className="p-3 sm:p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('promotions.stats.averageDiscount')}</p>
-                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">{t('promotions.stats.averageDiscount')}</p>
+                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                           {stats.averageDiscount.toFixed(1)}%
                         </p>
                       </div>
@@ -198,12 +210,35 @@ const Promotions = () => {
             )}
 
             {/* Filters */}
-            <PromotionFilters
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              statusFilter={statusFilter}
-              onStatusChange={setStatusFilter}
-            />
+            <div className="space-y-3">
+              <PromotionFilters
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                statusFilter={statusFilter}
+                onStatusChange={setStatusFilter}
+                discountTypeFilter={discountTypeFilter}
+                onDiscountTypeChange={setDiscountTypeFilter}
+                dateFromFilter={dateFromFilter}
+                onDateFromChange={setDateFromFilter}
+                dateToFilter={dateToFilter}
+                onDateToChange={setDateToFilter}
+              />
+              
+              {/* Bouton Export */}
+              {promotions && promotions.length > 0 && (
+                <div className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => exportAndDownloadPromotions(promotions)}
+                    className="h-9 text-xs sm:text-sm"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Exporter CSV
+                  </Button>
+                </div>
+              )}
+            </div>
 
             {/* Promotions Table */}
             {promotionsLoading ? (
@@ -212,8 +247,41 @@ const Promotions = () => {
                   <Skeleton className="h-96 w-full" />
                 </CardContent>
               </Card>
-            ) : filteredPromotions && filteredPromotions.length > 0 ? (
-              <PromotionsTable promotions={filteredPromotions} onUpdate={refetch} />
+            ) : promotions && promotions.length > 0 ? (
+              <>
+                <PromotionsTable promotions={promotions} onUpdate={refetch} />
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="text-sm text-muted-foreground">
+                        Page {page} sur {totalPages} ({total} promotion{total > 1 ? 's' : ''})
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPage(p => Math.max(1, p - 1))}
+                          disabled={page === 1 || promotionsLoading}
+                        >
+                          <ChevronLeft className="h-4 w-4 mr-1" />
+                          Précédent
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                          disabled={page === totalPages || promotionsLoading}
+                        >
+                          Suivant
+                          <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
             ) : (
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                 <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
@@ -222,11 +290,11 @@ const Promotions = () => {
                   </div>
                   <h3 className="text-lg sm:text-xl font-semibold mb-2">{t('promotions.empty.title')}</h3>
                   <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 max-w-md">
-                    {searchQuery || statusFilter !== "all"
+                    {debouncedSearch || statusFilter !== "all"
                       ? t('promotions.empty.noResults')
                       : t('promotions.empty.description')}
                   </p>
-                  {!searchQuery && statusFilter === "all" && (
+                  {!debouncedSearch && statusFilter === "all" && (
                     <Button 
                       onClick={() => setIsCreateDialogOpen(true)}
                       className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"

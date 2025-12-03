@@ -109,15 +109,15 @@ const AdminProducts = () => {
         {/* Header avec animation - Style Inventory */}
         <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700" role="banner">
           <div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2" id="admin-products-title">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                <Package className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+            <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2" id="admin-products-title">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                <Package className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
               </div>
               <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Gestion des produits
               </span>
             </h1>
-            <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+            <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
               {products.length} produit{products.length > 1 ? 's' : ''} sur la plateforme
             </p>
           </div>

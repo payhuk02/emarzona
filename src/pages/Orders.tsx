@@ -323,17 +323,17 @@ const Orders = () => {
         >
           <div>
             <h1 
-              className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight mb-1 sm:mb-2 flex items-center gap-2"
+              className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight mb-1 sm:mb-2 flex items-center gap-1.5 sm:gap-2"
               id="orders-title"
             >
-              <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm border border-blue-500/20 animate-in zoom-in duration-500">
-                <Package className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-blue-500 dark:text-blue-400" aria-hidden="true" />
+              <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm border border-blue-500/20 animate-in zoom-in duration-500">
+                <Package className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-blue-500 dark:text-blue-400" aria-hidden="true" />
               </div>
               <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                 {t('orders.title', 'Commandes')}
               </span>
             </h1>
-            <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+            <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
               {t('orders.subtitle', 'Gérez toutes vos commandes et suivez leurs statuts')}
             </p>
           </div>
@@ -405,14 +405,14 @@ const Orders = () => {
                     className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
-                      <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
-                        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2 sm:p-3 md:p-4">
+                      <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                        <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
                         {stat.label}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-3 sm:p-4 pt-0">
-                      <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                    <CardContent className="p-2 sm:p-3 md:p-4 pt-0">
+                      <div className={`text-base sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                         {stat.value}
                       </div>
                     </CardContent>
@@ -432,7 +432,7 @@ const Orders = () => {
                       placeholder={t('orders.searchPlaceholder', 'Rechercher par numéro, client...')}
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
-                      className="pl-8 sm:pl-10 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
+                      className="pl-8 sm:pl-10 min-h-[44px] h-11 sm:h-12 text-[11px] sm:text-xs md:text-sm"
                       aria-label={t('orders.search', 'Rechercher')}
                     />
                     {searchInput && (
@@ -604,8 +604,8 @@ const Orders = () => {
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
             <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16" role="status" aria-live="polite">
               <Package className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" aria-hidden="true" />
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">{t('orders.empty.title', 'Aucune commande')}</h3>
-              <p className="text-sm sm:text-base text-muted-foreground text-center mb-4 max-w-md">
+              <h3 className="text-sm sm:text-lg md:text-xl font-semibold mb-2">{t('orders.empty.title', 'Aucune commande')}</h3>
+              <p className="text-xs sm:text-sm md:text-base text-muted-foreground text-center mb-4 max-w-md">
                 {searchInput || statusFilter !== "all" || paymentStatusFilter !== "all" || dateRange?.from
                   ? t('orders.empty.noResults', 'Aucune commande ne correspond à vos critères de recherche')
                   : t('orders.empty.description', 'Commencez par créer votre première commande')}

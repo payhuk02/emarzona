@@ -1,14 +1,14 @@
 /**
  * useDebounce Hook
- * Date: 28 Janvier 2025
+ * Date: 30 Janvier 2025
  * 
- * Hook pour debouncer les valeurs (utile pour les filtres de recherche)
+ * Hook pour debouncer une valeur
  */
 
 import { useState, useEffect } from 'react';
 
 /**
- * Debounce une valeur
+ * Debounce une valeur avec un délai
  * @param value - La valeur à debouncer
  * @param delay - Le délai en millisecondes (défaut: 300ms)
  * @returns La valeur debouncée
@@ -17,12 +17,10 @@ export function useDebounce<T>(value: T, delay: number = 300): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   useEffect(() => {
-    // Créer un timer qui met à jour la valeur debouncée après le délai
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
 
-    // Nettoyer le timer si la valeur change avant la fin du délai
     return () => {
       clearTimeout(handler);
     };

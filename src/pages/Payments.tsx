@@ -373,8 +373,8 @@ export default function Payments() {
                     <CreditCard className="h-8 w-8 text-muted-foreground" />
                   </div>
                 </div>
-                <CardTitle className="text-xl sm:text-2xl font-bold">Aucune boutique sélectionnée</CardTitle>
-                <CardDescription className="text-sm sm:text-base mt-2">
+                <CardTitle className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold">Aucune boutique sélectionnée</CardTitle>
+                <CardDescription className="text-xs sm:text-sm md:text-base mt-2">
                   Veuillez sélectionner une boutique ou créer une nouvelle boutique pour gérer les paiements.
                 </CardDescription>
               </CardHeader>
@@ -412,15 +412,15 @@ export default function Payments() {
           <div ref={headerRef} className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 sm:p-6">
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                    <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                    <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                   </div>
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     Paiements
                   </span>
                 </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                   Gérez vos transactions et suivez vos paiements en temps réel
                 </p>
               </div>
@@ -463,8 +463,8 @@ export default function Payments() {
                         <CreditCard className="h-10 w-10 text-purple-500 dark:text-purple-400" />
                       </div>
                     </div>
-                    <CardTitle className="text-xl sm:text-2xl">Aucun paiement pour le moment</CardTitle>
-                    <CardDescription className="mt-2 text-sm sm:text-base">
+                    <CardTitle className="text-sm sm:text-lg md:text-xl lg:text-2xl">Aucun paiement pour le moment</CardTitle>
+                    <CardDescription className="mt-2 text-xs sm:text-sm md:text-base">
                       Créez votre premier paiement pour commencer à suivre vos transactions
                     </CardDescription>
                   </CardHeader>
@@ -487,14 +487,14 @@ export default function Payments() {
                     <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-purple-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                       <CardHeader className="pb-3 relative z-10">
-                        <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
-                          <CreditCard className="h-4 w-4 text-purple-200" />
+                        <CardTitle className="text-[10px] sm:text-xs md:text-sm font-semibold text-purple-100 flex items-center gap-2">
+                          <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-200" />
                           Total
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="relative z-10">
-                        <div className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">{stats.total}</div>
-                        <p className="text-xs text-purple-200/90 mt-1 font-medium">paiements</p>
+                        <div className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg">{stats.total}</div>
+                        <p className="text-[10px] sm:text-xs text-purple-200/90 mt-1 font-medium">paiements</p>
                       </CardContent>
                       <div className="absolute top-2 right-2 h-2 w-2 bg-purple-300 rounded-full opacity-60 group-hover:opacity-100 transition-opacity"></div>
                     </Card>
@@ -503,14 +503,14 @@ export default function Payments() {
                     <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-green-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                       <CardHeader className="pb-3 relative z-10">
-                        <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-green-400 drop-shadow-lg" />
+                        <CardTitle className="text-[10px] sm:text-xs md:text-sm font-semibold text-purple-100 flex items-center gap-2">
+                          <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-400 drop-shadow-lg" />
                           Completés
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="relative z-10">
-                        <div className="text-2xl md:text-3xl font-bold text-green-400 drop-shadow-lg">{stats.completed}</div>
-                        <p className="text-xs text-purple-200/90 mt-1 font-medium">paiements</p>
+                        <div className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-green-400 drop-shadow-lg">{stats.completed}</div>
+                        <p className="text-[10px] sm:text-xs text-purple-200/90 mt-1 font-medium">paiements</p>
                       </CardContent>
                       <div className="absolute top-2 right-2 h-2 w-2 bg-green-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-green-400/50"></div>
                     </Card>
@@ -519,14 +519,14 @@ export default function Payments() {
                     <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-yellow-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-yellow-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                       <CardHeader className="pb-3 relative z-10">
-                        <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-yellow-400 drop-shadow-lg" />
+                        <CardTitle className="text-[10px] sm:text-xs md:text-sm font-semibold text-purple-100 flex items-center gap-2">
+                          <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-400 drop-shadow-lg" />
                           En attente
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="relative z-10">
-                        <div className="text-2xl md:text-3xl font-bold text-yellow-400 drop-shadow-lg">{stats.pending}</div>
-                        <p className="text-xs text-purple-200/90 mt-1 font-medium">paiements</p>
+                        <div className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-yellow-400 drop-shadow-lg">{stats.pending}</div>
+                        <p className="text-[10px] sm:text-xs text-purple-200/90 mt-1 font-medium">paiements</p>
                       </CardContent>
                       <div className="absolute top-2 right-2 h-2 w-2 bg-yellow-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-yellow-400/50"></div>
                     </Card>
@@ -535,14 +535,14 @@ export default function Payments() {
                     <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-red-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                       <CardHeader className="pb-3 relative z-10">
-                        <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
-                          <XCircle className="h-4 w-4 text-red-400 drop-shadow-lg" />
+                        <CardTitle className="text-[10px] sm:text-xs md:text-sm font-semibold text-purple-100 flex items-center gap-2">
+                          <XCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-400 drop-shadow-lg" />
                           Échoués
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="relative z-10">
-                        <div className="text-2xl md:text-3xl font-bold text-red-400 drop-shadow-lg">{stats.failed}</div>
-                        <p className="text-xs text-purple-200/90 mt-1 font-medium">paiements</p>
+                        <div className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-red-400 drop-shadow-lg">{stats.failed}</div>
+                        <p className="text-[10px] sm:text-xs text-purple-200/90 mt-1 font-medium">paiements</p>
                       </CardContent>
                       <div className="absolute top-2 right-2 h-2 w-2 bg-red-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-red-400/50"></div>
                     </Card>
@@ -551,16 +551,16 @@ export default function Payments() {
                     <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-blue-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                       <CardHeader className="pb-3 relative z-10">
-                        <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-blue-400 drop-shadow-lg" />
+                        <CardTitle className="text-[10px] sm:text-xs md:text-sm font-semibold text-purple-100 flex items-center gap-2">
+                          <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-400 drop-shadow-lg" />
                           Revenu
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="relative z-10">
-                        <div className="text-2xl md:text-3xl font-bold text-blue-400 drop-shadow-lg">
+                        <div className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-400 drop-shadow-lg">
                           {stats.totalRevenue.toLocaleString('fr-FR')}
                         </div>
-                        <p className="text-xs text-purple-200/90 mt-1 font-medium">XOF</p>
+                        <p className="text-[10px] sm:text-xs text-purple-200/90 mt-1 font-medium">XOF</p>
                       </CardContent>
                       <div className="absolute top-2 right-2 h-2 w-2 bg-blue-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-blue-400/50"></div>
                     </Card>

@@ -50,10 +50,10 @@ const Settings = () => {
                   <SettingsIcon className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-primary" aria-hidden="true" />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
+                  <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">
                     {t('settings.title')}
                   </h1>
-                  <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                  <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                     {t('settings.subtitle')}
                   </p>
                 </div>

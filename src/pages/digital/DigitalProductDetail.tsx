@@ -336,7 +336,7 @@ export default function DigitalProductDetail() {
               {/* Title & Price */}
               <div>
                 <div className="flex items-start justify-between mb-2">
-                  <h1 className="text-3xl font-bold">{product.name}</h1>
+                  <h1 className="text-lg sm:text-2xl md:text-3xl font-bold">{product.name}</h1>
                   <Badge variant={product.is_active ? 'default' : 'secondary'}>
                     {product.is_active ? 'Actif' : 'Inactif'}
                   </Badge>
@@ -347,10 +347,10 @@ export default function DigitalProductDetail() {
                 <div className="flex items-baseline gap-3 mt-4">
                   {product.promotional_price ? (
                     <>
-                      <span className="text-4xl font-bold text-primary">
+                      <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-primary">
                         {product.promotional_price.toLocaleString()} {product.currency}
                       </span>
-                      <span className="text-xl line-through text-muted-foreground">
+                      <span className="text-base sm:text-lg md:text-xl line-through text-muted-foreground">
                         {product.price.toLocaleString()} {product.currency}
                       </span>
                       <Badge variant="destructive">
@@ -358,7 +358,7 @@ export default function DigitalProductDetail() {
                       </Badge>
                     </>
                   ) : (
-                    <span className="text-4xl font-bold">
+                    <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold">
                       {product.price.toLocaleString()} {product.currency}
                     </span>
                   )}

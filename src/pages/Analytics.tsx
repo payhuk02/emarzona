@@ -125,15 +125,15 @@ const Analytics = () => {
               role="banner"
             >
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2" id="analytics-title">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                    <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2" id="analytics-title">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                    <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                   </div>
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     Statistiques
                   </span>
                 </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                   Vue d'ensemble de votre activité
                 </p>
               </div>
@@ -151,15 +151,15 @@ const Analytics = () => {
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Revenu total</p>
+                      <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">Revenu total</p>
                       {isLoading ? (
                         <Skeleton className="h-6 w-24 mb-1" />
                       ) : (
-                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                           {totalRevenue.toLocaleString()} XOF
                         </p>
                       )}
-                      <p className="text-xs text-muted-foreground mt-1">Total des ventes</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Total des ventes</p>
                     </div>
                     <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5">
                       <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
@@ -173,15 +173,15 @@ const Analytics = () => {
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Commandes</p>
+                      <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">Commandes</p>
                       {isLoading ? (
                         <Skeleton className="h-6 w-16 mb-1" />
                       ) : (
-                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                           {orders?.length || 0}
                         </p>
                       )}
-                      <p className="text-xs text-muted-foreground mt-1">{completedOrders} terminées</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{completedOrders} terminées</p>
                     </div>
                     <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5">
                       <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
@@ -199,11 +199,11 @@ const Analytics = () => {
                       {isLoading ? (
                         <Skeleton className="h-6 w-16 mb-1" />
                       ) : (
-                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                           {customers?.length || 0}
                         </p>
                       )}
-                      <p className="text-xs text-muted-foreground mt-1">Base clients</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Base clients</p>
                     </div>
                     <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5">
                       <Users className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
@@ -217,11 +217,11 @@ const Analytics = () => {
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Produits actifs</p>
+                      <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">Produits actifs</p>
                       {isLoading ? (
                         <Skeleton className="h-6 w-16 mb-1" />
                       ) : (
-                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                           {activeProducts}
                         </p>
                       )}

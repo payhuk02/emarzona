@@ -50,10 +50,10 @@ export const EmailAnalyticsPage = () => {
                 <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                   Analytics Email
                 </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground mt-1">
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
                   Analysez les performances de vos campagnes et séquences email
                 </p>
               </div>

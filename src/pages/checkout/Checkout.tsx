@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -255,13 +255,15 @@ const Checkout = () => {
     return Object.keys(errors).length === 0;
   };
 
-  // Calculer le prix - IMPORTANT: Utiliser le prix promo si disponible, pas le prix barré
+  // Calculer le prix - IMPORTANT: Utiliser le prix promo si disponible, puis appliquer le coupon
   const calculatePrice = useCallback((): number => {
     if (!product) return 0;
     
     // Si une variante est sélectionnée, utiliser son prix
     if (selectedVariant?.price) {
-      return Number(selectedVariant.price);
+      const variantPrice = Number(selectedVariant.price);
+      const couponDiscount = appliedCouponCode?.discountAmount || 0;
+      return Math.max(0, variantPrice - couponDiscount);
     }
     
     // IMPORTANT: Utiliser le prix promo si disponible, sinon le prix normal
@@ -269,15 +271,15 @@ const Checkout = () => {
     const promoPrice = product.promotional_price || product.promo_price;
     const basePrice = Number(product.price) || 0;
     
-    // Si un prix promo existe et est inférieur au prix normal, l'utiliser
+    // Déterminer le prix de base (promo ou normal)
+    let finalBasePrice: number;
     if (promoPrice && Number(promoPrice) < basePrice && Number(promoPrice) > 0) {
-      return Number(promoPrice);
+      finalBasePrice = Number(promoPrice);
+    } else {
+      finalBasePrice = basePrice;
     }
     
-    // Sinon, utiliser le prix normal
-    const finalBasePrice = basePrice;
-    
-    // Appliquer la réduction du code promo
+    // Appliquer la réduction du code promo sur le prix de base
     const couponDiscount = appliedCouponCode?.discountAmount || 0;
     return Math.max(0, finalBasePrice - couponDiscount);
   }, [product, selectedVariant, appliedCouponCode]);
@@ -436,8 +438,10 @@ const Checkout = () => {
     }
   }, [formData, product, store, user, selectedVariant, calculatePrice, toast]);
 
-  // Prix affiché
-  const displayPrice = calculatePrice();
+  // Prix affiché - Utiliser useMemo pour garantir la mise à jour quand appliedCouponCode change
+  const displayPrice = useMemo(() => {
+    return calculatePrice();
+  }, [calculatePrice]);
   const currency = product?.currency || "XOF";
 
   if (loading) {

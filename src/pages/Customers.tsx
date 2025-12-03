@@ -154,15 +154,15 @@ const Customers = () => {
               className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
             >
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                    <Users className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                   </div>
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     Clients
                   </span>
                 </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                   Gérez et fidélisez votre clientèle
                 </p>
               </div>
@@ -184,8 +184,8 @@ const Customers = () => {
                   <CardContent className="p-3 sm:p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Clients</p>
-                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">Total Clients</p>
+                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                           {stats.total}
                         </p>
                       </div>
@@ -199,8 +199,8 @@ const Customers = () => {
                   <CardContent className="p-3 sm:p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Commandes</p>
-                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">Total Commandes</p>
+                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                           {stats.totalOrders}
                         </p>
                       </div>
@@ -214,8 +214,8 @@ const Customers = () => {
                   <CardContent className="p-3 sm:p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Dépensé</p>
-                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">Total Dépensé</p>
+                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                           {stats.totalSpent.toLocaleString()}
                         </p>
                       </div>
@@ -229,8 +229,8 @@ const Customers = () => {
                   <CardContent className="p-3 sm:p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground mb-1">Moyenne</p>
-                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">Moyenne</p>
+                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                           {stats.averageSpent.toLocaleString()}
                         </p>
                       </div>
@@ -333,8 +333,8 @@ const Customers = () => {
                   <div className="p-4 rounded-full bg-gradient-to-br from-purple-500/10 to-pink-500/5 mb-4 animate-in zoom-in duration-500">
                     <Users className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-semibold mb-2">Aucun client</h3>
-                  <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 max-w-md">
+                  <h3 className="text-sm sm:text-lg md:text-xl font-semibold mb-2">Aucun client</h3>
+                  <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-4 sm:mb-6 max-w-md">
                     {searchQuery
                       ? "Aucun client ne correspond à votre recherche"
                       : "Commencez par ajouter votre premier client"}

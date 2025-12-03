@@ -358,15 +358,15 @@ export const DigitalProductsList = () => {
               <div className="flex items-center gap-2 sm:gap-3">
                 <SidebarTrigger className="mr-1 sm:mr-2" />
                 <div>
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                      <Download className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                  <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                    <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                      <Download className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                     </div>
                     <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                       {t('digitalProducts.title', 'Produits Digitaux')}
                     </span>
                   </h1>
-                  <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                  <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                     {t('digitalProducts.subtitle', 'Gérez vos produits digitaux, téléchargements et licenses')}
                   </p>
                 </div>
@@ -429,7 +429,7 @@ export const DigitalProductsList = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-3 sm:p-4 pt-0">
-                      <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                      <div className={`text-base sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                         {isLoading ? (
                           <Skeleton className="h-6 w-16" />
                         ) : (
@@ -599,7 +599,7 @@ export const DigitalProductsList = () => {
                           <div className="p-4 rounded-full bg-muted/50 w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 flex items-center justify-center">
                             <Download className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
                           </div>
-                          <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 sm:mb-3">
+                          <h3 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground mb-2 sm:mb-3">
                             {t('digitalProducts.empty.title', 'Aucun produit digital')}
                           </h3>
                           <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
@@ -829,7 +829,7 @@ export const DigitalProductsList = () => {
                           <div className="p-4 rounded-full bg-muted/50 w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 flex items-center justify-center">
                             <CheckCircle2 className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
                           </div>
-                          <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 sm:mb-3">
+                          <h3 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground mb-2 sm:mb-3">
                             {t('digitalProducts.empty.active', 'Aucun produit actif')}
                           </h3>
                           <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
@@ -963,7 +963,7 @@ export const DigitalProductsList = () => {
                           <div className="p-4 rounded-full bg-muted/50 w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 flex items-center justify-center">
                             <Clock className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
                           </div>
-                          <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 sm:mb-3">
+                          <h3 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground mb-2 sm:mb-3">
                             {t('digitalProducts.empty.draft', 'Aucun brouillon')}
                           </h3>
                           <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">

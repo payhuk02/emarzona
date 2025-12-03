@@ -61,7 +61,7 @@ interface ShippingAddress {
 export default function Checkout() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { items, summary, isLoading: cartLoading, appliedCoupon: appliedCouponLegacy } = useCart();
+  const { items, summary, isLoading: cartLoading } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   
   // State pour la carte cadeau
@@ -190,15 +190,35 @@ export default function Checkout() {
   }, [items]);
 
   // Restaurer le code promo depuis localStorage au chargement
+  // IMPORTANT: Ne charger que si le coupon n'est pas déjà chargé
+  // pour éviter la double application
   useEffect(() => {
+    // Ne charger que si appliedCouponCode n'est pas déjà défini
+    if (appliedCouponCode) {
+      return; // Déjà chargé, ne pas recharger
+    }
+
     try {
       const savedCoupon = localStorage.getItem('applied_coupon');
       if (savedCoupon) {
         const coupon = JSON.parse(savedCoupon);
+        // Vérifier que le coupon n'est pas expiré (24h)
+        if (coupon.appliedAt) {
+          const appliedAt = new Date(coupon.appliedAt);
+          const now = new Date();
+          const hoursDiff = (now.getTime() - appliedAt.getTime()) / (1000 * 60 * 60);
+          
+          if (hoursDiff >= 24) {
+            // Coupon expiré, le supprimer
+            localStorage.removeItem('applied_coupon');
+            return;
+          }
+        }
+        
         if (coupon.id && coupon.discountAmount && coupon.code) {
           setAppliedCouponCode({
             id: coupon.id,
-            discountAmount: coupon.discountAmount,
+            discountAmount: Number(coupon.discountAmount), // S'assurer que c'est un nombre
             code: coupon.code,
           });
         }
@@ -208,7 +228,7 @@ export default function Checkout() {
       logger.warn('Error loading coupon from localStorage:', errorObj);
       localStorage.removeItem('applied_coupon');
     }
-  }, []);
+  }, [appliedCouponCode]); // Ne s'exécute qu'une fois au montage ou quand appliedCouponCode change
 
   // Charger le customer_id et vérifier si c'est la première commande
   useEffect(() => {
@@ -301,43 +321,55 @@ export default function Checkout() {
   }, [formData.country]);
 
   // ============================================
-  // CALCUL DIRECT SANS USEMEMO POUR GARANTIR LA MISE À JOUR EN TEMPS RÉEL
-  // Tous les calculs sont faits directement dans le render pour éviter les problèmes
-  // de dépendances React et garantir que le total se met à jour immédiatement
+  // CALCUL AVEC USEMEMO ET DÉPENDANCES EXPLICITES POUR GARANTIR LA MISE À JOUR
+  // IMPORTANT: summary.subtotal inclut déjà les remises sur items (voir useCart.ts ligne 108-111)
+  // Donc on ne soustrait QUE le coupon, pas les remises items qui sont déjà dans summary.subtotal
   // ============================================
 
-  // 1. Calculer les remises sur les items uniquement (sans coupons)
-  const itemDiscounts = items.reduce((total, item) => total + ((item.discount_amount || 0) * item.quantity), 0);
+  // 1. Calculer les remises sur les items (pour affichage uniquement)
+  // NOTE: Ces remises sont DÉJÀ incluses dans summary.subtotal, on ne les soustrait pas
+  const itemDiscounts = useMemo(() => {
+    return items.reduce((total, item) => total + ((item.discount_amount || 0) * item.quantity), 0);
+  }, [items]);
 
-  // 2. Montant du coupon du nouveau système - Extraction explicite pour garantir la détection
-  const couponDiscount = appliedCouponCode && appliedCouponCode.discountAmount 
-    ? Number(appliedCouponCode.discountAmount) 
-    : 0;
+  // 2. Montant du coupon - Extraction explicite avec dépendances individuelles
+  const couponDiscount = useMemo(() => {
+    if (!appliedCouponCode || !appliedCouponCode.discountAmount) return 0;
+    return Number(appliedCouponCode.discountAmount);
+  }, [appliedCouponCode?.id, appliedCouponCode?.discountAmount, appliedCouponCode?.code]);
   
-  // 3. Total des remises : remises items + coupon
-  const totalDiscounts = itemDiscounts + couponDiscount;
-
-  // 4. Sous-total après remises
-  const subtotalAfterDiscounts = summary.subtotal - totalDiscounts;
+  // 3. Sous-total après remises
+  // IMPORTANT: summary.subtotal = prix total - remises items (déjà calculé dans useCart)
+  // On soustrait UNIQUEMENT le coupon, pas les remises items qui sont déjà dans summary.subtotal
+  const subtotalAfterDiscounts = useMemo(() => {
+    return Math.max(0, summary.subtotal - couponDiscount);
+  }, [summary.subtotal, couponDiscount]);
 
   // 5. Calcul des taxes (18% sur le montant après remises)
-  const taxableAmount = subtotalAfterDiscounts;
-  const taxAmount = Math.max(0, taxableAmount * taxRate);
+  const taxAmount = useMemo(() => {
+    return Math.max(0, subtotalAfterDiscounts * taxRate);
+  }, [subtotalAfterDiscounts, taxRate]);
 
   // 6. Montant avec taxes
-  const subtotalWithTaxes = subtotalAfterDiscounts + taxAmount;
+  const subtotalWithTaxes = useMemo(() => {
+    return subtotalAfterDiscounts + taxAmount;
+  }, [subtotalAfterDiscounts, taxAmount]);
 
   // 7. Montant avec shipping
-  const subtotalWithShipping = subtotalWithTaxes + shippingAmount;
+  const subtotalWithShipping = useMemo(() => {
+    return subtotalWithTaxes + shippingAmount;
+  }, [subtotalWithTaxes, shippingAmount]);
 
   // 8. Montant à utiliser de la carte cadeau (calculé après taxes et shipping)
-  const giftCardAmount = (() => {
+  const giftCardAmount = useMemo(() => {
     if (!appliedGiftCard || !appliedGiftCard.balance) return 0;
     return Math.min(appliedGiftCard.balance, subtotalWithShipping);
-  })();
+  }, [appliedGiftCard?.id, appliedGiftCard?.balance, subtotalWithShipping]);
 
-  // 9. Total final - Calculé directement avec toutes les valeurs primitives pour garantir la mise à jour
-  const finalTotal = Math.max(0, subtotalWithShipping - giftCardAmount);
+  // 9. Total final - Calculé avec toutes les dépendances pour garantir la mise à jour
+  const finalTotal = useMemo(() => {
+    return Math.max(0, subtotalWithShipping - giftCardAmount);
+  }, [subtotalWithShipping, giftCardAmount]);
 
   // Debug: Vérifier que le coupon est bien pris en compte dans le calcul
   // Ce useEffect se déclenche uniquement quand le coupon change (ajout ou retrait)
@@ -351,8 +383,13 @@ export default function Checkout() {
           subtotal: summary.subtotal,
           itemDiscounts,
           couponDiscount,
-          totalDiscounts,
-          finalTotal
+          subtotalAfterDiscounts,
+          taxAmount,
+          subtotalWithShipping,
+          giftCardAmount,
+          finalTotal,
+          // Vérifier qu'il n'y a pas de double application
+          summaryDiscountAmount: summary.discount_amount
         });
       }
     } else {
@@ -361,7 +398,19 @@ export default function Checkout() {
         console.log('[Checkout] Coupon retiré, total:', finalTotal);
       }
     }
-  }, [appliedCouponCode?.id, appliedCouponCode?.discountAmount]);
+  }, [
+    appliedCouponCode?.id, 
+    appliedCouponCode?.discountAmount,
+    appliedCouponCode?.code,
+    summary.subtotal,
+    itemDiscounts,
+    couponDiscount,
+    subtotalAfterDiscounts,
+    taxAmount,
+    subtotalWithShipping,
+    giftCardAmount,
+    finalTotal
+  ]);
 
   // Validation formulaire
   const validateForm = (): boolean => {
@@ -587,37 +636,9 @@ export default function Checkout() {
         }
       }
 
-      // Enregistrer l'utilisation du coupon legacy si un coupon a été appliqué
-      interface LegacyCoupon {
-        promotionId?: string;
-        discountAmount?: number;
-      }
-      const legacyCoupon = appliedCouponLegacy as LegacyCoupon | null;
-      if (legacyCoupon?.promotionId) {
-        try {
-          const { data: sessionId } = await supabase.auth.getSession();
-          const { recordCouponUsage } = await import('@/lib/supabase-rpc');
-          const { error: recordError } = await recordCouponUsage({
-            promotion_id_param: legacyCoupon.promotionId,
-            order_id_param: order.id,
-            discount_amount_param: legacyCoupon.discountAmount || 0,
-            original_amount_param: summary.subtotal + taxAmount,
-            final_amount_param: finalTotal,
-            session_id_param: sessionId?.session?.access_token || null,
-          });
-
-          if (recordError) {
-            logger.error('Error recording coupon usage:', { error: recordError });
-          }
-
-          // Retirer le coupon après utilisation
-          localStorage.removeItem('applied_coupon');
-          sessionStorage.removeItem('applied_coupon');
-        } catch (couponError) {
-          logger.error('Error recording coupon usage:', { error: couponError });
-          // Ne pas bloquer la commande si l'enregistrement du coupon échoue
-        }
-      }
+      // NOTE: L'ancien système de coupons a été supprimé
+      // Seul le nouveau système (appliedCouponCode) est utilisé maintenant
+      // L'enregistrement de l'utilisation du coupon est fait plus haut (lignes 579-641)
 
       // Rédimer la carte cadeau si une carte a été appliquée
       if (appliedGiftCard && giftCardAmount > 0) {
@@ -1206,15 +1227,15 @@ export default function Checkout() {
                             orderAmount={summary.subtotal}
                             isFirstOrder={isFirstOrder}
                             onApply={(promotionId, discountAmount, code) => {
-                              setAppliedCouponCode({
+                              // Forcer la mise à jour en créant un nouvel objet avec discountAmount converti en nombre
+                              const newCoupon = {
                                 id: promotionId,
-                                discountAmount,
+                                discountAmount: Number(discountAmount),
                                 code: code || '',
-                              });
+                              };
+                              setAppliedCouponCode(newCoupon);
                               localStorage.setItem('applied_coupon', JSON.stringify({
-                                id: promotionId,
-                                discountAmount,
-                                code: code || '',
+                                ...newCoupon,
                                 appliedAt: new Date().toISOString(),
                               }));
                               toast({

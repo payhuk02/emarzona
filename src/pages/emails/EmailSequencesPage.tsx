@@ -116,10 +116,10 @@ export const EmailSequencesPage = () => {
                 <Mail className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                   Séquences Email
                 </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground mt-1">
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
                   Créez et gérez vos séquences d'emails automatiques (drip campaigns)
                 </p>
               </div>

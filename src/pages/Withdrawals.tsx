@@ -173,8 +173,8 @@ const Withdrawals = () => {
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold">{t('withdrawals.title')}</h1>
-              <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold">{t('withdrawals.title')}</h1>
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1 sm:mt-2">
                 {t('withdrawals.description')}
               </p>
             </div>

@@ -74,8 +74,8 @@ const PlatformRevenue = () => {
           <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h1 className="text-3xl font-bold">Revenus de la Plateforme</h1>
-                <p className="text-muted-foreground mt-1">
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold">Revenus de la Plateforme</h1>
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
                   Suivi des commissions (10% par vente)
                 </p>
               </div>
@@ -118,13 +118,13 @@ const PlatformRevenue = () => {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
                     Total Commissions
                   </CardTitle>
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">
                     {loading ? (
                       <Skeleton className="h-8 w-32" />
                     ) : (
@@ -139,13 +139,13 @@ const PlatformRevenue = () => {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
                     Total Ventes
                   </CardTitle>
                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">
                     {loading ? (
                       <Skeleton className="h-8 w-32" />
                     ) : (
@@ -160,13 +160,13 @@ const PlatformRevenue = () => {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
                     Nombre de Ventes
                   </CardTitle>
                   <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">
                     {loading ? <Skeleton className="h-8 w-20" /> : stats.salesCount}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -177,13 +177,13 @@ const PlatformRevenue = () => {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
                     Commission Moyenne
                   </CardTitle>
                   <Percent className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">
                     {loading ? (
                       <Skeleton className="h-8 w-32" />
                     ) : (
