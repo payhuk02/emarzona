@@ -170,6 +170,7 @@ const EmailWorkflowsPage = lazy(() => import("./pages/emails/EmailWorkflowsPage"
 const EmailTemplateEditorPage = lazy(() => import("./pages/emails/EmailTemplateEditorPage").then(m => ({ default: m.EmailTemplateEditorPage })));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const Payments = lazy(() => import("./pages/Payments"));
+const PaymentsCustomers = lazy(() => import("./pages/PaymentsCustomers"));
 const Withdrawals = lazy(() => import("./pages/Withdrawals"));
 const PaymentMethods = lazy(() => import("./pages/PaymentMethods"));
 const Settings = lazy(() => import("./pages/Settings"));
@@ -233,6 +234,7 @@ const AdminInventory = lazy(() => import("./pages/admin/AdminInventory"));
 const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
+const AdminTransactionReconciliation = lazy(() => import("./pages/admin/AdminTransactionReconciliation"));
 const AdminShipping = lazy(() => import("./pages/admin/AdminShipping"));
 const AdminShippingConversations = lazy(() => import("./pages/admin/AdminShippingConversations"));
 const AdminVendorConversations = lazy(() => import("./pages/admin/AdminVendorConversations"));
@@ -503,6 +505,7 @@ const AppContent = () => {
           <Route path="/dashboard/emails/templates/editor" element={<ProtectedRoute><EmailTemplateEditorPage /></ProtectedRoute>} />
           <Route path="/dashboard/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           <Route path="/dashboard/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
+          <Route path="/dashboard/payments-customers" element={<ProtectedRoute><PaymentsCustomers /></ProtectedRoute>} />
           <Route path="/dashboard/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/dashboard/kyc" element={<ProtectedRoute><KYC /></ProtectedRoute>} />
           <Route path="/dashboard/referrals" element={<ProtectedRoute><Referrals /></ProtectedRoute>} />
@@ -635,6 +638,7 @@ const AppContent = () => {
           <Route path="/admin/support" element={<ProtectedRoute><AdminSupport /></ProtectedRoute>} />
           <Route path="/admin/analytics" element={<ProtectedRoute><AdminAnalytics /></ProtectedRoute>} />
           <Route path="/admin/payments" element={<ProtectedRoute><AdminPayments /></ProtectedRoute>} />
+          <Route path="/admin/transaction-reconciliation" element={<ProtectedRoute><AdminTransactionReconciliation /></ProtectedRoute>} />
           <Route path="/admin/shipping" element={<ProtectedRoute><AdminShipping /></ProtectedRoute>} />
           <Route path="/admin/shipping-conversations" element={<ProtectedRoute><AdminShippingConversations /></ProtectedRoute>} />
           <Route path="/admin/vendor-conversations" element={<ProtectedRoute><AdminVendorConversations /></ProtectedRoute>} />

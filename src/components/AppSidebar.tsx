@@ -405,6 +405,11 @@ const menuSections = [
         icon: CreditCard,
       },
       {
+        title: "Paiements & Clients",
+        url: "/dashboard/payments-customers",
+        icon: Users,
+      },
+      {
         title: "Solde à Payer",
         url: "/dashboard/pay-balance",
         icon: DollarSign,

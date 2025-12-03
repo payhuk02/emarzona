@@ -1,4 +1,12 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
+/**
+ * Edge Function: Retry Failed Transactions
+ * Date: 1 Février 2025
+ * 
+ * Description: Retry automatique des transactions en attente avec backoff exponentiel
+ * 
+ * Cron: Toutes les heures (configuré dans Supabase Dashboard)
+ */
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 
@@ -7,18 +15,151 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface RetryInfo {
-  retry_id: string;
-  transaction_id: string;
-  attempt_number: number;
-  max_attempts: number;
-  payment_provider: string;
+interface RetryConfig {
+  maxAttempts: number;
+  backoffIntervals: number[]; // En heures: [1, 6, 24]
+  minAgeForRetry: number; // En heures: transactions plus anciennes que X heures
+}
+
+const DEFAULT_RETRY_CONFIG: RetryConfig = {
+  maxAttempts: 3,
+  backoffIntervals: [1, 6, 24], // 1h, 6h, 24h
+  minAgeForRetry: 1, // Retry après 1h minimum
+};
+
+// Note: La logique de shouldRetry est maintenant gérée par la fonction SQL get_pending_transaction_retries()
+// qui utilise la table transaction_retries avec next_retry_at et les stratégies de backoff
+
+/**
+ * Vérifie le statut d'une transaction auprès du provider
+ */
+async function verifyTransactionWithProvider(
+  supabase: any,
+  transaction: any
+): Promise<{ success: boolean; newStatus?: string; error?: string }> {
+  try {
+      if (transaction.payment_provider === 'moneroo' && transaction.moneroo_transaction_id) {
+        // Appeler l'Edge Function moneroo pour vérifier le statut
+        const monerooUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/moneroo`;
+        const response = await fetch(monerooUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'get_payment',
+            data: {
+              paymentId: transaction.moneroo_transaction_id,
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          return { success: false, error: `Moneroo API error: ${response.status} - ${errorText}` };
+        }
+
+        const responseData = await response.json();
+        
+        // La réponse Moneroo peut être dans data.data ou directement dans data
+        const paymentData = responseData.data?.data || responseData.data || responseData;
+        
+        // Mapper le statut Moneroo vers notre statut
+        const statusMap: Record<string, string> = {
+          'completed': 'completed',
+          'success': 'completed',
+          'paid': 'completed',
+          'failed': 'failed',
+          'pending': 'processing',
+          'cancelled': 'cancelled',
+          'expired': 'cancelled',
+        };
+
+        const monerooStatus = paymentData.status?.toLowerCase() || paymentData.payment_status?.toLowerCase() || 'processing';
+        const newStatus = statusMap[monerooStatus] || 'processing';
+
+        return { 
+          success: true, 
+          newStatus,
+          providerData: paymentData,
+        };
+      }
+
+    // Pour PayDunya, on pourrait ajouter la logique ici
+    // Pour l'instant, on retourne une erreur
+    return { success: false, error: 'Provider not supported for automatic retry' };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Unknown error' };
+  }
 }
 
 /**
- * Edge Function pour retry automatique des transactions échouées
- * À appeler via un cron job (ex: toutes les heures)
+ * Met à jour le statut d'une transaction
  */
+async function updateTransactionStatus(
+  supabase: any,
+  transactionId: string,
+  newStatus: string,
+  resultData?: any
+): Promise<boolean> {
+  try {
+    const updates: any = {
+      status: newStatus,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (newStatus === 'completed') {
+      updates.completed_at = new Date().toISOString();
+    } else if (newStatus === 'failed') {
+      updates.failed_at = new Date().toISOString();
+    }
+
+    const { error } = await supabase
+      .from('transactions')
+      .update(updates)
+      .eq('id', transactionId);
+
+    if (error) {
+      console.error('Error updating transaction:', error);
+      return false;
+    }
+
+    // Si la transaction est complétée, mettre à jour l'order associé
+    if (newStatus === 'completed') {
+      const { data: transaction } = await supabase
+        .from('transactions')
+        .select('order_id')
+        .eq('id', transactionId)
+        .single();
+
+      if (transaction?.order_id) {
+        await supabase
+          .from('orders')
+          .update({
+            status: 'completed',
+            payment_status: 'paid',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', transaction.order_id);
+      }
+    }
+
+    // Logger le retry
+    await supabase.from('transaction_logs').insert({
+      transaction_id: transactionId,
+      event_type: 'retry_verification',
+      status: newStatus,
+      response_data: resultData,
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Error in updateTransactionStatus:', error);
+    return false;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -29,288 +170,199 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log('Starting transaction retry job...');
+    console.log('🔄 Starting automatic transaction retry job...');
 
-    // Récupérer les retries à traiter
-    const { data: retries, error: retriesError } = await supabase.rpc(
-      'get_pending_transaction_retries'
-    );
+    // Récupérer la configuration depuis platform_settings (optionnel)
+    let retryConfig = DEFAULT_RETRY_CONFIG;
+    try {
+      const { data: settings } = await supabase
+        .from('platform_settings')
+        .select('settings')
+        .eq('key', 'admin')
+        .single();
 
-    if (retriesError) {
-      console.error('Error fetching pending retries:', retriesError);
-      throw retriesError;
+      if (settings?.settings?.retry_config) {
+        retryConfig = { ...DEFAULT_RETRY_CONFIG, ...settings.settings.retry_config };
+      }
+    } catch (error) {
+      console.warn('Could not fetch retry config, using defaults:', error);
     }
 
-    if (!retries || retries.length === 0) {
-      console.log('No pending retries to process');
+    // Utiliser la fonction SQL existante pour récupérer les retries à traiter
+    const { data: pendingRetries, error: fetchError } = await supabase
+      .rpc('get_pending_transaction_retries');
+
+    if (fetchError) {
+      throw new Error(`Error fetching pending retries: ${fetchError.message}`);
+    }
+
+    if (!pendingRetries || pendingRetries.length === 0) {
+      console.log('✅ No transactions eligible for retry');
       return new Response(
-        JSON.stringify({ success: true, message: 'No retries to process', processed: 0 }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          success: true, 
+          message: 'No transactions eligible for retry',
+          processed: 0,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`Processing ${retries.length} retries...`);
+    console.log(`📊 Found ${pendingRetries.length} transactions to retry`);
 
-    const results = await Promise.allSettled(
-      retries.map(async (retry: RetryInfo) => {
-        try {
-          // Marquer la retry comme en cours de traitement
+    // Récupérer les détails complets des transactions
+    const transactionIds = pendingRetries.map((r: any) => r.transaction_id);
+    const { data: transactions, error: transactionsError } = await supabase
+      .from('transactions')
+      .select('*')
+      .in('id', transactionIds);
+
+    if (transactionsError) {
+      throw new Error(`Error fetching transactions: ${transactionsError.message}`);
+    }
+
+    if (!transactions || transactions.length === 0) {
+      console.log('✅ No transactions eligible for retry');
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'No transactions eligible for retry',
+          processed: 0,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`📊 Found ${transactions.length} transactions to check`);
+
+    let processed = 0;
+    let updated = 0;
+    let failed = 0;
+    let skipped = 0;
+
+    // Créer un map pour accéder rapidement aux transactions
+    const transactionsMap = new Map(transactions?.map((t: any) => [t.id, t]) || []);
+
+    for (const retryInfo of pendingRetries) {
+      const transaction = transactionsMap.get(retryInfo.transaction_id);
+      
+      if (!transaction) {
+        console.warn(`⚠️  Transaction ${retryInfo.transaction_id} not found`);
+        skipped++;
+        continue;
+      }
+
+      processed++;
+
+      console.log(`🔄 Retrying transaction ${transaction.id} (attempt ${retryInfo.attempt_number})...`);
+
+      // Mettre à jour le statut de la retry à 'processing'
+      const { data: retryRecord, error: retryError } = await supabase
+        .from('transaction_retries')
+        .update({
+          status: 'processing',
+          last_attempt_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', retryInfo.retry_id)
+        .select()
+        .single();
+
+      if (retryError) {
+        console.error(`❌ Error updating retry record for ${transaction.id}:`, retryError);
+        failed++;
+        continue;
+      }
+
+      // Vérifier le statut auprès du provider
+      const verificationResult = await verifyTransactionWithProvider(supabase, transaction);
+
+      if (verificationResult.success && verificationResult.newStatus) {
+        // Mettre à jour la transaction
+        const updateSuccess = await updateTransactionStatus(
+          supabase,
+          transaction.id,
+          verificationResult.newStatus,
+          verificationResult
+        );
+
+        if (updateSuccess) {
+          // Marquer le retry comme complété
           await supabase
             .from('transaction_retries')
             .update({
-              status: 'processing',
-              last_attempt_at: new Date().toISOString(),
+              status: 'completed',
+              completed_at: new Date().toISOString(),
+              last_attempt_result: verificationResult,
               updated_at: new Date().toISOString(),
             })
-            .eq('id', retry.retry_id);
+            .eq('id', retryInfo.retry_id);
 
-          // Récupérer la transaction
-          const { data: transaction, error: txError } = await supabase
-            .from('transactions')
-            .select('*')
-            .eq('id', retry.transaction_id)
-            .single();
-
-          if (txError || !transaction) {
-            throw new Error(`Transaction not found: ${retry.transaction_id}`);
-          }
-
-          // Vérifier le provider et appeler la fonction de vérification appropriée
-          let verificationResult: { success: boolean; status?: string; error?: string };
-
-          if (transaction.payment_provider === 'paydunya' && transaction.paydunya_invoice_token) {
-            // Vérifier avec PayDunya
-            verificationResult = await verifyPayDunyaTransaction(
-              supabase,
-              transaction.paydunya_invoice_token,
-              transaction.id
-            );
-          } else if (transaction.payment_provider === 'moneroo' && transaction.moneroo_transaction_id) {
-            // Vérifier avec Moneroo
-            verificationResult = await verifyMonerooTransaction(
-              supabase,
-              transaction.moneroo_transaction_id,
-              transaction.id
-            );
-          } else {
-            throw new Error('Unknown payment provider or missing transaction ID');
-          }
-
-          // Mettre à jour le résultat de la retry
-          if (verificationResult.success && verificationResult.status === 'completed') {
-            // Succès !
-            await supabase
-              .from('transaction_retries')
-              .update({
-                status: 'completed',
-                last_attempt_result: verificationResult,
-                completed_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              })
-              .eq('id', retry.retry_id);
-
-            // Mettre à jour la transaction
-            await supabase
-              .from('transactions')
-              .update({
-                status: 'completed',
-                completed_at: new Date().toISOString(),
-                retry_count: retry.attempt_number,
-                updated_at: new Date().toISOString(),
-              })
-              .eq('id', transaction.id);
-
-            console.log(`Transaction ${transaction.id} successfully verified after ${retry.attempt_number} attempts`);
-            return { success: true, transaction_id: transaction.id, attempt: retry.attempt_number };
-          } else if (verificationResult.success && verificationResult.status === 'failed') {
-            // Échec définitif
-            await supabase
-              .from('transaction_retries')
-              .update({
-                status: 'failed',
-                last_attempt_result: verificationResult,
-                error_message: verificationResult.error || 'Transaction failed',
-                completed_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              })
-              .eq('id', retry.retry_id);
-
-            console.log(`Transaction ${transaction.id} failed after ${retry.attempt_number} attempts`);
-            return { success: false, transaction_id: transaction.id, error: verificationResult.error };
-          } else {
-            // Toujours en attente, planifier le prochain retry
-            if (retry.attempt_number < retry.max_attempts) {
-              await supabase.rpc('create_or_update_transaction_retry', {
-                p_transaction_id: transaction.id,
-                p_max_attempts: retry.max_attempts,
-                p_strategy: 'exponential',
-              });
-
-              console.log(`Transaction ${transaction.id} still pending, scheduled next retry (attempt ${retry.attempt_number + 1})`);
-              return { success: true, transaction_id: transaction.id, pending: true, attempt: retry.attempt_number };
-            } else {
-              // Maximum atteint
-              await supabase
-                .from('transaction_retries')
-                .update({
-                  status: 'failed',
-                  last_attempt_result: verificationResult,
-                  error_message: 'Maximum retry attempts reached',
-                  completed_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString(),
-                })
-                .eq('id', retry.retry_id);
-
-              console.log(`Transaction ${transaction.id} reached maximum retry attempts`);
-              return { success: false, transaction_id: transaction.id, error: 'Max attempts reached' };
-            }
-          }
-        } catch (error: unknown) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          console.error(`Error processing retry ${retry.retry_id}:`, errorMessage);
-
-          // Mettre à jour la retry avec l'erreur
-          await supabase
-            .from('transaction_retries')
-            .update({
-              status: 'pending', // Remettre en pending pour réessayer
-              last_attempt_result: { error: errorMessage },
-              error_message: errorMessage,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', retry.retry_id);
-
-          return { success: false, retry_id: retry.retry_id, error: errorMessage };
+          console.log(`✅ Transaction ${transaction.id} updated to ${verificationResult.newStatus}`);
+          updated++;
+        } else {
+          failed++;
         }
-      })
-    );
+      } else {
+        // Si on n'a pas atteint le maximum, créer la prochaine tentative
+        if (retryInfo.attempt_number < retryInfo.max_attempts) {
+          // Créer la prochaine tentative via la fonction SQL
+          await supabase.rpc('create_or_update_transaction_retry', {
+            p_transaction_id: transaction.id,
+            p_max_attempts: retryInfo.max_attempts,
+            p_strategy: 'exponential',
+          });
+        }
 
-    const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
-    const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success)).length;
+        // Marquer le retry actuel comme échoué
+        await supabase
+          .from('transaction_retries')
+          .update({
+            status: 'failed',
+            completed_at: new Date().toISOString(),
+            error_message: verificationResult.error,
+            last_attempt_result: { error: verificationResult.error },
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', retryInfo.retry_id);
 
-    console.log(`Retry job completed: ${successful} successful, ${failed} failed`);
+        console.log(`⚠️  Transaction ${transaction.id} verification failed: ${verificationResult.error}`);
+        failed++;
+      }
+
+      // Petite pause pour éviter de surcharger les APIs
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    const summary = {
+      success: true,
+      message: 'Retry job completed',
+      stats: {
+        total_checked: pendingRetries.length,
+        processed: processed,
+        updated: updated,
+        failed: failed,
+        skipped: skipped,
+      },
+    };
+
+    console.log('✅ Retry job completed:', summary);
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        processed: retries.length,
-        successful,
-        failed,
-        results: results.map(r => r.status === 'fulfilled' ? r.value : { error: 'Promise rejected' }),
+      JSON.stringify(summary),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error: any) {
+    console.error('❌ Error in retry job:', error);
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: error.message || 'Unknown error',
       }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error in retry job:', errorMessage);
-    return new Response(
-      JSON.stringify({ success: false, error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     );
   }
 });
-
-/**
- * Vérifier une transaction PayDunya
- */
-async function verifyPayDunyaTransaction(
-  supabase: ReturnType<typeof createClient>,
-  paydunyaTransactionId: string,
-  transactionId: string
-): Promise<{ success: boolean; status?: string; error?: string }> {
-  try {
-    // Appeler l'API PayDunya pour vérifier le statut
-    const paydunyaMasterKey = Deno.env.get('PAYDUNYA_MASTER_KEY');
-    const paydunyaPrivateKey = Deno.env.get('PAYDUNYA_PRIVATE_KEY');
-    const paydunyaToken = Deno.env.get('PAYDUNYA_TOKEN');
-    const paydunyaApiUrl = Deno.env.get('PAYDUNYA_API_URL') || 'https://app.paydunya.com/api/v1';
-
-    if (!paydunyaMasterKey || !paydunyaPrivateKey || !paydunyaToken) {
-      throw new Error('PayDunya credentials not configured');
-    }
-
-    const response = await fetch(`${paydunyaApiUrl}/checkout-invoice/confirm/${paydunyaTransactionId}`, {
-      method: 'GET',
-      headers: {
-        'PAYDUNYA-MASTER-KEY': paydunyaMasterKey,
-        'PAYDUNYA-PRIVATE-KEY': paydunyaPrivateKey,
-        'PAYDUNYA-TOKEN': paydunyaToken,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return { success: false, error: data.error || 'PayDunya API error' };
-    }
-
-    const status = data.response?.status || data.status;
-    const statusMap: Record<string, string> = {
-      'completed': 'completed',
-      'success': 'completed',
-      'paid': 'completed',
-      'failed': 'failed',
-      'pending': 'processing',
-    };
-
-    return {
-      success: true,
-      status: statusMap[status?.toLowerCase()] || 'processing',
-    };
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return { success: false, error: errorMessage };
-  }
-}
-
-/**
- * Vérifier une transaction Moneroo
- */
-async function verifyMonerooTransaction(
-  supabase: ReturnType<typeof createClient>,
-  monerooTransactionId: string,
-  transactionId: string
-): Promise<{ success: boolean; status?: string; error?: string }> {
-  try {
-    // Appeler l'API Moneroo via Edge Function
-    const monerooApiKey = Deno.env.get('MONEROO_API_KEY');
-    const monerooApiUrl = Deno.env.get('MONEROO_API_URL') || 'https://api.moneroo.io/v1';
-
-    if (!monerooApiKey) {
-      throw new Error('Moneroo API key not configured');
-    }
-
-    const response = await fetch(`${monerooApiUrl}/payments/${monerooTransactionId}/verify`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${monerooApiKey}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return { success: false, error: data.error || 'Moneroo API error' };
-    }
-
-    const status = data.status;
-    const statusMap: Record<string, string> = {
-      'completed': 'completed',
-      'success': 'completed',
-      'failed': 'failed',
-      'pending': 'processing',
-    };
-
-    return {
-      success: true,
-      status: statusMap[status?.toLowerCase()] || 'processing',
-    };
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return { success: false, error: errorMessage };
-  }
-}
-

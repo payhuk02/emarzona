@@ -270,8 +270,22 @@ serve(async (req) => {
           ? parseFloat(orderData.total_amount) 
           : orderData.total_amount;
 
-        // Tolérance de 1 XOF pour les arrondis
-        const tolerance = 1;
+        // Récupérer la tolérance depuis platform_settings (défaut: 1 XOF)
+        let tolerance = 1.0;
+        try {
+          const { data: settings } = await supabase
+            .from('platform_settings')
+            .select('settings')
+            .eq('key', 'admin')
+            .single();
+          
+          if (settings?.settings?.max_amount_tolerance) {
+            tolerance = parseFloat(settings.settings.max_amount_tolerance.toString()) || 1.0;
+          }
+        } catch (error) {
+          console.warn('Could not fetch max_amount_tolerance from platform_settings, using default:', error);
+        }
+
         const amountDifference = Math.abs(webhookAmount - orderAmount);
 
         if (amountDifference > tolerance) {
@@ -282,6 +296,7 @@ serve(async (req) => {
             order_amount: orderAmount,
             difference: amountDifference,
             tolerance,
+            percentage_diff: ((amountDifference / orderAmount) * 100).toFixed(2) + '%',
           });
 
           // Logger l'alerte de sécurité
@@ -293,6 +308,8 @@ serve(async (req) => {
               webhook_amount: webhookAmount,
               order_amount: orderAmount,
               difference: amountDifference,
+              tolerance,
+              percentage_diff: ((amountDifference / orderAmount) * 100).toFixed(2) + '%',
               timestamp: new Date().toISOString(),
             },
             error_data: {
@@ -301,20 +318,19 @@ serve(async (req) => {
             },
           }).catch(err => console.error('Error logging amount mismatch:', err));
 
-          // Rejeter le webhook si la différence est significative (> 10 XOF)
-          if (amountDifference > 10) {
-            return new Response(
-              JSON.stringify({ 
-                error: 'Amount mismatch - transaction rejected',
-                webhook_amount: webhookAmount,
-                expected_amount: orderAmount,
-              }),
-              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
-          }
-
-          // Si la différence est petite mais > tolérance, logger mais continuer
-          console.warn('Amount mismatch within tolerance, proceeding with caution');
+          // 🔴 REJETER le webhook si la différence dépasse la tolérance configurée
+          // Plus de tolérance de 10 XOF - on utilise maintenant la tolérance configurée
+          return new Response(
+            JSON.stringify({ 
+              error: 'Amount mismatch - transaction rejected',
+              message: `Webhook amount (${webhookAmount}) differs from order amount (${orderAmount}) by ${amountDifference} XOF, exceeding tolerance of ${tolerance} XOF`,
+              webhook_amount: webhookAmount,
+              expected_amount: orderAmount,
+              difference: amountDifference,
+              tolerance,
+            }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         }
       }
     }
