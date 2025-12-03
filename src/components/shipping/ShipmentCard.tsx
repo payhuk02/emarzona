@@ -21,6 +21,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { TrackingTimeline } from './TrackingTimeline';
 import { usePrintLabel, useCancelShipment } from '@/hooks/shipping/useFedexShipping';
+import { AutomaticTrackingButton } from './AutomaticTrackingButton';
 
 interface ShipmentCardProps {
   shipment: any;
@@ -85,6 +86,7 @@ const ShipmentCardComponent = ({ shipment, onRefresh }: ShipmentCardProps) => {
             </div>
 
             <div className="flex items-center gap-2">
+              <AutomaticTrackingButton shipmentId={shipment.id} />
               {shipment.tracking_url && (
                 <Button
                   variant="outline"

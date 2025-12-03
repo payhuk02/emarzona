@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
+import { TrackingAutoRefresh } from '@/components/shipping/TrackingAutoRefresh';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -284,6 +285,7 @@ export default function ShippingDashboard() {
 
   return (
     <SidebarProvider>
+      <TrackingAutoRefresh enabled={true} intervalMs={5 * 60 * 1000} />
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <main className="flex-1 overflow-auto">

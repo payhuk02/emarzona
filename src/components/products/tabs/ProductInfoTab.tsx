@@ -47,6 +47,11 @@ import {
   Copy,
   RefreshCw
 } from "lucide-react";
+// Import des catégories centralisées
+import { 
+  getCategoriesForProductType,
+  type CategoryOption
+} from '@/constants/product-categories';
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -99,45 +104,11 @@ interface ProductInfoTabProps {
   storeCurrency?: string;
 }
 
-// Constantes pour les choix dynamiques
-const DIGITAL_CATEGORIES = [
-  { value: "formation", label: "Formation", icon: Users },
-  { value: "ebook", label: "Ebook", icon: Package },
-  { value: "template", label: "Template", icon: Settings },
-  { value: "logiciel", label: "Logiciel", icon: Smartphone },
-  { value: "cours", label: "Cours en ligne", icon: Users },
-  { value: "guide", label: "Guide", icon: Info },
-  { value: "checklist", label: "Checklist", icon: CheckCircle2 },
-  { value: "audio", label: "Fichier audio", icon: Download },
-  { value: "video", label: "Vidéo", icon: Package },
-  { value: "app", label: "Application mobile", icon: Smartphone }
-];
-
-const PHYSICAL_CATEGORIES = [
-  { value: "vetements", label: "Vêtements", icon: Package },
-  { value: "accessoires", label: "Accessoires", icon: Package },
-  { value: "artisanat", label: "Artisanat", icon: Package },
-  { value: "electronique", label: "Électronique", icon: Smartphone },
-  { value: "maison", label: "Maison & Jardin", icon: Package },
-  { value: "sport", label: "Sport", icon: Package },
-  { value: "beaute", label: "Beauté", icon: Package },
-  { value: "livres", label: "Livres", icon: Package },
-  { value: "jouets", label: "Jouets", icon: Package },
-  { value: "alimentation", label: "Alimentation", icon: Package }
-];
-
-const SERVICE_CATEGORIES = [
-  { value: "consultation", label: "Consultation", icon: Users },
-  { value: "coaching", label: "Coaching", icon: Target },
-  { value: "design", label: "Design", icon: Settings },
-  { value: "developpement", label: "Développement", icon: Settings },
-  { value: "marketing", label: "Marketing", icon: TrendingUp },
-  { value: "redaction", label: "Rédaction", icon: Package },
-  { value: "traduction", label: "Traduction", icon: Globe },
-  { value: "maintenance", label: "Maintenance", icon: Wrench },
-  { value: "formation", label: "Formation", icon: Users },
-  { value: "conseil", label: "Conseil", icon: Info }
-];
+// Import des catégories centralisées
+import { 
+  getCategoriesForProductType,
+  type CategoryOption
+} from '@/constants/product-categories';
 
 const PRICING_MODELS = [
   { 
@@ -201,6 +172,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
   const [lastType, setLastType] = useState<string | null>(formData.product_type || null);
   const [showTypeChangeDialog, setShowTypeChangeDialog] = useState(false);
   const [pendingTypeChange, setPendingTypeChange] = useState<string | null>(null);
+  const [customCategory, setCustomCategory] = useState<string>('');
   const { toast } = useToast();
 
   // Hook personnalisé pour la vérification de slug
@@ -258,13 +230,11 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
    * Mémorisé pour éviter les recalculs inutiles
    */
   const categories = useMemo(() => {
-    switch (formData.product_type) {
-      case "digital": return DIGITAL_CATEGORIES;
-      case "physical": return PHYSICAL_CATEGORIES;
-      case "service": return SERVICE_CATEGORIES;
-      default: return [];
-    }
+    return getCategoriesForProductType(formData.product_type || '');
   }, [formData.product_type]);
+
+  // Afficher le champ personnalisé si "Autre" est sélectionné
+  const showCustomCategoryInput = formData.category === 'autre';
 
   /**
    * Retourne la couleur associée au type de produit
@@ -543,6 +513,23 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                     })}
                   </SelectContent>
                 </Select>
+                {showCustomCategoryInput && (
+                  <div className="mt-2">
+                    <Label className="text-sm font-medium text-white">
+                      Précisez la catégorie <span className="text-red-400">*</span>
+                    </Label>
+                    <Input
+                      value={customCategory}
+                      onChange={(e) => {
+                        setCustomCategory(e.target.value);
+                        // Mettre à jour la catégorie avec la valeur personnalisée
+                        updateFormData("category", e.target.value);
+                      }}
+                      placeholder="Ex: Formation en développement web"
+                      className="bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 mt-1"
+                    />
+                  </div>
+                )}
                 {validationErrors.category && (
                   <div className="flex items-center gap-2 text-red-400 text-sm">
                     <AlertCircle className="h-4 w-4" />

@@ -51,6 +51,7 @@ import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 import { SEOMeta, ProductSchema } from '@/components/seo';
 import { ArtistCertificateDisplay } from '@/components/artist/ArtistCertificateDisplay';
 import { ShippingInfoDisplay } from '@/components/physical/ShippingInfoDisplay';
+import { ArtistShippingCalculator } from '@/components/artist/ArtistShippingCalculator';
 
 const ArtistProductDetail = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -588,7 +589,13 @@ const ArtistProductDetail = () => {
 
               {/* Shipping Info */}
               {product?.artist?.requires_shipping && (
-                <ShippingInfoDisplay productId={productId!} />
+                <>
+                  <ShippingInfoDisplay productId={productId!} />
+                  <ArtistShippingCalculator 
+                    productId={productId!} 
+                    artworkValue={product?.price || 0} 
+                  />
+                </>
               )}
 
               {/* Certificate Display */}
@@ -633,6 +640,14 @@ const ArtistProductDetail = () => {
 
             {/* Details Tab */}
             <TabsContent value="details" className="space-y-6">
+              {/* Shipping Calculator - Only show if shipping required */}
+              {product?.artist?.requires_shipping && (
+                <ArtistShippingCalculator 
+                  productId={productId!} 
+                  artworkValue={product?.price || 0} 
+                />
+              )}
+              
               <Card>
                 <CardHeader>
                   <CardTitle>Détails de l'œuvre</CardTitle>

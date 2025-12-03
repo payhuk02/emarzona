@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { getAllMarketplaceCategories, type CategoryOption } from '@/constants/product-categories';
 
 interface CategoryNavigationBarProps {
   categories: string[];
@@ -51,7 +52,8 @@ interface CategoryNavigationBarProps {
 }
 
 // Définition complète des catégories avec leurs icônes et labels (style comeup.com)
-const CATEGORY_CONFIG = [
+// Utilise maintenant les catégories centralisées
+const CATEGORY_CONFIG_BASE: CategoryOption[] = [
   { 
     value: 'all', 
     label: 'Pour vous', 
@@ -298,6 +300,14 @@ const CATEGORY_CONFIG = [
     icon: Package,
     popular: false
   },
+];
+
+// Combiner les catégories de base avec toutes les catégories des 5 systèmes
+const CATEGORY_CONFIG: CategoryOption[] = [
+  ...CATEGORY_CONFIG_BASE,
+  ...getAllMarketplaceCategories().filter(cat => 
+    !CATEGORY_CONFIG_BASE.some(base => base.value === cat.value)
+  ),
 ];
 
 export function CategoryNavigationBar({

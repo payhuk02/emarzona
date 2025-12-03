@@ -469,3 +469,55 @@ export const sendWelcomeEmail = async (params: {
   });
 };
 
+/**
+ * Envoyer email de mise à jour de tracking
+ */
+export const sendTrackingUpdateEmail = async (params: {
+  userEmail: string;
+  userName: string;
+  userId?: string;
+  orderId: string;
+  trackingNumber: string;
+  trackingUrl?: string;
+  status: string;
+  carrierName?: string;
+  estimatedDelivery?: string;
+  latestEvent?: {
+    description: string;
+    location?: string;
+    timestamp: string;
+  };
+}) => {
+  // Déterminer le template selon le statut
+  let templateSlug = 'shipment-tracking-update';
+  
+  if (params.status === 'delivered') {
+    templateSlug = 'shipment-delivered';
+  } else if (params.status === 'out_for_delivery') {
+    templateSlug = 'shipment-out-for-delivery';
+  }
+
+  return sendEmail({
+    templateSlug,
+    to: params.userEmail,
+    toName: params.userName,
+    userId: params.userId,
+    orderId: params.orderId,
+    productType: 'physical', // Tracking concerne principalement les produits physiques
+    variables: {
+      user_name: params.userName,
+      order_id: params.orderId,
+      tracking_number: params.trackingNumber,
+      tracking_url: params.trackingUrl || `https://tracking.example.com/${params.trackingNumber}`,
+      status: params.status,
+      carrier_name: params.carrierName || 'Transporteur',
+      estimated_delivery: params.estimatedDelivery,
+      latest_event_description: params.latestEvent?.description,
+      latest_event_location: params.latestEvent?.location,
+      latest_event_timestamp: params.latestEvent?.timestamp 
+        ? new Date(params.latestEvent.timestamp).toLocaleString('fr-FR')
+        : undefined,
+    },
+  });
+};
+

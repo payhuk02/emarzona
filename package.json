@@ -58,7 +58,9 @@
     "issues:create:bash": "bash scripts/create-github-issues.sh",
     "issues:create:api": "powershell -ExecutionPolicy Bypass -File scripts/create-github-issues-api.ps1",
     "supabase:types": "npx supabase gen types typescript --project-id hbdnzajbyjakdhuavrvb --schema public > src/integrations/supabase/types.ts",
-    "supabase:types:check": "npx supabase gen types typescript --project-id hbdnzajbyjakdhuavrvb --schema public"
+    "supabase:types:check": "npx supabase gen types typescript --project-id hbdnzajbyjakdhuavrvb --schema public",
+    "favicon:generate": "node scripts/generate-favicon.js",
+    "favicon:generate:simple": "node scripts/generate-favicon-simple.js"
   },
   "vercel": {
     "buildCommand": "npm run build",

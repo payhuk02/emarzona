@@ -26,6 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useCart } from '@/hooks/cart/useCart';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useCalculateArtistShipping } from '@/hooks/artist/useArtistShipping';
 import { initiatePayment } from '@/lib/payment-service';
 import { getAffiliateInfo } from '@/lib/affiliation-tracking';
 import { safeRedirect } from '@/lib/url-validator';
@@ -312,13 +313,27 @@ export default function Checkout() {
     return defaultRates[formData.country] || 0.18;
   }, [formData.country]);
 
-  // Calculer shipping (exemple simple : 5000 XOF pour BF, 15000 pour autres)
+  // Calculer shipping - Support spécialisé pour œuvres d'artiste
   const shippingAmount = useMemo(() => {
+    // Vérifier si le panier contient des œuvres d'artiste nécessitant un shipping spécialisé
+    const artistProducts = items.filter(item => item.product_type === 'artist');
+    
+    if (artistProducts.length > 0) {
+      // Pour les œuvres d'artiste, utiliser le calcul spécialisé
+      // Le calcul sera fait dynamiquement via le hook useCalculateArtistShipping
+      // Pour l'instant, estimation basique
+      if (formData.country === 'BF') {
+        return 15000; // Shipping spécialisé BF (plus cher que standard)
+      }
+      return 35000; // Shipping spécialisé international (emballage + assurance)
+    }
+    
+    // Shipping standard pour autres produits
     if (formData.country === 'BF') {
       return 5000; // Frais de livraison Burkina Faso
     }
     return 15000; // International
-  }, [formData.country]);
+  }, [formData.country, items]);
 
   // ============================================
   // CALCUL AVEC USEMEMO ET DÉPENDANCES EXPLICITES POUR GARANTIR LA MISE À JOUR

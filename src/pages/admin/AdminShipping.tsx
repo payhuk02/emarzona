@@ -32,6 +32,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { AutomaticTrackingButton } from '@/components/shipping/AutomaticTrackingButton';
+import { TrackingAutoRefresh } from '@/components/shipping/TrackingAutoRefresh';
 
 export default function AdminShipping() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -109,16 +111,20 @@ export default function AdminShipping() {
 
   return (
     <SidebarProvider>
+      <TrackingAutoRefresh enabled={true} intervalMs={5 * 60 * 1000} />
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto p-6 space-y-6">
             {/* Header */}
-            <div ref={headerRef} role="banner">
-              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight" id="admin-shipping-title">Expéditions</h1>
-              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
-                Vue d'ensemble de toutes les expéditions de la plateforme
-              </p>
+            <div ref={headerRef} role="banner" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight" id="admin-shipping-title">Expéditions</h1>
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
+                  Vue d'ensemble de toutes les expéditions de la plateforme
+                </p>
+              </div>
+              <AutomaticTrackingButton variant="batch" />
             </div>
 
             {/* Stats Cards */}
