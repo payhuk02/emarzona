@@ -64,6 +64,8 @@ import {
   Trophy,
   Star,
   Compass,
+  DollarSign,
+  HelpCircle,
 } from 'lucide-react';
 
 export interface CategoryOption {
