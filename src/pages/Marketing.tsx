@@ -59,7 +59,7 @@ export const Marketing = () => {
 
   return (
     <MainLayout layoutType="marketing">
-      <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <div className="container mx-auto p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-5 md:space-y-6">
         {/* Header */}
         <div className="space-y-2">
           <div className="flex items-center gap-3">
@@ -78,23 +78,23 @@ export const Marketing = () => {
         </div>
 
         {/* Marketing Features Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
           {marketingFeatures.map((feature) => {
             const Icon = feature.icon;
             return (
               <NavLink key={feature.path} to={feature.path}>
                 <Card className="h-full hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer border-border/50 bg-card/50 backdrop-blur-sm">
-                  <CardHeader>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className={`p-2 rounded-lg bg-gradient-to-br ${feature.color} bg-opacity-10`}>
-                        <Icon className={`h-5 w-5 bg-gradient-to-r ${feature.color} bg-clip-text text-transparent`} />
+                  <CardHeader className="p-3 sm:p-4 md:p-6">
+                    <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3 mb-1.5 sm:mb-2">
+                      <div className={`p-1.5 sm:p-2 rounded-lg bg-gradient-to-br ${feature.color} bg-opacity-10`}>
+                        <Icon className={`h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 bg-gradient-to-r ${feature.color} bg-clip-text text-transparent`} />
                       </div>
-                      <CardTitle className="text-lg">{feature.title}</CardTitle>
+                      <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg">{feature.title}</CardTitle>
                     </div>
-                    <CardDescription>{feature.description}</CardDescription>
+                    <CardDescription className="text-[10px] sm:text-xs md:text-sm">{feature.description}</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className={`text-sm font-medium bg-gradient-to-r ${feature.color} bg-clip-text text-transparent`}>
+                  <CardContent className="p-3 sm:p-4 md:p-6">
+                    <div className={`text-[10px] sm:text-xs md:text-sm font-medium bg-gradient-to-r ${feature.color} bg-clip-text text-transparent`}>
                       Accéder →
                     </div>
                   </CardContent>
@@ -105,42 +105,42 @@ export const Marketing = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-3 sm:gap-4 md:grid-cols-3">
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground">
                 Campagnes Actives
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">-</div>
-              <p className="text-sm text-muted-foreground mt-1">
+            <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+              <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground">-</div>
+              <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-0.5 sm:mt-1">
                 Aucune donnée disponible
               </p>
             </CardContent>
           </Card>
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground">
                 Taux d'ouverture
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">-</div>
-              <p className="text-sm text-muted-foreground mt-1">
+            <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+              <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground">-</div>
+              <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-0.5 sm:mt-1">
                 Aucune donnée disponible
               </p>
             </CardContent>
           </Card>
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground">
                 Promotions Actives
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">-</div>
-              <p className="text-sm text-muted-foreground mt-1">
+            <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+              <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground">-</div>
+              <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-0.5 sm:mt-1">
                 Aucune donnée disponible
               </p>
             </CardContent>

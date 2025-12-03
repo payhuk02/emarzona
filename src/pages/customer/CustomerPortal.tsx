@@ -221,7 +221,7 @@ export default function CustomerPortal() {
             <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
               {/* Header - Desktop seulement */}
               <div ref={headerRef} className="hidden lg:block space-y-2 animate-in fade-in slide-in-from-top-4">
-                <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-2 sm:gap-3 text-gray-900 dark:text-gray-50">
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 md:gap-3 text-gray-900 dark:text-gray-50">
                   <div className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 flex items-center justify-center">
                     <User className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 text-purple-600 dark:text-purple-400" />
                   </div>
@@ -263,7 +263,7 @@ export default function CustomerPortal() {
                   </div>
                 </CardHeader>
                 <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4">
-                  <div className="text-lg xs:text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent break-words">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent break-words">
                     {(stats?.totalSpent || 0).toLocaleString('fr-FR')} XOF
                   </div>
                   <p className="text-[10px] xs:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-tight">Depuis le début</p>
@@ -280,7 +280,7 @@ export default function CustomerPortal() {
                   </div>
                 </CardHeader>
                 <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4">
-                  <div className="text-lg xs:text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     {stats?.digitalProducts || 0}
                   </div>
                   <p className="text-[10px] xs:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-tight">Achetés</p>

@@ -448,7 +448,7 @@ const MyCourses = () => {
                 className="hover:bg-accent/50 transition-colors duration-200 flex-shrink-0 touch-manipulation min-h-[44px] min-w-[44px]"
               />
               <div className="flex-1 min-w-0 overflow-hidden">
-                <h1 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate px-1" id="courses-title">
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate px-1" id="courses-title">
                   {t('courses.myCourses', 'Mes Cours')}
                 </h1>
               </div>
@@ -518,16 +518,16 @@ const MyCourses = () => {
                       <div className="p-2 sm:p-3 rounded-lg bg-white/10 backdrop-blur-sm">
                         <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
                       </div>
-                      <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold">
+                      <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold">
                         {t('courses.myCourses', 'Mes Cours')}
                       </h1>
                     </div>
-                    <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-blue-100 max-w-2xl">
+                    <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-blue-100 max-w-2xl">
                       {t('courses.subtitle', 'Suivez votre progression et continuez votre apprentissage')}
                     </p>
-                    <div className="mt-4 sm:mt-6 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-300 animate-pulse" />
-                      <span className="text-xs sm:text-sm text-blue-100">
+                    <div className="mt-2 sm:mt-3 md:mt-4 flex items-center gap-1.5 sm:gap-2">
+                      <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-yellow-300 animate-pulse" />
+                      <span className="text-[9px] sm:text-[10px] md:text-xs text-blue-100">
                         {stats.total} {stats.total > 1 ? t('courses.courses', 'cours') : t('courses.course', 'cours')} {stats.total > 0 ? t('courses.enrolled', 'inscrits') : ''}
                       </span>
                     </div>
@@ -544,45 +544,45 @@ const MyCourses = () => {
                     aria-label={t('courses.stats.ariaLabel', 'Statistiques des cours')}
                   >
                     <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 lg:p-6">
-                        <CardTitle className="text-[11px] sm:text-xs lg:text-sm font-medium">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4 lg:p-6">
+                        <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
                           {t('courses.stats.total', 'Total des cours')}
                         </CardTitle>
-                        <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-blue-600 group-hover:text-blue-700 transition-colors duration-200 flex-shrink-0" />
+                        <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 text-blue-600 group-hover:text-blue-700 transition-colors duration-200 flex-shrink-0" />
                       </CardHeader>
-                      <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
-                        <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">{stats.total}</div>
-                        <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
+                      <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 pt-0">
+                        <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold mb-0.5 sm:mb-1">{stats.total}</div>
+                        <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
                           {t('courses.stats.totalDescription', 'Cours inscrits')}
                         </p>
                       </CardContent>
                     </Card>
 
                     <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 lg:p-6">
-                        <CardTitle className="text-[11px] sm:text-xs lg:text-sm font-medium">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4 lg:p-6">
+                        <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
                           {t('courses.stats.inProgress', 'En cours')}
                         </CardTitle>
-                        <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-blue-600 group-hover:text-blue-700 transition-colors duration-200 flex-shrink-0" />
+                        <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 text-blue-600 group-hover:text-blue-700 transition-colors duration-200 flex-shrink-0" />
                       </CardHeader>
-                      <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
-                        <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">{stats.inProgress}</div>
-                        <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
+                      <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 pt-0">
+                        <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold mb-0.5 sm:mb-1">{stats.inProgress}</div>
+                        <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
                           {t('courses.stats.inProgressDescription', 'En progression')}
                         </p>
                       </CardContent>
                     </Card>
 
                     <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 lg:p-6">
-                        <CardTitle className="text-[11px] sm:text-xs lg:text-sm font-medium">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4 lg:p-6">
+                        <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
                           {t('courses.stats.completed', 'Terminés')}
                         </CardTitle>
-                        <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-green-600 group-hover:text-green-700 transition-colors duration-200 flex-shrink-0" />
+                        <Trophy className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 text-green-600 group-hover:text-green-700 transition-colors duration-200 flex-shrink-0" />
                       </CardHeader>
-                      <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
-                        <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">{stats.completed}</div>
-                        <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
+                      <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 pt-0">
+                        <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold mb-0.5 sm:mb-1">{stats.completed}</div>
+                        <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
                           {t('courses.stats.completedDescription', 'Cours terminés')}
                         </p>
                       </CardContent>
@@ -600,7 +600,7 @@ const MyCourses = () => {
                           placeholder={t('courses.search.placeholder', 'Rechercher un cours... (Cmd/Ctrl+K)')}
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="pl-10 pr-9 sm:pr-20 h-9 sm:h-10 bg-background/50 border-border/50 focus:bg-background focus:border-primary/50 transition-all duration-200"
+                          className="pl-10 pr-9 sm:pr-20 h-9 sm:h-10 bg-background/50 border-border/50 focus:bg-background focus:border-primary/50 transition-all duration-200 text-[10px] sm:text-xs md:text-sm"
                         />
                         {searchQuery ? (
                           <Button
@@ -624,8 +624,8 @@ const MyCourses = () => {
                       {/* Filtres */}
                       <div className="flex items-center gap-2 flex-wrap">
                         <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
-                          <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px] h-9 sm:h-10 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200">
-                            <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                          <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px] h-9 sm:h-10 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200 text-[10px] sm:text-xs md:text-sm">
+                            <Filter className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
                             <SelectValue placeholder={t('courses.filters.status', 'Statut')} />
                           </SelectTrigger>
                           <SelectContent>
@@ -637,8 +637,8 @@ const MyCourses = () => {
                         </Select>
 
                         <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-                          <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px] h-9 sm:h-10 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200">
-                            <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                          <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px] h-9 sm:h-10 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200 text-[10px] sm:text-xs md:text-sm">
+                            <BarChart3 className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
                             <SelectValue placeholder={t('courses.sort.placeholder', 'Trier par')} />
                           </SelectTrigger>
                           <SelectContent>
@@ -693,12 +693,12 @@ const MyCourses = () => {
                     <Card className="shadow-sm border-border/50 bg-card/30 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
                       <CardContent className="py-8 sm:py-12 text-center">
                         <GraduationCap className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground animate-pulse" />
-                        <h3 className="text-base sm:text-lg lg:text-xl font-semibold mb-2">
+                        <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold mb-1 sm:mb-2">
                           {searchQuery || statusFilter !== 'all' 
                             ? t('courses.empty.noResults', 'Aucun cours trouvé')
                             : t('courses.empty.noCourses', 'Aucun cours pour le moment')}
                         </h3>
-                        <p className="text-sm sm:text-base text-muted-foreground mb-4 max-w-md mx-auto">
+                        <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-3 sm:mb-4 max-w-md mx-auto">
                           {searchQuery || statusFilter !== 'all'
                             ? t('courses.empty.noResultsDescription', 'Essayez de modifier vos filtres de recherche')
                             : t('courses.empty.noCoursesDescription', 'Explorez notre catalogue et inscrivez-vous à votre premier cours !')}

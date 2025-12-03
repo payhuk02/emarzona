@@ -133,8 +133,8 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
   if (loading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Historique des retraits</CardTitle>
+        <CardHeader className="p-2.5 sm:p-3 md:p-4">
+          <CardTitle className="text-sm sm:text-base md:text-lg">Historique des retraits</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -152,10 +152,10 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
       <CardHeader>
         <div className="flex flex-col gap-3 sm:gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <CardTitle className="text-base sm:text-lg">
+            <CardTitle className="text-sm sm:text-base md:text-lg">
               Historique des retraits
               {filteredWithdrawals.length > 0 && (
-                <span className="ml-2 text-sm font-normal text-muted-foreground">
+                <span className="ml-2 text-[10px] sm:text-xs md:text-sm font-normal text-muted-foreground">
                   ({filteredWithdrawals.length})
                 </span>
               )}
@@ -165,7 +165,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                 setStatusFilter(value);
                 setCurrentPage(1);
               }}>
-                <SelectTrigger className="w-full sm:w-[180px] text-sm sm:text-base">
+                <SelectTrigger className="w-full sm:w-[180px] h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent position="popper" className="z-[1060]">
@@ -183,7 +183,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                     variant="outline"
                     size="sm"
                     onClick={handleExportCSV}
-                    className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
+                    className="text-[10px] sm:text-xs md:text-sm h-7 sm:h-8 px-2 sm:px-3"
                   >
                     <Download className="h-3 w-3 sm:mr-1" />
                     <span className="hidden sm:inline">CSV</span>
@@ -192,7 +192,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                     variant="outline"
                     size="sm"
                     onClick={handleExportJSON}
-                    className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
+                    className="text-[10px] sm:text-xs md:text-sm h-7 sm:h-8 px-2 sm:px-3"
                   >
                     <Download className="h-3 w-3 sm:mr-1" />
                     <span className="hidden sm:inline">JSON</span>
@@ -204,7 +204,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
           {/* Pagination controls */}
           {filteredWithdrawals.length > itemsPerPage && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 pt-2 border-t">
-              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-[10px] sm:text-xs md:text-sm text-muted-foreground">
                 <span>Lignes par page:</span>
                 <Select
                   value={itemsPerPage.toString()}
@@ -213,7 +213,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                     setCurrentPage(1);
                   }}
                 >
-                  <SelectTrigger className="w-[70px] h-7 sm:h-8 text-xs sm:text-sm">
+                  <SelectTrigger className="w-[70px] h-7 sm:h-8 text-[10px] sm:text-xs md:text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent position="popper" className="z-[1060]">
@@ -224,7 +224,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                   </SelectContent>
                 </Select>
               </div>
-              <div className="text-xs sm:text-sm text-muted-foreground">
+              <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
                 Page {currentPage} sur {totalPages} ({filteredWithdrawals.length} retrait{filteredWithdrawals.length > 1 ? 's' : ''})
               </div>
             </div>
@@ -235,8 +235,8 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
         {filteredWithdrawals.length === 0 ? (
           <div className="text-center py-8 sm:py-12 text-muted-foreground">
             <Wallet className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-20" />
-            <p className="text-sm sm:text-base">Aucun retrait</p>
-            <p className="text-xs sm:text-sm mt-2 px-4">
+            <p className="text-xs sm:text-sm md:text-base">Aucun retrait</p>
+            <p className="text-[10px] sm:text-xs md:text-sm mt-2 px-4">
               {statusFilter === 'all' 
                 ? 'Vous n\'avez pas encore effectué de retrait'
                 : `Aucun retrait avec le statut "${statusFilter}"`}
@@ -247,18 +247,18 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-xs sm:text-sm">Date</TableHead>
-                  <TableHead className="text-xs sm:text-sm">Montant</TableHead>
-                  <TableHead className="text-xs sm:text-sm hidden sm:table-cell">Méthode</TableHead>
-                  <TableHead className="text-xs sm:text-sm">Statut</TableHead>
-                  <TableHead className="text-xs sm:text-sm hidden md:table-cell">Référence</TableHead>
-                  <TableHead className="text-xs sm:text-sm">Actions</TableHead>
+                  <TableHead className="text-[10px] sm:text-xs md:text-sm">Date</TableHead>
+                  <TableHead className="text-[10px] sm:text-xs md:text-sm">Montant</TableHead>
+                  <TableHead className="text-[10px] sm:text-xs md:text-sm hidden sm:table-cell">Méthode</TableHead>
+                  <TableHead className="text-[10px] sm:text-xs md:text-sm">Statut</TableHead>
+                  <TableHead className="text-[10px] sm:text-xs md:text-sm hidden md:table-cell">Référence</TableHead>
+                  <TableHead className="text-[10px] sm:text-xs md:text-sm">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedWithdrawals.map((withdrawal) => (
                   <TableRow key={withdrawal.id}>
-                    <TableCell className="text-xs sm:text-sm whitespace-nowrap">
+                    <TableCell className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap">
                       <span className="sm:hidden">
                         {format(new Date(withdrawal.created_at), 'dd/MM/yy', { locale: fr })}
                       </span>
@@ -266,16 +266,16 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                         {format(new Date(withdrawal.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}
                       </span>
                     </TableCell>
-                    <TableCell className="font-semibold text-xs sm:text-sm">
+                    <TableCell className="font-semibold text-[10px] sm:text-xs md:text-sm">
                       {formatCurrency(withdrawal.amount)} {withdrawal.currency}
                     </TableCell>
-                    <TableCell className="text-xs sm:text-sm hidden sm:table-cell">
+                    <TableCell className="text-[10px] sm:text-xs md:text-sm hidden sm:table-cell">
                       {getPaymentMethodLabel(withdrawal.payment_method)}
                     </TableCell>
                     <TableCell>
                       {getStatusBadge(withdrawal.status)}
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground hidden md:table-cell">
+                    <TableCell className="text-[10px] sm:text-xs text-muted-foreground hidden md:table-cell">
                       {withdrawal.transaction_reference || '-'}
                     </TableCell>
                     <TableCell>
@@ -284,7 +284,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                           size="sm"
                           variant="ghost"
                           onClick={() => setSelectedWithdrawalId(withdrawal.id)}
-                          className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
+                          className="text-[10px] sm:text-xs md:text-sm h-7 sm:h-8 px-2 sm:px-3"
                           title="Voir l'historique"
                         >
                           <History className="h-3 w-3 sm:mr-1" />
@@ -295,7 +295,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                             size="sm"
                             variant="outline"
                             onClick={() => onCancel(withdrawal.id)}
-                            className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
+                            className="text-[10px] sm:text-xs md:text-sm h-7 sm:h-8 px-2 sm:px-3"
                           >
                             <span className="hidden sm:inline">Annuler</span>
                             <span className="sm:hidden">✕</span>
@@ -303,7 +303,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                         )}
                       </div>
                       {withdrawal.rejection_reason && (
-                        <div className="text-xs text-destructive mt-1 max-w-[150px] sm:max-w-none truncate sm:whitespace-normal">
+                        <div className="text-[10px] sm:text-xs text-destructive mt-1 max-w-[150px] sm:max-w-none truncate sm:whitespace-normal">
                           {withdrawal.rejection_reason}
                         </div>
                       )}

@@ -381,7 +381,7 @@ export default function MyOrders() {
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 flex items-center justify-center">
                     <ShoppingBag className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                     Mes Commandes
                   </h1>
                 </div>
@@ -403,19 +403,19 @@ export default function MyOrders() {
                       className="border border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
                       style={{ animationDelay: `${index * 70}ms` }}
                     >
-                      <CardHeader className="pb-2 sm:pb-3 p-2.5 sm:p-3 lg:p-4">
-                        <CardTitle className="text-[10px] xs:text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                          <div className={`h-6 w-6 rounded-lg bg-gradient-to-br ${stat.iconGradient} border ${stat.iconBorder} flex items-center justify-center`}>
-                            <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${stat.iconColor}`} />
+                      <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
+                        <CardTitle className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5">
+                          <div className={`h-5 w-5 sm:h-6 sm:w-6 rounded-lg bg-gradient-to-br ${stat.iconGradient} border ${stat.iconBorder} flex items-center justify-center`}>
+                            <Icon className={`h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 ${stat.iconColor}`} />
                           </div>
                           {stat.label}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="p-2.5 sm:p-3 lg:p-4 pt-0 space-y-1 sm:space-y-1.5">
-                        <div className={`text-base sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
+                      <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0 space-y-1 sm:space-y-1.5">
+                        <div className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
                           {stat.value}
                         </div>
-                        <p className="text-[10px] xs:text-xs sm:text-sm text-muted-foreground">
+                        <p className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm text-muted-foreground">
                           {stat.description}
                         </p>
                       </CardContent>

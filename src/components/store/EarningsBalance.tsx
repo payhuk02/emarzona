@@ -28,18 +28,18 @@ export const EarningsBalance = ({ earnings, loading, onWithdrawClick }: Earnings
       {/* Solde disponible */}
       <Card className="sm:col-span-2 border-2 border-primary">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+          <CardTitle className="text-[9px] sm:text-[10px] md:text-xs font-medium text-muted-foreground">
             Solde disponible
           </CardTitle>
-          <Wallet className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+          <Wallet className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary flex-shrink-0" />
         </CardHeader>
-        <CardContent>
-          <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary mb-3 sm:mb-4">
+        <CardContent className="p-2.5 sm:p-3 md:p-4">
+          <div className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-primary mb-2 sm:mb-3 md:mb-4">
             {loading ? '...' : formatCurrency(availableBalance)}
           </div>
           <Button 
             size="sm" 
-            className="w-full text-xs sm:text-sm" 
+            className="w-full h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm" 
             onClick={onWithdrawClick}
             disabled={!canWithdraw || loading}
           >
@@ -53,16 +53,16 @@ export const EarningsBalance = ({ earnings, loading, onWithdrawClick }: Earnings
       {/* Revenus totaux */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+          <CardTitle className="text-[9px] sm:text-[10px] md:text-xs font-medium text-muted-foreground">
             Revenus totaux
           </CardTitle>
-          <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-600 flex-shrink-0" />
+          <DollarSign className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-600 flex-shrink-0" />
         </CardHeader>
-        <CardContent>
-          <div className="text-lg sm:text-xl md:text-2xl font-bold text-emerald-600">
+        <CardContent className="p-2.5 sm:p-3 md:p-4">
+          <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-emerald-600">
             {loading ? '...' : formatCurrency(earnings?.total_revenue || 0)}
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">
             Depuis le début
           </p>
         </CardContent>
@@ -71,16 +71,16 @@ export const EarningsBalance = ({ earnings, loading, onWithdrawClick }: Earnings
       {/* Total retiré */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+          <CardTitle className="text-[9px] sm:text-[10px] md:text-xs font-medium text-muted-foreground">
             Total retiré
           </CardTitle>
-          <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600 flex-shrink-0" />
+          <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-orange-600 flex-shrink-0" />
         </CardHeader>
-        <CardContent>
-          <div className="text-lg sm:text-xl md:text-2xl font-bold text-orange-600">
+        <CardContent className="p-2.5 sm:p-3 md:p-4">
+          <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-orange-600">
             {loading ? '...' : formatCurrency(earnings?.total_withdrawn || 0)}
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">
             Montant retiré
           </p>
         </CardContent>
@@ -88,12 +88,12 @@ export const EarningsBalance = ({ earnings, loading, onWithdrawClick }: Earnings
 
       {/* Progression vers le retrait minimum */}
       <Card className="sm:col-span-2 md:col-span-4">
-        <CardHeader>
-          <CardTitle className="text-xs sm:text-sm">Progression vers le retrait minimum</CardTitle>
+        <CardHeader className="p-2.5 sm:p-3 md:p-4">
+          <CardTitle className="text-[9px] sm:text-[10px] md:text-xs">Progression vers le retrait minimum</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-2.5 sm:p-3 md:p-4">
           <div className="space-y-2 sm:space-y-3">
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0 text-xs sm:text-sm">
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0 text-[9px] sm:text-[10px] md:text-xs">
               <span className="text-muted-foreground">Minimum : {formatCurrency(MIN_WITHDRAWAL)}</span>
               <span className="font-semibold">
                 {loading ? '...' : `${formatCurrency(availableBalance)} / ${formatCurrency(MIN_WITHDRAWAL)}`}

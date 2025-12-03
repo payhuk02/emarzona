@@ -369,7 +369,7 @@ const Landing = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5 md:gap-6 lg:gap-8 max-w-7xl mx-auto">
             {/* Digital Products */}
             <Card className="bg-card border-border/50 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group backdrop-blur-sm">
-              <CardContent className="p-4 sm:p-5 md:p-6 text-center">
+              <CardContent className="p-4 sm:p-5 md:p-6 text-left">
                 <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl gradient-primary flex items-center justify-center mb-3 sm:mb-4 mx-auto text-primary-foreground group-hover:shadow-glow group-hover:scale-110 transition-all duration-300">
                   <FileText className="h-6 w-6 sm:h-7 sm:w-7" />
                 </div>
@@ -396,7 +396,7 @@ const Landing = () => {
 
             {/* Physical Products */}
             <Card className="bg-card border-border/50 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group backdrop-blur-sm">
-              <CardContent className="p-4 sm:p-5 md:p-6 text-center">
+              <CardContent className="p-4 sm:p-5 md:p-6 text-left">
                 <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl gradient-accent flex items-center justify-center mb-3 sm:mb-4 mx-auto text-accent-foreground group-hover:shadow-glow group-hover:scale-110 transition-all duration-300">
                   <Truck className="h-6 w-6 sm:h-7 sm:w-7" />
                 </div>
@@ -423,7 +423,7 @@ const Landing = () => {
 
             {/* Services */}
             <Card className="bg-card border-border/50 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group backdrop-blur-sm">
-              <CardContent className="p-4 sm:p-5 md:p-6 text-center">
+              <CardContent className="p-4 sm:p-5 md:p-6 text-left">
                 <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-purple-500/20 flex items-center justify-center mb-3 sm:mb-4 mx-auto text-purple-600 group-hover:shadow-glow group-hover:scale-110 transition-all duration-300">
                   <Briefcase className="h-6 w-6 sm:h-7 sm:w-7" />
                 </div>
@@ -450,7 +450,7 @@ const Landing = () => {
 
             {/* Courses */}
             <Card className="bg-card border-border/50 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group backdrop-blur-sm">
-              <CardContent className="p-4 sm:p-5 md:p-6 text-center">
+              <CardContent className="p-4 sm:p-5 md:p-6 text-left">
                 <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-orange-500/20 flex items-center justify-center mb-3 sm:mb-4 mx-auto text-orange-600 group-hover:shadow-glow group-hover:scale-110 transition-all duration-300">
                   <GraduationCap className="h-6 w-6 sm:h-7 sm:w-7" />
                 </div>
@@ -477,7 +477,7 @@ const Landing = () => {
 
             {/* Artist Works */}
             <Card className="bg-card border-border/50 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group backdrop-blur-sm">
-              <CardContent className="p-4 sm:p-5 md:p-6 text-center">
+              <CardContent className="p-4 sm:p-5 md:p-6 text-left">
                 <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-pink-500/20 flex items-center justify-center mb-3 sm:mb-4 mx-auto text-pink-600 group-hover:shadow-glow group-hover:scale-110 transition-all duration-300">
                   <Palette className="h-6 w-6 sm:h-7 sm:w-7" />
                 </div>
@@ -1300,7 +1300,7 @@ const Landing = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-card py-12 md:py-16" role="contentinfo">
+      <footer className="border-t border-gray-800 bg-black py-12 md:py-16" role="contentinfo">
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
           <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-12">
             <div className="col-span-1 xs:col-span-2 md:col-span-1">
@@ -1319,40 +1319,40 @@ const Landing = () => {
                     <span className="text-xs font-bold text-primary-foreground">E</span>
                   </div>
                 )}
-                <span className="text-lg md:text-xl font-bold text-foreground">Emarzona</span>
+                <span className="text-lg md:text-xl font-bold text-white">Emarzona</span>
               </div>
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-gray-400 text-sm leading-relaxed">
                 La plateforme e-commerce la plus complète pour vendre produits digitaux, physiques, services et cours en ligne. Créez votre boutique ou vendez sur notre Marketplace pour toucher plus de clients.
               </p>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4 text-foreground text-sm md:text-base">Produit</h4>
+              <h4 className="font-semibold mb-4 text-white text-sm md:text-base">Produit</h4>
               <ul className="space-y-2.5 text-sm sm:text-base">
-                <li><Link to="/marketplace" className="text-muted-foreground hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Marketplace</Link></li>
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Fonctionnalités</Link></li>
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Tarifs</Link></li>
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Démo</Link></li>
+                <li><Link to="/marketplace" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Marketplace</Link></li>
+                <li><Link to="/auth" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Fonctionnalités</Link></li>
+                <li><Link to="/auth" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Tarifs</Link></li>
+                <li><Link to="/auth" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Démo</Link></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4 text-foreground text-sm md:text-base">Support</h4>
+              <h4 className="font-semibold mb-4 text-white text-sm md:text-base">Support</h4>
               <ul className="space-y-2.5 text-sm sm:text-base">
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Documentation</Link></li>
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Guides</Link></li>
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Contact</Link></li>
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">FAQ</Link></li>
+                <li><Link to="/auth" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Documentation</Link></li>
+                <li><Link to="/auth" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Guides</Link></li>
+                <li><Link to="/auth" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Contact</Link></li>
+                <li><Link to="/auth" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">FAQ</Link></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4 text-foreground text-sm md:text-base">Entreprise</h4>
+              <h4 className="font-semibold mb-4 text-white text-sm md:text-base">Entreprise</h4>
               <ul className="space-y-2.5 text-sm sm:text-base">
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">À propos</Link></li>
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Blog</Link></li>
-                <li><Link to="/auth" className="text-muted-foreground hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Carrières</Link></li>
-                <li><Link to="/community" className="text-muted-foreground hover:text-primary hover:translate-x-1 block transition-smooth flex items-center gap-1 min-h-[44px] touch-manipulation">
+                <li><Link to="/auth" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">À propos</Link></li>
+                <li><Link to="/auth" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Blog</Link></li>
+                <li><Link to="/auth" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation">Carrières</Link></li>
+                <li><Link to="/community" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth flex items-center gap-1 min-h-[44px] touch-manipulation">
                   <Users className="h-3 w-3 sm:h-4 sm:w-4" />
                   Communauté
                 </Link></li>
@@ -1360,8 +1360,8 @@ const Landing = () => {
             </div>
           </div>
           
-          <div className="border-t pt-8 text-center">
-            <p className="text-muted-foreground text-xs md:text-sm">
+          <div className="border-t border-gray-800 pt-8 text-center">
+            <p className="text-gray-400 text-xs md:text-sm">
               © {new Date().getFullYear()} Emarzona. Tous droits réservés.
             </p>
           </div>

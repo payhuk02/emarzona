@@ -109,9 +109,9 @@ const AdminProducts = () => {
         {/* Header avec animation - Style Inventory */}
         <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700" role="banner">
           <div>
-            <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2" id="admin-products-title">
+            <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2" id="admin-products-title">
               <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                <Package className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 text-purple-500 dark:text-purple-400" aria-hidden="true" />
               </div>
               <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Gestion des produits
@@ -124,20 +124,20 @@ const AdminProducts = () => {
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Liste des produits</CardTitle>
-            <CardDescription>Gérer tous les produits de la plateforme</CardDescription>
-            <div className="relative mt-4">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <CardHeader className="p-3 sm:p-4 md:p-6">
+            <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg">Liste des produits</CardTitle>
+            <CardDescription className="text-[10px] sm:text-xs md:text-sm">Gérer tous les produits de la plateforme</CardDescription>
+            <div className="relative mt-3 sm:mt-4">
+              <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher par nom ou boutique..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 min-h-[44px]"
+                className="pl-8 sm:pl-10 min-h-[44px] text-xs sm:text-sm"
               />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
             <div ref={tableRef} role="region" aria-label="Tableau des produits">
               <Table>
               <TableHeader>

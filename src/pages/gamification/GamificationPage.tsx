@@ -32,8 +32,8 @@ function MobileHeader() {
         
         {/* Titre avec Icône */}
         <div className="flex-1 min-w-0 flex items-center gap-2">
-          <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0" aria-hidden="true" />
-          <h1 className="text-sm sm:text-base font-bold truncate text-gray-900 dark:text-gray-50">
+          <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" aria-hidden="true" />
+          <h1 className="text-xs sm:text-sm md:text-base font-bold truncate text-gray-900 dark:text-gray-50">
             Gamification
           </h1>
         </div>
@@ -65,13 +65,13 @@ export default function GamificationPage() {
               >
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 flex items-center justify-center">
-                    <Trophy className="h-6 w-6 text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                    <Trophy className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-blue-600 dark:text-blue-400" aria-hidden="true" />
                   </div>
-                  <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
                     Gamification
                   </h1>
                 </div>
-                <p className="text-sm lg:text-base text-muted-foreground">
+                <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground">
                   Suivez vos points, badges, achievements et votre classement
                 </p>
               </div>
@@ -95,15 +95,15 @@ export default function GamificationPage() {
                         </svg>
                       </div>
                       <div className="flex-1">
-                        <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                        <h3 className="mb-2 text-sm sm:text-base md:text-lg font-semibold text-gray-900 dark:text-white">
                           Erreur de chargement
                         </h3>
-                        <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                        <p className="mb-4 text-[10px] sm:text-xs md:text-sm text-gray-600 dark:text-gray-400">
                           Une erreur s'est produite lors du chargement de la page de gamification.
                         </p>
                         <button
                           onClick={() => navigate(0)}
-                          className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                          className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs md:text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                         >
                           <svg
                             className="h-4 w-4"

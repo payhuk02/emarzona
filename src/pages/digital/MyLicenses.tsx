@@ -129,9 +129,9 @@ export const MyLicenses = () => {
               <div className="flex items-center gap-2 sm:gap-3">
                 <SidebarTrigger className="mr-1 sm:mr-2" />
                 <div>
-                  <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                      <Shield className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                  <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                    <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                      <Shield className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-7 lg:w-7 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                     </div>
                     <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                       Mes Licenses
@@ -184,21 +184,21 @@ export const MyLicenses = () => {
                     className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
-                      <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
-                        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
+                      <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                        <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
                         {stat.label}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-3 sm:p-4 pt-0">
-                      <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                    <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                      <div className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                         {isLoading ? (
-                          <Loader2 className="h-6 w-6 animate-spin" />
+                          <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
                         ) : (
                           stat.value
                         )}
                       </div>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+                      <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">
                         {stat.subtitle}
                       </p>
                     </CardContent>
@@ -249,15 +249,15 @@ export const MyLicenses = () => {
             <div ref={licensesRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               {filteredLicenses.length === 0 && !isLoading ? (
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <CardContent className="py-12 sm:py-16 lg:py-20 text-center">
+                  <CardContent className="py-8 sm:py-12 md:py-16 lg:py-20 text-center">
                     <div className="max-w-md mx-auto">
-                      <div className="p-4 rounded-full bg-muted/50 w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 flex items-center justify-center">
-                        <Shield className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
+                      <div className="p-3 sm:p-4 rounded-full bg-muted/50 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-3 sm:mb-4 md:mb-6 flex items-center justify-center">
+                        <Shield className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-muted-foreground" />
                       </div>
-                      <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 sm:mb-3">
+                      <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground mb-1.5 sm:mb-2 md:mb-3">
                         Aucune license
                       </h3>
-                      <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
+                      <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-4 sm:mb-6 md:mb-8">
                         {searchInput.trim() 
                           ? 'Aucune license ne correspond à votre recherche.'
                           : 'Vos licenses de produits digitaux apparaîtront ici'}
@@ -341,8 +341,8 @@ const LicenseManagementDialog = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Gérer les activations</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xs sm:text-sm md:text-base lg:text-lg">Gérer les activations</DialogTitle>
+          <DialogDescription className="text-[10px] sm:text-xs md:text-sm">
             Activations de cette license sur vos appareils
           </DialogDescription>
         </DialogHeader>
@@ -374,16 +374,16 @@ const LicenseManagementDialog = ({
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium truncate">
+                        <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                          <h4 className="font-medium truncate text-xs sm:text-sm md:text-base">
                             {activation.device_name || 'Appareil sans nom'}
                           </h4>
-                          <Badge variant={activation.is_active ? 'default' : 'secondary'}>
+                          <Badge variant={activation.is_active ? 'default' : 'secondary'} className="text-[9px] sm:text-[10px] md:text-xs">
                             {activation.is_active ? 'Actif' : 'Inactif'}
                           </Badge>
                         </div>
                         
-                        <div className="space-y-1 text-sm text-muted-foreground">
+                        <div className="space-y-0.5 sm:space-y-1 text-[10px] sm:text-xs md:text-sm text-muted-foreground">
                           {activation.os_name && (
                             <p>{activation.os_name} {activation.os_version}</p>
                           )}

@@ -185,11 +185,6 @@ const menuSections = [
         icon: Package,
       },
       {
-        title: "Mes Cours",
-        url: "/dashboard/my-courses",
-        icon: GraduationCap,
-      },
-      {
         title: "Créer un Cours",
         url: "/dashboard/courses/new",
         icon: GraduationCap,
@@ -913,17 +908,17 @@ export function AppSidebar() {
   };
 
   return (
-    <div className="[&_[data-sidebar=sidebar]]:!bg-gradient-to-br [&_[data-sidebar=sidebar]]:!from-slate-900 [&_[data-sidebar=sidebar]]:!via-blue-950 [&_[data-sidebar=sidebar]]:!to-black">
+    <div className="[&_[data-sidebar=sidebar]]:!bg-gradient-to-br [&_[data-sidebar=sidebar]]:!from-blue-700 [&_[data-sidebar=sidebar]]:!via-blue-800 [&_[data-sidebar=sidebar]]:!to-blue-900">
       <Sidebar 
         collapsible="icon" 
-        className="border-r transition-all duration-300"
+        className="border-r border-blue-600/30 transition-all duration-300"
         style={{
           '--sidebar-background': 'transparent',
         } as React.CSSProperties}
       >
         <SidebarContent>
         {/* Logo */}
-        <div className="p-3 sm:p-4 md:p-5 border-b border-blue-800/30">
+        <div className="p-3 sm:p-4 md:p-5 border-b border-blue-600/30">
           <Link 
             to="/dashboard" 
             className="flex items-center gap-2"
@@ -958,10 +953,10 @@ export function AppSidebar() {
         {!isOnAdminPage && menuSections.map((section) => (
           <SidebarGroup key={section.label}>
             <SidebarGroupLabel 
-              className="!text-blue-200 font-semibold [&_span]:!text-blue-200"
+              className="!text-blue-100 font-semibold [&_span]:!text-blue-100"
               aria-label={`Section ${section.label}`}
             >
-              {!isCollapsed && <span className="!text-blue-200">{section.label}</span>}
+              {!isCollapsed && <span className="!text-blue-100">{section.label}</span>}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -981,8 +976,8 @@ export function AppSidebar() {
                           asChild
                           className={`transition-all duration-300 group relative flex items-center ${
                             isDashboardActive
-                              ? "bg-blue-600/30 !text-blue-200 font-semibold border-l-2 border-blue-400 [&_*]:!text-blue-200 [&_svg]:!text-blue-200 [&_span]:!text-blue-200"
-                              : "!text-slate-300 hover:bg-blue-900/30 hover:!text-white hover:translate-x-1 [&_svg]:!text-slate-300 [&_span]:!text-slate-300"
+                              ? "bg-blue-600/40 !text-white font-semibold border-l-2 border-blue-300 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white"
+                              : "!text-blue-100 hover:bg-blue-600/40 hover:!text-white hover:translate-x-1 [&_svg]:!text-blue-100 [&_span]:!text-blue-100"
                           }`}
                         >
                           <NavLink
@@ -1015,10 +1010,10 @@ export function AppSidebar() {
                                     description: `Vous consultez maintenant les données de "${store.name}"`,
                                   });
                                 }}
-                                className={`w-full justify-start !text-slate-300 transition-all duration-200 [&_svg]:!text-slate-300 [&_span]:!text-slate-300 ${
+                                className={`w-full justify-start !text-blue-100 transition-all duration-200 [&_svg]:!text-blue-100 [&_span]:!text-blue-100 ${
                                   selectedStoreId === store.id
-                                    ? "bg-blue-600/30 !text-blue-200 font-semibold [&_*]:!text-blue-200 [&_svg]:!text-blue-200 [&_span]:!text-blue-200"
-                                    : "hover:bg-blue-900/30 hover:!text-white hover:translate-x-1 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
+                                    ? "bg-blue-600/40 !text-white font-semibold [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white"
+                                    : "hover:bg-blue-600/40 hover:!text-white hover:translate-x-1 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
                                 }`}
                               >
                                 {selectedStoreId === store.id && (
@@ -1032,7 +1027,7 @@ export function AppSidebar() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => navigate("/dashboard/store")}
-                                className="w-full justify-start !text-slate-300 hover:bg-blue-900/30 hover:!text-white hover:translate-x-1 transition-all duration-200 [&_svg]:!text-slate-300 [&_span]:!text-slate-300 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
+                                className="w-full justify-start !text-blue-100 hover:bg-blue-600/40 hover:!text-white hover:translate-x-1 transition-all duration-200 [&_svg]:!text-blue-100 [&_span]:!text-blue-100 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
                               >
                                 <Plus className="h-3 w-3 mr-2" />
                                 <span>Créer une boutique</span>
@@ -1054,8 +1049,8 @@ export function AppSidebar() {
                           className={({ isActive }) =>
                             `transition-all duration-300 group relative flex items-center ${
                               isActive
-                                ? "bg-blue-600/30 !text-blue-200 font-semibold border-l-2 border-blue-400 [&_*]:!text-blue-200 [&_svg]:!text-blue-200 [&_span]:!text-blue-200"
-                                : "!text-slate-300 hover:bg-blue-900/30 hover:!text-white hover:translate-x-1 [&_svg]:!text-slate-300 [&_span]:!text-slate-300"
+                                ? "bg-blue-600/40 !text-white font-semibold border-l-2 border-blue-300 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white"
+                                : "!text-blue-100 hover:bg-blue-600/40 hover:!text-white hover:translate-x-1 [&_svg]:!text-blue-100 [&_span]:!text-blue-100"
                             }`
                           }
                         >
@@ -1087,7 +1082,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink
                       to="/dashboard"
-                      className="!text-slate-300 hover:bg-blue-900/30 hover:!text-white hover:translate-x-1 transition-all duration-300 [&_svg]:!text-slate-300 [&_span]:!text-slate-300 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
+                      className="!text-blue-100 hover:bg-blue-600/40 hover:!text-white hover:translate-x-1 transition-all duration-300 [&_svg]:!text-blue-100 [&_span]:!text-blue-100 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
                     >
                       <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
                       {!isCollapsed && <span>← Retour Dashboard</span>}
@@ -1103,8 +1098,8 @@ export function AppSidebar() {
         {/* Admin Menu Items - Organisé par sections */}
         {isAdmin && adminMenuSections.map((section) => (
           <SidebarGroup key={section.label}>
-            <SidebarGroupLabel className="!text-blue-200 font-semibold [&_span]:!text-blue-200">
-              {!isCollapsed && <span className="!text-blue-200">{section.label}</span>}
+            <SidebarGroupLabel className="!text-blue-100 font-semibold [&_span]:!text-blue-100">
+              {!isCollapsed && <span className="!text-blue-100">{section.label}</span>}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -1122,8 +1117,8 @@ export function AppSidebar() {
                           className={({ isActive }) =>
                             `transition-all duration-300 ${
                               isActive
-                                ? "bg-blue-600/30 !text-blue-200 font-semibold border-l-2 border-blue-400 [&_*]:!text-blue-200 [&_svg]:!text-blue-200 [&_span]:!text-blue-200"
-                                : "!text-slate-300 hover:bg-blue-900/30 hover:!text-white hover:translate-x-1 [&_svg]:!text-slate-300 [&_span]:!text-slate-300"
+                                ? "bg-blue-600/40 !text-white font-semibold border-l-2 border-blue-300 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white"
+                                : "!text-blue-100 hover:bg-blue-600/40 hover:!text-white hover:translate-x-1 [&_svg]:!text-blue-100 [&_span]:!text-blue-100"
                             }`
                           }
                         >
@@ -1148,7 +1143,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter className="border-t border-blue-800/30 p-4 space-y-2">
+      <SidebarFooter className="border-t border-blue-600/30 p-4 space-y-2">
         {!isCollapsed && (
           <LanguageSwitcher 
             variant="default" 
@@ -1159,7 +1154,7 @@ export function AppSidebar() {
         )}
         <Button
           variant="ghost"
-          className="w-full justify-start !text-slate-300 hover:bg-blue-900/30 hover:!text-white transition-all duration-200 [&_svg]:!text-slate-300 [&_span]:!text-slate-300 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
+          className="w-full justify-start !text-blue-100 hover:bg-blue-600/40 hover:!text-white transition-all duration-200 [&_svg]:!text-blue-100 [&_span]:!text-blue-100 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
           onClick={handleLogout}
           aria-label={isCollapsed ? "Déconnexion" : undefined}
         >

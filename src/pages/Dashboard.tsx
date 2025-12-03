@@ -270,20 +270,20 @@ const Dashboard = () => {
                       className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
                       style={{ animationDelay: `${index * 100}ms` }}
                     >
-                      <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
-                        <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
-                          <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
+                        <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                          <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
                           {stat.label}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="p-3 sm:p-4 pt-0">
-                        <div className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1 break-words`}>
+                      <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                        <div className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1 break-words`}>
                           {stat.value}
                         </div>
-                        <p className="text-[11px] sm:text-xs text-muted-foreground mb-2 leading-tight">
+                        <p className="text-[10px] sm:text-[11px] md:text-xs text-muted-foreground mb-1.5 sm:mb-2 leading-tight">
                           {stat.description}
                         </p>
-                        <Badge variant="default" className="text-[10px] sm:text-xs px-2 py-0.5">
+                        <Badge variant="default" className="text-[9px] sm:text-[10px] md:text-xs px-1.5 sm:px-2 py-0.5">
                           {stat.trend}
                         </Badge>
                       </CardContent>
@@ -300,15 +300,15 @@ const Dashboard = () => {
               role="region" 
               aria-labelledby="quick-actions-title"
             >
-              <CardHeader className="pb-3 p-4 sm:p-6">
-                <CardTitle id="quick-actions-title" className="flex items-center gap-2 text-base sm:text-lg">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20">
-                    <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+              <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
+                <CardTitle id="quick-actions-title" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20">
+                    <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                   </div>
                   {t('dashboard.quickActions.title')}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4 sm:p-6 pt-0">
+              <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
                 <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" role="list" aria-label={t('dashboard.quickActions.ariaLabel', 'Actions rapides disponibles')}>
                   {[
                     {
@@ -350,17 +350,17 @@ const Dashboard = () => {
                           }
                         }}
                       >
-                        <CardContent className="p-3 sm:p-4 md:p-6 h-full flex flex-col justify-center">
-                          <div className="flex items-start gap-2 sm:gap-3">
-                            <div className={`p-2.5 sm:p-3 rounded-xl bg-gradient-to-br ${action.color === 'from-green-600 to-emerald-600' ? 'from-green-500/10 to-emerald-500/10' : action.color === 'from-blue-600 to-cyan-600' ? 'from-blue-500/10 to-cyan-500/10' : 'from-purple-500/10 to-pink-500/10'} group-hover:opacity-80 transition-colors shrink-0`}>
+                        <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 h-full flex flex-col justify-center">
+                          <div className="flex items-start gap-1.5 sm:gap-2 md:gap-3">
+                            <div className={`p-2 sm:p-2.5 md:p-3 rounded-xl bg-gradient-to-br ${action.color === 'from-green-600 to-emerald-600' ? 'from-green-500/10 to-emerald-500/10' : action.color === 'from-blue-600 to-cyan-600' ? 'from-blue-500/10 to-cyan-500/10' : 'from-purple-500/10 to-pink-500/10'} group-hover:opacity-80 transition-colors shrink-0`}>
                               <Icon 
-                                className={`h-5 w-5 sm:h-6 sm:w-6 ${action.color === 'from-green-600 to-emerald-600' ? 'text-green-500' : action.color === 'from-blue-600 to-cyan-600' ? 'text-blue-500' : 'text-purple-500'}`} 
+                                className={`h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 ${action.color === 'from-green-600 to-emerald-600' ? 'text-green-500' : action.color === 'from-blue-600 to-cyan-600' ? 'text-blue-500' : 'text-purple-500'}`} 
                                 aria-hidden="true" 
                               />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-sm sm:text-base mb-1 break-words">{action.title}</h3>
-                              <p className="text-[11px] sm:text-xs md:text-sm text-muted-foreground line-clamp-2 leading-relaxed">{action.description}</p>
+                              <h3 className="font-semibold text-xs sm:text-sm md:text-base mb-0.5 sm:mb-1 break-words">{action.title}</h3>
+                              <p className="text-[10px] sm:text-[11px] md:text-xs lg:text-sm text-muted-foreground line-clamp-2 leading-relaxed">{action.description}</p>
                             </div>
                           </div>
                         </CardContent>
@@ -374,32 +374,32 @@ const Dashboard = () => {
             {/* Bottom Row - Responsive & Animated */}
             <div 
               ref={bottomRef} 
-              className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-700" 
+              className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-700" 
               role="region" 
               aria-label={t('dashboard.bottomSection.ariaLabel', 'Notifications et activité récente')}
             >
               {/* Notifications */}
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300" role="region" aria-labelledby="notifications-title">
-                <CardHeader className="pb-3 p-4 sm:p-6">
-                  <CardTitle id="notifications-title" className="flex items-center gap-2 text-base sm:text-lg">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm border border-blue-500/20">
-                      <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 dark:text-blue-400" aria-hidden="true" />
+                <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
+                  <CardTitle id="notifications-title" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg">
+                    <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm border border-blue-500/20">
+                      <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-blue-500 dark:text-blue-400" aria-hidden="true" />
                     </div>
                     {t('dashboard.notifications.title')}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-4 sm:p-6 pt-0">
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
                   <div className="space-y-3" role="list" aria-label={t('dashboard.notifications.list.ariaLabel', 'Liste des notifications')}>
                     {notifications.length === 0 ? (
-                      <div className="text-center py-6">
-                        <Bell className="h-8 w-8 mx-auto mb-2 text-muted-foreground opacity-50" />
-                        <p className="text-xs sm:text-sm text-muted-foreground">Aucune notification</p>
+                      <div className="text-center py-4 sm:py-6">
+                        <Bell className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-1.5 sm:mb-2 text-muted-foreground opacity-50" />
+                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Aucune notification</p>
                       </div>
                     ) : (
                       notifications.map((notification) => (
                         <div 
                           key={notification.id} 
-                          className="flex items-start gap-3 p-3 sm:p-4 rounded-lg hover:bg-muted/50 transition-colors touch-manipulation min-h-[60px] cursor-pointer" 
+                          className="flex items-start gap-2 sm:gap-2.5 md:gap-3 p-2 sm:p-3 md:p-4 rounded-lg hover:bg-muted/50 transition-colors touch-manipulation min-h-[50px] sm:min-h-[60px] cursor-pointer" 
                           role="listitem"
                           tabIndex={0}
                           onKeyDown={(e) => {
@@ -409,15 +409,15 @@ const Dashboard = () => {
                           }}
                         >
                           <div className="flex-shrink-0 mt-0.5">
-                            <div className="p-1.5 sm:p-2 rounded-full bg-blue-500/10">
-                              <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-500" aria-hidden="true" />
+                            <div className="p-1 sm:p-1.5 sm:p-2 rounded-full bg-blue-500/10">
+                              <Bell className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-blue-500" aria-hidden="true" />
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-xs sm:text-sm font-medium mb-1">{notification.title}</h4>
-                            <p className="text-[11px] sm:text-xs text-muted-foreground mb-2 line-clamp-2 leading-relaxed">{notification.message}</p>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs text-muted-foreground">
+                            <h4 className="text-[10px] sm:text-xs md:text-sm font-medium mb-0.5 sm:mb-1">{notification.title}</h4>
+                            <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mb-1.5 sm:mb-2 line-clamp-2 leading-relaxed">{notification.message}</p>
+                            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                              <span className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
                                 {new Date(notification.timestamp).toLocaleString('fr-FR', {
                                   day: '2-digit',
                                   month: '2-digit',
@@ -427,7 +427,7 @@ const Dashboard = () => {
                                 })}
                               </span>
                               {!notification.read && (
-                                <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                                <Badge variant="secondary" className="text-[9px] sm:text-[10px] md:text-xs px-1.5 sm:px-2 py-0.5">
                                   {t('dashboard.notificationsBadge.new')}
                                 </Badge>
                               )}
@@ -442,26 +442,26 @@ const Dashboard = () => {
 
               {/* Recent Activity */}
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-                <CardHeader className="pb-3 p-4 sm:p-6">
-                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5 backdrop-blur-sm border border-green-500/20">
-                      <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 dark:text-green-400" />
+                <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg">
+                    <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5 backdrop-blur-sm border border-green-500/20">
+                      <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-green-500 dark:text-green-400" />
                     </div>
                     {t('dashboard.recentActivity.title')}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-4 sm:p-6 pt-0">
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
                   <div className="space-y-3">
                     {stats.recentActivity.length === 0 ? (
-                      <div className="text-center py-6">
-                        <Activity className="h-8 w-8 mx-auto mb-2 text-muted-foreground opacity-50" />
-                        <p className="text-xs sm:text-sm text-muted-foreground">Aucune activité récente</p>
+                      <div className="text-center py-4 sm:py-6">
+                        <Activity className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-1.5 sm:mb-2 text-muted-foreground opacity-50" />
+                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Aucune activité récente</p>
                       </div>
                     ) : (
                       stats.recentActivity.map((activity) => (
                         <div 
                           key={activity.id} 
-                          className="flex items-start gap-3 p-3 sm:p-4 rounded-lg hover:bg-muted/50 transition-colors touch-manipulation min-h-[60px] cursor-pointer"
+                          className="flex items-start gap-2 sm:gap-2.5 md:gap-3 p-2 sm:p-3 md:p-4 rounded-lg hover:bg-muted/50 transition-colors touch-manipulation min-h-[50px] sm:min-h-[60px] cursor-pointer"
                           tabIndex={0}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
@@ -470,14 +470,14 @@ const Dashboard = () => {
                           }}
                         >
                           <div className="flex-shrink-0 mt-0.5">
-                            <div className="p-1.5 sm:p-2 rounded-full bg-green-500/10">
-                              <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500" />
+                            <div className="p-1 sm:p-1.5 sm:p-2 rounded-full bg-green-500/10">
+                              <Activity className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-green-500" />
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-xs sm:text-sm font-medium mb-1 line-clamp-2 leading-relaxed">{activity.message}</h4>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs text-muted-foreground">
+                            <h4 className="text-[10px] sm:text-xs md:text-sm font-medium mb-0.5 sm:mb-1 line-clamp-2 leading-relaxed">{activity.message}</h4>
+                            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                              <span className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
                                 {new Date(activity.timestamp).toLocaleString('fr-FR', {
                                   day: '2-digit',
                                   month: '2-digit',
@@ -487,7 +487,7 @@ const Dashboard = () => {
                                 })}
                               </span>
                               {activity.status && (
-                                <Badge variant="outline" className="text-xs px-2 py-0.5">
+                                <Badge variant="outline" className="text-[9px] sm:text-[10px] md:text-xs px-1.5 sm:px-2 py-0.5">
                                   {activity.status}
                                 </Badge>
                               )}
@@ -502,39 +502,42 @@ const Dashboard = () => {
 
               {/* Quick Settings */}
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-                <CardHeader className="pb-3 p-4 sm:p-6">
-                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-gray-500/10 to-gray-500/5 backdrop-blur-sm border border-gray-500/20">
-                      <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 dark:text-gray-400" />
+                <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg">
+                    <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-gray-500/10 to-gray-500/5 backdrop-blur-sm border border-gray-500/20">
+                      <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-gray-500 dark:text-gray-400" />
                     </div>
                     Paramètres Rapides
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-4 sm:p-6 pt-0">
-                  <div className="space-y-2 sm:space-y-3">
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="space-y-1.5 sm:space-y-2 md:space-y-3">
                     <Button 
                       variant="outline" 
-                      className="w-full justify-start h-10 sm:h-12 text-xs sm:text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors" 
+                      className="w-full justify-start h-9 sm:h-10 md:h-12 text-[10px] sm:text-xs md:text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors" 
                       onClick={handleViewStore}
                     >
-                      <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 sm:mr-3" />
-                      Paramètres Boutique
+                      <Settings className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2 md:mr-3" />
+                      <span className="hidden sm:inline">Paramètres Boutique</span>
+                      <span className="sm:hidden">Boutique</span>
                     </Button>
                     <Button 
                       variant="outline" 
-                      className="w-full justify-start h-10 sm:h-12 text-xs sm:text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors" 
+                      className="w-full justify-start h-9 sm:h-10 md:h-12 text-[10px] sm:text-xs md:text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors" 
                       onClick={handleManageCustomers}
                     >
-                      <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 sm:mr-3" />
-                      Gérer les Clients
+                      <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2 md:mr-3" />
+                      <span className="hidden sm:inline">Gérer les Clients</span>
+                      <span className="sm:hidden">Clients</span>
                     </Button>
                     <Button 
                       variant="outline" 
-                      className="w-full justify-start h-10 sm:h-12 text-xs sm:text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors" 
+                      className="w-full justify-start h-9 sm:h-10 md:h-12 text-[10px] sm:text-xs md:text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors" 
                       onClick={handleSettings}
                     >
-                      <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 sm:mr-3" />
-                      Configuration
+                      <Settings className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2 md:mr-3" />
+                      <span className="hidden sm:inline">Configuration</span>
+                      <span className="sm:hidden">Config</span>
                     </Button>
                   </div>
                 </CardContent>

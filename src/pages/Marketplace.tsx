@@ -655,13 +655,13 @@ const Marketplace = () => {
               <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-yellow-400 animate-pulse" aria-hidden="true" />
               <h1 
                 id="hero-title" 
-                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
               >
                 {getValue('marketplace.hero.title')}
               </h1>
               <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-yellow-400 animate-pulse" aria-hidden="true" />
             </div>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-slate-300 mb-4 sm:mb-6 lg:mb-8 max-w-4xl mx-auto leading-relaxed px-2">
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-slate-300 mb-3 sm:mb-4 md:mb-6 lg:mb-8 max-w-4xl mx-auto leading-relaxed px-2">
               {getValue('marketplace.hero.subtitle')}
               <br />
               <span className="text-blue-400 font-semibold">{getValue('marketplace.hero.tagline')}</span>

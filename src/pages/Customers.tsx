@@ -181,16 +181,16 @@ const Customers = () => {
             {!customersLoading && (
               <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                  <CardContent className="p-3 sm:p-4">
+                  <CardContent className="p-2.5 sm:p-3 md:p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">Total Clients</p>
-                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">Total Clients</p>
+                        <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                           {stats.total}
                         </p>
                       </div>
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5">
-                        <Users className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5">
+                        <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-purple-500" />
                       </div>
                     </div>
                   </CardContent>
@@ -199,13 +199,13 @@ const Customers = () => {
                   <CardContent className="p-3 sm:p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">Total Commandes</p>
-                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                        <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">Total Commandes</p>
+                        <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                           {stats.totalOrders}
                         </p>
                       </div>
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5">
-                        <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5">
+                        <ShoppingBag className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-blue-500" />
                       </div>
                     </div>
                   </CardContent>
@@ -214,13 +214,13 @@ const Customers = () => {
                   <CardContent className="p-3 sm:p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">Total Dépensé</p>
-                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                        <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">Total Dépensé</p>
+                        <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                           {stats.totalSpent.toLocaleString()}
                         </p>
                       </div>
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5">
-                        <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5">
+                        <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-green-500" />
                       </div>
                     </div>
                   </CardContent>
@@ -229,13 +229,13 @@ const Customers = () => {
                   <CardContent className="p-3 sm:p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">Moyenne</p>
-                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                        <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">Moyenne</p>
+                        <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                           {stats.averageSpent.toLocaleString()}
                         </p>
                       </div>
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5">
-                        <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5">
+                        <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-orange-500" />
                       </div>
                     </div>
                   </CardContent>
@@ -333,8 +333,8 @@ const Customers = () => {
                   <div className="p-4 rounded-full bg-gradient-to-br from-purple-500/10 to-pink-500/5 mb-4 animate-in zoom-in duration-500">
                     <Users className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground" />
                   </div>
-                  <h3 className="text-sm sm:text-lg md:text-xl font-semibold mb-2">Aucun client</h3>
-                  <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-4 sm:mb-6 max-w-md">
+                  <h3 className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold mb-1.5 sm:mb-2">Aucun client</h3>
+                  <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mb-3 sm:mb-4 md:mb-6 max-w-md">
                     {searchQuery
                       ? "Aucun client ne correspond à votre recherche"
                       : "Commencez par ajouter votre premier client"}

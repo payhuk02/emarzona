@@ -93,18 +93,19 @@ const CourseAnalytics = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="container mx-auto py-8 px-4">
+        <div className="container mx-auto py-4 sm:py-6 md:py-8 px-3 sm:px-4">
           <Button
             variant="ghost"
             onClick={() => navigate(`/courses/${slug}`)}
-            className="mb-4 text-white hover:bg-white/20"
+            className="mb-3 sm:mb-4 text-white hover:bg-white/20 h-8 sm:h-9 text-xs sm:text-sm"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {t('courses.analytics.backToCourse')}
+            <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+            <span className="hidden sm:inline">{t('courses.analytics.backToCourse')}</span>
+            <span className="sm:hidden">Retour</span>
           </Button>
 
-          <h1 className="text-3xl font-bold mb-2">{t('courses.analytics.title')}</h1>
-          <p className="text-xl text-blue-100">{product.name}</p>
+          <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold mb-1 sm:mb-2">{t('courses.analytics.title')}</h1>
+          <p className="text-xs sm:text-sm md:text-base lg:text-lg text-blue-100">{product.name}</p>
         </div>
       </div>
 

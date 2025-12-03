@@ -531,6 +531,76 @@ export default function Checkout() {
         throw new Error('Boutique non trouvée');
       }
 
+      // 🆕 Créer ou mettre à jour le client dans la table customers
+      let finalCustomerId: string | null = null;
+      try {
+        // Vérifier si le client existe déjà
+        const { data: existingCustomer } = await supabase
+          .from('customers')
+          .select('id')
+          .eq('store_id', product.store_id)
+          .eq('email', formData.email)
+          .maybeSingle();
+
+        if (existingCustomer) {
+          // Mettre à jour le client existant avec les nouvelles informations
+          finalCustomerId = existingCustomer.id;
+          const { error: updateError } = await supabase
+            .from('customers')
+            .update({
+              full_name: formData.full_name,
+              phone: formData.phone,
+              metadata: {
+                address: `${formData.address_line1}${formData.address_line2 ? `, ${formData.address_line2}` : ''}`,
+                city: formData.city,
+                postal_code: formData.postal_code,
+                country: formData.country,
+                state: formData.state || null,
+                address_line1: formData.address_line1,
+                address_line2: formData.address_line2 || null,
+              },
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', finalCustomerId);
+
+          if (updateError) {
+            logger.warn('Error updating customer:', updateError);
+            // Ne pas bloquer le processus si la mise à jour échoue
+          }
+        } else {
+          // Créer un nouveau client
+          const { data: newCustomer, error: customerError } = await supabase
+            .from('customers')
+            .insert({
+              store_id: product.store_id,
+              email: formData.email,
+              full_name: formData.full_name,
+              phone: formData.phone,
+              metadata: {
+                address: `${formData.address_line1}${formData.address_line2 ? `, ${formData.address_line2}` : ''}`,
+                city: formData.city,
+                postal_code: formData.postal_code,
+                country: formData.country,
+                state: formData.state || null,
+                address_line1: formData.address_line1,
+                address_line2: formData.address_line2 || null,
+              },
+            })
+            .select('id')
+            .single();
+
+          if (customerError || !newCustomer) {
+            logger.warn('Error creating customer:', customerError);
+            // Ne pas bloquer le processus si la création échoue
+          } else {
+            finalCustomerId = newCustomer.id;
+          }
+        }
+      } catch (customerErr) {
+        logger.warn('Error in customer creation/update:', customerErr);
+        // Ne pas bloquer le processus
+      }
+
       // Générer numéro de commande
       const { data: orderNumberData } = await supabase.rpc('generate_order_number');
       const orderNumber = orderNumberData || `ORD-${Date.now()}`;
@@ -540,7 +610,7 @@ export default function Checkout() {
         .from('orders')
         .insert({
           store_id: product.store_id,
-          customer_id: user.id,
+          customer_id: finalCustomerId || user.id, // Utiliser customer_id si disponible, sinon user.id
           order_number: orderNumber,
           total_amount: finalTotal,
           currency: 'XOF',
@@ -809,11 +879,11 @@ export default function Checkout() {
           <div className="max-w-6xl mx-auto space-y-6">
             {/* Header */}
             <header>
-              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
+              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
                 <ShoppingBag className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" aria-hidden="true" />
                 Finaliser la commande
               </h1>
-              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1" id="checkout-description">
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-0.5 sm:mt-1" id="checkout-description">
                 Remplissez vos informations pour compléter votre achat
               </p>
             </header>
@@ -824,7 +894,7 @@ export default function Checkout() {
                 {/* Informations de livraison */}
                 <Card role="region" aria-labelledby="shipping-title" aria-describedby="shipping-description">
                   <CardHeader>
-                    <CardTitle id="shipping-title" className="flex items-center gap-2">
+                    <CardTitle id="shipping-title" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg">
                       <MapPin className="h-5 w-5" aria-hidden="true" />
                       Informations de livraison
                     </CardTitle>

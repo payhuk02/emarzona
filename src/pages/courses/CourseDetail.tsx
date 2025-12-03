@@ -227,10 +227,10 @@ const CourseDetail = () => {
             <Badge variant="secondary" className="mb-4">
               {product.category}
             </Badge>
-            <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-4">
+            <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold mb-2 sm:mb-4">
               {product.name}
             </h1>
-            <p className="text-xl text-orange-100 mb-6">
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-orange-100 mb-4 sm:mb-6">
               {product.short_description}
             </p>
 
@@ -252,25 +252,25 @@ const CourseDetail = () => {
             )}
 
             {/* Stats */}
-            <div className="flex flex-wrap gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+            <div className="flex flex-wrap gap-3 sm:gap-4 md:gap-6 text-[10px] sm:text-xs md:text-sm">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-yellow-400 fill-yellow-400" />
                 <span>{course.average_rating || '4.5'} (125 avis)</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
                 <span>{course.total_enrollments || 0} étudiants</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
                 <span>{course.total_duration_minutes} minutes</span>
               </div>
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
                 <span>{course.total_lessons} leçons</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Globe className="w-5 h-5" />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
                 <span className="capitalize">{course.language}</span>
               </div>
             </div>
@@ -286,8 +286,8 @@ const CourseDetail = () => {
                   )}
                 </div>
                 <div>
-                  <p className="text-sm text-orange-100">Créé par</p>
-                  <p className="font-semibold">{store.name}</p>
+                  <p className="text-[10px] sm:text-xs text-orange-100">Créé par</p>
+                  <p className="font-semibold text-xs sm:text-sm md:text-base">{store.name}</p>
                 </div>
               </div>
             )}
@@ -365,7 +365,7 @@ const CourseDetail = () => {
             {/* Description */}
             <Card>
               <CardContent className="p-6">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4">À propos de ce cours</h2>
+                <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold mb-3 sm:mb-4">À propos de ce cours</h2>
                 <div className="prose prose-sm max-w-none">
                   <p className="text-gray-700 whitespace-pre-line">
                     {product.description}
@@ -378,8 +378,8 @@ const CourseDetail = () => {
             {product.licensing_type && (
               <Card>
                 <CardContent className="p-6">
-                  <h2 className="text-xl font-bold mb-3">Conditions de licence</h2>
-                  <div className="text-sm text-gray-700 space-y-2">
+                  <h2 className="text-sm sm:text-base md:text-lg font-bold mb-2 sm:mb-3">Conditions de licence</h2>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-gray-700 space-y-2">
                     <p>
                       Type de licence: <strong>{product.licensing_type === 'plr' ? 'PLR (droits de label privé)' : product.licensing_type === 'copyrighted' ? "Protégé par droit d'auteur" : 'Standard'}</strong>
                     </p>
@@ -397,8 +397,8 @@ const CourseDetail = () => {
             {course.learning_objectives && course.learning_objectives.length > 0 && (
               <Card>
                 <CardContent className="p-6">
-                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <Target className="w-5 h-5 text-orange-600" />
+                  <h2 className="text-sm sm:text-base md:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2">
+                    <Target className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 text-orange-600" />
                     Ce que vous allez apprendre
                   </h2>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">

@@ -243,7 +243,7 @@ export default function MyFavorites() {
                   >
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
-                  <h1 className="text-lg sm:text-2xl md:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
+                  <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
                     <Heart className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-red-500 fill-red-500" />
                     Mes Favoris
                   </h1>
@@ -272,57 +272,57 @@ export default function MyFavorites() {
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total</CardTitle>
-                  <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">Total</CardTitle>
+                  <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-500 fill-red-500" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.total}</div>
-                  <p className="text-xs text-muted-foreground">Produits favoris</p>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">{stats.total}</div>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">Produits favoris</p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Digitaux</CardTitle>
-                  <Download className="h-4 w-4 text-blue-600" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">Digitaux</CardTitle>
+                  <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-base sm:text-xl md:text-2xl font-bold text-blue-600">{stats.digital}</div>
-                  <p className="text-xs text-muted-foreground">Produits</p>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-blue-600">{stats.digital}</div>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">Produits</p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Physiques</CardTitle>
-                  <Package className="h-4 w-4 text-green-600" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">Physiques</CardTitle>
+                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-base sm:text-xl md:text-2xl font-bold text-green-600">{stats.physical}</div>
-                  <p className="text-xs text-muted-foreground">Produits</p>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-green-600">{stats.physical}</div>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">Produits</p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Services</CardTitle>
-                  <Calendar className="h-4 w-4 text-purple-600" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">Services</CardTitle>
+                  <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-base sm:text-xl md:text-2xl font-bold text-purple-600">{stats.service}</div>
-                  <p className="text-xs text-muted-foreground">Produits</p>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-purple-600">{stats.service}</div>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">Produits</p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Cours</CardTitle>
-                  <BookOpen className="h-4 w-4 text-orange-600" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">Cours</CardTitle>
+                  <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-base sm:text-xl md:text-2xl font-bold text-orange-600">{stats.course}</div>
-                  <p className="text-xs text-muted-foreground">Produits</p>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-orange-600">{stats.course}</div>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">Produits</p>
                 </CardContent>
               </Card>
             </div>

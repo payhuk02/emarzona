@@ -151,18 +151,18 @@ const Analytics = () => {
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">Revenu total</p>
+                      <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">Revenu total</p>
                       {isLoading ? (
                         <Skeleton className="h-6 w-24 mb-1" />
                       ) : (
-                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                        <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                           {totalRevenue.toLocaleString()} XOF
                         </p>
                       )}
-                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Total des ventes</p>
+                      <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">Total des ventes</p>
                     </div>
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5">
-                      <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+                    <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5">
+                      <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-green-500" />
                     </div>
                   </div>
                 </CardContent>
@@ -173,18 +173,18 @@ const Analytics = () => {
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">Commandes</p>
+                      <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">Commandes</p>
                       {isLoading ? (
                         <Skeleton className="h-6 w-16 mb-1" />
                       ) : (
-                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                        <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                           {orders?.length || 0}
                         </p>
                       )}
-                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{completedOrders} terminées</p>
+                      <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">{completedOrders} terminées</p>
                     </div>
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5">
-                      <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                    <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5">
+                      <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-blue-500" />
                     </div>
                   </div>
                 </CardContent>
@@ -195,18 +195,18 @@ const Analytics = () => {
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Clients</p>
+                      <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">Clients</p>
                       {isLoading ? (
                         <Skeleton className="h-6 w-16 mb-1" />
                       ) : (
-                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                           {customers?.length || 0}
                         </p>
                       )}
-                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Base clients</p>
+                      <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">Base clients</p>
                     </div>
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5">
-                      <Users className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
+                    <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5">
+                      <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-purple-500" />
                     </div>
                   </div>
                 </CardContent>
@@ -217,18 +217,18 @@ const Analytics = () => {
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-1">Produits actifs</p>
+                      <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">Produits actifs</p>
                       {isLoading ? (
                         <Skeleton className="h-6 w-16 mb-1" />
                       ) : (
-                        <p className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                        <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                           {activeProducts}
                         </p>
                       )}
-                      <p className="text-xs text-muted-foreground mt-1">Sur {products?.length || 0} total</p>
+                      <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">Sur {products?.length || 0} total</p>
                     </div>
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5">
-                      <Package className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
+                    <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5">
+                      <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-orange-500" />
                     </div>
                   </div>
                 </CardContent>

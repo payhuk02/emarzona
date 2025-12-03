@@ -39,15 +39,15 @@ const CreateCourse = () => {
                 
                 {/* Titre avec icône - Style Inventaire et Mes Cours */}
                 <div>
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                      <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                  <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
+                    <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                      <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                     </div>
                     <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                       {t('courses.create.title')}
                     </span>
                   </h1>
-                  <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                  <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground">
                     {t('courses.create.description')}
                   </p>
                 </div>

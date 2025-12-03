@@ -86,11 +86,11 @@ export const WithdrawalsFilters = ({
     <Card>
       <CardHeader className="pb-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-            <Filter className="h-4 w-4" />
+          <CardTitle className="text-sm sm:text-base md:text-lg flex items-center gap-2">
+            <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             Filtres
             {hasActiveFilters && (
-              <Badge variant="secondary" className="ml-2 text-xs">
+              <Badge variant="secondary" className="ml-2 text-[9px] sm:text-[10px] md:text-xs">
                 Actifs
               </Badge>
             )}
@@ -101,17 +101,18 @@ export const WithdrawalsFilters = ({
                 variant="ghost"
                 size="sm"
                 onClick={handleReset}
-                className="text-xs sm:text-sm h-7 sm:h-8"
+                className="text-[10px] sm:text-xs md:text-sm h-7 sm:h-8"
               >
                 <X className="h-3 w-3 mr-1" />
-                Réinitialiser
+                <span className="hidden sm:inline">Réinitialiser</span>
+                <span className="sm:hidden">Réinit.</span>
               </Button>
             )}
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-xs sm:text-sm h-7 sm:h-8"
+              className="text-[10px] sm:text-xs md:text-sm h-7 sm:h-8"
             >
               {isExpanded ? 'Réduire' : 'Développer'}
             </Button>
@@ -121,16 +122,16 @@ export const WithdrawalsFilters = ({
       <CardContent className="space-y-3 sm:space-y-4">
         {/* Recherche */}
         <div className="space-y-2">
-          <Label htmlFor="search" className="text-xs sm:text-sm">Recherche</Label>
+          <Label htmlFor="search" className="text-[10px] sm:text-xs md:text-sm">Recherche</Label>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+            <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
             <Input
               id="search"
               placeholder="Rechercher par référence, boutique..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleApplyFilters()}
-              className="pl-8 sm:pl-10 text-sm sm:text-base"
+              className="pl-8 sm:pl-10 h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm"
             />
           </div>
         </div>
@@ -138,37 +139,40 @@ export const WithdrawalsFilters = ({
         {/* Filtres rapides par période */}
         {showQuickFilters && onQuickFilter && (
           <div className="space-y-2">
-            <Label className="text-xs sm:text-sm">Période rapide</Label>
+            <Label className="text-[10px] sm:text-xs md:text-sm">Période rapide</Label>
             <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onQuickFilter('week')}
-                className="text-xs sm:text-sm h-7 sm:h-8"
+                className="text-[10px] sm:text-xs md:text-sm h-7 sm:h-8"
               >
-                Cette semaine
+                <span className="hidden sm:inline">Cette semaine</span>
+                <span className="sm:hidden">Semaine</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onQuickFilter('month')}
-                className="text-xs sm:text-sm h-7 sm:h-8"
+                className="text-[10px] sm:text-xs md:text-sm h-7 sm:h-8"
               >
-                Ce mois
+                <span className="hidden sm:inline">Ce mois</span>
+                <span className="sm:hidden">Mois</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onQuickFilter('year')}
-                className="text-xs sm:text-sm h-7 sm:h-8"
+                className="text-[10px] sm:text-xs md:text-sm h-7 sm:h-8"
               >
-                Cette année
+                <span className="hidden sm:inline">Cette année</span>
+                <span className="sm:hidden">Année</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onQuickFilter('all')}
-                className="text-xs sm:text-sm h-7 sm:h-8"
+                className="text-[10px] sm:text-xs md:text-sm h-7 sm:h-8"
               >
                 Tout
               </Button>
@@ -181,9 +185,9 @@ export const WithdrawalsFilters = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 pt-2 border-t">
             {/* Statut */}
             <div className="space-y-2">
-              <Label htmlFor="status" className="text-xs sm:text-sm">Statut</Label>
+              <Label htmlFor="status" className="text-[10px] sm:text-xs md:text-sm">Statut</Label>
               <Select value={status} onValueChange={(value: any) => setStatus(value)}>
-                <SelectTrigger id="status" className="text-sm sm:text-base">
+                <SelectTrigger id="status" className="h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent position="popper" className="z-[1060]">
@@ -199,9 +203,9 @@ export const WithdrawalsFilters = ({
 
             {/* Méthode de paiement */}
             <div className="space-y-2">
-              <Label htmlFor="payment_method" className="text-xs sm:text-sm">Méthode de paiement</Label>
+              <Label htmlFor="payment_method" className="text-[10px] sm:text-xs md:text-sm">Méthode de paiement</Label>
               <Select value={paymentMethod} onValueChange={(value: any) => setPaymentMethod(value)}>
-                <SelectTrigger id="payment_method" className="text-sm sm:text-base">
+                <SelectTrigger id="payment_method" className="h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent position="popper" className="z-[1060]">
@@ -215,17 +219,17 @@ export const WithdrawalsFilters = ({
 
             {/* Date de début */}
             <div className="space-y-2">
-              <Label className="text-xs sm:text-sm">Date de début</Label>
+              <Label className="text-[10px] sm:text-xs md:text-sm">Date de début</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full justify-start text-left font-normal text-sm sm:text-base h-9 sm:h-10",
+                      "w-full justify-start text-left font-normal text-[10px] sm:text-xs md:text-sm h-8 sm:h-9",
                       !dateFrom && "text-muted-foreground"
                     )}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     {dateFrom ? format(dateFrom, "dd/MM/yyyy", { locale: fr }) : "Sélectionner"}
                   </Button>
                 </PopoverTrigger>
@@ -243,17 +247,17 @@ export const WithdrawalsFilters = ({
 
             {/* Date de fin */}
             <div className="space-y-2">
-              <Label className="text-xs sm:text-sm">Date de fin</Label>
+              <Label className="text-[10px] sm:text-xs md:text-sm">Date de fin</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full justify-start text-left font-normal text-sm sm:text-base h-9 sm:h-10",
+                      "w-full justify-start text-left font-normal text-[10px] sm:text-xs md:text-sm h-8 sm:h-9",
                       !dateTo && "text-muted-foreground"
                     )}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     {dateTo ? format(dateTo, "dd/MM/yyyy", { locale: fr }) : "Sélectionner"}
                   </Button>
                 </PopoverTrigger>
@@ -271,32 +275,32 @@ export const WithdrawalsFilters = ({
 
             {/* Montant minimum */}
             <div className="space-y-2">
-              <Label htmlFor="min_amount" className="text-xs sm:text-sm">Montant minimum (XOF)</Label>
+              <Label htmlFor="min_amount" className="text-[10px] sm:text-xs md:text-sm">Montant minimum (XOF)</Label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                <DollarSign className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
                 <Input
                   id="min_amount"
                   type="number"
                   placeholder="0"
                   value={minAmount}
                   onChange={(e) => setMinAmount(e.target.value)}
-                  className="pl-8 sm:pl-10 text-sm sm:text-base"
+                  className="pl-8 sm:pl-10 h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm"
                 />
               </div>
             </div>
 
             {/* Montant maximum */}
             <div className="space-y-2">
-              <Label htmlFor="max_amount" className="text-xs sm:text-sm">Montant maximum (XOF)</Label>
+              <Label htmlFor="max_amount" className="text-[10px] sm:text-xs md:text-sm">Montant maximum (XOF)</Label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                <DollarSign className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
                 <Input
                   id="max_amount"
                   type="number"
                   placeholder="0"
                   value={maxAmount}
                   onChange={(e) => setMaxAmount(e.target.value)}
-                  className="pl-8 sm:pl-10 text-sm sm:text-base"
+                  className="pl-8 sm:pl-10 h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm"
                 />
               </div>
             </div>
@@ -308,7 +312,7 @@ export const WithdrawalsFilters = ({
           <Button
             onClick={handleApplyFilters}
             size="sm"
-            className="w-full sm:w-auto text-xs sm:text-sm"
+            className="w-full sm:w-auto h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm"
           >
             Appliquer les filtres
           </Button>

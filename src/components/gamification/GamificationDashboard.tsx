@@ -76,7 +76,7 @@ export const GamificationDashboard = () => {
     return (
       <Card className="border shadow-sm">
         <CardContent className="pt-6 px-3 sm:px-6">
-          <p className="text-center text-sm sm:text-base text-muted-foreground py-8">
+          <p className="text-center text-xs sm:text-sm md:text-base text-muted-foreground py-6 sm:py-8">
             Aucune donnée de gamification disponible. Vos statistiques apparaîtront ici une fois que vous commencerez à utiliser la plateforme.
           </p>
         </CardContent>
@@ -145,18 +145,18 @@ export const GamificationDashboard = () => {
               style={{ animationDelay: `${index * 80}ms` }}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-5 pt-3 sm:pt-4">
-                <CardTitle className="text-[11px] xs:text-xs sm:text-sm font-medium text-muted-foreground">
+                <CardTitle className="text-[9px] sm:text-[10px] md:text-xs font-medium text-muted-foreground">
                   {stat.label}
                 </CardTitle>
-                <div className={`h-7 w-7 rounded-lg bg-gradient-to-br ${stat.iconBg} border ${stat.iconBorder} flex items-center justify-center`}>
-                  <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${stat.iconColor}`} />
+                <div className={`h-6 w-6 sm:h-7 sm:w-7 rounded-lg bg-gradient-to-br ${stat.iconBg} border ${stat.iconBorder} flex items-center justify-center`}>
+                  <Icon className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${stat.iconColor}`} />
                 </div>
               </CardHeader>
-              <CardContent className="px-3 sm:px-5 pb-3 sm:pb-4">
-                <div className={`text-lg xs:text-xl sm:text-2xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
+              <CardContent className="px-2.5 sm:px-3 md:px-5 pb-2.5 sm:pb-3 md:pb-4">
+                <div className={`text-sm sm:text-base md:text-lg lg:text-xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
                   {stat.value}
                 </div>
-                <p className="text-[10px] xs:text-xs text-muted-foreground mt-1">
+                <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">
                   {stat.description}
                 </p>
               </CardContent>
@@ -171,8 +171,8 @@ export const GamificationDashboard = () => {
         className="border border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
       >
         <CardHeader className="px-3 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
-          <CardTitle className="text-base sm:text-lg text-foreground">Progression vers le niveau {gamification.current_level + 1}</CardTitle>
-          <CardDescription className="text-xs sm:text-sm">
+          <CardTitle className="text-sm sm:text-base md:text-lg text-foreground">Progression vers le niveau {gamification.current_level + 1}</CardTitle>
+          <CardDescription className="text-[10px] sm:text-xs md:text-sm">
             {gamification.experience_points} / {gamification.experience_points_to_next_level} XP
           </CardDescription>
         </CardHeader>
@@ -191,7 +191,7 @@ export const GamificationDashboard = () => {
           <TabsList className="inline-flex w-full sm:w-auto min-w-full sm:min-w-0 flex-nowrap sm:flex-wrap gap-1 sm:gap-2 p-1 h-auto bg-muted/60 backdrop-blur-sm border border-border/50 rounded-xl">
             <TabsTrigger 
               value="badges"
-              className="text-[11px] xs:text-xs sm:text-sm px-2 xs:px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap min-h-[36px] sm:min-h-[44px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center gap-1 sm:gap-2 rounded-lg transition-all duration-200"
+              className="text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap min-h-[36px] sm:min-h-[40px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center gap-1 sm:gap-2 rounded-lg transition-all duration-200"
             >
               <Award className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span className="hidden xs:inline">Badges</span>
@@ -200,7 +200,7 @@ export const GamificationDashboard = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="achievements"
-              className="text-[11px] xs:text-xs sm:text-sm px-2 xs:px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap min-h-[36px] sm:min-h-[44px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center gap-1 sm:gap-2 rounded-lg transition-all duration-200"
+              className="text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap min-h-[36px] sm:min-h-[40px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center gap-1 sm:gap-2 rounded-lg transition-all duration-200"
             >
               <Trophy className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span className="hidden xs:inline">Achievements</span>
@@ -209,7 +209,7 @@ export const GamificationDashboard = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="leaderboard"
-              className="text-[11px] xs:text-xs sm:text-sm px-2 xs:px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap min-h-[36px] sm:min-h-[44px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center gap-1 sm:gap-2 rounded-lg transition-all duration-200"
+              className="text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap min-h-[36px] sm:min-h-[40px] touch-manipulation data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-sm flex items-center gap-1 sm:gap-2 rounded-lg transition-all duration-200"
             >
               <Users className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span className="hidden xs:inline">Leaderboard</span>
@@ -222,14 +222,14 @@ export const GamificationDashboard = () => {
         <TabsContent value="badges" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
           <Card className="border border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
             <CardHeader className="px-3 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
-              <CardTitle className="text-base sm:text-lg text-foreground">Mes Badges</CardTitle>
-              <CardDescription className="text-xs sm:text-sm">
+              <CardTitle className="text-sm sm:text-base md:text-lg text-foreground">Mes Badges</CardTitle>
+              <CardDescription className="text-[10px] sm:text-xs md:text-sm">
                 {badges.length} badge{badges.length > 1 ? 's' : ''} obtenu{badges.length > 1 ? 's' : ''}
               </CardDescription>
             </CardHeader>
             <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
               {badges.length === 0 ? (
-                <div className="text-center py-8 text-sm sm:text-base text-muted-foreground">
+                <div className="text-center py-6 sm:py-8 text-xs sm:text-sm md:text-base text-muted-foreground">
                   Aucun badge obtenu pour le moment
                 </div>
               ) : (
@@ -248,7 +248,7 @@ export const GamificationDashboard = () => {
                       ) : (
                         <Award className="h-12 w-12 sm:h-16 sm:w-16 mb-2 text-primary flex-shrink-0" />
                       )}
-                      <div className="text-xs sm:text-sm font-medium text-center text-gray-900 dark:text-gray-50 break-words">
+                      <div className="text-[10px] sm:text-xs md:text-sm font-medium text-center text-gray-900 dark:text-gray-50 break-words">
                         {userBadge.badge?.name || 'Badge'}
                       </div>
                       <div className="text-[10px] xs:text-xs text-muted-foreground text-center mt-1">
@@ -266,14 +266,14 @@ export const GamificationDashboard = () => {
         <TabsContent value="achievements" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
           <Card className="border border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
             <CardHeader className="px-3 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
-              <CardTitle className="text-base sm:text-lg text-foreground">Mes Achievements</CardTitle>
-              <CardDescription className="text-xs sm:text-sm">
+              <CardTitle className="text-sm sm:text-base md:text-lg text-foreground">Mes Achievements</CardTitle>
+              <CardDescription className="text-[10px] sm:text-xs md:text-sm">
                 {achievements.length} achievement{achievements.length > 1 ? 's' : ''} débloqué{achievements.length > 1 ? 's' : ''}
               </CardDescription>
             </CardHeader>
             <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
               {achievements.length === 0 ? (
-                <div className="text-center py-8 text-sm sm:text-base text-muted-foreground">
+                <div className="text-center py-6 sm:py-8 text-xs sm:text-sm md:text-base text-muted-foreground">
                   Aucun achievement débloqué pour le moment
                 </div>
               ) : (
@@ -293,10 +293,10 @@ export const GamificationDashboard = () => {
                         <Trophy className="h-10 w-10 sm:h-12 sm:w-12 text-primary flex-shrink-0" />
                       )}
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm sm:text-base text-gray-900 dark:text-gray-50 break-words">
+                        <div className="font-medium text-xs sm:text-sm md:text-base text-gray-900 dark:text-gray-50 break-words">
                           {userAchievement.achievement?.title || 'Achievement'}
                         </div>
-                        <div className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">
+                        <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-1 break-words">
                           {userAchievement.achievement?.description}
                         </div>
                         <div className="text-[10px] xs:text-xs text-muted-foreground mt-1">
@@ -320,14 +320,14 @@ export const GamificationDashboard = () => {
         <TabsContent value="leaderboard" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
           <Card className="border border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
             <CardHeader className="px-3 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
-              <CardTitle className="text-base sm:text-lg text-foreground">Leaderboard Global</CardTitle>
-              <CardDescription className="text-xs sm:text-sm">
+              <CardTitle className="text-sm sm:text-base md:text-lg text-foreground">Leaderboard Global</CardTitle>
+              <CardDescription className="text-[10px] sm:text-xs md:text-sm">
                 Top 10 des utilisateurs
               </CardDescription>
             </CardHeader>
             <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
               {leaderboard.length === 0 ? (
-                <div className="text-center py-8 text-sm sm:text-base text-muted-foreground">
+                <div className="text-center py-6 sm:py-8 text-xs sm:text-sm md:text-base text-muted-foreground">
                   Aucun classement disponible pour le moment
                 </div>
               ) : (
@@ -383,14 +383,14 @@ export const GamificationDashboard = () => {
         className="border border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
       >
         <CardHeader className="px-3 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
-          <CardTitle className="text-base sm:text-lg text-foreground">Historique des Points</CardTitle>
-          <CardDescription className="text-xs sm:text-sm">
+          <CardTitle className="text-sm sm:text-base md:text-lg text-foreground">Historique des Points</CardTitle>
+          <CardDescription className="text-[10px] sm:text-xs md:text-sm">
             Dernières activités
           </CardDescription>
         </CardHeader>
         <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
           {pointsHistory.length === 0 ? (
-            <div className="text-center py-8 text-sm sm:text-base text-muted-foreground">
+            <div className="text-center py-6 sm:py-8 text-xs sm:text-sm md:text-base text-muted-foreground">
               Aucun historique disponible
             </div>
           ) : (

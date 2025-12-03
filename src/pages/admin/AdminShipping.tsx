@@ -115,11 +115,11 @@ export default function AdminShipping() {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-6 space-y-6">
+          <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-5 md:space-y-6">
             {/* Header */}
             <div ref={headerRef} role="banner" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight" id="admin-shipping-title">Expéditions</h1>
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold tracking-tight" id="admin-shipping-title">Expéditions</h1>
                 <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                   Vue d'ensemble de toutes les expéditions de la plateforme
                 </p>
@@ -130,58 +130,58 @@ export default function AdminShipping() {
             {/* Stats Cards */}
             <div ref={statsRef} className="grid gap-4 md:grid-cols-4" role="region" aria-label="Statistiques des expéditions">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Total Expéditions</CardTitle>
-                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" aria-hidden="true" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">Total Expéditions</CardTitle>
+                  <Package className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-muted-foreground" aria-hidden="true" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.totalShipments}</div>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">{stats.totalShipments}</div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">En Attente</CardTitle>
-                  <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-500" aria-hidden="true" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">En Attente</CardTitle>
+                  <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-orange-500" aria-hidden="true" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-base sm:text-xl md:text-2xl font-bold text-orange-600">{stats.pendingShipments}</div>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-orange-600">{stats.pendingShipments}</div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">En Transit</CardTitle>
-                  <Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-500" aria-hidden="true" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">En Transit</CardTitle>
+                  <Truck className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-blue-500" aria-hidden="true" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-base sm:text-xl md:text-2xl font-bold text-blue-600">{stats.inTransitShipments}</div>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-blue-600">{stats.inTransitShipments}</div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Livrés</CardTitle>
-                  <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500" aria-hidden="true" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">Livrés</CardTitle>
+                  <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-green-500" aria-hidden="true" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-base sm:text-xl md:text-2xl font-bold text-green-600">{stats.deliveredShipments}</div>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-green-600">{stats.deliveredShipments}</div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Filters & Table */}
             <Card>
-              <CardHeader>
-                <div className="flex flex-col md:flex-row gap-4">
+              <CardHeader className="p-3 sm:p-4 md:p-6">
+                <div className="flex flex-col md:flex-row gap-3 sm:gap-4">
                   <div className="flex-1">
                     <div className="relative">
-                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Search className="absolute left-2.5 sm:left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                       <Input
                         placeholder="Rechercher par tracking ou commande..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-8 min-h-[44px]"
+                        className="pl-8 sm:pl-10 min-h-[44px] text-xs sm:text-sm"
                       />
                     </div>
                   </div>
@@ -196,7 +196,7 @@ export default function AdminShipping() {
                 </div>
               </CardHeader>
 
-              <CardContent>
+              <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
                 {isLoading ? (
                   <div className="text-center py-8">Chargement...</div>
                 ) : filteredShipments && filteredShipments.length > 0 ? (
@@ -238,7 +238,7 @@ export default function AdminShipping() {
                 ) : (
                   <div className="text-center py-12">
                     <Truck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Aucune expédition</h3>
+                    <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-1.5 sm:mb-2">Aucune expédition</h3>
                     <p className="text-muted-foreground">Aucune expédition trouvée.</p>
                   </div>
                 )}

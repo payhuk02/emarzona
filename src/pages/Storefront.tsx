@@ -247,7 +247,7 @@ const Storefront = () => {
           <div className="h-20 w-20 rounded-full bg-red-500/10 mx-auto mb-4 flex items-center justify-center">
             <AlertCircle className="h-10 w-10 text-red-500" aria-hidden="true" />
           </div>
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 text-foreground">Boutique introuvable</h1>
+          <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold mb-1.5 sm:mb-2 text-foreground">Boutique introuvable</h1>
           <p className="text-muted-foreground mb-6">
             {error || "Cette boutique n'existe pas ou a été supprimée."}
           </p>
@@ -365,12 +365,12 @@ const Storefront = () => {
                         <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
                           <ShoppingCart className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" aria-hidden="true" />
                         </div>
-                        <h3 className="text-lg sm:text-xl font-semibold mb-2 text-foreground">
+                        <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold mb-1.5 sm:mb-2 text-foreground">
                           {searchQuery || category !== "all" || productType !== "all" || licensingType !== "all"
                             ? getValue('storefront.noProducts') || "Aucun produit ne correspond à vos filtres"
                             : getValue('storefront.noProducts') || "Aucun produit disponible"}
                         </h3>
-                        <p className="text-sm sm:text-base text-muted-foreground mb-4">
+                        <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-3 sm:mb-4">
                           {searchQuery || category !== "all" || productType !== "all" || licensingType !== "all"
                             ? "Essayez de modifier vos critères de recherche ou de filtrage."
                             : "Cette boutique n'a pas encore de produits à vendre. Revenez bientôt !"}

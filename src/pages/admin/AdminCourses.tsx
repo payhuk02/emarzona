@@ -119,8 +119,8 @@ export default function AdminCourses() {
           <div className="container mx-auto p-6 space-y-6">
             {/* Header */}
             <div ref={headerRef} role="banner">
-              <h1 className="text-3xl font-bold tracking-tight" id="admin-courses-title">Cours en Ligne</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold tracking-tight" id="admin-courses-title">Cours en Ligne</h1>
+              <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground">
                 Vue d'ensemble de tous les cours de la plateforme
               </p>
             </div>
@@ -128,42 +128,42 @@ export default function AdminCourses() {
             {/* Stats Cards */}
             <div ref={statsRef} className="grid gap-4 md:grid-cols-4" role="region" aria-label="Statistiques des cours">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Cours</CardTitle>
-                  <GraduationCap className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-2.5 sm:p-3 md:p-4">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs font-medium">Total Cours</CardTitle>
+                  <GraduationCap className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" aria-hidden="true" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalCourses}</div>
+                <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">{stats.totalCourses}</div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Cours Publiés</CardTitle>
-                  <BookOpen className="h-4 w-4 text-green-500" aria-hidden="true" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-2.5 sm:p-3 md:p-4">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs font-medium">Cours Publiés</CardTitle>
+                  <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-500" aria-hidden="true" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{stats.publishedCourses}</div>
+                <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-green-600">{stats.publishedCourses}</div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Étudiants</CardTitle>
-                  <Users className="h-4 w-4 text-blue-500" aria-hidden="true" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-2.5 sm:p-3 md:p-4">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs font-medium">Total Étudiants</CardTitle>
+                  <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-500" aria-hidden="true" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">{stats.totalStudents}</div>
+                <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-blue-600">{stats.totalStudents}</div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Note Moyenne</CardTitle>
-                  <Star className="h-4 w-4 text-yellow-500" aria-hidden="true" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-2.5 sm:p-3 md:p-4">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs font-medium">Note Moyenne</CardTitle>
+                  <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-yellow-500" aria-hidden="true" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-yellow-600">
+                <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-yellow-600">
                     {stats.averageRating.toFixed(1)} ⭐
                   </div>
                 </CardContent>
@@ -181,16 +181,16 @@ export default function AdminCourses() {
                         placeholder="Rechercher cours ou instructeur..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-8 min-h-[44px]"
+                        className="pl-8 min-h-[40px] text-[10px] sm:text-[11px] md:text-xs"
                       />
                     </div>
                   </div>
                   <Tabs value={activeTab} onValueChange={setActiveTab}>
                     <TabsList>
-                      <TabsTrigger value="all" className="min-h-[44px]">Tous</TabsTrigger>
-                      <TabsTrigger value="published" className="min-h-[44px]">Publiés</TabsTrigger>
-                      <TabsTrigger value="draft" className="min-h-[44px]">Brouillons</TabsTrigger>
-                      <TabsTrigger value="archived" className="min-h-[44px]">Archivés</TabsTrigger>
+                      <TabsTrigger value="all" className="min-h-[40px] text-xs sm:text-sm">Tous</TabsTrigger>
+                      <TabsTrigger value="published" className="min-h-[40px] text-xs sm:text-sm">Publiés</TabsTrigger>
+                      <TabsTrigger value="draft" className="min-h-[40px] text-xs sm:text-sm">Brouillons</TabsTrigger>
+                      <TabsTrigger value="archived" className="min-h-[40px] text-xs sm:text-sm">Archivés</TabsTrigger>
                     </TabsList>
                   </Tabs>
                 </div>
@@ -203,13 +203,13 @@ export default function AdminCourses() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Titre</TableHead>
-                        <TableHead>Instructeur</TableHead>
-                        <TableHead>Prix</TableHead>
-                        <TableHead>Étudiants</TableHead>
-                        <TableHead>Note</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead>Date Création</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Titre</TableHead>
+                        <TableHead className="hidden md:table-cell text-xs sm:text-sm">Instructeur</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Prix</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Étudiants</TableHead>
+                        <TableHead className="hidden sm:table-cell text-xs sm:text-sm">Note</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Statut</TableHead>
+                        <TableHead className="hidden lg:table-cell text-xs sm:text-sm">Date Création</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -221,23 +221,23 @@ export default function AdminCourses() {
 
                         return (
                           <TableRow key={course.id}>
-                            <TableCell className="font-medium">{course.title}</TableCell>
-                            <TableCell>{course.instructor?.full_name || 'N/A'}</TableCell>
-                            <TableCell>{course.price?.toLocaleString()} FCFA</TableCell>
-                            <TableCell>
+                            <TableCell className="font-medium text-xs sm:text-sm">{course.title}</TableCell>
+                            <TableCell className="hidden md:table-cell text-xs sm:text-sm">{course.instructor?.full_name || 'N/A'}</TableCell>
+                            <TableCell className="text-xs sm:text-sm">{course.price?.toLocaleString()} FCFA</TableCell>
+                            <TableCell className="text-xs sm:text-sm">
                               <div className="flex items-center gap-1">
                                 <Users className="h-3 w-3" />
                                 {course.enrollments?.[0]?.count || 0}
                               </div>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
                               <div className="flex items-center gap-1">
                                 <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
                                 {avgRating > 0 ? avgRating.toFixed(1) : '-'}
                               </div>
                             </TableCell>
-                            <TableCell>{getStatusBadge(course.status)}</TableCell>
-                            <TableCell>
+                            <TableCell className="text-xs sm:text-sm">{getStatusBadge(course.status)}</TableCell>
+                            <TableCell className="hidden lg:table-cell text-xs sm:text-sm">
                               {format(new Date(course.created_at), 'PP', { locale: fr })}
                             </TableCell>
                           </TableRow>
@@ -246,10 +246,10 @@ export default function AdminCourses() {
                     </TableBody>
                   </Table>
                 ) : (
-                  <div className="text-center py-12">
-                    <GraduationCap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Aucun cours</h3>
-                    <p className="text-muted-foreground">Aucun cours trouvé.</p>
+                  <div className="text-center py-8 sm:py-12">
+                    <GraduationCap className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+                    <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-1 sm:mb-2">Aucun cours</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Aucun cours trouvé.</p>
                   </div>
                 )}
               </CardContent>

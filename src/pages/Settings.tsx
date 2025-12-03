@@ -90,12 +90,12 @@ const Settings = () => {
               <TabsContent value="profile" className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
                   <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
-                    <CardTitle className="text-lg sm:text-xl">{t('settings.profile.cardTitle')}</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm">
+                    <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl">{t('settings.profile.cardTitle')}</CardTitle>
+                    <CardDescription className="text-[10px] sm:text-xs md:text-sm">
                       {t('settings.profile.cardDescription')}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
+                  <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6">
                     <AdvancedProfileSettings />
                   </CardContent>
                 </Card>
@@ -105,12 +105,12 @@ const Settings = () => {
               <TabsContent value="store" className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
                   <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
-                    <CardTitle className="text-lg sm:text-xl">{t('settings.store.cardTitle')}</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm">
+                    <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl">{t('settings.store.cardTitle')}</CardTitle>
+                    <CardDescription className="text-[10px] sm:text-xs md:text-sm">
                       {t('settings.store.cardDescription')}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
+                  <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6">
                     <StoreSettings action={searchParams.get('action')} />
                   </CardContent>
                 </Card>
@@ -127,12 +127,12 @@ const Settings = () => {
               <TabsContent value="notifications" className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
                   <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
-                    <CardTitle className="text-lg sm:text-xl">{t('settings.notifications.cardTitle')}</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm">
+                    <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl">{t('settings.notifications.cardTitle')}</CardTitle>
+                    <CardDescription className="text-[10px] sm:text-xs md:text-sm">
                       {t('settings.notifications.cardDescription')}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
+                  <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6">
                     <NotificationSettings />
                   </CardContent>
                 </Card>
@@ -147,12 +147,12 @@ const Settings = () => {
               <TabsContent value="import-export" className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
                   <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
-                    <CardTitle className="text-lg sm:text-xl">Import/Export de données</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm">
+                    <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl">Import/Export de données</CardTitle>
+                    <CardDescription className="text-[10px] sm:text-xs md:text-sm">
                       Importez ou exportez vos produits, commandes et clients
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
+                  <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6">
                     <ImportExportManager />
                   </CardContent>
                 </Card>
@@ -162,12 +162,12 @@ const Settings = () => {
               <TabsContent value="security" className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
                   <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
-                    <CardTitle className="text-lg sm:text-xl">{t('settings.security.cardTitle')}</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm">
+                    <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl">{t('settings.security.cardTitle')}</CardTitle>
+                    <CardDescription className="text-[10px] sm:text-xs md:text-sm">
                       {t('settings.security.cardDescription')}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
+                  <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6">
                     <SecuritySettings />
                   </CardContent>
                 </Card>

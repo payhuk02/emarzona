@@ -45,11 +45,11 @@ export const BaseContextSidebar = ({
     <aside 
       className={cn(
         'hidden md:block fixed left-0 top-16 w-56 md:w-64 h-[calc(100vh-4rem)]',
-        'border-r border-blue-800/30',
-        'bg-gradient-to-br from-slate-900 via-blue-950 to-black',
+        'border-r border-blue-600/30',
+        'bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900',
         'overflow-y-auto z-40',
         'transition-all duration-300 ease-in-out',
-        'scrollbar-thin scrollbar-thumb-blue-800/50 scrollbar-track-transparent',
+        'scrollbar-thin scrollbar-thumb-blue-500/50 scrollbar-track-transparent',
         'shadow-[4px_0_12px_rgba(0,0,0,0.15)]',
         'backdrop-blur-sm',
         className
@@ -78,9 +78,9 @@ export const BaseContextSidebar = ({
           className={cn(
             'md:hidden fixed top-20 left-3 z-50',
             'h-11 w-11 p-0 rounded-full',
-            'bg-gradient-to-br from-slate-900/95 via-blue-950/95 to-black/95',
-            'border-blue-800/30 text-blue-200',
-            'hover:bg-blue-900/30 hover:text-white hover:scale-110',
+            'bg-gradient-to-br from-blue-700/95 via-blue-800/95 to-blue-900/95',
+            'border-blue-600/30 text-blue-100',
+            'hover:bg-blue-600/40 hover:text-white hover:scale-110',
             'shadow-lg backdrop-blur-sm',
             'transition-all duration-200 ease-in-out',
             'touch-manipulation',
@@ -95,20 +95,20 @@ export const BaseContextSidebar = ({
         side="left"
         className={cn(
           'w-[85vw] sm:w-80 p-0',
-          'bg-gradient-to-br from-slate-900 via-blue-950 to-black',
-          'border-r border-blue-800/30',
+          'bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900',
+          'border-r border-blue-600/30',
           'overflow-y-auto',
-          'scrollbar-thin scrollbar-thumb-blue-800/50 scrollbar-track-transparent'
+          'scrollbar-thin scrollbar-thumb-blue-500/50 scrollbar-track-transparent'
         )}
       >
         <div className="p-4 space-y-4">
           {/* Header avec bouton fermer */}
-          <div className="flex items-center justify-between pb-3 border-b border-blue-800/30">
+          <div className="flex items-center justify-between pb-3 border-b border-blue-600/30">
             <Breadcrumb items={breadcrumbItems} />
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 text-blue-200 hover:text-white hover:bg-blue-900/30 touch-manipulation"
+              className="h-9 w-9 text-blue-100 hover:text-white hover:bg-blue-600/40 touch-manipulation"
               onClick={() => setOpen(false)}
               aria-label="Fermer le menu"
             >

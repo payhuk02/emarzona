@@ -265,8 +265,8 @@ export default function MyCourses() {
           <main className="flex-1 p-4 md:p-6 space-y-6">
             <div className="flex items-center justify-center h-[60vh]">
               <div className="text-center space-y-4">
-                <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-                <p className="text-muted-foreground">Chargement des cours...</p>
+                <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto text-primary" />
+                <p className="text-xs sm:text-sm text-muted-foreground">Chargement des cours...</p>
               </div>
             </div>
           </main>
@@ -284,15 +284,15 @@ export default function MyCourses() {
           {/* Header avec animation - Style Inventaire */}
           <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
             <div>
-              <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
-                <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                  <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                <div className="p-1 sm:p-1.5 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                  <GraduationCap className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-4.5 md:w-4.5 lg:h-5 lg:w-5 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                 </div>
                 <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   Mes Cours
                 </span>
               </h1>
-              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
+              <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground">
                 Continuez votre apprentissage et suivez votre progression
               </p>
             </div>
@@ -300,10 +300,11 @@ export default function MyCourses() {
               <Button
                 onClick={handleRefresh}
                 size="sm"
-                className="min-h-[44px] h-11 sm:h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="min-h-[40px] h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
               >
-                <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                <span className="hidden sm:inline text-xs sm:text-sm">Rafraîchir</span>
+                <RefreshCw className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
+                <span className="hidden sm:inline">Rafraîchir</span>
+                <span className="sm:hidden">Raf.</span>
               </Button>
             </div>
           </div>
@@ -326,14 +327,14 @@ export default function MyCourses() {
                   className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
-                    <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
-                      <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <CardHeader className="pb-2 sm:pb-3 p-2.5 sm:p-3 md:p-4">
+                    <CardTitle className="text-[9px] sm:text-[10px] md:text-xs font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
+                      <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                       {stat.label}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-3 sm:p-4 pt-0">
-                    <div className={`text-base sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                    <div className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                       {stat.value}
                     </div>
                   </CardContent>
@@ -362,7 +363,7 @@ export default function MyCourses() {
                     placeholder="Rechercher par nom de cours..."
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
-                    className="pl-8 sm:pl-10 pr-8 sm:pr-20 h-9 sm:h-10 text-xs sm:text-sm"
+                    className="pl-8 sm:pl-10 pr-8 sm:pr-20 h-9 sm:h-10 text-[10px] sm:text-xs md:text-sm"
                     aria-label="Rechercher"
                   />
                   <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -394,19 +395,19 @@ export default function MyCourses() {
               <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1 w-full sm:w-auto">
                 <TabsTrigger 
                   value="all" 
-                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs md:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
                 >
                   Tous ({stats.total})
                 </TabsTrigger>
                 <TabsTrigger 
                   value="in-progress" 
-                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs md:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
                 >
                   En cours ({stats.inProgress})
                 </TabsTrigger>
                 <TabsTrigger 
                   value="completed" 
-                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs md:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
                 >
                   Terminés ({stats.completed})
                 </TabsTrigger>
@@ -423,8 +424,8 @@ export default function MyCourses() {
                           <div className="p-4 rounded-full bg-muted/50 w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 flex items-center justify-center">
                             <GraduationCap className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
                           </div>
-                          <h3 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-foreground mb-2 sm:mb-3">Aucun cours trouvé</h3>
-                          <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
+                          <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-foreground mb-2 sm:mb-3">Aucun cours trouvé</h3>
+                          <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-4 sm:mb-6">
                             {searchInput || activeTab !== 'all'
                               ? 'Aucun cours ne correspond à vos critères de recherche'
                               : 'Vous n\'êtes inscrit à aucun cours pour le moment. Explorez notre catalogue pour découvrir des cours passionnants !'}
@@ -485,10 +486,10 @@ export default function MyCourses() {
                           </div>
 
                           <CardHeader className="p-4 sm:p-6">
-                            <CardTitle className="text-base sm:text-lg lg:text-xl font-bold line-clamp-2 mb-2 group-hover:text-primary transition-colors duration-200">
+                            <CardTitle className="text-sm sm:text-base md:text-lg font-bold line-clamp-2 mb-2 group-hover:text-primary transition-colors duration-200">
                               {enrollment.course?.product?.name || 'Cours'}
                             </CardTitle>
-                            <CardDescription className="flex items-center gap-2 text-xs sm:text-sm">
+                            <CardDescription className="flex items-center gap-2 text-[10px] sm:text-xs md:text-sm">
                               <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                               <span>Inscrit le {new Date(enrollment.enrollment_date || enrollment.enrolled_at || new Date()).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                             </CardDescription>
@@ -497,7 +498,7 @@ export default function MyCourses() {
                           <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
                             {/* Progress Bar améliorée */}
                             <div className="space-y-2">
-                              <div className="flex items-center justify-between text-xs sm:text-sm">
+                              <div className="flex items-center justify-between text-[10px] sm:text-xs md:text-sm">
                                 <span className="font-medium text-foreground">Progression</span>
                                 <span className="font-bold text-primary">{enrollment.progress_percentage}%</span>
                               </div>
@@ -515,7 +516,7 @@ export default function MyCourses() {
                                   style={{ width: `${enrollment.progress_percentage}%` }}
                                 />
                               </div>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
                                 {enrollment.completed_lessons_count} / {enrollment.total_lessons_count} leçons complétées
                               </p>
                             </div>

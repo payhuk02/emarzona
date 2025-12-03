@@ -342,9 +342,9 @@ export default function PaymentsCustomers() {
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <div className="flex-1 flex items-center justify-center p-4">
-            <div className="text-center space-y-4">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto text-purple-500" />
-              <p className="text-muted-foreground">Chargement des données...</p>
+            <div className="text-center space-y-3 sm:space-y-4">
+              <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin mx-auto text-purple-500" />
+              <p className="text-xs sm:text-sm text-muted-foreground">Chargement des données...</p>
             </div>
           </div>
         </div>
@@ -359,14 +359,14 @@ export default function PaymentsCustomers() {
           <AppSidebar />
           <div className="flex-1 flex items-center justify-center p-4">
             <Card className="max-w-md">
-              <CardHeader className="text-center">
-                <CardTitle>Aucune boutique sélectionnée</CardTitle>
-                <CardDescription>
+              <CardHeader className="text-center p-4 sm:p-6">
+                <CardTitle className="text-sm sm:text-base md:text-lg">Aucune boutique sélectionnée</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   Veuillez sélectionner une boutique pour voir les paiements et clients.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="text-center">
-                <Button onClick={() => navigate('/dashboard/store')}>
+              <CardContent className="text-center p-4 sm:p-6 pt-0">
+                <Button size="sm" className="text-xs sm:text-sm" onClick={() => navigate('/dashboard/store')}>
                   Créer une boutique
                 </Button>
               </CardContent>
@@ -382,87 +382,93 @@ export default function PaymentsCustomers() {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-6 space-y-6">
+          <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-6">
             {/* Header */}
-            <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
               <div>
-                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5">
-                    <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
+                <h1 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold tracking-tight flex items-center gap-1.5 sm:gap-2">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5">
+                    <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-purple-500" />
                   </div>
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     Paiements & Clients
                   </span>
                 </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-0.5 sm:mt-1">
                   Vue unifiée de tous les paiements et références clients
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 sm:gap-2">
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={handleRefresh}
                   disabled={paymentsLoading || customersLoading}
+                  className="text-xs sm:text-sm"
                 >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${(paymentsLoading || customersLoading) ? 'animate-spin' : ''}`} />
-                  Actualiser
+                  <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 ${(paymentsLoading || customersLoading) ? 'animate-spin' : ''}`} />
+                  <span className="hidden sm:inline">Actualiser</span>
+                  <span className="sm:hidden">Raf.</span>
                 </Button>
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() => handleExportCSV('all')}
                   disabled={isExporting}
+                  className="text-xs sm:text-sm"
                 >
-                  <Download className="h-4 w-4 mr-2" />
-                  Exporter
+                  <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                  <span className="hidden sm:inline">Exporter</span>
+                  <span className="sm:hidden">Exp.</span>
                 </Button>
               </div>
             </div>
 
             {/* Stats Cards */}
-            <div ref={statsRef} className="grid gap-4 md:grid-cols-4 lg:grid-cols-5">
+            <div ref={statsRef} className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Total Paiements</CardTitle>
-                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Total Paiements</CardTitle>
+                  <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold">{stats.totalPayments}</div>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold">{stats.totalPayments}</div>
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Réussis</CardTitle>
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Réussis</CardTitle>
+                  <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold text-green-600">{stats.completedPayments}</div>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-green-600">{stats.completedPayments}</div>
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs sm:text-sm font-medium">En Attente</CardTitle>
-                  <Clock className="h-4 w-4 text-yellow-500" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">En Attente</CardTitle>
+                  <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold text-yellow-600">{stats.pendingPayments}</div>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-yellow-600">{stats.pendingPayments}</div>
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Échoués</CardTitle>
-                  <XCircle className="h-4 w-4 text-red-500" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Échoués</CardTitle>
+                  <XCircle className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold text-red-600">{stats.failedPayments}</div>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-red-600">{stats.failedPayments}</div>
                 </CardContent>
               </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Revenus</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <Card className="col-span-2 md:col-span-1">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Revenus</CardTitle>
+                  <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold">
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-2xl font-bold">
                     {stats.totalRevenue.toLocaleString('fr-FR')} XOF
                   </div>
                 </CardContent>
@@ -470,42 +476,42 @@ export default function PaymentsCustomers() {
             </div>
 
             {/* Customer Stats */}
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-1 sm:grid-cols-3">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Total Clients</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Total Clients</CardTitle>
+                  <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold">{stats.totalCustomers}</div>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold">{stats.totalCustomers}</div>
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Clients Actifs</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Clients Actifs</CardTitle>
+                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold">{stats.activeCustomers}</div>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold">{stats.activeCustomers}</div>
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Total Commandes</CardTitle>
-                  <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Total Commandes</CardTitle>
+                  <ShoppingBag className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold">{stats.totalOrders}</div>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold">{stats.totalOrders}</div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-                <TabsTrigger value="payments">Paiements ({filteredPayments.length})</TabsTrigger>
-                <TabsTrigger value="customers">Clients ({filteredCustomers.length})</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3 text-[10px] sm:text-xs md:text-sm">
+                <TabsTrigger value="overview" className="text-[10px] sm:text-xs md:text-sm">Vue d'ensemble</TabsTrigger>
+                <TabsTrigger value="payments" className="text-[10px] sm:text-xs md:text-sm">Paiements ({filteredPayments.length})</TabsTrigger>
+                <TabsTrigger value="customers" className="text-[10px] sm:text-xs md:text-sm">Clients ({filteredCustomers.length})</TabsTrigger>
               </TabsList>
 
               {/* Overview Tab */}
@@ -513,15 +519,15 @@ export default function PaymentsCustomers() {
                 <div className="grid gap-4 md:grid-cols-2">
                   {/* Recent Payments */}
                   <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base sm:text-lg">Paiements Récents</CardTitle>
-                      <CardDescription>Les 10 derniers paiements</CardDescription>
+                    <CardHeader className="p-3 sm:p-4 md:p-6">
+                      <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg">Paiements Récents</CardTitle>
+                      <CardDescription className="text-[10px] sm:text-xs md:text-sm">Les 10 derniers paiements</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
+                    <CardContent className="p-3 sm:p-4 md:p-6">
+                      <div className="space-y-1.5 sm:space-y-2">
                         {paymentsLoading ? (
-                          <div className="flex items-center justify-center py-8">
-                            <Loader2 className="h-6 w-6 animate-spin" />
+                          <div className="flex items-center justify-center py-4 sm:py-6 md:py-8">
+                            <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 animate-spin" />
                           </div>
                         ) : payments && payments.length > 0 ? (
                           payments.slice(0, 10).map((payment) => (
@@ -531,27 +537,28 @@ export default function PaymentsCustomers() {
                               onClick={() => handleViewPayment(payment)}
                             >
                               <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-sm">
+                                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                  <span className="font-medium text-[10px] sm:text-xs md:text-sm">
                                     {payment.customers?.name || 'Client inconnu'}
                                   </span>
-                                  {getStatusBadge(payment.status)}
+                                  <div className="text-[9px] sm:text-[10px]">{getStatusBadge(payment.status)}</div>
                                 </div>
-                                <div className="text-xs text-muted-foreground mt-1">
+                                <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">
                                   {payment.amount.toLocaleString('fr-FR')} {payment.currency} • {format(new Date(payment.created_at), 'dd MMM yyyy', { locale: fr })}
                                 </div>
                               </div>
-                              <Eye className="h-4 w-4 text-muted-foreground" />
+                              <Eye className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground shrink-0" />
                             </div>
                           ))
                         ) : (
-                          <p className="text-sm text-muted-foreground text-center py-4">Aucun paiement</p>
+                          <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground text-center py-3 sm:py-4">Aucun paiement</p>
                         )}
                       </div>
                       {payments && payments.length > 10 && (
                         <Button
                           variant="outline"
-                          className="w-full mt-4"
+                          size="sm"
+                          className="w-full mt-3 sm:mt-4 text-xs sm:text-sm"
                           onClick={() => setActiveTab('payments')}
                         >
                           Voir tous les paiements
@@ -562,15 +569,15 @@ export default function PaymentsCustomers() {
 
                   {/* Active Customers */}
                   <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base sm:text-lg">Clients Actifs</CardTitle>
-                      <CardDescription>Clients avec commandes récentes</CardDescription>
+                    <CardHeader className="p-3 sm:p-4 md:p-6">
+                      <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg">Clients Actifs</CardTitle>
+                      <CardDescription className="text-[10px] sm:text-xs md:text-sm">Clients avec commandes récentes</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
+                    <CardContent className="p-3 sm:p-4 md:p-6">
+                      <div className="space-y-1.5 sm:space-y-2">
                         {customersLoading ? (
-                          <div className="flex items-center justify-center py-8">
-                            <Loader2 className="h-6 w-6 animate-spin" />
+                          <div className="flex items-center justify-center py-4 sm:py-6 md:py-8">
+                            <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 animate-spin" />
                           </div>
                         ) : customers && customers.length > 0 ? (
                           customers
@@ -584,22 +591,23 @@ export default function PaymentsCustomers() {
                                 onClick={() => handleViewCustomer(customer)}
                               >
                                 <div className="flex-1">
-                                  <div className="font-medium text-sm">{customer.name}</div>
-                                  <div className="text-xs text-muted-foreground mt-1">
+                                  <div className="font-medium text-[10px] sm:text-xs md:text-sm">{customer.name}</div>
+                                  <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">
                                     {customer.total_orders || 0} commande(s) • {(Number(customer.total_spent) || 0).toLocaleString('fr-FR')} XOF
                                   </div>
                                 </div>
-                                <Eye className="h-4 w-4 text-muted-foreground" />
+                                <Eye className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground shrink-0" />
                               </div>
                             ))
                         ) : (
-                          <p className="text-sm text-muted-foreground text-center py-4">Aucun client actif</p>
+                          <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground text-center py-3 sm:py-4">Aucun client actif</p>
                         )}
                       </div>
                       {customers && customers.filter((c) => (c.total_orders || 0) > 0).length > 10 && (
                         <Button
                           variant="outline"
-                          className="w-full mt-4"
+                          size="sm"
+                          className="w-full mt-3 sm:mt-4 text-xs sm:text-sm"
                           onClick={() => setActiveTab('customers')}
                         >
                           Voir tous les clients
@@ -614,20 +622,20 @@ export default function PaymentsCustomers() {
               <TabsContent value="payments" className="space-y-4">
                 {/* Filters */}
                 <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col sm:flex-row gap-4">
+                  <CardContent className="pt-3 sm:pt-4 md:pt-6 p-3 sm:p-4 md:p-6">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4">
                       <div className="relative flex-1">
-                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Search className="absolute left-2 top-2.5 h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                         <Input
                           placeholder="Rechercher par transaction, client, commande..."
                           value={searchInput}
                           onChange={(e) => setSearchInput(e.target.value)}
-                          className="pl-8"
+                          className="pl-7 sm:pl-8 text-xs sm:text-sm h-8 sm:h-10"
                         />
                       </div>
                       <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
-                        <SelectTrigger className="w-full sm:w-[180px]">
-                          <Filter className="h-4 w-4 mr-2" />
+                        <SelectTrigger className="w-full sm:w-[180px] text-xs sm:text-sm h-8 sm:h-10">
+                          <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                           <SelectValue placeholder="Statut" />
                         </SelectTrigger>
                         <SelectContent>
@@ -641,11 +649,14 @@ export default function PaymentsCustomers() {
                       </Select>
                       <Button
                         variant="outline"
+                        size="sm"
                         onClick={() => handleExportCSV('payments')}
                         disabled={isExporting}
+                        className="text-xs sm:text-sm h-8 sm:h-10"
                       >
-                        <Download className="h-4 w-4 mr-2" />
-                        Exporter
+                        <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                        <span className="hidden sm:inline">Exporter</span>
+                        <span className="sm:hidden">Exp.</span>
                       </Button>
                     </div>
                   </CardContent>
@@ -653,65 +664,65 @@ export default function PaymentsCustomers() {
 
                 {/* Payments Table */}
                 <Card ref={contentRef}>
-                  <CardHeader>
-                    <CardTitle>Paiements</CardTitle>
-                    <CardDescription>
+                  <CardHeader className="p-3 sm:p-4 md:p-6">
+                    <CardTitle className="text-xs sm:text-sm md:text-base">Paiements</CardTitle>
+                    <CardDescription className="text-[10px] sm:text-xs md:text-sm">
                       {filteredPayments.length} paiement(s) trouvé(s)
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-3 sm:p-4 md:p-6">
                     {paymentsLoading ? (
-                      <div className="flex items-center justify-center py-8">
-                        <Loader2 className="h-8 w-8 animate-spin" />
+                      <div className="flex items-center justify-center py-4 sm:py-6 md:py-8">
+                        <Loader2 className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 animate-spin" />
                       </div>
                     ) : filteredPayments.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-8">Aucun paiement trouvé</p>
+                      <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground text-center py-6 sm:py-8">Aucun paiement trouvé</p>
                     ) : (
                       <div className="overflow-x-auto">
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>Transaction ID</TableHead>
-                              <TableHead>Client</TableHead>
-                              <TableHead>Montant</TableHead>
-                              <TableHead>Statut</TableHead>
-                              <TableHead>Méthode</TableHead>
-                              <TableHead>Commande</TableHead>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Actions</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm">Transaction ID</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm">Client</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm">Montant</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm">Statut</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm hidden md:table-cell">Méthode</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm hidden lg:table-cell">Commande</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm">Date</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm">Actions</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {filteredPayments.map((payment) => (
                               <TableRow key={payment.id}>
-                                <TableCell className="font-mono text-xs">
-                                  {payment.transaction_id?.substring(0, 12) || payment.id.substring(0, 8)}...
+                                <TableCell className="font-mono text-[10px] sm:text-xs">
+                                  {payment.transaction_id?.substring(0, 8) || payment.id.substring(0, 6)}...
                                 </TableCell>
                                 <TableCell>
                                   <div>
-                                    <div className="font-medium text-sm">
+                                    <div className="font-medium text-[10px] sm:text-xs md:text-sm">
                                       {payment.customers?.name || 'N/A'}
                                     </div>
                                     {payment.customers?.email && (
-                                      <div className="text-xs text-muted-foreground">
+                                      <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
                                         {payment.customers.email}
                                       </div>
                                     )}
                                   </div>
                                 </TableCell>
                                 <TableCell>
-                                  <div className="font-semibold">
+                                  <div className="font-semibold text-[10px] sm:text-xs md:text-sm">
                                     {payment.amount.toLocaleString('fr-FR')} {payment.currency}
                                   </div>
                                 </TableCell>
-                                <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                                <TableCell>
-                                  <Badge variant="outline">{payment.payment_method}</Badge>
+                                <TableCell><div className="text-[9px] sm:text-[10px]">{getStatusBadge(payment.status)}</div></TableCell>
+                                <TableCell className="hidden md:table-cell">
+                                  <Badge variant="outline" className="text-[9px] sm:text-[10px]">{payment.payment_method}</Badge>
                                 </TableCell>
-                                <TableCell className="text-xs">
+                                <TableCell className="text-[10px] sm:text-xs hidden lg:table-cell">
                                   {payment.orders?.order_number || 'N/A'}
                                 </TableCell>
-                                <TableCell className="text-xs">
+                                <TableCell className="text-[10px] sm:text-xs">
                                   {format(new Date(payment.created_at), 'dd MMM yyyy', { locale: fr })}
                                 </TableCell>
                                 <TableCell>
@@ -719,8 +730,9 @@ export default function PaymentsCustomers() {
                                     size="sm"
                                     variant="ghost"
                                     onClick={() => handleViewPayment(payment)}
+                                    className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                                   >
-                                    <Eye className="h-4 w-4" />
+                                    <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                                   </Button>
                                 </TableCell>
                               </TableRow>
@@ -740,21 +752,24 @@ export default function PaymentsCustomers() {
                   <CardContent className="pt-6">
                     <div className="flex flex-col sm:flex-row gap-4">
                       <div className="relative flex-1">
-                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Search className="absolute left-2 top-2.5 h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                         <Input
                           placeholder="Rechercher par nom, email, téléphone..."
                           value={searchInput}
                           onChange={(e) => setSearchInput(e.target.value)}
-                          className="pl-8"
+                          className="pl-7 sm:pl-8 text-xs sm:text-sm h-8 sm:h-10"
                         />
                       </div>
                       <Button
                         variant="outline"
+                        size="sm"
                         onClick={() => handleExportCSV('customers')}
                         disabled={isExporting}
+                        className="text-xs sm:text-sm h-8 sm:h-10"
                       >
-                        <Download className="h-4 w-4 mr-2" />
-                        Exporter
+                        <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                        <span className="hidden sm:inline">Exporter</span>
+                        <span className="sm:hidden">Exp.</span>
                       </Button>
                     </div>
                   </CardContent>
@@ -762,31 +777,31 @@ export default function PaymentsCustomers() {
 
                 {/* Customers Table */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Clients</CardTitle>
-                    <CardDescription>
+                  <CardHeader className="p-3 sm:p-4 md:p-6">
+                    <CardTitle className="text-xs sm:text-sm md:text-base">Clients</CardTitle>
+                    <CardDescription className="text-[10px] sm:text-xs md:text-sm">
                       {filteredCustomers.length} client(s) trouvé(s)
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-3 sm:p-4 md:p-6">
                     {customersLoading ? (
-                      <div className="flex items-center justify-center py-8">
-                        <Loader2 className="h-8 w-8 animate-spin" />
+                      <div className="flex items-center justify-center py-4 sm:py-6 md:py-8">
+                        <Loader2 className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 animate-spin" />
                       </div>
                     ) : filteredCustomers.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-8">Aucun client trouvé</p>
+                      <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground text-center py-6 sm:py-8">Aucun client trouvé</p>
                     ) : (
                       <div className="overflow-x-auto">
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>Nom</TableHead>
-                              <TableHead>Contact</TableHead>
-                              <TableHead>Localisation</TableHead>
-                              <TableHead>Commandes</TableHead>
-                              <TableHead>Total Dépensé</TableHead>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Actions</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm">Nom</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm hidden sm:table-cell">Contact</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm hidden md:table-cell">Localisation</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm">Commandes</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm">Total Dépensé</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm hidden lg:table-cell">Date</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs md:text-sm">Actions</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -799,28 +814,28 @@ export default function PaymentsCustomers() {
                               return (
                                 <TableRow key={customer.id}>
                                   <TableCell>
-                                    <div className="font-medium">{customer.name}</div>
+                                    <div className="font-medium text-[10px] sm:text-xs md:text-sm">{customer.name}</div>
                                   </TableCell>
-                                  <TableCell>
+                                  <TableCell className="hidden sm:table-cell">
                                     <div className="space-y-1">
                                       {customer.email && (
-                                        <div className="flex items-center gap-1 text-xs">
-                                          <Mail className="h-3 w-3" />
+                                        <div className="flex items-center gap-1 text-[9px] sm:text-[10px] md:text-xs">
+                                          <Mail className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                                           {customer.email}
                                         </div>
                                       )}
                                       {customer.phone && (
-                                        <div className="flex items-center gap-1 text-xs">
-                                          <Phone className="h-3 w-3" />
+                                        <div className="flex items-center gap-1 text-[9px] sm:text-[10px] md:text-xs">
+                                          <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                                           {customer.phone}
                                         </div>
                                       )}
                                     </div>
                                   </TableCell>
-                                  <TableCell>
+                                  <TableCell className="hidden md:table-cell">
                                     {(customer.city || customer.country) && (
-                                      <div className="flex items-center gap-1 text-xs">
-                                        <MapPin className="h-3 w-3" />
+                                      <div className="flex items-center gap-1 text-[10px] sm:text-xs">
+                                        <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                                         {customer.city && customer.country
                                           ? `${customer.city}, ${customer.country}`
                                           : customer.city || customer.country}
@@ -829,20 +844,20 @@ export default function PaymentsCustomers() {
                                   </TableCell>
                                   <TableCell>
                                     <div className="space-y-1">
-                                      <div className="font-medium">{customer.total_orders || 0}</div>
+                                      <div className="font-medium text-[10px] sm:text-xs md:text-sm">{customer.total_orders || 0}</div>
                                       {customerPayments.length > 0 && (
-                                        <div className="text-xs text-muted-foreground">
+                                        <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
                                           {completedPayments} ✓ {pendingPayments} ⏳ {failedPayments} ✗
                                         </div>
                                       )}
                                     </div>
                                   </TableCell>
                                   <TableCell>
-                                    <div className="font-semibold">
+                                    <div className="font-semibold text-[10px] sm:text-xs md:text-sm">
                                       {(Number(customer.total_spent) || 0).toLocaleString('fr-FR')} XOF
                                     </div>
                                   </TableCell>
-                                  <TableCell className="text-xs">
+                                  <TableCell className="text-[10px] sm:text-xs hidden lg:table-cell">
                                     {format(new Date(customer.created_at), 'dd MMM yyyy', { locale: fr })}
                                   </TableCell>
                                   <TableCell>
@@ -850,8 +865,9 @@ export default function PaymentsCustomers() {
                                       size="sm"
                                       variant="ghost"
                                       onClick={() => handleViewCustomer(customer)}
+                                      className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                                     >
-                                      <Eye className="h-4 w-4" />
+                                      <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                                     </Button>
                                   </TableCell>
                                 </TableRow>
@@ -868,58 +884,58 @@ export default function PaymentsCustomers() {
 
             {/* View Payment Dialog */}
             <Dialog open={viewPaymentDialogOpen} onOpenChange={setViewPaymentDialogOpen}>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Détails du Paiement</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle className="text-sm sm:text-base md:text-lg">Détails du Paiement</DialogTitle>
+                  <DialogDescription className="text-xs sm:text-sm">
                     Informations complètes sur le paiement
                   </DialogDescription>
                 </DialogHeader>
                 {selectedPayment && (
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Transaction ID</label>
-                        <p className="font-mono text-sm">{selectedPayment.transaction_id || selectedPayment.id}</p>
+                        <label className="text-xs sm:text-sm font-medium text-muted-foreground">Transaction ID</label>
+                        <p className="font-mono text-[10px] sm:text-xs md:text-sm">{selectedPayment.transaction_id || selectedPayment.id}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Statut</label>
-                        <div className="mt-1">{getStatusBadge(selectedPayment.status)}</div>
+                        <label className="text-xs sm:text-sm font-medium text-muted-foreground">Statut</label>
+                        <div className="mt-1 text-[9px] sm:text-[10px]">{getStatusBadge(selectedPayment.status)}</div>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Montant</label>
-                        <p className="text-lg font-semibold">
+                        <label className="text-xs sm:text-sm font-medium text-muted-foreground">Montant</label>
+                        <p className="text-sm sm:text-base md:text-lg font-semibold">
                           {selectedPayment.amount.toLocaleString('fr-FR')} {selectedPayment.currency}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Méthode</label>
-                        <p>{selectedPayment.payment_method}</p>
+                        <label className="text-xs sm:text-sm font-medium text-muted-foreground">Méthode</label>
+                        <p className="text-[10px] sm:text-xs md:text-sm">{selectedPayment.payment_method}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Client</label>
-                        <p>{selectedPayment.customers?.name || 'N/A'}</p>
+                        <label className="text-xs sm:text-sm font-medium text-muted-foreground">Client</label>
+                        <p className="text-[10px] sm:text-xs md:text-sm">{selectedPayment.customers?.name || 'N/A'}</p>
                         {selectedPayment.customers?.email && (
-                          <p className="text-sm text-muted-foreground">{selectedPayment.customers.email}</p>
+                          <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">{selectedPayment.customers.email}</p>
                         )}
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Commande</label>
-                        <p>{selectedPayment.orders?.order_number || 'N/A'}</p>
+                        <label className="text-xs sm:text-sm font-medium text-muted-foreground">Commande</label>
+                        <p className="text-[10px] sm:text-xs md:text-sm">{selectedPayment.orders?.order_number || 'N/A'}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Date de création</label>
-                        <p>{format(new Date(selectedPayment.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}</p>
+                        <label className="text-xs sm:text-sm font-medium text-muted-foreground">Date de création</label>
+                        <p className="text-[10px] sm:text-xs md:text-sm">{format(new Date(selectedPayment.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Dernière mise à jour</label>
-                        <p>{format(new Date(selectedPayment.updated_at), 'dd MMM yyyy HH:mm', { locale: fr })}</p>
+                        <label className="text-xs sm:text-sm font-medium text-muted-foreground">Dernière mise à jour</label>
+                        <p className="text-[10px] sm:text-xs md:text-sm">{format(new Date(selectedPayment.updated_at), 'dd MMM yyyy HH:mm', { locale: fr })}</p>
                       </div>
                     </div>
                     {selectedPayment.notes && (
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Notes</label>
-                        <p className="text-sm">{selectedPayment.notes}</p>
+                        <label className="text-xs sm:text-sm font-medium text-muted-foreground">Notes</label>
+                        <p className="text-[10px] sm:text-xs md:text-sm">{selectedPayment.notes}</p>
                       </div>
                     )}
                   </div>
@@ -931,8 +947,8 @@ export default function PaymentsCustomers() {
             <Dialog open={viewCustomerDialogOpen} onOpenChange={setViewCustomerDialogOpen}>
               <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Détails du Client</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle className="text-sm sm:text-base md:text-lg">Détails du Client</DialogTitle>
+                  <DialogDescription className="text-xs sm:text-sm">
                     Informations complètes et historique des paiements
                   </DialogDescription>
                 </DialogHeader>
@@ -940,35 +956,35 @@ export default function PaymentsCustomers() {
                   <div className="space-y-6">
                     {/* Customer Info */}
                     <div>
-                      <h3 className="font-semibold mb-3">Informations</h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <h3 className="font-semibold mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">Informations</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                          <label className="text-sm font-medium text-muted-foreground">Nom</label>
-                          <p className="font-medium">{selectedCustomer.name}</p>
+                          <label className="text-xs sm:text-sm font-medium text-muted-foreground">Nom</label>
+                          <p className="font-medium text-[10px] sm:text-xs md:text-sm">{selectedCustomer.name}</p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-muted-foreground">Email</label>
-                          <p>{selectedCustomer.email || 'N/A'}</p>
+                          <label className="text-xs sm:text-sm font-medium text-muted-foreground">Email</label>
+                          <p className="text-[10px] sm:text-xs md:text-sm">{selectedCustomer.email || 'N/A'}</p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-muted-foreground">Téléphone</label>
-                          <p>{selectedCustomer.phone || 'N/A'}</p>
+                          <label className="text-xs sm:text-sm font-medium text-muted-foreground">Téléphone</label>
+                          <p className="text-[10px] sm:text-xs md:text-sm">{selectedCustomer.phone || 'N/A'}</p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-muted-foreground">Localisation</label>
-                          <p>
+                          <label className="text-xs sm:text-sm font-medium text-muted-foreground">Localisation</label>
+                          <p className="text-[10px] sm:text-xs md:text-sm">
                             {selectedCustomer.city && selectedCustomer.country
                               ? `${selectedCustomer.city}, ${selectedCustomer.country}`
                               : selectedCustomer.city || selectedCustomer.country || 'N/A'}
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-muted-foreground">Total Commandes</label>
-                          <p className="font-semibold">{selectedCustomer.total_orders || 0}</p>
+                          <label className="text-xs sm:text-sm font-medium text-muted-foreground">Total Commandes</label>
+                          <p className="font-semibold text-[10px] sm:text-xs md:text-sm">{selectedCustomer.total_orders || 0}</p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-muted-foreground">Total Dépensé</label>
-                          <p className="font-semibold">
+                          <label className="text-xs sm:text-sm font-medium text-muted-foreground">Total Dépensé</label>
+                          <p className="font-semibold text-[10px] sm:text-xs md:text-sm">
                             {(Number(selectedCustomer.total_spent) || 0).toLocaleString('fr-FR')} XOF
                           </p>
                         </div>
@@ -982,21 +998,21 @@ export default function PaymentsCustomers() {
 
                       return (
                         <div>
-                          <h3 className="font-semibold mb-3">Historique des Paiements ({customerPayments.length})</h3>
+                          <h3 className="font-semibold mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">Historique des Paiements ({customerPayments.length})</h3>
                           <div className="space-y-2 max-h-96 overflow-y-auto">
                             {customerPayments.map((payment) => (
                               <div
                                 key={payment.id}
-                                className="flex items-center justify-between p-3 border rounded-lg"
+                                className="flex items-center justify-between p-2 sm:p-3 border rounded-lg"
                               >
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium text-sm">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                    <span className="font-medium text-[10px] sm:text-xs md:text-sm">
                                       {payment.amount.toLocaleString('fr-FR')} {payment.currency}
                                     </span>
-                                    {getStatusBadge(payment.status)}
+                                    <div className="text-[9px] sm:text-[10px]">{getStatusBadge(payment.status)}</div>
                                   </div>
-                                  <div className="text-xs text-muted-foreground mt-1">
+                                  <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">
                                     {payment.payment_method} • {format(new Date(payment.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}
                                     {payment.orders?.order_number && ` • Commande: ${payment.orders.order_number}`}
                                   </div>
@@ -1009,8 +1025,9 @@ export default function PaymentsCustomers() {
                                     setSelectedPayment(payment);
                                     setViewPaymentDialogOpen(true);
                                   }}
+                                  className="h-7 w-7 sm:h-8 sm:w-8 p-0 shrink-0 ml-2"
                                 >
-                                  <Eye className="h-4 w-4" />
+                                  <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                                 </Button>
                               </div>
                             ))}

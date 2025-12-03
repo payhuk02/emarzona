@@ -620,10 +620,10 @@ const Products = () => {
               </div>
             ) : products.length === 0 ? (
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-8 sm:p-12 text-center">
-                  <Package className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4 animate-in zoom-in duration-500" />
-                  <h3 className="text-sm sm:text-lg md:text-xl font-semibold mb-2">{t('products.empty.title')}</h3>
-                  <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-4">
+                <CardContent className="p-4 sm:p-6 md:p-8 lg:p-12 text-center">
+                  <Package className="h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 text-muted-foreground mx-auto mb-3 sm:mb-4 animate-in zoom-in duration-500" />
+                  <h3 className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold mb-1.5 sm:mb-2">{t('products.empty.title')}</h3>
+                  <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mb-3 sm:mb-4">
                     {t('products.empty.description')}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
@@ -765,8 +765,8 @@ const Products = () => {
                     <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                       <CardContent className="p-8 sm:p-12 text-center">
                         <Package className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4 animate-in zoom-in duration-500" />
-                        <h3 className="text-sm sm:text-lg md:text-xl font-semibold mb-2">{t('products.empty.noResults')}</h3>
-                        <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-4">
+                        <h3 className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold mb-1.5 sm:mb-2">{t('products.empty.noResults')}</h3>
+                        <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mb-3 sm:mb-4">
                           {t('products.empty.noResultsDescription')}
                         </p>
                         <Button 
@@ -1073,7 +1073,7 @@ const Products = () => {
               )}
 
               <div>
-                <h3 className="text-2xl font-bold mb-2">{quickViewProduct.name}</h3>
+                <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold mb-1.5 sm:mb-2">{quickViewProduct.name}</h3>
                 <div className="flex items-center gap-2 mb-4">
                   <Badge variant={quickViewProduct.is_active ? "default" : "secondary"}>
                     {quickViewProduct.is_active ? "Actif" : "Inactif"}
@@ -1087,7 +1087,7 @@ const Products = () => {
 
               <div>
                 <h4 className="font-semibold mb-2">Prix</h4>
-                <p className="text-2xl font-bold text-primary">
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-primary">
                   {quickViewProduct.price.toLocaleString()} {quickViewProduct.currency || 'FCFA'}
                 </p>
               </div>

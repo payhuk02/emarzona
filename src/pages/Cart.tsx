@@ -102,16 +102,16 @@ export default function Cart() {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto space-y-4 sm:space-y-5 md:space-y-6">
             {/* Header */}
             <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
               <div>
-                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
-                  <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8" aria-hidden="true" />
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
+                  <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-7 lg:w-7" aria-hidden="true" />
                   {getValue('cart.title')}
                 </h1>
-                <p className="text-sm sm:text-base text-muted-foreground mt-1" id="cart-description">
+                <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-0.5 sm:mt-1" id="cart-description">
                   {summary.item_count} {getValue('cart.itemCount') || (summary.item_count > 1 ? 'articles' : 'article')}
                 </p>
               </div>
@@ -123,7 +123,7 @@ export default function Cart() {
                   aria-label="Vider le panier"
                 >
                   <Trash2 className="h-4 w-4 sm:h-5 sm:w-5 mr-2" aria-hidden="true" />
-                  <span className="text-sm sm:text-base">{getValue('cart.clearCart')}</span>
+                  <span className="text-xs sm:text-sm md:text-base">{getValue('cart.clearCart')}</span>
                 </Button>
               )}
             </header>

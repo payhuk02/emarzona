@@ -405,14 +405,14 @@ const Orders = () => {
                     className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2 sm:p-3 md:p-4">
-                      <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
-                        <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
+                    <CardHeader className="pb-1 sm:pb-1.5 md:pb-2 lg:pb-3 p-2 sm:p-2.5 md:p-3 lg:p-4">
+                      <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                        <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5 lg:h-4 lg:w-4" />
                         {stat.label}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-2 sm:p-3 md:p-4 pt-0">
-                      <div className={`text-base sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                      <div className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                         {stat.value}
                       </div>
                     </CardContent>
@@ -604,8 +604,8 @@ const Orders = () => {
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
             <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16" role="status" aria-live="polite">
               <Package className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" aria-hidden="true" />
-              <h3 className="text-sm sm:text-lg md:text-xl font-semibold mb-2">{t('orders.empty.title', 'Aucune commande')}</h3>
-              <p className="text-xs sm:text-sm md:text-base text-muted-foreground text-center mb-4 max-w-md">
+              <h3 className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold mb-1.5 sm:mb-2">{t('orders.empty.title', 'Aucune commande')}</h3>
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground text-center mb-3 sm:mb-4 max-w-md">
                 {searchInput || statusFilter !== "all" || paymentStatusFilter !== "all" || dateRange?.from
                   ? t('orders.empty.noResults', 'Aucune commande ne correspond à vos critères de recherche')
                   : t('orders.empty.description', 'Commencez par créer votre première commande')}
@@ -616,7 +616,7 @@ const Orders = () => {
                     setIsCreateDialogOpen(true);
                     logger.info('Ouverture dialog création depuis état vide');
                   }}
-                  className="min-h-[44px] bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base"
+                  className="min-h-[44px] bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm md:text-base"
                   aria-label={t('orders.empty.createFirst', 'Créer votre première commande')}
                 >
                   <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" aria-hidden="true" />
