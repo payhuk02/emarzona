@@ -206,7 +206,7 @@ export const DigitalProductsCompare = () => {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <Card className="p-12 text-center">
           <AlertCircle className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-bold mb-2">Aucun produit à comparer</h2>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-2">Aucun produit à comparer</h2>
           <p className="text-muted-foreground mb-6">
             Ajoutez des produits à votre comparaison pour les voir côte à côte
           </p>
@@ -225,8 +225,8 @@ export const DigitalProductsCompare = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Comparaison de produits</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold mb-2">Comparaison de produits</h1>
+            <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
               Comparez jusqu'à {MAX_COMPARISON} produits digitaux côte à côte
             </p>
           </div>

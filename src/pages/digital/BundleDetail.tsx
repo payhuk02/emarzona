@@ -144,7 +144,7 @@ export default function BundleDetail() {
               </div>
 
               <CardHeader>
-                <CardTitle className="text-3xl">{bundle.name}</CardTitle>
+                <CardTitle className="text-lg sm:text-2xl md:text-3xl">{bundle.name}</CardTitle>
                 {bundle.short_description && (
                   <CardDescription className="text-base">
                     {bundle.short_description}
@@ -236,8 +236,8 @@ export default function BundleDetail() {
                   )}
                   <Separator />
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold">Prix du bundle:</span>
-                    <span className="text-3xl font-bold text-primary">
+                    <span className="text-base sm:text-xl md:text-2xl font-bold">Prix du bundle:</span>
+                    <span className="text-lg sm:text-2xl md:text-3xl font-bold text-primary">
                       {formatPrice(bundle.bundle_price)} XOF
                     </span>
                   </div>

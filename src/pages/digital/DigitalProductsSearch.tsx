@@ -406,8 +406,8 @@ export const DigitalProductsSearch = () => {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Recherche de produits digitaux</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-bold mb-2">Recherche de produits digitaux</h1>
+          <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
             Trouvez exactement ce que vous cherchez avec notre recherche avancée
           </p>
         </div>

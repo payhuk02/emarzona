@@ -17,6 +17,11 @@ import {
   Zap,
   Star,
   Percent,
+  PenTool,
+  Palette,
+  Award,
+  Shield,
+  User,
 } from 'lucide-react';
 
 /**
@@ -271,6 +276,80 @@ export function getProductKeyInfo(product: UnifiedProduct): ProductKeyInfo[] {
       }
 
       break;
+
+    case 'artist':
+      // Type d'artiste
+      if (product.artist_type) {
+        const artistTypeLabels: Record<string, string> = {
+          writer: 'Écrivain',
+          musician: 'Musicien',
+          visual_artist: 'Artiste visuel',
+          designer: 'Designer',
+          multimedia: 'Multimédia',
+          other: 'Artiste',
+        };
+        keyInfo.push({
+          label: 'Type',
+          value: artistTypeLabels[product.artist_type] || 'Artiste',
+          icon: PenTool,
+        });
+      }
+
+      // Nom de l'artiste
+      if (product.artist_name) {
+        keyInfo.push({
+          label: 'Artiste',
+          value: product.artist_name,
+          icon: User,
+        });
+      }
+
+      // Type d'édition
+      if (product.edition_type) {
+        const editionLabels: Record<string, string> = {
+          original: 'Original',
+          limited_edition: 'Édition limitée',
+          print: 'Tirage',
+          reproduction: 'Reproduction',
+        };
+        keyInfo.push({
+          label: 'Édition',
+          value: editionLabels[product.edition_type] || product.edition_type,
+          icon: Palette,
+        });
+      }
+
+      // Édition limitée
+      if (product.edition_type === 'limited_edition' && product.edition_number && product.total_editions) {
+        keyInfo.push({
+          label: 'Numéro',
+          value: `${product.edition_number}/${product.total_editions}`,
+          icon: Award,
+          badge: true,
+        });
+      }
+
+      // Certificat d'authenticité
+      if (product.certificate_of_authenticity) {
+        keyInfo.push({
+          label: 'Certificat',
+          value: 'Authentifié',
+          icon: Shield,
+          badge: true,
+        });
+      }
+
+      // Livraison fragile
+      if (product.shipping_fragile) {
+        keyInfo.push({
+          label: 'Livraison',
+          value: 'Fragile',
+          icon: Package,
+          badge: true,
+        });
+      }
+
+      break;
   }
 
   return keyInfo;
@@ -335,6 +414,22 @@ export function getProductTypeBadge(product: UnifiedProduct): {
         color: 'bg-orange-500',
         icon: FileText,
       };
+
+    case 'artist': {
+      const artistTypeLabels: Record<string, string> = {
+        writer: 'Écrivain',
+        musician: 'Musicien',
+        visual_artist: 'Artiste visuel',
+        designer: 'Designer',
+        multimedia: 'Multimédia',
+        other: 'Artiste',
+      };
+      return {
+        label: artistTypeLabels[product.artist_type || 'other'] || 'Artiste',
+        color: 'bg-pink-500',
+        icon: Palette,
+      };
+    }
 
     default:
       return {

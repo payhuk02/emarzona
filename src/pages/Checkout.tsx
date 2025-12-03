@@ -794,11 +794,11 @@ export default function Checkout() {
           <div className="max-w-6xl mx-auto space-y-6">
             {/* Header */}
             <header>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
-                <ShoppingBag className="h-8 w-8" aria-hidden="true" />
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
+                <ShoppingBag className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" aria-hidden="true" />
                 Finaliser la commande
               </h1>
-              <p className="text-muted-foreground mt-1" id="checkout-description">
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1" id="checkout-description">
                 Remplissez vos informations pour compléter votre achat
               </p>
             </header>
@@ -1132,7 +1132,7 @@ export default function Checkout() {
                           )}
                           <div className="flex justify-between items-center text-lg font-bold pt-2 border-t">
                             <span>Total Général:</span>
-                            <span className="text-2xl text-primary">
+                            <span className="text-base sm:text-xl md:text-2xl text-primary">
                               {Math.max(0, Array.from(storeGroups.values())
                                 .reduce((sum, group) => sum + (group.total || 0), 0) - (appliedCouponCode ? couponDiscount : 0))
                                 .toLocaleString('fr-FR')} XOF

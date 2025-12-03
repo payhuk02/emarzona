@@ -185,11 +185,11 @@ export default function RecurringBookingsManagement() {
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
             <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
-                <Repeat className="h-8 w-8" />
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
+                <Repeat className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" />
                 Gestion des Réservations Récurrentes
               </h1>
-              <p className="text-muted-foreground mt-1">
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
                 Gérez vos séries de réservations qui se répètent automatiquement
               </p>
             </div>
@@ -198,7 +198,7 @@ export default function RecurringBookingsManagement() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card>
                 <CardContent className="pt-6">
-                  <div className="text-2xl font-bold">{patterns?.length || 0}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{patterns?.length || 0}</div>
                   <div className="text-sm text-muted-foreground">Séries totales</div>
                 </CardContent>
               </Card>

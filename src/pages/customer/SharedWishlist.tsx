@@ -111,11 +111,11 @@ export default function SharedWishlist() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold flex items-center gap-2 mb-2">
-            <Heart className="h-8 w-8 text-red-500" />
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 mb-2">
+            <Heart className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-red-500" />
             Wishlist partagée
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
             {products.length} produit{products.length > 1 ? 's' : ''} dans cette wishlist
           </p>
         </div>

@@ -227,7 +227,7 @@ const CourseDetail = () => {
             <Badge variant="secondary" className="mb-4">
               {product.category}
             </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-4">
               {product.name}
             </h1>
             <p className="text-xl text-orange-100 mb-6">
@@ -365,7 +365,7 @@ const CourseDetail = () => {
             {/* Description */}
             <Card>
               <CardContent className="p-6">
-                <h2 className="text-2xl font-bold mb-4">À propos de ce cours</h2>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4">À propos de ce cours</h2>
                 <div className="prose prose-sm max-w-none">
                   <p className="text-gray-700 whitespace-pre-line">
                     {product.description}
@@ -606,7 +606,7 @@ const CourseDetail = () => {
                   {product.promotional_price && product.promotional_price < product.price ? (
                     <div>
                       <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-bold text-orange-600">
+                        <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-orange-600">
                           {product.promotional_price.toLocaleString()} {product.currency}
                         </span>
                       </div>
@@ -618,7 +618,7 @@ const CourseDetail = () => {
                       </Badge>
                     </div>
                   ) : (
-                    <div className="text-4xl font-bold">
+                    <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold">
                       {product.price.toLocaleString()} {product.currency}
                     </div>
                   )}

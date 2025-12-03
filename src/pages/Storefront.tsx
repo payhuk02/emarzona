@@ -247,7 +247,7 @@ const Storefront = () => {
           <div className="h-20 w-20 rounded-full bg-red-500/10 mx-auto mb-4 flex items-center justify-center">
             <AlertCircle className="h-10 w-10 text-red-500" aria-hidden="true" />
           </div>
-          <h1 className="text-2xl font-bold mb-2 text-foreground">Boutique introuvable</h1>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 text-foreground">Boutique introuvable</h1>
           <p className="text-muted-foreground mb-6">
             {error || "Cette boutique n'existe pas ou a été supprimée."}
           </p>

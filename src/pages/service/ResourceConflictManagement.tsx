@@ -51,15 +51,15 @@ export default function ResourceConflictManagement() {
               <div className="flex items-center gap-3">
                 <SidebarTrigger />
                 <div>
-                  <h1 className="text-3xl font-bold flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5 border border-orange-500/20">
-                      <AlertTriangle className="h-6 w-6 text-orange-500" />
+                  <h1 className="text-lg sm:text-2xl md:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
+                    <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5 border border-orange-500/20">
+                      <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-orange-500" />
                     </div>
                     <span className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                       Gestion des Conflits de Ressources
                     </span>
                   </h1>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-1">
                     Détectez, analysez et résolvez les conflits de ressources
                   </p>
                 </div>

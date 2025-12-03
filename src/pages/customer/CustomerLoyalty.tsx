@@ -173,11 +173,11 @@ export default function CustomerLoyalty() {
       <div className="flex-1 p-6 space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Award className="h-8 w-8" />
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
+            <Award className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" />
             Programme de Fidélité
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
             Consultez vos points, échangez des récompenses et suivez votre progression
           </p>
         </div>
@@ -222,8 +222,8 @@ export default function CustomerLoyalty() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold">{defaultStore?.available_points || 0}</span>
-                    <span className="text-lg text-muted-foreground">points disponibles</span>
+                    <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold">{defaultStore?.available_points || 0}</span>
+                    <span className="text-sm sm:text-base md:text-lg text-muted-foreground">points disponibles</span>
                   </div>
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div>
@@ -256,7 +256,7 @@ export default function CustomerLoyalty() {
                   <CardContent className="space-y-4">
                     <div className="flex items-center gap-4">
                       <div
-                        className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold text-white"
+                        className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white"
                         style={{
                           backgroundColor: TIER_COLORS[defaultStore.current_tier_type] || '#808080',
                         }}
@@ -264,7 +264,7 @@ export default function CustomerLoyalty() {
                         {defaultStore.current_tier_type[0].toUpperCase()}
                       </div>
                       <div>
-                        <div className="text-2xl font-bold">
+                        <div className="text-base sm:text-xl md:text-2xl font-bold">
                           {defaultStore.current_tier?.name || defaultStore.current_tier_type.toUpperCase()}
                         </div>
                         {defaultStore.current_tier?.description && (

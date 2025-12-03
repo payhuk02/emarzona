@@ -65,8 +65,8 @@ export const MyDownloads = () => {
           <div className="container mx-auto p-6 space-y-6">
             {/* Header */}
             <div>
-              <h1 className="text-3xl font-bold">Mes Téléchargements</h1>
-              <p className="text-muted-foreground mt-1">
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold">Mes Téléchargements</h1>
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
                 Accédez à tous vos fichiers téléchargés
               </p>
             </div>
@@ -79,7 +79,7 @@ export const MyDownloads = () => {
                   <Download className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.total}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.total}</div>
                   <p className="text-xs text-muted-foreground">
                     Téléchargements
                   </p>
@@ -92,7 +92,7 @@ export const MyDownloads = () => {
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold text-green-600">
                     {stats.successful}
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -107,7 +107,7 @@ export const MyDownloads = () => {
                   <XCircle className="h-4 w-4 text-red-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold text-red-600">
                     {stats.failed}
                   </div>
                   <p className="text-xs text-muted-foreground">

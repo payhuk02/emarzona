@@ -504,9 +504,9 @@ export default function PhysicalProductDetail() {
               {/* Title & Category */}
               <div>
                 <Badge className="mb-2">{product?.category}</Badge>
-                <h1 className="text-3xl font-bold mb-2">{product?.name}</h1>
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold mb-2">{product?.name}</h1>
                 {product?.short_description && (
-                  <p className="text-muted-foreground">
+                  <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
                     {product.short_description}
                   </p>
                 )}
@@ -514,7 +514,7 @@ export default function PhysicalProductDetail() {
 
               {/* Price */}
               <div className="flex items-center gap-4">
-                <span className="text-3xl font-bold">
+                <span className="text-lg sm:text-2xl md:text-3xl font-bold">
                   {product?.price.toLocaleString()} {product?.currency}
                 </span>
                 {product?.promotional_price && (

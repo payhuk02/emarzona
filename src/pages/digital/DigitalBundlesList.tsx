@@ -121,8 +121,8 @@ export const DigitalBundlesList = () => {
                     <Package className="w-8 h-8 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-bold">Bundles de Produits</h1>
-                    <p className="text-purple-100 mt-1">
+                    <h1 className="text-lg sm:text-2xl md:text-3xl font-bold">Bundles de Produits</h1>
+                    <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-purple-100 mt-1">
                       Groupez vos produits digitaux pour augmenter vos ventes
                     </p>
                   </div>
@@ -141,11 +141,11 @@ export const DigitalBundlesList = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Bundles</CardTitle>
-                  <Package className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Total Bundles</CardTitle>
+                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalBundles}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.totalBundles}</div>
                 </CardContent>
               </Card>
 
@@ -155,7 +155,7 @@ export const DigitalBundlesList = () => {
                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalSales}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.totalSales}</div>
                 </CardContent>
               </Card>
 
@@ -165,7 +165,7 @@ export const DigitalBundlesList = () => {
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">
                     {stats.totalRevenue.toLocaleString()} XOF
                   </div>
                 </CardContent>
@@ -177,7 +177,7 @@ export const DigitalBundlesList = () => {
                   <Sparkles className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.featuredCount}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.featuredCount}</div>
                 </CardContent>
               </Card>
             </div>

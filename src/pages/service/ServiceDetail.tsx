@@ -536,9 +536,9 @@ export default function ServiceDetail() {
               {/* Title & Category */}
               <div>
                 <Badge className="mb-2">{service?.category}</Badge>
-                <h1 className="text-3xl font-bold mb-2">{service?.name}</h1>
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold mb-2">{service?.name}</h1>
                 {service?.short_description && (
-                  <p className="text-lg text-muted-foreground">
+                  <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
                     {service.short_description}
                   </p>
                 )}
@@ -547,7 +547,7 @@ export default function ServiceDetail() {
               {/* Service Details */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Détails du service</CardTitle>
+                  <CardTitle className="text-sm sm:text-base md:text-lg">Détails du service</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4">
                   <div className="flex items-center gap-3">
@@ -621,7 +621,7 @@ export default function ServiceDetail() {
                   {/* Service Details */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Détails du service</CardTitle>
+                      <CardTitle className="text-sm sm:text-base md:text-lg">Détails du service</CardTitle>
                     </CardHeader>
                     <CardContent className="grid grid-cols-2 gap-4">
                       <div className="flex items-center gap-3">
@@ -678,7 +678,7 @@ export default function ServiceDetail() {
                 <TabsContent value="team" className="space-y-6">
                   {service?.staff && service.staff.length > 0 ? (
                     <div className="space-y-4">
-                      <h2 className="text-2xl font-bold">Notre équipe</h2>
+                      <h2 className="text-lg sm:text-xl md:text-2xl font-bold">Notre équipe</h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {service.staff.map((member: any) => (
                           <StaffCard

@@ -3,7 +3,7 @@
  * vers le format UnifiedProduct
  */
 
-import { UnifiedProduct, DigitalProduct, PhysicalProduct, ServiceProduct, CourseProduct } from '@/types/unified-product';
+import { UnifiedProduct, DigitalProduct, PhysicalProduct, ServiceProduct, CourseProduct, ArtistProduct } from '@/types/unified-product';
 
 /**
  * Transforme un produit de la base de données vers UnifiedProduct
@@ -102,6 +102,29 @@ export function transformToUnifiedProduct(product: any): UnifiedProduct {
         total_duration: product.total_duration,
         difficulty: product.difficulty,
       } as CourseProduct;
+
+    case 'artist':
+      // Récupérer les données artist depuis artist_products si disponible
+      const artistData = product.artist || product.artist_products?.[0];
+      return {
+        ...base,
+        type: 'artist',
+        artist_type: artistData?.artist_type || 'other',
+        artist_name: artistData?.artist_name,
+        artist_bio: artistData?.artist_bio,
+        artwork_title: artistData?.artwork_title || product.name,
+        artwork_year: artistData?.artwork_year,
+        artwork_medium: artistData?.artwork_medium,
+        artwork_dimensions: artistData?.artwork_dimensions,
+        edition_type: artistData?.artwork_edition_type,
+        edition_number: artistData?.edition_number,
+        total_editions: artistData?.total_editions,
+        requires_shipping: artistData?.requires_shipping !== false,
+        shipping_fragile: artistData?.shipping_fragile || false,
+        shipping_insurance_required: artistData?.shipping_insurance_required || false,
+        certificate_of_authenticity: artistData?.certificate_of_authenticity || false,
+        signature_authenticated: artistData?.signature_authenticated || false,
+      } as ArtistProduct;
 
     default:
       // Par défaut, traiter comme digital

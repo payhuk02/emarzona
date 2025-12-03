@@ -109,8 +109,8 @@ export default function DigitalProductAnalytics() {
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Retour
                 </Button>
-                <h1 className="text-3xl font-bold">Analytics - {digitalProduct.product.name}</h1>
-                <p className="text-muted-foreground mt-1">
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold">Analytics - {digitalProduct.product.name}</h1>
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
                   Statistiques détaillées de téléchargements et licenses
                 </p>
               </div>

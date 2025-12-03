@@ -107,8 +107,8 @@ export default function Cart() {
             {/* Header */}
             <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-                  <ShoppingBag className="h-6 w-6 sm:h-8 sm:w-8" aria-hidden="true" />
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
+                  <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8" aria-hidden="true" />
                   {getValue('cart.title')}
                 </h1>
                 <p className="text-sm sm:text-base text-muted-foreground mt-1" id="cart-description">

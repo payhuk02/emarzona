@@ -243,8 +243,8 @@ export default function MyFavorites() {
                   >
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
-                  <h1 className="text-3xl font-bold flex items-center gap-2">
-                    <Heart className="h-8 w-8 text-red-500 fill-red-500" />
+                  <h1 className="text-lg sm:text-2xl md:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
+                    <Heart className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-red-500 fill-red-500" />
                     Mes Favoris
                   </h1>
                 </div>
@@ -277,7 +277,7 @@ export default function MyFavorites() {
                   <Heart className="h-4 w-4 text-red-500 fill-red-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.total}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.total}</div>
                   <p className="text-xs text-muted-foreground">Produits favoris</p>
                 </CardContent>
               </Card>
@@ -288,7 +288,7 @@ export default function MyFavorites() {
                   <Download className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">{stats.digital}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold text-blue-600">{stats.digital}</div>
                   <p className="text-xs text-muted-foreground">Produits</p>
                 </CardContent>
               </Card>
@@ -299,7 +299,7 @@ export default function MyFavorites() {
                   <Package className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{stats.physical}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold text-green-600">{stats.physical}</div>
                   <p className="text-xs text-muted-foreground">Produits</p>
                 </CardContent>
               </Card>
@@ -310,7 +310,7 @@ export default function MyFavorites() {
                   <Calendar className="h-4 w-4 text-purple-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-purple-600">{stats.service}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold text-purple-600">{stats.service}</div>
                   <p className="text-xs text-muted-foreground">Produits</p>
                 </CardContent>
               </Card>
@@ -321,7 +321,7 @@ export default function MyFavorites() {
                   <BookOpen className="h-4 w-4 text-orange-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-orange-600">{stats.course}</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold text-orange-600">{stats.course}</div>
                   <p className="text-xs text-muted-foreground">Produits</p>
                 </CardContent>
               </Card>
