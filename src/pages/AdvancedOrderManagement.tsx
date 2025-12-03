@@ -23,14 +23,8 @@ import {
   TrendingUp,
   CheckCircle,
   Package,
-  AlertCircle,
   Loader2,
   RefreshCw,
-  Clock,
-  Users,
-  ArrowUpRight,
-  Sparkles,
-  Zap,
 } from "lucide-react";
 import { useStore } from "@/hooks/useStore";
 import type { Store } from "@/hooks/useStore";
@@ -52,7 +46,6 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 // Composant séparé pour éviter les erreurs de hooks conditionnels
 const AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("payments");
   const [selectedOrderId, setSelectedOrderId] = useState<string | undefined>();
@@ -522,6 +515,7 @@ const AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
 
 const AdvancedOrderManagement = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { store, loading: storeLoading } = useStore();
 
   // Loading state
