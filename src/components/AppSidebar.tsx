@@ -120,19 +120,39 @@ const menuSections = [
         icon: User,
       },
       {
+        title: "Mon Profil",
+        url: "/account/profile",
+        icon: User,
+      },
+      {
         title: "Mes Commandes",
         url: "/account/orders",
         icon: ShoppingCart,
       },
       {
+        title: "Mes Factures",
+        url: "/account/invoices",
+        icon: Receipt,
+      },
+      {
+        title: "Mes Retours",
+        url: "/account/returns",
+        icon: RotateCcw,
+      },
+      {
+        title: "Ma Liste de Souhaits",
+        url: "/account/wishlist",
+        icon: Heart,
+      },
+      {
+        title: "Mes Alertes",
+        url: "/account/alerts",
+        icon: Bell,
+      },
+      {
         title: "Mes Téléchargements",
         url: "/account/downloads",
         icon: Download,
-      },
-      {
-        title: "Gamification",
-        url: "/dashboard/gamification",
-        icon: Trophy,
       },
       {
         title: "Mon Portail Digital",
@@ -150,39 +170,9 @@ const menuSections = [
         icon: GraduationCap,
       },
       {
-        title: "Créer un Cours",
-        url: "/dashboard/courses/new",
-        icon: GraduationCap,
-      },
-      {
-        title: "Ma Liste de Souhaits",
-        url: "/account/wishlist",
-        icon: Heart,
-      },
-      {
-        title: "Mes Alertes",
-        url: "/account/alerts",
-        icon: Bell,
-      },
-      {
-        title: "Mes Factures",
-        url: "/account/invoices",
-        icon: Receipt,
-      },
-      {
-        title: "Mes Retours",
-        url: "/account/returns",
-        icon: RotateCcw,
-      },
-      {
-        title: "Mon Profil",
-        url: "/account/profile",
-        icon: User,
-      },
-      {
-        title: "Tableau de bord Affilié",
-        url: "/affiliate/dashboard",
-        icon: TrendingUp,
+        title: "Gamification",
+        url: "/dashboard/gamification",
+        icon: Trophy,
       },
     ]
   },
@@ -197,6 +187,11 @@ const menuSections = [
       {
         title: "Mes Cours",
         url: "/dashboard/my-courses",
+        icon: GraduationCap,
+      },
+      {
+        title: "Créer un Cours",
+        url: "/dashboard/courses/new",
         icon: GraduationCap,
       },
       {
@@ -215,19 +210,24 @@ const menuSections = [
         icon: Key,
       },
       {
-        title: "Bundles Produits",
-        url: "/dashboard/digital-products/bundles/create",
-        icon: Layers,
+        title: "Gestion des Licences",
+        url: "/dashboard/license-management",
+        icon: Key,
       },
       {
-        title: "Analytics Digitaux",
-        url: "/dashboard/digital-products",
-        icon: BarChart,
+        title: "Bundles Produits Digitaux",
+        url: "/dashboard/digital-products/bundles/create",
+        icon: Layers,
       },
       {
         title: "Mises à jour Digitales",
         url: "/dashboard/digital/updates",
         icon: Sparkles,
+      },
+      {
+        title: "Analytics Digitaux",
+        url: "/dashboard/digital-products",
+        icon: BarChart,
       },
     ]
   },
@@ -385,7 +385,7 @@ const menuSections = [
         icon: Package,
       },
       {
-        title: "Bundles Produits",
+        title: "Bundles Produits Physiques",
         url: "/dashboard/physical-bundles",
         icon: ShoppingBag,
       },
@@ -419,6 +419,11 @@ const menuSections = [
   {
     label: "Marketing & Croissance",
     items: [
+      {
+        title: "Marketing",
+        url: "/dashboard/marketing",
+        icon: Target,
+      },
       {
         title: "Clients",
         url: "/dashboard/customers",
@@ -467,6 +472,11 @@ const menuSections = [
       {
         title: "Affiliation",
         url: "/dashboard/affiliates",
+        icon: TrendingUp,
+      },
+      {
+        title: "Tableau de bord Affilié",
+        url: "/affiliate/dashboard",
         icon: TrendingUp,
       },
       {

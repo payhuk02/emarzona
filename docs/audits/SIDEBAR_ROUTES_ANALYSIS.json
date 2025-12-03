@@ -1,0 +1,688 @@
+{
+  "summary": {
+    "totalSidebarLinks": 135,
+    "totalRoutes": 183,
+    "missingRoutes": 0,
+    "orphanRoutes": 68
+  },
+  "sections": [
+    {
+      "label": "Principal",
+      "items": [
+        {
+          "title": "Tableau de bord",
+          "url": "/dashboard"
+        },
+        {
+          "title": "Boutique",
+          "url": "/dashboard/store"
+        },
+        {
+          "title": "Marketplace",
+          "url": "/marketplace"
+        }
+      ]
+    },
+    {
+      "label": "Mon Compte",
+      "items": [
+        {
+          "title": "Portail Client",
+          "url": "/account"
+        },
+        {
+          "title": "Mes Commandes",
+          "url": "/account/orders"
+        },
+        {
+          "title": "Mes Téléchargements",
+          "url": "/account/downloads"
+        },
+        {
+          "title": "Gamification",
+          "url": "/dashboard/gamification"
+        },
+        {
+          "title": "Mon Portail Digital",
+          "url": "/account/digital"
+        },
+        {
+          "title": "Mon Portail Produits Physiques",
+          "url": "/account/physical"
+        },
+        {
+          "title": "Mes Cours",
+          "url": "/account/courses"
+        },
+        {
+          "title": "Créer un Cours",
+          "url": "/dashboard/courses/new"
+        },
+        {
+          "title": "Ma Liste de Souhaits",
+          "url": "/account/wishlist"
+        },
+        {
+          "title": "Mes Alertes",
+          "url": "/account/alerts"
+        },
+        {
+          "title": "Mes Factures",
+          "url": "/account/invoices"
+        },
+        {
+          "title": "Mes Retours",
+          "url": "/account/returns"
+        },
+        {
+          "title": "Mon Profil",
+          "url": "/account/profile"
+        },
+        {
+          "title": "Tableau de bord Affilié",
+          "url": "/affiliate/dashboard"
+        }
+      ]
+    },
+    {
+      "label": "Produits & Cours",
+      "items": [
+        {
+          "title": "Produits",
+          "url": "/dashboard/products"
+        },
+        {
+          "title": "Mes Cours",
+          "url": "/dashboard/my-courses"
+        },
+        {
+          "title": "Produits Digitaux",
+          "url": "/dashboard/digital-products"
+        },
+        {
+          "title": "Mes Téléchargements",
+          "url": "/dashboard/my-downloads"
+        },
+        {
+          "title": "Mes Licences",
+          "url": "/dashboard/my-licenses"
+        },
+        {
+          "title": "Bundles Produits",
+          "url": "/dashboard/digital-products/bundles/create"
+        },
+        {
+          "title": "Analytics Digitaux",
+          "url": "/dashboard/digital-products"
+        },
+        {
+          "title": "Mises à jour Digitales",
+          "url": "/dashboard/digital/updates"
+        }
+      ]
+    },
+    {
+      "label": "Ventes & Logistique",
+      "items": [
+        {
+          "title": "Commandes",
+          "url": "/dashboard/orders"
+        },
+        {
+          "title": "Équipe",
+          "url": "/dashboard/store/team"
+        },
+        {
+          "title": "Mes Tâches",
+          "url": "/dashboard/tasks"
+        },
+        {
+          "title": "Retraits",
+          "url": "/dashboard/withdrawals"
+        },
+        {
+          "title": "Méthodes de paiement",
+          "url": "/dashboard/payment-methods"
+        },
+        {
+          "title": "Commandes Avancées",
+          "url": "/dashboard/advanced-orders"
+        },
+        {
+          "title": "Messages Clients",
+          "url": "/vendor/messaging"
+        },
+        {
+          "title": "Réservations",
+          "url": "/dashboard/bookings"
+        },
+        {
+          "title": "Calendrier Avancé",
+          "url": "/dashboard/advanced-calendar"
+        },
+        {
+          "title": "Gestion des Services",
+          "url": "/dashboard/service-management"
+        },
+        {
+          "title": "Réservations Récurrentes",
+          "url": "/dashboard/recurring-bookings"
+        },
+        {
+          "title": "Calendrier Staff",
+          "url": "/dashboard/services/staff-availability"
+        },
+        {
+          "title": "Conflits Ressources",
+          "url": "/dashboard/services/resource-conflicts"
+        },
+        {
+          "title": "Inventaire",
+          "url": "/dashboard/inventory"
+        },
+        {
+          "title": "Expéditions",
+          "url": "/dashboard/shipping"
+        },
+        {
+          "title": "Services de Livraison",
+          "url": "/dashboard/shipping-services"
+        },
+        {
+          "title": "Contacter un Service",
+          "url": "/dashboard/contact-shipping-service"
+        },
+        {
+          "title": "Expéditions Batch",
+          "url": "/dashboard/batch-shipping"
+        },
+        {
+          "title": "Kits Produits",
+          "url": "/dashboard/product-kits"
+        },
+        {
+          "title": "Prévisions Demande",
+          "url": "/dashboard/demand-forecasting"
+        },
+        {
+          "title": "Optimisation Coûts",
+          "url": "/dashboard/cost-optimization"
+        },
+        {
+          "title": "Fournisseurs",
+          "url": "/dashboard/suppliers"
+        },
+        {
+          "title": "Entrepôts",
+          "url": "/dashboard/warehouses"
+        },
+        {
+          "title": "Gestion Stocks Produits Physiques",
+          "url": "/dashboard/physical-inventory"
+        },
+        {
+          "title": "Analytics Produits Physiques",
+          "url": "/dashboard/physical-analytics"
+        },
+        {
+          "title": "Lots & Expiration",
+          "url": "/dashboard/physical-lots"
+        },
+        {
+          "title": "Numéros de Série & Traçabilité",
+          "url": "/dashboard/physical-serial-tracking"
+        },
+        {
+          "title": "Scanner Codes-barres",
+          "url": "/dashboard/physical-barcode-scanner"
+        },
+        {
+          "title": "Précommandes",
+          "url": "/dashboard/physical-preorders"
+        },
+        {
+          "title": "Backorders",
+          "url": "/dashboard/physical-backorders"
+        },
+        {
+          "title": "Bundles Produits",
+          "url": "/dashboard/physical-bundles"
+        },
+        {
+          "title": "Multi-devises",
+          "url": "/dashboard/multi-currency"
+        }
+      ]
+    },
+    {
+      "label": "Finance & Paiements",
+      "items": [
+        {
+          "title": "Paiements",
+          "url": "/dashboard/payments"
+        },
+        {
+          "title": "Solde à Payer",
+          "url": "/dashboard/pay-balance"
+        },
+        {
+          "title": "Gestion Paiements",
+          "url": "/dashboard/payment-management"
+        }
+      ]
+    },
+    {
+      "label": "Marketing & Croissance",
+      "items": [
+        {
+          "title": "Clients",
+          "url": "/dashboard/customers"
+        },
+        {
+          "title": "Promotions",
+          "url": "/dashboard/promotions"
+        },
+        {
+          "title": "Campagnes Email",
+          "url": "/dashboard/emails/campaigns"
+        },
+        {
+          "title": "Séquences Email",
+          "url": "/dashboard/emails/sequences"
+        },
+        {
+          "title": "Segments d'Audience",
+          "url": "/dashboard/emails/segments"
+        },
+        {
+          "title": "Analytics Email",
+          "url": "/dashboard/emails/analytics"
+        },
+        {
+          "title": "Workflows Email",
+          "url": "/dashboard/emails/workflows"
+        },
+        {
+          "title": "Éditeur Templates",
+          "url": "/dashboard/emails/templates/editor"
+        },
+        {
+          "title": "Parrainage",
+          "url": "/dashboard/referrals"
+        },
+        {
+          "title": "Affiliation",
+          "url": "/dashboard/affiliates"
+        },
+        {
+          "title": "Cours Promus",
+          "url": "/affiliate/courses"
+        }
+      ]
+    },
+    {
+      "label": "Analytics & SEO",
+      "items": [
+        {
+          "title": "Statistiques",
+          "url": "/dashboard/analytics"
+        },
+        {
+          "title": "Mes Pixels",
+          "url": "/dashboard/pixels"
+        },
+        {
+          "title": "Mon SEO",
+          "url": "/dashboard/seo"
+        }
+      ]
+    },
+    {
+      "label": "Systèmes & Intégrations",
+      "items": [
+        {
+          "title": "Intégrations",
+          "url": "/dashboard/integrations"
+        },
+        {
+          "title": "Webhooks",
+          "url": "/dashboard/webhooks"
+        },
+        {
+          "title": "Webhooks Produits Digitaux",
+          "url": "/dashboard/digital-webhooks"
+        },
+        {
+          "title": "Webhooks Produits Physiques",
+          "url": "/dashboard/physical-webhooks"
+        },
+        {
+          "title": "Programme de Fidélité",
+          "url": "/dashboard/loyalty"
+        },
+        {
+          "title": "Cartes Cadeaux",
+          "url": "/dashboard/gift-cards"
+        }
+      ]
+    },
+    {
+      "label": "Configuration",
+      "items": [
+        {
+          "title": "KYC",
+          "url": "/dashboard/kyc"
+        },
+        {
+          "title": "Paramètres",
+          "url": "/dashboard/settings"
+        },
+        {
+          "title": "Rejoindre la communauté",
+          "url": "/community"
+        }
+      ]
+    },
+    {
+      "label": "[ADMIN] Administration",
+      "items": [
+        {
+          "title": "Vue d'ensemble",
+          "url": "/admin"
+        },
+        {
+          "title": "Utilisateurs",
+          "url": "/admin/users"
+        },
+        {
+          "title": "Boutiques",
+          "url": "/admin/stores"
+        }
+      ]
+    },
+    {
+      "label": "[ADMIN] Catalogue",
+      "items": [
+        {
+          "title": "Produits",
+          "url": "/admin/products"
+        },
+        {
+          "title": "Cours",
+          "url": "/admin/courses"
+        },
+        {
+          "title": "Produits Digitaux",
+          "url": "/dashboard/digital-products"
+        },
+        {
+          "title": "Produits Physiques",
+          "url": "/dashboard/products"
+        },
+        {
+          "title": "Services",
+          "url": "/dashboard/bookings"
+        },
+        {
+          "title": "Avis",
+          "url": "/admin/reviews"
+        },
+        {
+          "title": "Licences",
+          "url": "/dashboard/license-management"
+        }
+      ]
+    },
+    {
+      "label": "[ADMIN] Commerce",
+      "items": [
+        {
+          "title": "Ventes",
+          "url": "/admin/sales"
+        },
+        {
+          "title": "Commandes",
+          "url": "/admin/orders"
+        },
+        {
+          "title": "Inventaire Global",
+          "url": "/admin/inventory"
+        },
+        {
+          "title": "Expéditions",
+          "url": "/admin/shipping"
+        },
+        {
+          "title": "Retours",
+          "url": "/admin/returns"
+        },
+        {
+          "title": "Calendrier Avancé",
+          "url": "/dashboard/advanced-calendar"
+        },
+        {
+          "title": "Gestion des Services",
+          "url": "/dashboard/service-management"
+        },
+        {
+          "title": "Réservations Récurrentes",
+          "url": "/dashboard/recurring-bookings"
+        },
+        {
+          "title": "Kits Produits",
+          "url": "/dashboard/product-kits"
+        },
+        {
+          "title": "Prévisions Demande",
+          "url": "/dashboard/demand-forecasting"
+        },
+        {
+          "title": "Optimisation Coûts",
+          "url": "/dashboard/cost-optimization"
+        },
+        {
+          "title": "Expéditions Batch",
+          "url": "/dashboard/batch-shipping"
+        },
+        {
+          "title": "Fournisseurs",
+          "url": "/dashboard/suppliers"
+        },
+        {
+          "title": "Entrepôts",
+          "url": "/dashboard/warehouses"
+        },
+        {
+          "title": "Gestion des Affiliés",
+          "url": "/dashboard/store-affiliates"
+        }
+      ]
+    },
+    {
+      "label": "[ADMIN] Finance",
+      "items": [
+        {
+          "title": "Revenus Plateforme",
+          "url": "/admin/revenue"
+        },
+        {
+          "title": "Paiements",
+          "url": "/admin/payments"
+        },
+        {
+          "title": "Retraits Vendeurs",
+          "url": "/admin/store-withdrawals"
+        },
+        {
+          "title": "Taxes",
+          "url": "/admin/taxes"
+        },
+        {
+          "title": "Litiges",
+          "url": "/admin/disputes"
+        },
+        {
+          "title": "Statistiques Moneroo",
+          "url": "/admin/moneroo-analytics"
+        },
+        {
+          "title": "Réconciliation Moneroo",
+          "url": "/admin/moneroo-reconciliation"
+        },
+        {
+          "title": "Monitoring Transactions",
+          "url": "/admin/transaction-monitoring"
+        }
+      ]
+    },
+    {
+      "label": "[ADMIN] Systèmes & Intégrations",
+      "items": [
+        {
+          "title": "Intégrations",
+          "url": "/admin/integrations"
+        },
+        {
+          "title": "Webhooks",
+          "url": "/admin/webhooks"
+        },
+        {
+          "title": "Webhooks Produits Digitaux",
+          "url": "/dashboard/digital-webhooks"
+        },
+        {
+          "title": "Webhooks Produits Physiques",
+          "url": "/dashboard/physical-webhooks"
+        },
+        {
+          "title": "Programme de Fidélité",
+          "url": "/admin/loyalty"
+        },
+        {
+          "title": "Cartes Cadeaux",
+          "url": "/admin/gift-cards"
+        }
+      ]
+    },
+    {
+      "label": "[ADMIN] Croissance",
+      "items": [
+        {
+          "title": "Parrainages",
+          "url": "/admin/referrals"
+        },
+        {
+          "title": "Affiliation",
+          "url": "/admin/affiliates"
+        },
+        {
+          "title": "Analytics",
+          "url": "/admin/analytics"
+        }
+      ]
+    },
+    {
+      "label": "[ADMIN] Sécurité & Support",
+      "items": [
+        {
+          "title": "Admin KYC",
+          "url": "/admin/kyc"
+        },
+        {
+          "title": "Sécurité 2FA",
+          "url": "/admin/security"
+        },
+        {
+          "title": "Activité",
+          "url": "/admin/activity"
+        },
+        {
+          "title": "Audit",
+          "url": "/admin/audit"
+        },
+        {
+          "title": "Support",
+          "url": "/admin/support"
+        },
+        {
+          "title": "Notifications",
+          "url": "/admin/notifications"
+        }
+      ]
+    },
+    {
+      "label": "[ADMIN] Configuration",
+      "items": [
+        {
+          "title": "Paramètres",
+          "url": "/admin/settings"
+        },
+        {
+          "title": "Commissions",
+          "url": "/admin/commission-settings"
+        },
+        {
+          "title": "Paiements Commissions",
+          "url": "/admin/commission-payments"
+        },
+        {
+          "title": "Personnalisation",
+          "url": "/admin/platform-customization"
+        }
+      ]
+    }
+  ],
+  "missingRoutes": [],
+  "orphanRoutes": [
+    "/account/orders",
+    "/account/downloads",
+    "/account/digital",
+    "/account/physical",
+    "/account/courses",
+    "/account/profile",
+    "/account/wishlist",
+    "/account/alerts",
+    "/account/invoices",
+    "/account/returns",
+    "/account/loyalty",
+    "/account/gift-cards",
+    "/dashboard/advanced-orders-test",
+    "/dashboard/marketing",
+    "/dashboard/physical-promotions",
+    "/affiliate/dashboard",
+    "/affiliate/courses",
+    "/affiliate/courses/:slug",
+    "/dashboard/digital/updates/:productId",
+    "/dashboard/services/staff-availability/:serviceId",
+    "/dashboard/services/recurring-bookings",
+    "/dashboard/shipping-service-messages/:conversationId",
+    "/admin/users",
+    "/admin/stores",
+    "/admin/products",
+    "/admin/sales",
+    "/admin/referrals",
+    "/admin/activity",
+    "/admin/settings",
+    "/admin/commission-settings",
+    "/admin/commission-payments",
+    "/admin/platform-customization",
+    "/admin/moneroo-analytics",
+    "/admin/moneroo-reconciliation",
+    "/admin/transaction-monitoring",
+    "/admin/notifications",
+    "/admin/revenue",
+    "/admin/kyc",
+    "/admin/disputes",
+    "/admin/affiliates",
+    "/admin/store-withdrawals",
+    "/admin/reviews",
+    "/admin/inventory",
+    "/admin/support",
+    "/admin/payments",
+    "/admin/shipping",
+    "/admin/shipping-conversations",
+    "/admin/vendor-conversations",
+    "/admin/courses",
+    "/admin/security"
+  ]
+}

@@ -143,9 +143,9 @@ export const StoreDashboardMockup = () => {
   ];
 
   return (
-    <div className="relative rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl border border-gray-200/50 bg-white flex flex-col h-[500px] md:h-[550px]">
-      {/* TopNavigationBar - Barre de navigation horizontale */}
-      <div className="bg-white border-b border-gray-200 px-3 md:px-4 py-2 flex items-center justify-between shrink-0">
+    <div className="relative rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl border border-gray-200/60 bg-gradient-to-br from-white via-slate-50/30 to-white backdrop-blur-xl flex flex-col h-[450px] sm:h-[500px] md:h-[550px] lg:h-[600px]">
+      {/* TopNavigationBar - Barre de navigation horizontale Premium */}
+      <div className="bg-white/95 backdrop-blur-md border-b border-gray-200/80 px-3 md:px-4 py-2 flex items-center justify-between shrink-0 shadow-sm">
         {/* Logo */}
         <div className="flex items-center gap-2 shrink-0">
           <div className="h-7 w-7 rounded bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
@@ -190,8 +190,8 @@ export const StoreDashboardMockup = () => {
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar - Style Emarzona avec dégradé bleu */}
-        <div className="w-64 md:w-72 bg-gradient-to-b from-blue-600 via-blue-700 to-blue-800 border-r border-blue-500/30 flex flex-col shrink-0 shadow-lg">
+        {/* Sidebar - Style Emarzona avec dégradé bleu Premium */}
+        <div className="w-56 sm:w-64 md:w-72 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 border-r border-blue-500/40 flex flex-col shrink-0 shadow-xl">
           {/* Logo et sections */}
           <div className="p-3 md:p-4 border-b border-blue-500/30">
             <div className="flex items-center gap-2 mb-3">
@@ -340,10 +340,10 @@ export const StoreDashboardMockup = () => {
           </div>
         </div>
 
-        {/* Contenu Principal */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
-          {/* Header avec titre gradient */}
-          <div className="bg-white border-b border-gray-200 px-4 md:px-6 py-4 md:py-5">
+        {/* Contenu Principal Premium */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
+          {/* Header avec titre gradient Premium */}
+          <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/80 px-4 md:px-6 py-3 md:py-4 shadow-sm">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
                 <LayoutDashboard className="h-5 w-5 md:h-6 md:w-6 text-purple-600" />
@@ -364,32 +364,32 @@ export const StoreDashboardMockup = () => {
           {/* Contenu scrollable */}
           <div className="flex-1 overflow-y-auto p-4 md:p-6">
             {/* KPI Cards - 4 cartes principales Premium */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5 mb-5 md:mb-6">
               {stats.map((stat, index) => (
                 <Card
                   key={index}
-                  className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 bg-gradient-to-br from-white to-gray-50/80 backdrop-blur-sm"
+                  className="group relative overflow-hidden border border-gray-200/60 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-white via-white to-gray-50/50 backdrop-blur-sm"
                 >
                   {/* Effet de brillance au hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/0 group-hover:from-white/30 group-hover:via-white/20 group-hover:to-white/0 transition-all duration-500"></div>
                   
-                  <CardContent className="relative p-4 md:p-5">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className={`relative p-3 rounded-xl bg-gradient-to-br ${stat.color} shadow-lg shadow-black/10`}>
-                        <stat.icon className="h-5 w-5 md:h-6 md:w-6 text-white" />
-                        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent"></div>
+                  <CardContent className="relative p-3 sm:p-4 md:p-5">
+                    <div className="flex items-start justify-between mb-2 sm:mb-3">
+                      <div className={`relative p-2.5 sm:p-3 rounded-xl bg-gradient-to-br ${stat.color} shadow-xl shadow-black/20 group-hover:scale-110 transition-transform duration-300`}>
+                        <stat.icon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white" />
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/30 to-transparent"></div>
                       </div>
-                      <Badge className="text-[10px] px-2 py-1 bg-gray-100 text-gray-700 font-semibold border-0 shadow-sm">
+                      <Badge className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gray-100/80 backdrop-blur-sm text-gray-700 font-bold border border-gray-200/50 shadow-sm">
                         {stat.trend}
                       </Badge>
                     </div>
-                    <div className="space-y-1">
-                      <div className={`text-2xl md:text-3xl font-bold bg-gradient-to-r ${stat.textColor} bg-clip-text text-transparent`}>
-                        {stat.value} {stat.currency && <span className="text-base text-gray-600">{stat.currency}</span>}
+                    <div className="space-y-0.5 sm:space-y-1">
+                      <div className={`text-xl sm:text-2xl md:text-3xl font-extrabold bg-gradient-to-r ${stat.textColor} bg-clip-text text-transparent`}>
+                        {stat.value} {stat.currency && <span className="text-sm sm:text-base text-gray-600">{stat.currency}</span>}
                       </div>
-                      <div className="text-xs md:text-sm font-bold text-gray-800">{stat.label}</div>
+                      <div className="text-[10px] sm:text-xs md:text-sm font-bold text-gray-800">{stat.label}</div>
                       {stat.subtitle && (
-                        <div className="text-[10px] md:text-xs text-gray-500 font-medium">{stat.subtitle}</div>
+                        <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500 font-semibold">{stat.subtitle}</div>
                       )}
                     </div>
                   </CardContent>
@@ -397,27 +397,27 @@ export const StoreDashboardMockup = () => {
               ))}
             </div>
 
-            {/* Actions rapides Premium */}
-            <div className="mb-5">
-              <h2 className="text-base md:text-lg font-bold text-gray-900 mb-4">Actions rapides</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+            {/* Actions rapides Premium - Responsive */}
+            <div className="mb-4 sm:mb-5">
+              <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-gray-900 mb-3 sm:mb-4">Actions rapides</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
                 {quickActions.map((action, index) => {
                   const Icon = action.icon;
                   return (
                     <Card
                       key={index}
-                      className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 bg-gradient-to-br from-white to-gray-50/80 backdrop-blur-sm cursor-pointer"
+                      className="group relative overflow-hidden border border-gray-200/60 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-white via-white to-gray-50/50 backdrop-blur-sm cursor-pointer"
                     >
                       {/* Effet de brillance au hover */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/0 group-hover:from-white/30 group-hover:via-white/20 group-hover:to-white/0 transition-all duration-500"></div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/0 group-hover:from-white/40 group-hover:via-white/25 group-hover:to-white/0 transition-all duration-300"></div>
                       
-                      <CardContent className="relative p-5 md:p-6">
-                        <div className={`relative p-4 rounded-xl bg-gradient-to-br ${action.color} shadow-lg shadow-black/10 mb-4 w-fit group-hover:scale-110 transition-transform`}>
-                          <Icon className="h-6 w-6 md:h-7 md:w-7 text-white" />
-                          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent"></div>
+                      <CardContent className="relative p-4 sm:p-5 md:p-6">
+                        <div className={`relative p-3 sm:p-4 rounded-xl bg-gradient-to-br ${action.color} shadow-xl shadow-black/20 mb-3 sm:mb-4 w-fit group-hover:scale-110 transition-transform duration-300`}>
+                          <Icon className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-white" />
+                          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/30 to-transparent"></div>
                         </div>
-                        <h3 className="text-base md:text-lg font-bold text-gray-900 mb-2">{action.title}</h3>
-                        <p className="text-sm md:text-base text-gray-600 leading-relaxed">{action.description}</p>
+                        <h3 className="text-sm sm:text-base md:text-lg font-extrabold text-gray-900 mb-1.5 sm:mb-2">{action.title}</h3>
+                        <p className="text-xs sm:text-sm md:text-base text-gray-600 leading-relaxed font-medium">{action.description}</p>
                       </CardContent>
                     </Card>
                   );
@@ -467,14 +467,14 @@ export const MultiCurrencyMockup = () => {
   ];
 
   return (
-    <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200/60 bg-gradient-to-br from-white via-white to-gray-50/50 backdrop-blur-xl">
-      {/* Effet de brillance animé */}
+    <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-gray-200/70 bg-gradient-to-br from-white via-slate-50/40 to-white backdrop-blur-xl">
+      {/* Effet de brillance animé Premium */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -inset-10 bg-gradient-to-r from-transparent via-blue-500/10 to-transparent animate-shimmer rotate-12" 
+        <div className="absolute -inset-10 bg-gradient-to-r from-transparent via-blue-500/15 to-transparent animate-shimmer rotate-12" 
              style={{ width: '200%', height: '200%' }}></div>
       </div>
       
-      <div className="relative p-4 md:p-5 space-y-3">
+      <div className="relative p-3 sm:p-4 md:p-5 space-y-2.5 sm:space-y-3">
         {/* Header Premium */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
@@ -497,12 +497,12 @@ export const MultiCurrencyMockup = () => {
         {currencies.map((currency, index) => (
           <Card
             key={index}
-            className={`group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 bg-gradient-to-br ${currency.bgColor} backdrop-blur-sm`}
+            className={`group relative overflow-hidden border border-gray-200/60 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br ${currency.bgColor} backdrop-blur-sm`}
           >
-            {/* Effet de brillance au hover */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/0 group-hover:from-white/20 group-hover:via-white/10 group-hover:to-white/0 transition-all duration-500"></div>
+            {/* Effet de brillance au hover Premium */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/0 group-hover:from-white/30 group-hover:via-white/15 group-hover:to-white/0 transition-all duration-300"></div>
             
-            <CardContent className="relative p-4 md:p-5">
+            <CardContent className="relative p-3 sm:p-4 md:p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="relative">
