@@ -3,7 +3,7 @@
  * Affiche un bouton avec un dropdown pour sélectionner la langue
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from '@/components/icons';
 import {
@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { AVAILABLE_LANGUAGES, type LanguageCode } from '@/i18n/config';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useStableDropdownPosition } from '@/hooks/use-stable-dropdown-position';
 
 interface LanguageSwitcherProps {
   className?: string;
@@ -33,21 +34,29 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const { i18n } = useTranslation();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   
   const currentLanguage = AVAILABLE_LANGUAGES.find(
     (lang) => lang.code === i18n.language
   ) || AVAILABLE_LANGUAGES[0];
 
+  // Utiliser le hook de stabilisation réutilisable
+  useStableDropdownPosition({
+    open,
+    menuRef,
+    lockDelay: 50,
+  });
+
   const changeLanguage = useCallback((langCode: LanguageCode) => {
-    // Changer la langue immédiatement
-    i18n.changeLanguage(langCode);
-    localStorage.setItem('emarzona_language', langCode);
-    document.documentElement.lang = langCode;
+    // Fermer le menu immédiatement pour éviter le repositionnement
+    setOpen(false);
     
-    // Fermer le menu après un court délai pour permettre la mise à jour
+    // Changer la langue après un court délai
     setTimeout(() => {
-      setOpen(false);
-    }, 150);
+      i18n.changeLanguage(langCode);
+      localStorage.setItem('emarzona_language', langCode);
+      document.documentElement.lang = langCode;
+    }, 100);
   }, [i18n]);
 
   return (
@@ -67,6 +76,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
+        ref={menuRef}
         align={isMobile ? "start" : "end"}
         side="bottom"
         sideOffset={8}
