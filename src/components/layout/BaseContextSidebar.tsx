@@ -101,12 +101,12 @@ export const BaseContextSidebar = ({
           variant="outline"
           size="sm"
           className={cn(
-            'md:hidden fixed top-20 left-3 z-50',
-            'h-11 w-11 p-0 rounded-full',
-            'bg-gradient-to-br from-blue-700/95 via-blue-800/95 to-blue-900/95',
-            'border-blue-600/30 text-blue-100',
-            'hover:bg-blue-600/40 hover:text-white hover:scale-110',
-            'shadow-lg backdrop-blur-sm',
+            'md:hidden fixed top-16 left-2 z-[60]',
+            'h-10 w-10 p-0 rounded-lg',
+            'bg-background border border-border',
+            'text-foreground',
+            'hover:bg-accent hover:text-accent-foreground',
+            'shadow-lg',
             'transition-all duration-200 ease-in-out',
             'touch-manipulation',
             triggerClassName
@@ -154,16 +154,25 @@ export const BaseContextSidebar = ({
   // Extrait les items de navigation des enfants
   const mobileNavItems = extractNavItems(children);
 
-  const mobileBottomNav = (
+  const mobileBottomNav = mobileNavItems.length > 0 ? (
     <nav
       className={cn(
-        'md:hidden fixed bottom-0 left-0 right-0 z-[100]',
-        'bg-card border-t border-border',
+        'md:hidden fixed bottom-0 left-0 right-0 z-[110]',
+        'bg-background border-t border-border',
         'shadow-[0_-2px_8px_rgba(0,0,0,0.1)]',
-        'safe-area-bottom'
+        'safe-area-bottom',
+        'context-bottom-nav' // Classe spécifique pour éviter le CSS global
       )}
       role="navigation"
       aria-label="Navigation contextuelle mobile"
+      style={{ 
+        position: 'fixed',
+        bottom: 0,
+        top: 'auto',
+        left: 0,
+        right: 0,
+        zIndex: 110
+      }}
     >
       {/* Scroll horizontal pour les items de navigation */}
       <div className="overflow-x-auto scrollbar-hide">
@@ -172,7 +181,7 @@ export const BaseContextSidebar = ({
         </div>
       </div>
     </nav>
-  );
+  ) : null;
 
   return (
     <>

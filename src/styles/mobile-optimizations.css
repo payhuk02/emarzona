@@ -106,6 +106,14 @@ select {
     backdrop-filter: blur(10px);
   }
   
+  /* Exception pour la barre de navigation contextuelle en bas */
+  nav.context-bottom-nav {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    z-index: 110 !important;
+  }
+  
   /* Bottom navigation pour mobile */
   .bottom-nav {
     position: fixed;
