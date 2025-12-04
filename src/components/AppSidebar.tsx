@@ -908,7 +908,7 @@ export function AppSidebar() {
   };
 
   return (
-    <div className="[&_[data-sidebar=sidebar]]:!bg-gradient-to-br [&_[data-sidebar=sidebar]]:!from-blue-700 [&_[data-sidebar=sidebar]]:!via-blue-800 [&_[data-sidebar=sidebar]]:!to-blue-900">
+    <div className="[&_[data-sidebar=sidebar]]:!bg-gradient-to-br [&_[data-sidebar=sidebar]]:!from-blue-500 [&_[data-sidebar=sidebar]]:!via-blue-400 [&_[data-sidebar=sidebar]]:!to-blue-300">
       <Sidebar 
         collapsible="icon" 
         className="border-r border-blue-600/30 transition-all duration-300"
