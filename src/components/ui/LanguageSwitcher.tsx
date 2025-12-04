@@ -3,7 +3,7 @@
  * Affiche un bouton avec un dropdown pour sélectionner la langue
  */
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from '@/components/icons';
 import {
@@ -33,70 +33,30 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const { i18n } = useTranslation();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
-  const menuContentRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
   
   const currentLanguage = AVAILABLE_LANGUAGES.find(
     (lang) => lang.code === i18n.language
   ) || AVAILABLE_LANGUAGES[0];
 
-  // Empêcher le repositionnement du menu pendant le changement de langue
-  useEffect(() => {
-    if (open && menuContentRef.current && triggerRef.current) {
-      const menu = menuContentRef.current;
-      const trigger = triggerRef.current;
-      
-      // Sauvegarder la position initiale
-      const rect = trigger.getBoundingClientRect();
-      const savedPosition = {
-        top: rect.top + rect.height + 8,
-        left: isMobile ? rect.left : rect.right - 180,
-      };
-      
-      // Observer les changements de position du trigger
-      const observer = new MutationObserver(() => {
-        if (menu && menu.style) {
-          // Forcer la position fixe sur mobile
-          if (isMobile) {
-            menu.style.position = 'fixed';
-            menu.style.top = `${savedPosition.top}px`;
-            menu.style.left = `${savedPosition.left}px`;
-            menu.style.transform = 'none';
-          }
-        }
-      });
-      
-      observer.observe(document.body, { childList: true, subtree: true });
-      
-      return () => observer.disconnect();
-    }
-  }, [open, isMobile]);
-
   const changeLanguage = useCallback((langCode: LanguageCode) => {
-    // Ne pas fermer immédiatement pour éviter le repositionnement
-    // Changer la langue d'abord
-    i18n.changeLanguage(langCode);
+    // Fermer le menu d'abord pour éviter le repositionnement
+    setOpen(false);
     
-    // Sauvegarder dans localStorage
-    localStorage.setItem('emarzona_language', langCode);
-    
-    // Mettre à jour l'attribut lang du document
-    document.documentElement.lang = langCode;
-    
-    // Fermer le menu après un court délai pour permettre la mise à jour
+    // Changer la langue après un court délai
     setTimeout(() => {
-      setOpen(false);
-    }, 150);
+      i18n.changeLanguage(langCode);
+      localStorage.setItem('emarzona_language', langCode);
+      document.documentElement.lang = langCode;
+    }, 50);
   }, [i18n]);
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={isMobile}>
       <DropdownMenuTrigger asChild>
         <Button
-          ref={triggerRef}
           variant={variant}
           size="sm"
-          className={cn('gap-2', buttonClassName)}
+          className={cn('gap-2 touch-manipulation', buttonClassName)}
           aria-label="Change language"
         >
           <Globe className="h-4 w-4" />
@@ -107,32 +67,32 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
-        ref={menuContentRef}
         align={isMobile ? "start" : "end"}
         side="bottom"
         sideOffset={isMobile ? 4 : 8}
         alignOffset={0}
         collisionPadding={isMobile ? 16 : 8}
-        avoidCollisions={true}
-        sticky="always"
+        avoidCollisions={false}
         className={cn(
-          "min-w-[180px]",
+          "min-w-[180px] z-[100]",
           isMobile && "!fixed"
         )}
-        onCloseAutoFocus={(e) => {
-          // Empêcher le focus automatique qui peut causer le repositionnement
-          e.preventDefault();
-        }}
       >
         {AVAILABLE_LANGUAGES.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
             onSelect={(e) => {
               e.preventDefault();
+              e.stopPropagation();
+              changeLanguage(lang.code);
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               changeLanguage(lang.code);
             }}
             className={cn(
-              'gap-2 cursor-pointer touch-manipulation',
+              'gap-2 cursor-pointer touch-manipulation min-h-[44px]',
               currentLanguage.code === lang.code && 'bg-accent'
             )}
           >
