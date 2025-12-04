@@ -664,7 +664,8 @@
       "noAbout": "Nenhuma informação sobre esta loja",
       "noReviews": "Nenhuma avaliação ainda",
       "noContact": "Nenhuma informação de contato disponível"
-    }
+    },
+    "noProducts": "Nenhum produto disponível"
   },
   "dashboard": {
     "title": "Painel",

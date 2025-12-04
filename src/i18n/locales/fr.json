@@ -397,7 +397,8 @@
       "noAbout": "Aucune information à propos de cette boutique",
       "noReviews": "Aucun avis pour le moment",
       "noContact": "Aucune information de contact disponible"
-    }
+    },
+    "noProducts": "Aucun produit disponible"
   },
   "products": {
     "title": "Mes Produits",

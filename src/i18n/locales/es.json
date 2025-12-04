@@ -350,7 +350,8 @@
       "noAbout": "Sin información sobre esta tienda",
       "noReviews": "Sin reseñas aún",
       "noContact": "Sin información de contacto disponible"
-    }
+    },
+    "noProducts": "No hay productos disponibles"
   },
   "products": {
     "title": "Mis Productos",

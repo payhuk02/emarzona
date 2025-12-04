@@ -340,7 +340,8 @@
       "noAbout": "No information about this store",
       "noReviews": "No reviews yet",
       "noContact": "No contact information available"
-    }
+    },
+    "noProducts": "No products available"
   },
   "products": {
     "title": "My Products",
