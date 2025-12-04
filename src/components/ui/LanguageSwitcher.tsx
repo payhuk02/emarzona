@@ -3,7 +3,7 @@
  * Affiche un bouton avec un dropdown pour sélectionner la langue
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from '@/components/icons';
 import {
@@ -30,23 +30,30 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   showLabel = false,
 }) => {
   const { i18n } = useTranslation();
+  const [open, setOpen] = useState(false);
   
   const currentLanguage = AVAILABLE_LANGUAGES.find(
     (lang) => lang.code === i18n.language
   ) || AVAILABLE_LANGUAGES[0];
 
-  const changeLanguage = (langCode: LanguageCode) => {
-    i18n.changeLanguage(langCode);
+  const changeLanguage = useCallback((langCode: LanguageCode) => {
+    // Fermer le menu avant de changer la langue pour éviter les re-renders
+    setOpen(false);
     
-    // Sauvegarder dans localStorage
-    localStorage.setItem('emarzona_language', langCode);
-    
-    // Mettre à jour l'attribut lang du document
-    document.documentElement.lang = langCode;
-  };
+    // Petit délai pour permettre la fermeture du menu
+    setTimeout(() => {
+      i18n.changeLanguage(langCode);
+      
+      // Sauvegarder dans localStorage
+      localStorage.setItem('emarzona_language', langCode);
+      
+      // Mettre à jour l'attribut lang du document
+      document.documentElement.lang = langCode;
+    }, 100);
+  }, [i18n]);
 
   return (
-    <DropdownMenu className={className}>
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           variant={variant}
@@ -61,13 +68,23 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent 
+        align="end" 
+        side="bottom"
+        sideOffset={8}
+        alignOffset={0}
+        collisionPadding={8}
+        className="min-w-[180px]"
+      >
         {AVAILABLE_LANGUAGES.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => changeLanguage(lang.code)}
+            onSelect={(e) => {
+              e.preventDefault();
+              changeLanguage(lang.code);
+            }}
             className={cn(
-              'gap-2 cursor-pointer',
+              'gap-2 cursor-pointer touch-manipulation',
               currentLanguage.code === lang.code && 'bg-accent'
             )}
           >
