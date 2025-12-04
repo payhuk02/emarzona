@@ -164,7 +164,9 @@ export const MainLayout = ({
             className={cn(
               'flex-1 overflow-auto bg-background transition-all duration-300',
               // Marge pour sidebar (AppSidebar OU ContextSidebar - 16rem = 256px = 64 en Tailwind)
-              hasFixedSidebar ? 'md:ml-56 lg:ml-64' : 'lg:ml-64'
+              hasFixedSidebar ? 'md:ml-56 lg:ml-64' : 'lg:ml-64',
+              // Marge en bas sur mobile pour la barre de navigation horizontale (80px = 20 en Tailwind)
+              hasFixedSidebar ? 'pb-20 md:pb-0' : ''
             )}
             tabIndex={-1}
             aria-label="Contenu principal"

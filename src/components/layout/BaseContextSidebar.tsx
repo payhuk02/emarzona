@@ -1,13 +1,9 @@
 /**
  * Base Context Sidebar - Composant de base professionnel et responsive
- * Gère desktop (fixed) et mobile (Sheet) avec animations fluides
+ * Gère desktop (fixed) et mobile (barre horizontale en bas) avec animations fluides
  */
 
-import { ReactNode, useState, useEffect } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
+import { ReactNode, cloneElement, isValidElement, Children } from 'react';
 import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
 import { cn } from '@/lib/utils';
 
@@ -19,9 +15,34 @@ interface BaseContextSidebarProps {
 }
 
 /**
+ * Fonction récursive pour extraire les ContextSidebarNavItem des enfants
+ * Détecte les items par leurs props (label, path, icon)
+ */
+const extractNavItems = (children: ReactNode): ReactNode[] => {
+  const items: ReactNode[] = [];
+  
+  Children.forEach(children, (child) => {
+    if (isValidElement(child)) {
+      const props = child.props || {};
+      // Si c'est un ContextSidebarNavItem (a les props label, path, icon)
+      if (props.label && props.path && props.icon) {
+        items.push(cloneElement(child as React.ReactElement<any>, { horizontal: true }));
+      } 
+      // Si c'est un nav ou un autre conteneur, on extrait ses enfants
+      else if (props.children) {
+        const nestedItems = extractNavItems(props.children);
+        items.push(...nestedItems);
+      }
+    }
+  });
+  
+  return items;
+};
+
+/**
  * Composant de base pour toutes les sidebars contextuelles
  * - Desktop: Sidebar fixe à gauche
- * - Mobile: Sheet (drawer) avec bouton trigger
+ * - Mobile: Barre de navigation horizontale fixe en bas
  * - Design professionnel avec animations fluides
  */
 export const BaseContextSidebar = ({ 
@@ -30,16 +51,6 @@ export const BaseContextSidebar = ({
   className = '',
   triggerClassName = ''
 }: BaseContextSidebarProps) => {
-  const isMobile = useIsMobile();
-  const [open, setOpen] = useState(false);
-
-  // Fermer le drawer mobile après navigation
-  useEffect(() => {
-    const handleClose = () => setOpen(false);
-    window.addEventListener('close-mobile-sidebar', handleClose);
-    return () => window.removeEventListener('close-mobile-sidebar', handleClose);
-  }, []);
-
   // Desktop: Sidebar fixe
   const desktopSidebar = (
     <aside 
@@ -68,61 +79,30 @@ export const BaseContextSidebar = ({
     </aside>
   );
 
-  // Mobile: Sheet (drawer) avec trigger
-  const mobileSidebar = (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn(
-            'md:hidden fixed top-20 left-3 z-50',
-            'h-11 w-11 p-0 rounded-full',
-            'bg-gradient-to-br from-blue-700/95 via-blue-800/95 to-blue-900/95',
-            'border-blue-600/30 text-blue-100',
-            'hover:bg-blue-600/40 hover:text-white hover:scale-110',
-            'shadow-lg backdrop-blur-sm',
-            'transition-all duration-200 ease-in-out',
-            'touch-manipulation',
-            triggerClassName
-          )}
-          aria-label="Ouvrir le menu contextuel"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-      </SheetTrigger>
-      <SheetContent
-        side="left"
-        className={cn(
-          'w-[85vw] sm:w-80 p-0',
-          'bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900',
-          'border-r border-blue-600/30',
-          'overflow-y-auto',
-          'scrollbar-thin scrollbar-thumb-blue-500/50 scrollbar-track-transparent'
-        )}
-      >
-        <div className="p-4 space-y-4">
-          {/* Header avec bouton fermer */}
-          <div className="flex items-center justify-between pb-3 border-b border-blue-600/30">
-            <Breadcrumb items={breadcrumbItems} />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 text-blue-100 hover:text-white hover:bg-blue-600/40 touch-manipulation"
-              onClick={() => setOpen(false)}
-              aria-label="Fermer le menu"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+  // Mobile: Barre de navigation horizontale fixe en bas
+  // Extrait les items de navigation des enfants
+  const mobileNavItems = extractNavItems(children);
 
-          {/* Contenu de la sidebar */}
-          <div className="space-y-1">
-            {children}
-          </div>
+  const mobileSidebar = (
+    <nav
+      className={cn(
+        'md:hidden fixed bottom-0 left-0 right-0 z-50',
+        'bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900',
+        'border-t border-blue-600/30',
+        'shadow-[0_-4px_12px_rgba(0,0,0,0.15)]',
+        'backdrop-blur-sm',
+        'safe-area-bottom'
+      )}
+      role="navigation"
+      aria-label="Navigation contextuelle mobile"
+    >
+      {/* Scroll horizontal pour les items de navigation */}
+      <div className="overflow-x-auto scrollbar-hide">
+        <div className="flex items-center justify-start gap-1 px-2 py-2 min-h-[64px]">
+          {mobileNavItems}
         </div>
-      </SheetContent>
-    </Sheet>
+      </div>
+    </nav>
   );
 
   return (
