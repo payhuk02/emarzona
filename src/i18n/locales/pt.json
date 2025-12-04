@@ -15,6 +15,17 @@
     "analytics": "Análises",
     "help": "Ajuda"
   },
+  "navigation": {
+    "dashboard": "Painel",
+    "products": "Produtos",
+    "orders": "Pedidos",
+    "customers": "Clientes",
+    "marketing": "Marketing",
+    "emails": "Emails",
+    "analytics": "Analytics",
+    "settings": "Configurações",
+    "myProfile": "Meu Perfil"
+  },
   "auth": {
     "welcome": "Bem-vindo ao Emarzona",
     "welcomeSubtitle": "Sua plataforma de e-commerce de confiança",
@@ -1107,7 +1118,8 @@
     "undo": "Desfazer",
     "redo": "Refazer",
     "welcome": "Bem-vindo",
-    "coverage": "Cobertura"
+    "coverage": "Cobertura",
+    "language": "Idioma"
   },
   "notifications": {
     "title": "Notificações",

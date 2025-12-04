@@ -25,7 +25,8 @@
     "hide": "Hide",
     "manageAll": "Manage all your",
     "or": "Or",
-    "coverage": "Coverage"
+    "coverage": "Coverage",
+    "language": "Language"
   },
   "nav": {
     "home": "Home",
@@ -130,7 +131,11 @@
       "button": "Send reset link",
       "success": "Reset email sent!",
       "error": "Error sending email"
-    }
+    },
+    "signOut": "Sign out",
+    "signOutSuccess": "Sign out successful",
+    "signOutSuccessDescription": "You have been successfully signed out.",
+    "signOutError": "An error occurred while signing out."
   },
   "marketplace": {
     "title": "Marketplace",

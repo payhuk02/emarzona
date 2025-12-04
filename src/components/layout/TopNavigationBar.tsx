@@ -4,6 +4,7 @@
  */
 
 import { NavLink, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
@@ -36,36 +37,37 @@ import { useToast } from '@/hooks/use-toast';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
 
-// Navigation principale
-const mainNavItems = [
-  { label: 'Tableau de bord', path: '/dashboard', icon: LayoutDashboard },
-  { label: 'Produits', path: '/dashboard/products', icon: Package },
-  { label: 'Commandes', path: '/dashboard/orders', icon: ShoppingCart },
-  { label: 'Clients', path: '/dashboard/customers', icon: Users },
-  { label: 'Marketing', path: '/dashboard/marketing', icon: Target },
-  { label: 'Emails', path: '/dashboard/emails/campaigns', icon: Mail },
-  { label: 'Analytics', path: '/dashboard/analytics', icon: BarChart3 },
-  { label: 'Paramètres', path: '/dashboard/settings', icon: Settings },
-];
-
 export const TopNavigationBar = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const platformLogo = usePlatformLogo();
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Navigation principale avec i18n
+  const mainNavItems = [
+    { label: t('navigation.dashboard', 'Tableau de bord'), path: '/dashboard', icon: LayoutDashboard },
+    { label: t('navigation.products', 'Produits'), path: '/dashboard/products', icon: Package },
+    { label: t('navigation.orders', 'Commandes'), path: '/dashboard/orders', icon: ShoppingCart },
+    { label: t('navigation.customers', 'Clients'), path: '/dashboard/customers', icon: Users },
+    { label: t('navigation.marketing', 'Marketing'), path: '/dashboard/marketing', icon: Target },
+    { label: t('navigation.emails', 'Emails'), path: '/dashboard/emails/campaigns', icon: Mail },
+    { label: t('navigation.analytics', 'Analytics'), path: '/dashboard/analytics', icon: BarChart3 },
+    { label: t('navigation.settings', 'Paramètres'), path: '/dashboard/settings', icon: Settings },
+  ];
+
   const handleSignOut = async () => {
     try {
       await signOut();
       toast({
-        title: 'Déconnexion réussie',
-        description: 'Vous avez été déconnecté avec succès.',
+        title: t('auth.signOutSuccess', 'Déconnexion réussie'),
+        description: t('auth.signOutSuccessDescription', 'Vous avez été déconnecté avec succès.'),
       });
     } catch (error) {
       toast({
-        title: 'Erreur',
-        description: 'Une erreur est survenue lors de la déconnexion.',
+        title: t('common.error', 'Erreur'),
+        description: t('auth.signOutError', 'Une erreur est survenue lors de la déconnexion.'),
         variant: 'destructive',
       });
     }
@@ -178,6 +180,13 @@ export const TopNavigationBar = () => {
                     );
                   })}
                 </nav>
+                {/* Language Switcher dans le menu mobile */}
+                <div className="p-4 border-t">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">{t('common.language', 'Langue')}</span>
+                  </div>
+                  <LanguageSwitcher variant="outline" showLabel={true} className="w-full" />
+                </div>
               </div>
             </SheetContent>
           </Sheet>
@@ -194,7 +203,7 @@ export const TopNavigationBar = () => {
               <ThemeSelectorCompact />
             </div>
 
-            {/* Language Switcher */}
+            {/* Language Switcher - Visible sur desktop et tablette */}
             <div className="hidden sm:block">
               <LanguageSwitcher variant="outline" showLabel={false} />
             </div>
@@ -225,19 +234,19 @@ export const TopNavigationBar = () => {
                 <DropdownMenuItem asChild>
                   <NavLink to="/account/profile" className="cursor-pointer">
                     <User className="mr-2 h-4 w-4" />
-                    Mon Profil
+                    {t('navigation.myProfile', 'Mon Profil')}
                   </NavLink>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <NavLink to="/dashboard/settings" className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
-                    Paramètres
+                    {t('navigation.settings', 'Paramètres')}
                   </NavLink>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
-                  Déconnexion
+                  {t('auth.signOut', 'Déconnexion')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

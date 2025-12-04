@@ -41,6 +41,17 @@
     "login": "Iniciar sesión",
     "signup": "Registrarse"
   },
+  "navigation": {
+    "dashboard": "Panel",
+    "products": "Productos",
+    "orders": "Pedidos",
+    "customers": "Clientes",
+    "marketing": "Marketing",
+    "emails": "Emails",
+    "analytics": "Analytics",
+    "settings": "Configuración",
+    "myProfile": "Mi Perfil"
+  },
   "wizard": {
     "title": "Nuevo Producto Digital",
     "subtitle": "Crea un producto digital profesional en 6 pasos",
@@ -130,7 +141,11 @@
       "button": "Enviar enlace de restablecimiento",
       "success": "¡Correo de restablecimiento enviado!",
       "error": "Error al enviar el correo"
-    }
+    },
+    "signOut": "Cerrar sesión",
+    "signOutSuccess": "Sesión cerrada exitosamente",
+    "signOutSuccessDescription": "Has cerrado sesión exitosamente.",
+    "signOutError": "Ocurrió un error al cerrar sesión."
   },
   "marketplace": {
     "title": "Mercado",

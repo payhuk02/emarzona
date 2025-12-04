@@ -25,7 +25,8 @@
     "hide": "Ausblenden",
     "manageAll": "Verwalten Sie alle Ihre",
     "or": "Oder",
-    "coverage": "Abdeckung"
+    "coverage": "Abdeckung",
+    "language": "Sprache"
   },
   "nav": {
     "home": "Startseite",
@@ -40,6 +41,17 @@
     "logout": "Abmelden",
     "login": "Anmelden",
     "signup": "Registrieren"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "products": "Produkte",
+    "orders": "Bestellungen",
+    "customers": "Kunden",
+    "marketing": "Marketing",
+    "emails": "E-Mails",
+    "analytics": "Analytik",
+    "settings": "Einstellungen",
+    "myProfile": "Mein Profil"
   },
   "wizard": {
     "title": "Neues Digitales Produkt",
@@ -130,7 +142,11 @@
       "button": "Link zum Zurücksetzen senden",
       "success": "E-Mail zum Zurücksetzen gesendet!",
       "error": "Fehler beim Senden der E-Mail"
-    }
+    },
+    "signOut": "Abmelden",
+    "signOutSuccess": "Erfolgreich abgemeldet",
+    "signOutSuccessDescription": "Sie wurden erfolgreich abgemeldet.",
+    "signOutError": "Beim Abmelden ist ein Fehler aufgetreten."
   },
   "marketplace": {
     "title": "Marktplatz",
@@ -1589,17 +1605,6 @@
       "completed": "Abgeschlossen",
       "cancelled": "Storniert"
     }
-  },
-  "common": {
-    "welcome": "Willkommen",
-    "startBuilding": "Beginnen Sie hier mit dem Aufbau Ihres erstaunlichen Projekts!",
-    "notAvailable": "N/A",
-    "optional": "optional",
-    "cancel": "Abbrechen",
-    "save": "Speichern",
-    "description": "Beschreibung",
-    "hide": "Ausblenden",
-    "view": "Anzeigen"
   },
   "shipping": {
     "title": "Versand",
