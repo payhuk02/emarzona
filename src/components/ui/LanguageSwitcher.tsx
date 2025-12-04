@@ -3,7 +3,7 @@
  * Affiche un bouton avec un dropdown pour sélectionner la langue
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from '@/components/icons';
 import {
@@ -33,21 +33,90 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const { i18n } = useTranslation();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const positionLocked = useRef(false);
   
   const currentLanguage = AVAILABLE_LANGUAGES.find(
     (lang) => lang.code === i18n.language
   ) || AVAILABLE_LANGUAGES[0];
 
-  const changeLanguage = useCallback((langCode: LanguageCode) => {
-    // Changer la langue immédiatement
-    i18n.changeLanguage(langCode);
-    localStorage.setItem('emarzona_language', langCode);
-    document.documentElement.lang = langCode;
+  // Verrouiller la position du menu sur mobile une fois qu'il est ouvert
+  useEffect(() => {
+    if (!open || !isMobile || !menuRef.current) {
+      positionLocked.current = false;
+      return;
+    }
+
+    const menu = menuRef.current;
     
-    // Fermer le menu après un court délai pour permettre la mise à jour
+    // Attendre que le menu soit positionné par Radix UI
+    const timeoutId = setTimeout(() => {
+      const rect = menu.getBoundingClientRect();
+      
+      if (rect.top > 0 && rect.left > 0) {
+        // Sauvegarder et verrouiller la position
+        const savedTop = rect.top;
+        const savedLeft = rect.left;
+        const savedWidth = rect.width;
+        
+        positionLocked.current = true;
+        
+        // Fonction pour restaurer la position
+        const restorePosition = () => {
+          if (positionLocked.current && menu) {
+            menu.style.cssText = `
+              position: fixed !important;
+              top: ${savedTop}px !important;
+              left: ${savedLeft}px !important;
+              width: ${savedWidth}px !important;
+              transform: none !important;
+              margin: 0 !important;
+            `;
+          }
+        };
+        
+        // Restaurer immédiatement
+        restorePosition();
+        
+        // Surveiller avec requestAnimationFrame
+        let rafId: number;
+        const checkPosition = () => {
+          if (positionLocked.current && menu) {
+            const currentRect = menu.getBoundingClientRect();
+            if (
+              Math.abs(currentRect.top - savedTop) > 1 ||
+              Math.abs(currentRect.left - savedLeft) > 1
+            ) {
+              restorePosition();
+            }
+            rafId = requestAnimationFrame(checkPosition);
+          }
+        };
+        rafId = requestAnimationFrame(checkPosition);
+        
+        return () => {
+          cancelAnimationFrame(rafId);
+        };
+      }
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      positionLocked.current = false;
+    };
+  }, [open, isMobile]);
+
+  const changeLanguage = useCallback((langCode: LanguageCode) => {
+    // Fermer le menu d'abord
+    positionLocked.current = false;
+    setOpen(false);
+    
+    // Changer la langue après un court délai
     setTimeout(() => {
-      setOpen(false);
-    }, 150);
+      i18n.changeLanguage(langCode);
+      localStorage.setItem('emarzona_language', langCode);
+      document.documentElement.lang = langCode;
+    }, 50);
   }, [i18n]);
 
   return (
@@ -67,14 +136,14 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
+        ref={menuRef}
         align={isMobile ? "start" : "end"}
         side="bottom"
         sideOffset={8}
         alignOffset={0}
         collisionPadding={isMobile ? 8 : 8}
-        avoidCollisions={true}
+        avoidCollisions={!isMobile}
         onCloseAutoFocus={(e) => {
-          // Empêcher le focus automatique qui peut causer le repositionnement
           if (isMobile) {
             e.preventDefault();
           }
