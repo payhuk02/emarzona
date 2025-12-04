@@ -68,15 +68,18 @@ export const BaseContextSidebar = ({
     <aside 
       className={cn(
         'hidden md:block fixed left-0 top-16 w-56 md:w-64 h-[calc(100vh-4rem)]',
-        'border-r border-blue-600/30',
-        'bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900',
+        'border-r border-white/10',
+        'text-white',
         'overflow-y-auto z-40',
         'transition-all duration-300 ease-in-out',
-        'scrollbar-thin scrollbar-thumb-blue-500/50 scrollbar-track-transparent',
+        'scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent',
         'shadow-[4px_0_12px_rgba(0,0,0,0.15)]',
         'backdrop-blur-sm',
         className
       )}
+      style={{
+        backgroundColor: '#282870',
+      } as React.CSSProperties}
       aria-label="Navigation contextuelle"
     >
       <div className="p-3 sm:p-4 md:p-5 space-y-4 md:space-y-5">

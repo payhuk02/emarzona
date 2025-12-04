@@ -908,17 +908,22 @@ export function AppSidebar() {
   };
 
   return (
-    <div className="[&_[data-sidebar=sidebar]]:!bg-gradient-to-br [&_[data-sidebar=sidebar]]:!from-blue-500 [&_[data-sidebar=sidebar]]:!via-blue-400 [&_[data-sidebar=sidebar]]:!to-blue-300">
+    <div 
+      className="[&_[data-sidebar=sidebar]]:!text-white"
+      style={{
+        '--sidebar-background': '#282870',
+      } as React.CSSProperties}
+    >
       <Sidebar 
         collapsible="icon" 
-        className="border-r border-blue-400/30 transition-all duration-300"
+        className="border-r border-white/10 transition-all duration-300"
         style={{
-          '--sidebar-background': 'transparent',
+          '--sidebar-background': '#282870',
         } as React.CSSProperties}
       >
         <SidebarContent>
         {/* Logo */}
-        <div className="p-3 sm:p-4 md:p-5 border-b border-blue-400/30">
+        <div className="p-3 sm:p-4 md:p-5 border-b border-white/10">
           <Link 
             to="/dashboard" 
             className="flex items-center gap-2"
@@ -953,10 +958,10 @@ export function AppSidebar() {
         {!isOnAdminPage && menuSections.map((section) => (
           <SidebarGroup key={section.label}>
             <SidebarGroupLabel 
-              className="!text-blue-100 font-semibold [&_span]:!text-blue-100"
+              className="!text-white font-semibold [&_span]:!text-white opacity-90"
               aria-label={`Section ${section.label}`}
             >
-              {!isCollapsed && <span className="!text-blue-100">{section.label}</span>}
+              {!isCollapsed && <span className="!text-white">{section.label}</span>}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -976,8 +981,8 @@ export function AppSidebar() {
                           asChild
                           className={`transition-all duration-300 group relative flex items-center ${
                             isDashboardActive
-                              ? "bg-blue-600/40 !text-white font-semibold border-l-2 border-blue-300 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white"
-                              : "!text-blue-100 hover:bg-blue-600/40 hover:!text-white hover:translate-x-1 [&_svg]:!text-blue-100 [&_span]:!text-blue-100"
+                              ? "bg-white/20 !text-white font-semibold border-l-2 border-white/50 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white"
+                              : "!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90"
                           }`}
                         >
                           <NavLink
@@ -1010,10 +1015,10 @@ export function AppSidebar() {
                                     description: `Vous consultez maintenant les données de "${store.name}"`,
                                   });
                                 }}
-                                className={`w-full justify-start !text-blue-100 transition-all duration-200 [&_svg]:!text-blue-100 [&_span]:!text-blue-100 ${
+                                className={`w-full justify-start !text-white transition-all duration-200 [&_svg]:!text-white [&_span]:!text-white opacity-90 ${
                                   selectedStoreId === store.id
-                                    ? "bg-blue-600/40 !text-white font-semibold [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white"
-                                    : "hover:bg-blue-600/40 hover:!text-white hover:translate-x-1 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
+                                    ? "bg-white/20 !text-white font-semibold [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white opacity-100"
+                                    : "hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
                                 }`}
                               >
                                 {selectedStoreId === store.id && (
@@ -1027,7 +1032,7 @@ export function AppSidebar() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => navigate("/dashboard/store")}
-                                className="w-full justify-start !text-blue-100 hover:bg-blue-600/40 hover:!text-white hover:translate-x-1 transition-all duration-200 [&_svg]:!text-blue-100 [&_span]:!text-blue-100 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
+                                className="w-full justify-start !text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 transition-all duration-200 [&_svg]:!text-white [&_span]:!text-white opacity-90"
                               >
                                 <Plus className="h-3 w-3 mr-2" />
                                 <span>Créer une boutique</span>
@@ -1082,7 +1087,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink
                       to="/dashboard"
-                      className="!text-blue-100 hover:bg-blue-600/40 hover:!text-white hover:translate-x-1 transition-all duration-300 [&_svg]:!text-blue-100 [&_span]:!text-blue-100 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
+                      className="!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 transition-all duration-300 [&_svg]:!text-white [&_span]:!text-white opacity-90"
                     >
                       <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
                       {!isCollapsed && <span>← Retour Dashboard</span>}
@@ -1098,8 +1103,8 @@ export function AppSidebar() {
         {/* Admin Menu Items - Organisé par sections */}
         {isAdmin && adminMenuSections.map((section) => (
           <SidebarGroup key={section.label}>
-            <SidebarGroupLabel className="!text-blue-100 font-semibold [&_span]:!text-blue-100">
-              {!isCollapsed && <span className="!text-blue-100">{section.label}</span>}
+            <SidebarGroupLabel className="!text-white font-semibold [&_span]:!text-white opacity-90">
+              {!isCollapsed && <span className="!text-white">{section.label}</span>}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -1154,7 +1159,7 @@ export function AppSidebar() {
         )}
         <Button
           variant="ghost"
-          className="w-full justify-start !text-blue-100 hover:bg-blue-600/40 hover:!text-white transition-all duration-200 [&_svg]:!text-blue-100 [&_span]:!text-blue-100 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
+          className="w-full justify-start !text-white hover:bg-white/10 hover:!text-white transition-all duration-200 [&_svg]:!text-white [&_span]:!text-white opacity-90"
           onClick={handleLogout}
           aria-label={isCollapsed ? "Déconnexion" : undefined}
         >

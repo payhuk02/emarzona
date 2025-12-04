@@ -156,7 +156,10 @@ const Sidebar = React.forwardRef<
         <SheetContent
           data-sidebar="sidebar"
           data-mobile="true"
-          className="w-[--sidebar-width] bg-gradient-to-br from-blue-500 via-blue-400 to-blue-300 p-0 text-white [&>button]:hidden border-r border-blue-400/30"
+          className="w-[--sidebar-width] p-0 text-white [&>button]:hidden border-r border-white/10"
+          style={{
+            backgroundColor: '#282870',
+          } as React.CSSProperties}
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
