@@ -82,10 +82,22 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         sideOffset={8}
         alignOffset={0}
         collisionPadding={isMobile ? 8 : 8}
-        avoidCollisions={true}
+        avoidCollisions={!isMobile}
         onCloseAutoFocus={(e) => {
           // Empêcher le focus automatique qui peut causer le repositionnement
           if (isMobile) {
+            e.preventDefault();
+          }
+        }}
+        onEscapeKeyDown={(e) => {
+          setOpen(false);
+        }}
+        onPointerDownOutside={(e) => {
+          // Sur mobile, permettre la fermeture seulement si on clique en dehors
+          if (!isMobile) return;
+          const target = e.target as HTMLElement;
+          // Ne pas fermer si on clique sur un élément du menu
+          if (target.closest('[role="menuitem"]')) {
             e.preventDefault();
           }
         }}
