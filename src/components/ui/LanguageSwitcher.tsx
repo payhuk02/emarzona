@@ -39,19 +39,19 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   ) || AVAILABLE_LANGUAGES[0];
 
   const changeLanguage = useCallback((langCode: LanguageCode) => {
-    // Fermer le menu d'abord pour éviter le repositionnement
-    setOpen(false);
+    // Changer la langue immédiatement
+    i18n.changeLanguage(langCode);
+    localStorage.setItem('emarzona_language', langCode);
+    document.documentElement.lang = langCode;
     
-    // Changer la langue après un court délai
+    // Fermer le menu après un court délai pour permettre la mise à jour
     setTimeout(() => {
-      i18n.changeLanguage(langCode);
-      localStorage.setItem('emarzona_language', langCode);
-      document.documentElement.lang = langCode;
-    }, 50);
+      setOpen(false);
+    }, 150);
   }, [i18n]);
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen} modal={isMobile}>
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           variant={variant}
@@ -69,14 +69,17 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       <DropdownMenuContent 
         align={isMobile ? "start" : "end"}
         side="bottom"
-        sideOffset={isMobile ? 4 : 8}
+        sideOffset={8}
         alignOffset={0}
-        collisionPadding={isMobile ? 16 : 8}
-        avoidCollisions={false}
-        className={cn(
-          "min-w-[180px] z-[100]",
-          isMobile && "!fixed"
-        )}
+        collisionPadding={isMobile ? 8 : 8}
+        avoidCollisions={true}
+        onCloseAutoFocus={(e) => {
+          // Empêcher le focus automatique qui peut causer le repositionnement
+          if (isMobile) {
+            e.preventDefault();
+          }
+        }}
+        className="min-w-[180px] z-[100]"
       >
         {AVAILABLE_LANGUAGES.map((lang) => (
           <DropdownMenuItem
