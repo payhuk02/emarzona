@@ -3,13 +3,13 @@
  * Gère desktop (fixed) et mobile (drawer + barre horizontale en bas) avec animations fluides
  */
 
-import { ReactNode, cloneElement, isValidElement, Children, useState, useEffect } from 'react';
+import { ReactNode, cloneElement, isValidElement, Children } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
 import { cn } from '@/lib/utils';
+import { useSidebar } from '@/components/ui/sidebar';
 
 interface BaseContextSidebarProps {
   breadcrumbItems: BreadcrumbItem[];
@@ -56,14 +56,7 @@ export const BaseContextSidebar = ({
   triggerClassName = ''
 }: BaseContextSidebarProps) => {
   const isMobile = useIsMobile();
-  const [open, setOpen] = useState(false);
-
-  // Fermer le drawer mobile après navigation
-  useEffect(() => {
-    const handleClose = () => setOpen(false);
-    window.addEventListener('close-mobile-sidebar', handleClose);
-    return () => window.removeEventListener('close-mobile-sidebar', handleClose);
-  }, []);
+  const { setOpenMobile } = useSidebar();
 
   // Desktop: Sidebar fixe
   const desktopSidebar = (
@@ -93,61 +86,27 @@ export const BaseContextSidebar = ({
     </aside>
   );
 
-  // Mobile: Drawer (sidebar verticale accessible)
-  const mobileDrawer = (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn(
-            'md:hidden fixed top-16 left-2 z-[60]',
-            'h-10 w-10 p-0 rounded-lg',
-            'bg-background border border-border',
-            'text-foreground',
-            'hover:bg-accent hover:text-accent-foreground',
-            'shadow-lg',
-            'transition-all duration-200 ease-in-out',
-            'touch-manipulation',
-            triggerClassName
-          )}
-          aria-label="Ouvrir le menu contextuel"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-      </SheetTrigger>
-      <SheetContent
-        side="left"
-        className={cn(
-          'w-[85vw] sm:w-80 p-0',
-          'bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900',
-          'border-r border-blue-600/30',
-          'overflow-y-auto',
-          'scrollbar-thin scrollbar-thumb-blue-500/50 scrollbar-track-transparent'
-        )}
-      >
-        <div className="p-4 space-y-4">
-          {/* Header avec bouton fermer */}
-          <div className="flex items-center justify-between pb-3 border-b border-blue-600/30">
-            <Breadcrumb items={breadcrumbItems} />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 text-blue-100 hover:text-white hover:bg-blue-600/40 touch-manipulation"
-              onClick={() => setOpen(false)}
-              aria-label="Fermer le menu"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Contenu de la sidebar */}
-          <div className="space-y-1">
-            {children}
-          </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+  // Mobile: Hamburger pour ouvrir la sidebar principale (AppSidebar)
+  const mobileHamburger = (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => setOpenMobile(true)}
+      className={cn(
+        'md:hidden fixed top-16 left-2 z-[60]',
+        'h-10 w-10 p-0 rounded-lg',
+        'bg-background border border-border',
+        'text-foreground',
+        'hover:bg-accent hover:text-accent-foreground',
+        'shadow-lg',
+        'transition-all duration-200 ease-in-out',
+        'touch-manipulation',
+        triggerClassName
+      )}
+      aria-label="Ouvrir le menu principal"
+    >
+      <Menu className="h-5 w-5" />
+    </Button>
   );
 
   // Mobile: Barre de navigation horizontale fixe en bas
@@ -186,7 +145,7 @@ export const BaseContextSidebar = ({
   return (
     <>
       {desktopSidebar}
-      {mobileDrawer}
+      {mobileHamburger}
       {mobileBottomNav}
     </>
   );
