@@ -1,4 +1,5 @@
 import { useMemo, useRef, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Sparkles, 
   Star, 
@@ -51,278 +52,277 @@ interface CategoryNavigationBarProps {
   onCategoryChange: (category: string) => void;
 }
 
-// Définition complète des catégories avec leurs icônes et labels (style comeup.com)
-// Utilise maintenant les catégories centralisées
-const CATEGORY_CONFIG_BASE: CategoryOption[] = [
-  { 
-    value: 'all', 
-    label: 'Pour vous', 
-    icon: Compass,
-    popular: false
-  },
-  { 
-    value: 'featured', 
-    label: 'Meilleurs services', 
-    icon: Star,
-    popular: true
-  },
-  { 
-    value: 'formation', 
-    label: 'Formations', 
-    icon: GraduationCap,
-    popular: true
-  },
-  { 
-    value: 'cours', 
-    label: 'Cours', 
-    icon: BookOpen,
-    popular: true
-  },
-  { 
-    value: 'design', 
-    label: 'Design & Graphisme', 
-    icon: Palette,
-    popular: true
-  },
-  { 
-    value: 'marketing', 
-    label: 'SEO & Marketing', 
-    icon: TrendingUp,
-    popular: true
-  },
-  { 
-    value: 'developpement', 
-    label: 'Développement Web', 
-    icon: Code,
-    popular: true
-  },
-  { 
-    value: 'informatique', 
-    label: 'Informatique', 
-    icon: Smartphone,
-    popular: true
-  },
-  { 
-    value: 'redaction', 
-    label: 'Rédaction', 
-    icon: FileText,
-    popular: true
-  },
-  { 
-    value: 'video', 
-    label: 'Vidéo & Montage', 
-    icon: Video,
-    popular: true
-  },
-  { 
-    value: 'audio', 
-    label: 'Audio & Musique', 
-    icon: Music,
-    popular: false
-  },
-  { 
-    value: 'photographie', 
-    label: 'Photographie', 
-    icon: Camera,
-    popular: false
-  },
-  { 
-    value: 'ebook', 
-    label: 'Ebooks & Guides', 
-    icon: BookOpen,
-    popular: false
-  },
-  { 
-    value: 'template', 
-    label: 'Templates', 
-    icon: Layout,
-    popular: false
-  },
-  { 
-    value: 'logiciel', 
-    label: 'Logiciels', 
-    icon: Smartphone,
-    popular: false
-  },
-  { 
-    value: 'app', 
-    label: 'Applications', 
-    icon: Smartphone,
-    popular: false
-  },
-  { 
-    value: 'vetements', 
-    label: 'T-shirts & Vêtements', 
-    icon: ShoppingBag,
-    popular: false
-  },
-  { 
-    value: 'accessoires', 
-    label: 'Accessoires', 
-    icon: Package,
-    popular: false
-  },
-  { 
-    value: 'electronique', 
-    label: 'Électronique', 
-    icon: Zap,
-    popular: false
-  },
-  { 
-    value: 'traduction', 
-    label: 'Traduction', 
-    icon: Globe,
-    popular: false
-  },
-  { 
-    value: 'coaching', 
-    label: 'Coaching', 
-    icon: Target,
-    popular: false
-  },
-  { 
-    value: 'consultation', 
-    label: 'Consultation', 
-    icon: Users,
-    popular: false
-  },
-  { 
-    value: 'conseil', 
-    label: 'Conseil Business', 
-    icon: Briefcase,
-    popular: false
-  },
-  { 
-    value: 'social', 
-    label: 'Réseaux sociaux', 
-    icon: MessageSquare,
-    popular: false
-  },
-  { 
-    value: 'maintenance', 
-    label: 'Maintenance', 
-    icon: Wrench,
-    popular: false
-  },
-  { 
-    value: 'graphisme', 
-    label: 'Graphisme', 
-    icon: ImageIcon,
-    popular: false
-  },
-  { 
-    value: 'animation', 
-    label: 'Animation', 
-    icon: Film,
-    popular: false
-  },
-  { 
-    value: 'illustration', 
-    label: 'Illustration', 
-    icon: PenTool,
-    popular: false
-  },
-  { 
-    value: 'ui-ux', 
-    label: 'UI/UX Design', 
-    icon: Layers,
-    popular: false
-  },
-  { 
-    value: 'data', 
-    label: 'Data & Analytics', 
-    icon: BarChart3,
-    popular: false
-  },
-  { 
-    value: 'cloud', 
-    label: 'Cloud & DevOps', 
-    icon: Cloud,
-    popular: false
-  },
-  { 
-    value: 'securite', 
-    label: 'Sécurité', 
-    icon: Shield,
-    popular: false
-  },
-  { 
-    value: 'podcast', 
-    label: 'Podcast', 
-    icon: Mic,
-    popular: false
-  },
-  { 
-    value: 'voix-off', 
-    label: 'Voix-off', 
-    icon: Headphones,
-    popular: false
-  },
-  { 
-    value: 'maison', 
-    label: 'Maison & Jardin', 
-    icon: Package,
-    popular: false
-  },
-  { 
-    value: 'sport', 
-    label: 'Sport', 
-    icon: Package,
-    popular: false
-  },
-  { 
-    value: 'beaute', 
-    label: 'Beauté', 
-    icon: Sparkles,
-    popular: false
-  },
-  { 
-    value: 'livres', 
-    label: 'Livres', 
-    icon: BookOpen,
-    popular: false
-  },
-  { 
-    value: 'jouets', 
-    label: 'Jouets', 
-    icon: Gift,
-    popular: false
-  },
-  { 
-    value: 'alimentation', 
-    label: 'Alimentation', 
-    icon: Package,
-    popular: false
-  },
-  { 
-    value: 'artisanat', 
-    label: 'Artisanat', 
-    icon: Package,
-    popular: false
-  },
-];
-
-// Combiner les catégories de base avec toutes les catégories des 5 systèmes
-const CATEGORY_CONFIG: CategoryOption[] = [
-  ...CATEGORY_CONFIG_BASE,
-  ...getAllMarketplaceCategories().filter(cat => 
-    !CATEGORY_CONFIG_BASE.some(base => base.value === cat.value)
-  ),
-];
-
 export function CategoryNavigationBar({
   categories,
   selectedCategory,
   onCategoryChange,
 }: CategoryNavigationBarProps) {
+  const { t } = useTranslation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
 
-  // Afficher toutes les catégories (pas de filtrage basé sur les produits réels pour avoir toutes les options)
+  // Définition complète des catégories avec leurs icônes et labels (style comeup.com)
+  // Utilise maintenant les catégories centralisées avec i18n
+  const CATEGORY_CONFIG_BASE: CategoryOption[] = useMemo(() => [
+    { 
+      value: 'all', 
+      label: t('marketplace.categories.all', 'Pour vous'), 
+      icon: Compass,
+      popular: false
+    },
+    { 
+      value: 'featured', 
+      label: t('marketplace.categories.featured', 'Meilleurs services'), 
+      icon: Star,
+      popular: true
+    },
+    { 
+      value: 'formation', 
+      label: t('marketplace.categories.formation', 'Formations'), 
+      icon: GraduationCap,
+      popular: true
+    },
+    { 
+      value: 'cours', 
+      label: t('marketplace.categories.cours', 'Cours'), 
+      icon: BookOpen,
+      popular: true
+    },
+    { 
+      value: 'design', 
+      label: t('marketplace.categories.design', 'Design & Graphisme'), 
+      icon: Palette,
+      popular: true
+    },
+    { 
+      value: 'marketing', 
+      label: t('marketplace.categories.marketing', 'SEO & Marketing'), 
+      icon: TrendingUp,
+      popular: true
+    },
+    { 
+      value: 'developpement', 
+      label: t('marketplace.categories.developpement', 'Développement Web'), 
+      icon: Code,
+      popular: true
+    },
+    { 
+      value: 'informatique', 
+      label: t('marketplace.categories.informatique', 'Informatique'), 
+      icon: Smartphone,
+      popular: true
+    },
+    { 
+      value: 'redaction', 
+      label: t('marketplace.categories.redaction', 'Rédaction'), 
+      icon: FileText,
+      popular: true
+    },
+    { 
+      value: 'video', 
+      label: t('marketplace.categories.video', 'Vidéo & Montage'), 
+      icon: Video,
+      popular: true
+    },
+    { 
+      value: 'audio', 
+      label: t('marketplace.categories.audio', 'Audio & Musique'), 
+      icon: Music,
+      popular: false
+    },
+    { 
+      value: 'photographie', 
+      label: t('marketplace.categories.photographie', 'Photographie'), 
+      icon: Camera,
+      popular: false
+    },
+    { 
+      value: 'ebook', 
+      label: t('marketplace.categories.ebook', 'Ebooks & Guides'), 
+      icon: BookOpen,
+      popular: false
+    },
+    { 
+      value: 'template', 
+      label: t('marketplace.categories.template', 'Templates'), 
+      icon: Layout,
+      popular: false
+    },
+    { 
+      value: 'logiciel', 
+      label: t('marketplace.categories.logiciel', 'Logiciels'), 
+      icon: Smartphone,
+      popular: false
+    },
+    { 
+      value: 'app', 
+      label: t('marketplace.categories.app', 'Applications'), 
+      icon: Smartphone,
+      popular: false
+    },
+    { 
+      value: 'vetements', 
+      label: t('marketplace.categories.vetements', 'T-shirts & Vêtements'), 
+      icon: ShoppingBag,
+      popular: false
+    },
+    { 
+      value: 'accessoires', 
+      label: t('marketplace.categories.accessoires', 'Accessoires'), 
+      icon: Package,
+      popular: false
+    },
+    { 
+      value: 'electronique', 
+      label: t('marketplace.categories.electronique', 'Électronique'), 
+      icon: Zap,
+      popular: false
+    },
+    { 
+      value: 'traduction', 
+      label: t('marketplace.categories.traduction', 'Traduction'), 
+      icon: Globe,
+      popular: false
+    },
+    { 
+      value: 'coaching', 
+      label: t('marketplace.categories.coaching', 'Coaching'), 
+      icon: Target,
+      popular: false
+    },
+    { 
+      value: 'consultation', 
+      label: t('marketplace.categories.consultation', 'Consultation'), 
+      icon: Users,
+      popular: false
+    },
+    { 
+      value: 'conseil', 
+      label: t('marketplace.categories.conseil', 'Conseil Business'), 
+      icon: Briefcase,
+      popular: false
+    },
+    { 
+      value: 'social', 
+      label: t('marketplace.categories.social', 'Réseaux sociaux'), 
+      icon: MessageSquare,
+      popular: false
+    },
+    { 
+      value: 'maintenance', 
+      label: t('marketplace.categories.maintenance', 'Maintenance'), 
+      icon: Wrench,
+      popular: false
+    },
+    { 
+      value: 'graphisme', 
+      label: t('marketplace.categories.graphisme', 'Graphisme'), 
+      icon: ImageIcon,
+      popular: false
+    },
+    { 
+      value: 'animation', 
+      label: t('marketplace.categories.animation', 'Animation'), 
+      icon: Film,
+      popular: false
+    },
+    { 
+      value: 'illustration', 
+      label: t('marketplace.categories.illustration', 'Illustration'), 
+      icon: PenTool,
+      popular: false
+    },
+    { 
+      value: 'ui-ux', 
+      label: t('marketplace.categories.uiUx', 'UI/UX Design'), 
+      icon: Layers,
+      popular: false
+    },
+    { 
+      value: 'data', 
+      label: t('marketplace.categories.data', 'Data & Analytics'), 
+      icon: BarChart3,
+      popular: false
+    },
+    { 
+      value: 'cloud', 
+      label: t('marketplace.categories.cloud', 'Cloud & DevOps'), 
+      icon: Cloud,
+      popular: false
+    },
+    { 
+      value: 'securite', 
+      label: t('marketplace.categories.securite', 'Sécurité'), 
+      icon: Shield,
+      popular: false
+    },
+    { 
+      value: 'podcast', 
+      label: t('marketplace.categories.podcast', 'Podcast'), 
+      icon: Mic,
+      popular: false
+    },
+    { 
+      value: 'voix-off', 
+      label: t('marketplace.categories.voixOff', 'Voix-off'), 
+      icon: Headphones,
+      popular: false
+    },
+    { 
+      value: 'maison', 
+      label: t('marketplace.categories.maison', 'Maison & Jardin'), 
+      icon: Package,
+      popular: false
+    },
+    { 
+      value: 'sport', 
+      label: t('marketplace.categories.sport', 'Sport'), 
+      icon: Package,
+      popular: false
+    },
+    { 
+      value: 'beaute', 
+      label: t('marketplace.categories.beaute', 'Beauté'), 
+      icon: Sparkles,
+      popular: false
+    },
+    { 
+      value: 'livres', 
+      label: t('marketplace.categories.livres', 'Livres'),
+      icon: BookOpen,
+      popular: false
+    },
+    { 
+      value: 'jouets', 
+      label: t('marketplace.categories.jouets', 'Jouets'), 
+      icon: Gift,
+      popular: false
+    },
+    { 
+      value: 'alimentation', 
+      label: t('marketplace.categories.alimentation', 'Alimentation'), 
+      icon: Package,
+      popular: false
+    },
+    { 
+      value: 'artisanat', 
+      label: t('marketplace.categories.artisanat', 'Artisanat'), 
+      icon: Package,
+      popular: false
+    },
+  ], [t]);
+
+  // Combiner les catégories de base avec toutes les catégories des 5 systèmes
   const availableCategories = useMemo(() => {
-    return CATEGORY_CONFIG;
-  }, []);
+    const allCategories = [
+      ...CATEGORY_CONFIG_BASE,
+      ...getAllMarketplaceCategories().filter(cat => 
+        !CATEGORY_CONFIG_BASE.some(base => base.value === cat.value)
+      ),
+    ];
+    return allCategories;
+  }, [CATEGORY_CONFIG_BASE]);
 
   // Gérer le scroll horizontal
   const handleScroll = () => {
@@ -361,7 +361,7 @@ export function CategoryNavigationBar({
           <button
             onClick={scrollLeft}
             className="absolute left-0 top-0 bottom-0 z-20 flex items-center justify-center w-12 bg-gradient-to-r from-white via-white/95 to-transparent hover:from-gray-50 transition-all duration-200 shadow-sm"
-            aria-label="Faire défiler vers la gauche"
+            aria-label={t('marketplace.categories.scrollLeft', 'Faire défiler vers la gauche')}
           >
             <ChevronLeft className="w-5 h-5 text-gray-700 hover:text-gray-900" />
           </button>
@@ -372,7 +372,7 @@ export function CategoryNavigationBar({
           <button
             onClick={scrollRight}
             className="absolute right-0 top-0 bottom-0 z-20 flex items-center justify-center w-12 bg-gradient-to-l from-white via-white/95 to-transparent hover:from-gray-50 transition-all duration-200 shadow-sm"
-            aria-label="Faire défiler vers la droite"
+            aria-label={t('marketplace.categories.scrollRight', 'Faire défiler vers la droite')}
           >
             <ChevronRight className="w-5 h-5 text-gray-700 hover:text-gray-900" />
           </button>
@@ -383,7 +383,7 @@ export function CategoryNavigationBar({
             ref={scrollContainerRef}
             className="flex items-center gap-4 sm:gap-5 lg:gap-6 overflow-x-auto scrollbar-hide py-4 px-4 sm:px-6 lg:px-8 scroll-smooth"
             role="tablist"
-            aria-label="Catégories de services"
+            aria-label={t('marketplace.categories.ariaLabel', 'Catégories de services')}
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {availableCategories.map((category) => {

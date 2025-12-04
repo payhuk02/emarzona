@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, Minus, DollarSign, Users, Percent } from 'lucide-react';
@@ -28,16 +29,18 @@ interface StatisticsCardProps {
 }
 
 export const StatisticsCard: React.FC<StatisticsCardProps> = ({
-  title = "Statistiques",
+  title,
   description,
   statistics,
   className,
 }) => {
+  const { t } = useTranslation();
+  const defaultTitle = title || t('promotions.statistics.title', 'Statistiques');
   return (
     <Card className={cn("border-border/50 bg-card/50 backdrop-blur-sm", className)}>
-      {title && (
+      {defaultTitle && (
         <CardHeader>
-          <CardTitle className="text-lg sm:text-xl">{title}</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">{defaultTitle}</CardTitle>
           {description && (
             <CardDescription className="text-xs sm:text-sm">{description}</CardDescription>
           )}
@@ -166,32 +169,36 @@ export const usePromotionStatistics = (promotions: any[]) => {
  * Composant pour afficher les statistiques des promotions
  */
 export const PromotionStatistics: React.FC<{ promotions: any[] }> = ({ promotions }) => {
+  const { t } = useTranslation();
   const stats = usePromotionStatistics(promotions);
 
   const statistics: Statistic[] = [
     {
-      label: 'Total',
+      label: t('promotions.statistics.total', 'Total'),
       value: stats.total,
       icon: <DollarSign className="h-4 w-4 text-primary" />,
-      description: 'Nombre total de promotions',
+      description: t('promotions.statistics.totalDescription', 'Nombre total de promotions'),
     },
     {
-      label: 'Actives',
+      label: t('promotions.statistics.active', 'Actives'),
       value: stats.active,
       icon: <TrendingUp className="h-4 w-4 text-green-600" />,
-      description: `${stats.inactive} inactive${stats.inactive > 1 ? 's' : ''}`,
+      description: t('promotions.statistics.inactive', {
+        defaultValue: '{{count}} inactive',
+        count: stats.inactive,
+      }, { count: stats.inactive }),
     },
     {
-      label: 'Utilisations',
+      label: t('promotions.statistics.uses', 'Utilisations'),
       value: stats.totalUses,
       icon: <Users className="h-4 w-4 text-blue-600" />,
-      description: 'Total des utilisations',
+      description: t('promotions.statistics.usesDescription', 'Total des utilisations'),
     },
     {
-      label: 'Réduction moyenne',
+      label: t('promotions.statistics.averageDiscount', 'Réduction moyenne'),
       value: `${stats.averageDiscount}%`,
       icon: <Percent className="h-4 w-4 text-orange-600" />,
-      description: 'Moyenne des réductions',
+      description: t('promotions.statistics.averageDiscountDescription', 'Moyenne des réductions'),
     },
   ];
 
