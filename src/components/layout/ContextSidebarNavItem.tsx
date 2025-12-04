@@ -43,26 +43,26 @@ export const ContextSidebarNavItem = ({
         to={path}
         onClick={onClick}
         className={cn(
-          'flex flex-col items-center justify-center gap-1',
-          'px-2.5 py-2 rounded-lg transition-all duration-200 ease-in-out',
-          'min-w-[60px] min-h-[60px] touch-manipulation',
+          'flex flex-col items-center justify-center gap-0.5',
+          'px-2 py-1.5 rounded-md transition-all duration-200 ease-in-out',
+          'min-w-[56px] min-h-[52px] touch-manipulation',
           'group relative flex-shrink-0',
           isActive
-            ? 'bg-blue-600/40 text-white shadow-md shadow-blue-600/20'
-            : 'text-blue-100 hover:bg-blue-600/40 hover:text-white'
+            ? 'bg-primary/10 text-primary'
+            : 'text-muted-foreground hover:bg-accent hover:text-foreground'
         )}
         aria-label={label}
         aria-current={isActive ? 'page' : undefined}
       >
         <Icon className={cn(
-          'h-5 w-5 flex-shrink-0 transition-colors duration-200',
-          isActive ? 'text-white' : 'text-blue-100 group-hover:text-white'
+          'h-4 w-4 flex-shrink-0 transition-colors duration-200',
+          isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
         )} aria-hidden="true" />
-        <span className="text-[10px] font-medium text-center leading-tight max-w-[60px] truncate">
+        <span className="text-[10px] font-medium text-center leading-tight max-w-[56px] truncate px-0.5">
           {label}
         </span>
         {isActive && (
-          <div className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-blue-300 animate-pulse" />
+          <div className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-primary" />
         )}
       </NavLink>
     );

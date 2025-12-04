@@ -86,11 +86,9 @@ export const BaseContextSidebar = ({
   const mobileSidebar = (
     <nav
       className={cn(
-        'md:hidden fixed bottom-0 left-0 right-0 z-50',
-        'bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900',
-        'border-t border-blue-600/30',
-        'shadow-[0_-4px_12px_rgba(0,0,0,0.15)]',
-        'backdrop-blur-sm',
+        'md:hidden fixed bottom-0 left-0 right-0 z-[100]',
+        'bg-card border-t border-border',
+        'shadow-[0_-2px_8px_rgba(0,0,0,0.1)]',
         'safe-area-bottom'
       )}
       role="navigation"
@@ -98,7 +96,7 @@ export const BaseContextSidebar = ({
     >
       {/* Scroll horizontal pour les items de navigation */}
       <div className="overflow-x-auto scrollbar-hide">
-        <div className="flex items-center justify-start gap-1 px-2 py-2 min-h-[64px]">
+        <div className="flex items-center justify-start gap-0.5 px-1 py-1.5 min-h-[56px]">
           {mobileNavItems}
         </div>
       </div>
