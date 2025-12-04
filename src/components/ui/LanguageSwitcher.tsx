@@ -3,7 +3,7 @@
  * Affiche un bouton avec un dropdown pour sélectionner la langue
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from '@/components/icons';
 import {
@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { AVAILABLE_LANGUAGES, type LanguageCode } from '@/i18n/config';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LanguageSwitcherProps {
   className?: string;
@@ -30,32 +31,69 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   showLabel = false,
 }) => {
   const { i18n } = useTranslation();
+  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
+  const menuContentRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   
   const currentLanguage = AVAILABLE_LANGUAGES.find(
     (lang) => lang.code === i18n.language
   ) || AVAILABLE_LANGUAGES[0];
 
+  // Empêcher le repositionnement du menu pendant le changement de langue
+  useEffect(() => {
+    if (open && menuContentRef.current && triggerRef.current) {
+      const menu = menuContentRef.current;
+      const trigger = triggerRef.current;
+      
+      // Sauvegarder la position initiale
+      const rect = trigger.getBoundingClientRect();
+      const savedPosition = {
+        top: rect.top + rect.height + 8,
+        left: isMobile ? rect.left : rect.right - 180,
+      };
+      
+      // Observer les changements de position du trigger
+      const observer = new MutationObserver(() => {
+        if (menu && menu.style) {
+          // Forcer la position fixe sur mobile
+          if (isMobile) {
+            menu.style.position = 'fixed';
+            menu.style.top = `${savedPosition.top}px`;
+            menu.style.left = `${savedPosition.left}px`;
+            menu.style.transform = 'none';
+          }
+        }
+      });
+      
+      observer.observe(document.body, { childList: true, subtree: true });
+      
+      return () => observer.disconnect();
+    }
+  }, [open, isMobile]);
+
   const changeLanguage = useCallback((langCode: LanguageCode) => {
-    // Fermer le menu avant de changer la langue pour éviter les re-renders
-    setOpen(false);
+    // Ne pas fermer immédiatement pour éviter le repositionnement
+    // Changer la langue d'abord
+    i18n.changeLanguage(langCode);
     
-    // Petit délai pour permettre la fermeture du menu
+    // Sauvegarder dans localStorage
+    localStorage.setItem('emarzona_language', langCode);
+    
+    // Mettre à jour l'attribut lang du document
+    document.documentElement.lang = langCode;
+    
+    // Fermer le menu après un court délai pour permettre la mise à jour
     setTimeout(() => {
-      i18n.changeLanguage(langCode);
-      
-      // Sauvegarder dans localStorage
-      localStorage.setItem('emarzona_language', langCode);
-      
-      // Mettre à jour l'attribut lang du document
-      document.documentElement.lang = langCode;
-    }, 100);
+      setOpen(false);
+    }, 150);
   }, [i18n]);
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={isMobile}>
       <DropdownMenuTrigger asChild>
         <Button
+          ref={triggerRef}
           variant={variant}
           size="sm"
           className={cn('gap-2', buttonClassName)}
@@ -69,12 +107,22 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
-        align="end" 
+        ref={menuContentRef}
+        align={isMobile ? "start" : "end"}
         side="bottom"
-        sideOffset={8}
+        sideOffset={isMobile ? 4 : 8}
         alignOffset={0}
-        collisionPadding={8}
-        className="min-w-[180px]"
+        collisionPadding={isMobile ? 16 : 8}
+        avoidCollisions={true}
+        sticky="always"
+        className={cn(
+          "min-w-[180px]",
+          isMobile && "!fixed"
+        )}
+        onCloseAutoFocus={(e) => {
+          // Empêcher le focus automatique qui peut causer le repositionnement
+          e.preventDefault();
+        }}
       >
         {AVAILABLE_LANGUAGES.map((lang) => (
           <DropdownMenuItem
