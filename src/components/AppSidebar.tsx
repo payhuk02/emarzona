@@ -911,14 +911,14 @@ export function AppSidebar() {
     <div className="[&_[data-sidebar=sidebar]]:!bg-gradient-to-br [&_[data-sidebar=sidebar]]:!from-blue-500 [&_[data-sidebar=sidebar]]:!via-blue-400 [&_[data-sidebar=sidebar]]:!to-blue-300">
       <Sidebar 
         collapsible="icon" 
-        className="border-r border-blue-600/30 transition-all duration-300"
+        className="border-r border-blue-400/30 transition-all duration-300"
         style={{
           '--sidebar-background': 'transparent',
         } as React.CSSProperties}
       >
         <SidebarContent>
         {/* Logo */}
-        <div className="p-3 sm:p-4 md:p-5 border-b border-blue-600/30">
+        <div className="p-3 sm:p-4 md:p-5 border-b border-blue-400/30">
           <Link 
             to="/dashboard" 
             className="flex items-center gap-2"
@@ -1143,7 +1143,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter className="border-t border-blue-600/30 p-4 space-y-2">
+      <SidebarFooter className="border-t border-blue-400/30 p-4 space-y-2">
         {!isCollapsed && (
           <LanguageSwitcher 
             variant="default" 
