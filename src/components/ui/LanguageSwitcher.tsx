@@ -48,6 +48,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     }
 
     const menu = menuRef.current;
+    let rafId: number | null = null;
     
     // Attendre que le menu soit positionné par Radix UI
     const timeoutId = setTimeout(() => {
@@ -79,7 +80,6 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         restorePosition();
         
         // Surveiller avec requestAnimationFrame
-        let rafId: number;
         const checkPosition = () => {
           if (positionLocked.current && menu) {
             const currentRect = menu.getBoundingClientRect();
@@ -93,15 +93,14 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           }
         };
         rafId = requestAnimationFrame(checkPosition);
-        
-        return () => {
-          cancelAnimationFrame(rafId);
-        };
       }
     }, 100);
 
     return () => {
       clearTimeout(timeoutId);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
       positionLocked.current = false;
     };
   }, [open, isMobile]);
