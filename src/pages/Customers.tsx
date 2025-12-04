@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import {
@@ -22,6 +23,7 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { logger } from "@/lib/logger";
 
 const Customers = () => {
+  const navigate = useNavigate();
   const { store, loading: storeLoading } = useStore();
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
@@ -111,8 +113,8 @@ const Customers = () => {
             <div className="container mx-auto p-3 sm:p-4 lg:p-6">
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl sm:text-2xl font-bold">Aucune boutique sélectionnée</CardTitle>
-                  <CardDescription className="text-sm sm:text-base mt-2">
+                  <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-bold">Aucune boutique sélectionnée</CardTitle>
+                  <CardDescription className="text-[10px] sm:text-xs md:text-sm lg:text-base mt-2">
                     Veuillez sélectionner une boutique ou créer une nouvelle boutique pour gérer vos clients.
                   </CardDescription>
                 </CardHeader>
@@ -120,14 +122,15 @@ const Customers = () => {
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Button 
                       onClick={() => navigate("/dashboard/store")} 
-                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                      className="min-h-[44px] bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-xs sm:text-sm"
                     >
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                       Créer une boutique
                     </Button>
                     <Button 
                       variant="outline"
-                      onClick={() => navigate("/dashboard")} 
+                      onClick={() => navigate("/dashboard")}
+                      className="min-h-[44px] text-xs sm:text-sm"
                     >
                       Retour au tableau de bord
                     </Button>
@@ -181,62 +184,54 @@ const Customers = () => {
             {!customersLoading && (
               <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                  <CardContent className="p-2.5 sm:p-3 md:p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">Total Clients</p>
-                        <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                          {stats.total}
-                        </p>
-                      </div>
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5">
-                        <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-purple-500" />
-                      </div>
+                  <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
+                    <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                      <Users className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5 lg:h-4 lg:w-4" />
+                      Total Clients
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                    <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      {stats.total}
                     </div>
                   </CardContent>
                 </Card>
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                  <CardContent className="p-3 sm:p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">Total Commandes</p>
-                        <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                          {stats.totalOrders}
-                        </p>
-                      </div>
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5">
-                        <ShoppingBag className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-blue-500" />
-                      </div>
+                  <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
+                    <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                      <ShoppingBag className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5 lg:h-4 lg:w-4" />
+                      Total Commandes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                    <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                      {stats.totalOrders}
                     </div>
                   </CardContent>
                 </Card>
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                  <CardContent className="p-3 sm:p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">Total Dépensé</p>
-                        <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                          {stats.totalSpent.toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5">
-                        <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-green-500" />
-                      </div>
+                  <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
+                    <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                      <DollarSign className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5 lg:h-4 lg:w-4" />
+                      Total Dépensé
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                    <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                      {stats.totalSpent.toLocaleString()}
                     </div>
                   </CardContent>
                 </Card>
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                  <CardContent className="p-3 sm:p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">Moyenne</p>
-                        <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                          {stats.averageSpent.toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5">
-                        <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-orange-500" />
-                      </div>
+                  <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
+                    <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                      <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5 lg:h-4 lg:w-4" />
+                      Moyenne
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                    <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                      {stats.averageSpent.toLocaleString()}
                     </div>
                   </CardContent>
                 </Card>
@@ -272,22 +267,22 @@ const Customers = () => {
                 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-4">
-                    <div className="text-sm text-muted-foreground">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mt-4">
+                    <div className="text-xs sm:text-sm text-muted-foreground">
                       Page {currentPage} sur {totalPages} ({totalCount} clients)
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                         disabled={currentPage === 1 || customersLoading}
-                        className="min-h-[44px] text-xs sm:text-sm"
+                        className="min-h-[44px] min-w-[44px] h-11 w-11 p-0 text-xs sm:text-sm"
+                        aria-label="Page précédente"
                       >
-                        <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5 mr-1" />
-                        <span className="text-xs sm:text-sm">Précédent</span>
+                        <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                       </Button>
-                      <div className="flex items-center gap-1 sm:gap-2">
+                      <div className="flex items-center gap-1">
                         {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                           let pageNum;
                           if (totalPages <= 5) {
@@ -306,7 +301,9 @@ const Customers = () => {
                               size="sm"
                               onClick={() => setCurrentPage(pageNum)}
                               disabled={customersLoading}
-                              className="min-h-[44px] min-w-[44px] h-11 w-11"
+                              className="min-h-[44px] min-w-[44px] h-11 w-11 text-xs sm:text-sm"
+                              aria-label={`Aller à la page ${pageNum}`}
+                              aria-current={currentPage === pageNum ? "page" : undefined}
                             >
                               {pageNum}
                             </Button>
@@ -318,10 +315,10 @@ const Customers = () => {
                         size="sm"
                         onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                         disabled={currentPage === totalPages || customersLoading}
-                        className="min-h-[44px] text-xs sm:text-sm"
+                        className="min-h-[44px] min-w-[44px] h-11 w-11 p-0 text-xs sm:text-sm"
+                        aria-label="Page suivante"
                       >
-                        <span className="text-xs sm:text-sm">Suivant</span>
-                        <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 ml-1" />
+                        <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
                       </Button>
                     </div>
                   </div>

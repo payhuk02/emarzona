@@ -86,8 +86,8 @@ export default function StaffAvailabilityCalendar() {
               <Card className="animate-in fade-in slide-in-from-top-4">
                 <CardContent className="p-12 text-center">
                   <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-2">Aucune boutique trouvée</h2>
-                  <p className="text-muted-foreground mb-6">
+                  <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold mb-1.5 sm:mb-2">Aucune boutique trouvée</h2>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6">
                     Vous devez créer une boutique avant de gérer les disponibilités du staff.
                   </p>
                 </CardContent>
@@ -133,10 +133,10 @@ export default function StaffAvailabilityCalendar() {
             {/* Tabs - Style Inventory */}
             <div ref={tabsRef} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-                <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 backdrop-blur-sm">
+                <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 backdrop-blur-sm gap-1.5 sm:gap-2">
                   <TabsTrigger 
                     value="calendar"
-                    className="flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                    className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                   >
                     <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">Calendrier</span>
@@ -144,7 +144,7 @@ export default function StaffAvailabilityCalendar() {
                   </TabsTrigger>
                   <TabsTrigger 
                     value="management"
-                    className="flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                    className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                   >
                     <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">Gestion</span>
@@ -152,7 +152,7 @@ export default function StaffAvailabilityCalendar() {
                   </TabsTrigger>
                   <TabsTrigger 
                     value="settings"
-                    className="flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                    className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                   >
                     <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">Paramètres</span>

@@ -108,58 +108,66 @@ export default function AdminInventory() {
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto p-6 space-y-6">
             {/* Header */}
-            <div ref={headerRef} className="flex items-center justify-between" role="banner">
+            <div ref={headerRef} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4" role="banner">
               <div>
-                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight" id="admin-inventory-title">Inventaire Global</h1>
+                <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2" id="admin-inventory-title">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                    <Warehouse className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                  </div>
+                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    Inventaire Global
+                  </span>
+                </h1>
                 <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                   Vue d'ensemble de l'inventaire de tous les vendeurs
                 </p>
               </div>
-              <Button variant="outline" size="sm" className="min-h-[44px]">
-                <Download className="h-4 w-4 mr-2" aria-hidden="true" />
-                Exporter CSV
+              <Button variant="outline" size="sm" className="min-h-[44px] text-xs sm:text-sm w-full sm:w-auto">
+                <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" aria-hidden="true" />
+                <span className="hidden sm:inline">Exporter CSV</span>
+                <span className="sm:hidden">CSV</span>
               </Button>
             </div>
 
             {/* Stats Cards */}
-            <div ref={statsRef} className="grid gap-4 md:grid-cols-4" role="region" aria-label="Statistiques de l'inventaire">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Total Articles</CardTitle>
-                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" aria-hidden="true" />
+            <div ref={statsRef} className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700" role="region" aria-label="Statistiques de l'inventaire">
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">Total Articles</CardTitle>
+                  <Package className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5 lg:h-4 lg:w-4 text-muted-foreground" aria-hidden="true" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.totalItems}</div>
+                <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">{stats.totalItems}</div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Stock Faible</CardTitle>
-                  <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-500" aria-hidden="true" />
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">Stock Faible</CardTitle>
+                  <AlertTriangle className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5 lg:h-4 lg:w-4 text-orange-500" aria-hidden="true" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-base sm:text-xl md:text-2xl font-bold text-orange-600">{stats.lowStockItems}</div>
+                <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-orange-600">{stats.lowStockItems}</div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">Rupture Stock</CardTitle>
-                  <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">Rupture Stock</CardTitle>
+                  <AlertTriangle className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5 lg:h-4 lg:w-4 text-red-500" aria-hidden="true" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-base sm:text-xl md:text-2xl font-bold text-red-600">{stats.outOfStockItems}</div>
+                <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-red-600">{stats.outOfStockItems}</div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Valeur Totale</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">Valeur Totale</CardTitle>
+                  <DollarSign className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5 lg:h-4 lg:w-4 text-muted-foreground" aria-hidden="true" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.totalValue.toLocaleString()} FCFA</div>
+                <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold break-words">{stats.totalValue.toLocaleString()} FCFA</div>
                 </CardContent>
               </Card>
             </div>
@@ -175,15 +183,18 @@ export default function AdminInventory() {
                         placeholder="Rechercher..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-8 min-h-[44px]"
+                        className="pl-8 min-h-[44px] text-xs sm:text-sm"
                       />
                     </div>
                   </div>
                   <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList>
-                      <TabsTrigger value="all" className="min-h-[44px]">Tous</TabsTrigger>
-                      <TabsTrigger value="low" className="min-h-[44px]">Stock Faible</TabsTrigger>
-                      <TabsTrigger value="out" className="min-h-[44px]">Rupture</TabsTrigger>
+                    <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1 gap-1.5 sm:gap-2">
+                      <TabsTrigger value="all" className="min-h-[44px] text-[10px] xs:text-xs sm:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300">Tous</TabsTrigger>
+                      <TabsTrigger value="low" className="min-h-[44px] text-[10px] xs:text-xs sm:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300">
+                        <span className="hidden sm:inline">Stock Faible</span>
+                        <span className="sm:hidden">Faible</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="out" className="min-h-[44px] text-[10px] xs:text-xs sm:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300">Rupture</TabsTrigger>
                     </TabsList>
                   </Tabs>
                 </div>
@@ -196,35 +207,35 @@ export default function AdminInventory() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Produit</TableHead>
-                        <TableHead>Variante</TableHead>
-                        <TableHead>Boutique</TableHead>
-                        <TableHead>Quantité</TableHead>
-                        <TableHead>Seuil</TableHead>
-                        <TableHead>Statut</TableHead>
+                        <TableHead className="text-[10px] sm:text-xs md:text-sm">Produit</TableHead>
+                        <TableHead className="text-[10px] sm:text-xs md:text-sm hidden sm:table-cell">Variante</TableHead>
+                        <TableHead className="text-[10px] sm:text-xs md:text-sm hidden md:table-cell">Boutique</TableHead>
+                        <TableHead className="text-[10px] sm:text-xs md:text-sm">Quantité</TableHead>
+                        <TableHead className="text-[10px] sm:text-xs md:text-sm hidden lg:table-cell">Seuil</TableHead>
+                        <TableHead className="text-[10px] sm:text-xs md:text-sm">Statut</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredItems.map((item) => (
                         <TableRow key={item.id}>
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium text-xs sm:text-sm">
                             {item.variant?.product?.name || 'N/A'}
                           </TableCell>
-                          <TableCell>{item.variant?.variant_name || '-'}</TableCell>
-                          <TableCell>{item.variant?.product?.store?.name || 'N/A'}</TableCell>
-                          <TableCell>
+                          <TableCell className="text-xs sm:text-sm hidden sm:table-cell">{item.variant?.variant_name || '-'}</TableCell>
+                          <TableCell className="text-xs sm:text-sm hidden md:table-cell">{item.variant?.product?.store?.name || 'N/A'}</TableCell>
+                          <TableCell className="text-xs sm:text-sm">
                             <span className={item.quantity === 0 ? 'text-red-600 font-bold' : ''}>
                               {item.quantity}
                             </span>
                           </TableCell>
-                          <TableCell>{item.low_stock_threshold || 10}</TableCell>
-                          <TableCell>
+                          <TableCell className="text-xs sm:text-sm hidden lg:table-cell">{item.low_stock_threshold || 10}</TableCell>
+                          <TableCell className="text-xs sm:text-sm">
                             {item.quantity === 0 ? (
-                              <Badge variant="destructive">Rupture</Badge>
+                              <Badge variant="destructive" className="text-[9px] sm:text-[10px] md:text-xs">Rupture</Badge>
                             ) : item.quantity <= (item.low_stock_threshold || 10) ? (
-                              <Badge variant="secondary">Stock Faible</Badge>
+                              <Badge variant="secondary" className="text-[9px] sm:text-[10px] md:text-xs">Stock Faible</Badge>
                             ) : (
-                              <Badge variant="default">OK</Badge>
+                              <Badge variant="default" className="text-[9px] sm:text-[10px] md:text-xs">OK</Badge>
                             )}
                           </TableCell>
                         </TableRow>

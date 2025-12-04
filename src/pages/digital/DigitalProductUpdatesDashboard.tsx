@@ -84,27 +84,28 @@ export default function DigitalProductUpdatesDashboard() {
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto p-4 lg:p-6 space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <SidebarTrigger />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <SidebarTrigger className="shrink-0" />
                 <div>
-                  <h1 className="text-lg sm:text-2xl md:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
+                  <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2">
                     <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20">
-                      <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-purple-500" />
+                      <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500" />
                     </div>
                     <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                       Gestion des Mises à Jour
                     </span>
                   </h1>
-                  <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-1">
+                  <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
                     Publiez et gérez les mises à jour de vos produits digitaux
                   </p>
                 </div>
               </div>
               {selectedProduct && (
-                <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Nouvelle mise à jour
+                <Button onClick={() => setShowCreateDialog(true)} className="gap-1.5 sm:gap-2 min-h-[44px] text-xs sm:text-sm w-full sm:w-auto">
+                  <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Nouvelle mise à jour</span>
+                  <span className="sm:hidden">Nouvelle</span>
                 </Button>
               )}
             </div>
@@ -171,19 +172,22 @@ export default function DigitalProductUpdatesDashboard() {
 
             {/* Updates Dashboard */}
             {selectedProduct && (
-              <Tabs defaultValue="updates" className="space-y-6">
-                <TabsList>
-                  <TabsTrigger value="updates">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Mises à jour
+              <Tabs defaultValue="updates" className="space-y-4 sm:space-y-6">
+                <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 backdrop-blur-sm gap-1.5 sm:gap-2">
+                  <TabsTrigger value="updates" className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300">
+                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Mises à jour</span>
+                    <span className="sm:hidden">Mises à j.</span>
                   </TabsTrigger>
-                  <TabsTrigger value="stats">
-                    <Download className="h-4 w-4 mr-2" />
-                    Statistiques
+                  <TabsTrigger value="stats" className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300">
+                    <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Statistiques</span>
+                    <span className="sm:hidden">Stats</span>
                   </TabsTrigger>
-                  <TabsTrigger value="settings">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Paramètres
+                  <TabsTrigger value="settings" className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300">
+                    <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Paramètres</span>
+                    <span className="sm:hidden">Param.</span>
                   </TabsTrigger>
                 </TabsList>
 

@@ -54,10 +54,14 @@ const StoreTeamManagement = () => {
                 <SidebarTrigger className="touch-manipulation min-h-[44px] min-w-[44px]" />
               </div>
             </header>
-            <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8">
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  Aucune boutique sélectionnée
+            <main className="flex-1 p-3 sm:p-4 lg:p-6">
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                <CardContent className="py-8 sm:py-12 text-center">
+                  <Users className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold mb-1.5 sm:mb-2">Aucune boutique sélectionnée</h2>
+                  <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
+                    Veuillez sélectionner une boutique pour gérer votre équipe
+                  </p>
                 </CardContent>
               </Card>
             </main>
@@ -80,46 +84,53 @@ const StoreTeamManagement = () => {
             <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 px-3 sm:px-4 md:px-6">
               <SidebarTrigger className="touch-manipulation min-h-[44px] min-w-[44px]" />
               <div className="flex-1 min-w-0 flex items-center gap-2 sm:gap-3">
-                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/5 border border-blue-500/20 flex items-center justify-center">
-                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
+                <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                 </div>
-                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Gestion d'équipe
-                </h1>
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                    <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent break-words">
+                      Gestion d'équipe
+                    </span>
+                  </h1>
+                  <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground hidden sm:block">
+                    Gérez les membres de votre équipe et leurs tâches
+                  </p>
+                </div>
               </div>
             </div>
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 bg-background overflow-x-hidden">
+          <main className="flex-1 p-3 sm:p-4 lg:p-6 bg-background overflow-x-hidden">
             <div className="max-w-7xl mx-auto w-full space-y-4 sm:space-y-6">
               {/* Statistiques */}
               <StoreTeamStats storeId={store.id} />
 
               {/* Tabs */}
               <Tabs defaultValue="members" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto">
+                <TabsList className="grid w-full grid-cols-3 gap-1.5 sm:gap-2 mb-4 sm:mb-6 h-auto p-1 bg-muted/50 backdrop-blur-sm">
                   <TabsTrigger
                     value="members"
-                    className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]"
+                    className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 touch-manipulation whitespace-nowrap overflow-hidden text-ellipsis"
                   >
-                    <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">Membres</span>
                     <span className="sm:hidden">Membres</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="tasks"
-                    className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]"
+                    className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 touch-manipulation whitespace-nowrap overflow-hidden text-ellipsis"
                   >
-                    <CheckSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <CheckSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">Tâches</span>
                     <span className="sm:hidden">Tâches</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="stats"
-                    className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]"
+                    className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 touch-manipulation whitespace-nowrap overflow-hidden text-ellipsis"
                   >
-                    <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">Statistiques</span>
                     <span className="sm:hidden">Stats</span>
                   </TabsTrigger>

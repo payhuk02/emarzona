@@ -12,11 +12,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Mail, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { EmailCampaign } from '@/lib/email/email-campaign-service';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export const EmailCampaignsPage = () => {
   const { store } = useStore();
   const [builderOpen, setBuilderOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<EmailCampaign | null>(null);
+  const headerRef = useScrollAnimation<HTMLDivElement>();
 
   const handleCreateCampaign = () => {
     setEditingCampaign(null);
@@ -43,10 +45,10 @@ export const EmailCampaignsPage = () => {
       <SidebarProvider>
         <div className="flex min-h-screen">
           <AppSidebar />
-          <main className="flex-1 p-6">
-            <Card>
-              <CardContent className="p-6">
-                <p className="text-center text-muted-foreground">
+          <main className="flex-1 p-3 sm:p-4 lg:p-6">
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-6 sm:p-8 sm:p-12 text-center">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Veuillez sélectionner une boutique
                 </p>
               </CardContent>
@@ -61,22 +63,27 @@ export const EmailCampaignsPage = () => {
     <SidebarProvider>
       <div className="flex min-h-screen">
         <AppSidebar />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           {/* Header */}
-          <div className="space-y-2">
+          <div 
+            ref={headerRef}
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+          >
             <div className="flex items-center gap-2 sm:gap-3">
               <SidebarTrigger 
                 aria-label="Toggle sidebar"
-                className="hover:bg-accent/50 transition-colors duration-200 flex-shrink-0 touch-manipulation min-h-[44px] min-w-[44px] lg:hidden"
+                className="hover:bg-accent/50 transition-colors duration-200 flex-shrink-0 touch-manipulation min-h-[44px] min-w-[44px]"
               />
-              <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/5 flex-shrink-0">
-                <Mail className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
+              <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/5 backdrop-blur-sm border border-blue-500/20 flex-shrink-0">
+                <Mail className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-blue-500 dark:text-blue-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Campagnes Email
+                <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Campagnes Email
+                  </span>
                 </h1>
-                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                   Créez et gérez vos campagnes email marketing
                 </p>
               </div>
@@ -84,12 +91,12 @@ export const EmailCampaignsPage = () => {
           </div>
 
           {/* Info Alert */}
-          <Alert className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
-            <Info className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-blue-900 dark:text-blue-100">
+          <Alert className="border-blue-200/50 bg-blue-50/50 dark:bg-blue-950/20 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
+            <AlertTitle className="text-xs sm:text-sm md:text-base text-blue-900 dark:text-blue-100">
               Système d'Emailing Avancé
             </AlertTitle>
-            <AlertDescription className="text-blue-800 dark:text-blue-200">
+            <AlertDescription className="text-[10px] sm:text-xs md:text-sm text-blue-800 dark:text-blue-200">
               Créez des campagnes email ciblées pour vos clients. Programmez des envois,
               segmentez votre audience et suivez les performances en temps réel.
             </AlertDescription>

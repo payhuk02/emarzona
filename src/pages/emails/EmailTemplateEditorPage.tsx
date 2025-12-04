@@ -19,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { EmailTemplate } from '@/types/email';
 import { useQueryClient } from '@tanstack/react-query';
 import { logger } from '@/lib/logger';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export const EmailTemplateEditorPage = () => {
   const [htmlContent, setHtmlContent] = useState('');
@@ -26,6 +27,8 @@ export const EmailTemplateEditorPage = () => {
   const [activeTab, setActiveTab] = useState<'editor' | 'blocks' | 'preview'>('editor');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+  const tabsRef = useScrollAnimation<HTMLDivElement>();
 
   const handleSave = async (templateData: Partial<EmailTemplate>) => {
     try {
@@ -82,22 +85,27 @@ export const EmailTemplateEditorPage = () => {
     <SidebarProvider>
       <div className="flex min-h-screen">
         <AppSidebar />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           {/* Header */}
-          <div className="space-y-2">
+          <div 
+            ref={headerRef}
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+          >
             <div className="flex items-center gap-2 sm:gap-3">
               <SidebarTrigger 
                 aria-label="Toggle sidebar"
-                className="hover:bg-accent/50 transition-colors duration-200 flex-shrink-0 touch-manipulation min-h-[44px] min-w-[44px] lg:hidden"
+                className="hover:bg-accent/50 transition-colors duration-200 flex-shrink-0 touch-manipulation min-h-[44px] min-w-[44px]"
               />
-              <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/5 flex-shrink-0">
-                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
+              <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/5 backdrop-blur-sm border border-blue-500/20 flex-shrink-0">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-blue-500 dark:text-blue-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Éditeur de Templates Email
+                <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Éditeur de Templates Email
+                  </span>
                 </h1>
-                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                   Créez et personnalisez vos templates email avec un éditeur visuel
                 </p>
               </div>
@@ -105,12 +113,12 @@ export const EmailTemplateEditorPage = () => {
           </div>
 
           {/* Info Alert */}
-          <Alert className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
-            <Info className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-blue-900 dark:text-blue-100">
+          <Alert className="border-blue-200/50 bg-blue-50/50 dark:bg-blue-950/20 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
+            <AlertTitle className="text-xs sm:text-sm md:text-base text-blue-900 dark:text-blue-100">
               Éditeur de Templates Email
             </AlertTitle>
-            <AlertDescription className="text-blue-800 dark:text-blue-200">
+            <AlertDescription className="text-[10px] sm:text-xs md:text-sm text-blue-800 dark:text-blue-200">
               Utilisez l&apos;éditeur pour créer vos templates email. Vous pouvez insérer des
               blocs prédéfinis, utiliser des variables dynamiques, et prévisualiser le résultat
               sur mobile et desktop.
@@ -118,51 +126,62 @@ export const EmailTemplateEditorPage = () => {
           </Alert>
 
           {/* Main Content */}
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="editor" className="text-xs sm:text-sm">
-                <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Éditeur</span>
-                <span className="sm:hidden">Édit</span>
-              </TabsTrigger>
-              <TabsTrigger value="blocks" className="text-xs sm:text-sm">
-                <Blocks className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Blocs</span>
-                <span className="sm:hidden">Bloc</span>
-              </TabsTrigger>
-              <TabsTrigger value="preview" className="text-xs sm:text-sm">
-                <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Prévisualisation</span>
-                <span className="sm:hidden">Aperçu</span>
-              </TabsTrigger>
-            </TabsList>
+          <div ref={tabsRef} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="space-y-4 sm:space-y-6">
+              <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 backdrop-blur-sm gap-1.5 sm:gap-2">
+                <TabsTrigger 
+                  value="editor" 
+                  className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
+                >
+                  <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Éditeur</span>
+                  <span className="sm:hidden">Édit</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="blocks" 
+                  className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
+                >
+                  <Blocks className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Blocs</span>
+                  <span className="sm:hidden">Bloc</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="preview" 
+                  className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
+                >
+                  <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Prévisualisation</span>
+                  <span className="sm:hidden">Aperçu</span>
+                </TabsTrigger>
+              </TabsList>
 
-            {/* Onglet Éditeur */}
-            <TabsContent value="editor">
-              <EmailTemplateEditor
-                template={null}
-                onSave={handleSave}
-                onChange={(data) => {
-                  setHtmlContent(data.htmlContent);
-                  setSubject(data.subject);
-                }}
-                language="fr"
-              />
-            </TabsContent>
+              {/* Onglet Éditeur */}
+              <TabsContent value="editor" className="mt-3 sm:mt-4 lg:mt-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <EmailTemplateEditor
+                  template={null}
+                  onSave={handleSave}
+                  onChange={(data) => {
+                    setHtmlContent(data.htmlContent);
+                    setSubject(data.subject);
+                  }}
+                  language="fr"
+                />
+              </TabsContent>
 
-            {/* Onglet Blocs */}
-            <TabsContent value="blocks">
-              <TemplateBlockLibrary onInsertBlock={handleInsertBlock} />
-            </TabsContent>
+              {/* Onglet Blocs */}
+              <TabsContent value="blocks" className="mt-3 sm:mt-4 lg:mt-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <TemplateBlockLibrary onInsertBlock={handleInsertBlock} />
+              </TabsContent>
 
-            {/* Onglet Prévisualisation */}
-            <TabsContent value="preview">
-              <TemplatePreview
-                htmlContent={htmlContent}
-                subject={subject}
-              />
-            </TabsContent>
-          </Tabs>
+              {/* Onglet Prévisualisation */}
+              <TabsContent value="preview" className="mt-3 sm:mt-4 lg:mt-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <TemplatePreview
+                  htmlContent={htmlContent}
+                  subject={subject}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
         </main>
       </div>
     </SidebarProvider>

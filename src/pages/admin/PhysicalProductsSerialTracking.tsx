@@ -139,43 +139,43 @@ export default function PhysicalProductsSerialTracking() {
             {/* Header - Responsive & Animated */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                    <Hash className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                    <Hash className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                   </div>
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     Numéros de Série et Traçabilité
                   </span>
                 </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                   Gérez les numéros de série, suivez la traçabilité complète et gérez les garanties
                 </p>
               </div>
             </div>
 
             <Tabs defaultValue="serials" className="space-y-4 sm:space-y-6">
-              <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 backdrop-blur-sm">
+              <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 backdrop-blur-sm gap-1.5 sm:gap-2">
                 <TabsTrigger 
                   value="serials"
-                  className="text-xs sm:text-sm px-2 sm:px-4 py-2 min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                 >
-                  <Hash className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span className="hidden xs:inline">Numéros de Série</span>
                   <span className="xs:hidden">Série</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="warranty"
-                  className="text-xs sm:text-sm px-2 sm:px-4 py-2 min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                 >
-                  <AlertTriangle className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span className="hidden xs:inline">Réclamations Garantie</span>
                   <span className="xs:hidden">Garantie</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="repairs"
-                  className="text-xs sm:text-sm px-2 sm:px-4 py-2 min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                 >
-                  <Wrench className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <Wrench className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span className="hidden xs:inline">Réparations</span>
                   <span className="xs:hidden">Réparations</span>
                 </TabsTrigger>
@@ -184,9 +184,9 @@ export default function PhysicalProductsSerialTracking() {
               <TabsContent value="serials" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
                 <div className="space-y-4 sm:space-y-6">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                    <Label className="text-xs sm:text-sm whitespace-nowrap">Sélectionner un Produit</Label>
+                    <Label className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap pt-2 sm:pt-0">Sélectionner un Produit</Label>
                     <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                      <SelectTrigger className="w-full sm:w-[300px] min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm">
+                      <SelectTrigger className="w-full sm:w-[300px] md:w-[350px] min-h-[44px] h-10 sm:h-11 md:h-12 text-xs sm:text-sm">
                         <SelectValue placeholder="Choisir un produit..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -202,10 +202,10 @@ export default function PhysicalProductsSerialTracking() {
                   {selectedProductId ? (
                     <SerialNumbersManager physicalProductId={selectedProductId} />
                   ) : (
-                    <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg border-border/50 bg-card/50 backdrop-blur-sm">
-                      <div className="text-center p-6">
-                        <Hash className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
-                        <p className="text-sm sm:text-base text-muted-foreground">
+                    <div className="flex items-center justify-center h-48 sm:h-64 md:h-80 border-2 border-dashed rounded-lg border-border/50 bg-card/50 backdrop-blur-sm">
+                      <div className="text-center p-4 sm:p-6">
+                        <Hash className="h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 mx-auto text-muted-foreground mb-3 sm:mb-4 animate-in zoom-in-95 duration-500" />
+                        <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
                           Sélectionnez un produit pour gérer ses numéros de série
                         </p>
                       </div>

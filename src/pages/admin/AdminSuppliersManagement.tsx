@@ -124,17 +124,17 @@ export default function AdminSuppliersManagement() {
                 <div className="flex items-start sm:items-center gap-2 sm:gap-3">
                   <SidebarTrigger className="mt-1 sm:mt-0 shrink-0 h-9 w-9 sm:h-10 sm:w-10" />
                   <div className="flex-1 min-w-0">
-                    <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold flex flex-col sm:flex-row sm:items-center gap-2 mb-1 sm:mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 flex items-center justify-center animate-in zoom-in duration-500 shrink-0">
-                          <Building2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-600 dark:text-purple-400" aria-hidden="true" />
+                    <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500 shrink-0">
+                          <Building2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                         </div>
                         <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent break-words">
                           Gestion des Fournisseurs
                         </span>
                       </div>
                     </h1>
-                    <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
+                    <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                       Gérez vos fournisseurs, commandes et réapprovisionnements automatiques
                     </p>
                   </div>
@@ -209,16 +209,16 @@ export default function AdminSuppliersManagement() {
                       className="border border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
                       style={{ animationDelay: `${index * 100}ms` }}
                     >
-                      <CardHeader className="pb-1.5 sm:pb-2 p-2.5 sm:p-3 lg:p-4">
-                        <CardTitle className="text-[10px] xs:text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5">
-                          <div className={`h-5 w-5 sm:h-6 sm:w-6 rounded-lg bg-gradient-to-br ${stat.iconBg} border ${stat.iconBorder} flex items-center justify-center`}>
-                            <Icon className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${stat.iconColor}`} />
+                      <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
+                        <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                          <div className={`p-1 sm:p-1.5 rounded-lg bg-gradient-to-br ${stat.iconBg} border ${stat.iconBorder} flex items-center justify-center`}>
+                            <Icon className={`h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5 lg:h-4 lg:w-4 ${stat.iconColor}`} />
                           </div>
                           {stat.label}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="p-2.5 sm:p-3 lg:p-4 pt-0">
-                        <div className={`text-lg xs:text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                      <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                        <div className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent break-words`}>
                           {stat.value}
                         </div>
                       </CardContent>

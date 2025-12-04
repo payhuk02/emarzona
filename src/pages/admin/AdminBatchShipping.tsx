@@ -156,14 +156,14 @@ export default function AdminBatchShipping() {
                     className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
-                      <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
-                        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
+                      <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                        <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5 lg:h-4 lg:w-4" />
                         {stat.label}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-3 sm:p-4 pt-0">
-                      <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                    <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                      <div className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent break-words`}>
                         {stat.value}
                       </div>
                     </CardContent>
