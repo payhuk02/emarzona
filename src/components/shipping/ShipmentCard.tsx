@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,24 +29,33 @@ interface ShipmentCardProps {
   onRefresh?: () => void;
 }
 
-const statusConfig: Record<string, { label: string; color: string; variant: any }> = {
-  pending: { label: 'En attente', color: 'bg-gray-500', variant: 'secondary' },
-  label_created: { label: 'Étiquette créée', color: 'bg-blue-500', variant: 'default' },
-  picked_up: { label: 'Ramassé', color: 'bg-purple-500', variant: 'default' },
-  in_transit: { label: 'En transit', color: 'bg-indigo-500', variant: 'default' },
-  out_for_delivery: { label: 'En livraison', color: 'bg-yellow-500', variant: 'default' },
-  delivered: { label: 'Livré', color: 'bg-green-500', variant: 'default' },
-  failed: { label: 'Échec', color: 'bg-red-500', variant: 'destructive' },
-  returned: { label: 'Retourné', color: 'bg-orange-500', variant: 'destructive' },
-  cancelled: { label: 'Annulé', color: 'bg-gray-500', variant: 'destructive' },
+const getStatusConfig = (status: string, t: (key: string, defaultValue?: string) => string) => {
+  const configs: Record<string, { labelKey: string; color: string; variant: any }> = {
+    pending: { labelKey: 'shipping.status.pending', color: 'bg-gray-500', variant: 'secondary' },
+    label_created: { labelKey: 'shipping.status.labelCreated', color: 'bg-blue-500', variant: 'default' },
+    picked_up: { labelKey: 'shipping.status.pickedUp', color: 'bg-purple-500', variant: 'default' },
+    in_transit: { labelKey: 'shipping.status.inTransit', color: 'bg-indigo-500', variant: 'default' },
+    out_for_delivery: { labelKey: 'shipping.status.outForDelivery', color: 'bg-yellow-500', variant: 'default' },
+    delivered: { labelKey: 'shipping.status.delivered', color: 'bg-green-500', variant: 'default' },
+    failed: { labelKey: 'shipping.status.failed', color: 'bg-red-500', variant: 'destructive' },
+    returned: { labelKey: 'shipping.status.returned', color: 'bg-orange-500', variant: 'destructive' },
+    cancelled: { labelKey: 'shipping.status.cancelled', color: 'bg-gray-500', variant: 'destructive' },
+  };
+
+  const config = configs[status] || configs.pending;
+  return {
+    ...config,
+    label: t(config.labelKey, config.labelKey.split('.').pop() || ''),
+  };
 };
 
 const ShipmentCardComponent = ({ shipment, onRefresh }: ShipmentCardProps) => {
+  const { t } = useTranslation();
   const [showTimeline, setShowTimeline] = useState(false);
   const printLabel = usePrintLabel();
   const cancelShipment = useCancelShipment();
 
-  const status = statusConfig[shipment.status] || statusConfig.pending;
+  const status = getStatusConfig(shipment.status, t);
 
   const handlePrintLabel = async () => {
     if (shipment.labels && shipment.labels.length > 0) {
@@ -54,7 +64,7 @@ const ShipmentCardComponent = ({ shipment, onRefresh }: ShipmentCardProps) => {
   };
 
   const handleCancel = async () => {
-    if (confirm('Êtes-vous sûr de vouloir annuler cette expédition ?')) {
+    if (confirm(t('shipping.cancelShipmentConfirm', 'Êtes-vous sûr de vouloir annuler cette expédition ?'))) {
       await cancelShipment.mutateAsync(shipment.id);
     }
   };
@@ -77,7 +87,7 @@ const ShipmentCardComponent = ({ shipment, onRefresh }: ShipmentCardProps) => {
                   <Badge variant={status.variant}>{status.label}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Commande #{shipment.order?.order_number || 'N/A'}
+                  {t('orders.orderNumber', 'Commande')} #{shipment.order?.order_number || t('common.notAvailable', 'N/A')}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {shipment.service_type || 'FedEx Ground'}
@@ -94,7 +104,7 @@ const ShipmentCardComponent = ({ shipment, onRefresh }: ShipmentCardProps) => {
                   onClick={() => window.open(shipment.tracking_url, '_blank')}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
-                  Suivre
+                  {t('shipping.track', 'Suivre')}
                 </Button>
               )}
               {shipment.labels && shipment.labels.length > 0 && (
@@ -105,7 +115,7 @@ const ShipmentCardComponent = ({ shipment, onRefresh }: ShipmentCardProps) => {
                   disabled={printLabel.isPending}
                 >
                   <Printer className="h-4 w-4 mr-2" />
-                  Étiquette
+                  {t('shipping.label', 'Étiquette')}
                 </Button>
               )}
               {onRefresh && (
@@ -119,12 +129,12 @@ const ShipmentCardComponent = ({ shipment, onRefresh }: ShipmentCardProps) => {
           {/* Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Origine</p>
+              <p className="text-xs text-muted-foreground mb-1">{t('shipping.origin', 'Origine')}</p>
               <div className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-blue-500 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">
-                    {shipment.ship_from?.name || 'N/A'}
+                    {shipment.ship_from?.name || t('common.notAvailable', 'N/A')}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {shipment.ship_from?.city}, {shipment.ship_from?.country}
@@ -134,12 +144,12 @@ const ShipmentCardComponent = ({ shipment, onRefresh }: ShipmentCardProps) => {
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Destination</p>
+              <p className="text-xs text-muted-foreground mb-1">{t('shipping.destination', 'Destination')}</p>
               <div className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-green-500 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">
-                    {shipment.ship_to?.name || 'N/A'}
+                    {shipment.ship_to?.name || t('common.notAvailable', 'N/A')}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {shipment.ship_to?.city}, {shipment.ship_to?.country}
@@ -149,7 +159,7 @@ const ShipmentCardComponent = ({ shipment, onRefresh }: ShipmentCardProps) => {
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Livraison estimée</p>
+              <p className="text-xs text-muted-foreground mb-1">{t('shipping.estimatedDelivery', 'Livraison estimée')}</p>
               <div className="flex items-start gap-2">
                 <Calendar className="h-4 w-4 text-purple-500 mt-0.5" />
                 <div>
@@ -158,11 +168,11 @@ const ShipmentCardComponent = ({ shipment, onRefresh }: ShipmentCardProps) => {
                       ? format(new Date(shipment.estimated_delivery), 'dd MMM yyyy', {
                           locale: fr,
                         })
-                      : 'N/A'}
+                      : t('common.notAvailable', 'N/A')}
                   </p>
                   {shipment.actual_delivery && (
                     <p className="text-xs text-green-600">
-                      Livré le{' '}
+                      {t('shipping.deliveredOn', 'Livré le')}{' '}
                       {format(new Date(shipment.actual_delivery), 'dd MMM yyyy', {
                         locale: fr,
                       })}
@@ -175,14 +185,14 @@ const ShipmentCardComponent = ({ shipment, onRefresh }: ShipmentCardProps) => {
 
           {/* Weight & Cost */}
           <div className="flex items-center gap-6 text-sm text-muted-foreground border-t pt-4">
-            <span>Poids: {shipment.weight_value} kg</span>
+            <span>{t('shipping.weight', 'Poids')}: {shipment.weight_value} kg</span>
             <span>•</span>
             <span>
-              Coût: {shipment.shipping_cost?.toLocaleString()} {shipment.currency}
+              {t('shipping.cost', 'Coût')}: {shipment.shipping_cost?.toLocaleString()} {shipment.currency}
             </span>
             <span>•</span>
             <span>
-              Créé le{' '}
+              {t('shipping.createdOn', 'Créé le')}{' '}
               {format(new Date(shipment.created_at), 'dd MMM yyyy à HH:mm', {
                 locale: fr,
               })}
@@ -197,7 +207,7 @@ const ShipmentCardComponent = ({ shipment, onRefresh }: ShipmentCardProps) => {
               onClick={() => setShowTimeline(!showTimeline)}
             >
               <Eye className="h-4 w-4 mr-2" />
-              {showTimeline ? 'Masquer' : 'Voir'} le suivi détaillé
+              {showTimeline ? t('common.hide', 'Masquer') : t('common.view', 'Voir')} {t('shipping.detailedTracking', 'le suivi détaillé')}
             </Button>
 
             {!['delivered', 'cancelled'].includes(shipment.status) && (
@@ -209,7 +219,7 @@ const ShipmentCardComponent = ({ shipment, onRefresh }: ShipmentCardProps) => {
                 className="text-red-600 hover:text-red-700"
               >
                 <XCircle className="h-4 w-4 mr-2" />
-                Annuler l'expédition
+                {t('shipping.cancelShipment', 'Annuler l\'expédition')}
               </Button>
             )}
           </div>

@@ -1,10 +1,10 @@
 {
   "reference": "FR",
-  "referenceKeys": 1014,
+  "referenceKeys": 1080,
   "languages": [
     {
       "language": "FR",
-      "totalKeys": 1014,
+      "totalKeys": 1080,
       "missingKeys": 0,
       "extraKeys": 0,
       "completeness": 100,
@@ -12,39 +12,35 @@
     },
     {
       "language": "EN",
-      "totalKeys": 1021,
+      "totalKeys": 1091,
       "missingKeys": 0,
-      "extraKeys": 7,
-      "completeness": "100.7",
+      "extraKeys": 11,
+      "completeness": "101.0",
       "missingKeysList": []
     },
     {
       "language": "ES",
-      "totalKeys": 1021,
+      "totalKeys": 1090,
       "missingKeys": 0,
-      "extraKeys": 7,
-      "completeness": "100.7",
+      "extraKeys": 10,
+      "completeness": "100.9",
       "missingKeysList": []
     },
     {
       "language": "DE",
-      "totalKeys": 1021,
+      "totalKeys": 1088,
       "missingKeys": 0,
-      "extraKeys": 7,
+      "extraKeys": 8,
       "completeness": "100.7",
       "missingKeysList": []
     },
     {
       "language": "PT",
-      "totalKeys": 1087,
-      "missingKeys": 3,
-      "extraKeys": 76,
-      "completeness": "106.9",
-      "missingKeysList": [
-        "dashboard.stats.products.title",
-        "dashboard.stats.orders.title",
-        "dashboard.stats.customers.title"
-      ]
+      "totalKeys": 1160,
+      "missingKeys": 0,
+      "extraKeys": 80,
+      "completeness": "107.4",
+      "missingKeysList": []
     }
   ]
 }

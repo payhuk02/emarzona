@@ -432,6 +432,7 @@
   },
   "orders": {
     "title": "Bestellungen",
+    "orderNumberLabel": "Bestellung",
     "new": "Neue Bestellung",
     "export": "CSV exportieren",
     "filters": {
@@ -1434,6 +1435,32 @@
       "title": "E-Mail-Kampagnen",
       "subtitle": "Erstellen und verwalten Sie Ihre E-Mail-Marketing-Kampagnen",
       "noStore": "Bitte wählen Sie einen Shop aus",
+      "editCampaign": "Kampagne bearbeiten",
+      "newCampaign": "Neue Kampagne",
+      "editCampaignDescription": "Bearbeiten Sie die Informationen Ihrer E-Mail-Kampagne",
+      "newCampaignDescription": "Erstellen Sie eine neue E-Mail-Marketing-Kampagne für Ihren Shop",
+      "campaignName": "Kampagnenname",
+      "campaignNamePlaceholder": "Newsletter Januar 2025",
+      "campaignType": "Kampagnentyp",
+      "campaignDescriptionPlaceholder": "Kampagnenbeschreibung...",
+      "audienceType": "Zielgruppentyp",
+      "scheduledAt": "Versanddatum und -zeit",
+      "scheduledAtPlaceholder": "Versand planen",
+      "scheduledAtDescription": "Leer lassen, um sofort zu senden oder einen Entwurf zu erstellen",
+      "timezone": "Zeitzone",
+      "createCampaign": "Kampagne erstellen",
+      "types": {
+        "newsletter": "Newsletter",
+        "promotional": "Werbeaktion",
+        "transactional": "Transaktional",
+        "abandonCart": "Verlassener Warenkorb",
+        "nurture": "Nurture"
+      },
+      "audienceTypes": {
+        "segment": "Segment",
+        "list": "Liste",
+        "filter": "Filter"
+      },
       "alert": {
         "title": "Erweitertes E-Mail-System",
         "description": "Erstellen Sie gezielte E-Mail-Kampagnen für Ihre Kunden. Planen Sie Versendungen, segmentieren Sie Ihr Publikum und verfolgen Sie die Leistung in Echtzeit."
@@ -1443,6 +1470,24 @@
       "title": "E-Mail-Sequenzen",
       "subtitle": "Erstellen Sie automatisierte E-Mail-Sequenzen für Ihre Kunden",
       "noStore": "Bitte wählen Sie einen Shop aus",
+      "editStep": "Schritt bearbeiten",
+      "newStep": "Neuer Schritt",
+      "editStepDescription": "Bearbeiten Sie die Einstellungen für diesen Sequenzschritt",
+      "newStepDescription": "Fügen Sie einen neuen Schritt zu Ihrer E-Mail-Sequenz hinzu",
+      "stepOrder": "Schrittreihenfolge",
+      "stepOrderDescription": "Die Reihenfolge bestimmt, wann dieser Schritt in der Sequenz ausgeführt wird",
+      "templateDescription": "Die Vorlage, die für diese E-Mail verwendet werden soll",
+      "delayType": "Verzögerungstyp",
+      "delayValue": "Wert",
+      "immediate": "Sofort",
+      "minutes": "Minuten",
+      "hours": "Stunden",
+      "days": "Tage",
+      "day": "Tag",
+      "hour": "Stunde",
+      "minute": "Minute",
+      "delayDescription": "Dieser Schritt wird {{value}} {{unit}}{{plural}} nach dem vorherigen Schritt gesendet",
+      "addStep": "Schritt hinzufügen",
       "tabs": {
         "list": "Liste",
         "steps": "Schritte"
@@ -1549,7 +1594,12 @@
     "welcome": "Willkommen",
     "startBuilding": "Beginnen Sie hier mit dem Aufbau Ihres erstaunlichen Projekts!",
     "notAvailable": "N/A",
-    "optional": "optional"
+    "optional": "optional",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "description": "Beschreibung",
+    "hide": "Ausblenden",
+    "view": "Anzeigen"
   },
   "shipping": {
     "title": "Versand",
@@ -1570,6 +1620,29 @@
     "totalShipping": "Gesamtversand",
     "estimatedDelivery": "Geschätzte Lieferung: {{days}} Tage",
     "recommendedCarriers": "Empfohlene Spediteure:",
+    "status": {
+      "pending": "Ausstehend",
+      "labelCreated": "Etikett erstellt",
+      "pickedUp": "Abgeholt",
+      "inTransit": "Unterwegs",
+      "outForDelivery": "Zur Zustellung",
+      "delivered": "Zugestellt",
+      "failed": "Fehlgeschlagen",
+      "returned": "Zurückgegeben",
+      "cancelled": "Storniert"
+    },
+    "origin": "Ursprung",
+    "destination": "Ziel",
+    "estimatedDeliveryLabel": "Geschätzte Lieferung",
+    "deliveredOn": "Zugestellt am",
+    "weight": "Gewicht",
+    "cost": "Kosten",
+    "createdOn": "Erstellt am",
+    "track": "Verfolgen",
+    "label": "Etikett",
+    "cancelShipment": "Versand stornieren",
+    "cancelShipmentConfirm": "Sind Sie sicher, dass Sie diesen Versand stornieren möchten?",
+    "detailedTracking": "detaillierte Verfolgung",
     "artistCalculator": {
       "title": "Spezialversand-Rechner",
       "description": "Berechnen Sie die spezialisierten Versandkosten für dieses Kunstwerk"

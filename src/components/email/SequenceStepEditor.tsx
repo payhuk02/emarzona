@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -47,6 +48,7 @@ export const SequenceStepEditor = ({
   stepOrder,
   onSuccess,
 }: SequenceStepEditorProps) => {
+  const { t } = useTranslation();
   const [templateId, setTemplateId] = useState<string>('');
   const [delayType, setDelayType] = useState<SequenceStepDelayType>('days');
   const [delayValue, setDelayValue] = useState<number>(1);
@@ -109,18 +111,18 @@ export const SequenceStepEditor = ({
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Modifier l\'étape' : 'Nouvelle étape'}
+            {isEditing ? t('emails.sequences.editStep', 'Modifier l\'étape') : t('emails.sequences.newStep', 'Nouvelle étape')}
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? 'Modifiez les paramètres de cette étape de la séquence'
-              : 'Ajoutez une nouvelle étape à votre séquence d\'emails'}
+              ? t('emails.sequences.editStepDescription', 'Modifiez les paramètres de cette étape de la séquence')
+              : t('emails.sequences.newStepDescription', 'Ajoutez une nouvelle étape à votre séquence d\'emails')}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="order">Ordre de l'étape *</Label>
+            <Label htmlFor="order">{t('emails.sequences.stepOrder', 'Ordre de l\'étape')} *</Label>
             <Input
               id="order"
               type="number"
@@ -130,18 +132,18 @@ export const SequenceStepEditor = ({
               required
             />
             <p className="text-xs text-muted-foreground mt-1">
-              L'ordre détermine quand cette étape sera exécutée dans la séquence
+              {t('emails.sequences.stepOrderDescription', 'L\'ordre détermine quand cette étape sera exécutée dans la séquence')}
             </p>
           </div>
 
           <div>
-            <Label htmlFor="template">Template email</Label>
+            <Label htmlFor="template">{t('emails.template', 'Template email')}</Label>
             <Select value={templateId || "__none__"} onValueChange={(value) => setTemplateId(value === "__none__" ? "" : value)}>
               <SelectTrigger id="template">
-                <SelectValue placeholder="Sélectionner un template" />
+                <SelectValue placeholder={t('emails.selectTemplate', 'Sélectionner un template')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">Aucun template</SelectItem>
+                <SelectItem value="__none__">{t('emails.noTemplate', 'Aucun template')}</SelectItem>
                 {templates?.map((template) => (
                   <SelectItem key={template.id} value={template.id}>
                     {template.name}
@@ -150,13 +152,13 @@ export const SequenceStepEditor = ({
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground mt-1">
-              Le template à utiliser pour cet email
+              {t('emails.sequences.templateDescription', 'Le template à utiliser pour cet email')}
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="delayType">Type de délai *</Label>
+              <Label htmlFor="delayType">{t('emails.sequences.delayType', 'Type de délai')} *</Label>
               <Select
                 value={delayType}
                 onValueChange={(value) => setDelayType(value as SequenceStepDelayType)}
@@ -165,16 +167,16 @@ export const SequenceStepEditor = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="immediate">Immédiat</SelectItem>
-                  <SelectItem value="minutes">Minutes</SelectItem>
-                  <SelectItem value="hours">Heures</SelectItem>
-                  <SelectItem value="days">Jours</SelectItem>
+                  <SelectItem value="immediate">{t('emails.sequences.immediate', 'Immédiat')}</SelectItem>
+                  <SelectItem value="minutes">{t('emails.sequences.minutes', 'Minutes')}</SelectItem>
+                  <SelectItem value="hours">{t('emails.sequences.hours', 'Heures')}</SelectItem>
+                  <SelectItem value="days">{t('emails.sequences.days', 'Jours')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label htmlFor="delayValue">Valeur *</Label>
+              <Label htmlFor="delayValue">{t('emails.sequences.delayValue', 'Valeur')} *</Label>
               <Input
                 id="delayValue"
                 type="number"
@@ -189,7 +191,11 @@ export const SequenceStepEditor = ({
 
           {delayType !== 'immediate' && (
             <p className="text-xs text-muted-foreground">
-              Cette étape sera envoyée {delayValue} {delayType === 'days' ? 'jour' : delayType === 'hours' ? 'heure' : 'minute'}{delayValue > 1 ? 's' : ''} après l'étape précédente
+              {t('emails.sequences.delayDescription', {
+                value: delayValue,
+                unit: delayType === 'days' ? t('emails.sequences.day', 'jour') : delayType === 'hours' ? t('emails.sequences.hour', 'heure') : t('emails.sequences.minute', 'minute'),
+                plural: delayValue > 1 ? 's' : ''
+              }, `Cette étape sera envoyée ${delayValue} ${delayType === 'days' ? 'jour' : delayType === 'hours' ? 'heure' : 'minute'}${delayValue > 1 ? 's' : ''} après l'étape précédente`)}
             </p>
           )}
 
@@ -200,11 +206,11 @@ export const SequenceStepEditor = ({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Annuler
+              {t('common.cancel', 'Annuler')}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {isEditing ? 'Enregistrer' : 'Ajouter l\'étape'}
+              {isEditing ? t('common.save', 'Enregistrer') : t('emails.sequences.addStep', 'Ajouter l\'étape')}
             </Button>
           </div>
         </form>

@@ -1434,6 +1434,32 @@
       "title": "Campañas de Email",
       "subtitle": "Crea y gestiona tus campañas de email marketing",
       "noStore": "Por favor, selecciona una tienda",
+      "editCampaign": "Modificar la campaña",
+      "newCampaign": "Nueva campaña",
+      "editCampaignDescription": "Modifica la información de tu campaña de email",
+      "newCampaignDescription": "Crea una nueva campaña de email marketing para tu tienda",
+      "campaignName": "Nombre de la campaña",
+      "campaignNamePlaceholder": "Newsletter de enero 2025",
+      "campaignType": "Tipo de campaña",
+      "campaignDescriptionPlaceholder": "Descripción de la campaña...",
+      "audienceType": "Tipo de audiencia",
+      "scheduledAt": "Fecha y hora de envío",
+      "scheduledAtPlaceholder": "Programar envío",
+      "scheduledAtDescription": "Deja vacío para enviar inmediatamente o crear un borrador",
+      "timezone": "Zona horaria",
+      "createCampaign": "Crear campaña",
+      "types": {
+        "newsletter": "Newsletter",
+        "promotional": "Promocional",
+        "transactional": "Transaccional",
+        "abandonCart": "Carrito abandonado",
+        "nurture": "Nurture"
+      },
+      "audienceTypes": {
+        "segment": "Segmento",
+        "list": "Lista",
+        "filter": "Filtros"
+      },
       "alert": {
         "title": "Sistema de Email Avanzado",
         "description": "Crea campañas de email dirigidas para tus clientes. Programa envíos, segmenta tu audiencia y sigue el rendimiento en tiempo real."
@@ -1443,6 +1469,24 @@
       "title": "Secuencias de Email",
       "subtitle": "Crea secuencias de emails automatizadas para tus clientes",
       "noStore": "Por favor, selecciona una tienda",
+      "editStep": "Modificar el paso",
+      "newStep": "Nuevo paso",
+      "editStepDescription": "Modifica la configuración de este paso de la secuencia",
+      "newStepDescription": "Añade un nuevo paso a tu secuencia de emails",
+      "stepOrder": "Orden del paso",
+      "stepOrderDescription": "El orden determina cuándo se ejecutará este paso en la secuencia",
+      "templateDescription": "La plantilla a usar para este email",
+      "delayType": "Tipo de retraso",
+      "delayValue": "Valor",
+      "immediate": "Inmediato",
+      "minutes": "Minutos",
+      "hours": "Horas",
+      "days": "Días",
+      "day": "día",
+      "hour": "hora",
+      "minute": "minuto",
+      "delayDescription": "Este paso se enviará {{value}} {{unit}}{{plural}} después del paso anterior",
+      "addStep": "Añadir paso",
       "tabs": {
         "list": "Lista",
         "steps": "Pasos"
@@ -1509,7 +1553,10 @@
         "blockInserted": "Bloque insertado",
         "blockInsertedDescription": "El bloque se ha insertado en tu plantilla."
       }
-    }
+    },
+    "template": "Plantilla de email",
+    "selectTemplate": "Seleccionar una plantilla",
+    "noTemplate": "Sin plantilla"
   },
   "digitalUpdates": {
     "title": "Gestión de Actualizaciones",
@@ -1549,7 +1596,12 @@
     "welcome": "Bienvenido",
     "startBuilding": "¡Comienza a construir tu increíble proyecto aquí!",
     "notAvailable": "N/A",
-    "optional": "opcional"
+    "optional": "opcional",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "description": "Descripción",
+    "hide": "Ocultar",
+    "view": "Ver"
   },
   "shipping": {
     "title": "Envío",
@@ -1570,6 +1622,29 @@
     "totalShipping": "Total envío",
     "estimatedDelivery": "Entrega estimada: {{days}} días",
     "recommendedCarriers": "Transportistas recomendados:",
+    "status": {
+      "pending": "En espera",
+      "labelCreated": "Etiqueta creada",
+      "pickedUp": "Recogido",
+      "inTransit": "En tránsito",
+      "outForDelivery": "En entrega",
+      "delivered": "Entregado",
+      "failed": "Fallido",
+      "returned": "Devuelto",
+      "cancelled": "Cancelado"
+    },
+    "origin": "Origen",
+    "destination": "Destino",
+    "estimatedDeliveryLabel": "Entrega estimada",
+    "deliveredOn": "Entregado el",
+    "weight": "Peso",
+    "cost": "Costo",
+    "createdOn": "Creado el",
+    "track": "Seguir",
+    "label": "Etiqueta",
+    "cancelShipment": "Cancelar envío",
+    "cancelShipmentConfirm": "¿Estás seguro de que quieres cancelar este envío?",
+    "detailedTracking": "seguimiento detallado",
     "artistCalculator": {
       "title": "Calculadora de Envío Especializado",
       "description": "Calcule los costos de envío especializados para esta obra de arte"

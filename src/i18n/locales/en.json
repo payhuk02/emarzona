@@ -432,6 +432,7 @@
   },
   "orders": {
     "title": "Orders",
+    "orderNumberLabel": "Order",
     "new": "New order",
     "export": "Export CSV",
     "filters": {
@@ -1434,6 +1435,32 @@
       "title": "Email Campaigns",
       "subtitle": "Create and manage your email marketing campaigns",
       "noStore": "Please select a store",
+      "editCampaign": "Edit campaign",
+      "newCampaign": "New campaign",
+      "editCampaignDescription": "Edit your email campaign information",
+      "newCampaignDescription": "Create a new email marketing campaign for your store",
+      "campaignName": "Campaign name",
+      "campaignNamePlaceholder": "January 2025 Newsletter",
+      "campaignType": "Campaign type",
+      "campaignDescriptionPlaceholder": "Campaign description...",
+      "audienceType": "Audience type",
+      "scheduledAt": "Send date and time",
+      "scheduledAtPlaceholder": "Schedule send",
+      "scheduledAtDescription": "Leave empty to send immediately or create a draft",
+      "timezone": "Timezone",
+      "createCampaign": "Create campaign",
+      "types": {
+        "newsletter": "Newsletter",
+        "promotional": "Promotional",
+        "transactional": "Transactional",
+        "abandonCart": "Abandoned cart",
+        "nurture": "Nurture"
+      },
+      "audienceTypes": {
+        "segment": "Segment",
+        "list": "List",
+        "filter": "Filters"
+      },
       "alert": {
         "title": "Advanced Email System",
         "description": "Create targeted email campaigns for your customers. Schedule sends, segment your audience and track performance in real-time."
@@ -1443,6 +1470,24 @@
       "title": "Email Sequences",
       "subtitle": "Create automated email sequences for your customers",
       "noStore": "Please select a store",
+      "editStep": "Edit step",
+      "newStep": "New step",
+      "editStepDescription": "Edit the settings for this sequence step",
+      "newStepDescription": "Add a new step to your email sequence",
+      "stepOrder": "Step order",
+      "stepOrderDescription": "The order determines when this step will be executed in the sequence",
+      "templateDescription": "The template to use for this email",
+      "delayType": "Delay type",
+      "delayValue": "Value",
+      "immediate": "Immediate",
+      "minutes": "Minutes",
+      "hours": "Hours",
+      "days": "Days",
+      "day": "day",
+      "hour": "hour",
+      "minute": "minute",
+      "delayDescription": "This step will be sent {{value}} {{unit}}{{plural}} after the previous step",
+      "addStep": "Add step",
       "tabs": {
         "list": "List",
         "steps": "Steps"
@@ -1509,7 +1554,10 @@
         "blockInserted": "Block inserted",
         "blockInsertedDescription": "The block has been inserted into your template."
       }
-    }
+    },
+    "template": "Email template",
+    "selectTemplate": "Select a template",
+    "noTemplate": "No template"
   },
   "digitalUpdates": {
     "title": "Update Management",
@@ -1549,7 +1597,12 @@
     "welcome": "Welcome",
     "startBuilding": "Start building your amazing project here!",
     "notAvailable": "N/A",
-    "optional": "optional"
+    "optional": "optional",
+    "cancel": "Cancel",
+    "save": "Save",
+    "description": "Description",
+    "hide": "Hide",
+    "view": "View"
   },
   "shipping": {
     "title": "Shipping",
@@ -1570,6 +1623,29 @@
     "totalShipping": "Total shipping",
     "estimatedDelivery": "Estimated delivery: {{days}} days",
     "recommendedCarriers": "Recommended carriers:",
+    "status": {
+      "pending": "Pending",
+      "labelCreated": "Label created",
+      "pickedUp": "Picked up",
+      "inTransit": "In transit",
+      "outForDelivery": "Out for delivery",
+      "delivered": "Delivered",
+      "failed": "Failed",
+      "returned": "Returned",
+      "cancelled": "Cancelled"
+    },
+    "origin": "Origin",
+    "destination": "Destination",
+    "estimatedDeliveryLabel": "Estimated delivery",
+    "deliveredOn": "Delivered on",
+    "weight": "Weight",
+    "cost": "Cost",
+    "createdOn": "Created on",
+    "track": "Track",
+    "label": "Label",
+    "cancelShipment": "Cancel shipment",
+    "cancelShipmentConfirm": "Are you sure you want to cancel this shipment?",
+    "detailedTracking": "detailed tracking",
     "artistCalculator": {
       "title": "Specialized Shipping Calculator",
       "description": "Calculate specialized shipping costs for this artist's work"

@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -42,6 +43,7 @@ export const CampaignBuilder = ({
   campaign,
   onSuccess,
 }: CampaignBuilderProps) => {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<CampaignType>('newsletter');
@@ -115,62 +117,62 @@ export const CampaignBuilder = ({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Modifier la campagne' : 'Nouvelle campagne'}
+            {isEditing ? t('emails.campaigns.editCampaign', 'Modifier la campagne') : t('emails.campaigns.newCampaign', 'Nouvelle campagne')}
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? 'Modifiez les informations de votre campagne email'
-              : 'Créez une nouvelle campagne email marketing pour votre boutique'}
+              ? t('emails.campaigns.editCampaignDescription', 'Modifiez les informations de votre campagne email')
+              : t('emails.campaigns.newCampaignDescription', 'Créez une nouvelle campagne email marketing pour votre boutique')}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="name">Nom de la campagne *</Label>
+            <Label htmlFor="name">{t('emails.campaigns.campaignName', 'Nom de la campagne')} *</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Newsletter de janvier 2025"
+              placeholder={t('emails.campaigns.campaignNamePlaceholder', 'Newsletter de janvier 2025')}
               required
             />
           </div>
 
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('common.description', 'Description')}</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description de la campagne..."
+              placeholder={t('emails.campaigns.campaignDescriptionPlaceholder', 'Description de la campagne...')}
               rows={3}
             />
           </div>
 
           <div>
-            <Label htmlFor="type">Type de campagne *</Label>
+            <Label htmlFor="type">{t('emails.campaigns.campaignType', 'Type de campagne')} *</Label>
             <Select value={type} onValueChange={(value) => setType(value as CampaignType)}>
               <SelectTrigger id="type">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="newsletter">Newsletter</SelectItem>
-                <SelectItem value="promotional">Promotionnelle</SelectItem>
-                <SelectItem value="transactional">Transactionnelle</SelectItem>
-                <SelectItem value="abandon_cart">Panier abandonné</SelectItem>
-                <SelectItem value="nurture">Nurture</SelectItem>
+                <SelectItem value="newsletter">{t('emails.campaigns.types.newsletter', 'Newsletter')}</SelectItem>
+                <SelectItem value="promotional">{t('emails.campaigns.types.promotional', 'Promotionnelle')}</SelectItem>
+                <SelectItem value="transactional">{t('emails.campaigns.types.transactional', 'Transactionnelle')}</SelectItem>
+                <SelectItem value="abandon_cart">{t('emails.campaigns.types.abandonCart', 'Panier abandonné')}</SelectItem>
+                <SelectItem value="nurture">{t('emails.campaigns.types.nurture', 'Nurture')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <Label htmlFor="template">Template email</Label>
+            <Label htmlFor="template">{t('emails.template', 'Template email')}</Label>
             <Select value={templateId || "__none__"} onValueChange={(value) => setTemplateId(value === "__none__" ? "" : value)}>
               <SelectTrigger id="template">
-                <SelectValue placeholder="Sélectionner un template" />
+                <SelectValue placeholder={t('emails.selectTemplate', 'Sélectionner un template')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">Aucun template</SelectItem>
+                <SelectItem value="__none__">{t('emails.noTemplate', 'Aucun template')}</SelectItem>
                 {templates?.map((template) => (
                   <SelectItem key={template.id} value={template.id}>
                     {template.name}
@@ -181,7 +183,7 @@ export const CampaignBuilder = ({
           </div>
 
           <div>
-            <Label htmlFor="audienceType">Type d'audience *</Label>
+            <Label htmlFor="audienceType">{t('emails.campaigns.audienceType', 'Type d\'audience')} *</Label>
             <Select
               value={audienceType}
               onValueChange={(value) => setAudienceType(value as AudienceType)}
@@ -190,29 +192,29 @@ export const CampaignBuilder = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="segment">Segment</SelectItem>
-                <SelectItem value="list">Liste</SelectItem>
-                <SelectItem value="filter">Filtres</SelectItem>
+                <SelectItem value="segment">{t('emails.campaigns.audienceTypes.segment', 'Segment')}</SelectItem>
+                <SelectItem value="list">{t('emails.campaigns.audienceTypes.list', 'Liste')}</SelectItem>
+                <SelectItem value="filter">{t('emails.campaigns.audienceTypes.filter', 'Filtres')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <Label htmlFor="scheduledAt">Date et heure d'envoi</Label>
+            <Label htmlFor="scheduledAt">{t('emails.campaigns.scheduledAt', 'Date et heure d\'envoi')}</Label>
             <Input
               id="scheduledAt"
               type="datetime-local"
               value={scheduledAt}
               onChange={(e) => setScheduledAt(e.target.value)}
-              placeholder="Programmer l'envoi"
+              placeholder={t('emails.campaigns.scheduledAtPlaceholder', 'Programmer l\'envoi')}
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Laissez vide pour envoyer immédiatement ou créer un brouillon
+              {t('emails.campaigns.scheduledAtDescription', 'Laissez vide pour envoyer immédiatement ou créer un brouillon')}
             </p>
           </div>
 
           <div>
-            <Label htmlFor="timezone">Fuseau horaire</Label>
+            <Label htmlFor="timezone">{t('emails.campaigns.timezone', 'Fuseau horaire')}</Label>
             <Select value={timezone} onValueChange={setTimezone}>
               <SelectTrigger id="timezone">
                 <SelectValue />
@@ -233,11 +235,11 @@ export const CampaignBuilder = ({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Annuler
+              {t('common.cancel', 'Annuler')}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {isEditing ? 'Enregistrer' : 'Créer la campagne'}
+              {isEditing ? t('common.save', 'Enregistrer') : t('emails.campaigns.createCampaign', 'Créer la campagne')}
             </Button>
           </div>
         </form>
