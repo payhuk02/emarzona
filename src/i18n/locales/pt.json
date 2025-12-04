@@ -18,13 +18,18 @@
   "auth": {
     "welcome": "Bem-vindo ao Emarzona",
     "welcomeSubtitle": "Sua plataforma de e-commerce de confiança",
+    "loading": "Carregando...",
     "termsNote": "Ao se registrar, você concorda com nossos Termos de Serviço e Política de Privacidade",
     "login": {
       "title": "Entrar",
+      "subtitle": "Entre na sua conta",
       "email": "E-mail",
       "emailPlaceholder": "seu@email.com",
       "password": "Senha",
       "passwordPlaceholder": "Sua senha",
+      "forgotPassword": "Esqueceu a senha?",
+      "noAccount": "Ainda não tem uma conta?",
+      "createAccount": "Criar uma conta",
       "button": "Entrar",
       "buttonLoading": "Conectando...",
       "success": "Conectado com sucesso!",
@@ -35,6 +40,7 @@
     },
     "signup": {
       "title": "Registrar",
+      "subtitle": "Crie sua conta de vendedor",
       "name": "Nome completo",
       "namePlaceholder": "João Silva",
       "email": "E-mail",
@@ -42,13 +48,29 @@
       "password": "Senha",
       "passwordPlaceholder": "Crie uma senha forte",
       "passwordHint": "Mínimo de 6 caracteres",
+      "confirmPassword": "Confirmar senha",
+      "hasAccount": "Já tem uma conta?",
+      "signIn": "Entrar",
       "button": "Criar conta",
       "buttonLoading": "Criando...",
       "success": "Conta criada!",
       "successDescription": "Verifique seu e-mail para confirmar sua conta",
       "error": "Erro ao criar a conta",
       "errorRequired": "Por favor, preencha todos os campos",
-      "errorExists": "Este e-mail já está em uso"
+      "errorExists": "Este e-mail já está em uso",
+      "errorPasswordLength": "A senha deve conter pelo menos 6 caracteres",
+      "terms": "Ao se registrar, você concorda com nossos",
+      "termsLink": "Termos de Serviço",
+      "and": "e nossa",
+      "privacyLink": "Política de Privacidade"
+    },
+    "forgotPassword": {
+      "title": "Esqueceu a senha",
+      "subtitle": "Digite seu e-mail para redefinir",
+      "email": "E-mail",
+      "button": "Enviar link",
+      "success": "E-mail de redefinição enviado!",
+      "error": "Erro ao enviar e-mail"
     }
   },
   "landing": {
@@ -408,16 +430,33 @@
     "title": "Mercado",
     "subtitle": "Descubra produtos incríveis",
     "searchPlaceholder": "Pesquisar produtos, lojas...",
+    "noProducts": "Nenhum produto disponível",
+    "noProductsSearch": "Tente outras palavras-chave ou filtros",
+    "noProductsDefault": "Seja o primeiro a vender seus produtos em nosso mercado!",
+    "createStore": "Criar minha loja gratuitamente",
     "loading": "Carregando produtos...",
+    "viewProduct": "Ver produto",
+    "addToCart": "Adicionar ao carrinho",
+    "resultsCount": "{{count}} produtos encontrados",
+    "filtersActive": "Filtros ativos:",
     "filters": {
+      "title": "Filtros",
       "active": "Filtros ativos:",
       "advanced": "Filtros avançados",
       "advancedAriaLabel": "Seção de filtros avançados",
       "clear": "Limpar filtros",
+      "priceRange": "Faixa de preço",
       "price": "Faixa de preço",
+      "rating": "Avaliação",
+      "availability": "Disponibilidade",
       "category": "Categoria",
       "type": "Tipo",
-      "sort": "Ordenar por"
+      "sort": "Ordenar por",
+      "reset": "Redefinir",
+      "apply": "Aplicar",
+      "verifiedOnly": "Apenas produtos verificados",
+      "featuredOnly": "Produtos em destaque",
+      "inStock": "Apenas em estoque"
     },
     "priceRanges": {
       "all": "Todos os preços",
@@ -425,7 +464,21 @@
       "under10": "Menos de 10€",
       "10to50": "10€ - 50€",
       "50to100": "50€ - 100€",
-      "over100": "Mais de 100€"
+      "over100": "Mais de 100€",
+      "0-5000": "0 - 5.000 XOF",
+      "5000-15000": "5.000 - 15.000 XOF",
+      "15000-50000": "15.000 - 50.000 XOF",
+      "50000-100000": "50.000 - 100.000 XOF",
+      "100000+": "100.000+ XOF"
+    },
+    "sort": {
+      "label": "Ordenar por",
+      "newest": "Mais recentes",
+      "price": "Preço",
+      "rating": "Avaliação",
+      "sales": "Vendas",
+      "name": "Nome",
+      "popularity": "Popularidade"
     },
     "sortOptions": {
       "recent": "Mais recentes",
@@ -433,11 +486,23 @@
       "priceDesc": "Preço: Maior para Menor",
       "popular": "Mais populares"
     },
+    "viewMode": {
+      "grid": "Grade",
+      "list": "Lista"
+    },
     "tags": {
       "new": "Novo",
+      "popular": "Popular",
+      "sale": "Em promoção",
+      "recommended": "Recomendado",
       "trending": "Tendência",
-      "bestseller": "Mais vendido",
-      "featured": "Destaque"
+      "premium": "Qualidade premium",
+      "fastShipping": "Entrega rápida",
+      "support": "Suporte 24/7",
+      "warranty": "Garantia",
+      "training": "Treinamento incluído",
+      "updates": "Atualização gratuita",
+      "community": "Comunidade ativa"
     },
     "empty": {
       "title": "Nenhum produto disponível",
@@ -548,11 +613,16 @@
     "title": "Painel",
     "loading": "Carregando seu painel...",
     "welcome": "Bem-vindo ao seu painel",
+    "createStorePrompt": "Comece criando sua loja para acessar o painel avançado",
     "createStore": "Você ainda não tem uma loja. Crie uma para começar a vender!",
     "createStoreButton": "Criar minha loja",
     "online": "Online",
     "refresh": "Atualizar dados",
     "retry": "Tentar novamente",
+    "error": {
+      "title": "Erro de carregamento",
+      "loading": "Erro ao carregar os dados"
+    },
     "errorLoading": "Erro ao carregar os dados",
     "stats": {
       "products": {
@@ -569,12 +639,41 @@
       },
       "revenue": {
         "title": "Receita",
-        "description": "Receita total"
+        "description": "Receita total",
+        "total": "Total de vendas"
+      },
+      "products": {
+        "active": "{{count}} ativo",
+        "active_plural": "{{count}} ativos"
+      },
+      "orders": {
+        "pending": "{{count}} pendente",
+        "pending_plural": "{{count}} pendentes"
+      },
+      "customers": {
+        "registered": "Clientes registrados"
       }
     },
+    "goals": {
+      "monthlyRevenue": "Receita mensal",
+      "newCustomers": "Novos clientes",
+      "productsSold": "Produtos vendidos",
+      "customersUnit": "clientes",
+      "ordersUnit": "pedidos"
+    },
+    "trends": {
+      "vsLastMonth": "vs mês passado"
+    },
     "notifications": {
-      "title": "Notificações",
+      "title": "Notificações recentes",
+      "viewAll": "Ver todas as notificações",
       "empty": "Nenhuma notificação",
+      "newOrder": "Nova ordem",
+      "newOrderMessage": "Ordem {{orderNumber}} recebida por {{amount}} FCFA",
+      "outOfStock": "Produto esgotado",
+      "outOfStockMessage": "O produto \"{{productName}}\" está esgotado",
+      "paymentReceived": "Pagamento recebido",
+      "paymentReceivedMessage": "Pagamento de {{amount}} FCFA confirmado",
       "markAllRead": "Marcar todas como lidas"
     },
     "quickActions": {
@@ -610,6 +709,7 @@
   },
   "products": {
     "title": "Meus Produtos",
+    "addNew": "Novo produto",
     "add": "Novo produto",
     "addShort": "Novo",
     "refresh": "Atualizar",
@@ -626,22 +726,37 @@
     "stats": {
       "total": "Total",
       "active": "Ativos",
+      "inactive": "Inativos",
       "draft": "Rascunhos",
       "outOfStock": "Sem estoque"
     },
     "filters": {
       "search": "Pesquisar produtos...",
       "category": "Categoria",
+      "allCategories": "Todas as categorias",
       "type": "Tipo",
+      "allTypes": "Todos os tipos",
       "status": "Status",
-      "stock": "Estoque",
+      "allStatus": "Todos os status",
+      "stockStatus": "Estoque",
+      "allStock": "Todos os estoques",
       "sortBy": "Ordenar por",
+      "recent": "Mais recentes",
+      "oldest": "Mais antigos",
+      "nameAsc": "Nome (A-Z)",
+      "nameDesc": "Nome (Z-A)",
+      "priceAsc": "Preço crescente",
+      "priceDesc": "Preço decrescente",
+      "stockAsc": "Estoque crescente",
+      "stockDesc": "Estoque decrescente",
       "all": "Todos"
     },
     "status": {
       "all": "Todos os status",
       "active": "Ativo",
+      "inactive": "Inativo",
       "draft": "Rascunho",
+      "published": "Publicado",
       "archived": "Arquivado"
     },
     "stockStatus": {
@@ -661,10 +776,14 @@
       "duplicate": "Duplicar",
       "delete": "Excluir",
       "view": "Ver",
+      "bulkDelete": "Excluir seleção",
+      "bulkActivate": "Ativar seleção",
+      "bulkDeactivate": "Desativar seleção",
       "bulkActions": "Ações em massa",
       "selectAll": "Selecionar todos",
       "deselectAll": "Desmarcar todos",
-      "deleteSelected": "Excluir selecionados"
+      "deleteSelected": "Excluir selecionados",
+      "selected": "{{count}} selecionado(s)"
     },
     "empty": {
       "title": "Nenhum produto por enquanto",
@@ -673,6 +792,7 @@
       "importButton": "Importar CSV",
       "noResults": "Nenhum produto encontrado",
       "noResultsDescription": "Nenhum produto corresponde aos seus critérios de pesquisa",
+      "tryAdjusting": "Tente ajustar seus filtros ou sua pesquisa",
       "clearFilters": "Limpar filtros"
     },
     "loading": "Carregando produtos...",
@@ -680,12 +800,18 @@
       "title": "Confirmar exclusão",
       "description": "Tem certeza de que deseja excluir este produto? Esta ação é irreversível.",
       "cancel": "Cancelar",
-      "confirm": "Excluir"
+      "confirm": "Excluir",
+      "success": "Produto excluído com sucesso",
+      "error": "Erro ao excluir produto",
+      "bulkTitle": "Excluir {{count}} produto(s)",
+      "bulkDescription": "Tem certeza de que deseja excluir estes {{count}} produtos? Esta ação é irreversível."
     },
     "edit": {
       "title": "Editar produto",
       "save": "Salvar alterações",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "success": "Produto modificado com sucesso",
+      "error": "Erro ao modificar produto"
     },
     "duplicate": {
       "success": "Produto duplicado com sucesso",
@@ -695,11 +821,44 @@
       "showing": "Mostrando {{from}} a {{to}} de {{total}} produtos",
       "previous": "Anterior",
       "next": "Próximo",
+      "first": "Primeiro",
+      "last": "Último",
+      "itemsPerPage": "Produtos por página",
       "rowsPerPage": "Linhas por página"
     },
     "quickView": {
-      "title": "Visualização rápida"
-    }
+      "title": "Visualização rápida",
+      "close": "Fechar",
+      "price": "Preço",
+      "stock": "Estoque",
+      "category": "Categoria",
+      "type": "Tipo",
+      "status": "Status",
+      "createdAt": "Criado em",
+      "updatedAt": "Modificado em"
+    },
+    "metadata": {
+      "createdAt": "Criado em",
+      "updatedAt": "Última atualização",
+      "version": "Versão"
+    },
+    "urlCopied": "URL copiada",
+    "urlCopiedDescription": "A URL do produto foi copiada para a área de transferência"
+  },
+  "cart": {
+    "title": "Carrinho",
+    "empty": "Seu carrinho está vazio",
+    "items": "item(ns)",
+    "subtotal": "Subtotal",
+    "shipping": "Entrega",
+    "tax": "Impostos",
+    "total": "Total",
+    "checkout": "Finalizar compra",
+    "continueShopping": "Continuar comprando",
+    "removeItem": "Remover",
+    "updateQuantity": "Atualizar",
+    "success": "Produto adicionado ao carrinho",
+    "error": "Erro ao adicionar produto"
   },
   "orders": {
     "title": "Pedidos",
@@ -709,7 +868,9 @@
     "filters": {
       "search": "Pesquisar pedidos...",
       "status": "Status",
+      "allStatus": "Todos os status",
       "paymentStatus": "Status de pagamento",
+      "allPayments": "Todos os pagamentos",
       "dateRange": "Período",
       "all": "Todos"
     },
@@ -807,6 +968,7 @@
     "profile": {
       "title": "Perfil",
       "subtitle": "Gerencie suas informações pessoais",
+      "advancedTitle": "Informações Avançadas",
       "cardTitle": "Informações do perfil",
       "cardDescription": "Atualize suas informações pessoais e de contato"
     },
@@ -857,19 +1019,27 @@
     },
     "storeSettings": {
       "loading": "Carregando informações da loja...",
-      "error": "Erro ao carregar as informações da loja"
+      "error": "Erro ao carregar as informações da loja",
+      "save": "Salvar",
+      "cancel": "Cancelar"
     },
     "notificationSettings": {
       "loading": "Carregando preferências de notificação...",
-      "error": "Erro ao carregar as preferências de notificação"
+      "error": "Erro ao carregar as preferências de notificação",
+      "save": "Salvar",
+      "cancel": "Cancelar"
     },
     "securitySettings": {
       "loading": "Carregando configurações de segurança...",
-      "error": "Erro ao carregar as configurações de segurança"
+      "error": "Erro ao carregar as configurações de segurança",
+      "save": "Salvar",
+      "cancel": "Cancelar"
     },
     "domainSettings": {
       "loading": "Carregando configurações de domínio...",
-      "error": "Erro ao carregar as configurações de domínio"
+      "error": "Erro ao carregar as configurações de domínio",
+      "save": "Salvar",
+      "cancel": "Cancelar"
     }
   },
   "common": {
@@ -935,6 +1105,18 @@
     "welcome": "Bem-vindo",
     "coverage": "Cobertura"
   },
+  "notifications": {
+    "title": "Notificações",
+    "markAllRead": "Marcar todas como lidas",
+    "noNotifications": "Nenhuma notificação",
+    "types": {
+      "order": "Nova ordem",
+      "payment": "Pagamento recebido",
+      "review": "Nova avaliação",
+      "message": "Nova mensagem",
+      "system": "Notificação do sistema"
+    }
+  },
   "errors": {
     "generic": "Ocorreu um erro. Por favor, tente novamente.",
     "network": "Erro de conexão. Verifique sua internet.",
@@ -942,6 +1124,7 @@
     "unauthorized": "Você não tem permissão para acessar esta página",
     "serverError": "Erro do servidor. Tente novamente mais tarde.",
     "validation": "Por favor, verifique os campos do formulário",
+    "tryAgain": "Por favor, tente novamente",
     "required": "Este campo é obrigatório",
     "invalidEmail": "E-mail inválido",
     "invalidPassword": "Senha deve ter pelo menos 6 caracteres",
@@ -1345,5 +1528,183 @@
         }
       }
     }
+  },
+  "emails": {
+    "campaigns": {
+      "title": "Campanhas de Email",
+      "subtitle": "Crie e gerencie suas campanhas de email marketing",
+      "noStore": "Por favor, selecione uma loja",
+      "alert": {
+        "title": "Sistema de Email Avançado",
+        "description": "Crie campanhas de email direcionadas para seus clientes. Agende envios, segmente seu público e acompanhe o desempenho em tempo real."
+      }
+    },
+    "sequences": {
+      "title": "Sequências de Email",
+      "subtitle": "Crie sequências de emails automatizadas para seus clientes",
+      "noStore": "Por favor, selecione uma loja",
+      "tabs": {
+        "list": "Lista",
+        "steps": "Etapas"
+      },
+      "alert": {
+        "title": "Sequências Automatizadas",
+        "description": "Crie sequências de emails que são enviadas automaticamente de acordo com um calendário definido. Perfeito para jornadas de integração, follow-ups e campanhas de nutrição."
+      }
+    },
+    "workflows": {
+      "title": "Fluxos de Trabalho de Email",
+      "subtitle": "Automatize seus emails com fluxos de trabalho inteligentes",
+      "noStore": "Por favor, selecione uma loja",
+      "alert": {
+        "title": "Fluxos de Trabalho Automatizados",
+        "description": "Crie fluxos de trabalho automatizados que acionam ações com base em eventos, condições ou agendamentos. Automatize suas campanhas de email para economizar tempo e melhorar o engajamento."
+      }
+    },
+    "analytics": {
+      "title": "Analytics de Email",
+      "subtitle": "Analise o desempenho de suas campanhas e sequências de email",
+      "noStore": "Por favor, selecione uma loja",
+      "alert": {
+        "title": "Analytics de Email Avançadas",
+        "description": "Visualize o desempenho de seus emails com gráficos detalhados. Analise as taxas de abertura, de clique e a receita gerada por suas campanhas."
+      }
+    },
+    "segments": {
+      "title": "Segmentos de Audiência",
+      "subtitle": "Crie e gerencie seus segmentos de audiência para direcionar suas campanhas de email",
+      "noStore": "Por favor, selecione uma loja",
+      "tabs": {
+        "list": "Lista de segmentos",
+        "preview": "Visualização"
+      },
+      "alert": {
+        "title": "Segmentação de Audiência",
+        "description": "Crie segmentos estáticos (lista manual) ou dinâmicos (calculados automaticamente) para direcionar precisamente suas campanhas de email. Os segmentos dinâmicos são atualizados automaticamente de acordo com seus critérios."
+      },
+      "backToList": "Voltar à lista",
+      "back": "Voltar",
+      "previewLabel": "Visualização: "
+    },
+    "templateEditor": {
+      "title": "Editor de Templates de Email",
+      "subtitle": "Crie e personalize seus templates de email com um editor visual",
+      "alert": {
+        "title": "Editor de Templates de Email",
+        "description": "Use o editor para criar seus templates de email. Você pode inserir blocos predefinidos, usar variáveis dinâmicas e visualizar o resultado em dispositivos móveis e desktop."
+      },
+      "tabs": {
+        "editor": "Editor",
+        "editorShort": "Editar",
+        "blocks": "Blocos",
+        "blocksShort": "Bloco",
+        "preview": "Visualização",
+        "previewShort": "Visualizar"
+      },
+      "toast": {
+        "saved": "Template salvo",
+        "savedDescription": "O template foi salvo com sucesso.",
+        "error": "Erro",
+        "errorDescription": "Erro ao salvar o template.",
+        "blockInserted": "Bloco inserido",
+        "blockInsertedDescription": "O bloco foi inserido em seu template."
+      }
+    }
+  },
+  "digitalUpdates": {
+    "title": "Gestão de Atualizações",
+    "subtitle": "Publique e gerencie as atualizações de seus produtos digitais",
+    "newUpdate": "Nova atualização",
+    "newUpdateShort": "Nova",
+    "selectProduct": "Selecionar um produto",
+    "selectProductDesc": "Escolha um produto digital para gerenciar suas atualizações",
+    "noProducts": "Nenhum produto digital",
+    "noProductsDesc": "Crie primeiro um produto digital para poder gerenciar suas atualizações",
+    "createProduct": "Criar um produto digital",
+    "currentVersion": "Versão atual: {{version}}",
+    "productWithoutName": "Produto sem nome",
+    "tabs": {
+      "updates": "Atualizações",
+      "updatesShort": "Atualiz.",
+      "stats": "Estatísticas",
+      "statsShort": "Estat.",
+      "settings": "Configurações",
+      "settingsShort": "Config."
+    }
+  },
+  "recurringBookings": {
+    "title": "Reservas Recorrentes",
+    "subtitle": "Gerencie suas séries de reservas recorrentes",
+    "noStore": "Nenhuma loja encontrada",
+    "noStoreDesc": "Por favor, crie uma loja para gerenciar suas reservas recorrentes",
+    "stats": {
+      "total": "Total",
+      "active": "Ativas",
+      "bookings": "Reservas",
+      "completed": "Concluídas",
+      "cancelled": "Canceladas"
+    }
+  },
+  "common": {
+    "welcome": "Bem-vindo",
+    "startBuilding": "Comece a construir seu projeto incrível aqui!"
+  },
+  "footer": {
+    "about": "Sobre",
+    "contact": "Contato",
+    "terms": "Termos de Serviço",
+    "privacy": "Política de Privacidade",
+    "help": "Ajuda",
+    "followUs": "Siga-nos",
+    "allRightsReserved": "Todos os direitos reservados"
+  },
+  "seo": {
+    "home": {
+      "title": "Emarzona - Plataforma de e-commerce e marketing",
+      "description": "Crie e gerencie sua loja online facilmente com Emarzona"
+    },
+    "marketplace": {
+      "title": "Marketplace Emarzona - Produtos Digitais",
+      "description": "Descubra milhares de produtos digitais: cursos, ebooks, templates, software e muito mais"
+    }
+  },
+  "common": {
+    "welcome": "Bem-vindo",
+    "startBuilding": "Comece a construir seu projeto incrível aqui!",
+    "notAvailable": "N/A",
+    "optional": "opcional"
+  },
+  "shipping": {
+    "title": "Entrega",
+    "country": "País",
+    "countryRequired": "País obrigatório",
+    "selectCountry": "Selecionar um país",
+    "city": "Cidade",
+    "cityPlaceholder": "Ex: Dakar",
+    "postalCode": "Código postal",
+    "postalCodePlaceholder": "Ex: 75001",
+    "calculate": "Calcular entrega",
+    "calculating": "Calculando...",
+    "calculationError": "Erro ao calcular a entrega",
+    "baseShipping": "Entrega base",
+    "insurance": "Seguro",
+    "specializedPackaging": "Embalagem especializada",
+    "specialHandling": "Manuseio especial",
+    "totalShipping": "Total entrega",
+    "estimatedDelivery": "Entrega estimada: {{days}} dias",
+    "recommendedCarriers": "Transportadoras recomendadas:",
+    "artistCalculator": {
+      "title": "Calculadora de Entrega Especializada",
+      "description": "Calcule os custos de entrega especializados para esta obra de arte"
+    }
+  },
+  "countries": {
+    "SN": "Senegal",
+    "CI": "Costa do Marfim",
+    "ML": "Mali",
+    "BF": "Burkina Faso",
+    "FR": "França",
+    "BE": "Bélgica",
+    "CH": "Suíça"
   }
 }

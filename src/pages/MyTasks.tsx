@@ -5,6 +5,7 @@
  * Page affichant les tâches assignées à l'utilisateur connecté
  */
 
+import { useTranslation } from 'react-i18next';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useStoreTasks, type StoreTask } from '@/hooks/useStoreTasks';
 
 const MyTasks = () => {
+  const { t } = useTranslation();
   const { store } = useStore();
   const headerRef = useScrollAnimation<HTMLDivElement>();
 
@@ -52,7 +54,7 @@ const MyTasks = () => {
                   <CheckSquare className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <h1 className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold truncate bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                  Mes Tâches
+                  {t('tasks.title', 'Mes Tâches')}
                 </h1>
               </div>
             </div>
@@ -80,17 +82,17 @@ const MyTasks = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CheckSquare className="h-5 w-5" />
-                      Mes Tâches
+                      {t('tasks.title', 'Mes Tâches')}
                     </CardTitle>
                     <CardDescription>
-                      Toutes les tâches qui vous sont assignées
+                      {t('tasks.description', 'Toutes les tâches qui vous sont assignées')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="py-12 text-center text-muted-foreground">
                     <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p className="font-medium mb-2">Aucune boutique sélectionnée</p>
+                    <p className="font-medium mb-2">{t('tasks.noStore', 'Aucune boutique sélectionnée')}</p>
                     <p className="text-sm">
-                      Sélectionnez une boutique pour voir vos tâches assignées.
+                      {t('tasks.noStoreDesc', 'Sélectionnez une boutique pour voir vos tâches assignées.')}
                     </p>
                   </CardContent>
                 </Card>

@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +25,7 @@ import { logger } from '@/lib/logger';
 type UnsubscribeType = 'all' | 'marketing' | 'newsletter' | 'transactional';
 
 export const UnsubscribePage = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [unsubscribeType, setUnsubscribeType] = useState<UnsubscribeType>('marketing');
   const [reason, setReason] = useState('');
@@ -59,7 +61,7 @@ export const UnsubscribePage = () => {
       setReason('');
     } catch (err: any) {
       logger.error('Failed to unsubscribe', { error: err });
-      setError(err.message || 'Erreur lors du désabonnement');
+      setError(err.message || t('emails.unsubscribe.error', 'Erreur lors du désabonnement'));
     } finally {
       setIsSubmitting(false);
     }
@@ -75,18 +77,18 @@ export const UnsubscribePage = () => {
                 <CheckCircle2 className="h-8 w-8 text-green-600" />
               </div>
             </div>
-            <CardTitle className="text-center">Désabonnement confirmé</CardTitle>
+            <CardTitle className="text-center">{t('emails.unsubscribe.success.title', 'Désabonnement confirmé')}</CardTitle>
             <CardDescription className="text-center">
-              Vous avez été désabonné avec succès
+              {t('emails.unsubscribe.success.description', 'Vous avez été désabonné avec succès')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Alert>
               <AlertDescription>
                 {unsubscribeType === 'all' ? (
-                  <>Vous ne recevrez plus aucun email de notre part.</>
+                  <>{t('emails.unsubscribe.success.all', 'Vous ne recevrez plus aucun email de notre part.')}</>
                 ) : (
-                  <>Vous ne recevrez plus d&apos;emails de type <strong>{unsubscribeType}</strong>.</>
+                  <>{t('emails.unsubscribe.success.type', { type: unsubscribeType, defaultValue: `Vous ne recevrez plus d'emails de type ${unsubscribeType}.` })}</>
                 )}
               </AlertDescription>
             </Alert>
@@ -105,27 +107,27 @@ export const UnsubscribePage = () => {
               <Mail className="h-8 w-8" />
             </div>
           </div>
-          <CardTitle className="text-center">Gérer vos préférences email</CardTitle>
+          <CardTitle className="text-center">{t('emails.unsubscribe.title', 'Gérer vos préférences email')}</CardTitle>
           <CardDescription className="text-center">
-            Vous pouvez vous désabonner de certains ou tous nos emails
+            {t('emails.unsubscribe.description', 'Vous pouvez vous désabonner de certains ou tous nos emails')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="email">Votre adresse email *</Label>
+              <Label htmlFor="email">{t('emails.unsubscribe.emailLabel', 'Votre adresse email *')}</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="votre@email.com"
+                placeholder={t('emails.unsubscribe.emailPlaceholder', 'votre@email.com')}
                 required
               />
             </div>
 
             <div>
-              <Label htmlFor="unsubscribe-type">Type de désabonnement *</Label>
+              <Label htmlFor="unsubscribe-type">{t('emails.unsubscribe.typeLabel', 'Type de désabonnement *')}</Label>
               <Select
                 value={unsubscribeType}
                 onValueChange={(value: UnsubscribeType) => setUnsubscribeType(value)}
@@ -134,21 +136,21 @@ export const UnsubscribePage = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="marketing">Emails marketing uniquement</SelectItem>
-                  <SelectItem value="newsletter">Newsletters uniquement</SelectItem>
-                  <SelectItem value="transactional">Emails transactionnels (non recommandé)</SelectItem>
-                  <SelectItem value="all">Tous les emails</SelectItem>
+                  <SelectItem value="marketing">{t('emails.unsubscribe.types.marketing', 'Emails marketing uniquement')}</SelectItem>
+                  <SelectItem value="newsletter">{t('emails.unsubscribe.types.newsletter', 'Newsletters uniquement')}</SelectItem>
+                  <SelectItem value="transactional">{t('emails.unsubscribe.types.transactional', 'Emails transactionnels (non recommandé)')}</SelectItem>
+                  <SelectItem value="all">{t('emails.unsubscribe.types.all', 'Tous les emails')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label htmlFor="reason">Raison (optionnel)</Label>
+              <Label htmlFor="reason">{t('emails.unsubscribe.reasonLabel', 'Raison (optionnel)')}</Label>
               <Textarea
                 id="reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Pourquoi vous désabonnez-vous ?"
+                placeholder={t('emails.unsubscribe.reasonPlaceholder', 'Pourquoi vous désabonnez-vous ?')}
                 rows={3}
               />
             </div>
@@ -164,10 +166,10 @@ export const UnsubscribePage = () => {
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Traitement...
+                  {t('emails.unsubscribe.processing', 'Traitement...')}
                 </>
               ) : (
-                'Confirmer le désabonnement'
+                t('emails.unsubscribe.confirm', 'Confirmer le désabonnement')
               )}
             </Button>
           </form>

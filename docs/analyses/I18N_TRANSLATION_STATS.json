@@ -1,0 +1,50 @@
+{
+  "reference": "FR",
+  "referenceKeys": 1014,
+  "languages": [
+    {
+      "language": "FR",
+      "totalKeys": 1014,
+      "missingKeys": 0,
+      "extraKeys": 0,
+      "completeness": 100,
+      "missingKeysList": []
+    },
+    {
+      "language": "EN",
+      "totalKeys": 1021,
+      "missingKeys": 0,
+      "extraKeys": 7,
+      "completeness": "100.7",
+      "missingKeysList": []
+    },
+    {
+      "language": "ES",
+      "totalKeys": 1021,
+      "missingKeys": 0,
+      "extraKeys": 7,
+      "completeness": "100.7",
+      "missingKeysList": []
+    },
+    {
+      "language": "DE",
+      "totalKeys": 1021,
+      "missingKeys": 0,
+      "extraKeys": 7,
+      "completeness": "100.7",
+      "missingKeysList": []
+    },
+    {
+      "language": "PT",
+      "totalKeys": 1087,
+      "missingKeys": 3,
+      "extraKeys": 76,
+      "completeness": "106.9",
+      "missingKeysList": [
+        "dashboard.stats.products.title",
+        "dashboard.stats.orders.title",
+        "dashboard.stats.customers.title"
+      ]
+    }
+  ]
+}

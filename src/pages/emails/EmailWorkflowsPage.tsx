@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import {
@@ -18,6 +19,7 @@ import type { EmailWorkflow } from '@/lib/email/email-workflow-service';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export const EmailWorkflowsPage = () => {
+  const { t } = useTranslation();
   const { store } = useStore();
   const [builderOpen, setBuilderOpen] = useState(false);
   const [editingWorkflow, setEditingWorkflow] = useState<EmailWorkflow | null>(null);
@@ -42,7 +44,7 @@ export const EmailWorkflowsPage = () => {
             <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
               <CardContent className="p-6 sm:p-8 sm:p-12 text-center">
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Veuillez sélectionner une boutique
+                  {t('emails.workflows.noStore')}
                 </p>
               </CardContent>
             </Card>
@@ -73,11 +75,11 @@ export const EmailWorkflowsPage = () => {
               <div className="flex-1 min-w-0">
                 <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                   <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                    Workflows Email
+                    {t('emails.workflows.title')}
                   </span>
                 </h1>
                 <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
-                  Automatisez vos emails avec des workflows intelligents
+                  {t('emails.workflows.subtitle')}
                 </p>
               </div>
             </div>
@@ -87,12 +89,10 @@ export const EmailWorkflowsPage = () => {
           <Alert className="border-purple-200/50 bg-purple-50/50 dark:bg-purple-950/20 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
             <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600" />
             <AlertTitle className="text-xs sm:text-sm md:text-base text-purple-900 dark:text-purple-100">
-              Workflows Automatisés
+              {t('emails.workflows.alert.title')}
             </AlertTitle>
             <AlertDescription className="text-[10px] sm:text-xs md:text-sm text-purple-800 dark:text-purple-200">
-              Créez des workflows automatisés qui déclenchent des actions basées sur des
-              événements, des conditions ou des planifications. Automatisez vos campagnes
-              email pour économiser du temps et améliorer l'engagement.
+              {t('emails.workflows.alert.description')}
             </AlertDescription>
           </Alert>
 

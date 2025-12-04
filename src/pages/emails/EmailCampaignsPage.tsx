@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { EmailCampaignManager, CampaignBuilder } from '@/components/email';
@@ -15,6 +16,7 @@ import type { EmailCampaign } from '@/lib/email/email-campaign-service';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export const EmailCampaignsPage = () => {
+  const { t } = useTranslation();
   const { store } = useStore();
   const [builderOpen, setBuilderOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<EmailCampaign | null>(null);
@@ -49,7 +51,7 @@ export const EmailCampaignsPage = () => {
             <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
               <CardContent className="p-6 sm:p-8 sm:p-12 text-center">
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Veuillez sélectionner une boutique
+                  {t('emails.campaigns.noStore')}
                 </p>
               </CardContent>
             </Card>
@@ -80,11 +82,11 @@ export const EmailCampaignsPage = () => {
               <div className="flex-1 min-w-0">
                 <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                   <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    Campagnes Email
+                    {t('emails.campaigns.title')}
                   </span>
                 </h1>
                 <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
-                  Créez et gérez vos campagnes email marketing
+                  {t('emails.campaigns.subtitle')}
                 </p>
               </div>
             </div>
@@ -94,11 +96,10 @@ export const EmailCampaignsPage = () => {
           <Alert className="border-blue-200/50 bg-blue-50/50 dark:bg-blue-950/20 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
             <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
             <AlertTitle className="text-xs sm:text-sm md:text-base text-blue-900 dark:text-blue-100">
-              Système d'Emailing Avancé
+              {t('emails.campaigns.alert.title')}
             </AlertTitle>
             <AlertDescription className="text-[10px] sm:text-xs md:text-sm text-blue-800 dark:text-blue-200">
-              Créez des campagnes email ciblées pour vos clients. Programmez des envois,
-              segmentez votre audience et suivez les performances en temps réel.
+              {t('emails.campaigns.alert.description')}
             </AlertDescription>
           </Alert>
 

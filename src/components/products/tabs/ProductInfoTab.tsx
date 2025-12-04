@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -168,6 +169,7 @@ const ACCESS_CONTROLS = [
 // CURRENCIES importé depuis @/lib/currencies pour éviter la duplication
 
 export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugAvailability, validationErrors = {}, storeCurrency }: ProductInfoTabProps) => {
+  const { t } = useTranslation();
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [lastType, setLastType] = useState<string | null>(formData.product_type || null);
   const [showTypeChangeDialog, setShowTypeChangeDialog] = useState(false);
@@ -200,10 +202,10 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
   const copyProductUrl = useCallback(() => {
     navigator.clipboard.writeText(productUrl);
     toast({
-      title: "URL copiée",
-      description: "L'URL du produit a été copiée dans le presse-papiers",
+      title: t('products.urlCopied', 'URL copiée'),
+      description: t('products.urlCopiedDescription', "L'URL du produit a été copiée dans le presse-papiers"),
     });
-  }, [productUrl, toast]);
+  }, [productUrl, toast, t]);
 
   // Génération d'un nouveau slug
   const regenerateSlug = useCallback(() => {
@@ -1062,23 +1064,23 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-white">Créé le</Label>
+                <Label className="text-sm font-medium text-white">{t('products.metadata.createdAt', 'Créé le')}</Label>
                 <Input 
-                  value={formData.created_at ? format(new Date(formData.created_at), "PPP p", { locale: fr }) : "N/A"} 
+                  value={formData.created_at ? format(new Date(formData.created_at), "PPP p", { locale: fr }) : t('common.notAvailable', 'N/A')} 
                   readOnly 
                   className="bg-gray-700/50 border-gray-600 text-gray-300" 
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-white">Dernière mise à jour</Label>
+                <Label className="text-sm font-medium text-white">{t('products.metadata.updatedAt', 'Dernière mise à jour')}</Label>
                 <Input 
-                  value={formData.updated_at ? format(new Date(formData.updated_at), "PPP p", { locale: fr }) : "N/A"} 
+                  value={formData.updated_at ? format(new Date(formData.updated_at), "PPP p", { locale: fr }) : t('common.notAvailable', 'N/A')} 
                   readOnly 
                   className="bg-gray-700/50 border-gray-600 text-gray-300" 
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-white">Version</Label>
+                <Label className="text-sm font-medium text-white">{t('products.metadata.version', 'Version')}</Label>
                 <Input 
                   value={formData.version || "1.0.0"} 
                   readOnly 
@@ -1086,13 +1088,13 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-white">Statut</Label>
+                <Label className="text-sm font-medium text-white">{t('products.metadata.status', 'Statut')}</Label>
                 <div className="flex items-center gap-2">
                   <Badge 
                     variant={formData.status === "published" ? "default" : "secondary"}
                     className="text-xs"
                   >
-                    {formData.status || "Brouillon"}
+                    {formData.status ? t(`products.status.${formData.status}`, formData.status) : t('products.status.draft', 'Brouillon')}
                   </Badge>
                 </div>
               </div>

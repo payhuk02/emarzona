@@ -7,6 +7,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -39,6 +40,7 @@ import { UpdateStats } from '@/components/digital/updates/UpdateStats';
 import { logger } from '@/lib/logger';
 
 export default function DigitalProductUpdatesDashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { productId } = useParams<{ productId?: string }>();
   const { store } = useStore();
@@ -93,19 +95,19 @@ export default function DigitalProductUpdatesDashboard() {
                       <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500" />
                     </div>
                     <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                      Gestion des Mises à Jour
+                      {t('digitalUpdates.title')}
                     </span>
                   </h1>
                   <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
-                    Publiez et gérez les mises à jour de vos produits digitaux
+                    {t('digitalUpdates.subtitle')}
                   </p>
                 </div>
               </div>
               {selectedProduct && (
                 <Button onClick={() => setShowCreateDialog(true)} className="gap-1.5 sm:gap-2 min-h-[44px] text-xs sm:text-sm w-full sm:w-auto">
                   <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Nouvelle mise à jour</span>
-                  <span className="sm:hidden">Nouvelle</span>
+                  <span className="hidden sm:inline">{t('digitalUpdates.newUpdate')}</span>
+                  <span className="sm:hidden">{t('digitalUpdates.newUpdateShort')}</span>
                 </Button>
               )}
             </div>
@@ -116,22 +118,22 @@ export default function DigitalProductUpdatesDashboard() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Package className="h-5 w-5" />
-                    Sélectionner un produit
+                    {t('digitalUpdates.selectProduct')}
                   </CardTitle>
                   <CardDescription>
-                    Choisissez un produit digital pour gérer ses mises à jour
+                    {t('digitalUpdates.selectProductDesc')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {digitalProducts.length === 0 ? (
                     <div className="text-center py-12">
                       <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                      <h3 className="text-base sm:text-lg font-semibold mb-2">Aucun produit digital</h3>
+                      <h3 className="text-base sm:text-lg font-semibold mb-2">{t('digitalUpdates.noProducts')}</h3>
                       <p className="text-muted-foreground mb-4">
-                        Créez d'abord un produit digital pour pouvoir gérer ses mises à jour
+                        {t('digitalUpdates.noProductsDesc')}
                       </p>
                       <Button onClick={() => navigate('/digital/products/create')}>
-                        Créer un produit digital
+                        {t('digitalUpdates.createProduct')}
                       </Button>
                     </div>
                   ) : (
@@ -152,9 +154,9 @@ export default function DigitalProductUpdatesDashboard() {
                                 />
                               )}
                               <div className="flex-1">
-                                <h3 className="font-semibold">{product.product?.name || 'Produit sans nom'}</h3>
+                                <h3 className="font-semibold">{product.product?.name || t('digitalUpdates.productWithoutName')}</h3>
                                 <p className="text-sm text-muted-foreground">
-                                  Version actuelle: {product.version || '1.0'}
+                                  {t('digitalUpdates.currentVersion', { version: product.version || '1.0' })}
                                 </p>
                                 <Badge variant="outline" className="mt-2">
                                   {product.digital_type || 'other'}
@@ -176,18 +178,18 @@ export default function DigitalProductUpdatesDashboard() {
                 <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 backdrop-blur-sm gap-1.5 sm:gap-2">
                   <TabsTrigger value="updates" className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300">
                     <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Mises à jour</span>
-                    <span className="sm:hidden">Mises à j.</span>
+                    <span className="hidden sm:inline">{t('digitalUpdates.tabs.updates')}</span>
+                    <span className="sm:hidden">{t('digitalUpdates.tabs.updatesShort')}</span>
                   </TabsTrigger>
                   <TabsTrigger value="stats" className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300">
                     <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Statistiques</span>
-                    <span className="sm:hidden">Stats</span>
+                    <span className="hidden sm:inline">{t('digitalUpdates.tabs.stats')}</span>
+                    <span className="sm:hidden">{t('digitalUpdates.tabs.statsShort')}</span>
                   </TabsTrigger>
                   <TabsTrigger value="settings" className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300">
                     <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Paramètres</span>
-                    <span className="sm:hidden">Param.</span>
+                    <span className="hidden sm:inline">{t('digitalUpdates.tabs.settings')}</span>
+                    <span className="sm:hidden">{t('digitalUpdates.tabs.settingsShort')}</span>
                   </TabsTrigger>
                 </TabsList>
 

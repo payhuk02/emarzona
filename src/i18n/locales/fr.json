@@ -645,8 +645,16 @@
     "status": {
       "active": "Actif",
       "inactive": "Inactif",
-      "draft": "Brouillon"
+      "draft": "Brouillon",
+      "published": "Publié"
     },
+    "metadata": {
+      "createdAt": "Créé le",
+      "updatedAt": "Dernière mise à jour",
+      "version": "Version"
+    },
+    "urlCopied": "URL copiée",
+    "urlCopiedDescription": "L'URL du produit a été copiée dans le presse-papiers",
     "stockStatus": {
       "inStock": "En stock",
       "lowStock": "Stock faible",
@@ -733,7 +741,8 @@
     "stats": {
       "products": {
         "title": "Produits",
-        "active": "{{count}} actifs"
+        "active": "{{count}} actif",
+        "active_plural": "{{count}} actifs"
       },
       "orders": {
         "title": "Commandes",
@@ -747,6 +756,16 @@
         "title": "Revenus",
         "total": "Total des ventes"
       }
+    },
+    "goals": {
+      "monthlyRevenue": "Revenus mensuels",
+      "newCustomers": "Nouveaux clients",
+      "productsSold": "Produits vendus",
+      "customersUnit": "clients",
+      "ordersUnit": "commandes"
+    },
+    "trends": {
+      "vsLastMonth": "vs mois dernier"
     },
     "notifications": {
       "title": "Notifications récentes",
@@ -1445,6 +1464,161 @@
         }
       }
     }
+  },
+  "emails": {
+    "campaigns": {
+      "title": "Campagnes Email",
+      "subtitle": "Créez et gérez vos campagnes email marketing",
+      "noStore": "Veuillez sélectionner une boutique",
+      "alert": {
+        "title": "Système d'Emailing Avancé",
+        "description": "Créez des campagnes email ciblées pour vos clients. Programmez des envois, segmentez votre audience et suivez les performances en temps réel."
+      }
+    },
+    "sequences": {
+      "title": "Séquences Email",
+      "subtitle": "Créez des séquences d'emails automatisées pour vos clients",
+      "noStore": "Veuillez sélectionner une boutique",
+      "tabs": {
+        "list": "Liste",
+        "steps": "Étapes"
+      },
+      "alert": {
+        "title": "Séquences Automatisées",
+        "description": "Créez des séquences d'emails qui s'envoient automatiquement selon un calendrier défini. Parfait pour les parcours d'onboarding, les relances et les campagnes de nurturing."
+      }
+    },
+    "workflows": {
+      "title": "Workflows Email",
+      "subtitle": "Automatisez vos emails avec des workflows intelligents",
+      "noStore": "Veuillez sélectionner une boutique",
+      "alert": {
+        "title": "Workflows Automatisés",
+        "description": "Créez des workflows automatisés qui déclenchent des actions basées sur des événements, des conditions ou des planifications. Automatisez vos campagnes email pour économiser du temps et améliorer l'engagement."
+      }
+    },
+    "analytics": {
+      "title": "Analytics Email",
+      "subtitle": "Analysez les performances de vos campagnes et séquences email",
+      "noStore": "Veuillez sélectionner une boutique",
+      "alert": {
+        "title": "Analytics Email Avancées",
+        "description": "Visualisez les performances de vos emails avec des graphiques détaillés. Analysez les taux d'ouverture, de clic, et les revenus générés par vos campagnes."
+      }
+    },
+    "segments": {
+      "title": "Segments d'Audience",
+      "subtitle": "Créez et gérez vos segments d'audience pour cibler vos campagnes email",
+      "noStore": "Veuillez sélectionner une boutique",
+      "tabs": {
+        "list": "Liste des segments",
+        "preview": "Prévisualisation"
+      },
+      "alert": {
+        "title": "Segmentation d'Audience",
+        "description": "Créez des segments statiques (liste manuelle) ou dynamiques (calculés automatiquement) pour cibler précisément vos campagnes email. Les segments dynamiques se mettent à jour automatiquement selon vos critères."
+      },
+      "backToList": "Retour à la liste",
+      "back": "Retour",
+      "previewLabel": "Prévisualisation: "
+    },
+    "templateEditor": {
+      "title": "Éditeur de Templates Email",
+      "subtitle": "Créez et personnalisez vos templates email avec un éditeur visuel",
+      "alert": {
+        "title": "Éditeur de Templates Email",
+        "description": "Utilisez l'éditeur pour créer vos templates email. Vous pouvez insérer des blocs prédéfinis, utiliser des variables dynamiques, et prévisualiser le résultat sur mobile et desktop."
+      },
+      "tabs": {
+        "editor": "Éditeur",
+        "editorShort": "Édit",
+        "blocks": "Blocs",
+        "blocksShort": "Bloc",
+        "preview": "Prévisualisation",
+        "previewShort": "Aperçu"
+      },
+      "toast": {
+        "saved": "Template sauvegardé",
+        "savedDescription": "Le template a été sauvegardé avec succès.",
+        "error": "Erreur",
+        "errorDescription": "Erreur lors de la sauvegarde du template.",
+        "blockInserted": "Bloc inséré",
+        "blockInsertedDescription": "Le bloc a été inséré dans votre template."
+      }
+    }
+  },
+  "digitalUpdates": {
+    "title": "Gestion des Mises à Jour",
+    "subtitle": "Publiez et gérez les mises à jour de vos produits digitaux",
+    "newUpdate": "Nouvelle mise à jour",
+    "newUpdateShort": "Nouvelle",
+    "selectProduct": "Sélectionner un produit",
+    "selectProductDesc": "Choisissez un produit digital pour gérer ses mises à jour",
+    "noProducts": "Aucun produit digital",
+    "noProductsDesc": "Créez d'abord un produit digital pour pouvoir gérer ses mises à jour",
+    "createProduct": "Créer un produit digital",
+    "currentVersion": "Version actuelle: {{version}}",
+    "productWithoutName": "Produit sans nom",
+    "tabs": {
+      "updates": "Mises à jour",
+      "updatesShort": "Mises à j.",
+      "stats": "Statistiques",
+      "statsShort": "Stats",
+      "settings": "Paramètres",
+      "settingsShort": "Param."
+    }
+  },
+  "recurringBookings": {
+    "title": "Réservations Récurrentes",
+    "subtitle": "Gérez vos séries de réservations récurrentes",
+    "noStore": "Aucune boutique trouvée",
+    "noStoreDesc": "Veuillez créer une boutique pour gérer vos réservations récurrentes",
+    "stats": {
+      "total": "Total",
+      "active": "Actives",
+      "bookings": "Réservations",
+      "completed": "Complétées",
+      "cancelled": "Annulées"
+    }
+  },
+  "common": {
+    "welcome": "Bienvenue",
+    "startBuilding": "Commencez à construire votre projet ici !",
+    "notAvailable": "N/A",
+    "optional": "optionnel"
+  },
+  "shipping": {
+    "title": "Livraison",
+    "country": "Pays",
+    "countryRequired": "Pays requis",
+    "selectCountry": "Sélectionner un pays",
+    "city": "Ville",
+    "cityPlaceholder": "Ex: Dakar",
+    "postalCode": "Code postal",
+    "postalCodePlaceholder": "Ex: 75001",
+    "calculate": "Calculer le shipping",
+    "calculating": "Calcul en cours...",
+    "calculationError": "Erreur lors du calcul du shipping",
+    "baseShipping": "Shipping de base",
+    "insurance": "Assurance",
+    "specializedPackaging": "Emballage spécialisé",
+    "specialHandling": "Manutention spéciale",
+    "totalShipping": "Total shipping",
+    "estimatedDelivery": "Livraison estimée : {{days}} jours",
+    "recommendedCarriers": "Transporteurs recommandés :",
+    "artistCalculator": {
+      "title": "Calcul du Shipping Spécialisé",
+      "description": "Calculez les frais de livraison spécialisés pour cette œuvre d'artiste"
+    }
+  },
+  "countries": {
+    "SN": "Sénégal",
+    "CI": "Côte d'Ivoire",
+    "ML": "Mali",
+    "BF": "Burkina Faso",
+    "FR": "France",
+    "BE": "Belgique",
+    "CH": "Suisse"
   }
 }
 

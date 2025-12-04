@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { EmailAnalyticsDashboard } from '@/components/email';
@@ -14,6 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export const EmailAnalyticsPage = () => {
+  const { t } = useTranslation();
   const { store } = useStore();
   const headerRef = useScrollAnimation<HTMLDivElement>();
 
@@ -26,7 +28,7 @@ export const EmailAnalyticsPage = () => {
             <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
               <CardContent className="p-6 sm:p-8 sm:p-12 text-center">
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Veuillez sélectionner une boutique
+                  {t('emails.analytics.noStore')}
                 </p>
               </CardContent>
             </Card>
@@ -57,11 +59,11 @@ export const EmailAnalyticsPage = () => {
               <div className="flex-1 min-w-0">
                 <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                   <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                    Analytics Email
+                    {t('emails.analytics.title')}
                   </span>
                 </h1>
                 <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
-                  Analysez les performances de vos campagnes et séquences email
+                  {t('emails.analytics.subtitle')}
                 </p>
               </div>
             </div>
@@ -71,11 +73,10 @@ export const EmailAnalyticsPage = () => {
           <Alert className="border-green-200/50 bg-green-50/50 dark:bg-green-950/20 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
             <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
             <AlertTitle className="text-xs sm:text-sm md:text-base text-green-900 dark:text-green-100">
-              Analytics Email Avancées
+              {t('emails.analytics.alert.title')}
             </AlertTitle>
             <AlertDescription className="text-[10px] sm:text-xs md:text-sm text-green-800 dark:text-green-200">
-              Visualisez les performances de vos emails avec des graphiques détaillés.
-              Analysez les taux d'ouverture, de clic, et les revenus générés par vos campagnes.
+              {t('emails.analytics.alert.description')}
             </AlertDescription>
           </Alert>
 

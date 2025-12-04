@@ -335,7 +335,8 @@
     "status": {
       "active": "Aktiv",
       "inactive": "Inaktiv",
-      "draft": "Entwurf"
+      "draft": "Entwurf",
+      "published": "Veröffentlicht"
     },
     "stockStatus": {
       "inStock": "Auf Lager",
@@ -405,7 +406,14 @@
       "status": "Status",
       "createdAt": "Erstellt am",
       "updatedAt": "Aktualisiert am"
-    }
+    },
+    "metadata": {
+      "createdAt": "Erstellt am",
+      "updatedAt": "Zuletzt aktualisiert",
+      "version": "Version"
+    },
+    "urlCopied": "URL kopiert",
+    "urlCopiedDescription": "Produkt-URL wurde in die Zwischenablage kopiert"
   },
   "cart": {
     "title": "Warenkorb",
@@ -518,7 +526,8 @@
     "stats": {
       "products": {
         "title": "Produkte",
-        "active": "{{count}} aktiv"
+        "active": "{{count}} aktiv",
+        "active_plural": "{{count}} aktiv"
       },
       "orders": {
         "title": "Bestellungen",
@@ -532,6 +541,16 @@
         "title": "Umsatz",
         "total": "Gesamtumsatz"
       }
+    },
+    "goals": {
+      "monthlyRevenue": "Monatlicher Umsatz",
+      "newCustomers": "Neue Kunden",
+      "productsSold": "Verkaufte Produkte",
+      "customersUnit": "Kunden",
+      "ordersUnit": "Bestellungen"
+    },
+    "trends": {
+      "vsLastMonth": "vs letzten Monat"
     },
     "notifications": {
       "title": "Aktuelle Benachrichtigungen",
@@ -1409,5 +1428,160 @@
         }
       }
     }
+  },
+  "emails": {
+    "campaigns": {
+      "title": "E-Mail-Kampagnen",
+      "subtitle": "Erstellen und verwalten Sie Ihre E-Mail-Marketing-Kampagnen",
+      "noStore": "Bitte wählen Sie einen Shop aus",
+      "alert": {
+        "title": "Erweitertes E-Mail-System",
+        "description": "Erstellen Sie gezielte E-Mail-Kampagnen für Ihre Kunden. Planen Sie Versendungen, segmentieren Sie Ihr Publikum und verfolgen Sie die Leistung in Echtzeit."
+      }
+    },
+    "sequences": {
+      "title": "E-Mail-Sequenzen",
+      "subtitle": "Erstellen Sie automatisierte E-Mail-Sequenzen für Ihre Kunden",
+      "noStore": "Bitte wählen Sie einen Shop aus",
+      "tabs": {
+        "list": "Liste",
+        "steps": "Schritte"
+      },
+      "alert": {
+        "title": "Automatisierte Sequenzen",
+        "description": "Erstellen Sie E-Mail-Sequenzen, die automatisch nach einem definierten Zeitplan gesendet werden. Perfekt für Onboarding-Journeys, Follow-ups und Nurturing-Kampagnen."
+      }
+    },
+    "workflows": {
+      "title": "E-Mail-Workflows",
+      "subtitle": "Automatisieren Sie Ihre E-Mails mit intelligenten Workflows",
+      "noStore": "Bitte wählen Sie einen Shop aus",
+      "alert": {
+        "title": "Automatisierte Workflows",
+        "description": "Erstellen Sie automatisierte Workflows, die Aktionen basierend auf Ereignissen, Bedingungen oder Zeitplänen auslösen. Automatisieren Sie Ihre E-Mail-Kampagnen, um Zeit zu sparen und das Engagement zu verbessern."
+      }
+    },
+    "analytics": {
+      "title": "E-Mail-Analytik",
+      "subtitle": "Analysieren Sie die Leistung Ihrer E-Mail-Kampagnen und -Sequenzen",
+      "noStore": "Bitte wählen Sie einen Shop aus",
+      "alert": {
+        "title": "Erweiterte E-Mail-Analytik",
+        "description": "Visualisieren Sie die Leistung Ihrer E-Mails mit detaillierten Diagrammen. Analysieren Sie Öffnungsraten, Klickraten und die von Ihren Kampagnen generierten Einnahmen."
+      }
+    },
+    "segments": {
+      "title": "Zielgruppensegmente",
+      "subtitle": "Erstellen und verwalten Sie Ihre Zielgruppensegmente, um Ihre E-Mail-Kampagnen zu zielen",
+      "noStore": "Bitte wählen Sie einen Shop aus",
+      "tabs": {
+        "list": "Segmentliste",
+        "preview": "Vorschau"
+      },
+      "alert": {
+        "title": "Zielgruppensegmentierung",
+        "description": "Erstellen Sie statische Segmente (manuelle Liste) oder dynamische Segmente (automatisch berechnet), um Ihre E-Mail-Kampagnen präzise zu zielen. Dynamische Segmente aktualisieren sich automatisch nach Ihren Kriterien."
+      },
+      "backToList": "Zurück zur Liste",
+      "back": "Zurück",
+      "previewLabel": "Vorschau: "
+    },
+    "templateEditor": {
+      "title": "E-Mail-Vorlagen-Editor",
+      "subtitle": "Erstellen und personalisieren Sie Ihre E-Mail-Vorlagen mit einem visuellen Editor",
+      "alert": {
+        "title": "E-Mail-Vorlagen-Editor",
+        "description": "Verwenden Sie den Editor, um Ihre E-Mail-Vorlagen zu erstellen. Sie können vordefinierte Blöcke einfügen, dynamische Variablen verwenden und das Ergebnis auf Mobilgerät und Desktop in der Vorschau anzeigen."
+      },
+      "tabs": {
+        "editor": "Editor",
+        "editorShort": "Bearbeiten",
+        "blocks": "Blöcke",
+        "blocksShort": "Block",
+        "preview": "Vorschau",
+        "previewShort": "Vorschau"
+      },
+      "toast": {
+        "saved": "Vorlage gespeichert",
+        "savedDescription": "Die Vorlage wurde erfolgreich gespeichert.",
+        "error": "Fehler",
+        "errorDescription": "Fehler beim Speichern der Vorlage.",
+        "blockInserted": "Block eingefügt",
+        "blockInsertedDescription": "Der Block wurde in Ihre Vorlage eingefügt."
+      }
+    }
+  },
+  "digitalUpdates": {
+    "title": "Update-Verwaltung",
+    "subtitle": "Veröffentlichen und verwalten Sie Updates für Ihre digitalen Produkte",
+    "newUpdate": "Neues Update",
+    "newUpdateShort": "Neu",
+    "selectProduct": "Produkt auswählen",
+    "selectProductDesc": "Wählen Sie ein digitales Produkt aus, um dessen Updates zu verwalten",
+    "noProducts": "Keine digitalen Produkte",
+    "noProductsDesc": "Erstellen Sie zuerst ein digitales Produkt, um dessen Updates zu verwalten",
+    "createProduct": "Digitales Produkt erstellen",
+    "currentVersion": "Aktuelle Version: {{version}}",
+    "productWithoutName": "Produkt ohne Namen",
+    "tabs": {
+      "updates": "Updates",
+      "updatesShort": "Updates",
+      "stats": "Statistiken",
+      "statsShort": "Stat.",
+      "settings": "Einstellungen",
+      "settingsShort": "Einst."
+    }
+  },
+  "recurringBookings": {
+    "title": "Wiederkehrende Buchungen",
+    "subtitle": "Verwalten Sie Ihre wiederkehrenden Buchungsserien",
+    "noStore": "Kein Shop gefunden",
+    "noStoreDesc": "Bitte erstellen Sie einen Shop, um Ihre wiederkehrenden Buchungen zu verwalten",
+    "stats": {
+      "total": "Gesamt",
+      "active": "Aktiv",
+      "bookings": "Buchungen",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert"
+    }
+  },
+  "common": {
+    "welcome": "Willkommen",
+    "startBuilding": "Beginnen Sie hier mit dem Aufbau Ihres erstaunlichen Projekts!",
+    "notAvailable": "N/A",
+    "optional": "optional"
+  },
+  "shipping": {
+    "title": "Versand",
+    "country": "Land",
+    "countryRequired": "Land erforderlich",
+    "selectCountry": "Land auswählen",
+    "city": "Stadt",
+    "cityPlaceholder": "Z.B: Dakar",
+    "postalCode": "Postleitzahl",
+    "postalCodePlaceholder": "Z.B: 75001",
+    "calculate": "Versand berechnen",
+    "calculating": "Berechnung läuft...",
+    "calculationError": "Fehler bei der Versandberechnung",
+    "baseShipping": "Grundversand",
+    "insurance": "Versicherung",
+    "specializedPackaging": "Spezialverpackung",
+    "specialHandling": "Spezialbehandlung",
+    "totalShipping": "Gesamtversand",
+    "estimatedDelivery": "Geschätzte Lieferung: {{days}} Tage",
+    "recommendedCarriers": "Empfohlene Spediteure:",
+    "artistCalculator": {
+      "title": "Spezialversand-Rechner",
+      "description": "Berechnen Sie die spezialisierten Versandkosten für dieses Kunstwerk"
+    }
+  },
+  "countries": {
+    "SN": "Senegal",
+    "CI": "Elfenbeinküste",
+    "ML": "Mali",
+    "BF": "Burkina Faso",
+    "FR": "Frankreich",
+    "BE": "Belgien",
+    "CH": "Schweiz"
   }
 }

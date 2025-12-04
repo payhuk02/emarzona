@@ -335,7 +335,8 @@
     "status": {
       "active": "Activo",
       "inactive": "Inactivo",
-      "draft": "Borrador"
+      "draft": "Borrador",
+      "published": "Publicado"
     },
     "stockStatus": {
       "inStock": "En stock",
@@ -405,7 +406,14 @@
       "status": "Estado",
       "createdAt": "Creado el",
       "updatedAt": "Actualizado el"
-    }
+    },
+    "metadata": {
+      "createdAt": "Creado el",
+      "updatedAt": "Última actualización",
+      "version": "Versión"
+    },
+    "urlCopied": "URL copiada",
+    "urlCopiedDescription": "La URL del producto ha sido copiada al portapapeles"
   },
   "cart": {
     "title": "Carrito",
@@ -518,7 +526,8 @@
     "stats": {
       "products": {
         "title": "Productos",
-        "active": "{{count}} activos"
+        "active": "{{count}} activo",
+        "active_plural": "{{count}} activos"
       },
       "orders": {
         "title": "Pedidos",
@@ -532,6 +541,16 @@
         "title": "Ingresos",
         "total": "Ventas totales"
       }
+    },
+    "goals": {
+      "monthlyRevenue": "Ingresos mensuales",
+      "newCustomers": "Nuevos clientes",
+      "productsSold": "Productos vendidos",
+      "customersUnit": "clientes",
+      "ordersUnit": "pedidos"
+    },
+    "trends": {
+      "vsLastMonth": "vs mes pasado"
     },
     "notifications": {
       "title": "Notificaciones recientes",
@@ -1409,5 +1428,160 @@
         }
       }
     }
+  },
+  "emails": {
+    "campaigns": {
+      "title": "Campañas de Email",
+      "subtitle": "Crea y gestiona tus campañas de email marketing",
+      "noStore": "Por favor, selecciona una tienda",
+      "alert": {
+        "title": "Sistema de Email Avanzado",
+        "description": "Crea campañas de email dirigidas para tus clientes. Programa envíos, segmenta tu audiencia y sigue el rendimiento en tiempo real."
+      }
+    },
+    "sequences": {
+      "title": "Secuencias de Email",
+      "subtitle": "Crea secuencias de emails automatizadas para tus clientes",
+      "noStore": "Por favor, selecciona una tienda",
+      "tabs": {
+        "list": "Lista",
+        "steps": "Pasos"
+      },
+      "alert": {
+        "title": "Secuencias Automatizadas",
+        "description": "Crea secuencias de emails que se envían automáticamente según un calendario definido. Perfecto para recorridos de incorporación, seguimientos y campañas de nutrición."
+      }
+    },
+    "workflows": {
+      "title": "Flujos de Trabajo de Email",
+      "subtitle": "Automatiza tus emails con flujos de trabajo inteligentes",
+      "noStore": "Por favor, selecciona una tienda",
+      "alert": {
+        "title": "Flujos de Trabajo Automatizados",
+        "description": "Crea flujos de trabajo automatizados que activan acciones basadas en eventos, condiciones o programaciones. Automatiza tus campañas de email para ahorrar tiempo y mejorar el compromiso."
+      }
+    },
+    "analytics": {
+      "title": "Analíticas de Email",
+      "subtitle": "Analiza el rendimiento de tus campañas y secuencias de email",
+      "noStore": "Por favor, selecciona una tienda",
+      "alert": {
+        "title": "Analíticas de Email Avanzadas",
+        "description": "Visualiza el rendimiento de tus emails con gráficos detallados. Analiza las tasas de apertura, de clic y los ingresos generados por tus campañas."
+      }
+    },
+    "segments": {
+      "title": "Segmentos de Audiencia",
+      "subtitle": "Crea y gestiona tus segmentos de audiencia para dirigir tus campañas de email",
+      "noStore": "Por favor, selecciona una tienda",
+      "tabs": {
+        "list": "Lista de segmentos",
+        "preview": "Vista previa"
+      },
+      "alert": {
+        "title": "Segmentación de Audiencia",
+        "description": "Crea segmentos estáticos (lista manual) o dinámicos (calculados automáticamente) para dirigir precisamente tus campañas de email. Los segmentos dinámicos se actualizan automáticamente según tus criterios."
+      },
+      "backToList": "Volver a la lista",
+      "back": "Volver",
+      "previewLabel": "Vista previa: "
+    },
+    "templateEditor": {
+      "title": "Editor de Plantillas de Email",
+      "subtitle": "Crea y personaliza tus plantillas de email con un editor visual",
+      "alert": {
+        "title": "Editor de Plantillas de Email",
+        "description": "Usa el editor para crear tus plantillas de email. Puedes insertar bloques predefinidos, usar variables dinámicas y previsualizar el resultado en móvil y escritorio."
+      },
+      "tabs": {
+        "editor": "Editor",
+        "editorShort": "Editar",
+        "blocks": "Bloques",
+        "blocksShort": "Bloque",
+        "preview": "Vista previa",
+        "previewShort": "Vista"
+      },
+      "toast": {
+        "saved": "Plantilla guardada",
+        "savedDescription": "La plantilla se ha guardado correctamente.",
+        "error": "Error",
+        "errorDescription": "Error al guardar la plantilla.",
+        "blockInserted": "Bloque insertado",
+        "blockInsertedDescription": "El bloque se ha insertado en tu plantilla."
+      }
+    }
+  },
+  "digitalUpdates": {
+    "title": "Gestión de Actualizaciones",
+    "subtitle": "Publica y gestiona las actualizaciones de tus productos digitales",
+    "newUpdate": "Nueva actualización",
+    "newUpdateShort": "Nueva",
+    "selectProduct": "Seleccionar un producto",
+    "selectProductDesc": "Elige un producto digital para gestionar sus actualizaciones",
+    "noProducts": "Ningún producto digital",
+    "noProductsDesc": "Crea primero un producto digital para poder gestionar sus actualizaciones",
+    "createProduct": "Crear un producto digital",
+    "currentVersion": "Versión actual: {{version}}",
+    "productWithoutName": "Producto sin nombre",
+    "tabs": {
+      "updates": "Actualizaciones",
+      "updatesShort": "Actualiz.",
+      "stats": "Estadísticas",
+      "statsShort": "Estad.",
+      "settings": "Configuración",
+      "settingsShort": "Config."
+    }
+  },
+  "recurringBookings": {
+    "title": "Reservas Recurrentes",
+    "subtitle": "Gestiona tus series de reservas recurrentes",
+    "noStore": "No se encontró ninguna tienda",
+    "noStoreDesc": "Por favor, crea una tienda para gestionar tus reservas recurrentes",
+    "stats": {
+      "total": "Total",
+      "active": "Activas",
+      "bookings": "Reservas",
+      "completed": "Completadas",
+      "cancelled": "Canceladas"
+    }
+  },
+  "common": {
+    "welcome": "Bienvenido",
+    "startBuilding": "¡Comienza a construir tu increíble proyecto aquí!",
+    "notAvailable": "N/A",
+    "optional": "opcional"
+  },
+  "shipping": {
+    "title": "Envío",
+    "country": "País",
+    "countryRequired": "País requerido",
+    "selectCountry": "Seleccionar un país",
+    "city": "Ciudad",
+    "cityPlaceholder": "Ej: Dakar",
+    "postalCode": "Código postal",
+    "postalCodePlaceholder": "Ej: 75001",
+    "calculate": "Calcular envío",
+    "calculating": "Calculando...",
+    "calculationError": "Error al calcular el envío",
+    "baseShipping": "Envío base",
+    "insurance": "Seguro",
+    "specializedPackaging": "Embalaje especializado",
+    "specialHandling": "Manejo especial",
+    "totalShipping": "Total envío",
+    "estimatedDelivery": "Entrega estimada: {{days}} días",
+    "recommendedCarriers": "Transportistas recomendados:",
+    "artistCalculator": {
+      "title": "Calculadora de Envío Especializado",
+      "description": "Calcule los costos de envío especializados para esta obra de arte"
+    }
+  },
+  "countries": {
+    "SN": "Senegal",
+    "CI": "Costa de Marfil",
+    "ML": "Mali",
+    "BF": "Burkina Faso",
+    "FR": "Francia",
+    "BE": "Bélgica",
+    "CH": "Suiza"
   }
 }

@@ -7,6 +7,7 @@
  */
 
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { RecurringBookingsManager } from '@/components/service/recurring';
@@ -18,6 +19,7 @@ import { useRecurringSeries } from '@/hooks/services/useRecurringBookings';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export default function RecurringBookingsPage() {
+  const { t } = useTranslation();
   const { store, isLoading: storeLoading } = useStore();
   const headerRef = useScrollAnimation<HTMLDivElement>();
   const statsRef = useScrollAnimation<HTMLDivElement>();
@@ -69,10 +71,10 @@ export default function RecurringBookingsPage() {
                 <CardContent className="pt-8 sm:pt-12 pb-8 sm:pb-12 text-center">
                   <Repeat className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
                   <p className="text-sm sm:text-base text-muted-foreground mb-4">
-                    Aucune boutique trouvée
+                    {t('recurringBookings.noStore')}
                   </p>
                   <p className="text-xs sm:text-sm text-muted-foreground">
-                    Veuillez créer une boutique pour gérer vos réservations récurrentes
+                    {t('recurringBookings.noStoreDesc')}
                   </p>
                 </CardContent>
               </Card>
@@ -103,12 +105,12 @@ export default function RecurringBookingsPage() {
                         <Repeat className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                       </div>
                       <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent break-words">
-                        Réservations Récurrentes
+                        {t('recurringBookings.title')}
                       </span>
                     </div>
                   </h1>
                   <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                    Gérez vos séries de réservations récurrentes
+                    {t('recurringBookings.subtitle')}
                   </p>
                 </div>
               </div>
@@ -121,31 +123,31 @@ export default function RecurringBookingsPage() {
             >
               {[
                 {
-                  label: 'Total',
+                  label: t('recurringBookings.stats.total'),
                   value: stats.total,
                   icon: Repeat,
                   color: 'from-purple-600 to-pink-600',
                 },
                 {
-                  label: 'Actives',
+                  label: t('recurringBookings.stats.active'),
                   value: stats.active,
                   icon: CheckCircle2,
                   color: 'from-green-600 to-emerald-600',
                 },
                 {
-                  label: 'Réservations',
+                  label: t('recurringBookings.stats.bookings'),
                   value: stats.totalBookings,
                   icon: Calendar,
                   color: 'from-blue-600 to-cyan-600',
                 },
                 {
-                  label: 'Complétées',
+                  label: t('recurringBookings.stats.completed'),
                   value: stats.completed,
                   icon: CheckCircle2,
                   color: 'from-green-600 to-emerald-600',
                 },
                 {
-                  label: 'Annulées',
+                  label: t('recurringBookings.stats.cancelled'),
                   value: stats.cancelled,
                   icon: XCircle,
                   color: 'from-red-600 to-rose-600',

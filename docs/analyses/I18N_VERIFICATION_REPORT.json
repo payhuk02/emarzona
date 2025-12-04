@@ -1,181 +1,13 @@
 {
-  "total": 163,
-  "withI18n": 135,
-  "withoutI18n": 28,
-  "withHardcodedText": 110,
+  "total": 179,
+  "withI18n": 178,
+  "withoutI18n": 1,
+  "withHardcodedText": 116,
   "pagesWithoutI18n": [
     {
-      "file": "src\\pages\\admin\\AdminBatchShipping.tsx",
-      "issues": [
-        "Pas d'import i18n détecté",
-        "Textes français hardcodés potentiels détectés"
-      ]
-    },
-    {
-      "file": "src\\pages\\admin\\AdminCostOptimization.tsx",
+      "file": "src\\pages\\UnsubscribePage.tsx",
       "issues": [
         "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\admin\\AdminDemandForecasting.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\admin\\AdminMonitoring.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\admin\\DigitalProductWebhooks.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\admin\\PhysicalBackorders.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\admin\\PhysicalBundles.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\admin\\PhysicalMultiCurrency.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\admin\\PhysicalPreOrders.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\admin\\PhysicalProductWebhooks.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\admin\\PhysicalPromotions.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\AdvancedDashboard.tsx",
-      "issues": [
-        "Pas d'import i18n détecté",
-        "Textes français hardcodés potentiels détectés"
-      ]
-    },
-    {
-      "file": "src\\pages\\AdvancedOrderManagementSimple.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\affiliate\\AffiliateCoursesDashboard.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\courses\\CourseAnalytics.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\courses\\CreateCourse.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\customer\\CustomerLoyaltyPage.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\customer\\CustomerMyGiftCardsPage.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\digital\\DigitalProductUpdatesDashboard.tsx",
-      "issues": [
-        "Pas d'import i18n détecté",
-        "Textes français hardcodés potentiels détectés"
-      ]
-    },
-    {
-      "file": "src\\pages\\gamification\\GamificationPage.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\Index.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\payments\\PaymentCancel.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\Pixels.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\ProductCreationDemo.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\Promotions.tsx",
-      "issues": [
-        "Pas d'import i18n détecté",
-        "Textes français hardcodés potentiels détectés"
-      ]
-    },
-    {
-      "file": "src\\pages\\service\\RecurringBookingsPage.tsx",
-      "issues": [
-        "Pas d'import i18n détecté",
-        "Textes français hardcodés potentiels détectés"
-      ]
-    },
-    {
-      "file": "src\\pages\\Store.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
-    },
-    {
-      "file": "src\\pages\\Withdrawals.tsx",
-      "issues": [
-        "Pas d'import i18n détecté",
-        "Textes français hardcodés potentiels détectés"
       ]
     }
   ],
@@ -186,6 +18,7 @@
     "src\\pages\\admin\\AdminBatchShipping.tsx",
     "src\\pages\\admin\\AdminCommissionPayments.tsx",
     "src\\pages\\admin\\AdminCommissionSettings.tsx",
+    "src\\pages\\admin\\AdminCommunity.tsx",
     "src\\pages\\admin\\AdminCourses.tsx",
     "src\\pages\\admin\\AdminDashboard.tsx",
     "src\\pages\\admin\\AdminDisputes.tsx",
@@ -208,6 +41,7 @@
     "src\\pages\\admin\\AdminSuppliersManagement.tsx",
     "src\\pages\\admin\\AdminSupport.tsx",
     "src\\pages\\admin\\AdminTaxManagement.tsx",
+    "src\\pages\\admin\\AdminTransactionReconciliation.tsx",
     "src\\pages\\admin\\AdminUsers.tsx",
     "src\\pages\\admin\\AdminVendorConversations.tsx",
     "src\\pages\\admin\\AdminWebhookManagement.tsx",
@@ -216,15 +50,16 @@
     "src\\pages\\admin\\PlatformCustomization.tsx",
     "src\\pages\\admin\\TransactionMonitoring.tsx",
     "src\\pages\\AdminKYC.tsx",
-    "src\\pages\\AdvancedDashboard.tsx",
     "src\\pages\\AdvancedOrderManagement.tsx",
     "src\\pages\\affiliate\\CourseAffiliate.tsx",
     "src\\pages\\AffiliateDashboard.tsx",
     "src\\pages\\Analytics.tsx",
+    "src\\pages\\artist\\ArtistProductDetail.tsx",
     "src\\pages\\Auth.tsx",
     "src\\pages\\checkout\\Cancel.tsx",
     "src\\pages\\checkout\\Success.tsx",
     "src\\pages\\Checkout.tsx",
+    "src\\pages\\community\\CommunityPage.tsx",
     "src\\pages\\courses\\CourseDetail.tsx",
     "src\\pages\\courses\\MyCourses.tsx",
     "src\\pages\\CreateProduct.tsx",
@@ -253,11 +88,13 @@
     "src\\pages\\digital\\LicenseManagement.tsx",
     "src\\pages\\digital\\MyLicenses.tsx",
     "src\\pages\\disputes\\DisputeDetail.tsx",
+    "src\\pages\\gamification\\GamificationPage.tsx",
     "src\\pages\\inventory\\InventoryDashboard.tsx",
     "src\\pages\\KYC.tsx",
     "src\\pages\\Landing.tsx",
     "src\\pages\\legal\\RefundPolicy.tsx",
     "src\\pages\\legal\\TermsOfService.tsx",
+    "src\\pages\\Marketing.tsx",
     "src\\pages\\Marketplace.tsx",
     "src\\pages\\notifications\\NotificationsCenter.tsx",
     "src\\pages\\orders\\OrderMessaging.tsx",
@@ -268,6 +105,7 @@
     "src\\pages\\payments\\PaymentManagementList.tsx",
     "src\\pages\\payments\\PaymentSuccess.tsx",
     "src\\pages\\Payments.tsx",
+    "src\\pages\\PaymentsCustomers.tsx",
     "src\\pages\\physical\\PhysicalProductDetail.tsx",
     "src\\pages\\physical\\PhysicalProductsList.tsx",
     "src\\pages\\PlatformRevenue.tsx",
@@ -278,7 +116,6 @@
     "src\\pages\\service\\AdvancedCalendarPage.tsx",
     "src\\pages\\service\\BookingsManagement.tsx",
     "src\\pages\\service\\RecurringBookingsManagement.tsx",
-    "src\\pages\\service\\RecurringBookingsPage.tsx",
     "src\\pages\\service\\ServiceDetail.tsx",
     "src\\pages\\service\\ServiceManagementPage.tsx",
     "src\\pages\\settings\\NotificationSettings.tsx",
@@ -286,6 +123,7 @@
     "src\\pages\\shipping\\ContactShippingService.tsx",
     "src\\pages\\shipping\\ShippingDashboard.tsx",
     "src\\pages\\shipping\\ShippingServiceMessages.tsx",
+    "src\\pages\\store\\StoreTeamManagement.tsx",
     "src\\pages\\StoreAffiliates.tsx",
     "src\\pages\\Storefront.tsx",
     "src\\pages\\vendor\\VendorMessaging.tsx",
@@ -330,10 +168,9 @@
     },
     {
       "file": "src\\pages\\admin\\AdminBatchShipping.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": true,
       "issues": [
-        "Pas d'import i18n détecté",
         "Textes français hardcodés potentiels détectés"
       ]
     },
@@ -354,12 +191,18 @@
       ]
     },
     {
-      "file": "src\\pages\\admin\\AdminCostOptimization.tsx",
-      "hasI18n": false,
-      "hasHardcodedText": false,
+      "file": "src\\pages\\admin\\AdminCommunity.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
       "issues": [
-        "Pas d'import i18n détecté"
+        "Textes français hardcodés potentiels détectés"
       ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminCostOptimization.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
     },
     {
       "file": "src\\pages\\admin\\AdminCourses.tsx",
@@ -379,11 +222,9 @@
     },
     {
       "file": "src\\pages\\admin\\AdminDemandForecasting.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\admin\\AdminDisputes.tsx",
@@ -427,11 +268,9 @@
     },
     {
       "file": "src\\pages\\admin\\AdminMonitoring.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\admin\\AdminNotifications.tsx",
@@ -572,6 +411,14 @@
       ]
     },
     {
+      "file": "src\\pages\\admin\\AdminTransactionReconciliation.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
       "file": "src\\pages\\admin\\AdminUsers.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
@@ -603,11 +450,9 @@
     },
     {
       "file": "src\\pages\\admin\\DigitalProductWebhooks.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\admin\\IntegrationsPage.tsx",
@@ -633,11 +478,9 @@
     },
     {
       "file": "src\\pages\\admin\\PhysicalBackorders.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\admin\\PhysicalBarcodeScanner.tsx",
@@ -647,11 +490,9 @@
     },
     {
       "file": "src\\pages\\admin\\PhysicalBundles.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\admin\\PhysicalInventoryManagement.tsx",
@@ -661,19 +502,15 @@
     },
     {
       "file": "src\\pages\\admin\\PhysicalMultiCurrency.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\admin\\PhysicalPreOrders.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\admin\\PhysicalProductsAnalytics.tsx",
@@ -695,19 +532,15 @@
     },
     {
       "file": "src\\pages\\admin\\PhysicalProductWebhooks.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\admin\\PhysicalPromotions.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\admin\\PlatformCustomization.tsx",
@@ -735,12 +568,9 @@
     },
     {
       "file": "src\\pages\\AdvancedDashboard.tsx",
-      "hasI18n": false,
-      "hasHardcodedText": true,
-      "issues": [
-        "Pas d'import i18n détecté",
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
     },
     {
       "file": "src\\pages\\AdvancedOrderManagement.tsx",
@@ -752,19 +582,15 @@
     },
     {
       "file": "src\\pages\\AdvancedOrderManagementSimple.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\affiliate\\AffiliateCoursesDashboard.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\affiliate\\CourseAffiliate.tsx",
@@ -790,6 +616,14 @@
     },
     {
       "file": "src\\pages\\Analytics.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\artist\\ArtistProductDetail.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
       "issues": [
@@ -841,12 +675,18 @@
       ]
     },
     {
-      "file": "src\\pages\\courses\\CourseAnalytics.tsx",
-      "hasI18n": false,
-      "hasHardcodedText": false,
+      "file": "src\\pages\\community\\CommunityPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
       "issues": [
-        "Pas d'import i18n détecté"
+        "Textes français hardcodés potentiels détectés"
       ]
+    },
+    {
+      "file": "src\\pages\\courses\\CourseAnalytics.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
     },
     {
       "file": "src\\pages\\courses\\CourseDetail.tsx",
@@ -858,11 +698,9 @@
     },
     {
       "file": "src\\pages\\courses\\CreateCourse.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\courses\\MyCourses.tsx",
@@ -896,11 +734,9 @@
     },
     {
       "file": "src\\pages\\customer\\CustomerLoyaltyPage.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\customer\\CustomerMyGiftCards.tsx",
@@ -912,11 +748,9 @@
     },
     {
       "file": "src\\pages\\customer\\CustomerMyGiftCardsPage.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\customer\\CustomerMyInvoices.tsx",
@@ -1096,10 +930,9 @@
     },
     {
       "file": "src\\pages\\digital\\DigitalProductUpdatesDashboard.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": true,
       "issues": [
-        "Pas d'import i18n détecté",
         "Textes français hardcodés potentiels détectés"
       ]
     },
@@ -1140,20 +973,54 @@
       "issues": []
     },
     {
-      "file": "src\\pages\\gamification\\GamificationPage.tsx",
-      "hasI18n": false,
+      "file": "src\\pages\\emails\\EmailAnalyticsPage.tsx",
+      "hasI18n": true,
       "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\emails\\EmailCampaignsPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\emails\\EmailSegmentsPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\emails\\EmailSequencesPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\emails\\EmailTemplateEditorPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\emails\\EmailWorkflowsPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\gamification\\GamificationPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
       "issues": [
-        "Pas d'import i18n détecté"
+        "Textes français hardcodés potentiels détectés"
       ]
     },
     {
       "file": "src\\pages\\Index.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\inventory\\InventoryDashboard.tsx",
@@ -1208,12 +1075,26 @@
       ]
     },
     {
+      "file": "src\\pages\\Marketing.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
       "file": "src\\pages\\Marketplace.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
       "issues": [
         "Textes français hardcodés potentiels détectés"
       ]
+    },
+    {
+      "file": "src\\pages\\MyTasks.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
     },
     {
       "file": "src\\pages\\NotFound.tsx",
@@ -1269,11 +1150,9 @@
     },
     {
       "file": "src\\pages\\payments\\PaymentCancel.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\payments\\PaymentManagement.tsx",
@@ -1308,6 +1187,14 @@
       ]
     },
     {
+      "file": "src\\pages\\PaymentsCustomers.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
       "file": "src\\pages\\physical\\PhysicalProductDetail.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
@@ -1325,11 +1212,9 @@
     },
     {
       "file": "src\\pages\\Pixels.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\PlatformRevenue.tsx",
@@ -1341,11 +1226,9 @@
     },
     {
       "file": "src\\pages\\ProductCreationDemo.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": []
     },
     {
       "file": "src\\pages\\ProductDetail.tsx",
@@ -1364,11 +1247,16 @@
       ]
     },
     {
+      "file": "src\\pages\\promotions\\UnifiedPromotionsPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
       "file": "src\\pages\\Promotions.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": true,
       "issues": [
-        "Pas d'import i18n détecté",
         "Textes français hardcodés potentiels détectés"
       ]
     },
@@ -1412,12 +1300,9 @@
     },
     {
       "file": "src\\pages\\service\\RecurringBookingsPage.tsx",
-      "hasI18n": false,
-      "hasHardcodedText": true,
-      "issues": [
-        "Pas d'import i18n détecté",
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
     },
     {
       "file": "src\\pages\\service\\ResourceConflictManagement.tsx",
@@ -1500,12 +1385,18 @@
       "issues": []
     },
     {
-      "file": "src\\pages\\Store.tsx",
-      "hasI18n": false,
-      "hasHardcodedText": false,
+      "file": "src\\pages\\store\\StoreTeamManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
       "issues": [
-        "Pas d'import i18n détecté"
+        "Textes français hardcodés potentiels détectés"
       ]
+    },
+    {
+      "file": "src\\pages\\Store.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
     },
     {
       "file": "src\\pages\\StoreAffiliates.tsx",
@@ -1524,6 +1415,14 @@
       ]
     },
     {
+      "file": "src\\pages\\UnsubscribePage.tsx",
+      "hasI18n": false,
+      "hasHardcodedText": false,
+      "issues": [
+        "Pas d'import i18n détecté"
+      ]
+    },
+    {
       "file": "src\\pages\\vendor\\VendorMessaging.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
@@ -1533,10 +1432,9 @@
     },
     {
       "file": "src\\pages\\Withdrawals.tsx",
-      "hasI18n": false,
+      "hasI18n": true,
       "hasHardcodedText": true,
       "issues": [
-        "Pas d'import i18n détecté",
         "Textes français hardcodés potentiels détectés"
       ]
     }

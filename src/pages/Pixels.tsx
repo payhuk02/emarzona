@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { Activity, Eye, ShoppingCart, DollarSign, Code } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 const Pixels = () => {
+  const { t } = useTranslation();
   const { pixels, loading } = usePixels();
   const headerRef = useScrollAnimation<HTMLDivElement>();
   const statsRef = useScrollAnimation<HTMLDivElement>();
@@ -34,11 +36,11 @@ const Pixels = () => {
                     <Code className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                   </div>
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Mes Pixels
+                    {t('pixels.title', 'Mes Pixels')}
                   </span>
                 </h1>
                 <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
-            Gérez vos Pixels publicitaires et suivez leurs performances
+            {t('pixels.subtitle', 'Gérez vos Pixels publicitaires et suivez leurs performances')}
           </p>
         </div>
               <div className="flex items-center gap-2">
@@ -56,12 +58,12 @@ const Pixels = () => {
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Pixels</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('pixels.stats.total', 'Total Pixels')}</p>
                       <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                         {pixels.length}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-              {activePixels} actif{activePixels > 1 ? 's' : ''}
+              {t('pixels.stats.active', { count: activePixels, defaultValue: `${activePixels} actif${activePixels > 1 ? 's' : ''}` })}
             </p>
                     </div>
                     <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5">
@@ -76,11 +78,11 @@ const Pixels = () => {
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Événements PageView</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('pixels.stats.pageView', 'Événements PageView')}</p>
                       <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                         -
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">7 derniers jours</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t('pixels.stats.last7Days', '7 derniers jours')}</p>
                     </div>
                     <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5">
                       <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
@@ -94,11 +96,11 @@ const Pixels = () => {
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Add to Cart</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('pixels.stats.addToCart', 'Add to Cart')}</p>
                       <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                         -
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">7 derniers jours</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t('pixels.stats.last7Days', '7 derniers jours')}</p>
                     </div>
                     <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5">
                       <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
@@ -112,11 +114,11 @@ const Pixels = () => {
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Achats</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('pixels.stats.purchases', 'Achats')}</p>
                       <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                         -
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">7 derniers jours</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t('pixels.stats.last7Days', '7 derniers jours')}</p>
                     </div>
                     <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5">
                       <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
@@ -132,9 +134,9 @@ const Pixels = () => {
               className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700"
             >
         <CardHeader>
-                <CardTitle className="text-base sm:text-lg">Vos Pixels</CardTitle>
+                <CardTitle className="text-base sm:text-lg">{t('pixels.list.title', 'Vos Pixels')}</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
-            Liste de tous vos Pixels configurés. Activez ou désactivez-les selon vos besoins.
+            {t('pixels.list.description', 'Liste de tous vos Pixels configurés. Activez ou désactivez-les selon vos besoins.')}
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { ProductAnalyticsDemo } from "@/components/products/tabs/ProductAnalyticsDemo";
 
 export const ProductCreationDemo = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     track_views: true,
     track_clicks: true,

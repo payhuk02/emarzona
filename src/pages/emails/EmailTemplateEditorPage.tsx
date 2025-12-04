@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import {
@@ -22,6 +23,7 @@ import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export const EmailTemplateEditorPage = () => {
+  const { t } = useTranslation();
   const [htmlContent, setHtmlContent] = useState('');
   const [subject, setSubject] = useState('');
   const [activeTab, setActiveTab] = useState<'editor' | 'blocks' | 'preview'>('editor');
@@ -48,8 +50,8 @@ export const EmailTemplateEditorPage = () => {
 
       queryClient.invalidateQueries({ queryKey: ['email-templates'] });
       toast({
-        title: 'Template sauvegardé',
-        description: 'Le template a été sauvegardé avec succès.',
+        title: t('emails.templateEditor.toast.saved'),
+        description: t('emails.templateEditor.toast.savedDescription'),
       });
 
       // Mettre à jour le state local pour la prévisualisation
@@ -64,8 +66,8 @@ export const EmailTemplateEditorPage = () => {
     } catch (error: any) {
       logger.error('Failed to save template', { error });
       toast({
-        title: 'Erreur',
-        description: error.message || 'Erreur lors de la sauvegarde du template.',
+        title: t('emails.templateEditor.toast.error'),
+        description: error.message || t('emails.templateEditor.toast.errorDescription'),
         variant: 'destructive',
       });
       throw error;
@@ -76,8 +78,8 @@ export const EmailTemplateEditorPage = () => {
     setHtmlContent((prev) => prev + '\n' + html);
     setActiveTab('editor');
     toast({
-      title: 'Bloc inséré',
-      description: 'Le bloc a été inséré dans votre template.',
+      title: t('emails.templateEditor.toast.blockInserted'),
+      description: t('emails.templateEditor.toast.blockInsertedDescription'),
     });
   };
 
@@ -102,11 +104,11 @@ export const EmailTemplateEditorPage = () => {
               <div className="flex-1 min-w-0">
                 <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                   <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    Éditeur de Templates Email
+                    {t('emails.templateEditor.title')}
                   </span>
                 </h1>
                 <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
-                  Créez et personnalisez vos templates email avec un éditeur visuel
+                  {t('emails.templateEditor.subtitle')}
                 </p>
               </div>
             </div>
@@ -116,12 +118,10 @@ export const EmailTemplateEditorPage = () => {
           <Alert className="border-blue-200/50 bg-blue-50/50 dark:bg-blue-950/20 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
             <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
             <AlertTitle className="text-xs sm:text-sm md:text-base text-blue-900 dark:text-blue-100">
-              Éditeur de Templates Email
+              {t('emails.templateEditor.alert.title')}
             </AlertTitle>
             <AlertDescription className="text-[10px] sm:text-xs md:text-sm text-blue-800 dark:text-blue-200">
-              Utilisez l&apos;éditeur pour créer vos templates email. Vous pouvez insérer des
-              blocs prédéfinis, utiliser des variables dynamiques, et prévisualiser le résultat
-              sur mobile et desktop.
+              {t('emails.templateEditor.alert.description')}
             </AlertDescription>
           </Alert>
 
@@ -134,24 +134,24 @@ export const EmailTemplateEditorPage = () => {
                   className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                 >
                   <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Éditeur</span>
-                  <span className="sm:hidden">Édit</span>
+                  <span className="hidden sm:inline">{t('emails.templateEditor.tabs.editor')}</span>
+                  <span className="sm:hidden">{t('emails.templateEditor.tabs.editorShort')}</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="blocks" 
                   className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                 >
                   <Blocks className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Blocs</span>
-                  <span className="sm:hidden">Bloc</span>
+                  <span className="hidden sm:inline">{t('emails.templateEditor.tabs.blocks')}</span>
+                  <span className="sm:hidden">{t('emails.templateEditor.tabs.blocksShort')}</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="preview" 
                   className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                 >
                   <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Prévisualisation</span>
-                  <span className="sm:hidden">Aperçu</span>
+                  <span className="hidden sm:inline">{t('emails.templateEditor.tabs.preview')}</span>
+                  <span className="sm:hidden">{t('emails.templateEditor.tabs.previewShort')}</span>
                 </TabsTrigger>
               </TabsList>
 

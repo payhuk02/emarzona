@@ -5,6 +5,7 @@
  * Page complète pour la gamification (points, badges, achievements, leaderboard)
  */
 
+import { useTranslation } from 'react-i18next';
 import { SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { GamificationDashboard } from '@/components/gamification/GamificationDashboard';
@@ -15,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 
 // Composant interne pour utiliser useSidebar
 function MobileHeader() {
+  const { t } = useTranslation();
   const { toggleSidebar } = useSidebar();
   
   return (
@@ -34,7 +36,7 @@ function MobileHeader() {
         <div className="flex-1 min-w-0 flex items-center gap-2">
           <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" aria-hidden="true" />
           <h1 className="text-xs sm:text-sm md:text-base font-bold truncate text-gray-900 dark:text-gray-50">
-            Gamification
+            {t('gamification.title', 'Gamification')}
           </h1>
         </div>
       </div>
@@ -44,6 +46,7 @@ function MobileHeader() {
 
 
 export default function GamificationPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const headerRef = useScrollAnimation<HTMLDivElement>();
 
@@ -68,11 +71,11 @@ export default function GamificationPage() {
                     <Trophy className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-blue-600 dark:text-blue-400" aria-hidden="true" />
                   </div>
                   <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                    Gamification
+                    {t('gamification.title', 'Gamification')}
                   </h1>
                 </div>
                 <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground">
-                  Suivez vos points, badges, achievements et votre classement
+                  {t('gamification.subtitle', 'Suivez vos points, badges, achievements et votre classement')}
                 </p>
               </div>
 
@@ -96,7 +99,7 @@ export default function GamificationPage() {
                       </div>
                       <div className="flex-1">
                         <h3 className="mb-2 text-sm sm:text-base md:text-lg font-semibold text-gray-900 dark:text-white">
-                          Erreur de chargement
+                          {t('errors.generic', 'Erreur de chargement')}
                         </h3>
                         <p className="mb-4 text-[10px] sm:text-xs md:text-sm text-gray-600 dark:text-gray-400">
                           Une erreur s'est produite lors du chargement de la page de gamification.

@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { 
@@ -23,6 +24,7 @@ import { useEmailSequence, useEmailSequenceSteps } from '@/hooks/email/useEmailS
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export const EmailSequencesPage = () => {
+  const { t } = useTranslation();
   const { store } = useStore();
   const [builderOpen, setBuilderOpen] = useState(false);
   const [stepEditorOpen, setStepEditorOpen] = useState(false);
@@ -93,7 +95,7 @@ export const EmailSequencesPage = () => {
             <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
               <CardContent className="p-6 sm:p-8 sm:p-12 text-center">
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Veuillez sélectionner une boutique
+                  {t('emails.sequences.noStore')}
                 </p>
               </CardContent>
             </Card>
@@ -124,11 +126,11 @@ export const EmailSequencesPage = () => {
               <div className="flex-1 min-w-0">
                 <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                   <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                    Séquences Email
+                    {t('emails.sequences.title')}
                   </span>
                 </h1>
                 <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
-                  Créez et gérez vos séquences d'emails automatiques (drip campaigns)
+                  {t('emails.sequences.subtitle')}
                 </p>
               </div>
             </div>
@@ -138,12 +140,10 @@ export const EmailSequencesPage = () => {
           <Alert className="border-purple-200/50 bg-purple-50/50 dark:bg-purple-950/20 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
             <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600" />
             <AlertTitle className="text-xs sm:text-sm md:text-base text-purple-900 dark:text-purple-100">
-              Séquences d'Emails Automatiques
+              {t('emails.sequences.alert.title')}
             </AlertTitle>
             <AlertDescription className="text-[10px] sm:text-xs md:text-sm text-purple-800 dark:text-purple-200">
-              Créez des séquences d'emails qui s'envoient automatiquement selon un calendrier
-              ou en réponse à des événements. Parfait pour les séquences de bienvenue,
-              de nurture, ou de récupération de panier abandonné.
+              {t('emails.sequences.alert.description')}
             </AlertDescription>
           </Alert>
 
@@ -155,14 +155,14 @@ export const EmailSequencesPage = () => {
                   value="list" 
                   className="flex-1 sm:flex-none gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                 >
-                  Liste des séquences
+                  {t('emails.sequences.tabs.list')}
                 </TabsTrigger>
                 {viewingSequenceId && (
                   <TabsTrigger 
                     value="steps" 
                     className="flex-1 sm:flex-none gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                   >
-                    <span className="hidden sm:inline">Étapes: </span>
+                    <span className="hidden sm:inline">{t('emails.sequences.tabs.steps')}: </span>
                     <span className="truncate">{viewingSequence?.name || '...'}</span>
                   </TabsTrigger>
                 )}
