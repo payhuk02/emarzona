@@ -151,8 +151,21 @@ export const MainLayout = ({
 
         {/* Main Content Area */}
         <div className="flex flex-1 pt-16">
-          {/* AppSidebar Principal - Visible seulement si pas de sidebar contextuelle */}
-          {!hasFixedSidebar && <AppSidebar />}
+          {/* AppSidebar Principal - Toujours rendu pour le hamburger mobile (Sheet géré par Sidebar) */}
+          {/* Le composant Sidebar détecte isMobile et retourne un Sheet au lieu d'un div desktop */}
+          {/* On le rend toujours, mais on le cache visuellement sur desktop si sidebar contextuelle */}
+          {/* Important: Le Sheet mobile fonctionne car Sidebar détecte isMobile et crée un Sheet */}
+          {/* On le rend une seule fois, mais caché visuellement sur desktop si sidebar contextuelle */}
+          <div className={hasFixedSidebar ? 'hidden md:block' : ''}>
+            <AppSidebar />
+          </div>
+          {/* Sur mobile, AppSidebar est toujours rendu (mais invisible) pour que le Sheet fonctionne via le hamburger */}
+          {/* Le composant Sidebar crée un Sheet quand isMobile=true, donc on doit le rendre même si invisible */}
+          {hasFixedSidebar && (
+            <div className="md:hidden" style={{ position: 'absolute', left: '-9999px', visibility: 'hidden', pointerEvents: 'none', width: 0, height: 0, overflow: 'hidden' }}>
+              <AppSidebar />
+            </div>
+          )}
 
           {/* Sidebar Contextuelle - Remplace AppSidebar quand présente (stable et statique) */}
           {renderContextSidebar()}

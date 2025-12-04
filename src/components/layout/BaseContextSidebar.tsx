@@ -3,7 +3,7 @@
  * Gère desktop (fixed) et mobile (drawer + barre horizontale en bas) avec animations fluides
  */
 
-import { ReactNode, cloneElement, isValidElement, Children } from 'react';
+import { ReactNode, cloneElement, isValidElement, Children, useMemo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
@@ -58,6 +58,11 @@ export const BaseContextSidebar = ({
   const isMobile = useIsMobile();
   const { setOpenMobile } = useSidebar();
 
+  // Mémoriser les items de navigation pour éviter les re-renders inutiles
+  const mobileNavItems = useMemo(() => {
+    return extractNavItems(children);
+  }, [children]);
+
   // Desktop: Sidebar fixe
   const desktopSidebar = (
     <aside 
@@ -110,37 +115,40 @@ export const BaseContextSidebar = ({
   );
 
   // Mobile: Barre de navigation horizontale fixe en bas
-  // Extrait les items de navigation des enfants
-  const mobileNavItems = extractNavItems(children);
-
-  const mobileBottomNav = mobileNavItems.length > 0 ? (
-    <nav
-      className={cn(
-        'md:hidden fixed bottom-0 left-0 right-0 z-[110]',
-        'bg-background border-t border-border',
-        'shadow-[0_-2px_8px_rgba(0,0,0,0.1)]',
-        'safe-area-bottom',
-        'context-bottom-nav' // Classe spécifique pour éviter le CSS global
-      )}
-      role="navigation"
-      aria-label="Navigation contextuelle mobile"
-      style={{ 
-        position: 'fixed',
-        bottom: 0,
-        top: 'auto',
-        left: 0,
-        right: 0,
-        zIndex: 110
-      }}
-    >
-      {/* Scroll horizontal pour les items de navigation */}
-      <div className="overflow-x-auto scrollbar-hide">
-        <div className="flex items-center justify-start gap-0.5 px-1 py-1.5 min-h-[56px]">
-          {mobileNavItems}
+  // Toujours visible si des items existent (même après navigation)
+  // Utilise useMemo pour éviter les re-renders inutiles
+  const mobileBottomNav = useMemo(() => {
+    if (mobileNavItems.length === 0) return null;
+    
+    return (
+      <nav
+        className={cn(
+          'md:hidden fixed bottom-0 left-0 right-0 z-[110]',
+          'bg-background border-t border-border',
+          'shadow-[0_-2px_8px_rgba(0,0,0,0.1)]',
+          'safe-area-bottom',
+          'context-bottom-nav' // Classe spécifique pour éviter le CSS global
+        )}
+        role="navigation"
+        aria-label="Navigation contextuelle mobile"
+        style={{ 
+          position: 'fixed',
+          bottom: 0,
+          top: 'auto',
+          left: 0,
+          right: 0,
+          zIndex: 110
+        }}
+      >
+        {/* Scroll horizontal pour les items de navigation */}
+        <div className="overflow-x-auto scrollbar-hide">
+          <div className="flex items-center justify-start gap-0.5 px-1 py-1.5 min-h-[56px]">
+            {mobileNavItems}
+          </div>
         </div>
-      </div>
-    </nav>
-  ) : null;
+      </nav>
+    );
+  }, [mobileNavItems]);
 
   return (
     <>
