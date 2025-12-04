@@ -1054,8 +1054,8 @@ export function AppSidebar() {
                           className={({ isActive }) =>
                             `transition-all duration-300 group relative flex items-center ${
                               isActive
-                                ? "bg-blue-600/40 !text-white font-semibold border-l-2 border-blue-300 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white"
-                                : "!text-blue-100 hover:bg-blue-600/40 hover:!text-white hover:translate-x-1 [&_svg]:!text-blue-100 [&_span]:!text-blue-100"
+                                ? "bg-white/20 !text-white font-semibold border-l-2 border-white/50 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white"
+                                : "!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90"
                             }`
                           }
                         >
@@ -1122,8 +1122,8 @@ export function AppSidebar() {
                           className={({ isActive }) =>
                             `transition-all duration-300 ${
                               isActive
-                                ? "bg-blue-600/40 !text-white font-semibold border-l-2 border-blue-300 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white"
-                                : "!text-blue-100 hover:bg-blue-600/40 hover:!text-white hover:translate-x-1 [&_svg]:!text-blue-100 [&_span]:!text-blue-100"
+                                ? "bg-white/20 !text-white font-semibold border-l-2 border-white/50 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white"
+                                : "!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90"
                             }`
                           }
                         >
