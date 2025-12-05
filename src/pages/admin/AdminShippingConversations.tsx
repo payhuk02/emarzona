@@ -71,7 +71,7 @@ interface ShippingConversation {
   subject?: string;
   status: 'active' | 'closed' | 'archived';
   last_message_at?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean | null | undefined>;
   created_at: string;
   updated_at: string;
   // Relations
@@ -196,9 +196,17 @@ export default function AdminShippingConversations() {
 
       // Filtrer par litige si nécessaire
       if (disputedFilter === 'disputed') {
-        return enrichedConversations.filter((c: any) => c.is_disputed);
+        interface EnrichedConversation extends ShippingConversation {
+          is_disputed?: boolean;
+          [key: string]: unknown;
+        }
+        return enrichedConversations.filter((c: EnrichedConversation) => c.is_disputed);
       } else if (disputedFilter === 'not_disputed') {
-        return enrichedConversations.filter((c: any) => !c.is_disputed);
+        interface EnrichedConversation extends ShippingConversation {
+          is_disputed?: boolean;
+          [key: string]: unknown;
+        }
+        return enrichedConversations.filter((c: EnrichedConversation) => !c.is_disputed);
       }
 
       return enrichedConversations;
@@ -244,7 +252,8 @@ export default function AdminShippingConversations() {
         description: 'La conversation a été marquée comme litige.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error marking as disputed', error);
       toast({
         title: '❌ Erreur',
@@ -281,7 +290,8 @@ export default function AdminShippingConversations() {
         description: 'Le litige a été résolu.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error resolving dispute', error);
       toast({
         title: '❌ Erreur',
@@ -332,7 +342,8 @@ export default function AdminShippingConversations() {
         description: 'Votre intervention a été envoyée.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error sending intervention message', error);
       toast({
         title: '❌ Erreur',
@@ -359,7 +370,8 @@ export default function AdminShippingConversations() {
         description: 'La conversation a été fermée.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error closing conversation', error);
       toast({
         title: '❌ Erreur',

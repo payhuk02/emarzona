@@ -35,6 +35,7 @@ import type {
 import { Loader2 } from 'lucide-react';
 import { WorkflowTriggerEditor } from './WorkflowTriggerEditor';
 import { WorkflowActionEditor } from './WorkflowActionEditor';
+import { logger } from '@/lib/logger';
 
 interface EmailWorkflowBuilderProps {
   open: boolean;
@@ -107,7 +108,7 @@ export const EmailWorkflowBuilder = ({
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
-      console.error('Failed to save workflow:', error);
+      logger.error('Failed to save workflow', { error });
       // Toast handled by hook
     }
   };

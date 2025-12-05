@@ -106,9 +106,21 @@ export const StatisticsCard: React.FC<StatisticsCardProps> = ({
 };
 
 /**
+ * Interface pour une promotion dans les statistiques
+ */
+interface PromotionForStats {
+  id: string;
+  is_active?: boolean;
+  used_count?: number;
+  current_uses?: number;
+  discount_type?: 'percentage' | 'fixed';
+  discount_value?: number;
+}
+
+/**
  * Hook pour calculer les statistiques des promotions
  */
-export const usePromotionStatistics = (promotions: any[]) => {
+export const usePromotionStatistics = (promotions: PromotionForStats[]) => {
   const stats = React.useMemo(() => {
     if (!promotions || promotions.length === 0) {
       return {
@@ -168,7 +180,7 @@ export const usePromotionStatistics = (promotions: any[]) => {
 /**
  * Composant pour afficher les statistiques des promotions
  */
-export const PromotionStatistics: React.FC<{ promotions: any[] }> = ({ promotions }) => {
+export const PromotionStatistics: React.FC<{ promotions: PromotionForStats[] }> = ({ promotions }) => {
   const { t } = useTranslation();
   const stats = usePromotionStatistics(promotions);
 

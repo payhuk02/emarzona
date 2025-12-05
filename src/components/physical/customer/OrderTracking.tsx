@@ -16,7 +16,7 @@ import {
   ExternalLink,
   Eye,
 } from 'lucide-react';
-import { useCustomerPhysicalOrders, useCustomerPhysicalOrder } from '@/hooks/physical/useCustomerPhysicalOrders';
+import { useCustomerPhysicalOrders, useCustomerPhysicalOrder, type CustomerPhysicalOrder } from '@/hooks/physical/useCustomerPhysicalOrders';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -26,6 +26,37 @@ import { useState } from 'react';
 
 interface OrderTrackingProps {
   orderId?: string;
+}
+
+interface Shipment {
+  id: string;
+  tracking_number?: string;
+  tracking_url?: string;
+  status: string;
+  carrier_name?: string;
+  estimated_delivery?: string;
+  actual_delivery?: string;
+}
+
+interface ShippingAddress {
+  street?: string;
+  city: string;
+  state?: string;
+  postal_code?: string;
+  country?: string;
+}
+
+interface OrderItem {
+  id: string;
+  quantity: number;
+  price: number;
+  products?: {
+    name?: string;
+    image_url?: string;
+  };
+  physical_product_variants?: {
+    name?: string;
+  };
 }
 
 // Composant pour afficher le suivi d'une commande spécifique
@@ -148,8 +179,8 @@ const OrderTrackingDetail = ({ orderId }: { orderId: string }) => {
                           </p>
                           {step.isCurrent && latestShipment && (
                             <p className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">
-                              {(latestShipment as any).tracking_number && (
-                                <>Numéro de suivi: {(latestShipment as any).tracking_number}</>
+                              {latestShipment.tracking_number && (
+                                <>Numéro de suivi: {latestShipment.tracking_number}</>
                               )}
                             </p>
                           )}
@@ -185,15 +216,15 @@ const OrderTrackingDetail = ({ orderId }: { orderId: string }) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-4 pb-3 sm:pb-4">
-            {(latestShipment as any).tracking_number && (
+            {latestShipment.tracking_number && (
               <div>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-2">
                   <span className="text-xs sm:text-sm font-medium">Numéro de suivi</span>
-                  {(latestShipment as any).tracking_url && (
+                  {latestShipment.tracking_url && (
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => window.open((latestShipment as any).tracking_url, '_blank')}
+                      onClick={() => window.open(latestShipment.tracking_url!, '_blank')}
                       className="min-h-[36px] sm:min-h-[32px] touch-manipulation w-full sm:w-auto"
                     >
                       <ExternalLink className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
@@ -202,38 +233,38 @@ const OrderTrackingDetail = ({ orderId }: { orderId: string }) => {
                   )}
                 </div>
                 <div className="p-2.5 sm:p-3 bg-muted rounded-lg font-mono text-xs sm:text-sm break-all">
-                  {(latestShipment as any).tracking_number}
+                  {latestShipment.tracking_number}
                 </div>
               </div>
             )}
 
-            {(latestShipment as any).carrier_name && (
+            {latestShipment.carrier_name && (
               <div>
                 <span className="text-xs sm:text-sm font-medium block mb-1">Transporteur</span>
-                <p className="text-xs sm:text-sm text-muted-foreground break-words">{(latestShipment as any).carrier_name}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground break-words">{latestShipment.carrier_name}</p>
               </div>
             )}
 
-            {(latestShipment as any).estimated_delivery && (
+            {latestShipment.estimated_delivery && (
               <div>
                 <span className="text-xs sm:text-sm font-medium flex items-center gap-2 mb-1">
                   <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                   Livraison estimée
                 </span>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  {format(new Date((latestShipment as any).estimated_delivery), 'dd MMMM yyyy', { locale: fr })}
+                  {format(new Date(latestShipment.estimated_delivery), 'dd MMMM yyyy', { locale: fr })}
                 </p>
               </div>
             )}
 
-            {(latestShipment as any).actual_delivery && (
+            {latestShipment.actual_delivery && (
               <div>
                 <span className="text-xs sm:text-sm font-medium flex items-center gap-2 mb-1">
                   <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                   Livré le
                 </span>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  {format(new Date((latestShipment as any).actual_delivery), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+                  {format(new Date(latestShipment.actual_delivery), 'dd MMMM yyyy à HH:mm', { locale: fr })}
                 </p>
               </div>
             )}
@@ -242,7 +273,7 @@ const OrderTrackingDetail = ({ orderId }: { orderId: string }) => {
       )}
 
       {/* Shipping Address */}
-      {(order as any).shipping_address && Object.keys((order as any).shipping_address).length > 0 && (
+      {order.shipping_address && Object.keys(order.shipping_address).length > 0 && (
         <Card>
           <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-4 pt-3 sm:pt-4">
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg lg:text-xl">
@@ -252,17 +283,24 @@ const OrderTrackingDetail = ({ orderId }: { orderId: string }) => {
           </CardHeader>
           <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
             <div className="space-y-1 text-xs sm:text-sm">
-              {(order as any).shipping_address.street && (
-                <p className="break-words">{(order as any).shipping_address.street}</p>
-              )}
-              <p className="break-words">
-                {(order as any).shipping_address.city}
-                {(order as any).shipping_address.state && `, ${(order as any).shipping_address.state}`}
-                {(order as any).shipping_address.postal_code && ` ${(order as any).shipping_address.postal_code}`}
-              </p>
-              {(order as any).shipping_address.country && (
-                <p className="break-words">{(order as any).shipping_address.country}</p>
-              )}
+              {(() => {
+                const address = order.shipping_address as ShippingAddress;
+                return (
+                  <>
+                    {address.street && (
+                      <p className="break-words">{address.street}</p>
+                    )}
+                    <p className="break-words">
+                      {address.city}
+                      {address.state && `, ${address.state}`}
+                      {address.postal_code && ` ${address.postal_code}`}
+                    </p>
+                    {address.country && (
+                      <p className="break-words">{address.country}</p>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </CardContent>
         </Card>
@@ -275,7 +313,7 @@ const OrderTrackingDetail = ({ orderId }: { orderId: string }) => {
         </CardHeader>
         <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
           <div className="space-y-3 sm:space-y-4">
-            {order.order_items?.map((item: any) => (
+            {order.order_items?.map((item: OrderItem) => (
               <div key={item.id} className="flex items-start gap-2 sm:gap-4 pb-3 sm:pb-4 border-b last:border-0">
                 {item.products?.image_url && (
                   <img

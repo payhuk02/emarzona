@@ -3,13 +3,54 @@
  * vers le format UnifiedProduct
  */
 
-import { UnifiedProduct, DigitalProduct, PhysicalProduct, ServiceProduct, CourseProduct, ArtistProduct } from '@/types/unified-product';
+import { UnifiedProduct, DigitalProduct, PhysicalProduct, ServiceProduct, CourseProduct, ArtistProduct, BaseProduct } from '@/types/unified-product';
+
+/**
+ * Type pour un produit brut de la base de données (non typé)
+ */
+type DatabaseProduct = {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  short_description?: string;
+  price?: number;
+  promotional_price?: number;
+  promo_price?: number;
+  currency?: string;
+  image_url?: string;
+  images?: string[];
+  store_id?: string;
+  stores?: {
+    id: string;
+    name: string;
+    slug: string;
+    logo_url?: string;
+  };
+  product_type?: 'digital' | 'physical' | 'service' | 'course' | 'artist';
+  rating?: number;
+  average_rating?: number;
+  reviews_count?: number;
+  total_reviews?: number;
+  purchases_count?: number;
+  tags?: string[];
+  category?: string;
+  is_active?: boolean;
+  is_draft?: boolean;
+  created_at: string;
+  updated_at?: string;
+  product_affiliate_settings?: Array<{
+    affiliate_enabled: boolean;
+    commission_rate: number;
+  }>;
+  [key: string]: unknown; // Pour les propriétés spécifiques à chaque type
+};
 
 /**
  * Transforme un produit de la base de données vers UnifiedProduct
  */
-export function transformToUnifiedProduct(product: any): UnifiedProduct {
-  const base: any = {
+export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProduct {
+  const base: Partial<BaseProduct> = {
     id: product.id,
     name: product.name,
     slug: product.slug,
@@ -138,17 +179,27 @@ export function transformToUnifiedProduct(product: any): UnifiedProduct {
 }
 
 /**
+ * Interface pour un fichier dans la liste
+ */
+interface FileItem {
+  format?: string;
+  name?: string;
+  [key: string]: unknown;
+}
+
+/**
  * Extrait les formats depuis les fichiers
  */
-function extractFormatsFromFiles(files: any[]): string[] {
+function extractFormatsFromFiles(files: FileItem[] | unknown[]): string[] {
   if (!files || !Array.isArray(files)) return [];
   
   const formats = new Set<string>();
-  files.forEach((file: any) => {
-    if (file.format) {
-      formats.add(file.format);
-    } else if (file.name) {
-      const ext = file.name.split('.').pop()?.toUpperCase();
+  files.forEach((file) => {
+    const fileItem = file as FileItem;
+    if (fileItem.format) {
+      formats.add(fileItem.format);
+    } else if (fileItem.name) {
+      const ext = fileItem.name.split('.').pop()?.toUpperCase();
       if (ext) formats.add(ext);
     }
   });
@@ -159,7 +210,7 @@ function extractFormatsFromFiles(files: any[]): string[] {
 /**
  * Transforme un tableau de produits
  */
-export function transformProducts(products: any[]): UnifiedProduct[] {
+export function transformProducts(products: DatabaseProduct[]): UnifiedProduct[] {
   return products.map(transformToUnifiedProduct);
 }
 

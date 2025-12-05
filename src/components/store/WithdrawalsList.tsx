@@ -36,6 +36,7 @@ import { fr } from 'date-fns/locale';
 import { WithdrawalHistoryDialog } from './WithdrawalHistoryDialog';
 import { downloadWithdrawalsCSV, downloadWithdrawalsJSON } from '@/lib/withdrawal-export';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface WithdrawalsListProps {
   withdrawals: StoreWithdrawal[];
@@ -51,8 +52,11 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const { toast } = useToast();
 
+  // Type pour les icônes de statut
+  type StatusIcon = typeof Clock | typeof Loader2 | typeof CheckCircle2 | typeof XCircle | typeof X;
+
   const getStatusBadge = (status: StoreWithdrawalStatus) => {
-    const variants: Record<StoreWithdrawalStatus, { variant: 'default' | 'secondary' | 'destructive' | 'outline', icon: any, label: string }> = {
+    const variants: Record<StoreWithdrawalStatus, { variant: 'default' | 'secondary' | 'destructive' | 'outline', icon: StatusIcon, label: string }> = {
       pending: { variant: 'secondary', icon: Clock, label: 'En attente' },
       processing: { variant: 'default', icon: Loader2, label: 'En cours' },
       completed: { variant: 'default', icon: CheckCircle2, label: 'Complété' },
@@ -100,7 +104,9 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
         title: 'Export réussi',
         description: `${filteredWithdrawals.length} retrait(s) exporté(s) en CSV`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Error exporting withdrawals CSV', { error: errorMessage });
       toast({
         title: 'Erreur',
         description: 'Impossible d\'exporter les retraits',
@@ -116,7 +122,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
         title: 'Export réussi',
         description: `${filteredWithdrawals.length} retrait(s) exporté(s) en JSON`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Erreur',
         description: 'Impossible d\'exporter les retraits',
@@ -161,7 +167,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
               )}
             </CardTitle>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-              <Select value={statusFilter} onValueChange={(value: any) => {
+              <Select value={statusFilter} onValueChange={(value: StoreWithdrawalStatus | 'all') => {
                 setStatusFilter(value);
                 setCurrentPage(1);
               }}>

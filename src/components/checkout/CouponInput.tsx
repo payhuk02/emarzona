@@ -16,6 +16,7 @@ import { useValidateUnifiedPromotion } from '@/hooks/physical/usePromotions';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 interface CouponInputProps {
   storeId?: string;
@@ -98,7 +99,7 @@ export const CouponInput = ({
           setCollectionIds([...new Set(collectionsList)]);
         }
       } catch (error) {
-        console.error('Error loading product categories/collections:', error);
+        logger.error('Error loading product categories/collections', { error });
       }
     };
 

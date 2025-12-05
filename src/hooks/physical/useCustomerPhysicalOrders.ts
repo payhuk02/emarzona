@@ -9,6 +9,66 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
+// Types pour les données brutes retournées par Supabase
+interface SupabaseOrderItem {
+  id: string;
+  product_id: string;
+  quantity: number;
+  price: number;
+  variant_id: string | null;
+  products: {
+    id: string;
+    name: string;
+    image_url: string | null;
+    product_type: string;
+  } | null;
+  physical_product_variants: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+interface SupabaseOrder {
+  id: string;
+  order_number: string;
+  store_id: string;
+  customer_id: string;
+  total_amount: number;
+  currency: string;
+  payment_status: string;
+  status: string;
+  shipping_address: Record<string, unknown> | null;
+  created_at: string;
+  delivered_at: string | null;
+  order_items: SupabaseOrderItem[] | null;
+}
+
+interface SupabaseShipment {
+  id: string;
+  order_id: string;
+  tracking_number: string | null;
+  tracking_url: string | null;
+  status: string;
+  carrier_id: string | null;
+  estimated_delivery: string | null;
+  actual_delivery: string | null;
+}
+
+interface SupabaseReturn {
+  id: string;
+  order_id: string;
+  return_number: string;
+  status: string;
+  return_reason: string;
+  requested_at: string;
+}
+
+interface SupabaseCarrier {
+  id: string;
+  name: string;
+  code: string;
+}
+
 export interface CustomerPhysicalOrder {
   id: string;
   order_number: string;
@@ -18,7 +78,7 @@ export interface CustomerPhysicalOrder {
   currency: string;
   payment_status: string;
   status: string;
-  shipping_address: Record<string, any>;
+  shipping_address: Record<string, string | number | boolean | null | undefined>;
   created_at: string;
   delivered_at?: string;
   order_items: Array<{
@@ -120,8 +180,8 @@ export const useCustomerPhysicalOrders = () => {
       }
 
       // Filtrer pour ne garder que les commandes avec produits physiques
-      const physicalOrders = (orders || []).filter((order: any) => {
-        return order.order_items?.some((item: any) => 
+      const physicalOrders = (orders || []).filter((order: SupabaseOrder) => {
+        return order.order_items?.some((item) => 
           item.products?.product_type === 'physical'
         );
       });
@@ -131,7 +191,7 @@ export const useCustomerPhysicalOrders = () => {
       }
 
       // OPTIMIZED: Fetch all shipments and returns in batch (N+1 fix)
-      const orderIds = physicalOrders.map((order: any) => order.id);
+      const orderIds = physicalOrders.map((order) => order.id);
 
       // Fetch all shipments for all orders in one query
       const { data: allShipments } = await supabase
@@ -148,8 +208,8 @@ export const useCustomerPhysicalOrders = () => {
 
       // Get unique carrier IDs
       const carrierIds = [...new Set((allShipments || [])
-        .map((s: any) => s.carrier_id)
-        .filter(Boolean))];
+        .map((s: SupabaseShipment) => s.carrier_id)
+        .filter((id): id is string => id !== null && id !== undefined))];
 
       // Fetch all carriers in one query (N+1 fix)
       const { data: allCarriers } = carrierIds.length > 0
@@ -160,15 +220,23 @@ export const useCustomerPhysicalOrders = () => {
         : { data: [] };
 
       // Create a map for quick lookup
-      const carriersMap = new Map(
-        (allCarriers || []).map((c: any) => [c.id, c])
+      const carriersMap = new Map<string, SupabaseCarrier>(
+        (allCarriers || []).map((c: SupabaseCarrier) => [c.id, c])
       );
 
       // Group shipments and returns by order_id
-      const shipmentsByOrder = new Map<string, any[]>();
-      const returnsByOrder = new Map<string, any[]>();
+      const shipmentsByOrder = new Map<string, Array<{
+        id: string;
+        tracking_number?: string;
+        tracking_url?: string;
+        status: string;
+        carrier_name?: string;
+        estimated_delivery?: string;
+        actual_delivery?: string;
+      }>>();
+      const returnsByOrder = new Map<string, SupabaseReturn[]>();
 
-      (allShipments || []).forEach((shipment: any) => {
+      (allShipments || []).forEach((shipment: SupabaseShipment) => {
         const orderId = shipment.order_id;
         if (!shipmentsByOrder.has(orderId)) {
           shipmentsByOrder.set(orderId, []);
@@ -181,7 +249,7 @@ export const useCustomerPhysicalOrders = () => {
         });
       });
 
-      (allReturns || []).forEach((returnItem: any) => {
+      (allReturns || []).forEach((returnItem: SupabaseReturn) => {
         const orderId = returnItem.order_id;
         if (!returnsByOrder.has(orderId)) {
           returnsByOrder.set(orderId, []);
@@ -190,7 +258,7 @@ export const useCustomerPhysicalOrders = () => {
       });
 
       // Map orders with their shipments and returns
-      const ordersWithDetails = physicalOrders.map((order: any) => ({
+      const ordersWithDetails = physicalOrders.map((order: SupabaseOrder) => ({
         id: order.id,
         order_number: order.order_number || order.id,
         store_id: order.store_id,
@@ -202,7 +270,7 @@ export const useCustomerPhysicalOrders = () => {
         shipping_address: order.shipping_address || {},
         created_at: order.created_at,
         delivered_at: order.delivered_at,
-        order_items: (order.order_items || []).map((item: any) => ({
+        order_items: (order.order_items || []).map((item: SupabaseOrderItem) => ({
           id: item.id,
           product_id: item.product_id,
           product_name: item.products?.name || 'Produit inconnu',

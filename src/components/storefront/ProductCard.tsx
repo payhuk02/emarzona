@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Product } from "@/hooks/useProducts";
+import type { UnifiedProduct } from "@/types/unified-product";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +33,7 @@ import { PriceStockAlertButton } from "@/components/marketplace/PriceStockAlertB
 import "@/styles/product-grid-professional.css";
 
 interface ProductCardProps {
-  product: Product;
+  product: Product & Partial<UnifiedProduct>;
   storeSlug: string;
 }
 
@@ -51,10 +52,10 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     fetchUser();
   }, []);
 
-  const price = (product as any).promotional_price ?? product.price;
-  const hasPromo = (product as any).promotional_price && (product as any).promotional_price < product.price;
+  const price = product.promo_price ?? product.price;
+  const hasPromo = product.promo_price && product.promo_price < product.price;
   const discountPercent = hasPromo
-    ? Math.round(((product.price - (product as any).promotional_price!) / product.price) * 100)
+    ? Math.round(((product.price - product.promo_price!) / product.price) * 100)
     : 0;
 
   // Vérifier si le produit est nouveau (< 7 jours)
@@ -97,8 +98,9 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
   const getShortDescription = (): string | undefined => {
     let rawText = '';
     
-    if ((product as any).short_description && (product as any).short_description.trim()) {
-      rawText = (product as any).short_description;
+    const extendedProduct = product as Product & Partial<UnifiedProduct>;
+    if (extendedProduct.short_description && extendedProduct.short_description.trim()) {
+      rawText = extendedProduct.short_description;
     } else if (product.description && product.description.trim()) {
       rawText = product.description;
     } else {
@@ -179,7 +181,8 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
       } else {
         throw new Error("Échec de l'initialisation du paiement");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast({
         title: "Erreur",
         description: error.message || "Impossible d'initier le paiement",
@@ -249,19 +252,19 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
         </div>
 
         {/* Licensing badges - Position après les badges Nouveau/Vedette pour éviter conflit */}
-        {(product as any).licensing_type && (
-          <div className="absolute top-3 left-3 flex flex-col gap-1 z-10" style={{ marginTop: (isNew() || (product as any).is_featured) ? '48px' : '0px' }}>
-            {(product as any).licensing_type === 'plr' && (
+        {extendedProduct.licensing_type && (
+          <div className="absolute top-3 left-3 flex flex-col gap-1 z-10" style={{ marginTop: (isNew() || extendedProduct.is_featured) ? '48px' : '0px' }}>
+            {extendedProduct.licensing_type === 'plr' && (
               <Badge className="bg-emerald-500 text-white border-0 hover:bg-emerald-600" title="PLR (Private Label Rights) : peut être modifié et revendu selon conditions" aria-label="Licence PLR - Droits de label privé">
                 <Shield className="h-3 w-3 mr-1" /> PLR
               </Badge>
             )}
-            {(product as any).licensing_type === 'copyrighted' && (
+            {extendedProduct.licensing_type === 'copyrighted' && (
               <Badge className="bg-red-500 text-white border-0 hover:bg-red-600" title="Protégé par droit d'auteur : revente/modification non autorisées" aria-label="Protégé par droit d'auteur">
                 <Shield className="h-3 w-3 mr-1" /> Droit d'auteur
               </Badge>
             )}
-            {(product as any).licensing_type === 'standard' && (
+            {extendedProduct.licensing_type === 'standard' && (
               <Badge className="bg-blue-500 text-white border-0 hover:bg-blue-600" title="Licence standard : utilisation personnelle uniquement" aria-label="Licence standard">
                 <Shield className="h-3 w-3 mr-1" /> Standard
               </Badge>
@@ -379,19 +382,19 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
                   Abonnement
                 </>
               )}
-              {(product as any).pricing_model === 'one-time' && (
+              {extendedProduct.pricing_model === 'one-time' && (
                 <>
                   <DollarSign className="h-3 w-3 mr-1" />
                   Achat unique
                 </>
               )}
-              {(product as any).pricing_model === 'free' && (
+              {extendedProduct.pricing_model === 'free' && (
                 <>
                   <Gift className="h-3 w-3 mr-1" />
                   Gratuit
                 </>
               )}
-              {(product as any).pricing_model === 'pay-what-you-want' && (
+              {extendedProduct.pricing_model === 'pay-what-you-want' && (
                 <>
                   <DollarSign className="h-3 w-3 mr-1" />
                   Prix libre

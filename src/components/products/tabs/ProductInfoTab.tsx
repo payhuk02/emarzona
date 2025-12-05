@@ -89,7 +89,7 @@ interface ProductFormData {
   updated_at?: string;
   version?: string;
   status?: string;
-  [key: string]: any; // Pour les champs additionnels
+  [key: string]: string | number | boolean | null | undefined; // Pour les champs additionnels
 }
 
 /**
@@ -97,7 +97,7 @@ interface ProductFormData {
  */
 interface ProductInfoTabProps {
   formData: ProductFormData;
-  updateFormData: (field: string, value: any) => void;
+  updateFormData: (field: string, value: string | number | boolean | null | undefined) => void;
   storeId: string;
   storeSlug: string;
   checkSlugAvailability: (slug: string) => Promise<boolean>;

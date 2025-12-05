@@ -116,8 +116,7 @@ const Landing = lazy(() => import("./pages/Landing"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => 
   import("./pages/Dashboard").then(m => ({ default: m.default })).catch((error) => {
-    logger.error('Erreur lors du chargement du Dashboard:', error);
-    console.error('Dashboard loading error details:', error);
+    logger.error('Erreur lors du chargement du Dashboard', { error });
     // Retourner un composant de fallback en cas d'erreur
     return {
       default: () => (
@@ -426,7 +425,7 @@ const AppContent = () => {
         <DynamicFavicon />
         <LoadingBar />
         <ScrollToTop />
-        {/* Composants non-critiques lazy-loaded */}
+        {/* Composants non-critiques lazy-loaded - Chargés après FCP pour améliorer les Web Vitals */}
         <Suspense fallback={null}>
           <PerformanceOptimizer />
           <CurrencyRatesInitializer />

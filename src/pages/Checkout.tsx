@@ -34,6 +34,7 @@ import { logger } from '@/lib/logger';
 import GiftCardInput from '@/components/checkout/GiftCardInput';
 import CouponInput from '@/components/checkout/CouponInput';
 import { PaymentProviderSelector } from '@/components/checkout/PaymentProviderSelector';
+import type { CartItem } from '@/types/cart';
 import {
   ShoppingBag,
   MapPin,
@@ -89,7 +90,16 @@ export default function Checkout() {
   
   // State pour la gestion multi-stores
   const [isMultiStore, setIsMultiStore] = useState<boolean>(false);
-  const [storeGroups, setStoreGroups] = useState<Map<string, { items: any[]; store_name?: string; subtotal?: number; tax_amount?: number; shipping_amount?: number; discount_amount?: number; total?: number }>>(new Map());
+  interface StoreGroup {
+    items: CartItem[];
+    store_name?: string;
+    subtotal?: number;
+    tax_amount?: number;
+    shipping_amount?: number;
+    discount_amount?: number;
+    total?: number;
+  }
+  const [storeGroups, setStoreGroups] = useState<Map<string, StoreGroup>>(new Map());
   const [isCheckingStores, setIsCheckingStores] = useState<boolean>(false);
   
   // Récupérer l'utilisateur pour pré-remplir le formulaire
@@ -139,8 +149,8 @@ export default function Checkout() {
 
           if (hasMultipleStores) {
             // Grouper les items par boutique (fonction simplifiée pour l'instant)
-            const groups = new Map<string, { items: any[]; store_name?: string; subtotal?: number; tax_amount?: number; shipping_amount?: number; discount_amount?: number; total?: number }>();
-            const skippedItems: any[] = [];
+            const groups = new Map<string, StoreGroup>();
+            const skippedItems: CartItem[] = [];
             
             for (const item of items) {
               const product = products.find(p => p.id === item.product_id);
@@ -161,7 +171,7 @@ export default function Checkout() {
             
             // Afficher un avertissement si des produits ont été ignorés
             if (skippedItems.length > 0) {
-              const productNames = skippedItems.map((item: any) => `${item.product_name} (x${item.quantity})`).join(', ');
+              const productNames = skippedItems.map((item) => `${item.product_name} (x${item.quantity})`).join(', ');
               toast({
                 title: 'Produits ignorés',
                 description: `${skippedItems.length} produit(s) ignoré(s) car ils n'ont pas de boutique associée : ${productNames}`,
@@ -392,7 +402,7 @@ export default function Checkout() {
     if (appliedCouponCode) {
       // Log uniquement pour debug en développement
       if (import.meta.env.DEV) {
-        console.log('[Checkout] Coupon appliqué:', {
+        logger.debug('[Checkout] Coupon appliqué', {
           couponCode: appliedCouponCode.code,
           discountAmount: appliedCouponCode.discountAmount,
           subtotal: summary.subtotal,
@@ -410,7 +420,7 @@ export default function Checkout() {
     } else {
       // Log quand le coupon est retiré
       if (import.meta.env.DEV) {
-        console.log('[Checkout] Coupon retiré, total:', finalTotal);
+        logger.debug('[Checkout] Coupon retiré', { finalTotal });
       }
     }
   }, [
@@ -701,7 +711,7 @@ export default function Checkout() {
             // Note: On utilise une fonction RPC ou une mise à jour SQL directe
             try {
               // Essayer d'abord avec une fonction RPC si elle existe
-              const { error: rpcError } = await (supabase.rpc as any)('increment_promotion_usage', {
+              const { error: rpcError } = await supabase.rpc('increment_promotion_usage', {
                 p_promotion_id: appliedCouponCode.id,
               });
               
@@ -709,8 +719,9 @@ export default function Checkout() {
                 // Si la fonction RPC n'existe pas, on peut ignorer l'erreur
                 logger.warn('Could not increment promotion usage (RPC may not exist):', { error: rpcError });
               }
-            } catch (err: any) {
-              logger.warn('Error incrementing promotion usage counter:', { error: err });
+            } catch (err: unknown) {
+              const errorMessage = err instanceof Error ? err.message : String(err);
+              logger.warn('Error incrementing promotion usage counter:', { error: errorMessage });
             }
 
             logger.info('Promotion usage recorded', { promotionId: appliedCouponCode.id, orderId: order.id });
@@ -795,7 +806,7 @@ export default function Checkout() {
 
       // Marquer le panier comme récupéré (pour abandoned cart recovery)
       try {
-        const { error: recoveryError } = await (supabase.rpc as any)('mark_cart_recovered', {
+        const { error: recoveryError } = await supabase.rpc('mark_cart_recovered', {
           p_user_id: user?.id || null,
           p_session_id: null, // Session ID pourrait être récupéré si nécessaire
         });
@@ -804,8 +815,9 @@ export default function Checkout() {
           logger.warn('Failed to mark cart as recovered', { error: recoveryError });
           // Ne pas bloquer le processus si l'erreur survient
         }
-      } catch (recoveryError: any) {
-        logger.warn('Error marking cart as recovered', { error: recoveryError });
+      } catch (recoveryError: unknown) {
+        const errorMessage = recoveryError instanceof Error ? recoveryError.message : String(recoveryError);
+        logger.warn('Error marking cart as recovered', { error: errorMessage });
         // Ne pas bloquer le processus si l'erreur survient
       }
       
@@ -818,11 +830,12 @@ export default function Checkout() {
         });
       });
 
-    } catch (error: any) {
-      logger.error('Erreur lors du checkout:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de finaliser la commande';
+      logger.error('Erreur lors du checkout:', { error: errorMessage });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de finaliser la commande',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -1140,7 +1153,7 @@ export default function Checkout() {
                               </span>
                             </div>
                             <div className="space-y-2 max-h-48 overflow-y-auto">
-                              {group.items.map((item: any) => (
+                              {group.items.map((item) => (
                                 <div key={item.id || item.product_id} className="flex gap-2 text-xs">
                                   <div className="w-8 h-8 rounded border overflow-hidden flex-shrink-0">
                                     <img

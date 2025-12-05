@@ -98,7 +98,28 @@ export const DigitalProductsCompare = () => {
 
       if (error) throw error;
 
-      return (data || []).map((product: any) => ({
+      interface ProductWithDigital {
+        id: string;
+        name: string;
+        description?: string;
+        price: number;
+        promotional_price?: number;
+        currency: string;
+        image_url?: string;
+        category?: string;
+        average_rating?: number;
+        total_reviews?: number;
+        is_active?: boolean;
+        created_at?: string;
+        digital_products?: Array<{
+          license_type?: string;
+          main_file_format?: string;
+          total_size_mb?: number;
+          total_downloads?: number;
+        }>;
+      }
+
+      return (data || []).map((product: ProductWithDigital) => ({
         id: product.id,
         name: product.name,
         description: product.description,
@@ -174,8 +195,8 @@ export const DigitalProductsCompare = () => {
   };
 
   // Fonction pour obtenir la valeur d'une propriété
-  const getPropertyValue = (product: ComparisonProduct, property: string): any => {
-    return (product as any)[property];
+  const getPropertyValue = (product: ComparisonProduct, property: string): string | number | undefined => {
+    return (product as Record<string, string | number | undefined>)[property];
   };
 
   // Propriétés à comparer

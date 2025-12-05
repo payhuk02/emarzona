@@ -37,7 +37,7 @@ export interface VendorMessage {
   sender_type: 'customer' | 'store' | 'admin';
   content?: string | null;
   message_type: 'text' | 'image' | 'video' | 'file' | 'system';
-  metadata?: any;
+  metadata?: Record<string, string | number | boolean | null | undefined>;
   is_read: boolean;
   read_at?: string | null;
   created_at: string;
@@ -89,7 +89,7 @@ export const useVendorMessaging = (
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
   const { toast } = useToast();
-  const channelRef = useRef<any>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   // Récupérer les conversations avec pagination
   const fetchConversations = useCallback(async () => {
@@ -180,7 +180,8 @@ export const useVendorMessaging = (
       }));
 
       setConversations(conversationsWithLastMessage as VendorConversation[]);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error("Error fetching vendor conversations:", error);
       toast({
         title: "Erreur",
@@ -233,7 +234,8 @@ export const useVendorMessaging = (
       });
 
       setMessages(messagesWithSenders as VendorMessage[]);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error("Error fetching vendor messages:", error);
       toast({
         title: "Erreur",
@@ -335,7 +337,8 @@ export const useVendorMessaging = (
       }
       
       return newConv as VendorConversation | null;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error("Error creating vendor conversation:", error);
       toast({
         title: "Erreur",
@@ -361,7 +364,8 @@ export const useVendorMessaging = (
 
       if (error) throw error;
       return data as VendorConversation | null;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error("Error fetching vendor conversation:", error);
       return null;
     }
@@ -436,7 +440,8 @@ export const useVendorMessaging = (
       });
       
       return message as VendorMessage | null;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error("Error sending vendor message:", error);
       toast({
         title: "Erreur",
@@ -465,7 +470,8 @@ export const useVendorMessaging = (
           }]);
 
         if (error) throw error;
-      } catch (error: any) {
+      } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error("Error uploading vendor attachment:", error);
       }
     }
@@ -483,7 +489,8 @@ export const useVendorMessaging = (
         .eq("conversation_id", conversationId)
         .neq("sender_id", userId)
         .eq("is_read", false);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error("Error marking vendor messages as read:", error);
     }
   };

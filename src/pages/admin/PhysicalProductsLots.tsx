@@ -62,7 +62,7 @@ export default function PhysicalProductsLots() {
         if (physicalError) {
           logger.error('Error fetching physical products', { error: physicalError, productIds });
           // Si on ne peut pas récupérer les physical_products, retourner quand même les produits
-          return storeProducts.map((p: any) => ({
+          return storeProducts.map((p: StoreProduct): ProductWithInfo => ({
             id: p.id, // Utiliser product_id comme id temporaire
             product: {
               id: p.id,
@@ -72,8 +72,16 @@ export default function PhysicalProductsLots() {
         }
 
         // Combiner les données : physical_products avec leurs produits
-        return (physicalProducts || []).map((pp: any) => {
-          const productInfo = storeProducts.find((p: any) => p.id === pp.product_id);
+        interface PhysicalProductWithInfo {
+          id: string;
+          product_id: string;
+        }
+        interface StoreProduct {
+          id: string;
+          name: string;
+        }
+        return (physicalProducts || []).map((pp: PhysicalProductWithInfo): ProductWithInfo => {
+          const productInfo = storeProducts.find((p: StoreProduct) => p.id === pp.product_id);
           return {
             id: pp.id,
             product: {
@@ -196,7 +204,7 @@ export default function PhysicalProductsLots() {
                         </SelectTrigger>
                         <SelectContent className="max-h-[300px]">
                           {products && products.length > 0 ? (
-                            products.map((product: any) => (
+                            products.map((product) => (
                               <SelectItem 
                                 key={product.id} 
                                 value={product.id}

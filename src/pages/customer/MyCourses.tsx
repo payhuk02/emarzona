@@ -391,7 +391,7 @@ export default function MyCourses() {
           </Card>
 
             {/* Tabs - Style Inventaire */}
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+            <Tabs value={activeTab} onValueChange={(v: string) => setActiveTab(v)}>
               <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1 w-full sm:w-auto">
                 <TabsTrigger 
                   value="all" 

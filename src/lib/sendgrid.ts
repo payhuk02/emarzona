@@ -126,14 +126,15 @@ export const sendEmail = async (payload: SendEmailPayload): Promise<{
       success: true,
       messageId: messageId || undefined,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue lors de l\'envoi de l\'email';
     logger.error('Error sending email', {
-      error: error.message,
+      error: errorMessage,
       payload: { to: payload.to, subject: payload.subject },
     });
     return {
       success: false,
-      error: error.message,
+      error: errorMessage,
     };
   }
 };
@@ -191,9 +192,32 @@ export const getTemplate = async (
 };
 
 /**
+ * Interface pour les données de log d'email
+ */
+interface EmailLogData {
+  template_id?: string;
+  template_slug: string;
+  recipient_email: string;
+  recipient_name?: string;
+  user_id?: string;
+  subject: string;
+  html_content?: string;
+  product_type?: string;
+  product_id?: string;
+  product_name?: string;
+  order_id?: string;
+  store_id?: string;
+  variables?: Record<string, string | number | boolean | null | undefined>;
+  sendgrid_message_id?: string;
+  sendgrid_status?: string;
+  error_message?: string;
+  error_code?: string;
+}
+
+/**
  * Logger un email envoyé
  */
-const logEmail = async (logData: any) => {
+const logEmail = async (logData: EmailLogData) => {
   try {
     const { error } = await supabase
       .from('email_logs')
@@ -205,13 +229,21 @@ const logEmail = async (logData: any) => {
     if (error) {
       logger.error('Error logging email', {
         error: error.message,
-        emailData: { to, subject, templateId },
+        emailData: { 
+          to: logData.recipient_email, 
+          subject: logData.subject, 
+          templateId: logData.template_id 
+        },
       });
     }
   } catch (error) {
     logger.error('Error in logEmail', {
       error: error instanceof Error ? error.message : String(error),
-      emailData: { to, subject, templateId },
+      emailData: { 
+        to: logData.recipient_email, 
+        subject: logData.subject, 
+        templateId: logData.template_id 
+      },
     });
   }
 };
@@ -219,7 +251,7 @@ const logEmail = async (logData: any) => {
 /**
  * Remplacer les variables dans le contenu
  */
-const replaceVariables = (content: string, variables: { [key: string]: any }): string => {
+const replaceVariables = (content: string, variables: Record<string, string | number | boolean | null | undefined>): string => {
   let result = content;
 
   Object.entries(variables).forEach(([key, value]) => {

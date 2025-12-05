@@ -190,8 +190,9 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
 
       if (error) throw error;
       setSlugAvailable(data);
-    } catch (error: any) {
-      logger.error("Error checking slug", { error, slug: slugToCheck });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error("Error checking slug", { error: errorMessage, slug: slugToCheck });
       setSlugAvailable(null);
     } finally {
       setIsCheckingSlug(false);
@@ -247,7 +248,72 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
 
       if (initialData) {
         // Update existing store
-        const updateData: any = {
+        interface StoreUpdateData {
+          name: string;
+          slug: string;
+          description: string | null;
+          default_currency: string;
+          logo_url?: string | null;
+          banner_url?: string | null;
+          about?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
+          facebook_url?: string | null;
+          instagram_url?: string | null;
+          twitter_url?: string | null;
+          linkedin_url?: string | null;
+          info_message?: string | null;
+          info_message_color?: string | null;
+          info_message_font?: string | null;
+          primary_color?: string | null;
+          secondary_color?: string | null;
+          accent_color?: string | null;
+          background_color?: string | null;
+          text_color?: string | null;
+          text_secondary_color?: string | null;
+          button_primary_color?: string | null;
+          button_primary_text?: string | null;
+          button_secondary_color?: string | null;
+          button_secondary_text?: string | null;
+          link_color?: string | null;
+          link_hover_color?: string | null;
+          border_radius?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full' | null;
+          shadow_intensity?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | null;
+          heading_font?: string | null;
+          body_font?: string | null;
+          font_size_base?: string | null;
+          heading_size_h1?: string | null;
+          heading_size_h2?: string | null;
+          heading_size_h3?: string | null;
+          line_height?: string | null;
+          letter_spacing?: string | null;
+          header_style?: 'minimal' | 'standard' | 'extended' | null;
+          footer_style?: 'minimal' | 'standard' | 'extended' | null;
+          sidebar_enabled?: boolean | null;
+          sidebar_position?: 'left' | 'right' | null;
+          product_grid_columns?: number | null;
+          product_card_style?: 'minimal' | 'standard' | 'detailed' | null;
+          navigation_style?: 'horizontal' | 'vertical' | 'mega' | null;
+          meta_title?: string | null;
+          meta_description?: string | null;
+          meta_keywords?: string | null;
+          og_title?: string | null;
+          og_description?: string | null;
+          og_image?: string | null;
+          address_line1?: string | null;
+          address_line2?: string | null;
+          city?: string | null;
+          state_province?: string | null;
+          postal_code?: string | null;
+          country?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          timezone?: string | null;
+          opening_hours?: StoreOpeningHours | null;
+          legal_pages?: StoreLegalPages | null;
+          [key: string]: unknown;
+        }
+        const updateData: StoreUpdateData = {
           name,
           slug,
           description: description || null,
@@ -350,7 +416,73 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
           return;
         }
 
-        const insertData: any = {
+        interface StoreInsertData {
+          user_id: string;
+          name: string;
+          slug: string;
+          description: string | null;
+          default_currency: string;
+          logo_url?: string | null;
+          banner_url?: string | null;
+          about?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
+          facebook_url?: string | null;
+          instagram_url?: string | null;
+          twitter_url?: string | null;
+          linkedin_url?: string | null;
+          info_message?: string | null;
+          info_message_color?: string | null;
+          info_message_font?: string | null;
+          primary_color?: string | null;
+          secondary_color?: string | null;
+          accent_color?: string | null;
+          background_color?: string | null;
+          text_color?: string | null;
+          text_secondary_color?: string | null;
+          button_primary_color?: string | null;
+          button_primary_text?: string | null;
+          button_secondary_color?: string | null;
+          button_secondary_text?: string | null;
+          link_color?: string | null;
+          link_hover_color?: string | null;
+          border_radius?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full' | null;
+          shadow_intensity?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | null;
+          heading_font?: string | null;
+          body_font?: string | null;
+          font_size_base?: string | null;
+          heading_size_h1?: string | null;
+          heading_size_h2?: string | null;
+          heading_size_h3?: string | null;
+          line_height?: string | null;
+          letter_spacing?: string | null;
+          header_style?: 'minimal' | 'standard' | 'extended' | null;
+          footer_style?: 'minimal' | 'standard' | 'extended' | null;
+          sidebar_enabled?: boolean | null;
+          sidebar_position?: 'left' | 'right' | null;
+          product_grid_columns?: number | null;
+          product_card_style?: 'minimal' | 'standard' | 'detailed' | null;
+          navigation_style?: 'horizontal' | 'vertical' | 'mega' | null;
+          meta_title?: string | null;
+          meta_description?: string | null;
+          meta_keywords?: string | null;
+          og_title?: string | null;
+          og_description?: string | null;
+          og_image?: string | null;
+          address_line1?: string | null;
+          address_line2?: string | null;
+          city?: string | null;
+          state_province?: string | null;
+          postal_code?: string | null;
+          country?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          timezone?: string | null;
+          opening_hours?: StoreOpeningHours | null;
+          legal_pages?: StoreLegalPages | null;
+          [key: string]: unknown;
+        }
+        const insertData: StoreInsertData = {
             user_id: user.id,
             name,
             slug,
@@ -450,10 +582,11 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
       }
 
       onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -948,9 +1081,10 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
                   setters[field]?.(value);
                 }}
                 onLayoutChange={(field, value) => {
-                  const setters: Record<string, (v: any) => void> = {
-                    header_style: (v) => setHeaderStyle(v as any),
-                    footer_style: (v) => setFooterStyle(v as any),
+                  type LayoutSetter = (v: 'minimal' | 'standard' | 'extended' | null) => void;
+                  const setters: Record<string, LayoutSetter> = {
+                    header_style: (v) => setHeaderStyle(v as 'minimal' | 'standard' | 'extended' | null),
+                    footer_style: (v) => setFooterStyle(v as 'minimal' | 'standard' | 'extended' | null),
                     sidebar_enabled: setSidebarEnabled,
                     sidebar_position: (v) => setSidebarPosition(v as any),
                     product_grid_columns: setProductGridColumns,

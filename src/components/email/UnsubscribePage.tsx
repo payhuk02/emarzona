@@ -59,9 +59,10 @@ export const UnsubscribePage = () => {
       setSuccess(true);
       setEmail('');
       setReason('');
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : t('emails.unsubscribe.error', 'Erreur lors du désabonnement');
       logger.error('Failed to unsubscribe', { error: err });
-      setError(err.message || t('emails.unsubscribe.error', 'Erreur lors du désabonnement'));
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

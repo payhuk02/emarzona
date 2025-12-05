@@ -921,7 +921,7 @@ export function AppSidebar() {
           '--sidebar-background': '#282870',
         } as React.CSSProperties}
       >
-        <SidebarContent>
+      <SidebarContent>
         {/* Logo */}
         <div className="p-3 sm:p-4 md:p-5 border-b border-white/10">
           <Link 
@@ -977,10 +977,10 @@ export function AppSidebar() {
                     const isDashboardActive = location.pathname === "/dashboard";
                     return (
                       <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton
+                            <SidebarMenuButton
                           asChild
                           className={`transition-all duration-300 group relative flex items-center ${
-                            isDashboardActive
+                                isDashboardActive
                               ? "bg-white/20 !text-white font-semibold border-l-2 border-white/50 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white"
                               : "!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90"
                           }`}
@@ -990,57 +990,57 @@ export function AppSidebar() {
                             end
                             className="flex items-center gap-2 w-full"
                           >
-                            <IconComponent 
+                                <IconComponent 
                               className="h-4 w-4 flex-shrink-0"
-                              aria-hidden="true"
-                            />
-                            {!isCollapsed && (
+                                  aria-hidden="true"
+                                />
+                                {!isCollapsed && (
                               <span className="flex-1 font-medium">{item.title}</span>
-                            )}
+                                )}
                           </NavLink>
-                        </SidebarMenuButton>
+                            </SidebarMenuButton>
                         {/* Sous-menu des boutiques - TOUJOURS VISIBLE (statique) */}
                         {!isCollapsed && (
-                          <div className="ml-4 mt-1 space-y-1">
-                            {stores.map((store) => (
-                              <Button
-                                key={store.id}
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  switchStore(store.id);
-                                  navigate("/dashboard");
-                                  toast({
-                                    title: "Boutique changée",
-                                    description: `Vous consultez maintenant les données de "${store.name}"`,
-                                  });
-                                }}
+                            <div className="ml-4 mt-1 space-y-1">
+                              {stores.map((store) => (
+                                <Button
+                                  key={store.id}
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    switchStore(store.id);
+                                    navigate("/dashboard");
+                                    toast({
+                                      title: "Boutique changée",
+                                      description: `Vous consultez maintenant les données de "${store.name}"`,
+                                    });
+                                  }}
                                 className={`w-full justify-start !text-white transition-all duration-200 [&_svg]:!text-white [&_span]:!text-white opacity-90 ${
-                                  selectedStoreId === store.id
+                                    selectedStoreId === store.id
                                     ? "bg-white/20 !text-white font-semibold [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white opacity-100"
                                     : "hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:hover:!text-white [&_span]:hover:!text-white"
-                                }`}
-                              >
-                                {selectedStoreId === store.id && (
-                                  <Check className="h-3 w-3 mr-2" />
-                                )}
-                                <span className="truncate">{store.name}</span>
-                              </Button>
-                            ))}
-                            {canCreateStore() && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate("/dashboard/store")}
+                                  }`}
+                                >
+                                  {selectedStoreId === store.id && (
+                                    <Check className="h-3 w-3 mr-2" />
+                                  )}
+                                  <span className="truncate">{store.name}</span>
+                                </Button>
+                              ))}
+                              {canCreateStore() && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => navigate("/dashboard/store")}
                                 className="w-full justify-start !text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 transition-all duration-200 [&_svg]:!text-white [&_span]:!text-white opacity-90"
-                              >
-                                <Plus className="h-3 w-3 mr-2" />
-                                <span>Créer une boutique</span>
-                              </Button>
-                            )}
-                          </div>
+                                >
+                                  <Plus className="h-3 w-3 mr-2" />
+                                  <span>Créer une boutique</span>
+                                </Button>
+                              )}
+                            </div>
                         )}
-                      </SidebarMenuItem>
+                        </SidebarMenuItem>
                     );
                   }
                   
@@ -1171,7 +1171,7 @@ export function AppSidebar() {
           )}
         </Button>
       </SidebarFooter>
-      </Sidebar>
+    </Sidebar>
     </div>
   );
 }

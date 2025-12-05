@@ -277,20 +277,20 @@ const Landing = () => {
             backgroundSize: '50px 50px'
           }}></div>
           
-          <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 relative z-10">
-            <div className="max-w-4xl mx-auto text-center animate-fade-in-up">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 relative z-10">
+          <div className="max-w-4xl mx-auto text-center animate-fade-in-up">
               {/* Badge Premium */}
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 rounded-full mb-4 sm:mb-6 border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300">
                 <Rocket className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                 <span className="text-[10px] sm:text-xs md:text-sm text-white font-semibold tracking-wide">La plateforme e-commerce la plus complète d'Afrique</span>
-              </div>
-              
+            </div>
+            
               {/* Titre Principal - Typographie Responsive Optimisée */}
               <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-extrabold mb-3 sm:mb-4 md:mb-6 leading-[1.1] sm:leading-tight text-white px-2 sm:px-4 break-words tracking-tight">
                 <span className="block mb-1 sm:mb-2">Vendez 5 types de produits</span>
                 <span className="block bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">sur une seule plateforme</span>
-              </h1>
-              
+            </h1>
+            
               {/* Sous-titre Optimisé */}
               <p className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-white/85 sm:text-white/90 mb-5 sm:mb-6 md:mb-8 max-w-2xl mx-auto leading-relaxed px-2 sm:px-4 break-words font-medium">
                 Produits digitaux, physiques, services, cours en ligne et œuvres d'artiste. Créez votre boutique, vendez sur notre Marketplace ou les deux ! Tout ce dont vous avez besoin pour créer et développer votre business en ligne.
@@ -300,49 +300,49 @@ const Landing = () => {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-10 md:mb-12 px-4">
                 <Link to="/auth" className="w-full sm:w-auto group">
                   <Button size="lg" className="w-full sm:w-auto bg-white text-gray-900 font-bold text-sm sm:text-base md:text-lg px-5 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 shadow-xl hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 hover:shadow-2xl">
-                    Démarrer gratuitement
+                  Démarrer gratuitement
                     <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-                <Link to="/marketplace" className="w-full sm:w-auto">
+                </Button>
+              </Link>
+              <Link to="/marketplace" className="w-full sm:w-auto">
                   <Button size="lg" variant="outline" className="w-full sm:w-auto bg-white/5 backdrop-blur-md text-white text-sm sm:text-base md:text-lg px-5 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 border-2 border-white/30 hover:bg-white/10 hover:border-white/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 font-semibold">
-                    Explorer la marketplace
-                  </Button>
-                </Link>
-              </div>
+                  Explorer la marketplace
+                </Button>
+              </Link>
+            </div>
 
               {/* Stats Counter Premium - Design Moderne */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 lg:gap-6 max-w-5xl mx-auto mb-6 sm:mb-8 md:mb-12 px-2 sm:px-4">
                 <div className="group bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6 border border-white/40 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 hover:bg-white">
                   <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-1 sm:mb-1.5 break-words">
-                    {animatedStats.users.toLocaleString()}+
-                  </div>
-                  <div className="text-[10px] sm:text-xs md:text-sm text-gray-700 font-semibold leading-tight">Vendeurs actifs</div>
+                  {animatedStats.users.toLocaleString()}+
                 </div>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-gray-700 font-semibold leading-tight">Vendeurs actifs</div>
+              </div>
                 <div className="group bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6 border border-white/40 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 hover:bg-white">
                   <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent mb-1 sm:mb-1.5 break-words">
-                    {animatedStats.products.toLocaleString()}+
-                  </div>
-                  <div className="text-[10px] sm:text-xs md:text-sm text-gray-700 font-semibold leading-tight">Produits disponibles</div>
+                  {animatedStats.products.toLocaleString()}+
                 </div>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-gray-700 font-semibold leading-tight">Produits disponibles</div>
+              </div>
                 <div className="group bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6 border border-white/40 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 hover:bg-white">
                   <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-1 sm:mb-1.5 break-words">
-                    {animatedStats.sales.toLocaleString()}+
-                  </div>
-                  <div className="text-[10px] sm:text-xs md:text-sm text-gray-700 font-semibold leading-tight">Ventes réalisées</div>
+                  {animatedStats.sales.toLocaleString()}+
                 </div>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-gray-700 font-semibold leading-tight">Ventes réalisées</div>
+              </div>
                 <div className="group bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 lg:p-6 border border-white/40 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 hover:bg-white">
                   <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-1 sm:mb-1.5 break-words">
-                    {animatedStats.stores}+
-                  </div>
-                  <div className="text-[10px] sm:text-xs md:text-sm text-gray-700 font-semibold leading-tight">Boutiques créées</div>
+                  {animatedStats.stores}+
                 </div>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-gray-700 font-semibold leading-tight">Boutiques créées</div>
               </div>
+            </div>
 
               {/* Dashboard Mockup Premium avec animation améliorée */}
               <div className="relative mt-6 sm:mt-8 md:mt-10 mx-2 sm:mx-4 md:mx-0 hidden sm:block">
                 <div className="animate-float hover:scale-[1.02] transition-transform duration-500">
-                  <StoreDashboardMockup />
+              <StoreDashboardMockup />
                 </div>
               </div>
             </div>
@@ -399,7 +399,7 @@ const Landing = () => {
               <CardContent className="p-4 sm:p-5 md:p-6 text-left">
                 <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl gradient-accent flex items-center justify-center mb-3 sm:mb-4 mx-auto text-accent-foreground group-hover:shadow-glow group-hover:scale-110 transition-all duration-300">
                   <Truck className="h-6 w-6 sm:h-7 sm:w-7" />
-                </div>
+                          </div>
                 <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 text-foreground">Produits Physiques</h3>
                 <p className="text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed mb-3 sm:mb-4 font-medium">
                   Gestion d'inventaire avancée, variants, tracking de stock. Intégration FedEx pour calcul de frais de port et génération d'étiquettes.
@@ -426,7 +426,7 @@ const Landing = () => {
               <CardContent className="p-4 sm:p-5 md:p-6 text-left">
                 <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-purple-500/20 flex items-center justify-center mb-3 sm:mb-4 mx-auto text-purple-600 group-hover:shadow-glow group-hover:scale-110 transition-all duration-300">
                   <Briefcase className="h-6 w-6 sm:h-7 sm:w-7" />
-                </div>
+                            </div>
                 <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 text-foreground">Services</h3>
                 <p className="text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed mb-3 sm:mb-4 font-medium">
                   Système de réservation avec calendrier moderne, gestion de disponibilité, staff assignment et notifications automatiques.
@@ -453,7 +453,7 @@ const Landing = () => {
               <CardContent className="p-4 sm:p-5 md:p-6 text-left">
                 <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-orange-500/20 flex items-center justify-center mb-3 sm:mb-4 mx-auto text-orange-600 group-hover:shadow-glow group-hover:scale-110 transition-all duration-300">
                   <GraduationCap className="h-6 w-6 sm:h-7 sm:w-7" />
-                </div>
+                          </div>
                 <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 text-foreground">Cours en Ligne</h3>
                 <p className="text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed mb-3 sm:mb-4 font-medium">
                   Plateforme LMS complète avec modules, leçons, quiz, progression, certificats et gamification pour vos étudiants.
@@ -472,8 +472,8 @@ const Landing = () => {
                     <span>Certificats de fin</span>
                   </li>
                 </ul>
-              </CardContent>
-            </Card>
+                        </CardContent>
+                      </Card>
 
             {/* Artist Works */}
             <Card className="bg-card border-border/50 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group backdrop-blur-sm">
@@ -511,15 +511,15 @@ const Landing = () => {
           <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-center max-w-6xl mx-auto">
             <div className="order-2 md:order-1">
               <div className="hidden sm:block">
-                <MultiCurrencyMockup />
-              </div>
+              <MultiCurrencyMockup />
+                </div>
               <div className="sm:hidden">
                 <div className="rounded-2xl overflow-hidden shadow-xl border border-border/50 bg-gradient-to-br from-white via-slate-50/50 to-white backdrop-blur-xl p-4">
                   <div className="text-center space-y-3">
                     <div className="flex items-center justify-center gap-2 mb-3">
                       <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 shadow-xl">
                         <Globe className="h-5 w-5 text-white" />
-                      </div>
+              </div>
                       <h4 className="text-base font-bold text-foreground">Paiements Multi-Devises</h4>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
@@ -699,32 +699,32 @@ const Landing = () => {
               <div className="space-y-2.5 sm:space-y-3 mb-4 sm:mb-6">
                 <div className="flex items-start gap-2 sm:gap-3">
                   <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-accent shrink-0 mt-0.5" />
-                  <div>
+            <div>
                     <div className="font-bold text-sm sm:text-base text-foreground">Campagnes & Séquences</div>
                     <div className="text-xs sm:text-sm text-muted-foreground font-medium">Créez des campagnes ciblées et des séquences d'emails automatisées</div>
-                  </div>
                 </div>
+              </div>
                 <div className="flex items-start gap-2 sm:gap-3">
                   <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-accent shrink-0 mt-0.5" />
                   <div>
                     <div className="font-bold text-sm sm:text-base text-foreground">Segmentation Avancée</div>
                     <div className="text-xs sm:text-sm text-muted-foreground font-medium">Segments statiques et dynamiques basés sur le comportement</div>
-                  </div>
-                </div>
+            </div>
+          </div>
                 <div className="flex items-start gap-2 sm:gap-3">
                   <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-accent shrink-0 mt-0.5" />
                   <div>
                     <div className="font-bold text-sm sm:text-base text-foreground">Workflows Automatisés</div>
                     <div className="text-xs sm:text-sm text-muted-foreground font-medium">Déclencheurs basés sur les événements et actions conditionnelles</div>
-                  </div>
                 </div>
+              </div>
                 <div className="flex items-start gap-2 sm:gap-3">
                   <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-accent shrink-0 mt-0.5" />
                   <div>
                     <div className="font-bold text-sm sm:text-base text-foreground">Analytics Complets</div>
                     <div className="text-xs sm:text-sm text-muted-foreground font-medium">Suivez les ouvertures, clics, conversions et ROI en temps réel</div>
-                  </div>
-                </div>
+            </div>
+              </div>
               </div>
               <Link to="/auth">
                 <Button className="gradient-primary text-primary-foreground font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200">
@@ -975,7 +975,7 @@ const Landing = () => {
                           {[...Array(5)].map((_, i) => (
                             <Star key={i} className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent" fill="currentColor" />
                           ))}
-                        </div>
+                  </div>
                         <p className="text-foreground mb-4 sm:mb-6 leading-relaxed text-xs sm:text-sm md:text-base font-medium">
                           "{testimonial.content}"
                         </p>
@@ -995,8 +995,8 @@ const Landing = () => {
                             <p className="text-xs sm:text-sm text-muted-foreground font-medium">{testimonial.role}</p>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                </CardContent>
+              </Card>
                   </CarouselItem>
                 ))}
               </CarouselContent>
@@ -1274,27 +1274,27 @@ const Landing = () => {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_80%,rgba(59,130,246,0.2),transparent_60%)] rounded-2xl sm:rounded-3xl md:rounded-[2rem] lg:rounded-[2.5rem]"></div>
           
           <div className="container mx-auto px-3 sm:px-4 md:px-6 text-center relative z-10">
-            <div className="max-w-3xl mx-auto">
+          <div className="max-w-3xl mx-auto">
               <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-extrabold mb-4 sm:mb-6 text-white px-2 sm:px-4 leading-tight tracking-tight">
-                Prêt à lancer votre business en ligne ?
-              </h2>
+              Prêt à lancer votre business en ligne ?
+            </h2>
               <p className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-white/85 sm:text-white/90 mb-6 sm:mb-8 px-2 sm:px-4 font-medium">
-                Rejoignez des milliers d'entrepreneurs qui font confiance à Emarzona. Démarrez gratuitement en moins de 2 minutes.
-              </p>
+              Rejoignez des milliers d'entrepreneurs qui font confiance à Emarzona. Démarrez gratuitement en moins de 2 minutes.
+            </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-2 sm:px-4">
                 <Link to="/auth" className="w-full sm:w-auto group">
                   <Button size="lg" className="w-full sm:w-auto bg-white text-gray-900 font-bold text-sm sm:text-base md:text-lg px-5 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 shadow-xl hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 hover:shadow-2xl">
-                    Créer mon compte gratuitement
+                  Créer mon compte gratuitement
                     <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
+                </Button>
+              </Link>
                 <Link to="/marketplace" className="w-full sm:w-auto">
                   <Button size="lg" variant="outline" className="w-full sm:w-auto bg-white/5 backdrop-blur-md text-white text-sm sm:text-base md:text-lg px-5 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 border-2 border-white/30 hover:bg-white/10 hover:border-white/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 font-bold">
-                    Explorer la marketplace
-                  </Button>
-                </Link>
-              </div>
+                  Explorer la marketplace
+                </Button>
+              </Link>
             </div>
+          </div>
           </div>
         </div>
       </section>

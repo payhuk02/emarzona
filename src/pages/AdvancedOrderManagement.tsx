@@ -523,12 +523,12 @@ const AdvancedOrderManagement = () => {
     return (
       <MainLayout>
         <div className="flex items-center justify-center p-4 min-h-[calc(100vh-4rem)]">
-          <div className="text-center space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-            <p className="text-sm text-muted-foreground">
-              {t('common.loading', 'Chargement...')}
-            </p>
-          </div>
+            <div className="text-center space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+              <p className="text-sm text-muted-foreground">
+                {t('common.loading', 'Chargement...')}
+              </p>
+            </div>
         </div>
       </MainLayout>
     );
@@ -539,29 +539,29 @@ const AdvancedOrderManagement = () => {
     return (
       <MainLayout>
         <div className="flex items-center justify-center p-4 sm:p-6 min-h-[calc(100vh-4rem)]">
-          <Card className="max-w-md w-full border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
-            <CardHeader className="text-center p-6 sm:p-8">
-              <div className="flex justify-center mb-4">
-                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-orange-500/10 to-amber-500/5 border border-orange-500/20 flex items-center justify-center animate-in zoom-in-95 duration-500">
-                  <Package className="h-8 w-8 sm:h-10 sm:w-10 text-orange-600 dark:text-orange-400" aria-hidden="true" />
+            <Card className="max-w-md w-full border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
+              <CardHeader className="text-center p-6 sm:p-8">
+                <div className="flex justify-center mb-4">
+                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-orange-500/10 to-amber-500/5 border border-orange-500/20 flex items-center justify-center animate-in zoom-in-95 duration-500">
+                    <Package className="h-8 w-8 sm:h-10 sm:w-10 text-orange-600 dark:text-orange-400" aria-hidden="true" />
+                  </div>
                 </div>
-              </div>
-              <CardTitle className="text-lg sm:text-xl mb-2">
-                {t('advancedOrders.noStore.title', 'Créez votre boutique d\'abord')}
-              </CardTitle>
-              <CardDescription className="text-sm sm:text-base">
-                {t('advancedOrders.noStore.description', 'Vous devez créer une boutique avant de pouvoir gérer les commandes avancées')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center p-6 sm:p-8 pt-0">
-              <Button 
-                onClick={() => navigate('/dashboard/store')}
-                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-              >
-                {t('advancedOrders.noStore.createStore', 'Créer ma boutique')}
-              </Button>
-            </CardContent>
-          </Card>
+                <CardTitle className="text-lg sm:text-xl mb-2">
+                  {t('advancedOrders.noStore.title', 'Créez votre boutique d\'abord')}
+                </CardTitle>
+                <CardDescription className="text-sm sm:text-base">
+                  {t('advancedOrders.noStore.description', 'Vous devez créer une boutique avant de pouvoir gérer les commandes avancées')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-center p-6 sm:p-8 pt-0">
+                <Button 
+                  onClick={() => navigate('/dashboard/store')}
+                  className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                  {t('advancedOrders.noStore.createStore', 'Créer ma boutique')}
+                </Button>
+              </CardContent>
+            </Card>
         </div>
       </MainLayout>
     );
@@ -569,7 +569,7 @@ const AdvancedOrderManagement = () => {
 
   return (
     <MainLayout>
-      <AdvancedOrderContent store={store} />
+        <AdvancedOrderContent store={store} />
     </MainLayout>
   );
 };

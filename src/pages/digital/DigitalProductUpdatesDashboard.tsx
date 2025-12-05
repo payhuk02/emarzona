@@ -59,8 +59,12 @@ export default function DigitalProductUpdatesDashboard() {
   // Pas besoin de filtrer, mais on s'assure que c'est bien un tableau
   const digitalProducts = Array.isArray(products) ? products : [];
 
+  interface DigitalProductWithId {
+    id: string;
+    product_id?: string;
+  }
   const selectedProduct = selectedProductId
-    ? digitalProducts.find((p: any) => p.id === selectedProductId || p.product_id === selectedProductId)
+    ? digitalProducts.find((p: DigitalProductWithId) => p.id === selectedProductId || p.product_id === selectedProductId)
     : null;
 
   if (isLoadingProducts) {
@@ -138,34 +142,43 @@ export default function DigitalProductUpdatesDashboard() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {digitalProducts.map((product: any) => (
-                        <Card
-                          key={product.id}
-                          className="cursor-pointer hover:shadow-md transition-shadow"
-                          onClick={() => setSelectedProductId(product.id)}
-                        >
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-4">
-                              {product.product?.image_url && (
-                                <img
-                                  src={product.product.image_url}
-                                  alt={product.product.name}
-                                  className="w-16 h-16 rounded-lg object-cover"
-                                />
-                              )}
-                              <div className="flex-1">
-                                <h3 className="font-semibold">{product.product?.name || t('digitalUpdates.productWithoutName')}</h3>
-                                <p className="text-sm text-muted-foreground">
-                                  {t('digitalUpdates.currentVersion', { version: product.version || '1.0' })}
-                                </p>
-                                <Badge variant="outline" className="mt-2">
-                                  {product.digital_type || 'other'}
-                                </Badge>
+                      {digitalProducts.map((product) => {
+                        interface DigitalProductCard {
+                          id: string;
+                          name?: string;
+                          image_url?: string;
+                          description?: string;
+                        }
+                        const productCard = product as DigitalProductCard;
+                        return (
+                          <Card
+                            key={productCard.id}
+                            className="cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={() => setSelectedProductId(productCard.id)}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-4">
+                                {product.product?.image_url && (
+                                  <img
+                                    src={product.product.image_url}
+                                    alt={product.product.name}
+                                    className="w-16 h-16 rounded-lg object-cover"
+                                  />
+                                )}
+                                <div className="flex-1">
+                                  <h3 className="font-semibold">{product.product?.name || t('digitalUpdates.productWithoutName')}</h3>
+                                  <p className="text-sm text-muted-foreground">
+                                    {t('digitalUpdates.currentVersion', { version: product.version || '1.0' })}
+                                  </p>
+                                  <Badge variant="outline" className="mt-2">
+                                    {product.digital_type || 'other'}
+                                  </Badge>
+                                </div>
                               </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
                     </div>
                   )}
                 </CardContent>

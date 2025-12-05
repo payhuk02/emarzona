@@ -3,6 +3,8 @@
  * À exécuter au chargement de l'application pour supprimer les références obsolètes
  */
 
+import { logger } from '@/lib/logger';
+
 const LOGO_CACHE_KEY = 'platform-logo-cache';
 
 /**
@@ -22,12 +24,12 @@ export const clearPayhukLogoCache = (): void => {
       if (hasPayhukReference) {
         // Nettoyer le cache
         localStorage.removeItem(LOGO_CACHE_KEY);
-        console.log('✅ Cache logo Payhuk nettoyé');
+        logger.info('Cache logo Payhuk nettoyé');
       }
     }
   } catch (error) {
     // Ignorer les erreurs de cache
-    console.warn('Erreur lors du nettoyage du cache logo:', error);
+    logger.warn('Erreur lors du nettoyage du cache logo', { error });
   }
 };
 
@@ -56,7 +58,7 @@ export const clearAllPayhukReferences = (): void => {
           
           if (hasPayhukReference) {
             localStorage.removeItem(key);
-            console.log(`✅ Cache ${key} nettoyé`);
+            logger.info(`Cache ${key} nettoyé`);
           }
         }
       } catch (error) {
@@ -64,7 +66,7 @@ export const clearAllPayhukReferences = (): void => {
       }
     });
   } catch (error) {
-    console.warn('Erreur lors du nettoyage des caches:', error);
+    logger.warn('Erreur lors du nettoyage des caches', { error });
   }
 };
 

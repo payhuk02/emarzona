@@ -40,7 +40,12 @@ export function stripHtmlTags(html: string): string {
     // Import dynamique pour éviter de charger DOMPurify si pas nécessaire
     try {
       // Si DOMPurify est disponible, l'utiliser pour sécuriser
-      const DOMPurify = (window as any).DOMPurify;
+      interface WindowWithDOMPurify extends Window {
+        DOMPurify?: {
+          sanitize: (html: string, options: { ALLOWED_TAGS: string[] }) => string;
+        };
+      }
+      const DOMPurify = (window as WindowWithDOMPurify).DOMPurify;
       if (DOMPurify) {
         // Nettoyer le HTML avec DOMPurify avant d'utiliser innerHTML
         const cleanHtml = DOMPurify.sanitize(html, { ALLOWED_TAGS: [] });

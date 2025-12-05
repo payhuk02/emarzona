@@ -217,11 +217,39 @@ export default function BookingsManagement() {
   });
 
   // Fetch availabilities
-  const { data: availabilities } = useQuery({
+  // Type temporaire pour service_availability en attendant la régénération des types Supabase
+  // TODO: Ajouter service_availability aux types Supabase générés (voir docs/TODOS.md)
+  interface ServiceAvailability {
+    id: string;
+    service_product_id: string;
+    staff_id: string | null;
+    date: string;
+    start_time: string;
+    end_time: string;
+    is_available: boolean;
+    created_at: string;
+    updated_at: string;
+    service_products?: {
+      id: string;
+      product_id: string;
+      products?: {
+        name: string;
+      } | null;
+    } | null;
+  }
+
+  const { data: availabilities } = useQuery<ServiceAvailability[]>({
     queryKey: ['service-availabilities'],
     queryFn: async () => {
-      // Utiliser any pour les tables non typées dans Supabase
-      const { data, error } = await (supabase as any)
+      // Type assertion nécessaire car service_availability n'est pas dans les types générés
+      const { data, error } = await (supabase as unknown as {
+        from: (table: string) => {
+          select: (query: string) => Promise<{
+            data: ServiceAvailability[] | null;
+            error: { message: string } | null;
+          }>;
+        };
+      })
         .from('service_availability')
         .select(`
           *,
@@ -236,16 +264,31 @@ export default function BookingsManagement() {
         logger.error('Error fetching availabilities', { error: error.message });
         throw error;
       }
-      return data;
+      return data || [];
     },
   });
+
+  // Type pour les availabilities
+  interface ServiceAvailabilityWithRelations {
+    id: string;
+    day_of_week: number;
+    start_time: string;
+    end_time: string;
+    is_available: boolean;
+    service_product?: Array<{
+      id: string;
+      product?: {
+        name: string;
+      };
+    }>;
+  }
 
   // Transform bookings to calendar events
   const events = useMemo((): ExtendedBookingEvent[] => {
     const bookingEvents: ExtendedBookingEvent[] = [];
 
     if (bookings) {
-      bookings.forEach((booking: any) => {
+      bookings.forEach((booking) => {
         try {
           const start = parseISO(`${booking.booking_date}T${booking.start_time || booking.booking_time || '00:00:00'}`);
           const end = parseISO(`${booking.booking_date}T${booking.end_time || booking.booking_time || '00:00:00'}`);
@@ -287,7 +330,7 @@ export default function BookingsManagement() {
         currentDate.setDate(now.getDate() + i);
         const dayOfWeek = currentDate.getDay();
 
-        availabilities.forEach((availability: any) => {
+        (availabilities as ServiceAvailabilityWithRelations[] | null)?.forEach((availability) => {
           if (availability.day_of_week === dayOfWeek) {
             const [startHour, startMinute] = availability.start_time.split(':');
             const [endHour, endMinute] = availability.end_time.split(':');
@@ -327,7 +370,7 @@ export default function BookingsManagement() {
   const filteredBookings = useMemo(() => {
     if (!bookings) return [];
 
-    return bookings.filter((booking: any) => {
+    return bookings.filter((booking) => {
       // Search filter
       const searchLower = debouncedSearch.toLowerCase();
       const matchesSearch = 
@@ -364,12 +407,12 @@ export default function BookingsManagement() {
     if (!bookings) return { total: 0, confirmed: 0, pending: 0, cancelled: 0, totalRevenue: 0 };
 
     const total = bookings.length;
-    const confirmed = bookings.filter((b: any) => b.status === 'confirmed').length;
-    const pending = bookings.filter((b: any) => b.status === 'pending').length;
-    const cancelled = bookings.filter((b: any) => b.status === 'cancelled').length;
+    const confirmed = bookings.filter((b) => b.status === 'confirmed').length;
+    const pending = bookings.filter((b) => b.status === 'pending').length;
+    const cancelled = bookings.filter((b) => b.status === 'cancelled').length;
     const totalRevenue = bookings
-      .filter((b: any) => b.status === 'confirmed' || b.status === 'completed')
-      .reduce((sum: number, b: any) => sum + (b.total_price || 0), 0);
+      .filter((b) => b.status === 'confirmed' || b.status === 'completed')
+      .reduce((sum: number, b) => sum + (b.total_price || 0), 0);
 
     return { total, confirmed, pending, cancelled, totalRevenue };
   }, [bookings]);
@@ -403,11 +446,12 @@ export default function BookingsManagement() {
       });
       setIsDialogOpen(false);
       logger.info('Booking confirmed', { bookingId });
-    } catch (error: any) {
-      logger.error('Error confirming booking', { bookingId, error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de confirmer la réservation';
+      logger.error('Error confirming booking', { bookingId, error: errorMessage });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de confirmer la réservation',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -425,11 +469,12 @@ export default function BookingsManagement() {
       });
       setIsDialogOpen(false);
       logger.info('Booking cancelled', { bookingId });
-    } catch (error: any) {
-      logger.error('Error cancelling booking', { bookingId, error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible d\'annuler la réservation';
+      logger.error('Error cancelling booking', { bookingId, error: errorMessage });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'annuler la réservation',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -445,11 +490,12 @@ export default function BookingsManagement() {
       });
       setIsDialogOpen(false);
       logger.info('Booking completed', { bookingId });
-    } catch (error: any) {
-      logger.error('Error completing booking', { bookingId, error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de terminer la réservation';
+      logger.error('Error completing booking', { bookingId, error: errorMessage });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de terminer la réservation',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -465,8 +511,9 @@ export default function BookingsManagement() {
       });
       setIsDialogOpen(false);
       logger.warn('Booking marked as no-show', { bookingId });
-    } catch (error: any) {
-      logger.error('Error marking no-show', { bookingId, error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de marquer comme absent';
+      logger.error('Error marking no-show', { bookingId, error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de marquer comme absent',
@@ -489,22 +536,22 @@ export default function BookingsManagement() {
     setIsExporting(true);
     try {
       const headers = ['ID', 'Date', 'Heure', 'Client', 'Email', 'Téléphone', 'Service', 'Statut', 'Prix', 'Participants'];
-      const rows = filteredBookings.map((booking: any) => [
+      const rows = filteredBookings.map((booking) => [
         booking.id,
         booking.booking_date,
-        booking.start_time || booking.booking_time || '',
+        booking.start_time || '',
         booking.customer?.full_name || '',
         booking.customer?.email || '',
         booking.customer?.phone || '',
         booking.service_product?.[0]?.product?.name || '',
         booking.status,
         booking.total_price || 0,
-        booking.participants_count || booking.participants || 1,
+        booking.participants_count || 1,
       ]);
 
       const csvContent = [
         headers.join(','),
-        ...rows.map((row: any[]) => row.map((cell: any) => `"${cell}"`).join(','))
+        ...rows.map((row) => row.map((cell) => `"${String(cell)}"`).join(','))
       ].join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -522,8 +569,9 @@ export default function BookingsManagement() {
         description: `${filteredBookings.length} réservation(s) exportée(s) en CSV.`,
       });
       logger.info('Bookings exported to CSV', { count: filteredBookings.length });
-    } catch (error: any) {
-      logger.error('Error exporting bookings', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Error exporting bookings', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'exporter les réservations.',

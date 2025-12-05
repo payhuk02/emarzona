@@ -20,7 +20,7 @@ export const ProductCreationDemo = () => {
     email_alerts: false
   });
 
-  const updateFormData = (field: string, value: any) => {
+  const updateFormData = (field: string, value: string | number | boolean | null | undefined) => {
     setFormData(prev => ({
       ...prev,
       [field]: value

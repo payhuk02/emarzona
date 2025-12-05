@@ -46,10 +46,12 @@ import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { logger } from '@/lib/logger';
+import type { User } from '@supabase/supabase-js';
+import type { Invoice } from '@/types/invoice';
 
 export default function CustomerMyInvoices() {
   const { toast } = useToast();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [searchInput, setSearchInput] = useState('');
   const debouncedSearch = useDebounce(searchInput, 300);
   const [activeTab, setActiveTab] = useState<'all' | 'paid' | 'sent' | 'draft' | 'overdue' | 'cancelled'>('all');
@@ -121,7 +123,7 @@ export default function CustomerMyInvoices() {
   }, [invoices]);
 
   // Gérer le téléchargement PDF
-  const handleDownloadPDF = useCallback(async (invoice: any) => {
+  const handleDownloadPDF = useCallback(async (invoice: Invoice) => {
     try {
       setGeneratingPDF(invoice.id);
       await downloadInvoicePDF(invoice);
@@ -130,8 +132,9 @@ export default function CustomerMyInvoices() {
         description: `Facture ${invoice.invoice_number} téléchargée avec succès`,
       });
       logger.info('Invoice PDF downloaded:', invoice.id);
-    } catch (error: any) {
-      logger.error('Error downloading invoice PDF:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Error downloading invoice PDF:', { error: errorMessage });
       toast({
         title: 'Erreur',
         description: 'Impossible de télécharger le PDF',
@@ -163,7 +166,8 @@ export default function CustomerMyInvoices() {
 
   // Obtenir le badge de statut
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: any }> = {
+    type StatusIcon = React.ComponentType<{ className?: string }>;
+    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: StatusIcon }> = {
       paid: { label: 'Payée', variant: 'default', icon: CheckCircle },
       sent: { label: 'Envoyée', variant: 'secondary', icon: Clock },
       draft: { label: 'Brouillon', variant: 'outline', icon: FileText },

@@ -60,7 +60,11 @@ export default function PhysicalProductsSerialTracking() {
         if (physicalError) {
           logger.error('Error fetching physical products', { error: physicalError, productIds });
           // Si on ne peut pas récupérer les physical_products, retourner quand même les produits
-          return storeProducts.map((p: any) => ({
+          interface StoreProduct {
+            id: string;
+            name: string;
+          }
+          return storeProducts.map((p: StoreProduct) => ({
             id: p.id, // Utiliser product_id comme id temporaire
             product: {
               id: p.id,
@@ -70,8 +74,16 @@ export default function PhysicalProductsSerialTracking() {
         }
 
         // Combiner les données : physical_products avec leurs produits
-        return (physicalProducts || []).map((pp: any) => {
-          const productInfo = storeProducts.find((p: any) => p.id === pp.product_id);
+        interface PhysicalProduct {
+          id: string;
+          product_id: string;
+        }
+        interface StoreProduct {
+          id: string;
+          name: string;
+        }
+        return (physicalProducts || []).map((pp: PhysicalProduct) => {
+          const productInfo = storeProducts.find((p: StoreProduct) => p.id === pp.product_id);
           return {
             id: pp.id,
             product: {
@@ -190,11 +202,21 @@ export default function PhysicalProductsSerialTracking() {
                         <SelectValue placeholder="Choisir un produit..." />
                       </SelectTrigger>
                       <SelectContent>
-                        {products?.map((product: any) => (
-                          <SelectItem key={product.id} value={product.id}>
-                            {product.product?.name || `Produit ${product.id.slice(0, 8)}`}
-                          </SelectItem>
-                        ))}
+                        {products?.map((product) => {
+                          interface ProductWithInfo {
+                            id: string;
+                            product?: {
+                              id: string;
+                              name: string;
+                            };
+                          }
+                          const productWithInfo = product as ProductWithInfo;
+                          return (
+                            <SelectItem key={productWithInfo.id} value={productWithInfo.id}>
+                              {productWithInfo.product?.name || `Produit ${productWithInfo.id.slice(0, 8)}`}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </div>

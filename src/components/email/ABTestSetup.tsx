@@ -19,6 +19,7 @@ import { useEmailTemplates } from '@/hooks/useEmail';
 import { useCreateEmailABTest } from '@/hooks/email/useEmailABTests';
 import type { ABTestVariant, CreateABTestPayload } from '@/lib/email/email-ab-test-service';
 import { Loader2 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface ABTestSetupProps {
   campaignId: string;
@@ -77,7 +78,7 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
       await createABTest.mutateAsync(payload);
       onSuccess?.();
     } catch (error) {
-      console.error('Failed to create AB test:', error);
+      logger.error('Failed to create AB test', { error });
     }
   };
 

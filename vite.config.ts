@@ -396,8 +396,9 @@ export default defineConfig(({ mode }) => {
           }
           
           // Séparer les pages admin en chunk dédié (lazy-loaded)
+          // OPTIMISATION: Séparer les pages admin pour réduire le chunk principal
           if (id.includes('src/pages/admin')) {
-            return 'admin';
+            return 'admin-pages';
           }
           
           // Séparer les composants de création de produits en chunk dédié
@@ -413,6 +414,21 @@ export default defineConfig(({ mode }) => {
           // Séparer les composants de dashboard en chunk dédié
           if (id.includes('src/components/dashboard')) {
             return 'dashboard';
+          }
+          
+          // OPTIMISATION: Séparer les composants d'email (lourds, utilisés seulement sur certaines pages)
+          if (id.includes('src/components/email') || id.includes('src/pages/emails')) {
+            return 'email-components';
+          }
+          
+          // OPTIMISATION: Séparer les composants d'analytics (lourds avec recharts)
+          if (id.includes('src/components/analytics')) {
+            return 'analytics-components';
+          }
+          
+          // OPTIMISATION: Séparer les composants de shipping (utilisés seulement sur certaines pages)
+          if (id.includes('src/components/shipping') || id.includes('src/pages/shipping')) {
+            return 'shipping-components';
           }
         },
         // Optimisation des noms de chunks

@@ -23,14 +23,17 @@ import { fr } from 'date-fns/locale';
 import { TrackingTimeline } from './TrackingTimeline';
 import { usePrintLabel, useCancelShipment } from '@/hooks/shipping/useFedexShipping';
 import { AutomaticTrackingButton } from './AutomaticTrackingButton';
+import type { Shipment } from '@/hooks/shipping/useFedexShipping';
 
 interface ShipmentCardProps {
-  shipment: any;
+  shipment: Shipment;
   onRefresh?: () => void;
 }
 
-const getStatusConfig = (status: string, t: (key: string, defaultValue?: string) => string) => {
-  const configs: Record<string, { labelKey: string; color: string; variant: any }> = {
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
+
+const getStatusConfig = (status: string, t: ReturnType<typeof useTranslation>['t']) => {
+  const configs: Record<string, { labelKey: string; color: string; variant: BadgeVariant }> = {
     pending: { labelKey: 'shipping.status.pending', color: 'bg-gray-500', variant: 'secondary' },
     label_created: { labelKey: 'shipping.status.labelCreated', color: 'bg-blue-500', variant: 'default' },
     picked_up: { labelKey: 'shipping.status.pickedUp', color: 'bg-purple-500', variant: 'default' },
@@ -45,7 +48,7 @@ const getStatusConfig = (status: string, t: (key: string, defaultValue?: string)
   const config = configs[status] || configs.pending;
   return {
     ...config,
-    label: t(config.labelKey, config.labelKey.split('.').pop() || ''),
+    label: t(config.labelKey, { defaultValue: config.labelKey.split('.').pop() || '' }),
   };
 };
 

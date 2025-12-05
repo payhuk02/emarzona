@@ -40,7 +40,7 @@ export function useCart() {
   const queryClient = useQueryClient();
   const [sessionId] = useState(() => getSessionId());
   // Récupérer l'utilisateur de manière synchrone au besoin
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -187,11 +187,12 @@ export function useCart() {
         description: 'Le produit a été ajouté avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible d\'ajouter au panier';
       logger.error('Error adding to cart:', error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'ajouter au panier',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -229,7 +230,7 @@ export function useCart() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error updating cart item:', error);
       toast({
         title: '❌ Erreur',
@@ -258,7 +259,7 @@ export function useCart() {
         description: 'L\'article a été retiré',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error removing cart item:', error);
       toast({
         title: '❌ Erreur',
@@ -291,7 +292,7 @@ export function useCart() {
         description: 'Tous les articles ont été retirés',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error clearing cart:', error);
       toast({
         title: '❌ Erreur',

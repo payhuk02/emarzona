@@ -38,11 +38,26 @@
     <!-- ✅ Google Fonts avec preconnect optimisé -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Font loading optimisé avec display=swap pour éviter les warnings de preload -->
+    <!-- Font loading optimisé avec display=swap pour améliorer FCP -->
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    
+    <!-- ✅ Preconnect pour Supabase (améliore TTFB) -->
+    <link rel="preconnect" href="https://hbdnzajbyjakdhuavrvb.supabase.co" />
+    
+    <!-- ✅ Prefetch pour les routes critiques (améliore la navigation) -->
+    <link rel="prefetch" href="/src/pages/Dashboard.tsx" as="script" />
+    <link rel="prefetch" href="/src/pages/Marketplace.tsx" as="script" />
     
     <!-- Note: Preload de main.tsx retiré car Vite le gère automatiquement -->
 

@@ -31,10 +31,10 @@ export interface EmailCampaign {
   recurrence_end_at?: string;
   audience_type: AudienceType;
   segment_id?: string;
-  audience_filters: Record<string, any>;
+  audience_filters: Record<string, string | number | boolean | null | undefined>;
   estimated_recipients?: number;
   ab_test_enabled: boolean;
-  ab_test_variants?: any;
+  ab_test_variants?: Record<string, string | number | boolean | null | undefined>;
   ab_test_winner?: 'variant_a' | 'variant_b';
   metrics: {
     sent: number;
@@ -62,10 +62,10 @@ export interface CreateCampaignPayload {
   recurrence_end_at?: string;
   audience_type: AudienceType;
   segment_id?: string;
-  audience_filters?: Record<string, any>;
+  audience_filters?: Record<string, string | number | boolean | null | undefined>;
   estimated_recipients?: number;
   ab_test_enabled?: boolean;
-  ab_test_variants?: any;
+  ab_test_variants?: Record<string, string | number | boolean | null | undefined>;
 }
 
 export interface UpdateCampaignPayload {
@@ -80,10 +80,10 @@ export interface UpdateCampaignPayload {
   recurrence_end_at?: string;
   audience_type?: AudienceType;
   segment_id?: string;
-  audience_filters?: Record<string, any>;
+  audience_filters?: Record<string, string | number | boolean | null | undefined>;
   estimated_recipients?: number;
   ab_test_enabled?: boolean;
-  ab_test_variants?: any;
+  ab_test_variants?: Record<string, string | number | boolean | null | undefined>;
 }
 
 // ============================================================
@@ -122,7 +122,8 @@ export class EmailCampaignService {
       }
 
       return data as EmailCampaign;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailCampaignService.createCampaign error', { error, payload });
       throw error;
     }
@@ -148,7 +149,8 @@ export class EmailCampaignService {
       }
 
       return data as EmailCampaign;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailCampaignService.getCampaign error', { error, campaignId });
       throw error;
     }
@@ -194,7 +196,8 @@ export class EmailCampaignService {
       }
 
       return (data || []) as EmailCampaign[];
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailCampaignService.getCampaigns error', { error, storeId, filters });
       throw error;
     }
@@ -221,7 +224,8 @@ export class EmailCampaignService {
       }
 
       return data as EmailCampaign;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailCampaignService.updateCampaign error', { error, campaignId, payload });
       throw error;
     }
@@ -243,7 +247,8 @@ export class EmailCampaignService {
       }
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailCampaignService.deleteCampaign error', { error, campaignId });
       throw error;
     }
@@ -261,7 +266,8 @@ export class EmailCampaignService {
         status: 'scheduled',
         scheduled_at: scheduledAt,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailCampaignService.scheduleCampaign error', { error, campaignId, scheduledAt });
       throw error;
     }
@@ -275,7 +281,8 @@ export class EmailCampaignService {
       return await this.updateCampaign(campaignId, {
         status: 'paused',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailCampaignService.pauseCampaign error', { error, campaignId });
       throw error;
     }
@@ -298,7 +305,8 @@ export class EmailCampaignService {
       return await this.updateCampaign(campaignId, {
         status: newStatus,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailCampaignService.resumeCampaign error', { error, campaignId });
       throw error;
     }
@@ -312,7 +320,8 @@ export class EmailCampaignService {
       return await this.updateCampaign(campaignId, {
         status: 'cancelled',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailCampaignService.cancelCampaign error', { error, campaignId });
       throw error;
     }
@@ -349,7 +358,8 @@ export class EmailCampaignService {
       }
 
       return data as EmailCampaign;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailCampaignService.updateCampaignMetrics error', { error, campaignId, metrics });
       throw error;
     }
@@ -373,7 +383,8 @@ export class EmailCampaignService {
         status: 'draft' as CampaignStatus,
         scheduled_at: undefined,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailCampaignService.duplicateCampaign error', { error, campaignId });
       throw error;
     }

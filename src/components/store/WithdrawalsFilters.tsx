@@ -186,7 +186,7 @@ export const WithdrawalsFilters = ({
             {/* Statut */}
             <div className="space-y-2">
               <Label htmlFor="status" className="text-[10px] sm:text-xs md:text-sm">Statut</Label>
-              <Select value={status} onValueChange={(value: any) => setStatus(value)}>
+              <Select value={status} onValueChange={(value: StoreWithdrawalStatus | 'all') => setStatus(value)}>
                 <SelectTrigger id="status" className="h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm">
                   <SelectValue />
                 </SelectTrigger>
@@ -204,7 +204,7 @@ export const WithdrawalsFilters = ({
             {/* Méthode de paiement */}
             <div className="space-y-2">
               <Label htmlFor="payment_method" className="text-[10px] sm:text-xs md:text-sm">Méthode de paiement</Label>
-              <Select value={paymentMethod} onValueChange={(value: any) => setPaymentMethod(value)}>
+              <Select value={paymentMethod} onValueChange={(value: StorePaymentMethod | 'all') => setPaymentMethod(value)}>
                 <SelectTrigger id="payment_method" className="h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm">
                   <SelectValue />
                 </SelectTrigger>

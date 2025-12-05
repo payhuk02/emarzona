@@ -51,6 +51,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import type { RecurringBookingPattern } from '@/hooks/service/useRecurringBookings';
 
 export default function RecurringBookingsManagement() {
   const { user } = useAuth();
@@ -124,7 +125,7 @@ export default function RecurringBookingsManagement() {
     }
   };
 
-  const getRecurrenceLabel = (pattern: any) => {
+  const getRecurrenceLabel = (pattern: RecurringBookingPattern) => {
     switch (pattern.recurrence_type) {
       case 'daily':
         return 'Quotidien';
@@ -211,7 +212,7 @@ export default function RecurringBookingsManagement() {
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                 <CardContent className="pt-4 sm:pt-6 p-3 sm:p-4">
                   <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">
-                    {patterns?.filter((p: any) => p.status === 'active').length || 0}
+                    {patterns?.filter((p) => p.status === 'active').length || 0}
                   </div>
                   <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">Séries actives</div>
                 </CardContent>
@@ -219,7 +220,7 @@ export default function RecurringBookingsManagement() {
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                 <CardContent className="pt-4 sm:pt-6 p-3 sm:p-4">
                   <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">
-                    {patterns?.reduce((sum: number, p: any) => sum + (p.created_occurrences || 0), 0) || 0}
+                    {patterns?.reduce((sum: number, p) => sum + (p.created_occurrences || 0), 0) || 0}
                   </div>
                   <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">Réservations créées</div>
                 </CardContent>
@@ -227,7 +228,7 @@ export default function RecurringBookingsManagement() {
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                 <CardContent className="pt-4 sm:pt-6 p-3 sm:p-4">
                   <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">
-                    {patterns?.reduce((sum: number, p: any) => sum + (p.total_occurrences || 0), 0) || 0}
+                    {patterns?.reduce((sum: number, p) => sum + (p.total_occurrences || 0), 0) || 0}
                   </div>
                   <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">Occurrences totales</div>
                 </CardContent>
@@ -258,7 +259,7 @@ export default function RecurringBookingsManagement() {
                         </TableRow>
                       </TableHeader>
                     <TableBody>
-                      {patterns.map((pattern: any) => (
+                      {patterns.map((pattern) => (
                         <TableRow key={pattern.id}>
                           <TableCell className="text-xs sm:text-sm">
                             <div>

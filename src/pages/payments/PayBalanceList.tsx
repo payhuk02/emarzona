@@ -46,6 +46,18 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import type { Order } from '@/hooks/useOrders';
+
+// Interface étendue pour Order avec relations
+interface OrderWithRelations extends Order {
+  order_items?: Array<{
+    id: string;
+    product_name: string;
+    quantity: number;
+    unit_price: number;
+    total_price: number;
+  }>;
+}
 
 export default function PayBalanceList() {
   const navigate = useNavigate();
@@ -99,7 +111,7 @@ export default function PayBalanceList() {
       if (error) throw error;
 
       // Filtrer les commandes avec solde restant
-      return data?.filter((order: any) => {
+      return (data as OrderWithRelations[] | null)?.filter((order) => {
         const percentagePaid = order.percentage_paid || 0;
         const remainingAmount = order.remaining_amount || 0;
         return remainingAmount > 0 || percentagePaid < 100;
@@ -109,7 +121,7 @@ export default function PayBalanceList() {
   });
 
   // Calculer le solde restant
-  const calculateBalance = useCallback((order: any) => {
+  const calculateBalance = useCallback((order: OrderWithRelations) => {
     const remainingAmount = order.remaining_amount || 0;
     const totalAmount = order.total_amount || 0;
     const percentagePaid = order.percentage_paid || 0;
@@ -130,7 +142,7 @@ export default function PayBalanceList() {
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
 
-    return orders.filter((order: any) => {
+    return orders.filter((order) => {
       // Search filter
       const searchLower = debouncedSearch.toLowerCase();
       const matchesSearch =
@@ -154,11 +166,11 @@ export default function PayBalanceList() {
   const stats = useMemo(() => {
     if (!orders) return { total: 0, totalBalance: 0, averageBalance: 0, urgentCount: 0 };
 
-    const ordersWithBalance = orders.filter((order: any) => calculateBalance(order) > 0);
+    const ordersWithBalance = orders.filter((order) => calculateBalance(order) > 0);
     const total = ordersWithBalance.length;
-    const totalBalance = ordersWithBalance.reduce((sum: number, order: any) => sum + calculateBalance(order), 0);
+    const totalBalance = ordersWithBalance.reduce((sum: number, order) => sum + calculateBalance(order), 0);
     const averageBalance = total > 0 ? totalBalance / total : 0;
-    const urgentCount = ordersWithBalance.filter((order: any) => {
+    const urgentCount = ordersWithBalance.filter((order) => {
       const balance = calculateBalance(order);
       return balance > order.total_amount * 0.5;
     }).length;
@@ -189,7 +201,7 @@ export default function PayBalanceList() {
         'Pourcentage Payé',
         'Statut',
       ];
-      const rows = filteredOrders.map((order: any) => {
+      const rows = filteredOrders.map((order) => {
         const balance = calculateBalance(order);
         const percentagePaid = order.percentage_paid || 0;
         return [
@@ -206,7 +218,7 @@ export default function PayBalanceList() {
 
       const csvContent = [
         headers.join(','),
-        ...rows.map((row: any[]) => row.map((cell: any) => `"${String(cell)}"`).join(','))
+        ...rows.map((row) => row.map((cell) => `"${String(cell)}"`).join(','))
       ].join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -224,8 +236,9 @@ export default function PayBalanceList() {
         description: `${filteredOrders.length} solde(s) exporté(s) en CSV.`,
       });
       logger.info('Balances exported to CSV', { count: filteredOrders.length });
-    } catch (error: any) {
-      logger.error('Error exporting balances to CSV', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Error exporting balances to CSV', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'exporter les soldes.',
@@ -245,8 +258,9 @@ export default function PayBalanceList() {
         description: 'La liste des soldes a été mise à jour.',
       });
       logger.info('Balances refreshed');
-    } catch (error: any) {
-      logger.error('Error refreshing balances', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Error refreshing balances', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'actualiser les soldes.',
@@ -500,7 +514,7 @@ export default function PayBalanceList() {
                   >
                     <span className="hidden sm:inline">Récent</span>
                     <span className="sm:hidden">Récent</span>
-                    <span className="opacity-80">({filteredOrders.filter((o: any) => new Date(o.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length})</span>
+                    <span className="opacity-80">({filteredOrders.filter((o) => new Date(o.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length})</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -541,7 +555,7 @@ export default function PayBalanceList() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                              {filteredOrders.map((order: any, index: number) => {
+                              {filteredOrders.map((order: OrderWithRelations, index: number) => {
                         const balance = calculateBalance(order);
                                 const percentagePaid = order.percentage_paid || 0;
                         return (

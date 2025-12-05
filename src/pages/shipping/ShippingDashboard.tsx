@@ -32,7 +32,7 @@ import {
   Loader2,
   Sparkles,
 } from 'lucide-react';
-import { useShipments, useUpdateShipmentTracking } from '@/hooks/shipping/useFedexShipping';
+import { useShipments, useUpdateShipmentTracking, type Shipment } from '@/hooks/shipping/useFedexShipping';
 import { useStore } from '@/hooks/useStore';
 import { ShipmentCard } from '@/components/shipping/ShipmentCard';
 import { CreateShipmentDialog } from '@/components/shipping/CreateShipmentDialog';
@@ -113,8 +113,9 @@ export default function ShippingDashboard() {
         description: 'Les informations de suivi ont été actualisées.',
       });
       logger.info('Tracking refreshed', { shipmentId });
-    } catch (error: any) {
-      logger.error('Error refreshing tracking', { shipmentId, error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Error refreshing tracking', { shipmentId, error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible de mettre à jour le suivi.',
@@ -143,8 +144,9 @@ export default function ShippingDashboard() {
         description: `${filteredShipments.length} expédition(s) actualisée(s).`,
       });
       logger.info('All tracking refreshed', { count: filteredShipments.length });
-    } catch (error: any) {
-      logger.error('Error refreshing all tracking', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Error refreshing all tracking', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Erreur lors de la mise à jour des suivis.',
@@ -167,7 +169,7 @@ export default function ShippingDashboard() {
     setIsExporting(true);
     try {
       const headers = ['ID', 'Numéro de tracking', 'Commande', 'Statut', 'Type service', 'Coût', 'Date création', 'Date livraison estimée'];
-      const rows = filteredShipments.map((shipment: any) => [
+      const rows = filteredShipments.map((shipment) => [
         shipment.id,
         shipment.tracking_number || '',
         shipment.order?.order_number || '',
@@ -180,7 +182,7 @@ export default function ShippingDashboard() {
 
       const csvContent = [
         headers.join(','),
-        ...rows.map((row: any[]) => row.map((cell: any) => `"${cell}"`).join(','))
+        ...rows.map((row) => row.map((cell) => `"${String(cell)}"`).join(','))
       ].join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -198,8 +200,9 @@ export default function ShippingDashboard() {
         description: `${filteredShipments.length} expédition(s) exportée(s) en CSV.`,
       });
       logger.info('Shipments exported to CSV', { count: filteredShipments.length });
-    } catch (error: any) {
-      logger.error('Error exporting shipments', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Error exporting shipments', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'exporter les expéditions.',

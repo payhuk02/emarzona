@@ -22,7 +22,7 @@ export interface EmailSequence {
   name: string;
   description?: string;
   trigger_type: SequenceTriggerType;
-  trigger_config: Record<string, any>;
+  trigger_config: Record<string, string | number | boolean | null | undefined>;
   status: SequenceStatus;
   enrolled_count: number;
   completed_count: number;
@@ -38,7 +38,7 @@ export interface EmailSequenceStep {
   template_id?: string;
   delay_type: SequenceStepDelayType;
   delay_value: number;
-  conditions?: Record<string, any>;
+  conditions?: Record<string, string | number | boolean | null | undefined>;
   created_at: string;
 }
 
@@ -52,7 +52,7 @@ export interface EmailSequenceEnrollment {
   enrolled_at: string;
   next_email_at?: string;
   completed_at?: string;
-  context: Record<string, any>;
+  context: Record<string, string | number | boolean | null | undefined>;
 }
 
 export interface CreateSequencePayload {
@@ -70,13 +70,13 @@ export interface CreateSequenceStepPayload {
   template_id?: string;
   delay_type: SequenceStepDelayType;
   delay_value: number;
-  conditions?: Record<string, any>;
+  conditions?: Record<string, string | number | boolean | null | undefined>;
 }
 
 export interface EnrollUserPayload {
   sequence_id: string;
   user_id: string;
-  context?: Record<string, any>;
+  context?: Record<string, string | number | boolean | null | undefined>;
 }
 
 // ============================================================
@@ -107,7 +107,7 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequence;
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('EmailSequenceService.createSequence error', { error, payload });
       throw error;
     }
@@ -133,7 +133,8 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequence;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.getSequence error', { error, sequenceId });
       throw error;
     }
@@ -180,7 +181,8 @@ export class EmailSequenceService {
       }
 
       return (data || []) as EmailSequence[];
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.getSequences error', { error, storeId, filters });
       throw error;
     }
@@ -207,7 +209,8 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequence;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.updateSequence error', { error, sequenceId, payload });
       throw error;
     }
@@ -229,7 +232,8 @@ export class EmailSequenceService {
       }
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.deleteSequence error', { error, sequenceId });
       throw error;
     }
@@ -255,7 +259,8 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequenceStep;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.addStep error', { error, payload });
       throw error;
     }
@@ -278,7 +283,8 @@ export class EmailSequenceService {
       }
 
       return (data || []) as EmailSequenceStep[];
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.getSteps error', { error, sequenceId });
       throw error;
     }
@@ -305,7 +311,8 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequenceStep;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.updateStep error', { error, stepId, payload });
       throw error;
     }
@@ -327,7 +334,8 @@ export class EmailSequenceService {
       }
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.deleteStep error', { error, stepId });
       throw error;
     }
@@ -356,7 +364,8 @@ export class EmailSequenceService {
       }
 
       return enrollment;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.enrollUser error', { error, payload });
       throw error;
     }
@@ -386,7 +395,8 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequenceEnrollment;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.getEnrollment error', { error, sequenceId, userId });
       throw error;
     }
@@ -433,7 +443,8 @@ export class EmailSequenceService {
       }
 
       return (data || []) as EmailSequenceEnrollment[];
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.getEnrollments error', { error, sequenceId, filters });
       throw error;
     }
@@ -461,7 +472,8 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequenceEnrollment;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.pauseEnrollment error', { error, sequenceId, userId });
       throw error;
     }
@@ -489,7 +501,8 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequenceEnrollment;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.cancelEnrollment error', { error, sequenceId, userId });
       throw error;
     }
@@ -498,7 +511,7 @@ export class EmailSequenceService {
   /**
    * Récupérer les prochains emails à envoyer (pour traitement par cron)
    */
-  static async getNextEmailsToSend(limit: number = 100): Promise<any[]> {
+  static async getNextEmailsToSend(limit: number = 100): Promise<EmailSequenceEnrollment[]> {
     try {
       const { data, error } = await supabase.rpc('get_next_sequence_emails_to_send', {
         p_limit: limit,
@@ -510,7 +523,8 @@ export class EmailSequenceService {
       }
 
       return data || [];
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.getNextEmailsToSend error', { error, limit });
       throw error;
     }
@@ -531,7 +545,8 @@ export class EmailSequenceService {
       }
 
       return data === true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.advanceEnrollment error', { error, enrollmentId });
       throw error;
     }

@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { Calendar, Users, TrendingUp } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface CohortData {
   cohort: string; // Mois de première visite
@@ -30,7 +31,7 @@ export const CohortAnalysis = () => {
 
       if (error) {
         // Fallback si la fonction n'existe pas encore
-        console.warn('Cohort analysis function not available:', error);
+        logger.warn('Cohort analysis function not available', { error });
         return getMockCohortData();
       }
 

@@ -197,7 +197,8 @@ const ProductCardProfessionalComponent = ({
           });
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       logger.error("Erreur lors de l'achat:", error);
       toast({
         title: "Erreur de paiement",
@@ -225,7 +226,8 @@ const ProductCardProfessionalComponent = ({
         product_type: (product.product_type || 'digital') as any,
         quantity: 1,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       logger.error("Erreur lors de l'ajout au panier:", error);
       // Error already handled in hook
     }
@@ -287,12 +289,12 @@ const ProductCardProfessionalComponent = ({
                 <Shield className="h-3.5 w-3.5 mr-1.5" /> PLR
               </Badge>
             )}
-            {(product as any).licensing_type === 'copyrighted' && (
+            {product.licensing_type === 'copyrighted' && (
               <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white border-0 shadow-lg hover:shadow-xl transition-all hover:scale-105" style={{ willChange: 'transform' }} aria-label="Produit protégé par droit d'auteur" title="Protégé par droit d'auteur : revente/modification non autorisées">
                 <Shield className="h-3.5 w-3.5 mr-1.5" /> Droit d'auteur
               </Badge>
             )}
-            {(product as any).licensing_type === 'standard' && (
+            {product.licensing_type === 'standard' && (
               <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all hover:scale-105" style={{ willChange: 'transform' }} aria-label="Licence standard" title="Licence standard : utilisation personnelle uniquement">
                 <Shield className="h-3.5 w-3.5 mr-1.5" /> Standard
               </Badge>
