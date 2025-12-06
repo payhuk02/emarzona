@@ -7,12 +7,14 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import {
   Table,
   TableBody,
@@ -37,6 +39,7 @@ import { supabase } from '@/integrations/supabase/client';
 export default function AdminInventory() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const isMobile = useIsMobile();
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -204,44 +207,103 @@ export default function AdminInventory() {
                 {isLoading ? (
                   <div className="text-center py-8">Chargement...</div>
                 ) : filteredItems && filteredItems.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="text-[10px] sm:text-xs md:text-sm">Produit</TableHead>
-                        <TableHead className="text-[10px] sm:text-xs md:text-sm hidden sm:table-cell">Variante</TableHead>
-                        <TableHead className="text-[10px] sm:text-xs md:text-sm hidden md:table-cell">Boutique</TableHead>
-                        <TableHead className="text-[10px] sm:text-xs md:text-sm">Quantité</TableHead>
-                        <TableHead className="text-[10px] sm:text-xs md:text-sm hidden lg:table-cell">Seuil</TableHead>
-                        <TableHead className="text-[10px] sm:text-xs md:text-sm">Statut</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredItems.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell className="font-medium text-xs sm:text-sm">
-                            {item.variant?.product?.name || 'N/A'}
-                          </TableCell>
-                          <TableCell className="text-xs sm:text-sm hidden sm:table-cell">{item.variant?.variant_name || '-'}</TableCell>
-                          <TableCell className="text-xs sm:text-sm hidden md:table-cell">{item.variant?.product?.store?.name || 'N/A'}</TableCell>
-                          <TableCell className="text-xs sm:text-sm">
-                            <span className={item.quantity === 0 ? 'text-red-600 font-bold' : ''}>
-                              {item.quantity}
+                  isMobile ? (
+                    <MobileTableCard
+                      data={filteredItems.map(item => ({ ...item, id: item.id }))}
+                      columns={[
+                        {
+                          key: 'product',
+                          header: 'Produit',
+                          priority: 'high',
+                          render: (row) => (
+                            <div>
+                              <p className="font-medium">{row.variant?.product?.name || 'N/A'}</p>
+                              {row.variant?.variant_name && (
+                                <p className="text-xs text-muted-foreground">{row.variant.variant_name}</p>
+                              )}
+                            </div>
+                          ),
+                        },
+                        {
+                          key: 'store',
+                          header: 'Boutique',
+                          priority: 'medium',
+                          render: (row) => <span>{row.variant?.product?.store?.name || 'N/A'}</span>,
+                        },
+                        {
+                          key: 'quantity',
+                          header: 'Quantité',
+                          priority: 'high',
+                          render: (row) => (
+                            <span className={row.quantity === 0 ? 'text-red-600 font-bold' : 'font-semibold'}>
+                              {row.quantity}
                             </span>
-                          </TableCell>
-                          <TableCell className="text-xs sm:text-sm hidden lg:table-cell">{item.low_stock_threshold || 10}</TableCell>
-                          <TableCell className="text-xs sm:text-sm">
-                            {item.quantity === 0 ? (
-                              <Badge variant="destructive" className="text-[9px] sm:text-[10px] md:text-xs">Rupture</Badge>
-                            ) : item.quantity <= (item.low_stock_threshold || 10) ? (
-                              <Badge variant="secondary" className="text-[9px] sm:text-[10px] md:text-xs">Stock Faible</Badge>
+                          ),
+                        },
+                        {
+                          key: 'threshold',
+                          header: 'Seuil',
+                          priority: 'low',
+                          render: (row) => <span>{row.low_stock_threshold || 10}</span>,
+                        },
+                        {
+                          key: 'status',
+                          header: 'Statut',
+                          priority: 'high',
+                          render: (row) => (
+                            row.quantity === 0 ? (
+                              <Badge variant="destructive" className="text-xs">Rupture</Badge>
+                            ) : row.quantity <= (row.low_stock_threshold || 10) ? (
+                              <Badge variant="secondary" className="text-xs">Stock Faible</Badge>
                             ) : (
-                              <Badge variant="default" className="text-[9px] sm:text-[10px] md:text-xs">OK</Badge>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                              <Badge variant="default" className="text-xs">OK</Badge>
+                            )
+                          ),
+                        },
+                      ]}
+                    />
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-[10px] sm:text-xs md:text-sm">Produit</TableHead>
+                            <TableHead className="text-[10px] sm:text-xs md:text-sm hidden sm:table-cell">Variante</TableHead>
+                            <TableHead className="text-[10px] sm:text-xs md:text-sm hidden md:table-cell">Boutique</TableHead>
+                            <TableHead className="text-[10px] sm:text-xs md:text-sm">Quantité</TableHead>
+                            <TableHead className="text-[10px] sm:text-xs md:text-sm hidden lg:table-cell">Seuil</TableHead>
+                            <TableHead className="text-[10px] sm:text-xs md:text-sm">Statut</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredItems.map((item) => (
+                            <TableRow key={item.id}>
+                              <TableCell className="font-medium text-xs sm:text-sm">
+                                {item.variant?.product?.name || 'N/A'}
+                              </TableCell>
+                              <TableCell className="text-xs sm:text-sm hidden sm:table-cell">{item.variant?.variant_name || '-'}</TableCell>
+                              <TableCell className="text-xs sm:text-sm hidden md:table-cell">{item.variant?.product?.store?.name || 'N/A'}</TableCell>
+                              <TableCell className="text-xs sm:text-sm">
+                                <span className={item.quantity === 0 ? 'text-red-600 font-bold' : ''}>
+                                  {item.quantity}
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-xs sm:text-sm hidden lg:table-cell">{item.low_stock_threshold || 10}</TableCell>
+                              <TableCell className="text-xs sm:text-sm">
+                                {item.quantity === 0 ? (
+                                  <Badge variant="destructive" className="text-[9px] sm:text-[10px] md:text-xs">Rupture</Badge>
+                                ) : item.quantity <= (item.low_stock_threshold || 10) ? (
+                                  <Badge variant="secondary" className="text-[9px] sm:text-[10px] md:text-xs">Stock Faible</Badge>
+                                ) : (
+                                  <Badge variant="default" className="text-[9px] sm:text-[10px] md:text-xs">OK</Badge>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )
                 ) : (
                   <div className="text-center py-12">
                     <Warehouse className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

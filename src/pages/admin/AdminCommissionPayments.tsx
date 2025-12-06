@@ -15,6 +15,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import {
   Table,
   TableBody,
@@ -92,6 +94,7 @@ export default function AdminCommissionPayments() {
   const { can } = useCurrentAdminPermissions();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [selectedPayment, setSelectedPayment] = useState<CommissionPayment | null>(null);
   const [showProcessDialog, setShowProcessDialog] = useState(false);
   const [transactionReference, setTransactionReference] = useState('');
@@ -431,90 +434,194 @@ export default function AdminCommissionPayments() {
                 </AlertDescription>
               </Alert>
             ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Utilisateur</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Montant</TableHead>
-                      <TableHead>Méthode</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {allPayments.map((payment) => (
-                      <TableRow key={payment.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="font-medium">{payment.user?.name || 'N/A'}</p>
-                              <p className="text-sm text-muted-foreground">{payment.user?.email || 'N/A'}</p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={payment.type === 'affiliate' ? 'default' : 'secondary'}>
-                            {payment.type === 'affiliate' ? 'Affiliation' : 'Parrainage'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-mono">
-                          {Number(payment.amount).toLocaleString('fr-FR')} {payment.currency}
-                        </TableCell>
-                        <TableCell>
-                          {payment.payment_method === 'mobile_money' ? 'Mobile Money' :
-                           payment.payment_method === 'bank_transfer' ? 'Virement Bancaire' :
-                           payment.payment_method === 'paypal' ? 'PayPal' :
-                           payment.payment_method}
-                        </TableCell>
-                        <TableCell>
-                          {getStatusBadge(payment.status)}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {format(new Date(payment.created_at), 'dd MMM yyyy', { locale: fr })}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {payment.status === 'pending' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => approvePayment.mutate(payment.id)}
-                                disabled={approvePayment.isPending}
-                              >
-                                {approvePayment.isPending ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  'Approuver'
-                                )}
-                              </Button>
-                            )}
-                            {(payment.status === 'approved' || payment.status === 'processing') && (
-                              <Button
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedPayment(payment);
-                                  setShowProcessDialog(true);
-                                }}
-                              >
-                                Traiter
-                              </Button>
-                            )}
-                            {payment.status === 'completed' && payment.transaction_reference && (
-                              <Badge variant="outline" className="text-xs">
-                                {payment.transaction_reference}
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
+              isMobile ? (
+                <MobileTableCard
+                  data={allPayments.map(p => ({ ...p, id: p.id }))}
+                  columns={[
+                    {
+                      key: 'user',
+                      header: 'Utilisateur',
+                      priority: 'high',
+                      render: (row) => (
+                        <div>
+                          <p className="font-medium">{row.user?.name || 'N/A'}</p>
+                          <p className="text-xs text-muted-foreground">{row.user?.email || 'N/A'}</p>
+                        </div>
+                      ),
+                    },
+                    {
+                      key: 'type',
+                      header: 'Type',
+                      priority: 'medium',
+                      render: (row) => (
+                        <Badge variant={row.type === 'affiliate' ? 'default' : 'secondary'}>
+                          {row.type === 'affiliate' ? 'Affiliation' : 'Parrainage'}
+                        </Badge>
+                      ),
+                    },
+                    {
+                      key: 'amount',
+                      header: 'Montant',
+                      priority: 'high',
+                      render: (row) => (
+                        <span className="font-mono font-semibold">
+                          {Number(row.amount).toLocaleString('fr-FR')} {row.currency}
+                        </span>
+                      ),
+                    },
+                    {
+                      key: 'payment_method',
+                      header: 'Méthode',
+                      priority: 'low',
+                      render: (row) => (
+                        row.payment_method === 'mobile_money' ? 'Mobile Money' :
+                        row.payment_method === 'bank_transfer' ? 'Virement Bancaire' :
+                        row.payment_method === 'paypal' ? 'PayPal' :
+                        row.payment_method
+                      ),
+                    },
+                    {
+                      key: 'status',
+                      header: 'Statut',
+                      priority: 'high',
+                      render: (row) => getStatusBadge(row.status),
+                    },
+                    {
+                      key: 'created_at',
+                      header: 'Date',
+                      priority: 'low',
+                      render: (row) => (
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(row.created_at), 'dd MMM yyyy', { locale: fr })}
+                        </span>
+                      ),
+                    },
+                  ]}
+                  actions={(row) => (
+                    <div className="flex flex-col gap-2">
+                      {row.status === 'pending' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => approvePayment.mutate(row.id)}
+                          disabled={approvePayment.isPending}
+                          className="min-h-[44px] w-full"
+                        >
+                          {approvePayment.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            'Approuver'
+                          )}
+                        </Button>
+                      )}
+                      {(row.status === 'approved' || row.status === 'processing') && (
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setSelectedPayment(row);
+                            setShowProcessDialog(true);
+                          }}
+                          className="min-h-[44px] w-full"
+                        >
+                          Traiter
+                        </Button>
+                      )}
+                      {row.status === 'completed' && row.transaction_reference && (
+                        <Badge variant="outline" className="text-xs w-full justify-center">
+                          {row.transaction_reference}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                />
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Utilisateur</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Montant</TableHead>
+                        <TableHead>Méthode</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {allPayments.map((payment) => (
+                        <TableRow key={payment.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              <div>
+                                <p className="font-medium">{payment.user?.name || 'N/A'}</p>
+                                <p className="text-sm text-muted-foreground">{payment.user?.email || 'N/A'}</p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={payment.type === 'affiliate' ? 'default' : 'secondary'}>
+                              {payment.type === 'affiliate' ? 'Affiliation' : 'Parrainage'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-mono">
+                            {Number(payment.amount).toLocaleString('fr-FR')} {payment.currency}
+                          </TableCell>
+                          <TableCell>
+                            {payment.payment_method === 'mobile_money' ? 'Mobile Money' :
+                             payment.payment_method === 'bank_transfer' ? 'Virement Bancaire' :
+                             payment.payment_method === 'paypal' ? 'PayPal' :
+                             payment.payment_method}
+                          </TableCell>
+                          <TableCell>
+                            {getStatusBadge(payment.status)}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {format(new Date(payment.created_at), 'dd MMM yyyy', { locale: fr })}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {payment.status === 'pending' && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => approvePayment.mutate(payment.id)}
+                                  disabled={approvePayment.isPending}
+                                  className="min-h-[44px]"
+                                >
+                                  {approvePayment.isPending ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    'Approuver'
+                                  )}
+                                </Button>
+                              )}
+                              {(payment.status === 'approved' || payment.status === 'processing') && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedPayment(payment);
+                                    setShowProcessDialog(true);
+                                  }}
+                                  className="min-h-[44px]"
+                                >
+                                  Traiter
+                                </Button>
+                              )}
+                              {payment.status === 'completed' && payment.transaction_reference && (
+                                <Badge variant="outline" className="text-xs">
+                                  {payment.transaction_reference}
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )
             )}
           </CardContent>
         </Card>
