@@ -68,6 +68,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminGiftCardManagement() {
+  const isMobile = useIsMobile();
   const { store } = useStore();
   
   // Alias pour compatibilité
@@ -326,9 +327,95 @@ export default function AdminGiftCardManagement() {
                         <p className="text-xs sm:text-sm text-muted-foreground">Aucune carte cadeau trouvée</p>
                       </div>
                     ) : (
-                      <>
-                        {/* Desktop Table */}
-                        <div className="hidden lg:block overflow-x-auto">
+                      isMobile ? (
+                        <MobileTableCard
+                          data={giftCards.map(c => ({ ...c, id: c.id }))}
+                          columns={[
+                            {
+                              key: 'code',
+                              label: 'Code',
+                              priority: 'high',
+                              render: (row: any) => (
+                                <div className="flex items-center gap-2">
+                                  <code className="text-xs font-mono bg-muted px-2 py-1 rounded">
+                                    {row.code}
+                                  </code>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleCopyCode(row.code)}
+                                    className="h-7 w-7 min-h-[44px] min-w-[44px]"
+                                  >
+                                    <Copy className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              ),
+                            },
+                            {
+                              key: 'amount',
+                              label: 'Montant Initial',
+                              priority: 'high',
+                              render: (row: any) => (
+                                <span className="font-medium text-sm">{formatCurrency(row.initial_amount)}</span>
+                              ),
+                            },
+                            {
+                              key: 'balance',
+                              label: 'Solde Restant',
+                              priority: 'high',
+                              render: (row: any) => (
+                                <span className="text-sm">{formatCurrency(row.current_balance)}</span>
+                              ),
+                            },
+                            {
+                              key: 'status',
+                              label: 'Statut',
+                              priority: 'high',
+                              render: (row: any) => getStatusBadge(row.status),
+                            },
+                            {
+                              key: 'recipient',
+                              label: 'Bénéficiaire',
+                              priority: 'medium',
+                              render: (row: any) => (
+                                row.recipient_email ? (
+                                  <div>
+                                    <div className="font-medium text-xs">{row.recipient_name || 'N/A'}</div>
+                                    <div className="text-xs text-muted-foreground">{row.recipient_email}</div>
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground text-xs">-</span>
+                                )
+                              ),
+                            },
+                            {
+                              key: 'issued',
+                              label: 'Date d\'émission',
+                              priority: 'low',
+                              render: (row: any) => (
+                                <span className="text-xs">{new Date(row.issued_at).toLocaleDateString('fr-FR')}</span>
+                              ),
+                            },
+                            {
+                              key: 'expires',
+                              label: 'Expiration',
+                              priority: 'low',
+                              render: (row: any) => (
+                                <span className="text-xs">
+                                  {row.expires_at ? new Date(row.expires_at).toLocaleDateString('fr-FR') : 'Jamais'}
+                                </span>
+                              ),
+                            },
+                          ]}
+                          actions={(row: any) => (
+                            <Button variant="ghost" size="sm" className="min-h-[44px] w-full">
+                              <Edit className="h-4 w-4 mr-2" />
+                              Modifier
+                            </Button>
+                          )}
+                        />
+                      ) : (
+                        <div className="overflow-x-auto">
                           <Table>
                             <TableHeader>
                               <TableRow>
@@ -399,68 +486,7 @@ export default function AdminGiftCardManagement() {
                             </TableBody>
                           </Table>
                         </div>
-
-                        {/* Mobile Cards */}
-                        <div className="lg:hidden space-y-3 sm:space-y-4">
-                          {giftCards.map((card) => (
-                            <Card key={card.id} className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-                              <CardContent className="p-3 sm:p-4">
-                                <div className="space-y-2">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                      <code className="text-xs sm:text-sm font-mono bg-muted px-2 py-1 rounded">
-                                        {card.code}
-                                      </code>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleCopyCode(card.code)}
-                                        className="h-7 w-7"
-                                      >
-                                        <Copy className="h-3.5 w-3.5" />
-                                      </Button>
-                                    </div>
-                                    {getStatusBadge(card.status)}
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
-                                    <div>
-                                      <p className="text-muted-foreground">Montant Initial</p>
-                                      <p className="font-medium">{formatCurrency(card.initial_amount)}</p>
-                                    </div>
-                                    <div>
-                                      <p className="text-muted-foreground">Solde Restant</p>
-                                      <p className="font-medium">{formatCurrency(card.current_balance)}</p>
-                                    </div>
-                                  </div>
-                                  {card.recipient_email && (
-                                    <div className="text-xs sm:text-sm">
-                                      <p className="text-muted-foreground">Bénéficiaire</p>
-                                      <p className="font-medium">{card.recipient_name || 'N/A'}</p>
-                                      <p className="text-muted-foreground">{card.recipient_email}</p>
-                                    </div>
-                                  )}
-                                  <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
-                                    <div>
-                                      <p className="text-muted-foreground">Émission</p>
-                                      <p>{new Date(card.issued_at).toLocaleDateString('fr-FR')}</p>
-                                    </div>
-                                    <div>
-                                      <p className="text-muted-foreground">Expiration</p>
-                                      <p>{card.expires_at ? new Date(card.expires_at).toLocaleDateString('fr-FR') : 'Jamais'}</p>
-                                    </div>
-                                  </div>
-                                  <div className="flex justify-end pt-2">
-                                    <Button variant="ghost" size="sm" className="min-h-[44px]">
-                                      <Edit className="h-3.5 w-3.5 mr-1.5" />
-                                      Modifier
-                                    </Button>
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      </>
+                      )
                     )}
                   </CardContent>
                 </Card>
