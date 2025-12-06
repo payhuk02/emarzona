@@ -7,7 +7,9 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { AppSidebar } from '@/components/AppSidebar';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -64,6 +66,7 @@ export default function AdminTransactionReconciliation() {
   const [activeTab, setActiveTab] = useState('pending');
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -409,6 +412,91 @@ export default function AdminTransactionReconciliation() {
                           Aucune transaction trouvée
                         </AlertDescription>
                       </Alert>
+                    ) : isMobile ? (
+                      <MobileTableCard
+                        data={filteredTransactions.map((t) => ({ id: t.id, ...t }))}
+                        columns={[
+                          {
+                            key: 'id',
+                            header: 'ID',
+                            priority: 'high',
+                            render: (value) => (
+                              <span className="font-mono text-xs">{String(value).substring(0, 8)}...</span>
+                            ),
+                          },
+                          {
+                            key: 'order',
+                            header: 'Commande',
+                            priority: 'high',
+                            render: (value, row) => (
+                              <div className="space-y-1">
+                                <div className="font-medium">
+                                  {row.order?.order_number || row.order_id?.substring(0, 8) || 'N/A'}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {row.order?.customer_email || ''}
+                                </div>
+                              </div>
+                            ),
+                          },
+                          {
+                            key: 'amount',
+                            header: 'Montant',
+                            priority: 'high',
+                            render: (value, row) => (
+                              <div className="font-semibold">
+                                {parseFloat(String(value) || '0').toLocaleString('fr-FR')} {row.currency}
+                              </div>
+                            ),
+                            className: 'font-semibold',
+                          },
+                          {
+                            key: 'status',
+                            header: 'Statut',
+                            priority: 'high',
+                            render: (value) => getStatusBadge(String(value)),
+                          },
+                          {
+                            key: 'payment_provider',
+                            header: 'Provider',
+                            priority: 'medium',
+                            render: (value) => <Badge variant="outline">{String(value)}</Badge>,
+                          },
+                          {
+                            key: 'created_at',
+                            header: 'Créée le',
+                            priority: 'medium',
+                            render: (value, row) => (
+                              <div>
+                                <div className={`text-xs ${getAgeColor(String(value))}`}>
+                                  {format(new Date(String(value)), 'dd MMM yyyy HH:mm', { locale: fr })}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {Math.round((Date.now() - new Date(String(value)).getTime()) / (1000 * 60 * 60))}h
+                                </div>
+                              </div>
+                            ),
+                          },
+                        ]}
+                        actions={(row) => (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => verifyTransactionMutation.mutate(row.id)}
+                            disabled={verifyTransactionMutation.isPending}
+                            className="min-h-[44px]"
+                          >
+                            {verifyTransactionMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                <RefreshCw className="h-4 w-4 mr-1" />
+                                Vérifier
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      />
                     ) : (
                       <div className="overflow-x-auto">
                         <Table>
