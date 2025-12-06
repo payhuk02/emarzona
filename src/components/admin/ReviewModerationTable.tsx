@@ -490,6 +490,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
           </Table>
         </div>
       </div>
+      )}
 
       {/* Footer - Responsive */}
       <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground px-1">
