@@ -194,19 +194,8 @@ export const PaymentMethodDialog = ({
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">
-            {method ? 'Modifier la méthode de paiement' : 'Ajouter une méthode de paiement'}
-          </DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm">
-            Enregistrez vos informations de paiement pour faciliter vos retraits
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-3 sm:space-y-4 py-3 sm:py-4">
+  const formContent = (
+    <div className="space-y-3 sm:space-y-4 py-3 sm:py-4">
           {/* Label */}
           <MobileFormField
             label="Nom de la méthode"
