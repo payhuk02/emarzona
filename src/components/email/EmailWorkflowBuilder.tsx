@@ -13,9 +13,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+import { BottomSheet, BottomSheetContent } from '@/components/ui/bottom-sheet';
+import { MobileFormField } from '@/components/ui/mobile-form-field';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCreateEmailWorkflow, useUpdateEmailWorkflow } from '@/hooks/email/useEmailWorkflows';
+import { useResponsiveModal } from '@/hooks/use-responsive-modal';
 import type {
   EmailWorkflow,
   CreateWorkflowPayload,
@@ -52,6 +53,7 @@ export const EmailWorkflowBuilder = ({
   workflow,
   onSuccess,
 }: EmailWorkflowBuilderProps) => {
+  const { useBottomSheet } = useResponsiveModal();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [triggerType, setTriggerType] = useState<WorkflowTriggerType>('event');
@@ -134,141 +136,150 @@ export const EmailWorkflowBuilder = ({
     setActions(newActions.map((action, i) => ({ ...action, order: i + 1 })));
   };
 
+  const formContent = (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <Tabs defaultValue="general" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="general">Général</TabsTrigger>
+          <TabsTrigger value="trigger">Déclencheur</TabsTrigger>
+          <TabsTrigger value="actions">Actions</TabsTrigger>
+        </TabsList>
+
+        {/* Onglet Général */}
+        <TabsContent value="general" className="space-y-4">
+          <MobileFormField
+            label="Nom"
+            name="name"
+            type="text"
+            value={name}
+            onChange={setName}
+            required
+          />
+          <MobileFormField
+            label="Description"
+            name="description"
+            type="textarea"
+            value={description}
+            onChange={setDescription}
+            fieldProps={{
+              rows: 3,
+            }}
+          />
+          <MobileFormField
+            label="Statut"
+            name="status"
+            type="select"
+            value={status}
+            onChange={(value) => setStatus(value as WorkflowStatus)}
+            selectOptions={[
+              { value: 'active', label: 'Actif' },
+              { value: 'paused', label: 'En pause' },
+              { value: 'archived', label: 'Archivé' },
+            ]}
+          />
+        </TabsContent>
+
+        {/* Onglet Déclencheur */}
+        <TabsContent value="trigger" className="space-y-4">
+          <MobileFormField
+            label="Type"
+            name="triggerType"
+            type="select"
+            value={triggerType}
+            onChange={(value) => setTriggerType(value as WorkflowTriggerType)}
+            required
+            selectOptions={[
+              { value: 'event', label: 'Événement' },
+              { value: 'time', label: 'Temps' },
+              { value: 'condition', label: 'Condition' },
+            ]}
+          />
+          <WorkflowTriggerEditor
+            triggerType={triggerType}
+            config={triggerConfig}
+            onChange={setTriggerConfig}
+          />
+        </TabsContent>
+
+        {/* Onglet Actions */}
+        <TabsContent value="actions" className="space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <Label>Actions du workflow</Label>
+            <Button type="button" variant="outline" size="sm" onClick={handleAddAction} className="w-full sm:w-auto">
+              Ajouter une action
+            </Button>
+          </div>
+          {actions.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground border rounded-lg">
+              <p>Aucune action configurée</p>
+              <p className="text-sm mt-2">Ajoutez une action pour démarrer</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {actions.map((action, index) => (
+                <WorkflowActionEditor
+                  key={index}
+                  action={action}
+                  index={index}
+                  onUpdate={(updatedAction) => handleUpdateAction(index, updatedAction)}
+                  onRemove={() => handleRemoveAction(index)}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+        <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
+          Annuler
+        </Button>
+        <Button
+          type="submit"
+          disabled={createWorkflow.isPending || updateWorkflow.isPending || !name.trim()}
+          className="w-full sm:w-auto"
+        >
+          {(createWorkflow.isPending || updateWorkflow.isPending) && (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          )}
+          {isEditing ? 'Mettre à jour' : 'Créer'}
+        </Button>
+      </div>
+    </form>
+  );
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{isEditing ? 'Modifier le workflow' : 'Créer un nouveau workflow'}</DialogTitle>
-          <DialogDescription>
-            {isEditing
-              ? 'Modifiez les détails de votre workflow automatisé.'
-              : 'Créez un workflow automatisé pour vos emails.'}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <Tabs defaultValue="general" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="general">Général</TabsTrigger>
-              <TabsTrigger value="trigger">Déclencheur</TabsTrigger>
-              <TabsTrigger value="actions">Actions</TabsTrigger>
-            </TabsList>
-
-            {/* Onglet Général */}
-            <TabsContent value="general" className="space-y-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Nom *
-                </Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="col-span-3"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-4 items-start gap-4">
-                <Label htmlFor="description" className="text-right pt-2">
-                  Description
-                </Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="col-span-3"
-                  rows={3}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="status" className="text-right">
-                  Statut
-                </Label>
-                <Select value={status} onValueChange={(value: WorkflowStatus) => setStatus(value)}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Actif</SelectItem>
-                    <SelectItem value="paused">En pause</SelectItem>
-                    <SelectItem value="archived">Archivé</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </TabsContent>
-
-            {/* Onglet Déclencheur */}
-            <TabsContent value="trigger" className="space-y-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="triggerType" className="text-right">
-                  Type *
-                </Label>
-                <Select
-                  value={triggerType}
-                  onValueChange={(value: WorkflowTriggerType) => setTriggerType(value)}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="event">Événement</SelectItem>
-                    <SelectItem value="time">Temps</SelectItem>
-                    <SelectItem value="condition">Condition</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <WorkflowTriggerEditor
-                triggerType={triggerType}
-                config={triggerConfig}
-                onChange={setTriggerConfig}
-              />
-            </TabsContent>
-
-            {/* Onglet Actions */}
-            <TabsContent value="actions" className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>Actions du workflow</Label>
-                <Button type="button" variant="outline" size="sm" onClick={handleAddAction}>
-                  Ajouter une action
-                </Button>
-              </div>
-              {actions.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground border rounded-lg">
-                  <p>Aucune action configurée</p>
-                  <p className="text-sm mt-2">Ajoutez une action pour démarrer</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {actions.map((action, index) => (
-                    <WorkflowActionEditor
-                      key={index}
-                      action={action}
-                      index={index}
-                      onUpdate={(updatedAction) => handleUpdateAction(index, updatedAction)}
-                      onRemove={() => handleRemoveAction(index)}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Annuler
-            </Button>
-            <Button
-              type="submit"
-              disabled={createWorkflow.isPending || updateWorkflow.isPending || !name.trim()}
-            >
-              {(createWorkflow.isPending || updateWorkflow.isPending) && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              {isEditing ? 'Mettre à jour' : 'Créer'}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <>
+      {useBottomSheet ? (
+        <BottomSheet open={open} onOpenChange={onOpenChange}>
+          <BottomSheetContent
+            title={isEditing ? 'Modifier le workflow' : 'Créer un nouveau workflow'}
+            description={
+              isEditing
+                ? 'Modifiez les détails de votre workflow automatisé.'
+                : 'Créez un workflow automatisé pour vos emails.'
+            }
+            className="max-h-[90vh] overflow-y-auto"
+          >
+            {formContent}
+          </BottomSheetContent>
+        </BottomSheet>
+      ) : (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{isEditing ? 'Modifier le workflow' : 'Créer un nouveau workflow'}</DialogTitle>
+              <DialogDescription>
+                {isEditing
+                  ? 'Modifiez les détails de votre workflow automatisé.'
+                  : 'Créez un workflow automatisé pour vos emails.'}
+              </DialogDescription>
+            </DialogHeader>
+            {formContent}
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 };
 
