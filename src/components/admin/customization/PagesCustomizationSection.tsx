@@ -64,6 +64,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { logger } from '@/lib/logger';
+import { LazyImage } from '@/components/ui/lazy-image';
 
 interface PagesCustomizationSectionProps {
   onChange?: () => void;
@@ -2176,7 +2177,12 @@ export const PagesCustomizationSection = ({ onChange }: PagesCustomizationSectio
           <div className="space-y-2">
             {value && (
               <div className="relative w-32 h-32 border-2 border-dashed border-border rounded-lg overflow-hidden">
-                <img src={value} alt={element.label} className="w-full h-full object-cover" />
+                <LazyImage
+                  src={value}
+                  alt={element.label}
+                  className="w-full h-full object-cover"
+                  skeletonClassName="w-full h-full"
+                />
                 <button
                   onClick={() => handleElementChange(pageId, element.key, '')}
                   className="absolute top-1 right-1 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90"

@@ -4,6 +4,7 @@
 
 import React, { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { LazyImage } from './lazy-image';
 
 interface AnimatedCardProps {
   children: ReactNode;
@@ -113,7 +114,12 @@ export const AnimatedImage: React.FC<AnimatedImageProps> = ({
 }) => {
   return (
     <div className={cn(zoom && 'image-zoom', className)}>
-      <img src={src} alt={alt} className="w-full h-full object-cover" />
+      <LazyImage
+        src={src}
+        alt={alt}
+        className="w-full h-full object-cover"
+        skeletonClassName="w-full h-full"
+      />
     </div>
   );
 };
