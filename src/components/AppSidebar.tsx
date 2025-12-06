@@ -931,13 +931,10 @@ export function AppSidebar() {
             aria-label="Retour au tableau de bord Emarzona"
           >
             {platformLogo ? (
-              <img 
+              <LazyImage 
                 src={platformLogo} 
                 alt="Logo Emarzona" 
-                width={40}
-                height={40}
                 className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 object-contain"
-                loading="eager" 
               />
             ) : (
               <div 
