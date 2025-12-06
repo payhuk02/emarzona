@@ -170,9 +170,9 @@
 
 ## 📊 Statistiques
 
-- **Modales migrées :** 6/15+ (~40%)
-- **Formulaires migrés :** 8/20+ (~40%)
-- **Tableaux migrés :** 3/15+ (~20%)
+- **Modales migrées :** 7/15+ (~47%)
+- **Formulaires migrés :** 9/20+ (~45%)
+- **Tableaux migrés :** 5/15+ (~33%)
 - **Images optimisées :** 1/15+ (~7%)
 
 ## 🎯 Prochaines migrations recommandées
@@ -190,6 +190,9 @@
 1. ✅ **AdminShipping** - Migré vers MobileTableCard
 2. ✅ **OrdersTable** - Migré vers MobileTableCard
 3. ✅ **CreatePromotionDialog** - Migré vers BottomSheet + MobileFormField
+4. ✅ **AdminSales** - Migré vers MobileTableCard
+5. ✅ **AdminPayments** - Migré vers MobileTableCard avec colonnes complexes
+6. ✅ **OrderEditDialog** - Migré vers BottomSheet + MobileFormField
 
 ### Priorité BASSE (Nouvelles priorités)
 
