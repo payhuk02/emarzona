@@ -125,112 +125,11 @@ export function useMobileMenu({
   }, [menuRef, triggerRef, collisionPadding]);
 
   const lockPosition = useCallback(() => {
-    if (!isMobile || !menuRef.current) return;
-
-    const position = calculateOptimalPosition();
-    if (!position) return;
-
-    positionRef.current = position;
-    setIsLocked(true);
-
-    const menu = menuRef.current;
-    const { top, left, width, height } = position;
-
-    // Appliquer les styles de verrouillage
-    // IMPORTANT: Ne pas utiliser touch-action: none car cela bloque les interactions
-    menu.style.cssText = `
-      position: fixed !important;
-      top: ${top}px !important;
-      left: ${left}px !important;
-      width: ${width}px !important;
-      min-width: ${width}px !important;
-      max-width: ${width}px !important;
-      transform: none !important;
-      translate: none !important;
-      margin: 0 !important;
-      will-change: auto !important;
-      contain: layout style paint !important;
-      isolation: isolate !important;
-      touch-action: pan-y !important;
-      z-index: ${zIndex} !important;
-      overflow-y: auto !important;
-      overflow-x: hidden !important;
-    `;
-
-    // Observer les changements de style pour maintenir la position
-    observerRef.current = new MutationObserver(() => {
-      if (positionRef.current && menu) {
-        const currentRect = menu.getBoundingClientRect();
-        const { top: targetTop, left: targetLeft } = positionRef.current;
-        
-        if (
-          Math.abs(currentRect.top - targetTop) > 0.5 ||
-          Math.abs(currentRect.left - targetLeft) > 0.5
-        ) {
-          menu.style.cssText = `
-            position: fixed !important;
-            top: ${targetTop}px !important;
-            left: ${targetLeft}px !important;
-            width: ${positionRef.current.width}px !important;
-            min-width: ${positionRef.current.width}px !important;
-            max-width: ${positionRef.current.width}px !important;
-            transform: none !important;
-            translate: none !important;
-            margin: 0 !important;
-            will-change: auto !important;
-            contain: layout style paint !important;
-            isolation: isolate !important;
-            touch-action: pan-y !important;
-            z-index: ${zIndex} !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-          `;
-        }
-      }
-    });
-
-    observerRef.current.observe(menu, {
-      attributes: true,
-      attributeFilter: ['style', 'class'],
-      childList: false,
-      subtree: false,
-    });
-
-    // Surveiller avec requestAnimationFrame pour une protection continue
-    const checkPosition = () => {
-      if (positionRef.current && menu) {
-        const currentRect = menu.getBoundingClientRect();
-        const { top: targetTop, left: targetLeft, width: targetWidth } = positionRef.current;
-        
-        if (
-          Math.abs(currentRect.top - targetTop) > 0.5 ||
-          Math.abs(currentRect.left - targetLeft) > 0.5 ||
-          Math.abs(currentRect.width - targetWidth) > 1
-        ) {
-          menu.style.cssText = `
-            position: fixed !important;
-            top: ${targetTop}px !important;
-            left: ${targetLeft}px !important;
-            width: ${targetWidth}px !important;
-            min-width: ${targetWidth}px !important;
-            max-width: ${targetWidth}px !important;
-            transform: none !important;
-            translate: none !important;
-            margin: 0 !important;
-            will-change: auto !important;
-            contain: layout style paint !important;
-            isolation: isolate !important;
-            touch-action: pan-y !important;
-            z-index: ${zIndex} !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-          `;
-        }
-        rafIdRef.current = requestAnimationFrame(checkPosition);
-      }
-    };
-    rafIdRef.current = requestAnimationFrame(checkPosition);
-  }, [isMobile, menuRef, triggerRef, calculateOptimalPosition, zIndex]);
+    // DÉSACTIVÉ: Le verrouillage agressif bloque l'application
+    // Utiliser uniquement les props de Radix UI pour le positionnement
+    // Le positionnement sera géré par Radix UI avec avoidCollisions={false} et sticky="always"
+    return;
+  }, []);
 
   const unlockPosition = useCallback(() => {
     setIsLocked(false);
@@ -251,36 +150,12 @@ export function useMobileMenu({
     }
   }, [menuRef]);
 
-  // Verrouiller la position quand le menu s'ouvre sur mobile
+  // DÉSACTIVÉ: Ne plus verrouiller la position agressivement
+  // Laisser Radix UI gérer le positionnement avec les props appropriées
   useEffect(() => {
-    if (!isOpen || !isMobile) {
-      unlockPosition();
-      return;
-    }
-
-    // Attendre que Radix UI ait fini de positionner le menu
-    timeoutRef.current = setTimeout(() => {
-      lockPosition();
-    }, lockDelay);
-
-    // Essayer plusieurs fois pour s'assurer que le menu est bien positionné
-    const timeout2 = setTimeout(() => {
-      lockPosition();
-    }, lockDelay * 2);
-
-    const timeout3 = setTimeout(() => {
-      lockPosition();
-    }, lockDelay * 3);
-
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      clearTimeout(timeout2);
-      clearTimeout(timeout3);
-      unlockPosition();
-    };
-  }, [isOpen, isMobile, lockPosition, unlockPosition, lockDelay]);
+    // Toujours déverrouiller pour éviter tout blocage
+    unlockPosition();
+  }, [isOpen, isMobile, unlockPosition]);
 
   // Nettoyer à la fermeture
   useEffect(() => {
@@ -293,22 +168,8 @@ export function useMobileMenu({
   // Le positionnement fixe du menu suffit pour le garder visible
   // Si nécessaire, on peut ajouter un scroll lock optionnel plus tard
 
-  const lockStyles: React.CSSProperties | undefined = isLocked && positionRef.current
-    ? {
-        position: 'fixed',
-        top: `${positionRef.current.top}px`,
-        left: `${positionRef.current.left}px`,
-        width: `${positionRef.current.width}px`,
-        minWidth: `${positionRef.current.width}px`,
-        maxWidth: `${positionRef.current.width}px`,
-        zIndex: zIndex,
-        touchAction: 'pan-y', // Permet le scroll vertical mais bloque le scroll horizontal
-        contain: 'layout style paint',
-        isolation: 'isolate',
-        overflowY: 'auto',
-        overflowX: 'hidden',
-      }
-    : undefined;
+  // Ne plus retourner de styles de verrouillage pour éviter de bloquer l'application
+  const lockStyles: React.CSSProperties | undefined = undefined;
 
   return {
     lockStyles,

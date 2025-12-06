@@ -20,7 +20,6 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuShortcut,
 } from './dropdown-menu';
-import { useMobileMenu } from '@/hooks/use-mobile-menu';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
@@ -105,15 +104,11 @@ export const MobileDropdown: React.FC<MobileDropdownProps> = ({
     onOpenChange?.(newOpen);
   };
 
-  // Utiliser le hook pour gérer le positionnement mobile
-  const { lockStyles, isLocked } = useMobileMenu({
-    menuRef: menuRef as React.RefObject<HTMLElement>,
-    isOpen,
-    triggerRef: triggerRef as React.RefObject<HTMLElement>,
-    lockDelay: 150,
-    collisionPadding: 8,
-    zIndex: 100,
-  });
+  // DÉSACTIVÉ: Ne plus utiliser le hook de verrouillage agressif
+  // Utiliser uniquement les props de Radix UI pour le positionnement
+  // const { lockStyles, isLocked } = useMobileMenu({...});
+  const lockStyles = undefined;
+  const isLocked = false;
 
   return (
     <DropdownMenu
@@ -135,52 +130,16 @@ export const MobileDropdown: React.FC<MobileDropdownProps> = ({
         sideOffset={sideOffset}
         mobileOptimized={!disableMobileOptimization}
         className={cn(
-          isMobile && !disableMobileOptimization && isLocked && '!fixed',
           width && typeof width === 'number' ? `w-[${width}px]` : width,
           contentClassName
         )}
         style={
-          isMobile && !disableMobileOptimization && lockStyles
-            ? { ...lockStyles, ...(width && { width: typeof width === 'number' ? `${width}px` : width }) }
-            : width
+          width
             ? { width: typeof width === 'number' ? `${width}px` : width }
             : undefined
         }
-        onCloseAutoFocus={(e) => {
-          if (isMobile && !disableMobileOptimization) {
-            e.preventDefault();
-          }
-        }}
-        onPointerDownOutside={(e) => {
-          // Permettre la fermeture normale du menu
-          // Ne pas empêcher la fermeture, seulement éviter les fermetures accidentelles pendant l'animation
-          if (isLocked && isMobile && !disableMobileOptimization) {
-            const target = e.target as HTMLElement;
-            // Ne pas empêcher si on clique sur le trigger
-            if (triggerRef.current?.contains(target)) {
-              return; // Laisser Radix UI gérer la fermeture
-            }
-            // Ne pas empêcher si on clique en dehors du menu
-            if (!menuRef.current?.contains(target)) {
-              return; // Laisser Radix UI gérer la fermeture
-            }
-          }
-        }}
-        onInteractOutside={(e) => {
-          // Permettre la fermeture normale du menu
-          // Ne pas empêcher la fermeture, seulement éviter les fermetures accidentelles pendant l'animation
-          if (isLocked && isMobile && !disableMobileOptimization) {
-            const target = e.target as HTMLElement;
-            // Ne pas empêcher si on clique sur le trigger
-            if (triggerRef.current?.contains(target)) {
-              return; // Laisser Radix UI gérer la fermeture
-            }
-            // Ne pas empêcher si on clique en dehors du menu
-            if (!menuRef.current?.contains(target)) {
-              return; // Laisser Radix UI gérer la fermeture
-            }
-          }
-        }}
+        // Laisser Radix UI gérer tous les événements normalement
+        // Pas de manipulation supplémentaire qui pourrait bloquer l'application
       >
         {children}
       </DropdownMenuContent>

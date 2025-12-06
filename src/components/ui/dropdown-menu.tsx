@@ -68,9 +68,11 @@ const DropdownMenuContent = React.forwardRef<
         sideOffset={sideOffset}
         side={isMobile && mobileOptimized ? "bottom" : props.side}
         align={isMobile && mobileOptimized ? "end" : props.align}
-        avoidCollisions={isMobile && mobileOptimized ? false : props.avoidCollisions ?? true}
+        // IMPORTANT: Laisser avoidCollisions activé pour que Radix UI gère le positionnement
+        // Ne pas utiliser sticky="always" qui peut causer des problèmes
+        avoidCollisions={props.avoidCollisions ?? true}
         collisionPadding={isMobile && mobileOptimized ? { top: 8, bottom: 8, left: 8, right: 8 } : props.collisionPadding ?? 8}
-        sticky={isMobile && mobileOptimized ? "always" : props.sticky ?? "partial"}
+        sticky={props.sticky ?? "partial"}
         className={cn(
           "z-[100] min-w-[8rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
           // Animations optimisées pour mobile
