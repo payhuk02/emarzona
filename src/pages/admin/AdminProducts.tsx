@@ -2,10 +2,12 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useAdminActions } from '@/hooks/useAdminActions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,6 +51,7 @@ const AdminProducts = () => {
   const { deleteProduct, toggleProductStatus } = useAdminActions();
   const navigate = useNavigate();
   const { isAAL2 } = useAdminMFA();
+  const isMobile = useIsMobile();
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -139,33 +142,118 @@ const AdminProducts = () => {
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
             <div ref={tableRef} role="region" aria-label="Tableau des produits">
-              <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Boutique</TableHead>
-                  <TableHead>Prix</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Date de création</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProducts.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.store_name}</TableCell>
-                    <TableCell>{formatCurrency(product.price)}</TableCell>
-                    <TableCell>
-                      <Badge variant={product.is_active ? 'default' : 'secondary'}>
-                        {product.is_active ? 'Actif' : 'Inactif'}
+              {/* Version mobile : Cartes */}
+              {isMobile ? (
+                <MobileTableCard
+                  data={filteredProducts}
+                  columns={[
+                    { key: 'name', label: 'Nom', priority: 'high' },
+                    { key: 'store_name', label: 'Boutique', priority: 'high' },
+                    { key: 'price', label: 'Prix', priority: 'high', render: (value) => formatCurrency(value) },
+                    { key: 'is_active', label: 'Statut', priority: 'high', render: (value) => (
+                      <Badge variant={value ? 'default' : 'secondary'}>
+                        {value ? 'Actif' : 'Inactif'}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {new Date(product.created_at).toLocaleDateString('fr-FR')}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    )},
+                    { key: 'created_at', label: 'Date de création', priority: 'medium', render: (value) => new Date(value).toLocaleDateString('fr-FR') },
+                  ]}
+                  actions={(product) => (
+                    <div className="flex flex-wrap gap-2">
+                      <ProtectedAction permission="products.manage">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={!isAAL2}
+                                  onClick={async () => {
+                                    if (!isAAL2) return;
+                                    const success = await toggleProductStatus(product.id, product.is_active);
+                                    if (success) {
+                                      await fetchProducts();
+                                    }
+                                  }}
+                                  className="w-full sm:w-auto"
+                                >
+                                  {product.is_active ? (
+                                    <>
+                                      <PowerOff className="h-4 w-4 mr-1" />
+                                      Désactiver
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Power className="h-4 w-4 mr-1" />
+                                      Activer
+                                    </>
+                                  )}
+                                </Button>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {product.is_active ? 'Désactiver le produit' : 'Activer le produit'}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </ProtectedAction>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/dashboard/products/${product.id}`)}
+                        className="w-full sm:w-auto"
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        Voir
+                      </Button>
+                      <ProtectedAction permission="products.delete">
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          disabled={!isAAL2}
+                          onClick={() => {
+                            if (!isAAL2) return;
+                            setSelectedProduct(product.id);
+                            setDeleteDialogOpen(true);
+                          }}
+                          className="w-full sm:w-auto"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Supprimer
+                        </Button>
+                      </ProtectedAction>
+                    </div>
+                  )}
+                />
+              ) : (
+                /* Version desktop : Tableau */
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nom</TableHead>
+                      <TableHead>Boutique</TableHead>
+                      <TableHead>Prix</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead>Date de création</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredProducts.map((product) => (
+                      <TableRow key={product.id}>
+                        <TableCell className="font-medium">{product.name}</TableCell>
+                        <TableCell>{product.store_name}</TableCell>
+                        <TableCell>{formatCurrency(product.price)}</TableCell>
+                        <TableCell>
+                          <Badge variant={product.is_active ? 'default' : 'secondary'}>
+                            {product.is_active ? 'Actif' : 'Inactif'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {new Date(product.created_at).toLocaleDateString('fr-FR')}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
                         <ProtectedAction permission="products.manage">
                           <TooltipProvider>
                             <Tooltip>

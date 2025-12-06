@@ -217,6 +217,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
       <div className="product-image-container relative overflow-hidden bg-muted/30 flex-grow">
         <ResponsiveProductImage
           src={product.image_url || '/placeholder-image.png'}
+          loading="lazy"
           alt={product.name}
           className="w-full h-full product-image"
           priority={true}
