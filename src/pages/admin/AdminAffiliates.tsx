@@ -8,7 +8,9 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -49,6 +51,7 @@ import { formatCurrency } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const AdminAffiliates = () => {
+  const isMobile = useIsMobile();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -467,111 +470,253 @@ const AdminAffiliates = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Affilié</TableHead>
-                      <TableHead>Code</TableHead>
-                      <TableHead className="text-right">Clics</TableHead>
-                      <TableHead className="text-right">Ventes</TableHead>
-                      <TableHead className="text-right">CA</TableHead>
-                      <TableHead className="text-right">Commissions</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {affiliates.map((affiliate) => {
-                      const conversionRate = affiliate.total_clicks > 0 
-                        ? ((affiliate.total_sales / affiliate.total_clicks) * 100).toFixed(1) 
+                {affiliates.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    Aucun affilié trouvé
+                  </div>
+                ) : isMobile ? (
+                  <MobileTableCard
+                    data={affiliates.map((aff) => {
+                      const conversionRate = aff.total_clicks > 0 
+                        ? ((aff.total_sales / aff.total_clicks) * 100).toFixed(1) 
                         : '0';
-                      
-                      return (
-                        <TableRow key={affiliate.id}>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{affiliate.display_name || 'N/A'}</p>
-                              <p className="text-xs text-muted-foreground">{affiliate.email}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{affiliate.affiliate_code}</Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <MousePointerClick className="h-3 w-3" />
-                              {affiliate.total_clicks}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right font-semibold">
-                            {affiliate.total_sales}
+                      return { id: aff.id, ...aff, conversionRate };
+                    })}
+                    columns={[
+                      {
+                        key: 'display_name',
+                        header: 'Affilié',
+                        priority: 'high',
+                        render: (value, row) => (
+                          <div>
+                            <p className="font-medium">{row.display_name || 'N/A'}</p>
+                            <p className="text-xs text-muted-foreground">{row.email}</p>
+                          </div>
+                        ),
+                        className: 'font-medium',
+                      },
+                      {
+                        key: 'affiliate_code',
+                        header: 'Code',
+                        priority: 'high',
+                        render: (value) => <Badge variant="outline">{String(value)}</Badge>,
+                      },
+                      {
+                        key: 'total_clicks',
+                        header: 'Clics',
+                        priority: 'medium',
+                        render: (value) => (
+                          <div className="flex items-center gap-1">
+                            <MousePointerClick className="h-3 w-3" />
+                            {Number(value)}
+                          </div>
+                        ),
+                      },
+                      {
+                        key: 'total_sales',
+                        header: 'Ventes',
+                        priority: 'high',
+                        render: (value, row) => (
+                          <div>
+                            <p className="font-semibold">{Number(value)}</p>
                             <p className="text-xs text-muted-foreground">
-                              {conversionRate}%
+                              {row.conversionRate}%
                             </p>
-                          </TableCell>
-                          <TableCell className="text-right font-semibold">
-                            {formatCurrency(affiliate.total_revenue)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div>
-                              <p className="font-semibold text-orange-600">
-                                {formatCurrency(affiliate.total_commission_earned)}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Payé : {formatCurrency(affiliate.total_commission_paid)}
-                              </p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {affiliate.status === 'active' && (
+                          </div>
+                        ),
+                        className: 'font-semibold',
+                      },
+                      {
+                        key: 'total_revenue',
+                        header: 'CA',
+                        priority: 'high',
+                        render: (value) => formatCurrency(Number(value)),
+                        className: 'font-semibold',
+                      },
+                      {
+                        key: 'total_commission_earned',
+                        header: 'Commissions',
+                        priority: 'high',
+                        render: (value, row) => (
+                          <div>
+                            <p className="font-semibold text-orange-600">
+                              {formatCurrency(Number(value))}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Payé : {formatCurrency(Number(row.total_commission_paid))}
+                            </p>
+                          </div>
+                        ),
+                      },
+                      {
+                        key: 'status',
+                        header: 'Statut',
+                        priority: 'high',
+                        render: (value) => {
+                          const status = String(value);
+                          if (status === 'active') {
+                            return (
                               <Badge className="gap-1">
                                 <CheckCircle2 className="h-3 w-3" />
                                 Actif
                               </Badge>
-                            )}
-                            {affiliate.status === 'suspended' && (
+                            );
+                          }
+                          if (status === 'suspended') {
+                            return (
                               <Badge variant="destructive" className="gap-1">
                                 <Ban className="h-3 w-3" />
                                 Suspendu
                               </Badge>
-                            )}
-                            {affiliate.status === 'pending' && (
+                            );
+                          }
+                          if (status === 'pending') {
+                            return (
                               <Badge variant="outline" className="gap-1">
                                 <Clock className="h-3 w-3" />
                                 En attente
                               </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {affiliate.status === 'active' ? (
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => {
-                                  setSelectedAffiliate(affiliate);
-                                  setShowSuspendDialog(true);
-                                }}
-                                className="gap-2"
-                              >
-                                <Ban className="h-3 w-3" />
-                                Suspendre
-                              </Button>
-                            ) : affiliate.status === 'suspended' ? (
-                              <Button
-                                size="sm"
-                                onClick={() => handleActivateAffiliate(affiliate)}
-                                className="gap-2"
-                              >
-                                <CheckCircle2 className="h-3 w-3" />
-                                Activer
-                              </Button>
-                            ) : null}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                            );
+                          }
+                          return null;
+                        },
+                      },
+                    ]}
+                    actions={(row) => (
+                      <div className="flex justify-end">
+                        {row.status === 'active' ? (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => {
+                              setSelectedAffiliate(row);
+                              setShowSuspendDialog(true);
+                            }}
+                            className="gap-2 min-h-[44px]"
+                          >
+                            <Ban className="h-3 w-3" />
+                            Suspendre
+                          </Button>
+                        ) : row.status === 'suspended' ? (
+                          <Button
+                            size="sm"
+                            onClick={() => handleActivateAffiliate(row)}
+                            className="gap-2 min-h-[44px]"
+                          >
+                            <CheckCircle2 className="h-3 w-3" />
+                            Activer
+                          </Button>
+                        ) : null}
+                      </div>
+                    )}
+                  />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Affilié</TableHead>
+                        <TableHead>Code</TableHead>
+                        <TableHead className="text-right">Clics</TableHead>
+                        <TableHead className="text-right">Ventes</TableHead>
+                        <TableHead className="text-right">CA</TableHead>
+                        <TableHead className="text-right">Commissions</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {affiliates.map((affiliate) => {
+                        const conversionRate = affiliate.total_clicks > 0 
+                          ? ((affiliate.total_sales / affiliate.total_clicks) * 100).toFixed(1) 
+                          : '0';
+                        
+                        return (
+                          <TableRow key={affiliate.id}>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">{affiliate.display_name || 'N/A'}</p>
+                                <p className="text-xs text-muted-foreground">{affiliate.email}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{affiliate.affiliate_code}</Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <MousePointerClick className="h-3 w-3" />
+                                {affiliate.total_clicks}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right font-semibold">
+                              {affiliate.total_sales}
+                              <p className="text-xs text-muted-foreground">
+                                {conversionRate}%
+                              </p>
+                            </TableCell>
+                            <TableCell className="text-right font-semibold">
+                              {formatCurrency(affiliate.total_revenue)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div>
+                                <p className="font-semibold text-orange-600">
+                                  {formatCurrency(affiliate.total_commission_earned)}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  Payé : {formatCurrency(affiliate.total_commission_paid)}
+                                </p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {affiliate.status === 'active' && (
+                                <Badge className="gap-1">
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Actif
+                                </Badge>
+                              )}
+                              {affiliate.status === 'suspended' && (
+                                <Badge variant="destructive" className="gap-1">
+                                  <Ban className="h-3 w-3" />
+                                  Suspendu
+                                </Badge>
+                              )}
+                              {affiliate.status === 'pending' && (
+                                <Badge variant="outline" className="gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  En attente
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {affiliate.status === 'active' ? (
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    setSelectedAffiliate(affiliate);
+                                    setShowSuspendDialog(true);
+                                  }}
+                                  className="gap-2"
+                                >
+                                  <Ban className="h-3 w-3" />
+                                  Suspendre
+                                </Button>
+                              ) : affiliate.status === 'suspended' ? (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleActivateAffiliate(affiliate)}
+                                  className="gap-2"
+                                >
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Activer
+                                </Button>
+                              ) : null}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
                 
                 {/* Pagination pour les affiliés */}
                 {affiliatesPagination && affiliatesPagination.totalPages > 1 && (
