@@ -7,7 +7,9 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { AppSidebar } from '@/components/AppSidebar';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +38,7 @@ import { fr } from 'date-fns/locale';
 export default function AdminCourses() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const isMobile = useIsMobile();
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -200,51 +203,118 @@ export default function AdminCourses() {
                 {isLoading ? (
                   <div className="text-center py-8">Chargement...</div>
                 ) : filteredCourses && filteredCourses.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="text-xs sm:text-sm">Titre</TableHead>
-                        <TableHead className="hidden md:table-cell text-xs sm:text-sm">Instructeur</TableHead>
-                        <TableHead className="text-xs sm:text-sm">Prix</TableHead>
-                        <TableHead className="text-xs sm:text-sm">Étudiants</TableHead>
-                        <TableHead className="hidden sm:table-cell text-xs sm:text-sm">Note</TableHead>
-                        <TableHead className="text-xs sm:text-sm">Statut</TableHead>
-                        <TableHead className="hidden lg:table-cell text-xs sm:text-sm">Date Création</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredCourses.map((course) => {
-                        const ratings = course.reviews || [];
+                  isMobile ? (
+                    <MobileTableCard
+                      data={filteredCourses.map((c) => {
+                        const ratings = c.reviews || [];
                         const avgRating = ratings.length
                           ? ratings.reduce((s: number, r: any) => s + (r.rating || 0), 0) / ratings.length
                           : 0;
-
-                        return (
-                          <TableRow key={course.id}>
-                            <TableCell className="font-medium text-xs sm:text-sm">{course.title}</TableCell>
-                            <TableCell className="hidden md:table-cell text-xs sm:text-sm">{course.instructor?.full_name || 'N/A'}</TableCell>
-                            <TableCell className="text-xs sm:text-sm">{course.price?.toLocaleString()} FCFA</TableCell>
-                            <TableCell className="text-xs sm:text-sm">
-                              <div className="flex items-center gap-1">
-                                <Users className="h-3 w-3" />
-                                {course.enrollments?.[0]?.count || 0}
-                              </div>
-                            </TableCell>
-                            <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
-                              <div className="flex items-center gap-1">
-                                <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                                {avgRating > 0 ? avgRating.toFixed(1) : '-'}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-xs sm:text-sm">{getStatusBadge(course.status)}</TableCell>
-                            <TableCell className="hidden lg:table-cell text-xs sm:text-sm">
-                              {format(new Date(course.created_at), 'PP', { locale: fr })}
-                            </TableCell>
-                          </TableRow>
-                        );
+                        return { id: c.id, ...c, avgRating };
                       })}
-                    </TableBody>
-                  </Table>
+                      columns={[
+                        {
+                          key: 'title',
+                          header: 'Titre',
+                          priority: 'high',
+                          className: 'font-medium',
+                        },
+                        {
+                          key: 'instructor',
+                          header: 'Instructeur',
+                          priority: 'medium',
+                          render: (value, row) => row.instructor?.full_name || 'N/A',
+                        },
+                        {
+                          key: 'price',
+                          header: 'Prix',
+                          priority: 'high',
+                          render: (value) => `${Number(value || 0).toLocaleString()} FCFA`,
+                          className: 'font-medium',
+                        },
+                        {
+                          key: 'enrollments',
+                          header: 'Étudiants',
+                          priority: 'high',
+                          render: (value, row) => (
+                            <div className="flex items-center gap-1">
+                              <Users className="h-3 w-3" />
+                              {row.enrollments?.[0]?.count || 0}
+                            </div>
+                          ),
+                        },
+                        {
+                          key: 'avgRating',
+                          header: 'Note',
+                          priority: 'medium',
+                          render: (value) => (
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                              {Number(value) > 0 ? Number(value).toFixed(1) : '-'}
+                            </div>
+                          ),
+                        },
+                        {
+                          key: 'status',
+                          header: 'Statut',
+                          priority: 'high',
+                          render: (value) => getStatusBadge(String(value)),
+                        },
+                        {
+                          key: 'created_at',
+                          header: 'Date Création',
+                          priority: 'low',
+                          render: (value) => format(new Date(value), 'PP', { locale: fr }),
+                        },
+                      ]}
+                    />
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-xs sm:text-sm">Titre</TableHead>
+                          <TableHead className="hidden md:table-cell text-xs sm:text-sm">Instructeur</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Prix</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Étudiants</TableHead>
+                          <TableHead className="hidden sm:table-cell text-xs sm:text-sm">Note</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Statut</TableHead>
+                          <TableHead className="hidden lg:table-cell text-xs sm:text-sm">Date Création</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredCourses.map((course) => {
+                          const ratings = course.reviews || [];
+                          const avgRating = ratings.length
+                            ? ratings.reduce((s: number, r: any) => s + (r.rating || 0), 0) / ratings.length
+                            : 0;
+
+                          return (
+                            <TableRow key={course.id}>
+                              <TableCell className="font-medium text-xs sm:text-sm">{course.title}</TableCell>
+                              <TableCell className="hidden md:table-cell text-xs sm:text-sm">{course.instructor?.full_name || 'N/A'}</TableCell>
+                              <TableCell className="text-xs sm:text-sm">{course.price?.toLocaleString()} FCFA</TableCell>
+                              <TableCell className="text-xs sm:text-sm">
+                                <div className="flex items-center gap-1">
+                                  <Users className="h-3 w-3" />
+                                  {course.enrollments?.[0]?.count || 0}
+                                </div>
+                              </TableCell>
+                              <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
+                                <div className="flex items-center gap-1">
+                                  <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                                  {avgRating > 0 ? avgRating.toFixed(1) : '-'}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-xs sm:text-sm">{getStatusBadge(course.status)}</TableCell>
+                              <TableCell className="hidden lg:table-cell text-xs sm:text-sm">
+                                {format(new Date(course.created_at), 'PP', { locale: fr })}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  )
                 ) : (
                   <div className="text-center py-8 sm:py-12">
                     <GraduationCap className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />

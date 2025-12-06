@@ -22,6 +22,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 
 interface StoreData {
   id: string;
@@ -41,6 +43,7 @@ const AdminStores = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { deleteStore } = useAdminActions();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -141,59 +144,117 @@ const AdminStores = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Propriétaire</TableHead>
-                  <TableHead>Produits</TableHead>
-                  <TableHead>Date de création</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredStores.map((store) => (
-                  <TableRow key={store.id}>
-                    <TableCell className="font-medium">{store.name}</TableCell>
-                    <TableCell>{store.owner_name}</TableCell>
-                    <TableCell>{store.products_count}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {new Date(store.created_at).toLocaleDateString('fr-FR')}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(`/stores/${store.slug}`)}
-                          className="min-h-[44px] min-w-[44px] sm:min-w-auto"
-                          aria-label="Voir la boutique"
-                        >
-                          <Eye className="h-4 w-4 sm:mr-1" />
-                          <span className="hidden sm:inline">Voir</span>
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedStore(store.id);
-                            setDeleteDialogOpen(true);
-                          }}
-                          className="min-h-[44px] min-w-[44px]"
-                          aria-label="Supprimer la boutique"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {filteredStores.length === 0 && (
+            {filteredStores.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 Aucune boutique trouvée
               </div>
+            ) : isMobile ? (
+              <MobileTableCard
+                data={filteredStores}
+                columns={[
+                  {
+                    key: 'name',
+                    header: 'Nom',
+                    priority: 'high',
+                    className: 'font-medium',
+                  },
+                  {
+                    key: 'owner_name',
+                    header: 'Propriétaire',
+                    priority: 'high',
+                  },
+                  {
+                    key: 'products_count',
+                    header: 'Produits',
+                    priority: 'medium',
+                  },
+                  {
+                    key: 'created_at',
+                    header: 'Date de création',
+                    priority: 'medium',
+                    render: (value) => (
+                      <span className="text-muted-foreground">
+                        {new Date(value).toLocaleDateString('fr-FR')}
+                      </span>
+                    ),
+                  },
+                ]}
+                actions={(row) => (
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/stores/${row.slug}`)}
+                      className="min-h-[44px] min-w-[44px]"
+                      aria-label="Voir la boutique"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedStore(row.id);
+                        setDeleteDialogOpen(true);
+                      }}
+                      className="min-h-[44px] min-w-[44px]"
+                      aria-label="Supprimer la boutique"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Propriétaire</TableHead>
+                    <TableHead>Produits</TableHead>
+                    <TableHead>Date de création</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredStores.map((store) => (
+                    <TableRow key={store.id}>
+                      <TableCell className="font-medium">{store.name}</TableCell>
+                      <TableCell>{store.owner_name}</TableCell>
+                      <TableCell>{store.products_count}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {new Date(store.created_at).toLocaleDateString('fr-FR')}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/stores/${store.slug}`)}
+                            className="min-h-[44px] min-w-[44px] sm:min-w-auto"
+                            aria-label="Voir la boutique"
+                          >
+                            <Eye className="h-4 w-4 sm:mr-1" />
+                            <span className="hidden sm:inline">Voir</span>
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedStore(store.id);
+                              setDeleteDialogOpen(true);
+                            }}
+                            className="min-h-[44px] min-w-[44px]"
+                            aria-label="Supprimer la boutique"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             )}
           </CardContent>
         </Card>
