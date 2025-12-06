@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Product } from "@/hooks/useProducts";
 import type { UnifiedProduct } from "@/types/unified-product";
 import { Button } from "@/components/ui/button";
@@ -52,28 +52,36 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     fetchUser();
   }, []);
 
-  const price = product.promo_price ?? product.price;
-  const hasPromo = product.promo_price && product.promo_price < product.price;
-  const discountPercent = hasPromo
-    ? Math.round(((product.price - product.promo_price!) / product.price) * 100)
-    : 0;
+  // Mémoriser les calculs de prix pour éviter les recalculs
+  const { price, hasPromo, discountPercent } = useMemo(() => {
+    const calculatedPrice = product.promo_price ?? product.price;
+    const calculatedHasPromo = product.promo_price && product.promo_price < product.price;
+    const calculatedDiscountPercent = calculatedHasPromo
+      ? Math.round(((product.price - product.promo_price!) / product.price) * 100)
+      : 0;
+    return {
+      price: calculatedPrice,
+      hasPromo: calculatedHasPromo,
+      discountPercent: calculatedDiscountPercent,
+    };
+  }, [product.promo_price, product.price]);
 
-  // Vérifier si le produit est nouveau (< 7 jours)
-  const isNew = () => {
+  // Vérifier si le produit est nouveau (< 7 jours) - mémorisé
+  const isNew = useMemo(() => {
     if (!product.created_at) return false;
     const createdDate = new Date(product.created_at);
     const now = new Date();
     const daysDiff = (now.getTime() - createdDate.getTime()) / (1000 * 3600 * 24);
     return daysDiff < 7;
-  };
+  }, [product.created_at]);
 
-  // Formater le prix
-  const formatPrice = (amount: number) => {
+  // Formater le prix - mémorisé
+  const formatPrice = useCallback((amount: number) => {
     return new Intl.NumberFormat('fr-FR').format(amount);
-  };
+  }, []);
 
-  // Nettoyer les balises HTML de la description
-  const stripHtmlTags = (html: string): string => {
+  // Nettoyer les balises HTML de la description - mémorisé
+  const stripHtmlTags = useCallback((html: string): string => {
     // SÉCURISÉ : Extraire le texte sans utiliser innerHTML (évite XSS)
     if (!html.includes('<')) {
       // Pas de HTML, retourner directement
@@ -92,10 +100,10 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
       temp.textContent = html; // textContent échappe automatiquement
       return temp.textContent || '';
     }
-  };
+  }, []);
 
-  // Générer une description courte
-  const getShortDescription = (): string | undefined => {
+  // Générer une description courte - mémorisé
+  const shortDescription = useMemo((): string | undefined => {
     let rawText = '';
     
     const extendedProduct = product as Product & Partial<UnifiedProduct>;
@@ -114,23 +122,24 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     }
     
     return cleanText;
-  };
-  
-  const shortDescription = getShortDescription();
+  }, [product.description, product.short_description, stripHtmlTags]);
 
-  // Gérer les favoris
-  const handleFavorite = (e: React.MouseEvent) => {
+  // Gérer les favoris - mémorisé
+  const handleFavorite = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorite(!isFavorite);
-    toast({
-      title: isFavorite ? "Retiré des favoris" : "Ajouté aux favoris",
-      description: isFavorite ? `${product.name} a été retiré de vos favoris` : `${product.name} a été ajouté à vos favoris`,
+    setIsFavorite(prev => {
+      const newValue = !prev;
+      toast({
+        title: prev ? "Retiré des favoris" : "Ajouté aux favoris",
+        description: prev ? `${product.name} a été retiré de vos favoris` : `${product.name} a été ajouté à vos favoris`,
+      });
+      return newValue;
     });
-  };
+  }, [product.name, toast]);
 
-  // Gérer l'achat
-  const handleBuyNow = async () => {
+  // Gérer l'achat - mémorisé
+  const handleBuyNow = useCallback(async () => {
     if (!product.store_id) {
       toast({
         title: "Erreur",
@@ -190,9 +199,10 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
       });
       setLoading(false);
     }
-  };
+  }, [product.store_id, product.id, product.name, product.currency, price, storeSlug, toast]);
 
-  const renderStars = (rating: number) => (
+  // Rendre les étoiles - mémorisé
+  const renderStars = useCallback((rating: number) => (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
@@ -203,7 +213,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
         />
       ))}
     </div>
-  );
+  ), []);
 
   return (
     <Card 

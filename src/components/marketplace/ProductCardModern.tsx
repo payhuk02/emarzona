@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { 
   ShoppingCart, 
@@ -96,24 +96,33 @@ const ProductCardModernComponent = ({
     fetchUser();
   }, []);
 
-  const price = product.promotional_price ?? product.price;
-  const hasPromo = product.promotional_price !== null && product.promotional_price !== undefined && product.promotional_price < product.price;
-  const discountPercent = hasPromo
-    ? Math.round(((product.price - product.promotional_price!) / product.price) * 100)
-    : 0;
+  // Mémoriser les calculs de prix pour éviter les recalculs
+  const { price, hasPromo, discountPercent } = useMemo(() => {
+    const calculatedPrice = product.promotional_price ?? product.price;
+    const calculatedHasPromo = product.promotional_price !== null && product.promotional_price !== undefined && product.promotional_price < product.price;
+    const calculatedDiscountPercent = calculatedHasPromo
+      ? Math.round(((product.price - product.promotional_price!) / product.price) * 100)
+      : 0;
+    return {
+      price: calculatedPrice,
+      hasPromo: calculatedHasPromo,
+      discountPercent: calculatedDiscountPercent,
+    };
+  }, [product.promotional_price, product.price]);
 
-  // Vérifier si le produit est nouveau (< 7 jours)
-  const isNew = () => {
+  // Vérifier si le produit est nouveau (< 7 jours) - mémorisé
+  const isNew = useMemo(() => {
     if (!product.created_at) return false;
     const createdDate = new Date(product.created_at);
     const now = new Date();
     const daysDiff = (now.getTime() - createdDate.getTime()) / (1000 * 3600 * 24);
     return daysDiff < 7;
-  };
+  }, [product.created_at]);
 
-  const formatPrice = (price: number) => {
+  // Formater le prix - mémorisé
+  const formatPrice = useCallback((price: number) => {
     return price.toLocaleString('fr-FR');
-  };
+  }, []);
 
   const renderStars = (rating: number) => (
     <div className="flex items-center gap-0.5" role="img" aria-label={`Note: ${rating.toFixed(1)} sur 5 étoiles`}>
@@ -129,7 +138,8 @@ const ProductCardModernComponent = ({
     </div>
   );
 
-  const handleBuyNow = async () => {
+  // Handlers mémorisés pour éviter les re-créations
+  const handleBuyNow = useCallback(async () => {
     if (!product.store_id) {
       toast({
         title: "Erreur",
@@ -188,9 +198,9 @@ const ProductCardModernComponent = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [product.store_id, product.id, product.name, product.currency, product.stores?.slug, price, storeSlug, toast]);
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = useCallback(async () => {
     if (!product.store_id) {
       toast({
         title: "Erreur",
@@ -209,13 +219,13 @@ const ProductCardModernComponent = ({
     } catch (error: any) {
       logger.error("Erreur lors de l'ajout au panier:", error);
     }
-  };
+  }, [product.store_id, product.id, product.product_type, addItem]);
 
-  const handleFavorite = async (e: React.MouseEvent) => {
+  const handleFavorite = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     await toggleFavorite(product.id);
-  };
+  }, [product.id, toggleFavorite]);
 
   const getLicensingBadge = () => {
     if (!product.licensing_type) return null;

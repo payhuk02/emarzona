@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useCallback } from "react";
 import { Product } from "@/hooks/useProducts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,16 +59,24 @@ const ProductListView = ({
   const { toast } = useToast();
   const [imageError, setImageError] = useState(false);
 
-  const productUrl = `${window.location.origin}/stores/${storeSlug}/products/${product.slug}`;
+  // Mémoriser l'URL du produit
+  const productUrl = useMemo(
+    () => `${window.location.origin}/stores/${storeSlug}/products/${product.slug}`,
+    [storeSlug, product.slug]
+  );
   
-  // Calculer les informations de stock
-  const stockInfo = getStockInfo(
-    product.stock_quantity,
-    product.low_stock_threshold,
-    product.track_inventory ?? (product.product_type !== 'digital')
+  // Calculer les informations de stock - mémorisé
+  const stockInfo = useMemo(
+    () => getStockInfo(
+      product.stock_quantity,
+      product.low_stock_threshold,
+      product.track_inventory ?? (product.product_type !== 'digital')
+    ),
+    [product.stock_quantity, product.low_stock_threshold, product.track_inventory, product.product_type]
   );
 
-  const handleCopyLink = async () => {
+  // Handlers mémorisés
+  const handleCopyLink = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(productUrl);
       toast({
@@ -82,21 +90,23 @@ const ProductListView = ({
         variant: "destructive",
       });
     }
-  };
+  }, [productUrl, toast]);
 
-  const handlePreview = () => {
+  const handlePreview = useCallback(() => {
     window.open(productUrl, "_blank");
-  };
+  }, [productUrl]);
 
-  const formatDate = (dateString: string) => {
+  // Formater la date - mémorisé
+  const formatDate = useCallback((dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
     });
-  };
+  }, []);
 
-  const getCategoryColor = (category: string | null) => {
+  // Obtenir la couleur de catégorie - mémorisé
+  const getCategoryColor = useCallback((category: string | null) => {
     const colors: Record<string, string> = {
       'Formation': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
       'Digital': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
@@ -105,7 +115,7 @@ const ProductListView = ({
       'Logiciel': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-100',
     };
     return colors[category || ''] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
-  };
+  }, []);
 
   return (
     <Card className={`hover:shadow-md transition-all border-border/50 ${isSelected ? 'ring-2 ring-primary' : ''}`}>
