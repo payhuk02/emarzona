@@ -45,10 +45,7 @@ export const usePayments = (
       // Récupérer d'abord les paiements sans jointure pour éviter les erreurs RLS
       let query = supabase
         .from("payments")
-        .select(`
-          *,
-          orders (order_number)
-        `)
+        .select("*")
         .eq("store_id", storeId)
         .order("created_at", { ascending: false });
 
@@ -70,9 +67,10 @@ export const usePayments = (
 
       if (error) throw error;
       
-      // Enrichir avec les données clients si customer_id existe
-      const paymentsWithCustomers = await Promise.all(
+      // Enrichir avec les données clients et orders si nécessaire
+      const paymentsEnriched = await Promise.all(
         (data || []).map(async (payment: any) => {
+          // Récupérer les données client si customer_id existe
           if (payment.customer_id) {
             try {
               const { data: customerData } = await supabase
@@ -97,11 +95,37 @@ export const usePayments = (
               });
             }
           }
+          
+          // Récupérer les données order si order_id existe
+          if (payment.order_id) {
+            try {
+              const { data: orderData } = await supabase
+                .from('orders')
+                .select('order_number')
+                .eq('id', payment.order_id)
+                .eq('store_id', storeId)
+                .single();
+              
+              if (orderData) {
+                payment.orders = {
+                  order_number: orderData.order_number,
+                };
+              }
+            } catch (orderError) {
+              // Ignorer les erreurs de récupération order, continuer sans
+              logger.error('Error fetching order for payment', { 
+                paymentId: payment.id, 
+                orderId: payment.order_id,
+                error: orderError 
+              });
+            }
+          }
+          
           return payment;
         })
       );
       
-      setPayments(paymentsWithCustomers);
+      setPayments(paymentsEnriched);
     } catch (error: any) {
       toast({
         title: "Erreur",
