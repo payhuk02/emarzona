@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 export interface Payment {
   id: string;
@@ -41,11 +42,11 @@ export const usePayments = (
     }
 
     try {
+      // Récupérer d'abord les paiements sans jointure pour éviter les erreurs RLS
       let query = supabase
         .from("payments")
         .select(`
           *,
-          customers (name, email),
           orders (order_number)
         `)
         .eq("store_id", storeId)
@@ -68,7 +69,39 @@ export const usePayments = (
       const { data, error } = await query;
 
       if (error) throw error;
-      setPayments(data || []);
+      
+      // Enrichir avec les données clients si customer_id existe
+      const paymentsWithCustomers = await Promise.all(
+        (data || []).map(async (payment: any) => {
+          if (payment.customer_id) {
+            try {
+              const { data: customerData } = await supabase
+                .from('customers')
+                .select('name, email, full_name')
+                .eq('id', payment.customer_id)
+                .eq('store_id', storeId)
+                .single();
+              
+              if (customerData) {
+                payment.customers = {
+                  name: customerData.name || customerData.full_name || 'N/A',
+                  email: customerData.email,
+                };
+              }
+            } catch (customerError) {
+              // Ignorer les erreurs de récupération client, continuer sans
+              logger.error('Error fetching customer for payment', { 
+                paymentId: payment.id, 
+                customerId: payment.customer_id,
+                error: customerError 
+              });
+            }
+          }
+          return payment;
+        })
+      );
+      
+      setPayments(paymentsWithCustomers);
     } catch (error: any) {
       toast({
         title: "Erreur",
