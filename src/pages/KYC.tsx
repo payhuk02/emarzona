@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MobileFormField } from '@/components/ui/mobile-form-field';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useKYC, KYCFormData } from '@/hooks/useKYC';
@@ -145,84 +146,78 @@ const KYC = () => {
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                     <div className="space-y-3 sm:space-y-4">
-                      <div>
-                        <Label htmlFor="full_name" className="text-xs sm:text-sm">Nom complet *</Label>
-                        <Input
-                          id="full_name"
-                          required
-                          value={formData.full_name || ''}
-                          onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                          placeholder="Jean Dupont"
-                          className="h-9 sm:h-10 text-xs sm:text-sm mt-1.5 sm:mt-2"
-                        />
-                      </div>
+                      <MobileFormField
+                        label="Nom complet"
+                        name="full_name"
+                        type="text"
+                        value={formData.full_name || ''}
+                        onChange={(value) => setFormData({ ...formData, full_name: value })}
+                        required
+                        fieldProps={{
+                          placeholder: "Jean Dupont",
+                        }}
+                      />
 
-                      <div>
-                        <Label htmlFor="date_of_birth" className="text-xs sm:text-sm">Date de naissance *</Label>
-                        <Input
-                          id="date_of_birth"
-                          type="date"
-                          required
-                          value={formData.date_of_birth || ''}
-                          onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
-                          className="h-9 sm:h-10 text-xs sm:text-sm mt-1.5 sm:mt-2"
-                        />
-                      </div>
+                      <MobileFormField
+                        label="Date de naissance"
+                        name="date_of_birth"
+                        type="date"
+                        value={formData.date_of_birth || ''}
+                        onChange={(value) => setFormData({ ...formData, date_of_birth: value })}
+                        required
+                      />
 
-                      <div>
-                        <Label htmlFor="address" className="text-xs sm:text-sm">Adresse complète *</Label>
-                        <Input
-                          id="address"
-                          required
-                          value={formData.address || ''}
-                          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                          placeholder="123 Rue Example"
-                          className="h-9 sm:h-10 text-xs sm:text-sm mt-1.5 sm:mt-2"
-                        />
-                      </div>
+                      <MobileFormField
+                        label="Adresse complète"
+                        name="address"
+                        type="text"
+                        value={formData.address || ''}
+                        onChange={(value) => setFormData({ ...formData, address: value })}
+                        required
+                        fieldProps={{
+                          placeholder: "123 Rue Example",
+                        }}
+                      />
 
                       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
-                        <div>
-                          <Label htmlFor="city" className="text-xs sm:text-sm">Ville *</Label>
-                          <Input
-                            id="city"
-                            required
-                            value={formData.city || ''}
-                            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                            placeholder="Paris"
-                            className="h-9 sm:h-10 text-xs sm:text-sm mt-1.5 sm:mt-2"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="country" className="text-xs sm:text-sm">Pays *</Label>
-                          <Input
-                            id="country"
-                            required
-                            value={formData.country || ''}
-                            onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                            placeholder="France"
-                            className="h-9 sm:h-10 text-xs sm:text-sm mt-1.5 sm:mt-2"
-                          />
-                        </div>
+                        <MobileFormField
+                          label="Ville"
+                          name="city"
+                          type="text"
+                          value={formData.city || ''}
+                          onChange={(value) => setFormData({ ...formData, city: value })}
+                          required
+                          fieldProps={{
+                            placeholder: "Paris",
+                          }}
+                        />
+                        <MobileFormField
+                          label="Pays"
+                          name="country"
+                          type="text"
+                          value={formData.country || ''}
+                          onChange={(value) => setFormData({ ...formData, country: value })}
+                          required
+                          fieldProps={{
+                            placeholder: "France",
+                          }}
+                        />
                       </div>
 
-                      <div>
-                        <Label htmlFor="document_type" className="text-xs sm:text-sm">Type de document *</Label>
-                        <Select
-                          value={formData.document_type}
-                          onValueChange={(value: any) => setFormData({ ...formData, document_type: value })}
-                        >
-                          <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm mt-1.5 sm:mt-2">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="cni">Carte Nationale d'Identité</SelectItem>
-                            <SelectItem value="passport">Passeport</SelectItem>
-                            <SelectItem value="drivers_license">Permis de conduire</SelectItem>
-                            <SelectItem value="other">Autre</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      <MobileFormField
+                        label="Type de document"
+                        name="document_type"
+                        type="select"
+                        value={formData.document_type || 'cni'}
+                        onChange={(value) => setFormData({ ...formData, document_type: value as any })}
+                        required
+                        selectOptions={[
+                          { value: 'cni', label: "Carte Nationale d'Identité" },
+                          { value: 'passport', label: 'Passeport' },
+                          { value: 'drivers_license', label: 'Permis de conduire' },
+                          { value: 'other', label: 'Autre' },
+                        ]}
+                      />
 
                       <div>
                         <Label htmlFor="document_front" className="text-xs sm:text-sm">Document (recto) * (max 5MB)</Label>

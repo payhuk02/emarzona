@@ -7,10 +7,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  BottomSheet,
+  BottomSheetContent,
+} from "@/components/ui/bottom-sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { MobileFormField } from "@/components/ui/mobile-form-field";
 import ProductSlugEditor from "./ProductSlugEditor";
 import ImageUpload from "./ImageUpload";
 import { Info } from '@/components/icons';
@@ -18,6 +23,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useProductManagement } from "@/hooks/useProductManagement";
 import { Product } from "@/hooks/useProducts";
 import { useSpaceInputFix } from "@/hooks/useSpaceInputFix";
+import { useResponsiveModal } from "@/hooks/use-responsive-modal";
 
 interface EditProductDialogProps {
   product: Product;
@@ -46,6 +52,7 @@ const EditProductDialogComponent = ({
   const { updateProduct, checkSlugAvailability, loading } =
     useProductManagement(product.store_id);
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
+  const { useBottomSheet } = useResponsiveModal();
 
   useEffect(() => {
     setName(product.name);
@@ -82,81 +89,75 @@ const EditProductDialogComponent = ({
     return await checkSlugAvailability(slugToCheck, product.id);
   }, [checkSlugAvailability, product.id]);
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Modifier le produit</DialogTitle>
-          <DialogDescription>
-            Modifiez les informations de votre produit
-          </DialogDescription>
-        </DialogHeader>
+  const formContent = (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Label htmlFor="isActive">Produit actif</Label>
+        <Switch
+          id="isActive"
+          checked={isActive}
+          onCheckedChange={setIsActive}
+        />
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="isActive">Produit actif</Label>
-            <Switch
-              id="isActive"
-              checked={isActive}
-              onCheckedChange={setIsActive}
-            />
-          </div>
+      <MobileFormField
+        label="Nom du produit"
+        name="name"
+        type="text"
+        value={name}
+        onChange={setName}
+        required
+        fieldProps={{
+          onKeyDown: handleSpaceKeyDown,
+          placeholder: "Formation Excel complète",
+        }}
+      />
 
-          <div>
-            <Label htmlFor="name">Nom du produit *</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onKeyDown={handleSpaceKeyDown}
-              placeholder="Formation Excel complète"
-              required
-            />
-          </div>
+      <ProductSlugEditor
+        productName={name}
+        currentSlug={slug}
+        storeSlug={storeSlug}
+        onSlugChange={setSlug}
+        onCheckAvailability={handleCheckAvailability}
+      />
 
-          <ProductSlugEditor
-            productName={name}
-            currentSlug={slug}
-            storeSlug={storeSlug}
-            onSlugChange={setSlug}
-            onCheckAvailability={handleCheckAvailability}
-          />
+      <MobileFormField
+        label="Prix (XOF)"
+        name="price"
+        type="number"
+        value={price}
+        onChange={setPrice}
+        required
+        fieldProps={{
+          placeholder: "5000",
+          min: "0",
+          step: "1",
+        }}
+      />
 
-          <div>
-            <Label htmlFor="price">Prix (XOF) *</Label>
-            <Input
-              id="price"
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="5000"
-              required
-              min="0"
-              step="1"
-            />
-          </div>
+      <MobileFormField
+        label="Catégorie"
+        name="category"
+        type="text"
+        value={category}
+        onChange={setCategory}
+        fieldProps={{
+          onKeyDown: handleSpaceKeyDown,
+          placeholder: "Formation",
+        }}
+      />
 
-          <div>
-            <Label htmlFor="category">Catégorie</Label>
-            <Input
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              onKeyDown={handleSpaceKeyDown}
-              placeholder="Formation"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="productType">Type de produit</Label>
-            <Input
-              id="productType"
-              value={productType}
-              onChange={(e) => setProductType(e.target.value)}
-              onKeyDown={handleSpaceKeyDown}
-              placeholder="Produit numérique"
-            />
-          </div>
+      <MobileFormField
+        label="Type de produit"
+        name="productType"
+        type="text"
+        value={productType}
+        onChange={setProductType}
+        fieldProps={{
+          onKeyDown: handleSpaceKeyDown,
+          placeholder: "Produit numérique",
+        }}
+      />
 
           <div className="space-y-1">
             <div className="flex items-center justify-between">
@@ -187,33 +188,61 @@ const EditProductDialogComponent = ({
             <p className="text-xs text-gray-500">Astuce: respectez 1280×720 (16:9) pour les cartes Marketplace et la boutique.</p>
           </div>
 
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              onKeyDown={handleSpaceKeyDown}
-              placeholder="Décrivez votre produit..."
-              rows={4}
-            />
-          </div>
+      <MobileFormField
+        label="Description"
+        name="description"
+        type="textarea"
+        value={description}
+        onChange={setDescription}
+        fieldProps={{
+          onKeyDown: handleSpaceKeyDown,
+          placeholder: "Décrivez votre produit...",
+          rows: 4,
+        }}
+      />
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Annuler
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Enregistrement..." : "Enregistrer"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+      <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          className="w-full sm:w-auto"
+        >
+          Annuler
+        </Button>
+        <Button type="submit" disabled={loading} className="w-full sm:w-auto">
+          {loading ? "Enregistrement..." : "Enregistrer"}
+        </Button>
+      </div>
+    </form>
+  );
+
+  return (
+    <>
+      {useBottomSheet ? (
+        <BottomSheet open={open} onOpenChange={onOpenChange}>
+          <BottomSheetContent
+            title="Modifier le produit"
+            description="Modifiez les informations de votre produit"
+            className="max-h-[90vh] overflow-y-auto"
+          >
+            {formContent}
+          </BottomSheetContent>
+        </BottomSheet>
+      ) : (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Modifier le produit</DialogTitle>
+              <DialogDescription>
+                Modifiez les informations de votre produit
+              </DialogDescription>
+            </DialogHeader>
+            {formContent}
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 };
 

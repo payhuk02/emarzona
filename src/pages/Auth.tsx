@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MobileFormField } from "@/components/ui/mobile-form-field";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -33,6 +34,12 @@ const Auth = () => {
   const [isResetLoading, setIsResetLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [resetError, setResetError] = useState<string>("");
+  // États contrôlés pour les formulaires
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [signupName, setSignupName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -131,10 +138,9 @@ const Auth = () => {
     setError("");
     setIsLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email-signup') as string;
-    const password = formData.get('password-signup') as string;
-    const name = formData.get('name') as string;
+    const email = signupEmail;
+    const password = signupPassword;
+    const name = signupName;
 
     // Validation
     if (!email || !password || !name) {
@@ -221,9 +227,8 @@ const Auth = () => {
     setError("");
     setIsLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email-login') as string;
-    const password = formData.get('password-login') as string;
+    const email = loginEmail;
+    const password = loginPassword;
 
     if (!email || !password) {
       setError(t('auth.login.errorRequired'));
@@ -336,21 +341,20 @@ const Auth = () => {
                   aria-label={t('auth.login.formLabel')}
                   noValidate
                 >
-                  <div className="space-y-2">
-                    <Label htmlFor="email-login">{t('auth.login.email')}</Label>
-                    <Input
-                      id="email-login"
-                      name="email-login"
-                      type="email"
-                      placeholder={t('auth.login.emailPlaceholder')}
-                      required
-                      disabled={isLoading}
-                      autoComplete="email"
-                      aria-required="true"
-                      aria-invalid={error.includes('email') || error.includes('Email')}
-                      className="min-h-[44px] text-base"
-                    />
-                  </div>
+                  <MobileFormField
+                    label={t('auth.login.email')}
+                    name="email-login"
+                    type="email"
+                    value={loginEmail}
+                    onChange={setLoginEmail}
+                    required
+                    error={error.includes('email') || error.includes('Email') ? error : undefined}
+                    fieldProps={{
+                      disabled: isLoading,
+                      autoComplete: "email",
+                      placeholder: t('auth.login.emailPlaceholder'),
+                    }}
+                  />
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="password-login">{t('auth.login.password')}</Label>
@@ -411,36 +415,34 @@ const Auth = () => {
                   aria-label={t('auth.signup.formLabel')}
                   noValidate
                 >
-                  <div className="space-y-2">
-                    <Label htmlFor="name">{t('auth.signup.name')}</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      type="text"
-                      placeholder={t('auth.signup.namePlaceholder')}
-                      required
-                      disabled={isLoading}
-                      autoComplete="name"
-                      aria-required="true"
-                      aria-invalid={error.includes('name') || error.includes('nom')}
-                      className="min-h-[44px] text-base"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email-signup">{t('auth.signup.email')}</Label>
-                    <Input
-                      id="email-signup"
-                      name="email-signup"
-                      type="email"
-                      placeholder={t('auth.signup.emailPlaceholder')}
-                      required
-                      disabled={isLoading}
-                      autoComplete="email"
-                      aria-required="true"
-                      aria-invalid={error.includes('email') || error.includes('Email')}
-                      className="min-h-[44px] text-base"
-                    />
-                  </div>
+                  <MobileFormField
+                    label={t('auth.signup.name')}
+                    name="name"
+                    type="text"
+                    value={signupName}
+                    onChange={setSignupName}
+                    required
+                    error={error.includes('name') || error.includes('nom') ? error : undefined}
+                    fieldProps={{
+                      disabled: isLoading,
+                      autoComplete: "name",
+                      placeholder: t('auth.signup.namePlaceholder'),
+                    }}
+                  />
+                  <MobileFormField
+                    label={t('auth.signup.email')}
+                    name="email-signup"
+                    type="email"
+                    value={signupEmail}
+                    onChange={setSignupEmail}
+                    required
+                    error={error.includes('email') || error.includes('Email') ? error : undefined}
+                    fieldProps={{
+                      disabled: isLoading,
+                      autoComplete: "email",
+                      placeholder: t('auth.signup.emailPlaceholder'),
+                    }}
+                  />
                   <div className="space-y-2">
                     <Label htmlFor="password-signup">{t('auth.signup.password')}</Label>
                     <div className="relative">

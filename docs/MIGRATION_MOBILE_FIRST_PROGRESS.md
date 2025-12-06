@@ -22,6 +22,15 @@
   - Grille responsive pour champs côte à côte
   - Boutons responsive (full-width sur mobile)
 
+#### ✅ EditProductDialog (`src/components/products/EditProductDialog.tsx`)
+- **Avant :** Dialog classique uniquement
+- **Après :** BottomSheet sur mobile, Dialog sur desktop
+- **Changements :**
+  - Utilisation de `useResponsiveModal` pour détection automatique
+  - Tous les champs migrés vers `MobileFormField`
+  - Switch pour produit actif conservé
+  - Boutons responsive (full-width sur mobile)
+
 ### 2. Formulaires vers MobileFormField
 
 #### ✅ CreateProductDialog - Champs migrés
@@ -39,6 +48,29 @@
 - Ville
 - Pays
 - Notes (textarea)
+
+#### ✅ EditProductDialog - Champs migrés
+- Nom du produit
+- Prix (XOF)
+- Catégorie
+- Type de produit
+- Description (textarea)
+- Switch produit actif (conservé)
+
+#### ✅ KYC Form - Champs migrés
+- Nom complet
+- Date de naissance
+- Adresse complète
+- Ville
+- Pays
+- Type de document (select)
+- Fichiers (conservés en Input standard)
+
+#### ✅ Auth Form - Champs migrés
+- Email (login)
+- Email (signup)
+- Nom (signup)
+- Mot de passe (conservés avec show/hide button)
 
 ### 3. Tableaux vers MobileTableCard
 
@@ -67,8 +99,8 @@
 
 ## 📊 Statistiques
 
-- **Modales migrées :** 2/15+ (~13%)
-- **Formulaires migrés :** 2/20+ (~10%)
+- **Modales migrées :** 3/15+ (~20%)
+- **Formulaires migrés :** 5/20+ (~25%)
 - **Tableaux migrés :** 1/15+ (~7%)
 - **Images optimisées :** 1/15+ (~7%)
 
@@ -76,17 +108,12 @@
 
 ### Priorité HAUTE
 
-1. **EditProductDialog** (`src/components/products/EditProductDialog.tsx`)
-   - Similaire à CreateProductDialog
-   - Migration rapide possible
+✅ **TERMINÉ :**
+1. ✅ **EditProductDialog** - Migré vers BottomSheet + MobileFormField
+2. ✅ **KYC Form** - Migré vers MobileFormField
+3. ✅ **Auth Form** - Migré vers MobileFormField (champs principaux)
 
-2. **KYC Form** (`src/pages/KYC.tsx`)
-   - Formulaire important avec plusieurs champs
-   - Migration vers MobileFormField
-
-3. **Auth Form** (`src/pages/Auth.tsx`)
-   - Formulaire de connexion/inscription
-   - Impact UX élevé
+### Priorité MOYENNE (Nouvelles priorités)
 
 ### Priorité MOYENNE
 
