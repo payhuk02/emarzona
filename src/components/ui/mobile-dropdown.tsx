@@ -76,6 +76,23 @@ interface MobileDropdownProps {
 
 /**
  * Composant MobileDropdown - Menu dropdown optimisé pour mobile
+ * 
+ * Wrapper autour de DropdownMenu qui gère automatiquement :
+ * - Le positionnement stable sur mobile
+ * - Les animations optimisées
+ * - La gestion de l'état (contrôlé ou non-contrôlé)
+ * 
+ * @example
+ * ```tsx
+ * <MobileDropdown
+ *   trigger={<Button>Menu</Button>}
+ *   align="end"
+ *   side="bottom"
+ * >
+ *   <DropdownMenuItem>Option 1</DropdownMenuItem>
+ *   <DropdownMenuItem>Option 2</DropdownMenuItem>
+ * </MobileDropdown>
+ * ```
  */
 export const MobileDropdown: React.FC<MobileDropdownProps> = ({
   trigger,
@@ -104,11 +121,8 @@ export const MobileDropdown: React.FC<MobileDropdownProps> = ({
     onOpenChange?.(newOpen);
   };
 
-  // DÉSACTIVÉ: Ne plus utiliser le hook de verrouillage agressif
-  // Utiliser uniquement les props de Radix UI pour le positionnement
-  // const { lockStyles, isLocked } = useMobileMenu({...});
-  const lockStyles = undefined;
-  const isLocked = false;
+  // Le positionnement est géré par Radix UI via les props
+  // Pas besoin de hook supplémentaire
 
   return (
     <DropdownMenu

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getPerformanceMonitor } from '@/lib/performance-monitor';
+import { logger } from '@/lib/logger';
 
 /**
  * Composant d'optimisation des performances mobile
@@ -171,7 +172,7 @@ export const PerformanceOptimizer = () => {
     setTimeout(() => {
       const report = monitor.getReport();
       if (import.meta.env.DEV) {
-        console.log('📊 Performance Report:', report);
+        logger.info('📊 Performance Report', { report });
       }
     }, 5000);
     // Appliquer les préférences utilisateur

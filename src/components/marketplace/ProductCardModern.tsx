@@ -57,7 +57,7 @@ interface ProductCardModernProps {
     created_at?: string;
     licensing_type?: string | null;
     license_terms?: string | null;
-    downloadable_files?: string[] | any;
+    downloadable_files?: string[];
     collect_shipping_address?: boolean | null;
     is_featured?: boolean;
     product_affiliate_settings?: Array<{
@@ -124,7 +124,7 @@ const ProductCardModernComponent = ({
     return price.toLocaleString('fr-FR');
   }, []);
 
-  const renderStars = (rating: number) => (
+  const renderStars = useCallback((rating: number) => (
     <div className="flex items-center gap-0.5" role="img" aria-label={`Note: ${rating.toFixed(1)} sur 5 étoiles`}>
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
@@ -136,7 +136,7 @@ const ProductCardModernComponent = ({
         />
       ))}
     </div>
-  );
+  ), []);
 
   // Handlers mémorisés pour éviter les re-créations
   const handleBuyNow = useCallback(async () => {
@@ -188,11 +188,14 @@ const ProductCardModernComponent = ({
           });
         });
       }
-    } catch (error: any) {
-      logger.error("Erreur lors de l'achat:", error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Impossible d'initialiser le paiement";
+      logger.error("Erreur lors de l'achat", { 
+        error: error instanceof Error ? error : new Error(String(error))
+      });
       toast({
         title: "Erreur de paiement",
-        description: error.message || "Impossible d'initialiser le paiement",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -213,11 +216,13 @@ const ProductCardModernComponent = ({
     try {
       await addItem({
         product_id: product.id,
-        product_type: (product.product_type || 'digital') as any,
+        product_type: (product.product_type || 'digital') as 'digital' | 'physical' | 'service' | 'course' | 'artist',
         quantity: 1,
       });
-    } catch (error: any) {
-      logger.error("Erreur lors de l'ajout au panier:", error);
+    } catch (error: unknown) {
+      logger.error("Erreur lors de l'ajout au panier", { 
+        error: error instanceof Error ? error : new Error(String(error))
+      });
     }
   }, [product.store_id, product.id, product.product_type, addItem]);
 

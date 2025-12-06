@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 
 interface UseOptimizedFormOptions<T> {
   /**
@@ -198,7 +199,9 @@ export function useOptimizedForm<T extends Record<string, any>>(
       try {
         await onSubmit(state.values);
       } catch (error) {
-        console.error('Form submission error:', error);
+        logger.error('Form submission error', { 
+          error: error instanceof Error ? error : new Error(String(error))
+        });
       } finally {
         setState((prev) => ({ ...prev, isSubmitting: false }));
       }

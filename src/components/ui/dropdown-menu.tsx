@@ -3,6 +3,8 @@ import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { MOBILE_COLLISION_PADDING, DESKTOP_COLLISION_PADDING } from "@/constants/mobile";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
@@ -52,14 +54,33 @@ const DropdownMenuSubContent = React.forwardRef<
 ));
 DropdownMenuSubContent.displayName = DropdownMenuPrimitive.SubContent.displayName;
 
+/**
+ * Contenu du DropdownMenu - Menu déroulant
+ * 
+ * Optimisé automatiquement pour mobile avec :
+ * - Positionnement adaptatif (bottom sur mobile)
+ * - Animations simplifiées
+ * - Collision padding adaptatif
+ * 
+ * @example
+ * ```tsx
+ * <DropdownMenuContent>
+ *   <DropdownMenuItem>Option 1</DropdownMenuItem>
+ *   <DropdownMenuItem>Option 2</DropdownMenuItem>
+ * </DropdownMenuContent>
+ * ```
+ */
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> & {
+    /**
+     * Activer l'optimisation mobile (positionnement et animations)
+     * @default true
+     */
     mobileOptimized?: boolean;
   }
 >(({ className, sideOffset = 4, mobileOptimized = true, ...props }, ref) => {
-  // Détecter mobile avec CSS media query pour éviter le flash
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isMobile = useIsMobile();
   
   return (
     <DropdownMenuPrimitive.Portal>
@@ -71,7 +92,7 @@ const DropdownMenuContent = React.forwardRef<
         // IMPORTANT: Laisser avoidCollisions activé pour que Radix UI gère le positionnement
         // Ne pas utiliser sticky="always" qui peut causer des problèmes
         avoidCollisions={props.avoidCollisions ?? true}
-        collisionPadding={isMobile && mobileOptimized ? { top: 8, bottom: 8, left: 8, right: 8 } : props.collisionPadding ?? 8}
+        collisionPadding={isMobile && mobileOptimized ? MOBILE_COLLISION_PADDING : (props.collisionPadding ?? DESKTOP_COLLISION_PADDING)}
         sticky={props.sticky ?? "partial"}
         className={cn(
           "z-[100] min-w-[8rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
@@ -88,14 +109,27 @@ const DropdownMenuContent = React.forwardRef<
 });
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 
+/**
+ * Item du DropdownMenu - Option individuelle dans le menu
+ * 
+ * Chaque item a une hauteur minimale de 44px pour respecter les guidelines de touch targets.
+ * 
+ * @example
+ * ```tsx
+ * <DropdownMenuItem onSelect={() => console.log('Selected')}>
+ *   Option 1
+ * </DropdownMenuItem>
+ * ```
+ */
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
+    /**
+     * Ajouter un padding à gauche (pour les items avec icônes)
+     */
     inset?: boolean;
   }
 >(({ className, inset, onSelect, ...props }, ref) => {
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  
   return (
     <DropdownMenuPrimitive.Item
       ref={ref}
@@ -105,6 +139,7 @@ const DropdownMenuItem = React.forwardRef<
         inset && "pl-8",
         className,
       )}
+      role="menuitem"
       onSelect={onSelect}
       {...props}
     />

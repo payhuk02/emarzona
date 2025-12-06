@@ -4,6 +4,18 @@ import type { UnifiedProduct } from "@/types/unified-product";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+
+/**
+ * Type étendu pour Product avec propriétés optionnelles supplémentaires
+ */
+interface ExtendedProduct extends Product {
+  is_featured?: boolean;
+  pricing_model?: 'subscription' | 'one-time';
+  downloadable_files?: string[];
+  licensing_type?: 'plr' | 'copyrighted' | 'standard';
+  stock_quantity?: number;
+  purchases_count?: number;
+}
 import { 
   ShoppingCart, 
   Star, 
@@ -33,7 +45,7 @@ import { PriceStockAlertButton } from "@/components/marketplace/PriceStockAlertB
 import "@/styles/product-grid-professional.css";
 
 interface ProductCardProps {
-  product: Product & Partial<UnifiedProduct>;
+  product: ExtendedProduct & Partial<UnifiedProduct>;
   storeSlug: string;
 }
 
@@ -254,7 +266,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
             </Badge>
           )}
           
-          {(product as any).is_featured && (
+          {extendedProduct.is_featured && (
             <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0">
               <Crown className="h-3 w-3 mr-1" />
               Vedette
@@ -385,9 +397,9 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
             return null;
           })()}
           
-          {(product as any).pricing_model && (
+          {extendedProduct.pricing_model && (
             <Badge variant="secondary" className="text-xs bg-indigo-100 text-indigo-800 border-0">
-              {(product as any).pricing_model === 'subscription' && (
+              {extendedProduct.pricing_model === 'subscription' && (
                 <>
                   <RefreshCw className="h-3 w-3 mr-1" />
                   Abonnement
@@ -416,29 +428,29 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
         </div>
 
         {/* Badge fichiers téléchargeables */}
-        {(product as any).downloadable_files && Array.isArray((product as any).downloadable_files) && (product as any).downloadable_files.length > 0 && (
+        {extendedProduct.downloadable_files && Array.isArray(extendedProduct.downloadable_files) && extendedProduct.downloadable_files.length > 0 && (
           <div className="mb-3">
             <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-700 border-green-500/20">
               <Download className="h-3 w-3 mr-1" />
-              {(product as any).downloadable_files.length} fichier{(product as any).downloadable_files.length > 1 ? 's' : ''}
+              {extendedProduct.downloadable_files.length} fichier{extendedProduct.downloadable_files.length > 1 ? 's' : ''}
             </Badge>
           </div>
         )}
 
         {/* Licensing details (amélioré) */}
-        {(product as any).licensing_type && (
+        {extendedProduct.licensing_type && (
           <div className="mb-3 flex items-center gap-2">
             <Shield className={`h-3.5 w-3.5 flex-shrink-0 ${
-              (product as any).licensing_type === 'plr' ? 'text-emerald-500' : 
-              (product as any).licensing_type === 'copyrighted' ? 'text-red-500' : 
+              extendedProduct.licensing_type === 'plr' ? 'text-emerald-500' : 
+              extendedProduct.licensing_type === 'copyrighted' ? 'text-red-500' : 
               'text-blue-500'
             }`} />
             <span className={`text-xs font-medium ${
-              (product as any).licensing_type === 'plr' ? 'text-emerald-700 dark:text-emerald-400' : 
-              (product as any).licensing_type === 'copyrighted' ? 'text-red-700 dark:text-red-400' : 
+              extendedProduct.licensing_type === 'plr' ? 'text-emerald-700 dark:text-emerald-400' : 
+              extendedProduct.licensing_type === 'copyrighted' ? 'text-red-700 dark:text-red-400' : 
               'text-blue-700 dark:text-blue-400'
             }`}>
-              {(product as any).licensing_type === 'plr' ? 'Licence PLR (droits de label privé)' : (product as any).licensing_type === 'copyrighted' ? 'Protégé par droit d\'auteur' : 'Licence standard'}
+              {extendedProduct.licensing_type === 'plr' ? 'Licence PLR (droits de label privé)' : extendedProduct.licensing_type === 'copyrighted' ? 'Protégé par droit d\'auteur' : 'Licence standard'}
             </span>
           </div>
         )}
@@ -461,16 +473,16 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
                 currentPrice={price}
                 currency={product.currency || 'XOF'}
                 productType={product.product_type || 'digital'}
-                stockQuantity={(product as any).stock_quantity}
+                stockQuantity={extendedProduct.stock_quantity}
                 variant="outline"
                 size="sm"
                 className="flex-shrink-0 h-7"
               />
             </div>
-            {(product as any).purchases_count !== undefined && (
+            {extendedProduct.purchases_count !== undefined && (
               <div className="flex items-center gap-1 text-sm text-gray-600">
                 <TrendingUp className="h-4 w-4" />
-                <span>{(product as any).purchases_count || 0}</span>
+                <span>{extendedProduct.purchases_count || 0}</span>
               </div>
             )}
           </div>
@@ -539,14 +551,22 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
 const ProductCard = React.memo(ProductCardComponent, (prevProps, nextProps) => {
+  const prevProduct = prevProps.product as ExtendedProduct;
+  const nextProduct = nextProps.product as ExtendedProduct;
+  
   return (
-    prevProps.product.id === nextProps.product.id &&
-    prevProps.product.price === nextProps.product.price &&
-    (prevProps.product as any).promotional_price === (nextProps.product as any).promotional_price &&
-    prevProps.product.image_url === nextProps.product.image_url &&
-    prevProps.product.name === nextProps.product.name &&
-    prevProps.product.rating === nextProps.product.rating &&
-    prevProps.product.reviews_count === nextProps.product.reviews_count &&
+    prevProduct.id === nextProduct.id &&
+    prevProduct.price === nextProduct.price &&
+    prevProduct.promo_price === nextProduct.promo_price &&
+    prevProduct.image_url === nextProduct.image_url &&
+    prevProduct.name === nextProduct.name &&
+    prevProduct.rating === nextProduct.rating &&
+    prevProduct.reviews_count === nextProduct.reviews_count &&
+    prevProduct.is_featured === nextProduct.is_featured &&
+    prevProduct.pricing_model === nextProduct.pricing_model &&
+    prevProduct.licensing_type === nextProduct.licensing_type &&
+    prevProduct.stock_quantity === nextProduct.stock_quantity &&
+    prevProduct.purchases_count === nextProduct.purchases_count &&
     prevProps.storeSlug === nextProps.storeSlug
   );
 });

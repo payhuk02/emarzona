@@ -7,17 +7,27 @@
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from '@/components/icons';
+import { Loader2 } from 'lucide-react';
 import { MobileDropdown, DropdownMenuItem } from '@/components/ui/mobile-dropdown';
 import { Button } from '@/components/ui/button';
 import { AVAILABLE_LANGUAGES, type LanguageCode } from '@/i18n/config';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { MOBILE_SIDE_OFFSET, DESKTOP_SIDE_OFFSET } from '@/constants/mobile';
 
 interface LanguageSwitcherProps {
   className?: string;
   buttonClassName?: string;
   variant?: 'default' | 'ghost' | 'outline';
   showLabel?: boolean;
+  /**
+   * État contrôlé d'ouverture du menu
+   */
+  open?: boolean;
+  /**
+   * Callback quand l'état d'ouverture change
+   */
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
@@ -25,25 +35,43 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   buttonClassName,
   variant = 'ghost',
   showLabel = false,
+  open: controlledOpen,
+  onOpenChange,
 }) => {
   const { i18n } = useTranslation();
   const isMobile = useIsMobile();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const [isChanging, setIsChanging] = useState(false);
+  
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const handleOpenChange = (newOpen: boolean) => {
+    if (controlledOpen === undefined) {
+      setInternalOpen(newOpen);
+    }
+    onOpenChange?.(newOpen);
+  };
   
   const currentLanguage = AVAILABLE_LANGUAGES.find(
     (lang) => lang.code === i18n.language
   ) || AVAILABLE_LANGUAGES[0];
 
   const changeLanguage = useCallback((langCode: LanguageCode) => {
-    setOpen(false);
+    // Prévenir les doubles clics
+    if (isChanging) return;
     
-    // Changer la langue après un court délai pour éviter les conflits
+    setIsChanging(true);
+    handleOpenChange(false);
+    
+    // Changement immédiat (pas de délai artificiel)
+    i18n.changeLanguage(langCode);
+    localStorage.setItem('emarzona_language', langCode);
+    document.documentElement.lang = langCode;
+    
+    // Réactiver après un court délai pour le feedback visuel
     setTimeout(() => {
-      i18n.changeLanguage(langCode);
-      localStorage.setItem('emarzona_language', langCode);
-      document.documentElement.lang = langCode;
-    }, isMobile ? 100 : 50);
-  }, [i18n, isMobile]);
+      setIsChanging(false);
+    }, 150);
+  }, [i18n, isChanging, handleOpenChange]);
 
   return (
     <MobileDropdown
@@ -52,10 +80,17 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           variant={variant}
           size="sm"
           className={cn('gap-2 touch-manipulation', buttonClassName)}
-          aria-label="Change language"
+          aria-label={`Change language (current: ${currentLanguage.name})`}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          disabled={isChanging}
         >
-          <Globe className="h-4 w-4" />
-          <span className="text-lg">{currentLanguage.flag}</span>
+          {isChanging ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Globe className="h-4 w-4" aria-hidden="true" />
+          )}
+          <span className="text-lg" aria-hidden="true">{currentLanguage.flag}</span>
           {showLabel && (
             <span className="hidden sm:inline">{currentLanguage.name}</span>
           )}
@@ -63,10 +98,10 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       }
       align="end"
       side="bottom"
-      sideOffset={isMobile ? 4 : 8}
+      sideOffset={isMobile ? MOBILE_SIDE_OFFSET : DESKTOP_SIDE_OFFSET}
       width={180}
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
       className={className}
       contentClassName="min-w-[180px]"
     >

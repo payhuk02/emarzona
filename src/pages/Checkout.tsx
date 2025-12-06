@@ -437,6 +437,343 @@ export default function Checkout() {
     finalTotal
   ]);
 
+  /**
+   * Traite le checkout multi-stores
+   * Crée une commande par boutique et initie les paiements
+   */
+  const processMultiStoreCheckout = async ({
+    storeGroups,
+    formData,
+    user,
+    finalTotal,
+    taxAmount,
+    shippingAmount,
+    couponDiscount,
+    giftCardAmount,
+    appliedCouponCode,
+    appliedGiftCard,
+    selectedPaymentProvider,
+    summary,
+  }: {
+    storeGroups: Map<string, StoreGroup>;
+    formData: ShippingAddress;
+    user: { id: string; email: string; user_metadata?: { full_name?: string } };
+    finalTotal: number;
+    taxAmount: number;
+    shippingAmount: number;
+    couponDiscount: number;
+    giftCardAmount: number;
+    appliedCouponCode: { id: string; discountAmount: number; code: string } | null;
+    appliedGiftCard: { id: string; balance: number; code: string } | null;
+    selectedPaymentProvider: 'moneroo' | 'paydunya';
+    summary: { subtotal: number; discount_amount: number };
+  }) => {
+    const createdOrders: Array<{ orderId: string; storeId: string; orderNumber: string; checkoutUrl?: string }> = [];
+    const errors: Array<{ storeId: string; error: string }> = [];
+
+    // Récupérer les infos d'affiliation si disponible
+    const affiliateInfo = await getAffiliateInfo();
+    const hasAffiliate = affiliateInfo.affiliate_link_id && affiliateInfo.product_id;
+
+    // Traiter chaque boutique
+    for (const [storeId, group] of storeGroups.entries()) {
+      try {
+        logger.info(`Processing checkout for store: ${storeId}`, { itemCount: group.items.length });
+
+        // Récupérer les informations de la boutique
+        const { data: store } = await supabase
+          .from('stores')
+          .select('id, name, slug')
+          .eq('id', storeId)
+          .single();
+
+        if (!store) {
+          errors.push({ storeId, error: 'Boutique non trouvée' });
+          continue;
+        }
+
+        // Calculer les totaux pour ce groupe
+        const groupSubtotal = group.items.reduce((sum, item) => 
+          sum + (item.unit_price * item.quantity) - (item.discount_amount || 0) * item.quantity, 0
+        );
+        
+        // Répartir proportionnellement les taxes, shipping, et réductions
+        const totalSubtotal = Array.from(storeGroups.values()).reduce((sum, g) => 
+          sum + g.items.reduce((s, item) => s + (item.unit_price * item.quantity), 0), 0
+        );
+        const proportion = totalSubtotal > 0 ? groupSubtotal / totalSubtotal : 1 / storeGroups.size;
+        
+        const groupTaxAmount = taxAmount * proportion;
+        const groupShippingAmount = shippingAmount * proportion;
+        const groupCouponDiscount = couponDiscount * proportion;
+        const groupGiftCardAmount = giftCardAmount * proportion;
+        const groupTotal = groupSubtotal + groupTaxAmount + groupShippingAmount - groupCouponDiscount - groupGiftCardAmount;
+
+        // Créer ou mettre à jour le client pour cette boutique
+        let finalCustomerId: string | null = null;
+        try {
+          const { data: existingCustomer } = await supabase
+            .from('customers')
+            .select('id')
+            .eq('store_id', storeId)
+            .eq('email', formData.email)
+            .maybeSingle();
+
+          if (existingCustomer) {
+            finalCustomerId = existingCustomer.id;
+            // Mettre à jour les informations du client
+            await supabase
+              .from('customers')
+              .update({
+                full_name: formData.full_name,
+                phone: formData.phone,
+                address: formData.address_line1,
+                city: formData.city,
+                postal_code: formData.postal_code,
+                country: formData.country,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', finalCustomerId);
+          } else {
+            // Créer un nouveau client
+            const { data: newCustomer, error: customerError } = await supabase
+              .from('customers')
+              .insert({
+                store_id: storeId,
+                email: formData.email,
+                full_name: formData.full_name,
+                phone: formData.phone,
+                address: formData.address_line1,
+                city: formData.city,
+                postal_code: formData.postal_code,
+                country: formData.country,
+              })
+              .select()
+              .single();
+
+            if (customerError || !newCustomer) {
+              logger.warn('Error creating customer for store:', { storeId, error: customerError });
+            } else {
+              finalCustomerId = newCustomer.id;
+            }
+          }
+        } catch (customerErr) {
+          logger.warn('Error in customer creation/update for store:', { storeId, error: customerErr });
+        }
+
+        // Générer numéro de commande
+        const { data: orderNumberData } = await supabase.rpc('generate_order_number');
+        const orderNumber = orderNumberData || `ORD-${Date.now()}-${storeId.slice(0, 8)}`;
+
+        // Créer la commande
+        const { data: order, error: orderError } = await supabase
+          .from('orders')
+          .insert({
+            store_id: storeId,
+            customer_id: finalCustomerId || user.id,
+            order_number: orderNumber,
+            total_amount: groupTotal,
+            currency: 'XOF',
+            payment_status: 'pending',
+            status: 'pending',
+            shipping_address: formData,
+          })
+          .select()
+          .single();
+
+        if (orderError) {
+          errors.push({ storeId, error: `Erreur création commande: ${orderError.message}` });
+          continue;
+        }
+
+        // Créer les order_items
+        const orderItems = group.items.map(item => ({
+          order_id: order.id,
+          product_id: item.product_id,
+          product_type: item.product_type,
+          product_name: item.product_name,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          total_price: (item.unit_price - (item.discount_amount || 0)) * item.quantity,
+          variant_id: item.variant_id,
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('order_items')
+          .insert(orderItems);
+
+        if (itemsError) {
+          errors.push({ storeId, error: `Erreur création items: ${itemsError.message}` });
+          continue;
+        }
+
+        // Créer automatiquement la facture
+        try {
+          const { createInvoiceFromOrder } = await import('@/lib/supabase-rpc');
+          const { data: invoiceResult, error: invoiceError } = await createInvoiceFromOrder({
+            p_order_id: order.id,
+          });
+
+          if (invoiceError) {
+            logger.error('Error creating invoice for store:', { storeId, error: invoiceError });
+          } else if (invoiceResult) {
+            logger.info(`Invoice created for store ${storeId}: ${invoiceResult.invoice_id}`);
+          }
+        } catch (invoiceErr) {
+          logger.error('Error in invoice creation for store:', { storeId, error: invoiceErr });
+        }
+
+        // Enregistrer l'utilisation de la promotion si applicable
+        if (appliedCouponCode && appliedCouponCode.id && groupCouponDiscount > 0) {
+          try {
+            const orderTotalBefore = groupSubtotal + groupTaxAmount + groupShippingAmount;
+            const orderTotalAfter = groupTotal;
+
+            await supabase
+              .from('promotion_usage')
+              .insert({
+                promotion_id: appliedCouponCode.id,
+                order_id: order.id,
+                customer_id: finalCustomerId || null,
+                user_id: user.id || null,
+                discount_amount: groupCouponDiscount,
+                order_total_before_discount: orderTotalBefore,
+                order_total_after_discount: orderTotalAfter,
+              });
+
+            // Incrémenter le compteur d'utilisation
+            await supabase.rpc('increment_promotion_usage', {
+              p_promotion_id: appliedCouponCode.id,
+            }).catch(() => {
+              // Ignorer si la fonction RPC n'existe pas
+            });
+          } catch (promotionError) {
+            logger.error('Error recording promotion usage for store:', { storeId, error: promotionError });
+          }
+        }
+
+        // Rédimer la carte cadeau si applicable
+        if (appliedGiftCard && groupGiftCardAmount > 0) {
+          try {
+            const { data: redeemResult, error: redeemError } = await supabase.rpc('redeem_gift_card' as any, {
+              p_gift_card_id: appliedGiftCard.id,
+              p_order_id: order.id,
+              p_amount: groupGiftCardAmount,
+            });
+
+            if (redeemError) {
+              logger.error('Error redeeming gift card for store:', { storeId, error: redeemError });
+            } else if (redeemResult && Array.isArray(redeemResult) && redeemResult.length > 0 && !(redeemResult[0] as any).success) {
+              logger.error('Gift card redemption failed for store:', { storeId, message: (redeemResult[0] as any).message });
+            }
+          } catch (giftCardError) {
+            logger.error('Error in gift card redemption for store:', { storeId, error: giftCardError });
+          }
+        }
+
+        // Initier le paiement
+        const paymentProvider = selectedPaymentProvider || 'moneroo';
+        const paymentResult = await initiatePayment({
+          storeId,
+          orderId: order.id,
+          customerId: user.id,
+          amount: groupTotal,
+          currency: 'XOF',
+          description: `Commande ${orderNumber} - ${group.items.length} article(s) - ${store.name}`,
+          customerEmail: formData.email,
+          customerName: formData.full_name,
+          customerPhone: formData.phone,
+          provider: paymentProvider,
+          metadata: {
+            order_number: orderNumber,
+            item_count: group.items.length,
+            shipping_address: formData,
+            store_name: store.name,
+            store_slug: store.slug,
+            is_multi_store: true,
+            total_stores: storeGroups.size,
+            ...(hasAffiliate && {
+              affiliate_link_id: affiliateInfo.affiliate_link_id,
+              affiliate_id: affiliateInfo.affiliate_id,
+              tracking_cookie: affiliateInfo.tracking_cookie,
+            }),
+          },
+        });
+
+        if (!paymentResult.success || !paymentResult.checkout_url) {
+          errors.push({ 
+            storeId, 
+            error: paymentResult.error || 'Impossible d\'initialiser le paiement' 
+          });
+          continue;
+        }
+
+        createdOrders.push({
+          orderId: order.id,
+          storeId,
+          orderNumber,
+          checkoutUrl: paymentResult.checkout_url,
+        });
+
+        logger.info(`Order created successfully for store ${storeId}`, { orderId: order.id, orderNumber });
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+        logger.error(`Error processing checkout for store ${storeId}:`, { error: errorMessage });
+        errors.push({ storeId, error: errorMessage });
+      }
+    }
+
+    // Résumé des résultats
+    if (createdOrders.length === 0) {
+      toast({
+        title: 'Erreur',
+        description: 'Aucune commande n\'a pu être créée. Veuillez réessayer.',
+        variant: 'destructive',
+      });
+      setIsProcessing(false);
+      return;
+    }
+
+    if (errors.length > 0) {
+      toast({
+        title: 'Attention',
+        description: `${createdOrders.length} commande(s) créée(s) avec succès, ${errors.length} erreur(s).`,
+        variant: 'default',
+      });
+    } else {
+      toast({
+        title: 'Succès',
+        description: `${createdOrders.length} commande(s) créée(s) avec succès !`,
+      });
+    }
+
+    // Marquer le panier comme récupéré
+    try {
+      await supabase.rpc('mark_cart_recovered', {
+        p_user_id: user.id || null,
+        p_session_id: null,
+      });
+    } catch (recoveryError) {
+      logger.warn('Failed to mark cart as recovered', { error: recoveryError });
+    }
+
+    // Rediriger vers le premier paiement
+    // Note: Pour un vrai multi-stores, on pourrait créer une page de suivi
+    // qui gère tous les paiements, mais pour l'instant on redirige vers le premier
+    if (createdOrders[0]?.checkoutUrl) {
+      safeRedirect(createdOrders[0].checkoutUrl, () => {
+        toast({
+          title: 'Erreur de paiement',
+          description: 'URL de paiement invalide',
+          variant: 'destructive',
+        });
+      });
+    } else {
+      // Si pas de checkout URL, rediriger vers la page des commandes
+      navigate('/account/orders');
+    }
+  };
+
   // Validation formulaire
   const validateForm = (): boolean => {
     const errors: Partial<Record<keyof ShippingAddress, string>> = {};
@@ -513,20 +850,25 @@ export default function Checkout() {
       }
 
       // 🆕 Vérifier si le panier contient des produits de plusieurs boutiques
-      // TODO: Implémenter le traitement complet multi-stores
       if (isMultiStore && storeGroups.size > 1) {
-        // Pour l'instant, on traite uniquement le premier store
-        // Le traitement multi-stores complet nécessite une implémentation dédiée
-        logger.log('Multi-store checkout detected', { storeCount: storeGroups.size });
+        logger.info('Multi-store checkout detected', { storeCount: storeGroups.size });
         
-        toast({
-          title: 'Checkout multi-boutiques',
-          description: 'Le checkout multi-boutiques est en cours de développement. Seuls les produits de la première boutique seront traités pour l\'instant.',
-          variant: 'default',
+        // Implémenter le traitement complet multi-stores
+        await processMultiStoreCheckout({
+          storeGroups,
+          formData,
+          user,
+          finalTotal,
+          taxAmount,
+          shippingAmount,
+          couponDiscount,
+          giftCardAmount,
+          appliedCouponCode,
+          appliedGiftCard,
+          selectedPaymentProvider,
+          summary,
         });
-
-        // On continue avec le traitement normal (premier store uniquement)
-        // TODO: Implémenter processMultiStoreCheckout pour gérer tous les stores
+        return; // processMultiStoreCheckout gère la redirection
       }
 
       // Comportement normal (un seul store ou fallback)
