@@ -77,6 +77,18 @@
 - Description (textarea)
 - Switch produit actif (conservé)
 
+#### ✅ CreatePromotionDialog - Champs migrés
+- Code promo (Input standard avec validation spéciale)
+- Description (textarea)
+- Type de réduction (select)
+- Valeur de la réduction (number avec validation)
+- Montant minimum d'achat (number)
+- Nombre d'utilisations max (number)
+- Date de début (datetime-local)
+- Date de fin (datetime-local)
+- Switch activation (conservé)
+- Preview toggle (conservé)
+
 #### ✅ KYC Form - Champs migrés
 - Nom complet
 - Date de naissance
@@ -172,7 +184,14 @@
 2. ✅ **KYC Form** - Migré vers MobileFormField
 3. ✅ **Auth Form** - Migré vers MobileFormField (champs principaux)
 
-### Priorité MOYENNE (Nouvelles priorités)
+### Priorité MOYENNE
+
+✅ **TERMINÉ :**
+1. ✅ **AdminShipping** - Migré vers MobileTableCard
+2. ✅ **OrdersTable** - Migré vers MobileTableCard
+3. ✅ **CreatePromotionDialog** - Migré vers BottomSheet + MobileFormField
+
+### Priorité BASSE (Nouvelles priorités)
 
 ### Priorité MOYENNE
 
