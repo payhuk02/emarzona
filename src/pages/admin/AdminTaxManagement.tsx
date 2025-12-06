@@ -17,6 +17,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
@@ -78,6 +80,7 @@ const TAX_TYPES: { value: TaxType; label: string }[] = [
 ];
 
 export default function AdminTaxManagement() {
+  const isMobile = useIsMobile();
   const { data: taxConfigs, isLoading } = useTaxConfigurations();
   const createTax = useCreateTaxConfiguration();
   const updateTax = useUpdateTaxConfiguration();
@@ -440,56 +443,72 @@ export default function AdminTaxManagement() {
                     </AlertDescription>
                   </Alert>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Pays/Région</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Nom</TableHead>
-                        <TableHead>Taux</TableHead>
-                        <TableHead>Période</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredConfigs.map((config) => (
-                        <TableRow key={config.id}>
-                          <TableCell>
+                  isMobile ? (
+                    <MobileTableCard
+                      data={filteredConfigs.map(c => ({ ...c, id: c.id }))}
+                      columns={[
+                        {
+                          key: 'country',
+                          label: 'Pays/Région',
+                          priority: 'high',
+                          render: (row: TaxConfiguration) => (
                             <div className="flex items-center gap-2">
                               <MapPin className="h-4 w-4 text-muted-foreground" />
                               <div>
-                                <div className="font-medium">{getCountryName(config.country_code)}</div>
-                                {config.state_province && (
+                                <div className="font-medium">{getCountryName(row.country_code)}</div>
+                                {row.state_province && (
                                   <div className="text-xs text-muted-foreground">
-                                    {config.state_province}
+                                    {row.state_province}
                                   </div>
                                 )}
                               </div>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{config.tax_type}</Badge>
-                          </TableCell>
-                          <TableCell>{config.tax_name}</TableCell>
-                          <TableCell>
+                          ),
+                        },
+                        {
+                          key: 'type',
+                          label: 'Type',
+                          priority: 'medium',
+                          render: (row: TaxConfiguration) => <Badge variant="outline">{row.tax_type}</Badge>,
+                        },
+                        {
+                          key: 'name',
+                          label: 'Nom',
+                          priority: 'high',
+                          render: (row: TaxConfiguration) => <span className="font-medium">{row.tax_name}</span>,
+                        },
+                        {
+                          key: 'rate',
+                          label: 'Taux',
+                          priority: 'high',
+                          render: (row: TaxConfiguration) => (
                             <div className="flex items-center gap-1">
                               <Percent className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-semibold">{config.rate}%</span>
+                              <span className="font-semibold">{row.rate}%</span>
                             </div>
-                          </TableCell>
-                          <TableCell>
+                          ),
+                        },
+                        {
+                          key: 'period',
+                          label: 'Période',
+                          priority: 'low',
+                          render: (row: TaxConfiguration) => (
                             <div className="text-sm">
-                              <div>Dès {format(new Date(config.effective_from), 'dd/MM/yyyy', { locale: fr })}</div>
-                              {config.effective_to && (
+                              <div>Dès {format(new Date(row.effective_from), 'dd/MM/yyyy', { locale: fr })}</div>
+                              {row.effective_to && (
                                 <div className="text-muted-foreground">
-                                  Jusqu'au {format(new Date(config.effective_to), 'dd/MM/yyyy', { locale: fr })}
+                                  Jusqu'au {format(new Date(row.effective_to), 'dd/MM/yyyy', { locale: fr })}
                                 </div>
                               )}
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            {config.is_active ? (
+                          ),
+                        },
+                        {
+                          key: 'status',
+                          label: 'Statut',
+                          priority: 'high',
+                          render: (row: TaxConfiguration) => (
+                            row.is_active ? (
                               <Badge variant="default" className="flex items-center gap-1 w-fit">
                                 <CheckCircle className="h-3 w-3" />
                                 Active
@@ -499,31 +518,123 @@ export default function AdminTaxManagement() {
                                 <XCircle className="h-3 w-3" />
                                 Inactive
                               </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleOpenEdit(config)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleDelete(config.id)}
-                                disabled={deleteTax.isPending}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
+                            )
+                          ),
+                        },
+                      ]}
+                      actions={(row) => {
+                        const config = row as TaxConfiguration;
+                        return (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleOpenEdit(config)}
+                              className="min-h-[44px] flex-1"
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Modifier
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDelete(config.id)}
+                              disabled={deleteTax.isPending}
+                              className="min-h-[44px] flex-1"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Supprimer
+                            </Button>
+                          </div>
+                        );
+                      }}
+                    />
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Pays/Région</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Nom</TableHead>
+                          <TableHead>Taux</TableHead>
+                          <TableHead>Période</TableHead>
+                          <TableHead>Statut</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredConfigs.map((config) => (
+                          <TableRow key={config.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-muted-foreground" />
+                                <div>
+                                  <div className="font-medium">{getCountryName(config.country_code)}</div>
+                                  {config.state_province && (
+                                    <div className="text-xs text-muted-foreground">
+                                      {config.state_province}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{config.tax_type}</Badge>
+                            </TableCell>
+                            <TableCell>{config.tax_name}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <Percent className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-semibold">{config.rate}%</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                <div>Dès {format(new Date(config.effective_from), 'dd/MM/yyyy', { locale: fr })}</div>
+                                {config.effective_to && (
+                                  <div className="text-muted-foreground">
+                                    Jusqu'au {format(new Date(config.effective_to), 'dd/MM/yyyy', { locale: fr })}
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {config.is_active ? (
+                                <Badge variant="default" className="flex items-center gap-1 w-fit">
+                                  <CheckCircle className="h-3 w-3" />
+                                  Active
+                                </Badge>
+                              ) : (
+                                <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                                  <XCircle className="h-3 w-3" />
+                                  Inactive
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleOpenEdit(config)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleDelete(config.id)}
+                                  disabled={deleteTax.isPending}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )
                 )}
               </CardContent>
             </Card>

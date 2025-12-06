@@ -7,11 +7,13 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
@@ -32,6 +34,7 @@ import {
 } from 'lucide-react';
 
 export default function AdminSupport() {
+  const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
 
@@ -193,48 +196,117 @@ export default function AdminSupport() {
               </CardHeader>
 
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>N° Ticket</TableHead>
-                      <TableHead>Utilisateur</TableHead>
-                      <TableHead>Sujet</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Priorité</TableHead>
-                      <TableHead>Messages</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockTickets.map((ticket) => (
-                      <TableRow key={ticket.id}>
-                        <TableCell className="font-medium">{ticket.ticket_number}</TableCell>
-                        <TableCell>
+                {isMobile ? (
+                  <MobileTableCard
+                    data={mockTickets.map(t => ({ ...t, id: t.id }))}
+                    columns={[
+                      {
+                        key: 'ticket_number',
+                        label: 'N° Ticket',
+                        priority: 'high',
+                        render: (row) => <span className="font-medium">{row.ticket_number}</span>,
+                      },
+                      {
+                        key: 'user',
+                        label: 'Utilisateur',
+                        priority: 'high',
+                        render: (row) => (
                           <div>
-                            <div className="font-medium">{ticket.user_name}</div>
-                            <div className="text-sm text-muted-foreground">{ticket.user_email}</div>
+                            <div className="font-medium">{row.user_name}</div>
+                            <div className="text-sm text-muted-foreground">{row.user_email}</div>
                           </div>
-                        </TableCell>
-                        <TableCell>{ticket.subject}</TableCell>
-                        <TableCell>{getStatusBadge(ticket.status)}</TableCell>
-                        <TableCell>{getPriorityBadge(ticket.priority)}</TableCell>
-                        <TableCell>
+                        ),
+                      },
+                      {
+                        key: 'subject',
+                        label: 'Sujet',
+                        priority: 'high',
+                        render: (row) => <span>{row.subject}</span>,
+                      },
+                      {
+                        key: 'status',
+                        label: 'Statut',
+                        priority: 'high',
+                        render: (row) => getStatusBadge(row.status),
+                      },
+                      {
+                        key: 'priority',
+                        label: 'Priorité',
+                        priority: 'medium',
+                        render: (row) => getPriorityBadge(row.priority),
+                      },
+                      {
+                        key: 'messages',
+                        label: 'Messages',
+                        priority: 'low',
+                        render: (row) => (
                           <div className="flex items-center gap-1">
                             <MessageSquare className="h-4 w-4" />
-                            {ticket.messages_count}
+                            {row.messages_count}
                           </div>
-                        </TableCell>
-                        <TableCell>{new Date(ticket.created_at).toLocaleDateString()}</TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="outline" size="sm">
-                            Voir
-                          </Button>
-                        </TableCell>
+                        ),
+                      },
+                      {
+                        key: 'date',
+                        label: 'Date',
+                        priority: 'low',
+                        render: (row) => (
+                          <span className="text-sm text-muted-foreground">
+                            {new Date(row.created_at).toLocaleDateString()}
+                          </span>
+                        ),
+                      },
+                    ]}
+                    actions={(row) => (
+                      <Button variant="outline" size="sm" className="min-h-[44px] w-full">
+                        Voir
+                      </Button>
+                    )}
+                  />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>N° Ticket</TableHead>
+                        <TableHead>Utilisateur</TableHead>
+                        <TableHead>Sujet</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead>Priorité</TableHead>
+                        <TableHead>Messages</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {mockTickets.map((ticket) => (
+                        <TableRow key={ticket.id}>
+                          <TableCell className="font-medium">{ticket.ticket_number}</TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{ticket.user_name}</div>
+                              <div className="text-sm text-muted-foreground">{ticket.user_email}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>{ticket.subject}</TableCell>
+                          <TableCell>{getStatusBadge(ticket.status)}</TableCell>
+                          <TableCell>{getPriorityBadge(ticket.priority)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <MessageSquare className="h-4 w-4" />
+                              {ticket.messages_count}
+                            </div>
+                          </TableCell>
+                          <TableCell>{new Date(ticket.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="outline" size="sm">
+                              Voir
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
             </div>

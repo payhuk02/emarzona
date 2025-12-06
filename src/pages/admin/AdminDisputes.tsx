@@ -1,12 +1,14 @@
 import { useState, useMemo, useCallback } from "react";
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { MobileTableCard } from "@/components/ui/mobile-table-card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,6 +31,7 @@ import { RequireAAL2 } from "@/components/admin/RequireAAL2";
 
 const AdminDisputes = () => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [statusFilter, setStatusFilter] = useState<DisputeStatus | "all">("all");
   const [initiatorFilter, setInitiatorFilter] = useState<InitiatorType | "all">("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
@@ -581,22 +584,167 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                     <p>Aucun litige trouvé</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <SortableHeader column="order_id" label="Commande" />
-                          <TableHead>Initiateur</TableHead>
-                          <SortableHeader column="subject" label="Sujet" />
-                          <TableHead>Priorité</TableHead>
-                          <TableHead>Statut</TableHead>
-                          <TableHead>Assigné à</TableHead>
-                          <SortableHeader column="created_at" label="Date" />
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {disputes.map((dispute) => (
+                  isMobile ? (
+                    <MobileTableCard
+                      data={disputes.map(d => ({ ...d, id: d.id }))}
+                      columns={[
+                        {
+                          key: 'order_id',
+                          header: 'Commande',
+                          priority: 'high',
+                          render: (row: Dispute) => (
+                            <div className="flex items-center gap-2">
+                              {row.order_id ? (
+                                <Link 
+                                  to={`/orders`}
+                                  className="text-primary hover:underline flex items-center gap-1 font-medium"
+                                >
+                                  {row.order_id.substring(0, 8)}
+                                  <ExternalLink className="h-3 w-3" />
+                                </Link>
+                              ) : (
+                                <span className="text-muted-foreground">N/A</span>
+                              )}
+                              {isNewDispute(row.created_at) && (
+                                <Badge variant="secondary" className="text-xs bg-yellow-200 text-yellow-800">
+                                  NOUVEAU
+                                </Badge>
+                              )}
+                            </div>
+                          ),
+                        },
+                        {
+                          key: 'initiator',
+                          header: 'Initiateur',
+                          priority: 'medium',
+                          render: (row: Dispute) => getInitiatorBadge(row.initiator_type),
+                        },
+                        {
+                          key: 'subject',
+                          header: 'Sujet',
+                          priority: 'high',
+                          render: (row: Dispute) => (
+                            <div>
+                              <p className="font-medium text-sm">{row.subject}</p>
+                              <p className="text-xs text-muted-foreground line-clamp-2">{row.description}</p>
+                            </div>
+                          ),
+                        },
+                        {
+                          key: 'priority',
+                          header: 'Priorité',
+                          priority: 'high',
+                          render: (row: Dispute) => getPriorityBadge(row.priority),
+                        },
+                        {
+                          key: 'status',
+                          header: 'Statut',
+                          priority: 'high',
+                          render: (row: Dispute) => getStatusBadge(row.status),
+                        },
+                        {
+                          key: 'assigned',
+                          header: 'Assigné',
+                          priority: 'low',
+                          render: (row: Dispute) => (
+                            row.assigned_admin_id ? (
+                              <div className="flex items-center gap-1">
+                                <Shield className="h-3 w-3 text-primary" />
+                                <span className="text-xs">Admin</span>
+                              </div>
+                            ) : (
+                              <Badge variant="outline" className="text-xs">Non assigné</Badge>
+                            )
+                          ),
+                        },
+                        {
+                          key: 'created_at',
+                          header: 'Date',
+                          priority: 'low',
+                          render: (row: Dispute) => (
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(row.created_at), "dd MMM yyyy", { locale: fr })}
+                            </span>
+                          ),
+                        },
+                      ]}
+                      actions={(row: Dispute) => (
+                        <div className="flex flex-col gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedDispute(row);
+                              setDetailsDialogOpen(true);
+                            }}
+                            className="min-h-[44px] w-full"
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Voir détails
+                          </Button>
+                          <ProtectedAction permission="disputes.manage">
+                            {!row.assigned_admin_id && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={!isAAL2}
+                                onClick={() => isAAL2 && handleOpenDialog(row, "assign")}
+                                className="min-h-[44px] w-full"
+                              >
+                                M'assigner
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={!isAAL2}
+                              onClick={() => isAAL2 && handleOpenDialog(row, "notes")}
+                              className="min-h-[44px] w-full"
+                            >
+                              Notes
+                            </Button>
+                            {row.status !== "resolved" && row.status !== "closed" && (
+                              <Button
+                                size="sm"
+                                disabled={!isAAL2}
+                                onClick={() => isAAL2 && handleOpenDialog(row, "resolve")}
+                                className="min-h-[44px] w-full"
+                              >
+                                Résoudre
+                              </Button>
+                            )}
+                            {row.status === "resolved" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={!isAAL2}
+                                onClick={() => isAAL2 && closeDispute(row.id)}
+                                className="min-h-[44px] w-full"
+                              >
+                                Fermer
+                              </Button>
+                            )}
+                          </ProtectedAction>
+                        </div>
+                      )}
+                    />
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <SortableHeader column="order_id" label="Commande" />
+                            <TableHead>Initiateur</TableHead>
+                            <SortableHeader column="subject" label="Sujet" />
+                            <TableHead>Priorité</TableHead>
+                            <TableHead>Statut</TableHead>
+                            <TableHead>Assigné à</TableHead>
+                            <SortableHeader column="created_at" label="Date" />
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {disputes.map((dispute) => (
                           <TableRow key={dispute.id} className={isNewDispute(dispute.created_at) ? "bg-yellow-50/30" : ""}>
                             <TableCell className="font-medium">
                               {dispute.order_id ? (
