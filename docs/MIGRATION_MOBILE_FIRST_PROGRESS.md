@@ -170,10 +170,10 @@
 
 ## 📊 Statistiques
 
-- **Modales migrées :** 11/15+ (~73%)
-- **Formulaires migrés :** 13/20+ (~65%)
+- **Modales migrées :** 12/15+ (~80%)
+- **Formulaires migrés :** 14/20+ (~70%)
 - **Tableaux migrés :** 5/15+ (~33%)
-- **Builders/Wizards migrés :** 2/10+ (~20%)
+- **Builders/Wizards migrés :** 3/10+ (~30%)
 - **Images optimisées :** 1/15+ (~7%)
 
 ## 🎯 Prochaines migrations recommandées
@@ -198,6 +198,7 @@
 8. ✅ **WithdrawalRequestDialog** - Migré vers BottomSheet + MobileFormField
 9. ✅ **EmailWorkflowBuilder** - Migré vers BottomSheet + MobileFormField + Tabs responsive
 10. ✅ **CampaignBuilder** - Migré vers BottomSheet + MobileFormField
+11. ✅ **EmailSequenceBuilder** - Migré vers BottomSheet + MobileFormField
 
 ### Priorité BASSE (Nouvelles priorités)
 
