@@ -436,25 +436,25 @@ export const PaymentMethodDialog = ({
               rows: 3,
             }}
           />
-        </div>
 
-        <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
-          <Button 
-            variant="outline" 
-            onClick={() => onOpenChange(false)} 
-            disabled={loading}
-            className="w-full sm:w-auto"
-          >
-            Annuler
-          </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={!isValid() || loading}
-            className="w-full sm:w-auto"
-          >
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {method ? 'Enregistrer' : 'Ajouter'}
-          </Button>
+          <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => onOpenChange(false)} 
+              disabled={loading}
+              className="w-full sm:w-auto"
+            >
+              Annuler
+            </Button>
+            <Button 
+              onClick={handleSubmit} 
+              disabled={!isValid() || loading}
+              className="w-full sm:w-auto"
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {method ? 'Enregistrer' : 'Ajouter'}
+            </Button>
+          </div>
         </div>
   );
 
