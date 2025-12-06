@@ -7,11 +7,13 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import {
   Table,
   TableBody,
@@ -38,6 +40,7 @@ import { TrackingAutoRefresh } from '@/components/shipping/TrackingAutoRefresh';
 export default function AdminShipping() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const isMobile = useIsMobile();
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -200,41 +203,96 @@ export default function AdminShipping() {
                 {isLoading ? (
                   <div className="text-center py-8">Chargement...</div>
                 ) : filteredShipments && filteredShipments.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>N° Tracking</TableHead>
-                        <TableHead>Commande</TableHead>
-                        <TableHead>Client</TableHead>
-                        <TableHead>Boutique</TableHead>
-                        <TableHead>Destination</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead>Date</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredShipments.map((shipment) => (
-                        <TableRow key={shipment.id}>
-                          <TableCell className="font-medium">
-                            {shipment.tracking_number || 'En attente'}
-                          </TableCell>
-                          <TableCell>{shipment.order?.order_number || 'N/A'}</TableCell>
-                          <TableCell>{shipment.order?.buyer?.full_name || 'N/A'}</TableCell>
-                          <TableCell>{shipment.store?.name || 'N/A'}</TableCell>
-                          <TableCell>
+                  isMobile ? (
+                    <MobileTableCard
+                      data={filteredShipments}
+                      columns={[
+                        { 
+                          key: 'tracking_number', 
+                          label: 'N° Tracking', 
+                          priority: 'high',
+                          render: (value) => value || 'En attente'
+                        },
+                        { 
+                          key: 'order', 
+                          label: 'Commande', 
+                          priority: 'high',
+                          render: (value) => value?.order_number || 'N/A'
+                        },
+                        { 
+                          key: 'order', 
+                          label: 'Client', 
+                          priority: 'high',
+                          render: (value) => value?.buyer?.full_name || 'N/A'
+                        },
+                        { 
+                          key: 'store', 
+                          label: 'Boutique', 
+                          priority: 'medium',
+                          render: (value) => value?.name || 'N/A'
+                        },
+                        { 
+                          key: 'destination', 
+                          label: 'Destination', 
+                          priority: 'medium',
+                          render: (_, row) => (
                             <div className="flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
-                              {shipment.destination_city}, {shipment.destination_country}
+                              {row.destination_city}, {row.destination_country}
                             </div>
-                          </TableCell>
-                          <TableCell>{getStatusBadge(shipment.status)}</TableCell>
-                          <TableCell>
-                            {format(new Date(shipment.created_at), 'PP', { locale: fr })}
-                          </TableCell>
+                          )
+                        },
+                        { 
+                          key: 'status', 
+                          label: 'Statut', 
+                          priority: 'high',
+                          render: (value) => getStatusBadge(value)
+                        },
+                        { 
+                          key: 'created_at', 
+                          label: 'Date', 
+                          priority: 'low',
+                          render: (value) => format(new Date(value), 'PP', { locale: fr })
+                        },
+                      ]}
+                    />
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>N° Tracking</TableHead>
+                          <TableHead>Commande</TableHead>
+                          <TableHead>Client</TableHead>
+                          <TableHead>Boutique</TableHead>
+                          <TableHead>Destination</TableHead>
+                          <TableHead>Statut</TableHead>
+                          <TableHead>Date</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredShipments.map((shipment) => (
+                          <TableRow key={shipment.id}>
+                            <TableCell className="font-medium">
+                              {shipment.tracking_number || 'En attente'}
+                            </TableCell>
+                            <TableCell>{shipment.order?.order_number || 'N/A'}</TableCell>
+                            <TableCell>{shipment.order?.buyer?.full_name || 'N/A'}</TableCell>
+                            <TableCell>{shipment.store?.name || 'N/A'}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {shipment.destination_city}, {shipment.destination_country}
+                              </div>
+                            </TableCell>
+                            <TableCell>{getStatusBadge(shipment.status)}</TableCell>
+                            <TableCell>
+                              {format(new Date(shipment.created_at), 'PP', { locale: fr })}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )
                 ) : (
                   <div className="text-center py-12">
                     <Truck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

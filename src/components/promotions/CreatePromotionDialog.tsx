@@ -1,15 +1,18 @@
 import React, { useState, useCallback } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { BottomSheet, BottomSheetContent } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { MobileFormField } from "@/components/ui/mobile-form-field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useSpaceInputFix } from "@/hooks/useSpaceInputFix";
+import { useResponsiveModal } from "@/hooks/use-responsive-modal";
 import {
   validatePromotionData,
   validateCodeFormat,
@@ -35,6 +38,7 @@ interface CreatePromotionDialogProps {
 const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId }: CreatePromotionDialogProps) => {
   const { toast } = useToast();
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
+  const { useBottomSheet } = useResponsiveModal();
   const [loading, setLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [codeValidation, setCodeValidation] = useState<{ valid: boolean; errors: string[] } | null>(null);
@@ -163,175 +167,155 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Nouvelle promotion</DialogTitle>
-          <DialogDescription>
-            Créez un code promo pour vos clients
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="code">Code promo *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
+  const formContent = (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="code">Code promo *</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs min-h-[44px] min-w-[44px]"
+              >
+                <Sparkles className="h-3 w-3 mr-1" />
+                <span className="hidden sm:inline">Suggestions</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[calc(100vw-2rem)] sm:w-64 max-w-[calc(100vw-2rem)] sm:max-w-xs p-2">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold mb-2">Suggestions de codes</p>
+                {codeSuggestions.map((suggestion, index) => (
                   <Button
+                    key={index}
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-7 text-xs"
+                    className="w-full justify-start text-xs font-mono min-h-[44px]"
+                    onClick={() => handleCodeChange(suggestion)}
                   >
-                    <Sparkles className="h-3 w-3 mr-1" />
-                    Suggestions
+                    {suggestion}
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[calc(100vw-2rem)] sm:w-64 max-w-[calc(100vw-2rem)] sm:max-w-xs p-2">
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold mb-2">Suggestions de codes</p>
-                    {codeSuggestions.map((suggestion, index) => (
-                      <Button
-                        key={index}
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-start text-xs font-mono"
-                        onClick={() => handleCodeChange(suggestion)}
-                      >
-                        {suggestion}
-                      </Button>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-            <Input
-              id="code"
-              value={formData.code}
-              onChange={(e) => handleCodeChange(e.target.value)}
-              onKeyDown={handleSpaceKeyDown}
-              placeholder="PROMO2025"
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+        <Input
+          id="code"
+          value={formData.code}
+          onChange={(e) => handleCodeChange(e.target.value)}
+          onKeyDown={handleSpaceKeyDown}
+          placeholder="PROMO2025"
+          required
+          maxLength={20}
+          className={codeValidation && !codeValidation.valid ? "border-red-500" : ""}
+          aria-invalid={codeValidation && !codeValidation.valid}
+          aria-describedby={codeValidation && !codeValidation.valid ? "code-error" : undefined}
+        />
+        {codeValidation && !codeValidation.valid && (
+          <p id="code-error" className="text-sm text-red-500">
+            {codeValidation.errors[0]}
+          </p>
+        )}
+        {codeValidation && codeValidation.valid && (
+          <p className="text-sm text-green-600">Format valide</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          Alphanumérique, 3-20 caractères (ex: PROMO2025)
+        </p>
+      </div>
+
+      <MobileFormField
+        label="Description"
+        name="description"
+        type="textarea"
+        value={formData.description}
+        onChange={(value) => setFormData({ ...formData, description: value })}
+        fieldProps={{
+          onKeyDown: handleSpaceKeyDown,
+          placeholder: "Description de la promotion...",
+        }}
+      />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <MobileFormField
+              label="Type de réduction"
+              name="discount_type"
+              type="select"
+              value={formData.discount_type}
+              onChange={(value) => setFormData({ ...formData, discount_type: value as any })}
               required
-              maxLength={20}
-              className={codeValidation && !codeValidation.valid ? "border-red-500" : ""}
-              aria-invalid={codeValidation && !codeValidation.valid}
-              aria-describedby={codeValidation && !codeValidation.valid ? "code-error" : undefined}
+              selectOptions={[
+                { value: 'percentage', label: 'Pourcentage (%)' },
+                { value: 'fixed', label: 'Montant fixe (XOF)' },
+              ]}
             />
-            {codeValidation && !codeValidation.valid && (
-              <p id="code-error" className="text-sm text-red-500">
-                {codeValidation.errors[0]}
-              </p>
-            )}
-            {codeValidation && codeValidation.valid && (
-              <p className="text-sm text-green-600">Format valide</p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Alphanumérique, 3-20 caractères (ex: PROMO2025)
-            </p>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              onKeyDown={handleSpaceKeyDown}
-              placeholder="Description de la promotion..."
+            <MobileFormField
+              label={`Valeur de la réduction * ${formData.discount_type === "percentage" ? "(%)" : "(XOF)"}`}
+              name="discount_value"
+              type="number"
+              value={formData.discount_value}
+              onChange={(value) => {
+                if (formData.discount_type === "percentage" && parseFloat(value) > 100) {
+                  return; // Empêcher les valeurs > 100%
+                }
+                setFormData({ ...formData, discount_value: value });
+              }}
+              required
+              error={formData.discount_type === "percentage" && formData.discount_value && parseFloat(formData.discount_value) > 100 ? "Le pourcentage ne peut pas dépasser 100%" : undefined}
+              fieldProps={{
+                min: "0",
+                max: formData.discount_type === "percentage" ? "100" : undefined,
+                step: formData.discount_type === "percentage" ? "0.01" : "1",
+              }}
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="discount_type">Type de réduction *</Label>
-              <Select 
-                value={formData.discount_type} 
-                onValueChange={(value) => setFormData({ ...formData, discount_type: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="percentage">Pourcentage (%)</SelectItem>
-                  <SelectItem value="fixed">Montant fixe (XOF)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <MobileFormField
+              label="Montant minimum d'achat (XOF)"
+              name="min_purchase"
+              type="number"
+              value={formData.min_purchase_amount}
+              onChange={(value) => setFormData({ ...formData, min_purchase_amount: value })}
+              fieldProps={{
+                min: "0",
+              }}
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="discount_value">
-                Valeur de la réduction * {formData.discount_type === "percentage" ? "(%)" : "(XOF)"}
-              </Label>
-              <Input
-                id="discount_value"
-                type="number"
-                min="0"
-                max={formData.discount_type === "percentage" ? "100" : undefined}
-                step={formData.discount_type === "percentage" ? "0.01" : "1"}
-                value={formData.discount_value}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (formData.discount_type === "percentage" && parseFloat(value) > 100) {
-                    return; // Empêcher les valeurs > 100%
-                  }
-                  setFormData({ ...formData, discount_value: value });
-                }}
-                required
-              />
-              {formData.discount_type === "percentage" && formData.discount_value && parseFloat(formData.discount_value) > 100 && (
-                <p className="text-sm text-red-500">Le pourcentage ne peut pas dépasser 100%</p>
-              )}
-            </div>
+            <MobileFormField
+              label="Nombre d'utilisations max"
+              name="max_uses"
+              type="number"
+              value={formData.max_uses}
+              onChange={(value) => setFormData({ ...formData, max_uses: value })}
+              fieldProps={{
+                min: "1",
+                placeholder: "Illimité",
+              }}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="min_purchase">Montant minimum d'achat (XOF)</Label>
-              <Input
-                id="min_purchase"
-                type="number"
-                min="0"
-                value={formData.min_purchase_amount}
-                onChange={(e) => setFormData({ ...formData, min_purchase_amount: e.target.value })}
-              />
-            </div>
+            <MobileFormField
+              label="Date de début"
+              name="start_date"
+              type="datetime-local"
+              value={formData.start_date}
+              onChange={(value) => setFormData({ ...formData, start_date: value })}
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="max_uses">Nombre d'utilisations max</Label>
-              <Input
-                id="max_uses"
-                type="number"
-                min="1"
-                value={formData.max_uses}
-                onChange={(e) => setFormData({ ...formData, max_uses: e.target.value })}
-                placeholder="Illimité"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="start_date">Date de début</Label>
-              <Input
-                id="start_date"
-                type="datetime-local"
-                value={formData.start_date}
-                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="end_date">Date de fin</Label>
-              <Input
-                id="end_date"
-                type="datetime-local"
-                value={formData.end_date}
-                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-              />
-            </div>
+            <MobileFormField
+              label="Date de fin"
+              name="end_date"
+              type="datetime-local"
+              value={formData.end_date}
+              onChange={(value) => setFormData({ ...formData, end_date: value })}
+            />
           </div>
 
           <div className="flex items-center space-x-2">
@@ -384,22 +368,49 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
             </Alert>
           )}
 
-          <div className="flex justify-end gap-2 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
+              className="w-full sm:w-auto"
             >
               Annuler
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full sm:w-auto">
               {loading ? "Création..." : "Créer la promotion"}
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+  );
+
+  return (
+    <>
+      {useBottomSheet ? (
+        <BottomSheet open={open} onOpenChange={onOpenChange}>
+          <BottomSheetContent
+            title="Nouvelle promotion"
+            description="Créez un code promo pour vos clients"
+            className="max-h-[90vh] overflow-y-auto"
+          >
+            {formContent}
+          </BottomSheetContent>
+        </BottomSheet>
+      ) : (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Nouvelle promotion</DialogTitle>
+              <DialogDescription>
+                Créez un code promo pour vos clients
+              </DialogDescription>
+            </DialogHeader>
+            {formContent}
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 };
 
