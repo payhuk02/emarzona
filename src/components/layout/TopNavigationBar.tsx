@@ -10,6 +10,7 @@ import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ThemeSelectorCompact } from '@/components/navigation/ThemeSelector';
 import { Button } from '@/components/ui/button';
+import { LazyImage } from '@/components/ui/lazy-image';
 import {
   MobileDropdown,
   DropdownMenuItem,
@@ -85,7 +86,7 @@ export const TopNavigationBar = () => {
           {/* Logo */}
           <NavLink to="/dashboard" className="flex items-center gap-2 shrink-0">
             {platformLogo ? (
-              <img
+              <LazyImage
                 src={platformLogo}
                 alt="Emarzona"
                 className="h-8 w-8 object-contain"
@@ -141,7 +142,7 @@ export const TopNavigationBar = () => {
                 <div className="p-4 border-b">
                   <div className="flex items-center gap-2">
                     {platformLogo ? (
-                      <img
+                      <LazyImage
                         src={platformLogo}
                         alt="Emarzona"
                         className="h-8 w-8 object-contain"

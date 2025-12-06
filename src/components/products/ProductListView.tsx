@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { LazyImage } from "@/components/ui/lazy-image";
 import { 
   Edit, 
   Trash2, 
@@ -125,7 +126,7 @@ const ProductListView = ({
           <div className="flex-shrink-0">
             {product.image_url && !imageError ? (
               <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted">
-                <img
+                <LazyImage
                   src={product.image_url}
                   alt={product.name}
                   className="w-full h-full object-cover"

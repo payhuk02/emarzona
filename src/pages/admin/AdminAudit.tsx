@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +27,7 @@ type AdminActionRow = {
 };
 
 export default function AdminAudit() {
+  const isMobile = useIsMobile();
   const [rows, setRows] = useState<AdminActionRow[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -232,40 +235,100 @@ export default function AdminAudit() {
               ) : filtered.length === 0 ? (
                 <div className="py-10 text-center text-muted-foreground">Aucune action trouvée</div>
               ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="whitespace-nowrap text-xs sm:text-sm">Date</TableHead>
-                        <TableHead className="whitespace-nowrap text-xs sm:text-sm">Action</TableHead>
-                        <TableHead className="whitespace-nowrap text-xs sm:text-sm">Cible</TableHead>
-                        <TableHead className="whitespace-nowrap text-xs sm:text-sm">Id cible</TableHead>
-                        <TableHead className="whitespace-nowrap text-xs sm:text-sm">Admin</TableHead>
-                        <TableHead className="whitespace-nowrap text-xs sm:text-sm">Détails</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {paged.map(r => (
-                        <TableRow key={r.id}>
-                          <TableCell className="text-muted-foreground text-xs sm:text-sm whitespace-nowrap">
-                            {new Date(r.created_at).toLocaleString()}
-                          </TableCell>
-                          <TableCell className="whitespace-nowrap">
-                            <Badge variant="secondary" className="text-xs">{r.action}</Badge>
-                          </TableCell>
-                          <TableCell className="text-xs sm:text-sm whitespace-nowrap">{r.target_type || '-'}</TableCell>
-                          <TableCell className="font-mono text-[10px] sm:text-xs whitespace-nowrap">{r.target_id || '-'}</TableCell>
-                          <TableCell className="font-mono text-[10px] sm:text-xs whitespace-nowrap">{r.actor_id}</TableCell>
-                          <TableCell>
-                            <pre className="text-[10px] sm:text-xs whitespace-pre-wrap max-w-[200px] sm:max-w-[520px] overflow-auto">
-                              {JSON.stringify(r.metadata ?? {}, null, 2)}
-                            </pre>
-                          </TableCell>
+                isMobile ? (
+                  <MobileTableCard
+                    data={paged.map(r => ({ ...r, id: r.id }))}
+                    columns={[
+                      {
+                        key: 'date',
+                        label: 'Date',
+                        priority: 'high',
+                        render: (row: AdminActionRow) => (
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(row.created_at).toLocaleString()}
+                          </span>
+                        ),
+                      },
+                      {
+                        key: 'action',
+                        label: 'Action',
+                        priority: 'high',
+                        render: (row: AdminActionRow) => (
+                          <Badge variant="secondary" className="text-xs">{row.action}</Badge>
+                        ),
+                      },
+                      {
+                        key: 'target_type',
+                        label: 'Cible',
+                        priority: 'medium',
+                        render: (row: AdminActionRow) => (
+                          <span className="text-xs">{row.target_type || '-'}</span>
+                        ),
+                      },
+                      {
+                        key: 'target_id',
+                        label: 'Id cible',
+                        priority: 'low',
+                        render: (row: AdminActionRow) => (
+                          <span className="font-mono text-[10px] break-all">{row.target_id || '-'}</span>
+                        ),
+                      },
+                      {
+                        key: 'actor_id',
+                        label: 'Admin',
+                        priority: 'medium',
+                        render: (row: AdminActionRow) => (
+                          <span className="font-mono text-[10px] break-all">{row.actor_id}</span>
+                        ),
+                      },
+                      {
+                        key: 'metadata',
+                        label: 'Détails',
+                        priority: 'low',
+                        render: (row: AdminActionRow) => (
+                          <pre className="text-[10px] whitespace-pre-wrap break-all max-h-32 overflow-auto">
+                            {JSON.stringify(row.metadata ?? {}, null, 2)}
+                          </pre>
+                        ),
+                      },
+                    ]}
+                  />
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="whitespace-nowrap text-xs sm:text-sm">Date</TableHead>
+                          <TableHead className="whitespace-nowrap text-xs sm:text-sm">Action</TableHead>
+                          <TableHead className="whitespace-nowrap text-xs sm:text-sm">Cible</TableHead>
+                          <TableHead className="whitespace-nowrap text-xs sm:text-sm">Id cible</TableHead>
+                          <TableHead className="whitespace-nowrap text-xs sm:text-sm">Admin</TableHead>
+                          <TableHead className="whitespace-nowrap text-xs sm:text-sm">Détails</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                      </TableHeader>
+                      <TableBody>
+                        {paged.map(r => (
+                          <TableRow key={r.id}>
+                            <TableCell className="text-muted-foreground text-xs sm:text-sm whitespace-nowrap">
+                              {new Date(r.created_at).toLocaleString()}
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              <Badge variant="secondary" className="text-xs">{r.action}</Badge>
+                            </TableCell>
+                            <TableCell className="text-xs sm:text-sm whitespace-nowrap">{r.target_type || '-'}</TableCell>
+                            <TableCell className="font-mono text-[10px] sm:text-xs whitespace-nowrap">{r.target_id || '-'}</TableCell>
+                            <TableCell className="font-mono text-[10px] sm:text-xs whitespace-nowrap">{r.actor_id}</TableCell>
+                            <TableCell>
+                              <pre className="text-[10px] sm:text-xs whitespace-pre-wrap max-w-[200px] sm:max-w-[520px] overflow-auto">
+                                {JSON.stringify(r.metadata ?? {}, null, 2)}
+                              </pre>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )
               )}
             </CardContent>
           </Card>
