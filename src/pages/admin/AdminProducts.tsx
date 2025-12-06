@@ -322,11 +322,12 @@ const AdminProducts = () => {
                 ))}
               </TableBody>
             </Table>
-            {filteredProducts.length === 0 && (
-              <div className="text-center py-12 text-muted-foreground" role="status" aria-live="polite">
-                Aucun produit trouvé
-              </div>
-            )}
+              )}
+              {filteredProducts.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground" role="status" aria-live="polite">
+                  Aucun produit trouvé
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
