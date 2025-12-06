@@ -14,6 +14,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   Dialog,
@@ -60,6 +62,7 @@ import { WithdrawalHistoryDialog } from '@/components/store/WithdrawalHistoryDia
 import { WithdrawalStatsCard } from '@/components/store/WithdrawalStatsCard';
 
 const AdminStoreWithdrawals = () => {
+  const isMobile = useIsMobile();
   const { isAdmin } = useAdmin();
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<StoreWithdrawalStatus | 'all'>('all');
@@ -478,119 +481,243 @@ const AdminStoreWithdrawals = () => {
                   <p className="text-sm sm:text-base">Aucun retrait trouvé</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto -mx-2 sm:mx-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="text-xs sm:text-sm">Date</TableHead>
-                        <TableHead className="text-xs sm:text-sm">Boutique</TableHead>
-                        <TableHead className="text-xs sm:text-sm">Montant</TableHead>
-                        <TableHead className="text-xs sm:text-sm hidden md:table-cell">Méthode</TableHead>
-                        <TableHead className="text-xs sm:text-sm">Statut</TableHead>
-                        <TableHead className="text-xs sm:text-sm hidden lg:table-cell">Référence</TableHead>
-                        <TableHead className="text-xs sm:text-sm">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredWithdrawals.map((withdrawal) => (
-                        <TableRow key={withdrawal.id}>
-                          <TableCell className="text-xs sm:text-sm whitespace-nowrap">
-                            <span className="sm:hidden">
-                              {format(new Date(withdrawal.created_at), 'dd/MM/yy', { locale: fr })}
-                            </span>
-                            <span className="hidden sm:inline">
-                              {format(new Date(withdrawal.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}
-                            </span>
-                          </TableCell>
-                          <TableCell className="font-semibold text-xs sm:text-sm">
-                            <span className="truncate max-w-[100px] sm:max-w-none block">
-                              {withdrawal.store?.name || 'N/A'}
-                            </span>
-                          </TableCell>
-                          <TableCell className="font-semibold text-xs sm:text-sm">
-                            {formatCurrency(withdrawal.amount)} {withdrawal.currency}
-                          </TableCell>
-                          <TableCell className="text-xs sm:text-sm hidden md:table-cell">
-                            {getPaymentMethodLabel(withdrawal.payment_method)}
-                          </TableCell>
-                          <TableCell>
-                            {getStatusBadge(withdrawal.status)}
-                          </TableCell>
-                          <TableCell className="text-xs text-muted-foreground hidden lg:table-cell">
-                            {withdrawal.transaction_reference || '-'}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-wrap gap-1 sm:gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setSelectedWithdrawal(withdrawal);
-                                  setShowViewDialog(true);
-                                }}
-                                className="text-xs sm:text-sm min-h-[44px] h-11 sm:h-12 px-2 sm:px-3"
-                              >
-                                <Eye className="h-3 w-3 sm:mr-1" />
-                                <span className="hidden sm:inline">Voir</span>
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => setHistoryWithdrawalId(withdrawal.id)}
-                                className="text-xs sm:text-sm min-h-[44px] h-11 sm:h-12 px-2 sm:px-3"
-                                title="Voir l'historique"
-                              >
-                                <History className="h-3 w-3" />
-                              </Button>
-                              {withdrawal.status === 'pending' && (
-                                <>
+                isMobile ? (
+                  <MobileTableCard
+                    data={filteredWithdrawals.map(w => ({ ...w, id: w.id }))}
+                    columns={[
+                      {
+                        key: 'date',
+                        label: 'Date',
+                        priority: 'high',
+                        render: (row: StoreWithdrawal) => (
+                          <span className="text-xs text-muted-foreground">
+                            {format(new Date(row.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}
+                          </span>
+                        ),
+                      },
+                      {
+                        key: 'store',
+                        label: 'Boutique',
+                        priority: 'high',
+                        render: (row: StoreWithdrawal) => (
+                          <span className="font-semibold text-sm">{row.store?.name || 'N/A'}</span>
+                        ),
+                      },
+                      {
+                        key: 'amount',
+                        label: 'Montant',
+                        priority: 'high',
+                        render: (row: StoreWithdrawal) => (
+                          <span className="font-semibold text-sm">
+                            {formatCurrency(row.amount)} {row.currency}
+                          </span>
+                        ),
+                      },
+                      {
+                        key: 'method',
+                        label: 'Méthode',
+                        priority: 'medium',
+                        render: (row: StoreWithdrawal) => (
+                          <span className="text-xs">{getPaymentMethodLabel(row.payment_method)}</span>
+                        ),
+                      },
+                      {
+                        key: 'status',
+                        label: 'Statut',
+                        priority: 'high',
+                        render: (row: StoreWithdrawal) => getStatusBadge(row.status),
+                      },
+                      {
+                        key: 'reference',
+                        label: 'Référence',
+                        priority: 'low',
+                        render: (row: StoreWithdrawal) => (
+                          <span className="text-xs text-muted-foreground">
+                            {row.transaction_reference || '-'}
+                          </span>
+                        ),
+                      },
+                    ]}
+                    actions={(row: StoreWithdrawal) => (
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedWithdrawal(row);
+                            setShowViewDialog(true);
+                          }}
+                          className="min-h-[44px] w-full"
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          Voir détails
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setHistoryWithdrawalId(row.id)}
+                          className="min-h-[44px] w-full"
+                        >
+                          <History className="h-4 w-4 mr-2" />
+                          Historique
+                        </Button>
+                        {row.status === 'pending' && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="default"
+                              onClick={() => {
+                                setSelectedWithdrawal(row);
+                                setShowApproveDialog(true);
+                              }}
+                              className="min-h-[44px] w-full"
+                            >
+                              Approuver
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => {
+                                setSelectedWithdrawal(row);
+                                setShowRejectDialog(true);
+                              }}
+                              className="min-h-[44px] w-full"
+                            >
+                              Rejeter
+                            </Button>
+                          </>
+                        )}
+                        {row.status === 'processing' && (
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => {
+                              setSelectedWithdrawal(row);
+                              setShowCompleteDialog(true);
+                            }}
+                            className="min-h-[44px] w-full"
+                          >
+                            Compléter
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  />
+                ) : (
+                  <div className="overflow-x-auto -mx-2 sm:mx-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Boutique</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Montant</TableHead>
+                          <TableHead className="text-xs sm:text-sm hidden md:table-cell">Méthode</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Statut</TableHead>
+                          <TableHead className="text-xs sm:text-sm hidden lg:table-cell">Référence</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredWithdrawals.map((withdrawal) => (
+                          <TableRow key={withdrawal.id}>
+                            <TableCell className="text-xs sm:text-sm whitespace-nowrap">
+                              <span className="sm:hidden">
+                                {format(new Date(withdrawal.created_at), 'dd/MM/yy', { locale: fr })}
+                              </span>
+                              <span className="hidden sm:inline">
+                                {format(new Date(withdrawal.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}
+                              </span>
+                            </TableCell>
+                            <TableCell className="font-semibold text-xs sm:text-sm">
+                              <span className="truncate max-w-[100px] sm:max-w-none block">
+                                {withdrawal.store?.name || 'N/A'}
+                              </span>
+                            </TableCell>
+                            <TableCell className="font-semibold text-xs sm:text-sm">
+                              {formatCurrency(withdrawal.amount)} {withdrawal.currency}
+                            </TableCell>
+                            <TableCell className="text-xs sm:text-sm hidden md:table-cell">
+                              {getPaymentMethodLabel(withdrawal.payment_method)}
+                            </TableCell>
+                            <TableCell>
+                              {getStatusBadge(withdrawal.status)}
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground hidden lg:table-cell">
+                              {withdrawal.transaction_reference || '-'}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1 sm:gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setSelectedWithdrawal(withdrawal);
+                                    setShowViewDialog(true);
+                                  }}
+                                  className="text-xs sm:text-sm min-h-[44px] h-11 sm:h-12 px-2 sm:px-3"
+                                >
+                                  <Eye className="h-3 w-3 sm:mr-1" />
+                                  <span className="hidden sm:inline">Voir</span>
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => setHistoryWithdrawalId(withdrawal.id)}
+                                  className="text-xs sm:text-sm min-h-[44px] h-11 sm:h-12 px-2 sm:px-3"
+                                  title="Voir l'historique"
+                                >
+                                  <History className="h-3 w-3" />
+                                </Button>
+                                {withdrawal.status === 'pending' && (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="default"
+                                      onClick={() => {
+                                        setSelectedWithdrawal(withdrawal);
+                                        setShowApproveDialog(true);
+                                      }}
+                                      className="text-xs sm:text-sm min-h-[44px] h-11 sm:h-12 px-2 sm:px-3"
+                                    >
+                                      <span className="hidden sm:inline">Approuver</span>
+                                      <span className="sm:hidden">✓</span>
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => {
+                                        setSelectedWithdrawal(withdrawal);
+                                        setShowRejectDialog(true);
+                                      }}
+                                      className="text-xs sm:text-sm min-h-[44px] h-11 sm:h-12 px-2 sm:px-3"
+                                    >
+                                      <span className="hidden sm:inline">Rejeter</span>
+                                      <span className="sm:hidden">✕</span>
+                                    </Button>
+                                  </>
+                                )}
+                                {withdrawal.status === 'processing' && (
                                   <Button
                                     size="sm"
                                     variant="default"
                                     onClick={() => {
                                       setSelectedWithdrawal(withdrawal);
-                                      setShowApproveDialog(true);
+                                      setShowCompleteDialog(true);
                                     }}
                                     className="text-xs sm:text-sm min-h-[44px] h-11 sm:h-12 px-2 sm:px-3"
                                   >
-                                    <span className="hidden sm:inline">Approuver</span>
+                                    <span className="hidden sm:inline">Compléter</span>
                                     <span className="sm:hidden">✓</span>
                                   </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() => {
-                                      setSelectedWithdrawal(withdrawal);
-                                      setShowRejectDialog(true);
-                                    }}
-                                    className="text-xs sm:text-sm min-h-[44px] h-11 sm:h-12 px-2 sm:px-3"
-                                  >
-                                    <span className="hidden sm:inline">Rejeter</span>
-                                    <span className="sm:hidden">✕</span>
-                                  </Button>
-                                </>
-                              )}
-                              {withdrawal.status === 'processing' && (
-                                <Button
-                                  size="sm"
-                                  variant="default"
-                                  onClick={() => {
-                                    setSelectedWithdrawal(withdrawal);
-                                    setShowCompleteDialog(true);
-                                  }}
-                                  className="text-xs sm:text-sm min-h-[44px] h-11 sm:h-12 px-2 sm:px-3"
-                                >
-                                  <span className="hidden sm:inline">Compléter</span>
-                                  <span className="sm:hidden">✓</span>
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )
               )}
             </CardContent>
           </Card>

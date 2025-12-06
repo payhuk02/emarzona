@@ -17,6 +17,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
@@ -85,6 +87,7 @@ const REWARD_TYPES: { value: LoyaltyRewardType; label: string }[] = [
 ];
 
 export default function AdminLoyaltyManagement() {
+  const isMobile = useIsMobile();
   const { store, loading: storeLoading } = useStore();
   
   // Alias pour compatibilité
@@ -393,9 +396,50 @@ export default function AdminLoyaltyManagement() {
                   </CardHeader>
                   <CardContent>
                     {transactions && transactions.length > 0 ? (
-                      <>
-                        {/* Desktop Table */}
-                        <div className="hidden lg:block overflow-x-auto">
+                      isMobile ? (
+                        <MobileTableCard
+                          data={transactions.slice(0, 10).map(t => ({ ...t, id: t.id }))}
+                          columns={[
+                            {
+                              key: 'date',
+                              label: 'Date',
+                              priority: 'high',
+                              render: (row: any) => (
+                                <span className="text-xs text-muted-foreground">
+                                  {format(new Date(row.created_at), 'PPp', { locale: fr })}
+                                </span>
+                              ),
+                            },
+                            {
+                              key: 'type',
+                              label: 'Type',
+                              priority: 'high',
+                              render: (row: any) => (
+                                <Badge variant="outline" className="text-xs">{row.transaction_type}</Badge>
+                              ),
+                            },
+                            {
+                              key: 'points',
+                              label: 'Points',
+                              priority: 'high',
+                              render: (row: any) => (
+                                <span className={`text-sm font-medium ${row.points_amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {row.points_amount > 0 ? '+' : ''}{row.points_amount}
+                                </span>
+                              ),
+                            },
+                            {
+                              key: 'description',
+                              label: 'Description',
+                              priority: 'medium',
+                              render: (row: any) => (
+                                <p className="text-xs">{row.description || '-'}</p>
+                              ),
+                            },
+                          ]}
+                        />
+                      ) : (
+                        <div className="overflow-x-auto">
                           <Table>
                             <TableHeader>
                               <TableRow>
@@ -423,33 +467,7 @@ export default function AdminLoyaltyManagement() {
                             </TableBody>
                           </Table>
                         </div>
-
-                        {/* Mobile Cards */}
-                        <div className="lg:hidden space-y-3 sm:space-y-4">
-                          {transactions.slice(0, 10).map((transaction) => (
-                            <Card key={transaction.id} className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-                              <CardContent className="p-3 sm:p-4">
-                                <div className="flex items-start justify-between mb-2">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <Badge variant="outline" className="text-xs">{transaction.transaction_type}</Badge>
-                                      <span className={`text-sm font-medium ${transaction.points_amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                        {transaction.points_amount > 0 ? '+' : ''}{transaction.points_amount} points
-                                      </span>
-                                    </div>
-                                    <p className="text-xs sm:text-sm text-muted-foreground mb-1">
-                                      {format(new Date(transaction.created_at), 'PPp', { locale: fr })}
-                                    </p>
-                                    {transaction.description && (
-                                      <p className="text-xs sm:text-sm">{transaction.description}</p>
-                                    )}
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      </>
+                      )
                     ) : (
                       <Alert>
                         <AlertDescription className="text-xs sm:text-sm">Aucune transaction enregistrée.</AlertDescription>
