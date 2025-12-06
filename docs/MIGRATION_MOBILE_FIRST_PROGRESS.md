@@ -170,9 +170,10 @@
 
 ## 📊 Statistiques
 
-- **Modales migrées :** 9/15+ (~60%)
-- **Formulaires migrés :** 11/20+ (~55%)
+- **Modales migrées :** 10/15+ (~67%)
+- **Formulaires migrés :** 12/20+ (~60%)
 - **Tableaux migrés :** 5/15+ (~33%)
+- **Builders/Wizards migrés :** 1/10+ (~10%)
 - **Images optimisées :** 1/15+ (~7%)
 
 ## 🎯 Prochaines migrations recommandées
@@ -195,6 +196,7 @@
 6. ✅ **OrderEditDialog** - Migré vers BottomSheet + MobileFormField
 7. ✅ **PaymentMethodDialog** - Migré vers BottomSheet + MobileFormField
 8. ✅ **WithdrawalRequestDialog** - Migré vers BottomSheet + MobileFormField
+9. ✅ **EmailWorkflowBuilder** - Migré vers BottomSheet + MobileFormField + Tabs responsive
 
 ### Priorité BASSE (Nouvelles priorités)
 
