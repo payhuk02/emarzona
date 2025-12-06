@@ -12,9 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { BottomSheet, BottomSheetContent } from '@/components/ui/bottom-sheet';
+import { MobileFormField } from '@/components/ui/mobile-form-field';
 import {
   Select,
   SelectContent,
@@ -23,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCreateEmailSequence, useUpdateEmailSequence } from '@/hooks/email/useEmailSequences';
+import { useResponsiveModal } from '@/hooks/use-responsive-modal';
 import type { 
   EmailSequence, 
   CreateSequencePayload, 
@@ -46,6 +46,7 @@ export const EmailSequenceBuilder = ({
   sequence,
   onSuccess,
 }: EmailSequenceBuilderProps) => {
+  const { useBottomSheet } = useResponsiveModal();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [triggerType, setTriggerType] = useState<SequenceTriggerType>('event');
@@ -104,79 +105,60 @@ export const EmailSequenceBuilder = ({
 
   const isLoading = createSequence.isPending || updateSequence.isPending;
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing ? 'Modifier la séquence' : 'Nouvelle séquence'}
-          </DialogTitle>
-          <DialogDescription>
-            {isEditing
-              ? 'Modifiez les informations de votre séquence email'
-              : 'Créez une nouvelle séquence d\'emails automatiques pour votre boutique'}
-          </DialogDescription>
-        </DialogHeader>
+  const formContent = (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <MobileFormField
+        label="Nom de la séquence"
+        name="name"
+        type="text"
+        value={name}
+        onChange={setName}
+        required
+        fieldProps={{
+          placeholder: "Séquence de bienvenue",
+        }}
+      />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="name">Nom de la séquence *</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Séquence de bienvenue"
-              required
-            />
-          </div>
+      <MobileFormField
+        label="Description"
+        name="description"
+        type="textarea"
+        value={description}
+        onChange={setDescription}
+        fieldProps={{
+          placeholder: "Description de la séquence...",
+          rows: 3,
+        }}
+      />
 
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description de la séquence..."
-              rows={3}
-            />
-          </div>
+      <MobileFormField
+        label="Type de déclencheur"
+        name="triggerType"
+        type="select"
+        value={triggerType}
+        onChange={(value) => setTriggerType(value as SequenceTriggerType)}
+        required
+        description="Le déclencheur détermine quand la séquence démarre pour un utilisateur"
+        selectOptions={[
+          { value: 'event', label: 'Événement (inscription, achat, etc.)' },
+          { value: 'time', label: 'Temps (après X jours/heures)' },
+          { value: 'behavior', label: 'Comportement (panier abandonné, etc.)' },
+        ]}
+      />
 
-          <div>
-            <Label htmlFor="triggerType">Type de déclencheur *</Label>
-            <Select 
-              value={triggerType} 
-              onValueChange={(value) => setTriggerType(value as SequenceTriggerType)}
-            >
-              <SelectTrigger id="triggerType">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="event">Événement (inscription, achat, etc.)</SelectItem>
-                <SelectItem value="time">Temps (après X jours/heures)</SelectItem>
-                <SelectItem value="behavior">Comportement (panier abandonné, etc.)</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground mt-1">
-              Le déclencheur détermine quand la séquence démarre pour un utilisateur
-            </p>
-          </div>
-
-          <div>
-            <Label htmlFor="status">Statut *</Label>
-            <Select 
-              value={status} 
-              onValueChange={(value) => setStatus(value as SequenceStatus)}
-            >
-              <SelectTrigger id="status">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="paused">En pause</SelectItem>
-                <SelectItem value="archived">Archivée</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      <MobileFormField
+        label="Statut"
+        name="status"
+        type="select"
+        value={status}
+        onChange={(value) => setStatus(value as SequenceStatus)}
+        required
+        selectOptions={[
+          { value: 'active', label: 'Active' },
+          { value: 'paused', label: 'En pause' },
+          { value: 'archived', label: 'Archivée' },
+        ]}
+      />
 
           {triggerType === 'event' && (
             <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
@@ -211,23 +193,58 @@ export const EmailSequenceBuilder = ({
             </div>
           )}
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
-            >
-              Annuler
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {isEditing ? 'Enregistrer' : 'Créer la séquence'}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+      <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={isLoading}
+          className="w-full sm:w-auto"
+        >
+          Annuler
+        </Button>
+        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+          {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          {isEditing ? 'Enregistrer' : 'Créer la séquence'}
+        </Button>
+      </div>
+    </form>
+  );
+
+  return (
+    <>
+      {useBottomSheet ? (
+        <BottomSheet open={open} onOpenChange={onOpenChange}>
+          <BottomSheetContent
+            title={isEditing ? 'Modifier la séquence' : 'Nouvelle séquence'}
+            description={
+              isEditing
+                ? 'Modifiez les informations de votre séquence email'
+                : 'Créez une nouvelle séquence d\'emails automatiques pour votre boutique'
+            }
+            className="max-h-[90vh] overflow-y-auto"
+          >
+            {formContent}
+          </BottomSheetContent>
+        </BottomSheet>
+      ) : (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {isEditing ? 'Modifier la séquence' : 'Nouvelle séquence'}
+              </DialogTitle>
+              <DialogDescription>
+                {isEditing
+                  ? 'Modifiez les informations de votre séquence email'
+                  : 'Créez une nouvelle séquence d\'emails automatiques pour votre boutique'}
+              </DialogDescription>
+            </DialogHeader>
+            {formContent}
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 };
 
