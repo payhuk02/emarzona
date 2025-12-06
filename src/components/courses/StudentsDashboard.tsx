@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
+import { LazyImage } from '@/components/ui/lazy-image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
@@ -363,7 +364,7 @@ export const StudentsDashboard: React.FC<StudentsDashboardProps> = ({
                     </div>
 
                     {student.avatar && (
-                      <img src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full" />
+                      <LazyImage src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full object-cover" aspectRatio="1/1" />
                     )}
 
                     <div className="flex-1">
