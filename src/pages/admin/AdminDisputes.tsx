@@ -946,6 +946,7 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                       </TableBody>
                     </Table>
                   </div>
+                  )
                 )}
 
                 {/* Pagination */}
