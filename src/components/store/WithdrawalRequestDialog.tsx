@@ -509,9 +509,8 @@ export const WithdrawalRequestDialog = ({
               </AlertDescription>
             </Alert>
           )}
-        </div>
 
-        <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
+          <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
           <Button 
             variant="outline" 
             onClick={() => onOpenChange(false)} 
