@@ -417,8 +417,15 @@ export default defineConfig(({ mode }) => {
           }
           
           // OPTIMISATION: Séparer les composants d'email (lourds, utilisés seulement sur certaines pages)
+          // CRITIQUE: UnsubscribePage est une page publique simple, séparer pour réduire le CSS
           if (id.includes('src/components/email') || id.includes('src/pages/emails')) {
             return 'email-components';
+          }
+          
+          // OPTIMISATION CRITIQUE: Séparer UnsubscribePage en chunk dédié pour réduire le CSS
+          // Cette page est publique et simple, ne doit pas hériter de tout le CSS de l'application
+          if (id.includes('src/pages/UnsubscribePage') || id.includes('src/components/email/UnsubscribePage')) {
+            return 'unsubscribe-page';
           }
           
           // OPTIMISATION: Séparer les composants d'analytics (lourds avec recharts)
@@ -429,6 +436,31 @@ export default defineConfig(({ mode }) => {
           // OPTIMISATION: Séparer les composants de shipping (utilisés seulement sur certaines pages)
           if (id.includes('src/components/shipping') || id.includes('src/pages/shipping')) {
             return 'shipping-components';
+          }
+          
+          // OPTIMISATION CRITIQUE: Séparer les composants layout (lourds, utilisés partout mais peuvent être lazy-loaded)
+          if (id.includes('src/components/layout')) {
+            return 'layout-components';
+          }
+          
+          // OPTIMISATION CRITIQUE: Séparer les composants navigation (légers mais nombreux)
+          if (id.includes('src/components/navigation')) {
+            return 'navigation-components';
+          }
+          
+          // OPTIMISATION CRITIQUE: Séparer les composants accessibility (non-critiques au démarrage)
+          if (id.includes('src/components/accessibility')) {
+            return 'accessibility-components';
+          }
+          
+          // OPTIMISATION CRITIQUE: Séparer les composants SEO (non-critiques au démarrage)
+          if (id.includes('src/components/seo')) {
+            return 'seo-components';
+          }
+          
+          // OPTIMISATION CRITIQUE: Séparer les composants errors (non-critiques au démarrage)
+          if (id.includes('src/components/errors')) {
+            return 'error-components';
           }
         },
         // Optimisation des noms de chunks

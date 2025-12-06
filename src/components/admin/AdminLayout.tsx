@@ -186,8 +186,9 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                 size="icon"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="ml-auto"
+                aria-label={sidebarOpen ? "Fermer le menu latéral" : "Ouvrir le menu latéral"}
               >
-                {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {sidebarOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
               </Button>
             </div>
 

@@ -218,8 +218,9 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
                       size="icon"
                       onClick={() => toggleSecretVisibility('moneroo_apiKey')}
                       className="shrink-0"
+                      aria-label={showSecrets.moneroo_apiKey ? "Masquer la clé API Moneroo" : "Afficher la clé API Moneroo"}
                     >
-                      {showSecrets.moneroo_apiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showSecrets.moneroo_apiKey ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                     </Button>
                   </div>
                 </div>
@@ -287,8 +288,9 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
                       size="icon"
                       onClick={() => toggleSecretVisibility('paydunya_masterKey')}
                       className="shrink-0"
+                      aria-label={showSecrets.paydunya_masterKey ? "Masquer la clé maître PayDunya" : "Afficher la clé maître PayDunya"}
                     >
-                      {showSecrets.paydunya_masterKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showSecrets.paydunya_masterKey ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                     </Button>
                   </div>
                 </div>
@@ -307,8 +309,9 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
                       size="icon"
                       onClick={() => toggleSecretVisibility('paydunya_privateKey')}
                       className="shrink-0"
+                      aria-label={showSecrets.paydunya_privateKey ? "Masquer la clé privée PayDunya" : "Afficher la clé privée PayDunya"}
                     >
-                      {showSecrets.paydunya_privateKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showSecrets.paydunya_privateKey ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                     </Button>
                   </div>
                 </div>
@@ -327,8 +330,9 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
                       size="icon"
                       onClick={() => toggleSecretVisibility('paydunya_token')}
                       className="shrink-0"
+                      aria-label={showSecrets.paydunya_token ? "Masquer le token PayDunya" : "Afficher le token PayDunya"}
                     >
-                      {showSecrets.paydunya_token ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showSecrets.paydunya_token ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                     </Button>
                   </div>
                 </div>
@@ -398,8 +402,9 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
                       size="icon"
                       onClick={() => toggleSecretVisibility('zoom_apiKey')}
                       className="shrink-0"
+                      aria-label={showSecrets.zoom_apiKey ? "Masquer la clé API Zoom" : "Afficher la clé API Zoom"}
                     >
-                      {showSecrets.zoom_apiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showSecrets.zoom_apiKey ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                     </Button>
                   </div>
                 </div>
@@ -418,8 +423,9 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
                       size="icon"
                       onClick={() => toggleSecretVisibility('zoom_apiSecret')}
                       className="shrink-0"
+                      aria-label={showSecrets.zoom_apiSecret ? "Masquer le secret API Zoom" : "Afficher le secret API Zoom"}
                     >
-                      {showSecrets.zoom_apiSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showSecrets.zoom_apiSecret ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                     </Button>
                   </div>
                 </div>
@@ -692,8 +698,9 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
                       variant="outline"
                       size="icon"
                       onClick={() => toggleSecretVisibility('openai_apiKey')}
+                      aria-label={showSecrets.openai_apiKey ? "Masquer la clé API OpenAI" : "Afficher la clé API OpenAI"}
                     >
-                      {showSecrets.openai_apiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showSecrets.openai_apiKey ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                     </Button>
                   </div>
                 </div>

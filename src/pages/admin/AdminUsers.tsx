@@ -478,8 +478,9 @@ const AdminUsers = () => {
                                 setRoleDialogOpen(true);
                               }}
                               className="min-h-[44px] min-w-[44px]"
+                              aria-label={`Modifier le rôle de ${row.email}`}
                             >
-                              <Edit3 className="h-4 w-4" />
+                              <Edit3 className="h-4 w-4" aria-hidden="true" />
                             </Button>
                           </TooltipTrigger>
                           {!isAAL2 && <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>}
@@ -502,8 +503,9 @@ const AdminUsers = () => {
                                   }
                                 }}
                                 className="min-h-[44px] min-w-[44px]"
+                                aria-label={`Réactiver l'utilisateur ${row.email}`}
                               >
-                                <CheckCircle className="h-4 w-4" />
+                                <CheckCircle className="h-4 w-4" aria-hidden="true" />
                               </Button>
                             </TooltipTrigger>
                             {!isAAL2 && <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>}
@@ -524,8 +526,9 @@ const AdminUsers = () => {
                                   setSuspendDialogOpen(true);
                                 }}
                                 className="min-h-[44px] min-w-[44px]"
+                                aria-label={`Suspendre l'utilisateur ${row.email}`}
                               >
-                                <Ban className="h-4 w-4" />
+                                <Ban className="h-4 w-4" aria-hidden="true" />
                               </Button>
                             </TooltipTrigger>
                             {!isAAL2 && <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>}
@@ -546,8 +549,9 @@ const AdminUsers = () => {
                                 setDeleteDialogOpen(true);
                               }}
                               className="min-h-[44px] min-w-[44px]"
+                              aria-label={`Supprimer l'utilisateur ${row.email}`}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" aria-hidden="true" />
                             </Button>
                           </TooltipTrigger>
                           {!isAAL2 && <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>}
@@ -660,8 +664,9 @@ const AdminUsers = () => {
                                         setRoleDialogOpen(true);
                                       }}
                                       className="min-h-[44px] min-w-[44px] sm:min-w-auto"
+                                      aria-label={`Modifier le rôle de ${user.email}`}
                                     >
-                                      <Edit3 className="h-4 w-4 sm:mr-1" />
+                                      <Edit3 className="h-4 w-4 sm:mr-1" aria-hidden="true" />
                                       <span className="hidden sm:inline">Rôle</span>
                                     </Button>
                                   </TooltipTrigger>
@@ -685,8 +690,9 @@ const AdminUsers = () => {
                                           }
                                         }}
                                         className="min-h-[44px] min-w-[44px] sm:min-w-auto"
+                                        aria-label={`Réactiver l'utilisateur ${user.email}`}
                                       >
-                                        <CheckCircle className="h-4 w-4 sm:mr-1" />
+                                        <CheckCircle className="h-4 w-4 sm:mr-1" aria-hidden="true" />
                                         <span className="hidden sm:inline">Réactiver</span>
                                       </Button>
                                     </TooltipTrigger>
@@ -708,8 +714,9 @@ const AdminUsers = () => {
                                           setSuspendDialogOpen(true);
                                         }}
                                         className="min-h-[44px] min-w-[44px] sm:min-w-auto"
+                                        aria-label={`Suspendre l'utilisateur ${user.email}`}
                                       >
-                                        <Ban className="h-4 w-4 sm:mr-1" />
+                                        <Ban className="h-4 w-4 sm:mr-1" aria-hidden="true" />
                                         <span className="hidden sm:inline">Suspendre</span>
                                       </Button>
                                     </TooltipTrigger>
@@ -731,8 +738,9 @@ const AdminUsers = () => {
                                         setDeleteDialogOpen(true);
                                       }}
                                       className="min-h-[44px] min-w-[44px]"
+                                      aria-label={`Supprimer l'utilisateur ${user.email}`}
                                     >
-                                      <Trash2 className="h-4 w-4" />
+                                      <Trash2 className="h-4 w-4" aria-hidden="true" />
                                     </Button>
                                   </TooltipTrigger>
                                   {!isAAL2 && <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>}

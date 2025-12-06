@@ -54,23 +54,43 @@ export const isSupabaseStorageUrl = (url: string | undefined | null): boolean =>
  */
 /**
  * Détecte le meilleur format d'image supporté par le navigateur
+ * Priorité: AVIF > WebP > Original
+ * 
+ * AVIF offre ~50% de compression en plus que WebP
+ * WebP offre ~30% de compression en plus que JPEG/PNG
  */
 const getBestSupportedFormat = (): 'avif' | 'webp' | 'origin' => {
   if (typeof document === 'undefined') return 'webp'; // SSR fallback
   
-  // Vérifier le support AVIF
-  const avifSupported = document.createElement('canvas')
-    .toDataURL('image/avif')
-    .indexOf('data:image/avif') === 0;
+  // Vérifier le support AVIF (format le plus moderne et efficace)
+  // AVIF est supporté par Chrome 85+, Firefox 93+, Safari 16+
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    const avifSupported = canvas.toDataURL('image/avif').indexOf('data:image/avif') === 0;
+    
+    if (avifSupported) {
+      return 'avif';
+    }
+  } catch (e) {
+    // AVIF non supporté, continuer avec WebP
+  }
   
-  if (avifSupported) return 'avif';
-  
-  // Vérifier le support WebP
-  const webpSupported = document.createElement('canvas')
-    .toDataURL('image/webp')
-    .indexOf('data:image/webp') === 0;
-  
-  if (webpSupported) return 'webp';
+  // Vérifier le support WebP (fallback universel)
+  // WebP est supporté par tous les navigateurs modernes
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    const webpSupported = canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+    
+    if (webpSupported) {
+      return 'webp';
+    }
+  } catch (e) {
+    // WebP non supporté, utiliser format original
+  }
   
   return 'origin';
 };

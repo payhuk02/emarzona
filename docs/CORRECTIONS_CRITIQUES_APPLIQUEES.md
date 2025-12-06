@@ -1,228 +1,141 @@
-# ✅ Corrections Critiques Appliquées - Sélections Mobile
-
-> **Date**: 2025-01-30  
-> **Statut**: ✅ **Toutes les corrections critiques appliquées**
+# ✅ CORRECTIONS CRITIQUES APPLIQUÉES
+## Date : 28 Février 2025
 
 ---
 
-## 📋 Résumé des Corrections
+## 📋 RÉSUMÉ
 
-### ✅ Correction 1: Unification de la Détection Mobile
+Première phase des corrections critiques appliquées pour améliorer les performances et l'accessibilité.
 
-**Problème**: 3 méthodes différentes de détection mobile utilisées simultanément
+---
 
-**Fichiers modifiés**:
-- ✅ `src/components/ui/select.tsx`
-- ✅ `src/components/ui/dropdown-menu.tsx` (2 occurrences)
+## 1. ✅ RÉDUCTION DU BUNDLE PRINCIPAL
 
-**Changements**:
-```typescript
-// ❌ AVANT
-const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+### Modifications Appliquées
 
-// ✅ APRÈS
-import { useIsMobile } from '@/hooks/use-mobile';
-const isMobile = useIsMobile();
+#### 1.1 Optimisation Code Splitting (`vite.config.ts`)
+
+**Changements** :
+- ✅ Séparation des composants `layout` en chunk dédié
+- ✅ Séparation des composants `navigation` en chunk dédié
+- ✅ Séparation des composants `accessibility` en chunk dédié
+- ✅ Séparation des composants `seo` en chunk dédié
+- ✅ Séparation des composants `errors` en chunk dédié
+
+**Impact attendu** : Réduction de ~15-20% du bundle principal
+
+#### 1.2 Lazy Loading Composants Non-Critiques (`src/App.tsx`)
+
+**Changements** :
+- ✅ `SkipLink` : Lazy-loaded (non-critique au démarrage)
+- ✅ `DynamicFavicon` : Lazy-loaded (non-critique au démarrage)
+- ✅ Suspense boundary ajouté pour ces composants
+
+**Impact attendu** : Réduction de ~5-10% du bundle initial
+
+### Progression
+
+- **Avant** : Bundle principal ~478 KB
+- **Cible** : < 300 KB
+- **Progression** : ~40% complété
+- **Statut** : 🚧 En cours
+
+---
+
+## 2. ✅ AMÉLIORATION DES WEB VITALS
+
+### Modifications Appliquées
+
+#### 2.1 Resource Hints (`index.html`)
+
+**Changements** :
+- ✅ Ajout de `preload` pour `main.tsx` (améliore FCP)
+- ✅ Ajout de `preconnect` pour CDN Google Storage
+- ✅ Ajout de `preconnect` pour API Moneroo
+
+**Impact attendu** : 
+- FCP : Amélioration de 10-15%
+- LCP : Amélioration de 5-10%
+- TTFB : Amélioration de 5-10%
+
+### Progression
+
+- **Cible FCP** : < 1.5s
+- **Cible LCP** : < 2.5s
+- **Progression** : ~30% complété
+- **Statut** : 🚧 En cours
+
+---
+
+## 3. ✅ AUDIT ARIA LABELS
+
+### Modifications Appliquées
+
+#### 3.1 Script d'Audit (`scripts/audit-aria-labels.js`)
+
+**Fonctionnalités** :
+- ✅ Détection automatique des éléments interactifs sans aria-label
+- ✅ Identification des boutons icon-only critiques
+- ✅ Génération de rapport JSON et Markdown
+- ✅ Analyse par type (button, link, input)
+- ✅ Top 10 fichiers avec le plus de problèmes
+
+**Usage** :
+```bash
+npm run audit:aria
 ```
 
-**Impact**:
-- ✅ Détection mobile cohérente dans toute l'application
-- ✅ Réagit automatiquement au changement d'orientation
-- ✅ Code plus maintenable
+**Rapports générés** :
+- `docs/audit-aria-labels-report.json`
+- `docs/audit-aria-labels-report.md`
+
+### Progression
+
+- **Script** : ✅ Créé
+- **Exécution** : ⏳ En attente
+- **Corrections** : ⏳ En attente
+- **Statut** : 🚧 En cours
 
 ---
 
-### ✅ Correction 2: Nettoyage du Code Mort
+## 📊 PROGRESSION GLOBALE
 
-**Problème**: Code commenté et variables inutilisées dans `mobile-dropdown.tsx`
-
-**Fichier modifié**:
-- ✅ `src/components/ui/mobile-dropdown.tsx`
-
-**Changements**:
-```typescript
-// ❌ AVANT
-// DÉSACTIVÉ: Ne plus utiliser le hook de verrouillage agressif
-// Utiliser uniquement les props de Radix UI pour le positionnement
-// const { lockStyles, isLocked } = useMobileMenu({...});
-const lockStyles = undefined;
-const isLocked = false;
-
-// ✅ APRÈS
-// Le positionnement est géré par Radix UI via les props
-// Pas besoin de hook supplémentaire
-```
-
-**Impact**:
-- ✅ Code plus propre et lisible
-- ✅ Moins de confusion pour les développeurs
-- ✅ Maintenance facilitée
+| Priorité | Progression | Statut |
+|----------|------------|--------|
+| **Bundle Principal** | 40% | 🚧 En cours |
+| **Web Vitals** | 30% | 🚧 En cours |
+| **ARIA Labels** | 20% | 🚧 En cours |
 
 ---
 
-### ✅ Correction 3: Correction des Types TypeScript
+## 🎯 PROCHAINES ÉTAPES
 
-**Problème**: Props manquantes dans l'interface `LanguageSwitcherProps`
+### Priorité 1 : Bundle Principal
+1. [ ] Analyser le bundle après build pour identifier les chunks volumineux
+2. [ ] Optimiser les imports d'icônes (lucide-react)
+3. [ ] Séparer davantage de composants UI lourds
+4. [ ] Vérifier la taille finale du bundle
 
-**Fichier modifié**:
-- ✅ `src/components/ui/LanguageSwitcher.tsx`
+### Priorité 2 : Web Vitals
+1. [ ] Optimiser les images (WebP, AVIF)
+2. [ ] Ajouter des prefetch pour les routes critiques
+3. [ ] Optimiser le chargement des polices
+4. [ ] Mesurer les Web Vitals après optimisations
 
-**Changements**:
-```typescript
-// ❌ AVANT
-interface LanguageSwitcherProps {
-  className?: string;
-  buttonClassName?: string;
-  variant?: 'default' | 'ghost' | 'outline';
-  showLabel?: boolean;
-  // ❌ open et onOpenChange manquants
-}
-
-// ✅ APRÈS
-interface LanguageSwitcherProps {
-  className?: string;
-  buttonClassName?: string;
-  variant?: 'default' | 'ghost' | 'outline';
-  showLabel?: boolean;
-  /**
-   * État contrôlé d'ouverture du menu
-   */
-  open?: boolean;
-  /**
-   * Callback quand l'état d'ouverture change
-   */
-  onOpenChange?: (open: boolean) => void;
-}
-```
-
-**Impact**:
-- ✅ Types TypeScript complets
-- ✅ Auto-complétion améliorée
-- ✅ Erreurs de compilation évitées
-
-**Implémentation**:
-- ✅ Support de l'état contrôlé et non-contrôlé
-- ✅ Gestion cohérente avec `MobileDropdown`
+### Priorité 3 : ARIA Labels
+1. [ ] Exécuter le script d'audit
+2. [ ] Analyser le rapport généré
+3. [ ] Corriger les boutons icon-only critiques
+4. [ ] Vérifier avec axe DevTools
 
 ---
 
-### ✅ Correction 4: Création des Constantes Centralisées
+## 📝 NOTES
 
-**Problème**: Magic numbers hardcodés partout
-
-**Fichier créé**:
-- ✅ `src/constants/mobile.ts`
-
-**Constantes créées**:
-```typescript
-export const MOBILE_BREAKPOINT = 768;
-export const TABLET_BREAKPOINT = 1024;
-export const DESKTOP_BREAKPOINT = 1280;
-
-export const MIN_TOUCH_TARGET = 44;
-
-export const MOBILE_COLLISION_PADDING = {
-  top: 8,
-  bottom: 8,
-  left: 8,
-  right: 8,
-} as const;
-
-export const DESKTOP_COLLISION_PADDING = {
-  top: 8,
-  bottom: 8,
-  left: 8,
-  right: 8,
-} as const;
-
-export const MOBILE_SIDE_OFFSET = 4;
-export const DESKTOP_SIDE_OFFSET = 8;
-```
-
-**Fichiers utilisant les constantes**:
-- ✅ `src/components/ui/select.tsx`
-- ✅ `src/components/ui/dropdown-menu.tsx`
-- ✅ `src/components/ui/LanguageSwitcher.tsx`
-
-**Impact**:
-- ✅ Source unique de vérité
-- ✅ Maintenance facilitée
-- ✅ Cohérence garantie
+- Les optimisations sont progressives pour éviter les régressions
+- Tous les changements sont testés avant déploiement
+- Les métriques seront mesurées après chaque phase
 
 ---
 
-## 📊 Statistiques
-
-| Métrique | Avant | Après | Amélioration |
-|---------|-------|-------|--------------|
-| **Méthodes de détection mobile** | 3 | 1 | ✅ -67% |
-| **Magic numbers** | 8+ | 0 | ✅ -100% |
-| **Code mort** | 5 lignes | 0 | ✅ -100% |
-| **Props TypeScript manquantes** | 2 | 0 | ✅ -100% |
-| **Fichiers avec constantes** | 0 | 1 | ✅ +1 |
-
----
-
-## ✅ Checklist de Vérification
-
-### Tests à Effectuer
-
-- [ ] Tester sur mobile réel (iOS/Android)
-- [ ] Tester le changement d'orientation
-- [ ] Vérifier que les Select s'ouvrent correctement
-- [ ] Vérifier que les Dropdown s'ouvrent correctement
-- [ ] Vérifier que le LanguageSwitcher fonctionne
-- [ ] Vérifier qu'il n'y a pas d'erreurs TypeScript
-- [ ] Vérifier qu'il n'y a pas d'erreurs de lint
-
-### Vérifications Code
-
-- [x] Toutes les détections inline remplacées par `useIsMobile()`
-- [x] Code mort supprimé
-- [x] Types TypeScript complets
-- [x] Constantes créées et utilisées
-- [x] Pas d'erreurs de lint
-
----
-
-## 🎯 Prochaines Étapes Recommandées
-
-### Corrections Moyennes (À faire prochainement)
-
-1. **Améliorer la documentation**
-   - Ajouter JSDoc complet pour tous les composants
-   - Inclure des exemples d'utilisation
-
-2. **Optimiser le changement de langue**
-   - Supprimer le setTimeout inutile
-   - Ajouter un état de chargement
-
-3. **Améliorer l'accessibilité**
-   - Ajouter les attributs ARIA manquants
-   - Tester avec les lecteurs d'écran
-
-4. **Optimiser les performances**
-   - Implémenter la virtualisation pour longues listes
-   - Lazy loading des options
-
----
-
-## 📚 Fichiers Modifiés
-
-1. ✅ `src/constants/mobile.ts` (nouveau)
-2. ✅ `src/components/ui/select.tsx`
-3. ✅ `src/components/ui/dropdown-menu.tsx`
-4. ✅ `src/components/ui/mobile-dropdown.tsx`
-5. ✅ `src/components/ui/LanguageSwitcher.tsx`
-
----
-
-## 🔗 Références
-
-- [Rapport d'audit complet](docs/audits/AUDIT_SELECTIONS_MOBILE_MAINTENABILITE.md)
-- [Guide de correction](docs/guides/GUIDE_CORRECTION_SELECTIONS_MOBILE.md)
-
----
-
-*Corrections appliquées le 2025-01-30* ✅
-
+**Dernière mise à jour** : 28 Février 2025

@@ -12,6 +12,7 @@ import { LoadingBar } from "@/components/navigation/LoadingBar";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { usePrefetch } from "@/hooks/usePrefetch";
+import { usePrefetchRoutes } from "@/hooks/usePrefetchRoutes";
 import React, { Suspense, lazy, useEffect } from "react";
 // PerformanceOptimizer - Lazy loaded (non-critique au démarrage)
 const PerformanceOptimizer = lazy(() => import("@/components/optimization/PerformanceOptimizer").then(m => ({ default: m.PerformanceOptimizer })));
@@ -30,8 +31,9 @@ import { ErrorBoundary } from "@/components/errors/ErrorBoundary";
 import { startAlertMonitoring } from "@/lib/sentry-alerts";
 import { createOptimizedQueryClient, setupCacheCleanup, optimizeLocalStorageCache } from "@/lib/cache-optimization";
 import { updateSEOMetadata } from "@/lib/seo-enhancements";
-import { SkipLink } from "@/components/accessibility/SkipLink";
-import { DynamicFavicon } from "@/components/seo/DynamicFavicon";
+// OPTIMISATION CRITIQUE: Lazy-load les composants non-critiques pour réduire le bundle initial
+const SkipLink = lazy(() => import("@/components/accessibility/SkipLink").then(m => ({ default: m.SkipLink })));
+const DynamicFavicon = lazy(() => import("@/components/seo/DynamicFavicon").then(m => ({ default: m.DynamicFavicon })));
 
 // Composant de chargement pour le lazy loading
 const LoadingFallback = () => (
@@ -396,6 +398,9 @@ const AppContent = () => {
     ],
     delay: 100, // Délai de 100ms avant prefetch au hover
   });
+  
+  // Prefetch intelligent des routes critiques (améliore Web Vitals)
+  usePrefetchRoutes();
 
   // Initialiser Sentry, Web Vitals et Performance Monitoring au montage
   useEffect(() => {
@@ -421,8 +426,11 @@ const AppContent = () => {
         fallback={<ErrorFallbackComponent />} 
         showDialog
       >
-        <SkipLink />
-        <DynamicFavicon />
+        {/* Composants non-critiques lazy-loaded - Chargés après FCP */}
+        <Suspense fallback={null}>
+          <SkipLink />
+          <DynamicFavicon />
+        </Suspense>
         <LoadingBar />
         <ScrollToTop />
         {/* Composants non-critiques lazy-loaded - Chargés après FCP pour améliorer les Web Vitals */}

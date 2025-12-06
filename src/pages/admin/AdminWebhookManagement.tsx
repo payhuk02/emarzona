@@ -717,8 +717,13 @@ export default function AdminWebhookManagement() {
                                   </div>
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                                        <MoreVertical className="h-4 w-4" />
+                                      <Button 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        className="h-8 w-8"
+                                        aria-label={`Actions pour le webhook ${webhook.name}`}
+                                      >
+                                        <MoreVertical className="h-4 w-4" aria-hidden="true" />
                                       </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
@@ -840,8 +845,9 @@ export default function AdminWebhookManagement() {
                                           setIsViewDialogOpen(true);
                                         }}
                                         className="h-8 w-8 p-0"
+                                        aria-label={`Voir les détails de la livraison ${delivery.event_type}`}
                                       >
-                                        <Eye className="h-3.5 w-3.5" />
+                                        <Eye className="h-3.5 w-3.5" aria-hidden="true" />
                                       </Button>
                                     </TableCell>
                                   </TableRow>
@@ -882,8 +888,9 @@ export default function AdminWebhookManagement() {
                                       setIsViewDialogOpen(true);
                                     }}
                                     className="h-8 w-8 p-0"
+                                    aria-label={`Voir les détails de la livraison ${delivery.event_type}`}
                                   >
-                                    <Eye className="h-4 w-4" />
+                                    <Eye className="h-4 w-4" aria-hidden="true" />
                                   </Button>
                                 </div>
                               </CardContent>

@@ -63,7 +63,9 @@
     "supabase:types": "npx supabase gen types typescript --project-id hbdnzajbyjakdhuavrvb --schema public > src/integrations/supabase/types.ts",
     "supabase:types:check": "npx supabase gen types typescript --project-id hbdnzajbyjakdhuavrvb --schema public",
     "favicon:generate": "node scripts/generate-favicon.js",
-    "favicon:generate:simple": "node scripts/generate-favicon-simple.js"
+    "favicon:generate:simple": "node scripts/generate-favicon-simple.js",
+    "audit:aria": "node scripts/audit-aria-labels.js",
+    "verify:unsubscribe-css": "node scripts/verify-unsubscribe-css.js"
   },
   "vercel": {
     "buildCommand": "npm run build",
