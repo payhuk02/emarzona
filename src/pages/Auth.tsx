@@ -214,7 +214,7 @@ const Auth = () => {
     } catch (error: any) {
       logger.error('Signup error', {
         error: error.message,
-        email: formData.email,
+        email: signupEmail,
       });
       setError(error.message || t('auth.signup.error'));
     } finally {
@@ -254,7 +254,7 @@ const Auth = () => {
     } catch (error: any) {
       logger.error('Login error', {
         error: error.message,
-        email: formData.email,
+        email: loginEmail,
       });
       if (error.message.includes('Invalid login credentials')) {
         setError(t('auth.login.error'));
@@ -377,6 +377,8 @@ const Auth = () => {
                         id="password-login"
                         name="password-login"
                         type={showPassword.login ? "text" : "password"}
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
                         placeholder={t('auth.login.passwordPlaceholder')}
                         required
                         disabled={isLoading}
@@ -450,6 +452,11 @@ const Auth = () => {
                         id="password-signup"
                         name="password-signup"
                         type={showPassword.signup ? "text" : "password"}
+                        value={signupPassword}
+                        onChange={(e) => {
+                          setSignupPassword(e.target.value);
+                          handlePasswordChange(e.target.value, 'signup');
+                        }}
                         placeholder={t('auth.signup.passwordPlaceholder')}
                         required
                         minLength={6}
@@ -458,7 +465,6 @@ const Auth = () => {
                         aria-required="true"
                         aria-invalid={error.includes('password') || error.includes('mot de passe')}
                         className="pr-12 min-h-[44px] text-base"
-                        onChange={(e) => handlePasswordChange(e.target.value, 'signup')}
                       />
                       <button
                         type="button"
