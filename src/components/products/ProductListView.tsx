@@ -231,7 +231,11 @@ const ProductListView = ({
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent 
+                align="end" 
+                className="w-[calc(100vw-2rem)] sm:w-48 max-w-[calc(100vw-2rem)] sm:max-w-xs"
+                mobileOptimized
+              >
                 {onQuickView && (
                   <DropdownMenuItem onClick={onQuickView}>
                     <Eye className="h-4 w-4 mr-2" />

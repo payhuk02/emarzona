@@ -528,7 +528,7 @@ export const DigitalProductsSearch = () => {
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80" align="start">
+            <PopoverContent className="w-[calc(100vw-2rem)] sm:w-80 max-w-[calc(100vw-2rem)] sm:max-w-sm" align="start">
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Catégorie</label>

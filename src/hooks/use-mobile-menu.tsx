@@ -137,6 +137,7 @@ export function useMobileMenu({
     const { top, left, width, height } = position;
 
     // Appliquer les styles de verrouillage
+    // IMPORTANT: Ne pas utiliser touch-action: none car cela bloque les interactions
     menu.style.cssText = `
       position: fixed !important;
       top: ${top}px !important;
@@ -144,16 +145,16 @@ export function useMobileMenu({
       width: ${width}px !important;
       min-width: ${width}px !important;
       max-width: ${width}px !important;
-      height: ${height}px !important;
       transform: none !important;
       translate: none !important;
       margin: 0 !important;
       will-change: auto !important;
       contain: layout style paint !important;
       isolation: isolate !important;
-      touch-action: none !important;
+      touch-action: pan-y !important;
       z-index: ${zIndex} !important;
-      overflow: hidden !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
     `;
 
     // Observer les changements de style pour maintenir la position
@@ -173,16 +174,16 @@ export function useMobileMenu({
             width: ${positionRef.current.width}px !important;
             min-width: ${positionRef.current.width}px !important;
             max-width: ${positionRef.current.width}px !important;
-            height: ${positionRef.current.height}px !important;
             transform: none !important;
             translate: none !important;
             margin: 0 !important;
             will-change: auto !important;
             contain: layout style paint !important;
             isolation: isolate !important;
-            touch-action: none !important;
+            touch-action: pan-y !important;
             z-index: ${zIndex} !important;
-            overflow: hidden !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
           `;
         }
       }
@@ -213,16 +214,16 @@ export function useMobileMenu({
             width: ${targetWidth}px !important;
             min-width: ${targetWidth}px !important;
             max-width: ${targetWidth}px !important;
-            height: ${positionRef.current.height}px !important;
             transform: none !important;
             translate: none !important;
             margin: 0 !important;
             will-change: auto !important;
             contain: layout style paint !important;
             isolation: isolate !important;
-            touch-action: none !important;
+            touch-action: pan-y !important;
             z-index: ${zIndex} !important;
-            overflow: hidden !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
           `;
         }
         rafIdRef.current = requestAnimationFrame(checkPosition);
@@ -288,17 +289,9 @@ export function useMobileMenu({
     }
   }, [isOpen, unlockPosition]);
 
-  // Gérer le scroll lock sur le body quand le menu est ouvert
-  useEffect(() => {
-    if (!isMobile || !isOpen) return;
-
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.body.style.overflow = originalStyle;
-    };
-  }, [isMobile, isOpen]);
+  // Ne pas verrouiller le scroll du body pour éviter de bloquer les interactions
+  // Le positionnement fixe du menu suffit pour le garder visible
+  // Si nécessaire, on peut ajouter un scroll lock optionnel plus tard
 
   const lockStyles: React.CSSProperties | undefined = isLocked && positionRef.current
     ? {
@@ -308,11 +301,12 @@ export function useMobileMenu({
         width: `${positionRef.current.width}px`,
         minWidth: `${positionRef.current.width}px`,
         maxWidth: `${positionRef.current.width}px`,
-        height: `${positionRef.current.height}px`,
         zIndex: zIndex,
-        touchAction: 'none',
+        touchAction: 'pan-y', // Permet le scroll vertical mais bloque le scroll horizontal
         contain: 'layout style paint',
         isolation: 'isolate',
+        overflowY: 'auto',
+        overflowX: 'hidden',
       }
     : undefined;
 

@@ -595,7 +595,11 @@ export default function SupplierOrders() {
                                     <MoreVertical className="h-3.5 w-3.5 lg:h-4 lg:w-4 xl:h-5 xl:w-5" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44 lg:w-48 xl:w-56">
+                                <DropdownMenuContent 
+                                  align="end" 
+                                  className="w-[calc(100vw-2rem)] sm:w-44 lg:w-48 xl:w-56 max-w-[calc(100vw-2rem)] sm:max-w-xs"
+                                  mobileOptimized
+                                >
                                   <DropdownMenuItem className="text-xs lg:text-sm cursor-pointer">
                                     <Eye className="mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4" />
                                     Voir détails
@@ -654,7 +658,11 @@ export default function SupplierOrders() {
                               <MoreVertical className="h-3.5 w-3.5 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-44 xs:w-48 sm:w-56">
+                          <DropdownMenuContent 
+                            align="end" 
+                            className="w-[calc(100vw-2rem)] xs:w-44 sm:w-48 md:w-56 max-w-[calc(100vw-2rem)] sm:max-w-xs"
+                            mobileOptimized
+                          >
                             <DropdownMenuItem className="text-xs sm:text-sm md:text-base cursor-pointer touch-manipulation">
                               <Eye className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               Voir détails

@@ -152,20 +152,32 @@ export const MobileDropdown: React.FC<MobileDropdownProps> = ({
           }
         }}
         onPointerDownOutside={(e) => {
-          // Empêcher la fermeture accidentelle quand le menu est verrouillé
+          // Permettre la fermeture normale du menu
+          // Ne pas empêcher la fermeture, seulement éviter les fermetures accidentelles pendant l'animation
           if (isLocked && isMobile && !disableMobileOptimization) {
             const target = e.target as HTMLElement;
-            if (menuRef.current?.contains(target)) {
-              e.preventDefault();
+            // Ne pas empêcher si on clique sur le trigger
+            if (triggerRef.current?.contains(target)) {
+              return; // Laisser Radix UI gérer la fermeture
+            }
+            // Ne pas empêcher si on clique en dehors du menu
+            if (!menuRef.current?.contains(target)) {
+              return; // Laisser Radix UI gérer la fermeture
             }
           }
         }}
         onInteractOutside={(e) => {
-          // Empêcher la fermeture accidentelle quand le menu est verrouillé
+          // Permettre la fermeture normale du menu
+          // Ne pas empêcher la fermeture, seulement éviter les fermetures accidentelles pendant l'animation
           if (isLocked && isMobile && !disableMobileOptimization) {
             const target = e.target as HTMLElement;
-            if (menuRef.current?.contains(target)) {
-              e.preventDefault();
+            // Ne pas empêcher si on clique sur le trigger
+            if (triggerRef.current?.contains(target)) {
+              return; // Laisser Radix UI gérer la fermeture
+            }
+            // Ne pas empêcher si on clique en dehors du menu
+            if (!menuRef.current?.contains(target)) {
+              return; // Laisser Radix UI gérer la fermeture
             }
           }
         }}

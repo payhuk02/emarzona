@@ -73,12 +73,8 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       {AVAILABLE_LANGUAGES.map((lang) => (
         <DropdownMenuItem
           key={lang.code}
-          onSelect={(e) => {
-            e.preventDefault();
-            changeLanguage(lang.code);
-          }}
-          onClick={(e) => {
-            e.preventDefault();
+          onSelect={() => {
+            // onSelect est appelé automatiquement par Radix UI, pas besoin de preventDefault
             changeLanguage(lang.code);
           }}
           className={cn(

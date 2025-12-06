@@ -189,7 +189,7 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
                     Suggestions
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-2">
+                <PopoverContent className="w-[calc(100vw-2rem)] sm:w-64 max-w-[calc(100vw-2rem)] sm:max-w-xs p-2">
                   <div className="space-y-1">
                     <p className="text-xs font-semibold mb-2">Suggestions de codes</p>
                     {codeSuggestions.map((suggestion, index) => (

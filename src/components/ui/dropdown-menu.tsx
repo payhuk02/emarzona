@@ -91,30 +91,23 @@ const DropdownMenuItem = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
     inset?: boolean;
   }
->(({ className, inset, ...props }, ref) => (
-  <DropdownMenuPrimitive.Item
-    ref={ref}
-    className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation",
-      "active:bg-accent active:text-accent-foreground",
-      inset && "pl-8",
-      className,
-    )}
-    onSelect={(e) => {
-      // Empêcher la propagation pour éviter les double-clics sur mobile
-      if (typeof window !== 'undefined' && window.innerWidth < 768) {
-        e.preventDefault();
-        // Réémettre l'événement après un court délai
-        setTimeout(() => {
-          props.onSelect?.(e);
-        }, 50);
-      } else {
-        props.onSelect?.(e);
-      }
-    }}
-    {...props}
-  />
-));
+>(({ className, inset, onSelect, ...props }, ref) => {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  
+  return (
+    <DropdownMenuPrimitive.Item
+      ref={ref}
+      className={cn(
+        "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation",
+        "active:bg-accent active:text-accent-foreground",
+        inset && "pl-8",
+        className,
+      )}
+      onSelect={onSelect}
+      {...props}
+    />
+  );
+});
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
 
 const DropdownMenuCheckboxItem = React.forwardRef<
