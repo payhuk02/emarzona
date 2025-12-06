@@ -22,6 +22,26 @@
   - Grille responsive pour champs côte à côte
   - Boutons responsive (full-width sur mobile)
 
+#### ✅ CreatePromotionDialog (`src/components/promotions/CreatePromotionDialog.tsx`)
+- **Avant :** Dialog classique uniquement
+- **Après :** BottomSheet sur mobile, Dialog sur desktop
+- **Changements :**
+  - Utilisation de `useResponsiveModal` pour détection automatique
+  - Champs principaux migrés vers `MobileFormField`
+  - Code promo conservé en Input standard (validation complexe)
+  - Preview et Switch conservés
+  - Boutons responsive (full-width sur mobile)
+
+#### ✅ WithdrawalRequestDialog (`src/components/store/WithdrawalRequestDialog.tsx`)
+- **Avant :** Dialog classique uniquement
+- **Après :** BottomSheet sur mobile, Dialog sur desktop
+- **Changements :**
+  - Utilisation de `useResponsiveModal` pour détection automatique
+  - Champs principaux migrés vers `MobileFormField`
+  - Structure conditionnelle conservée (Mobile Money / Bank Card / Bank Transfer)
+  - Validation en temps réel intégrée
+  - Boutons responsive (full-width sur mobile)
+
 #### ✅ EditProductDialog (`src/components/products/EditProductDialog.tsx`)
 - **Avant :** Dialog classique uniquement
 - **Après :** BottomSheet sur mobile, Dialog sur desktop
@@ -72,6 +92,28 @@
 - Nom (signup)
 - Mot de passe (conservés avec show/hide button)
 
+#### ✅ CreatePromotionDialog - Champs migrés
+- Description (textarea)
+- Type de réduction (select)
+- Valeur de la réduction (number)
+- Montant minimum d'achat (number)
+- Nombre d'utilisations max (number)
+- Date de début/fin (datetime-local)
+- Code promo (conservé en Input standard avec validation)
+
+#### ✅ ContactForm - Champs migrés
+- Nom complet
+- Email
+- Sujet
+- Message (textarea)
+
+#### ✅ WithdrawalRequestDialog - Champs migrés
+- Montant (number avec validation)
+- Mobile Money: Téléphone, Nom complet
+- Bank Card: Numéro de carte, Nom du titulaire
+- Bank Transfer: Numéro de compte, Nom de la banque, Nom du titulaire, IBAN
+- Notes (textarea)
+
 ### 3. Tableaux vers MobileTableCard
 
 #### ✅ AdminProducts (`src/pages/admin/AdminProducts.tsx`)
@@ -82,6 +124,23 @@
   - Colonnes avec priorités (high/medium/low)
   - Actions intégrées dans chaque carte
   - Affichage conditionnel selon device
+
+#### ✅ AdminShipping (`src/pages/admin/AdminShipping.tsx`)
+- **Avant :** Tableau uniquement (non responsive)
+- **Après :** Cartes sur mobile, tableau sur desktop
+- **Changements :**
+  - Détection mobile avec `useIsMobile`
+  - Colonnes avec priorités (high/medium/low)
+  - Rendu conditionnel des données complexes (order, store)
+
+#### ✅ OrdersTable (`src/components/orders/OrdersTable.tsx`)
+- **Avant :** Tableau uniquement (non responsive)
+- **Après :** Cartes sur mobile, tableau sur desktop
+- **Changements :**
+  - Détection mobile avec `useIsMobile`
+  - Colonnes avec priorités
+  - Selects intégrés dans les cartes pour changement de statut
+  - Actions intégrées dans chaque carte
 
 **Colonnes configurées :**
 - Nom (priority: high)
@@ -99,9 +158,9 @@
 
 ## 📊 Statistiques
 
-- **Modales migrées :** 3/15+ (~20%)
-- **Formulaires migrés :** 5/20+ (~25%)
-- **Tableaux migrés :** 1/15+ (~7%)
+- **Modales migrées :** 6/15+ (~40%)
+- **Formulaires migrés :** 8/20+ (~40%)
+- **Tableaux migrés :** 3/15+ (~20%)
 - **Images optimisées :** 1/15+ (~7%)
 
 ## 🎯 Prochaines migrations recommandées

@@ -12,13 +12,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { BottomSheet, BottomSheetContent } from '@/components/ui/bottom-sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { MobileFormField } from '@/components/ui/mobile-form-field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from '@/components/icons';
+import { useResponsiveModal } from '@/hooks/use-responsive-modal';
 import { StoreWithdrawalRequestForm, MobileMoneyDetails, BankCardDetails, BankTransferDetails, MobileMoneyOperator } from '@/types/store-withdrawals';
 import { formatCurrency } from '@/lib/utils';
 import { useStorePaymentMethods } from '@/hooks/useStorePaymentMethods';
@@ -40,6 +43,7 @@ export const WithdrawalRequestDialog = ({
   storeId,
   onSubmit,
 }: WithdrawalRequestDialogProps) => {
+  const { useBottomSheet } = useResponsiveModal();
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'mobile_money' | 'bank_card' | 'bank_transfer'>('mobile_money');
   const [selectedSavedMethod, setSelectedSavedMethod] = useState<string>('new');
@@ -218,31 +222,50 @@ export const WithdrawalRequestDialog = ({
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">Demander un retrait</DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm">
-            Retirez vos revenus via Mobile Money ou Carte bancaire
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-3 sm:space-y-4 py-3 sm:py-4">
-          {/* Montant */}
-          <div className="space-y-2">
-            <Label htmlFor="amount" className="text-xs sm:text-sm">Montant (XOF) *</Label>
-            <Input
-              id="amount"
-              type="number"
-              min={MIN_WITHDRAWAL}
-              max={availableBalance}
-              step="1000"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder={`Minimum: ${formatCurrency(MIN_WITHDRAWAL)}`}
-              className="text-sm sm:text-base"
-            />
+  const formContent = (
+    <div className="space-y-3 sm:space-y-4 py-3 sm:py-4">
+      {/* Montant */}
+      <MobileFormField
+        label="Montant (XOF)"
+        name="amount"
+        type="number"
+        value={amount}
+        onChange={setAmount}
+        required
+        description={
+          <div className="text-xs sm:text-sm text-muted-foreground space-y-1 mt-1">
+            <p>Solde disponible : {formatCurrency(availableBalance)}</p>
+            {amountNum > 0 && (
+              <>
+                <p>Montant demandé : {formatCurrency(amountNum)}</p>
+                {amountNum < MIN_WITHDRAWAL && (
+                  <p className="text-destructive">
+                    Minimum requis : {formatCurrency(MIN_WITHDRAWAL)}
+                  </p>
+                )}
+                {amountNum > availableBalance && (
+                  <p className="text-destructive">
+                    Montant supérieur au solde disponible
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        }
+        error={
+          amountNum > 0 && (amountNum < MIN_WITHDRAWAL || amountNum > availableBalance)
+            ? amountNum < MIN_WITHDRAWAL
+              ? `Minimum requis : ${formatCurrency(MIN_WITHDRAWAL)}`
+              : "Montant supérieur au solde disponible"
+            : undefined
+        }
+        fieldProps={{
+          min: MIN_WITHDRAWAL,
+          max: availableBalance,
+          step: "1000",
+          placeholder: `Minimum: ${formatCurrency(MIN_WITHDRAWAL)}`,
+        }}
+      />
             <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
               <p>Solde disponible : {formatCurrency(availableBalance)}</p>
               {amountNum > 0 && (
@@ -345,55 +368,56 @@ export const WithdrawalRequestDialog = ({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="mobile_phone" className="text-xs sm:text-sm">Numéro de téléphone *</Label>
-                <Input
-                  id="mobile_phone"
-                  type="tel"
-                  value={mobilePhone}
-                  onChange={(e) => setMobilePhone(e.target.value)}
-                  placeholder="+226 XX XX XX XX"
-                  className="text-sm sm:text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="mobile_full_name" className="text-xs sm:text-sm">Nom complet (optionnel)</Label>
-                <Input
-                  id="mobile_full_name"
-                  value={mobileFullName}
-                  onChange={(e) => setMobileFullName(e.target.value)}
-                  placeholder="Nom complet du titulaire"
-                  className="text-sm sm:text-base"
-                />
-              </div>
+              <MobileFormField
+                label="Numéro de téléphone"
+                name="mobile_phone"
+                type="tel"
+                value={mobilePhone}
+                onChange={setMobilePhone}
+                required
+                fieldProps={{
+                  placeholder: "+226 XX XX XX XX",
+                }}
+              />
+              <MobileFormField
+                label="Nom complet (optionnel)"
+                name="mobile_full_name"
+                type="text"
+                value={mobileFullName}
+                onChange={setMobileFullName}
+                fieldProps={{
+                  placeholder: "Nom complet du titulaire",
+                }}
+              />
             </div>
           )}
 
           {paymentMethod === 'bank_card' && (
             <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
               <h4 className="font-semibold text-sm sm:text-base">Détails Carte bancaire</h4>
-              <div className="space-y-2">
-                <Label htmlFor="card_number" className="text-xs sm:text-sm">Numéro de carte *</Label>
-                <Input
-                  id="card_number"
-                  type="text"
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value)}
-                  placeholder="1234 5678 9012 3456"
-                  maxLength={19}
-                  className="text-sm sm:text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cardholder_name" className="text-xs sm:text-sm">Nom du titulaire *</Label>
-                <Input
-                  id="cardholder_name"
-                  value={cardholderName}
-                  onChange={(e) => setCardholderName(e.target.value)}
-                  placeholder="Nom complet"
-                  className="text-sm sm:text-base"
-                />
-              </div>
+              <MobileFormField
+                label="Numéro de carte"
+                name="card_number"
+                type="text"
+                value={cardNumber}
+                onChange={setCardNumber}
+                required
+                fieldProps={{
+                  placeholder: "1234 5678 9012 3456",
+                  maxLength: 19,
+                }}
+              />
+              <MobileFormField
+                label="Nom du titulaire"
+                name="cardholder_name"
+                type="text"
+                value={cardholderName}
+                onChange={setCardholderName}
+                required
+                fieldProps={{
+                  placeholder: "Nom complet",
+                }}
+              />
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="expiry_month" className="text-xs sm:text-sm">Mois d'expiration</Label>
@@ -436,61 +460,64 @@ export const WithdrawalRequestDialog = ({
           {paymentMethod === 'bank_transfer' && (
             <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
               <h4 className="font-semibold text-sm sm:text-base">Détails Virement bancaire</h4>
-              <div className="space-y-2">
-                <Label htmlFor="account_number" className="text-xs sm:text-sm">Numéro de compte *</Label>
-                <Input
-                  id="account_number"
-                  value={accountNumber}
-                  onChange={(e) => setAccountNumber(e.target.value)}
-                  placeholder="Numéro de compte bancaire"
-                  className="text-sm sm:text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="transfer_bank_name" className="text-xs sm:text-sm">Nom de la banque *</Label>
-                <Input
-                  id="transfer_bank_name"
-                  value={transferBankName}
-                  onChange={(e) => setTransferBankName(e.target.value)}
-                  placeholder="Nom de la banque"
-                  className="text-sm sm:text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="account_holder_name" className="text-xs sm:text-sm">Nom du titulaire *</Label>
-                <Input
-                  id="account_holder_name"
-                  value={accountHolderName}
-                  onChange={(e) => setAccountHolderName(e.target.value)}
-                  placeholder="Nom complet du titulaire"
-                  className="text-sm sm:text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="iban" className="text-xs sm:text-sm">IBAN (optionnel)</Label>
-                <Input
-                  id="iban"
-                  value={iban}
-                  onChange={(e) => setIban(e.target.value)}
-                  placeholder="IBAN"
-                  className="text-sm sm:text-base"
-                />
-              </div>
+              <MobileFormField
+                label="Numéro de compte"
+                name="account_number"
+                type="text"
+                value={accountNumber}
+                onChange={setAccountNumber}
+                required
+                fieldProps={{
+                  placeholder: "Numéro de compte bancaire",
+                }}
+              />
+              <MobileFormField
+                label="Nom de la banque"
+                name="transfer_bank_name"
+                type="text"
+                value={transferBankName}
+                onChange={setTransferBankName}
+                required
+                fieldProps={{
+                  placeholder: "Nom de la banque",
+                }}
+              />
+              <MobileFormField
+                label="Nom du titulaire"
+                name="account_holder_name"
+                type="text"
+                value={accountHolderName}
+                onChange={setAccountHolderName}
+                required
+                fieldProps={{
+                  placeholder: "Nom complet du titulaire",
+                }}
+              />
+              <MobileFormField
+                label="IBAN (optionnel)"
+                name="iban"
+                type="text"
+                value={iban}
+                onChange={setIban}
+                fieldProps={{
+                  placeholder: "IBAN",
+                }}
+              />
             </div>
           )}
 
           {/* Notes */}
-          <div className="space-y-2">
-            <Label htmlFor="notes" className="text-xs sm:text-sm">Notes (optionnel)</Label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Informations supplémentaires..."
-              rows={3}
-              className="text-sm sm:text-base"
-            />
-          </div>
+          <MobileFormField
+            label="Notes (optionnel)"
+            name="notes"
+            type="textarea"
+            value={notes}
+            onChange={setNotes}
+            fieldProps={{
+              placeholder: "Informations supplémentaires...",
+              rows: 3,
+            }}
+          />
 
           {/* Alertes */}
           {amountNum > 0 && amountNum < MIN_WITHDRAWAL && (
@@ -512,7 +539,7 @@ export const WithdrawalRequestDialog = ({
           )}
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+        <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
           <Button 
             variant="outline" 
             onClick={() => onOpenChange(false)} 
@@ -531,9 +558,36 @@ export const WithdrawalRequestDialog = ({
             {loading && <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />}
             <span className="text-xs sm:text-sm">Envoyer la demande</span>
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+    </div>
+  );
+
+  return (
+    <>
+      {useBottomSheet ? (
+        <BottomSheet open={open} onOpenChange={onOpenChange}>
+          <BottomSheetContent
+            title="Demander un retrait"
+            description="Retirez vos revenus via Mobile Money ou Carte bancaire"
+            className="max-h-[90vh] overflow-y-auto"
+          >
+            {formContent}
+          </BottomSheetContent>
+        </BottomSheet>
+      ) : (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-lg sm:text-xl">Demander un retrait</DialogTitle>
+              <DialogDescription className="text-xs sm:text-sm">
+                Retirez vos revenus via Mobile Money ou Carte bancaire
+              </DialogDescription>
+            </DialogHeader>
+            {formContent}
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 };
 
