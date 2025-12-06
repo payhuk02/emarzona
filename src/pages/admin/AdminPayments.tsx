@@ -10,8 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Table,
   TableBody,
@@ -40,6 +42,7 @@ import { RequireAAL2 } from '@/components/admin/RequireAAL2';
 export default function AdminPayments() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const isMobile = useIsMobile();
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -217,41 +220,98 @@ export default function AdminPayments() {
                 {isLoading ? (
                   <div className="text-center py-8">Chargement...</div>
                 ) : filteredPayments && filteredPayments.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>N° Commande</TableHead>
-                        <TableHead>Client</TableHead>
-                        <TableHead>Produit</TableHead>
-                        <TableHead>Boutique</TableHead>
-                        <TableHead>Montant</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead>Date</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredPayments.map((payment) => (
-                        <TableRow key={payment.id}>
-                          <TableCell className="font-medium">{payment.order_number}</TableCell>
-                          <TableCell>
+                  isMobile ? (
+                    <MobileTableCard
+                      data={filteredPayments}
+                      columns={[
+                        { 
+                          key: 'order_number', 
+                          label: 'N° Commande', 
+                          priority: 'high',
+                          className: 'font-medium'
+                        },
+                        { 
+                          key: 'profiles', 
+                          label: 'Client', 
+                          priority: 'high',
+                          render: (value) => (
                             <div>
-                              <div className="font-medium">{payment.profiles?.full_name || 'N/A'}</div>
+                              <div className="font-medium">{value?.full_name || 'N/A'}</div>
                               <div className="text-sm text-muted-foreground">
-                                {payment.profiles?.email}
+                                {value?.email}
                               </div>
                             </div>
-                          </TableCell>
-                          <TableCell>{payment.products?.name || 'N/A'}</TableCell>
-                          <TableCell>{payment.stores?.name || 'N/A'}</TableCell>
-                          <TableCell>{payment.total_amount?.toLocaleString()} FCFA</TableCell>
-                          <TableCell>{getStatusBadge(payment.payment_status)}</TableCell>
-                          <TableCell>
-                            {format(new Date(payment.created_at), 'PP', { locale: fr })}
-                          </TableCell>
+                          )
+                        },
+                        { 
+                          key: 'products', 
+                          label: 'Produit', 
+                          priority: 'medium',
+                          render: (value) => value?.name || 'N/A'
+                        },
+                        { 
+                          key: 'stores', 
+                          label: 'Boutique', 
+                          priority: 'medium',
+                          render: (value) => value?.name || 'N/A'
+                        },
+                        { 
+                          key: 'total_amount', 
+                          label: 'Montant', 
+                          priority: 'high',
+                          render: (value) => `${value?.toLocaleString()} FCFA`
+                        },
+                        { 
+                          key: 'payment_status', 
+                          label: 'Statut', 
+                          priority: 'high',
+                          render: (value) => getStatusBadge(value)
+                        },
+                        { 
+                          key: 'created_at', 
+                          label: 'Date', 
+                          priority: 'low',
+                          render: (value) => format(new Date(value), 'PP', { locale: fr })
+                        },
+                      ]}
+                    />
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>N° Commande</TableHead>
+                          <TableHead>Client</TableHead>
+                          <TableHead>Produit</TableHead>
+                          <TableHead>Boutique</TableHead>
+                          <TableHead>Montant</TableHead>
+                          <TableHead>Statut</TableHead>
+                          <TableHead>Date</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredPayments.map((payment) => (
+                          <TableRow key={payment.id}>
+                            <TableCell className="font-medium">{payment.order_number}</TableCell>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{payment.profiles?.full_name || 'N/A'}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {payment.profiles?.email}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{payment.products?.name || 'N/A'}</TableCell>
+                            <TableCell>{payment.stores?.name || 'N/A'}</TableCell>
+                            <TableCell>{payment.total_amount?.toLocaleString()} FCFA</TableCell>
+                            <TableCell>{getStatusBadge(payment.payment_status)}</TableCell>
+                            <TableCell>
+                              {format(new Date(payment.created_at), 'PP', { locale: fr })}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )
                 ) : (
                   <div className="text-center py-12">
                     <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

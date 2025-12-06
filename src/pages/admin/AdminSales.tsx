@@ -2,8 +2,10 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const AdminSales = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const isMobile = useIsMobile();
   const { toast } = useToast();
 
   // Animations au scroll
@@ -237,42 +240,93 @@ const AdminSales = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Commande</TableHead>
-                      <TableHead>Boutique</TableHead>
-                      <TableHead>Montant</TableHead>
-                      <TableHead>Commission</TableHead>
-                      <TableHead>Statut</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredSales?.map((sale: any) => (
-                      <TableRow key={sale.id}>
-                        <TableCell>
-                          {new Date(sale.created_at).toLocaleDateString('fr-FR')}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {sale.orders?.[0]?.order_number || 'N/A'}
-                        </TableCell>
-                        <TableCell>{sale.stores?.[0]?.name || 'N/A'}</TableCell>
-                        <TableCell className="font-bold">
-                          {formatCurrency(sale.amount)}
-                        </TableCell>
-                        <TableCell className="text-cyan-600">
-                          {formatCurrency(sale.commission_amount || 0)}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={sale.status === 'completed' ? 'default' : 'secondary'}>
-                            {sale.status}
+                {isMobile ? (
+                  <MobileTableCard
+                    data={filteredSales || []}
+                    columns={[
+                      { 
+                        key: 'created_at', 
+                        label: 'Date', 
+                        priority: 'high',
+                        render: (value) => new Date(value).toLocaleDateString('fr-FR')
+                      },
+                      { 
+                        key: 'orders', 
+                        label: 'Commande', 
+                        priority: 'high',
+                        render: (value) => value?.[0]?.order_number || 'N/A',
+                        className: 'font-medium'
+                      },
+                      { 
+                        key: 'stores', 
+                        label: 'Boutique', 
+                        priority: 'medium',
+                        render: (value) => value?.[0]?.name || 'N/A'
+                      },
+                      { 
+                        key: 'amount', 
+                        label: 'Montant', 
+                        priority: 'high',
+                        render: (value) => formatCurrency(value),
+                        className: 'font-bold'
+                      },
+                      { 
+                        key: 'commission_amount', 
+                        label: 'Commission', 
+                        priority: 'medium',
+                        render: (value, row) => formatCurrency(value || 0),
+                        className: 'text-cyan-600'
+                      },
+                      { 
+                        key: 'status', 
+                        label: 'Statut', 
+                        priority: 'high',
+                        render: (value) => (
+                          <Badge variant={value === 'completed' ? 'default' : 'secondary'}>
+                            {value}
                           </Badge>
-                        </TableCell>
+                        )
+                      },
+                    ]}
+                  />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Commande</TableHead>
+                        <TableHead>Boutique</TableHead>
+                        <TableHead>Montant</TableHead>
+                        <TableHead>Commission</TableHead>
+                        <TableHead>Statut</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredSales?.map((sale: any) => (
+                        <TableRow key={sale.id}>
+                          <TableCell>
+                            {new Date(sale.created_at).toLocaleDateString('fr-FR')}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {sale.orders?.[0]?.order_number || 'N/A'}
+                          </TableCell>
+                          <TableCell>{sale.stores?.[0]?.name || 'N/A'}</TableCell>
+                          <TableCell className="font-bold">
+                            {formatCurrency(sale.amount)}
+                          </TableCell>
+                          <TableCell className="text-cyan-600">
+                            {formatCurrency(sale.commission_amount || 0)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={sale.status === 'completed' ? 'default' : 'secondary'}>
+                              {sale.status}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
                 {filteredSales?.length === 0 && (
                   <div className="text-center py-12 text-muted-foreground">
                     Aucune vente trouvée

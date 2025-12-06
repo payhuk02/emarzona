@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { BottomSheet, BottomSheetContent } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { MobileFormField } from "@/components/ui/mobile-form-field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +13,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { Plus, Trash2 } from '@/components/icons';
 import { Card } from "@/components/ui/card";
 import { Order } from "@/hooks/useOrders";
+import { useResponsiveModal } from "@/hooks/use-responsive-modal";
 
 interface OrderEditDialogProps {
   open: boolean;
@@ -32,6 +35,7 @@ interface OrderItem {
 const OrderEditDialogComponent = ({ open, onOpenChange, onSuccess, order, storeId }: OrderEditDialogProps) => {
   const { toast } = useToast();
   const { products } = useProducts(storeId);
+  const { useBottomSheet } = useResponsiveModal();
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<OrderItem[]>([]);
   const [notes, setNotes] = useState("");
@@ -222,48 +226,37 @@ const OrderEditDialogComponent = ({ open, onOpenChange, onSuccess, order, storeI
 
   if (!order) return null;
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Modifier commande {order.order_number}</DialogTitle>
-          <DialogDescription>
-            Modifiez les détails de cette commande
-          </DialogDescription>
-        </DialogHeader>
+  const formContent = (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Statuts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <MobileFormField
+          label="Statut commande"
+          name="status"
+          type="select"
+          value={status}
+          onChange={(value) => setStatus(value)}
+          selectOptions={[
+            { value: 'pending', label: 'En attente' },
+            { value: 'processing', label: 'En cours' },
+            { value: 'completed', label: 'Terminée' },
+            { value: 'cancelled', label: 'Annulée' },
+          ]}
+        />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Statuts */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Statut commande</Label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">En attente</SelectItem>
-                  <SelectItem value="processing">En cours</SelectItem>
-                  <SelectItem value="completed">Terminée</SelectItem>
-                  <SelectItem value="cancelled">Annulée</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Statut paiement</Label>
-              <Select value={paymentStatus} onValueChange={setPaymentStatus}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">En attente</SelectItem>
-                  <SelectItem value="paid">Payée</SelectItem>
-                  <SelectItem value="failed">Échouée</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+        <MobileFormField
+          label="Statut paiement"
+          name="paymentStatus"
+          type="select"
+          value={paymentStatus}
+          onChange={(value) => setPaymentStatus(value)}
+          selectOptions={[
+            { value: 'pending', label: 'En attente' },
+            { value: 'paid', label: 'Payée' },
+            { value: 'failed', label: 'Échouée' },
+          ]}
+        />
+      </div>
 
           {/* Produits */}
           <div className="space-y-3">
@@ -369,49 +362,77 @@ const OrderEditDialogComponent = ({ open, onOpenChange, onSuccess, order, storeI
           )}
 
           {/* Mode de paiement */}
-          <div className="space-y-2">
-            <Label>Mode de paiement</Label>
-            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="cash">Espèces</SelectItem>
-                <SelectItem value="card">Carte bancaire</SelectItem>
-                <SelectItem value="mobile">Paiement mobile</SelectItem>
-                <SelectItem value="transfer">Virement</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <MobileFormField
+            label="Mode de paiement"
+            name="paymentMethod"
+            type="select"
+            value={paymentMethod}
+            onChange={(value) => setPaymentMethod(value)}
+            selectOptions={[
+              { value: 'cash', label: 'Espèces' },
+              { value: 'card', label: 'Carte bancaire' },
+              { value: 'mobile', label: 'Paiement mobile' },
+              { value: 'transfer', label: 'Virement' },
+            ]}
+          />
 
           {/* Notes */}
-          <div className="space-y-2">
-            <Label>Notes</Label>
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Notes sur la commande..."
-              rows={3}
-            />
-          </div>
+          <MobileFormField
+            label="Notes"
+            name="notes"
+            type="textarea"
+            value={notes}
+            onChange={setNotes}
+            fieldProps={{
+              placeholder: "Notes sur la commande...",
+              rows: 3,
+            }}
+          />
 
           {/* Actions */}
-          <div className="flex justify-end gap-2 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
+              className="w-full sm:w-auto"
             >
               Annuler
             </Button>
-            <Button type="submit" disabled={loading || items.length === 0}>
+            <Button type="submit" disabled={loading || items.length === 0} className="w-full sm:w-auto">
               {loading ? "Enregistrement..." : "Enregistrer les modifications"}
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+  );
+
+  return (
+    <>
+      {useBottomSheet ? (
+        <BottomSheet open={open} onOpenChange={onOpenChange}>
+          <BottomSheetContent
+            title={`Modifier commande ${order.order_number}`}
+            description="Modifiez les détails de cette commande"
+            className="max-h-[90vh] overflow-y-auto"
+          >
+            {formContent}
+          </BottomSheetContent>
+        </BottomSheet>
+      ) : (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Modifier commande {order.order_number}</DialogTitle>
+              <DialogDescription>
+                Modifiez les détails de cette commande
+              </DialogDescription>
+            </DialogHeader>
+            {formContent}
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 };
 
