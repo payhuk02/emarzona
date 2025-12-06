@@ -287,40 +287,40 @@ export const WithdrawalRequestDialog = ({
           </div>
 
           {/* Méthode de paiement */}
-          <div className="space-y-2">
-            <Label htmlFor="payment_method" className="text-xs sm:text-sm">Méthode de paiement *</Label>
-            <Select value={paymentMethod} onValueChange={(value: any) => {
-              setPaymentMethod(value);
-              setSelectedSavedMethod('new'); // Réinitialiser la sélection
-            }}>
-              <SelectTrigger id="payment_method" className="text-sm sm:text-base">
-                <SelectValue placeholder="Sélectionner une méthode" />
-              </SelectTrigger>
-              <SelectContent position="popper" className="z-[1060]">
-                <SelectItem value="mobile_money">Mobile Money</SelectItem>
-                <SelectItem value="bank_card">Carte bancaire</SelectItem>
-                <SelectItem value="bank_transfer">Virement bancaire</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <MobileFormField
+            label="Méthode de paiement"
+            name="payment_method"
+            type="select"
+            value={paymentMethod}
+            onChange={(value) => {
+              setPaymentMethod(value as any);
+              setSelectedSavedMethod('new');
+            }}
+            required
+            selectOptions={[
+              { value: 'mobile_money', label: 'Mobile Money' },
+              { value: 'bank_card', label: 'Carte bancaire' },
+              { value: 'bank_transfer', label: 'Virement bancaire' },
+            ]}
+          />
 
           {/* Sélectionner une méthode sauvegardée */}
           {storeId && paymentMethods.length > 0 && (
             <div className="space-y-2">
-              <Label htmlFor="saved_method" className="text-xs sm:text-sm">Utiliser une méthode sauvegardée</Label>
-              <Select value={selectedSavedMethod} onValueChange={setSelectedSavedMethod}>
-                <SelectTrigger id="saved_method" className="text-sm sm:text-base">
-                  <SelectValue placeholder="Sélectionner une méthode" />
-                </SelectTrigger>
-                <SelectContent position="popper" className="z-[1060]">
-                  <SelectItem value="new">Nouvelle méthode</SelectItem>
-                  {paymentMethods.map((method) => (
-                    <SelectItem key={method.id} value={method.id}>
-                      {method.label} {method.is_default && '(Par défaut)'}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <MobileFormField
+                label="Utiliser une méthode sauvegardée"
+                name="saved_method"
+                type="select"
+                value={selectedSavedMethod}
+                onChange={setSelectedSavedMethod}
+                selectOptions={[
+                  { value: 'new', label: 'Nouvelle méthode' },
+                  ...paymentMethods.map((method) => ({
+                    value: method.id,
+                    label: `${method.label}${method.is_default ? ' (Par défaut)' : ''}`,
+                  })),
+                ]}
+              />
               {selectedSavedMethod !== 'new' && (
                 <p className="text-xs text-muted-foreground">
                   Les détails seront pré-remplis automatiquement
@@ -333,41 +333,34 @@ export const WithdrawalRequestDialog = ({
           {paymentMethod === 'mobile_money' && (
             <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
               <h4 className="font-semibold text-sm sm:text-base">Détails Mobile Money</h4>
-              <div className="space-y-2">
-                <Label htmlFor="mobile_country" className="text-xs sm:text-sm">Pays *</Label>
-                <Select value={mobileCountry} onValueChange={(value) => {
+              <MobileFormField
+                label="Pays"
+                name="mobile_country"
+                type="select"
+                value={mobileCountry}
+                onChange={(value) => {
                   setMobileCountry(value);
-                  // Réinitialiser l'opérateur avec le défaut du nouveau pays
                   const defaultOp = getDefaultOperatorForCountry(value);
                   setMobileOperator(defaultOp);
-                }}>
-                  <SelectTrigger id="mobile_country" className="text-sm sm:text-base">
-                    <SelectValue placeholder="Sélectionner un pays" />
-                  </SelectTrigger>
-                  <SelectContent position="popper" className="z-[1060] max-h-[300px]">
-                    {COUNTRIES.map((country) => (
-                      <SelectItem key={country.code} value={country.code}>
-                        {country.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="operator" className="text-xs sm:text-sm">Opérateur *</Label>
-                <Select value={mobileOperator} onValueChange={(value: any) => setMobileOperator(value)}>
-                  <SelectTrigger id="operator" className="text-sm sm:text-base">
-                    <SelectValue placeholder="Sélectionner un opérateur" />
-                  </SelectTrigger>
-                  <SelectContent position="popper" className="z-[1060]">
-                    {availableOperators.map((op) => (
-                      <SelectItem key={op.value} value={op.value}>
-                        {op.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                }}
+                required
+                selectOptions={COUNTRIES.map((country) => ({
+                  value: country.code,
+                  label: country.name,
+                }))}
+              />
+              <MobileFormField
+                label="Opérateur"
+                name="operator"
+                type="select"
+                value={mobileOperator}
+                onChange={(value) => setMobileOperator(value as any)}
+                required
+                selectOptions={availableOperators.map((op) => ({
+                  value: op.value,
+                  label: op.label,
+                }))}
+              />
               <MobileFormField
                 label="Numéro de téléphone"
                 name="mobile_phone"
@@ -419,41 +412,39 @@ export const WithdrawalRequestDialog = ({
                 }}
               />
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="expiry_month" className="text-xs sm:text-sm">Mois d'expiration</Label>
-                  <Input
-                    id="expiry_month"
-                    type="text"
-                    value={expiryMonth}
-                    onChange={(e) => setExpiryMonth(e.target.value)}
-                    placeholder="MM"
-                    maxLength={2}
-                    className="text-sm sm:text-base"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="expiry_year" className="text-xs sm:text-sm">Année d'expiration</Label>
-                  <Input
-                    id="expiry_year"
-                    type="text"
-                    value={expiryYear}
-                    onChange={(e) => setExpiryYear(e.target.value)}
-                    placeholder="YYYY"
-                    maxLength={4}
-                    className="text-sm sm:text-base"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bank_name" className="text-xs sm:text-sm">Nom de la banque (optionnel)</Label>
-                <Input
-                  id="bank_name"
-                  value={bankName}
-                  onChange={(e) => setBankName(e.target.value)}
-                  placeholder="Nom de la banque"
-                  className="text-sm sm:text-base"
+                <MobileFormField
+                  label="Mois d'expiration"
+                  name="expiry_month"
+                  type="text"
+                  value={expiryMonth}
+                  onChange={setExpiryMonth}
+                  fieldProps={{
+                    placeholder: "MM",
+                    maxLength: 2,
+                  }}
+                />
+                <MobileFormField
+                  label="Année d'expiration"
+                  name="expiry_year"
+                  type="text"
+                  value={expiryYear}
+                  onChange={setExpiryYear}
+                  fieldProps={{
+                    placeholder: "YYYY",
+                    maxLength: 4,
+                  }}
                 />
               </div>
+              <MobileFormField
+                label="Nom de la banque"
+                name="bank_name"
+                type="text"
+                value={bankName}
+                onChange={setBankName}
+                fieldProps={{
+                  placeholder: "Nom de la banque",
+                }}
+              />
             </div>
           )}
 

@@ -12,13 +12,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { BottomSheet, BottomSheetContent } from '@/components/ui/bottom-sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { MobileFormField } from '@/components/ui/mobile-form-field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Loader2 } from '@/components/icons';
+import { useResponsiveModal } from '@/hooks/use-responsive-modal';
 import { 
   SavedStorePaymentMethod, 
   StorePaymentMethodForm,
@@ -44,6 +47,7 @@ export const PaymentMethodDialog = ({
   method,
   onSubmit,
 }: PaymentMethodDialogProps) => {
+  const { useBottomSheet } = useResponsiveModal();
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<StorePaymentMethod>('mobile_money');
   const [label, setLabel] = useState('');
@@ -204,202 +208,198 @@ export const PaymentMethodDialog = ({
 
         <div className="space-y-3 sm:space-y-4 py-3 sm:py-4">
           {/* Label */}
-          <div className="space-y-2">
-            <Label htmlFor="label" className="text-xs sm:text-sm">Nom de la méthode *</Label>
-            <Input
-              id="label"
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              placeholder="Ex: Orange Money Principal, Carte UBA..."
-              className="text-sm sm:text-base"
-            />
-          </div>
+          <MobileFormField
+            label="Nom de la méthode"
+            name="label"
+            type="text"
+            value={label}
+            onChange={setLabel}
+            required
+            fieldProps={{
+              placeholder: "Ex: Orange Money Principal, Carte UBA...",
+            }}
+          />
 
           {/* Type de méthode */}
-          <div className="space-y-2">
-            <Label htmlFor="payment_method" className="text-xs sm:text-sm">Type de paiement *</Label>
-            <Select value={paymentMethod} onValueChange={(value: any) => setPaymentMethod(value)}>
-              <SelectTrigger className="text-sm sm:text-base" id="payment_method">
-                <SelectValue placeholder="Sélectionner un type" />
-              </SelectTrigger>
-              <SelectContent position="popper" className="z-[1060]">
-                <SelectItem value="mobile_money">Mobile Money</SelectItem>
-                <SelectItem value="bank_card">Carte bancaire</SelectItem>
-                <SelectItem value="bank_transfer">Virement bancaire</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <MobileFormField
+            label="Type de paiement"
+            name="payment_method"
+            type="select"
+            value={paymentMethod}
+            onChange={(value) => setPaymentMethod(value as any)}
+            required
+            selectOptions={[
+              { value: 'mobile_money', label: 'Mobile Money' },
+              { value: 'bank_card', label: 'Carte bancaire' },
+              { value: 'bank_transfer', label: 'Virement bancaire' },
+            ]}
+          />
 
           {/* Détails selon la méthode */}
           {paymentMethod === 'mobile_money' && (
             <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
               <h4 className="font-semibold text-sm sm:text-base">Détails Mobile Money</h4>
-              <div className="space-y-2">
-                <Label htmlFor="mobile_country" className="text-xs sm:text-sm">Pays *</Label>
-                <Select value={mobileCountry} onValueChange={(value) => {
+              <MobileFormField
+                label="Pays"
+                name="mobile_country"
+                type="select"
+                value={mobileCountry}
+                onChange={(value) => {
                   setMobileCountry(value);
-                  // Réinitialiser l'opérateur avec le défaut du nouveau pays
                   const defaultOp = getDefaultOperatorForCountry(value);
                   setMobileOperator(defaultOp);
-                }}>
-                  <SelectTrigger className="text-sm sm:text-base" id="mobile_country">
-                    <SelectValue placeholder="Sélectionner un pays" />
-                  </SelectTrigger>
-                  <SelectContent position="popper" className="z-[1060] max-h-[300px]">
-                    {COUNTRIES.map((country) => (
-                      <SelectItem key={country.code} value={country.code}>
-                        {country.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="operator" className="text-xs sm:text-sm">Opérateur *</Label>
-                <Select value={mobileOperator} onValueChange={(value: any) => setMobileOperator(value)}>
-                  <SelectTrigger className="text-sm sm:text-base" id="operator">
-                    <SelectValue placeholder="Sélectionner un opérateur" />
-                  </SelectTrigger>
-                  <SelectContent position="popper" className="z-[1060]">
-                    {availableOperators.map((op) => (
-                      <SelectItem key={op.value} value={op.value}>
-                        {op.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="mobile_phone" className="text-xs sm:text-sm">Numéro de téléphone *</Label>
-                <Input
-                  id="mobile_phone"
-                  type="tel"
-                  value={mobilePhone}
-                  onChange={(e) => setMobilePhone(e.target.value)}
-                  placeholder="+226 XX XX XX XX"
-                  className="text-sm sm:text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="mobile_full_name" className="text-xs sm:text-sm">Nom complet (optionnel)</Label>
-                <Input
-                  id="mobile_full_name"
-                  value={mobileFullName}
-                  onChange={(e) => setMobileFullName(e.target.value)}
-                  placeholder="Nom complet du titulaire"
-                  className="text-sm sm:text-base"
-                />
-              </div>
+                }}
+                required
+                selectOptions={COUNTRIES.map((country) => ({
+                  value: country.code,
+                  label: country.name,
+                }))}
+              />
+              <MobileFormField
+                label="Opérateur"
+                name="operator"
+                type="select"
+                value={mobileOperator}
+                onChange={(value) => setMobileOperator(value as any)}
+                required
+                selectOptions={availableOperators.map((op) => ({
+                  value: op.value,
+                  label: op.label,
+                }))}
+              />
+              <MobileFormField
+                label="Numéro de téléphone"
+                name="mobile_phone"
+                type="tel"
+                value={mobilePhone}
+                onChange={setMobilePhone}
+                required
+                fieldProps={{
+                  placeholder: "+226 XX XX XX XX",
+                }}
+              />
+              <MobileFormField
+                label="Nom complet"
+                name="mobile_full_name"
+                type="text"
+                value={mobileFullName}
+                onChange={setMobileFullName}
+                fieldProps={{
+                  placeholder: "Nom complet du titulaire",
+                }}
+              />
             </div>
           )}
 
           {paymentMethod === 'bank_card' && (
             <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
               <h4 className="font-semibold text-sm sm:text-base">Détails Carte bancaire</h4>
-              <div className="space-y-2">
-                <Label htmlFor="card_number" className="text-xs sm:text-sm">Numéro de carte *</Label>
-                <Input
-                  id="card_number"
-                  type="text"
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value)}
-                  placeholder="1234 5678 9012 3456"
-                  maxLength={19}
-                  className="text-sm sm:text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cardholder_name" className="text-xs sm:text-sm">Nom du titulaire *</Label>
-                <Input
-                  id="cardholder_name"
-                  value={cardholderName}
-                  onChange={(e) => setCardholderName(e.target.value)}
-                  placeholder="Nom complet"
-                  className="text-sm sm:text-base"
-                />
-              </div>
+              <MobileFormField
+                label="Numéro de carte"
+                name="card_number"
+                type="text"
+                value={cardNumber}
+                onChange={setCardNumber}
+                required
+                fieldProps={{
+                  placeholder: "1234 5678 9012 3456",
+                  maxLength: 19,
+                }}
+              />
+              <MobileFormField
+                label="Nom du titulaire"
+                name="cardholder_name"
+                type="text"
+                value={cardholderName}
+                onChange={setCardholderName}
+                required
+                fieldProps={{
+                  placeholder: "Nom complet",
+                }}
+              />
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="expiry_month" className="text-xs sm:text-sm">Mois d'expiration</Label>
-                  <Input
-                    id="expiry_month"
-                    type="text"
-                    value={expiryMonth}
-                    onChange={(e) => setExpiryMonth(e.target.value)}
-                    placeholder="MM"
-                    maxLength={2}
-                    className="text-sm sm:text-base"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="expiry_year" className="text-xs sm:text-sm">Année d'expiration</Label>
-                  <Input
-                    id="expiry_year"
-                    type="text"
-                    value={expiryYear}
-                    onChange={(e) => setExpiryYear(e.target.value)}
-                    placeholder="YYYY"
-                    maxLength={4}
-                    className="text-sm sm:text-base"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bank_name" className="text-xs sm:text-sm">Nom de la banque (optionnel)</Label>
-                <Input
-                  id="bank_name"
-                  value={bankName}
-                  onChange={(e) => setBankName(e.target.value)}
-                  placeholder="Nom de la banque"
-                  className="text-sm sm:text-base"
+                <MobileFormField
+                  label="Mois d'expiration"
+                  name="expiry_month"
+                  type="text"
+                  value={expiryMonth}
+                  onChange={setExpiryMonth}
+                  fieldProps={{
+                    placeholder: "MM",
+                    maxLength: 2,
+                  }}
+                />
+                <MobileFormField
+                  label="Année d'expiration"
+                  name="expiry_year"
+                  type="text"
+                  value={expiryYear}
+                  onChange={setExpiryYear}
+                  fieldProps={{
+                    placeholder: "YYYY",
+                    maxLength: 4,
+                  }}
                 />
               </div>
+              <MobileFormField
+                label="Nom de la banque"
+                name="bank_name"
+                type="text"
+                value={bankName}
+                onChange={setBankName}
+                fieldProps={{
+                  placeholder: "Nom de la banque",
+                }}
+              />
             </div>
           )}
 
           {paymentMethod === 'bank_transfer' && (
             <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
               <h4 className="font-semibold text-sm sm:text-base">Détails Virement bancaire</h4>
-              <div className="space-y-2">
-                <Label htmlFor="account_number" className="text-xs sm:text-sm">Numéro de compte *</Label>
-                <Input
-                  id="account_number"
-                  value={accountNumber}
-                  onChange={(e) => setAccountNumber(e.target.value)}
-                  placeholder="Numéro de compte bancaire"
-                  className="text-sm sm:text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="transfer_bank_name" className="text-xs sm:text-sm">Nom de la banque *</Label>
-                <Input
-                  id="transfer_bank_name"
-                  value={transferBankName}
-                  onChange={(e) => setTransferBankName(e.target.value)}
-                  placeholder="Nom de la banque"
-                  className="text-sm sm:text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="account_holder_name" className="text-xs sm:text-sm">Nom du titulaire *</Label>
-                <Input
-                  id="account_holder_name"
-                  value={accountHolderName}
-                  onChange={(e) => setAccountHolderName(e.target.value)}
-                  placeholder="Nom complet du titulaire"
-                  className="text-sm sm:text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="iban" className="text-xs sm:text-sm">IBAN (optionnel)</Label>
-                <Input
-                  id="iban"
-                  value={iban}
-                  onChange={(e) => setIban(e.target.value)}
-                  placeholder="IBAN"
-                  className="text-sm sm:text-base"
-                />
-              </div>
+              <MobileFormField
+                label="Numéro de compte"
+                name="account_number"
+                type="text"
+                value={accountNumber}
+                onChange={setAccountNumber}
+                required
+                fieldProps={{
+                  placeholder: "Numéro de compte bancaire",
+                }}
+              />
+              <MobileFormField
+                label="Nom de la banque"
+                name="transfer_bank_name"
+                type="text"
+                value={transferBankName}
+                onChange={setTransferBankName}
+                required
+                fieldProps={{
+                  placeholder: "Nom de la banque",
+                }}
+              />
+              <MobileFormField
+                label="Nom du titulaire"
+                name="account_holder_name"
+                type="text"
+                value={accountHolderName}
+                onChange={setAccountHolderName}
+                required
+                fieldProps={{
+                  placeholder: "Nom complet du titulaire",
+                }}
+              />
+              <MobileFormField
+                label="IBAN"
+                name="iban"
+                type="text"
+                value={iban}
+                onChange={setIban}
+                fieldProps={{
+                  placeholder: "IBAN",
+                }}
+              />
             </div>
           )}
 
@@ -436,26 +436,25 @@ export const PaymentMethodDialog = ({
           </div>
 
           {/* Notes */}
-          <div className="space-y-2">
-            <Label htmlFor="notes" className="text-xs sm:text-sm">Notes (optionnel)</Label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Informations supplémentaires..."
-              rows={3}
-              className="text-sm sm:text-base"
-            />
-          </div>
+          <MobileFormField
+            label="Notes"
+            name="notes"
+            type="textarea"
+            value={notes}
+            onChange={setNotes}
+            fieldProps={{
+              placeholder: "Informations supplémentaires...",
+              rows: 3,
+            }}
+          />
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+        <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
           <Button 
             variant="outline" 
             onClick={() => onOpenChange(false)} 
             disabled={loading}
             className="w-full sm:w-auto"
-            size="sm"
           >
             Annuler
           </Button>
@@ -463,14 +462,41 @@ export const PaymentMethodDialog = ({
             onClick={handleSubmit} 
             disabled={!isValid() || loading}
             className="w-full sm:w-auto"
-            size="sm"
           >
-            {loading && <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />}
-            <span className="text-xs sm:text-sm">{method ? 'Enregistrer' : 'Ajouter'}</span>
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {method ? 'Enregistrer' : 'Ajouter'}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+  );
+
+  return (
+    <>
+      {useBottomSheet ? (
+        <BottomSheet open={open} onOpenChange={onOpenChange}>
+          <BottomSheetContent
+            title={method ? 'Modifier la méthode de paiement' : 'Ajouter une méthode de paiement'}
+            description="Enregistrez vos informations de paiement pour faciliter vos retraits"
+            className="max-h-[90vh] overflow-y-auto"
+          >
+            {formContent}
+          </BottomSheetContent>
+        </BottomSheet>
+      ) : (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-lg sm:text-xl">
+                {method ? 'Modifier la méthode de paiement' : 'Ajouter une méthode de paiement'}
+              </DialogTitle>
+              <DialogDescription className="text-xs sm:text-sm">
+                Enregistrez vos informations de paiement pour faciliter vos retraits
+              </DialogDescription>
+            </DialogHeader>
+            {formContent}
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 };
 
