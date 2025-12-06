@@ -54,20 +54,36 @@ DropdownMenuSubContent.displayName = DropdownMenuPrimitive.SubContent.displayNam
 
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
-  <DropdownMenuPrimitive.Portal>
-    <DropdownMenuPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn(
-        "z-50 min-w-[8rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-        className,
-      )}
-      {...props}
-    />
-  </DropdownMenuPrimitive.Portal>
-));
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> & {
+    mobileOptimized?: boolean;
+  }
+>(({ className, sideOffset = 4, mobileOptimized = true, ...props }, ref) => {
+  // Détecter mobile avec CSS media query pour éviter le flash
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  
+  return (
+    <DropdownMenuPrimitive.Portal>
+      <DropdownMenuPrimitive.Content
+        ref={ref}
+        sideOffset={sideOffset}
+        side={isMobile && mobileOptimized ? "bottom" : props.side}
+        align={isMobile && mobileOptimized ? "end" : props.align}
+        avoidCollisions={isMobile && mobileOptimized ? false : props.avoidCollisions ?? true}
+        collisionPadding={isMobile && mobileOptimized ? { top: 8, bottom: 8, left: 8, right: 8 } : props.collisionPadding ?? 8}
+        sticky={isMobile && mobileOptimized ? "always" : props.sticky ?? "partial"}
+        className={cn(
+          "z-[100] min-w-[8rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
+          // Animations optimisées pour mobile
+          isMobile && mobileOptimized
+            ? "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+            : "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+          className,
+        )}
+        {...props}
+      />
+    </DropdownMenuPrimitive.Portal>
+  );
+});
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 
 const DropdownMenuItem = React.forwardRef<
@@ -80,9 +96,22 @@ const DropdownMenuItem = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation",
+      "active:bg-accent active:text-accent-foreground",
       inset && "pl-8",
       className,
     )}
+    onSelect={(e) => {
+      // Empêcher la propagation pour éviter les double-clics sur mobile
+      if (typeof window !== 'undefined' && window.innerWidth < 768) {
+        e.preventDefault();
+        // Réémettre l'événement après un court délai
+        setTimeout(() => {
+          props.onSelect?.(e);
+        }, 50);
+      } else {
+        props.onSelect?.(e);
+      }
+    }}
     {...props}
   />
 ));

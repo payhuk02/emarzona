@@ -11,13 +11,11 @@ import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ThemeSelectorCompact } from '@/components/navigation/ThemeSelector';
 import { Button } from '@/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
+  MobileDropdown,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/ui/mobile-dropdown';
 import {
   LayoutDashboard,
   Package,
@@ -209,47 +207,50 @@ export const TopNavigationBar = () => {
             </div>
 
             {/* User Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <MobileDropdown
+              trigger={
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="hover:bg-accent"
+                  className="hover:bg-accent touch-manipulation"
                 >
                   <User className="h-5 w-5" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">
-                      {user?.user_metadata?.full_name || user?.email}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {user?.email}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <NavLink to="/account/profile" className="cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
-                    {t('navigation.myProfile', 'Mon Profil')}
-                  </NavLink>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <NavLink to="/dashboard/settings" className="cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    {t('navigation.settings', 'Paramètres')}
-                  </NavLink>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  {t('auth.signOut', 'Déconnexion')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              }
+              align="end"
+              side="bottom"
+              width={224}
+              contentClassName="w-56"
+            >
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium">
+                    {user?.user_metadata?.full_name || user?.email}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {user?.email}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <NavLink to="/account/profile" className="cursor-pointer">
+                  <User className="mr-2 h-4 w-4" />
+                  {t('navigation.myProfile', 'Mon Profil')}
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/dashboard/settings" className="cursor-pointer">
+                  <Settings className="mr-2 h-4 w-4" />
+                  {t('navigation.settings', 'Paramètres')}
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+                <LogOut className="mr-2 h-4 w-4" />
+                {t('auth.signOut', 'Déconnexion')}
+              </DropdownMenuItem>
+            </MobileDropdown>
           </div>
         </div>
       </div>
