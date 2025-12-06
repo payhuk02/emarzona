@@ -18,6 +18,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
@@ -150,6 +152,7 @@ const WEBHOOK_EVENTS: { category: string; events: { value: WebhookEventType; lab
 ];
 
 export default function AdminWebhookManagement() {
+  const isMobile = useIsMobile();
   const { store, loading: storeLoading } = useStore();
   const { data: webhooks, isLoading } = useWebhooks(store?.id);
   const { data: stats } = useWebhookStats(store?.id);
@@ -590,78 +593,183 @@ export default function AdminWebhookManagement() {
                         </div>
                       </div>
 
-                      {/* Mobile Card View */}
-                      <div className="lg:hidden space-y-3 sm:space-y-4">
-                        {filteredWebhooks.map((webhook) => (
-                          <Card
-                            key={webhook.id}
-                            className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300"
-                          >
-                            <CardContent className="p-4 sm:p-5">
-                              <div className="flex items-start justify-between mb-3">
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="font-semibold text-sm sm:text-base truncate mb-1">
-                                    {webhook.name}
-                                  </h3>
-                                  <div className="flex items-center gap-2 mb-2">
-                                    {getStatusBadge(webhook.status)}
-                                    <Badge variant="outline" className="text-xs">{webhook.events.length} événement(s)</Badge>
-                                  </div>
+                      {/* Mobile Table Card View */}
+                      {isMobile ? (
+                        <MobileTableCard
+                          data={filteredWebhooks.map(w => ({ ...w, id: w.id }))}
+                          columns={[
+                            {
+                              key: 'name',
+                              label: 'Nom',
+                              priority: 'high',
+                              render: (row: Webhook) => (
+                                <span className="font-semibold text-sm">{row.name}</span>
+                              ),
+                            },
+                            {
+                              key: 'url',
+                              label: 'URL',
+                              priority: 'high',
+                              render: (row: Webhook) => (
+                                <code className="text-xs bg-muted/50 px-2 py-1 rounded truncate max-w-full font-mono block">
+                                  {row.url}
+                                </code>
+                              ),
+                            },
+                            {
+                              key: 'events',
+                              label: 'Événements',
+                              priority: 'medium',
+                              render: (row: Webhook) => (
+                                <Badge variant="outline" className="text-xs">{row.events.length} événement(s)</Badge>
+                              ),
+                            },
+                            {
+                              key: 'status',
+                              label: 'Statut',
+                              priority: 'high',
+                              render: (row: Webhook) => getStatusBadge(row.status),
+                            },
+                            {
+                              key: 'stats',
+                              label: 'Statistiques',
+                              priority: 'medium',
+                              render: (row: Webhook) => (
+                                <div className="text-xs text-muted-foreground">
+                                  <div>✓ {row.successful_deliveries} réussies</div>
+                                  <div>✗ {row.failed_deliveries} échecs</div>
                                 </div>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                      <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => setSelectedWebhookId(webhook.id)}>
-                                      <Activity className="h-4 w-4 mr-2" />
-                                      Historique
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleTest(webhook)} disabled={testWebhook.isPending}>
-                                      <TestTube className="h-4 w-4 mr-2" />
-                                      Tester
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleOpenDialog(webhook)}>
-                                      <Edit className="h-4 w-4 mr-2" />
-                                      Modifier
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleDelete(webhook)} disabled={deleteWebhook.isPending} className="text-destructive">
-                                      <Trash2 className="h-4 w-4 mr-2" />
-                                      Supprimer
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
+                              ),
+                            },
+                            {
+                              key: 'last_triggered',
+                              label: 'Dernière livraison',
+                              priority: 'low',
+                              render: (row: Webhook) => (
+                                <span className="text-xs text-muted-foreground">
+                                  {row.last_triggered_at
+                                    ? format(new Date(row.last_triggered_at), 'PPp', { locale: fr })
+                                    : 'Jamais'}
+                                </span>
+                              ),
+                            },
+                          ]}
+                          actions={(row: Webhook) => (
+                            <div className="flex flex-col gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setSelectedWebhookId(row.id)}
+                                className="min-h-[44px] w-full"
+                              >
+                                <Activity className="h-4 w-4 mr-2" />
+                                Historique
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleTest(row)}
+                                disabled={testWebhook.isPending}
+                                className="min-h-[44px] w-full"
+                              >
+                                <TestTube className="h-4 w-4 mr-2" />
+                                Tester
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleOpenDialog(row)}
+                                className="min-h-[44px] w-full"
+                              >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Modifier
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDelete(row)}
+                                disabled={deleteWebhook.isPending}
+                                className="min-h-[44px] w-full text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Supprimer
+                              </Button>
+                            </div>
+                          )}
+                        />
+                      ) : (
+                        <div className="lg:hidden space-y-3 sm:space-y-4">
+                          {filteredWebhooks.map((webhook) => (
+                            <Card
+                              key={webhook.id}
+                              className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300"
+                            >
+                              <CardContent className="p-4 sm:p-5">
+                                <div className="flex items-start justify-between mb-3">
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="font-semibold text-sm sm:text-base truncate mb-1">
+                                      {webhook.name}
+                                    </h3>
+                                    <div className="flex items-center gap-2 mb-2">
+                                      {getStatusBadge(webhook.status)}
+                                      <Badge variant="outline" className="text-xs">{webhook.events.length} événement(s)</Badge>
+                                    </div>
+                                  </div>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                                        <MoreVertical className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem onClick={() => setSelectedWebhookId(webhook.id)}>
+                                        <Activity className="h-4 w-4 mr-2" />
+                                        Historique
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleTest(webhook)} disabled={testWebhook.isPending}>
+                                        <TestTube className="h-4 w-4 mr-2" />
+                                        Tester
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleOpenDialog(webhook)}>
+                                        <Edit className="h-4 w-4 mr-2" />
+                                        Modifier
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleDelete(webhook)} disabled={deleteWebhook.isPending} className="text-destructive">
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Supprimer
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
 
-                              <div className="space-y-2 pt-3 border-t border-border/50">
-                                <div className="flex items-center justify-between">
-                                  <p className="text-xs text-muted-foreground">URL</p>
-                                  <code className="text-xs bg-muted/50 px-2 py-1 rounded truncate max-w-[200px] font-mono">
-                                    {webhook.url}
-                                  </code>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                  <p className="text-xs text-muted-foreground">Statistiques</p>
-                                  <div className="text-xs text-muted-foreground text-right">
-                                    <div>✓ {webhook.successful_deliveries} réussies</div>
-                                    <div>✗ {webhook.failed_deliveries} échecs</div>
+                                <div className="space-y-2 pt-3 border-t border-border/50">
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-xs text-muted-foreground">URL</p>
+                                    <code className="text-xs bg-muted/50 px-2 py-1 rounded truncate max-w-[200px] font-mono">
+                                      {webhook.url}
+                                    </code>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-xs text-muted-foreground">Statistiques</p>
+                                    <div className="text-xs text-muted-foreground text-right">
+                                      <div>✓ {webhook.successful_deliveries} réussies</div>
+                                      <div>✗ {webhook.failed_deliveries} échecs</div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-xs text-muted-foreground">Dernière livraison</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {webhook.last_triggered_at
+                                        ? format(new Date(webhook.last_triggered_at), 'PPp', { locale: fr })
+                                        : 'Jamais'}
+                                    </p>
                                   </div>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                  <p className="text-xs text-muted-foreground">Dernière livraison</p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {webhook.last_triggered_at
-                                      ? format(new Date(webhook.last_triggered_at), 'PPp', { locale: fr })
-                                      : 'Jamais'}
-                                  </p>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      )}
                     </>
                   ) : (
                     <div className="text-center py-12 sm:py-16">

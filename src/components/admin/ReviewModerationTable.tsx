@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import {
   Table,
   TableBody,
@@ -45,6 +47,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
   onDelete,
   loading = false,
 }) => {
+  const isMobile = useIsMobile();
   const [selectedReviews, setSelectedReviews] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -162,122 +165,156 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
         )}
       </div>
 
-      {/* Cards Layout pour très petits écrans (< 640px) */}
-      <div className="sm:hidden space-y-3">
-        {filteredReviews.length === 0 ? (
+      {/* Mobile Table Card View */}
+      {isMobile ? (
+        filteredReviews.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
             <p className="text-sm">Aucun avis à afficher</p>
           </div>
         ) : (
-          filteredReviews.map((review) => {
-            const spamResult = detectSpam(review.content || '', review.title);
-            return (
-              <Card key={review.id} className="border-border/50 bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-4 space-y-3">
-                  {/* Header avec checkbox et actions */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2 flex-1">
-                      <Checkbox
-                        checked={selectedReviews.includes(review.id)}
-                        onCheckedChange={() => toggleSelect(review.id)}
-                        className="h-4 w-4 mt-1"
-                      />
-                      <div className="flex-1 min-w-0">
-                        {review.title && (
-                          <p className="font-medium text-sm line-clamp-1 mb-1">{review.title}</p>
-                        )}
-                        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-                          {review.content}
-                        </p>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <ReviewStars rating={review.rating} size="sm" />
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                            {review.product_type}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-40">
-                        <DropdownMenuItem onClick={() => {}} className="text-xs">
-                          <Eye className="mr-2 h-3.5 w-3.5" />
-                          Voir détails
-                        </DropdownMenuItem>
-                        {!review.is_approved && (
-                          <DropdownMenuItem onClick={() => handleApprove([review.id])} className="text-xs">
-                            <CheckCircle className="mr-2 h-3.5 w-3.5" />
-                            Approuver
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem onClick={() => handleReject([review.id])} className="text-xs">
-                          <XCircle className="mr-2 h-3.5 w-3.5" />
-                          Rejeter
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleFlag([review.id])} className="text-xs">
-                          <Flag className="mr-2 h-3.5 w-3.5" />
-                          Signaler
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDelete([review.id])}
-                          className="text-destructive text-xs"
-                        >
-                          Supprimer
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  {/* Infos supplémentaires */}
-                  <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{review.reviewer_name || 'Anonyme'}</span>
-                      {review.is_verified_purchase && (
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                          Vérifié
-                        </Badge>
-                      )}
-                    </div>
-                    <span>
-                      {new Date(review.created_at).toLocaleDateString('fr-FR', {
-                        day: '2-digit',
-                        month: '2-digit'
-                      })}
-                    </span>
-                  </div>
-
-                  {/* Status et spam */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {review.is_approved ? (
-                      <Badge variant="default" className="text-[10px]">Approuvé</Badge>
-                    ) : review.is_flagged ? (
-                      <Badge variant="destructive" className="text-[10px]">Signalé</Badge>
-                    ) : (
-                      <Badge variant="secondary" className="text-[10px]">En attente</Badge>
+          <MobileTableCard
+            data={filteredReviews.map(r => ({ ...r, id: r.id }))}
+            columns={[
+              {
+                key: 'content',
+                label: 'Avis',
+                priority: 'high',
+                render: (row: Review) => (
+                  <div className="space-y-1">
+                    {row.title && (
+                      <p className="font-medium text-sm line-clamp-1">{row.title}</p>
                     )}
-                    {spamResult.confidence > 0.3 && (
-                      <Badge
-                        variant={spamResult.isSpam ? 'destructive' : 'outline'}
-                        className="text-[10px] gap-1"
-                      >
-                        <AlertTriangle className="h-2.5 w-2.5" />
-                        Spam {Math.round(spamResult.confidence * 100)}%
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {row.content}
+                    </p>
+                  </div>
+                ),
+              },
+              {
+                key: 'rating',
+                label: 'Note',
+                priority: 'high',
+                render: (row: Review) => <ReviewStars rating={row.rating} size="sm" />,
+              },
+              {
+                key: 'author',
+                label: 'Auteur',
+                priority: 'medium',
+                render: (row: Review) => (
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium">{row.reviewer_name || 'Anonyme'}</p>
+                    {row.is_verified_purchase && (
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                        Vérifié
                       </Badge>
                     )}
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })
-        )}
-      </div>
-
-      {/* Table - Responsive avec scroll horizontal sur mobile (≥ 640px) */}
-      <div className="hidden sm:block border rounded-lg overflow-x-auto">
+                ),
+              },
+              {
+                key: 'product',
+                label: 'Produit',
+                priority: 'low',
+                render: (row: Review) => (
+                  <Badge variant="outline" className="text-xs">{row.product_type}</Badge>
+                ),
+              },
+              {
+                key: 'status',
+                label: 'Statut',
+                priority: 'high',
+                render: (row: Review) => {
+                  const spamResult = detectSpam(row.content || '', row.title);
+                  return (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {row.is_approved ? (
+                        <Badge variant="default" className="text-[10px]">Approuvé</Badge>
+                      ) : row.is_flagged ? (
+                        <Badge variant="destructive" className="text-[10px]">Signalé</Badge>
+                      ) : (
+                        <Badge variant="secondary" className="text-[10px]">En attente</Badge>
+                      )}
+                      {spamResult.confidence > 0.3 && (
+                        <Badge
+                          variant={spamResult.isSpam ? 'destructive' : 'outline'}
+                          className="text-[10px] gap-1"
+                        >
+                          <AlertTriangle className="h-2.5 w-2.5" />
+                          Spam {Math.round(spamResult.confidence * 100)}%
+                        </Badge>
+                      )}
+                    </div>
+                  );
+                },
+              },
+              {
+                key: 'date',
+                label: 'Date',
+                priority: 'low',
+                render: (row: Review) => (
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(row.created_at).toLocaleDateString('fr-FR', {
+                      day: '2-digit',
+                      month: '2-digit'
+                    })}
+                  </span>
+                ),
+              },
+            ]}
+            actions={(row: Review) => (
+              <div className="flex flex-col gap-2">
+                <Checkbox
+                  checked={selectedReviews.includes(row.id)}
+                  onCheckedChange={() => toggleSelect(row.id)}
+                  className="h-4 w-4"
+                />
+                <div className="flex gap-2">
+                  {!row.is_approved && (
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => handleApprove([row.id])}
+                      className="min-h-[44px] flex-1"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Approuver
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleReject([row.id])}
+                    className="min-h-[44px] flex-1"
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Rejeter
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleFlag([row.id])}
+                    className="min-h-[44px] flex-1"
+                  >
+                    <Flag className="h-4 w-4 mr-2" />
+                    Signaler
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDelete([row.id])}
+                    className="min-h-[44px] flex-1 text-destructive"
+                  >
+                    Supprimer
+                  </Button>
+                </div>
+              </div>
+            )}
+          />
+        )
+      ) : (
+        <div className="border rounded-lg overflow-x-auto">
         <div className="min-w-full inline-block align-middle">
           <Table>
             <TableHeader>
