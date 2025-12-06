@@ -266,27 +266,8 @@ export const WithdrawalRequestDialog = ({
           placeholder: `Minimum: ${formatCurrency(MIN_WITHDRAWAL)}`,
         }}
       />
-            <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
-              <p>Solde disponible : {formatCurrency(availableBalance)}</p>
-              {amountNum > 0 && (
-                <>
-                  <p>Montant demandé : {formatCurrency(amountNum)}</p>
-                  {amountNum < MIN_WITHDRAWAL && (
-                    <p className="text-destructive">
-                      Minimum requis : {formatCurrency(MIN_WITHDRAWAL)}
-                    </p>
-                  )}
-                  {amountNum > availableBalance && (
-                    <p className="text-destructive">
-                      Montant supérieur au solde disponible
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
 
-          {/* Méthode de paiement */}
+      {/* Méthode de paiement */}
           <MobileFormField
             label="Méthode de paiement"
             name="payment_method"
