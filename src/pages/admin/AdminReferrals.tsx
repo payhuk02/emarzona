@@ -2,8 +2,10 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 const AdminReferrals = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -214,45 +217,106 @@ const AdminReferrals = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Parrain</TableHead>
-                  <TableHead>Filleul</TableHead>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredReferrals?.map((referral: any) => (
-                  <TableRow key={referral.id}>
-                    <TableCell className="font-medium">
-                      {referral.referrer?.display_name || 
-                       `${referral.referrer?.first_name || ''} ${referral.referrer?.last_name || ''}`.trim() || 
-                       'N/A'}
-                    </TableCell>
-                    <TableCell>
-                      {referral.referred?.display_name || 
-                       `${referral.referred?.first_name || ''} ${referral.referred?.last_name || ''}`.trim() || 
-                       'N/A'}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{referral.referral_code}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={referral.status === 'active' ? 'default' : 'secondary'}>
-                        {referral.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {new Date(referral.created_at).toLocaleDateString('fr-FR')}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {filteredReferrals?.length === 0 && (
+            {filteredReferrals && filteredReferrals.length > 0 ? (
+              isMobile ? (
+                <MobileTableCard
+                  data={filteredReferrals.map((r: any) => ({ ...r, id: r.id }))}
+                  columns={[
+                    {
+                      key: 'referrer',
+                      header: 'Parrain',
+                      priority: 'high',
+                      render: (row: any) => (
+                        <span className="font-medium">
+                          {row.referrer?.display_name || 
+                           `${row.referrer?.first_name || ''} ${row.referrer?.last_name || ''}`.trim() || 
+                           'N/A'}
+                        </span>
+                      ),
+                    },
+                    {
+                      key: 'referred',
+                      header: 'Filleul',
+                      priority: 'high',
+                      render: (row: any) => (
+                        row.referred?.display_name || 
+                        `${row.referred?.first_name || ''} ${row.referred?.last_name || ''}`.trim() || 
+                        'N/A'
+                      ),
+                    },
+                    {
+                      key: 'referral_code',
+                      header: 'Code',
+                      priority: 'medium',
+                      render: (row: any) => (
+                        <Badge variant="outline">{row.referral_code}</Badge>
+                      ),
+                    },
+                    {
+                      key: 'status',
+                      header: 'Statut',
+                      priority: 'high',
+                      render: (row: any) => (
+                        <Badge variant={row.status === 'active' ? 'default' : 'secondary'}>
+                          {row.status}
+                        </Badge>
+                      ),
+                    },
+                    {
+                      key: 'created_at',
+                      header: 'Date',
+                      priority: 'low',
+                      render: (row: any) => (
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(row.created_at).toLocaleDateString('fr-FR')}
+                        </span>
+                      ),
+                    },
+                  ]}
+                />
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Parrain</TableHead>
+                        <TableHead>Filleul</TableHead>
+                        <TableHead>Code</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead>Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredReferrals.map((referral: any) => (
+                        <TableRow key={referral.id}>
+                          <TableCell className="font-medium">
+                            {referral.referrer?.display_name || 
+                             `${referral.referrer?.first_name || ''} ${referral.referrer?.last_name || ''}`.trim() || 
+                             'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            {referral.referred?.display_name || 
+                             `${referral.referred?.first_name || ''} ${referral.referred?.last_name || ''}`.trim() || 
+                             'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{referral.referral_code}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={referral.status === 'active' ? 'default' : 'secondary'}>
+                              {referral.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {new Date(referral.created_at).toLocaleDateString('fr-FR')}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )
+            ) : (
               <div className="text-center py-12 text-muted-foreground">
                 Aucun parrainage trouvé
               </div>

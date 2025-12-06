@@ -10,6 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
+import { LazyImage } from '@/components/ui/lazy-image';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -59,6 +62,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function AdminReturnManagement() {
   const { store } = useStore();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const { data: returns, isLoading } = useStoreReturns(store?.id);
   const updateStatus = useUpdateReturnStatus();
   const processRefund = useProcessRefund();
@@ -258,129 +262,274 @@ export default function AdminReturnManagement() {
               </CardHeader>
               <CardContent>
                 {filteredReturns && filteredReturns.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Numéro</TableHead>
-                        <TableHead>Produit</TableHead>
-                        <TableHead>Client</TableHead>
-                        <TableHead>Raison</TableHead>
-                        <TableHead>Montant</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredReturns.map((returnItem: any) => (
-                        <TableRow key={returnItem.id}>
-                          <TableCell className="font-mono text-sm">
-                            {returnItem.return_number}
-                          </TableCell>
-                          <TableCell>
+                  isMobile ? (
+                    <MobileTableCard
+                      data={filteredReturns.map((r: any) => ({ ...r, id: r.id }))}
+                      columns={[
+                        {
+                          key: 'return_number',
+                          header: 'Numéro',
+                          priority: 'high',
+                          render: (row: any) => (
+                            <span className="font-mono text-sm font-medium">{row.return_number}</span>
+                          ),
+                        },
+                        {
+                          key: 'product',
+                          header: 'Produit',
+                          priority: 'high',
+                          render: (row: any) => (
                             <div className="flex items-center gap-2">
-                              {returnItem.products?.image_url && (
-                                <img
-                                  src={returnItem.products.image_url}
-                                  alt={returnItem.products.name}
+                              {row.products?.image_url && (
+                                <LazyImage
+                                  src={row.products.image_url}
+                                  alt={row.products.name}
                                   className="w-10 h-10 object-cover rounded"
                                 />
                               )}
-                              <span className="font-medium">{returnItem.products?.name || 'Produit'}</span>
+                              <span className="font-medium">{row.products?.name || 'Produit'}</span>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-sm">{returnItem.orders?.customer_id || 'N/A'}</span>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-sm text-muted-foreground">
-                              {returnItem.return_reason}
-                            </span>
-                          </TableCell>
-                          <TableCell>
+                          ),
+                        },
+                        {
+                          key: 'customer',
+                          header: 'Client',
+                          priority: 'medium',
+                          render: (row: any) => (
+                            <span className="text-sm">{row.orders?.customer_id || 'N/A'}</span>
+                          ),
+                        },
+                        {
+                          key: 'reason',
+                          header: 'Raison',
+                          priority: 'low',
+                          render: (row: any) => (
+                            <span className="text-xs text-muted-foreground">{row.return_reason}</span>
+                          ),
+                        },
+                        {
+                          key: 'amount',
+                          header: 'Montant',
+                          priority: 'high',
+                          render: (row: any) => (
                             <div className="flex items-center gap-1">
-                              <DollarSign className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">
-                                {returnItem.total_amount.toLocaleString('fr-FR')} XOF
+                              <DollarSign className="h-3 w-3 text-muted-foreground" />
+                              <span className="font-semibold">
+                                {row.total_amount.toLocaleString('fr-FR')} XOF
                               </span>
                             </div>
-                          </TableCell>
-                          <TableCell>{getStatusBadge(returnItem.status)}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                              <Calendar className="h-3 w-3" />
-                              {format(new Date(returnItem.requested_at), 'PPP', { locale: fr })}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem asChild>
-                                  <Dialog>
-                                    <DialogTrigger asChild>
-                                      <span className="cursor-pointer">Voir détails</span>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                                      <DialogHeader>
-                                        <DialogTitle>Détails du Retour</DialogTitle>
-                                        <DialogDescription>
-                                          {returnItem.return_number}
-                                        </DialogDescription>
-                                      </DialogHeader>
-                                      <ReturnDetailView returnId={returnItem.id} onApprove={handleApprove} onReject={handleReject} onRefund={() => {
-                                        setSelectedReturnId(returnItem.id);
-                                        setRefundAmount(returnItem.total_amount.toString());
-                                        setRefundDialogOpen(true);
-                                      }} />
-                                    </DialogContent>
-                                  </Dialog>
-                                </DropdownMenuItem>
-                                {returnItem.status === 'requested' && (
-                                  <>
-                                    <DropdownMenuItem
-                                      onClick={() => handleApprove(returnItem.id)}
-                                    >
-                                      <CheckCircle2 className="h-4 w-4 mr-2" />
-                                      Approuver
+                          ),
+                        },
+                        {
+                          key: 'status',
+                          header: 'Statut',
+                          priority: 'high',
+                          render: (row: any) => getStatusBadge(row.status),
+                        },
+                        {
+                          key: 'date',
+                          header: 'Date',
+                          priority: 'low',
+                          render: (row: any) => (
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(row.requested_at), 'PPP', { locale: fr })}
+                            </span>
+                          ),
+                        },
+                      ]}
+                      actions={(row: any) => (
+                        <div className="flex flex-col gap-2">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm" className="min-h-[44px] w-full">
+                                <Eye className="h-4 w-4 mr-2" />
+                                Voir détails
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Détails du Retour</DialogTitle>
+                                <DialogDescription>
+                                  {row.return_number}
+                                </DialogDescription>
+                              </DialogHeader>
+                              <ReturnDetailView returnId={row.id} onApprove={handleApprove} onReject={handleReject} onRefund={() => {
+                                setSelectedReturnId(row.id);
+                                setRefundAmount(row.total_amount.toString());
+                                setRefundDialogOpen(true);
+                              }} />
+                            </DialogContent>
+                          </Dialog>
+                          {row.status === 'requested' && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => handleApprove(row.id)}
+                                className="min-h-[44px] w-full"
+                              >
+                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                Approuver
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => {
+                                  const reason = prompt('Raison du rejet:');
+                                  if (reason) {
+                                    handleReject(row.id, reason);
+                                  }
+                                }}
+                                className="min-h-[44px] w-full"
+                              >
+                                <XCircle className="h-4 w-4 mr-2" />
+                                Rejeter
+                              </Button>
+                            </>
+                          )}
+                          {row.status === 'received' && (
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setSelectedReturnId(row.id);
+                                setRefundAmount(row.total_amount.toString());
+                                setRefundDialogOpen(true);
+                              }}
+                              className="min-h-[44px] w-full"
+                            >
+                              <DollarSign className="h-4 w-4 mr-2" />
+                              Traiter remboursement
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    />
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Numéro</TableHead>
+                            <TableHead>Produit</TableHead>
+                            <TableHead>Client</TableHead>
+                            <TableHead>Raison</TableHead>
+                            <TableHead>Montant</TableHead>
+                            <TableHead>Statut</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredReturns.map((returnItem: any) => (
+                            <TableRow key={returnItem.id}>
+                              <TableCell className="font-mono text-sm">
+                                {returnItem.return_number}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  {returnItem.products?.image_url && (
+                                    <LazyImage
+                                      src={returnItem.products.image_url}
+                                      alt={returnItem.products.name}
+                                      className="w-10 h-10 object-cover rounded"
+                                    />
+                                  )}
+                                  <span className="font-medium">{returnItem.products?.name || 'Produit'}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <span className="text-sm">{returnItem.orders?.customer_id || 'N/A'}</span>
+                              </TableCell>
+                              <TableCell>
+                                <span className="text-sm text-muted-foreground">
+                                  {returnItem.return_reason}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-1">
+                                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                  <span className="font-medium">
+                                    {returnItem.total_amount.toLocaleString('fr-FR')} XOF
+                                  </span>
+                                </div>
+                              </TableCell>
+                              <TableCell>{getStatusBadge(returnItem.status)}</TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                  <Calendar className="h-3 w-3" />
+                                  {format(new Date(returnItem.requested_at), 'PPP', { locale: fr })}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]">
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem asChild>
+                                      <Dialog>
+                                        <DialogTrigger asChild>
+                                          <span className="cursor-pointer">Voir détails</span>
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                                          <DialogHeader>
+                                            <DialogTitle>Détails du Retour</DialogTitle>
+                                            <DialogDescription>
+                                              {returnItem.return_number}
+                                            </DialogDescription>
+                                          </DialogHeader>
+                                          <ReturnDetailView returnId={returnItem.id} onApprove={handleApprove} onReject={handleReject} onRefund={() => {
+                                            setSelectedReturnId(returnItem.id);
+                                            setRefundAmount(returnItem.total_amount.toString());
+                                            setRefundDialogOpen(true);
+                                          }} />
+                                        </DialogContent>
+                                      </Dialog>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        const reason = prompt('Raison du rejet:');
-                                        if (reason) {
-                                          handleReject(returnItem.id, reason);
-                                        }
-                                      }}
-                                      className="text-red-600"
-                                    >
-                                      <XCircle className="h-4 w-4 mr-2" />
-                                      Rejeter
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-                                {returnItem.status === 'received' && (
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setSelectedReturnId(returnItem.id);
-                                      setRefundAmount(returnItem.total_amount.toString());
-                                      setRefundDialogOpen(true);
-                                    }}
-                                  >
-                                    <DollarSign className="h-4 w-4 mr-2" />
-                                    Traiter remboursement
-                                  </DropdownMenuItem>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                                    {returnItem.status === 'requested' && (
+                                      <>
+                                        <DropdownMenuItem
+                                          onClick={() => handleApprove(returnItem.id)}
+                                        >
+                                          <CheckCircle2 className="h-4 w-4 mr-2" />
+                                          Approuver
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={() => {
+                                            const reason = prompt('Raison du rejet:');
+                                            if (reason) {
+                                              handleReject(returnItem.id, reason);
+                                            }
+                                          }}
+                                          className="text-red-600"
+                                        >
+                                          <XCircle className="h-4 w-4 mr-2" />
+                                          Rejeter
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+                                    {returnItem.status === 'received' && (
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          setSelectedReturnId(returnItem.id);
+                                          setRefundAmount(returnItem.total_amount.toString());
+                                          setRefundDialogOpen(true);
+                                        }}
+                                      >
+                                        <DollarSign className="h-4 w-4 mr-2" />
+                                        Traiter remboursement
+                                      </DropdownMenuItem>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )
                 ) : (
                   <div className="text-center py-12">
                     <RefreshCw className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
