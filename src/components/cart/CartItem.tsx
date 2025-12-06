@@ -7,6 +7,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { LazyImage } from '@/components/ui/lazy-image';
 import { Trash2, Plus, Minus } from '@/components/icons';
 import type { CartItem as CartItemType } from '@/types/cart';
 
@@ -33,11 +34,10 @@ const CartItemComponent = ({ item, onUpdateQuantity, onRemove, isLoading }: Cart
     <article className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors" aria-labelledby={`cart-item-${item.id}-name`}>
       {/* Image */}
       <div className="relative w-full sm:w-24 h-48 sm:h-24 rounded-lg overflow-hidden flex-shrink-0 border">
-        <img
+        <LazyImage
           src={item.product_image_url || '/placeholder-product.png'}
           alt={item.product_name}
           className="w-full h-full object-cover"
-          loading="lazy"
         />
       </div>
 
