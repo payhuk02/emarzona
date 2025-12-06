@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { safeRedirect } from "@/lib/url-validator";
 import { ResponsiveProductImage } from "@/components/ui/ResponsiveProductImage";
+import { LazyImage } from "@/components/ui/lazy-image";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { useMarketplaceFavorites } from "@/hooks/useMarketplaceFavorites";
@@ -324,12 +325,11 @@ const ProductCardModernComponent = ({
         {product.stores && (
           <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
             {product.stores.logo_url ? (
-              <img 
-                src={product.stores.logo_url} 
+              <LazyImage
+                src={product.stores.logo_url}
                 alt={`Logo de ${product.stores.name}`}
                 className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
-                loading="lazy"
-                decoding="async"
+                skeletonClassName="rounded-full"
               />
             ) : (
               <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
