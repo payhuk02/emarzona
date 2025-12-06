@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import {
   Table,
   TableBody,
@@ -32,6 +34,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DataTableErrorBoundary } from '@/components/errors/DataTableErrorBoundary';
 
 export default function AdminErrorMonitoring() {
+  const isMobile = useIsMobile();
   const [errorLogs, setErrorLogs] = useState<ErrorLog[]>([]);
   const [filteredLogs, setFilteredLogs] = useState<ErrorLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -337,57 +340,130 @@ export default function AdminErrorMonitoring() {
                 </AlertDescription>
               </Alert>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Timestamp</TableHead>
-                      <TableHead>Niveau</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Message</TableHead>
-                      <TableHead>URL</TableHead>
-                      <TableHead>Utilisateur</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredLogs.map((log, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-mono text-xs">
-                          {new Date(log.timestamp).toLocaleString('fr-FR')}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={getLevelBadgeVariant(log.context.level)}>
-                            {getLevelIcon(log.context.level)}
-                            <span className="ml-1">{log.context.level || 'component'}</span>
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{log.error.name}</Badge>
-                        </TableCell>
-                        <TableCell className="max-w-md">
-                          <div className="truncate" title={log.error.message}>
-                            {log.error.message}
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-xs">
-                          <div className="truncate text-xs text-muted-foreground" title={log.url}>
-                            {log.url}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {log.context.userId ? (
-                            <div className="truncate" title={log.context.userId}>
-                              {log.context.userId.substring(0, 8)}...
-                            </div>
+              isMobile ? (
+                <MobileTableCard
+                  data={filteredLogs.map((log, index) => ({ ...log, id: `log-${index}` }))}
+                  columns={[
+                    {
+                      key: 'timestamp',
+                      label: 'Timestamp',
+                      priority: 'high',
+                      render: (row: ErrorLog) => (
+                        <span className="font-mono text-xs">
+                          {new Date(row.timestamp).toLocaleString('fr-FR')}
+                        </span>
+                      ),
+                    },
+                    {
+                      key: 'level',
+                      label: 'Niveau',
+                      priority: 'high',
+                      render: (row: ErrorLog) => (
+                        <Badge variant={getLevelBadgeVariant(row.context.level)}>
+                          {getLevelIcon(row.context.level)}
+                          <span className="ml-1">{row.context.level || 'component'}</span>
+                        </Badge>
+                      ),
+                    },
+                    {
+                      key: 'type',
+                      label: 'Type',
+                      priority: 'high',
+                      render: (row: ErrorLog) => (
+                        <Badge variant="outline">{row.error.name}</Badge>
+                      ),
+                    },
+                    {
+                      key: 'message',
+                      label: 'Message',
+                      priority: 'high',
+                      render: (row: ErrorLog) => (
+                        <div className="truncate text-xs" title={row.error.message}>
+                          {row.error.message}
+                        </div>
+                      ),
+                    },
+                    {
+                      key: 'url',
+                      label: 'URL',
+                      priority: 'medium',
+                      render: (row: ErrorLog) => (
+                        <div className="truncate text-xs text-muted-foreground" title={row.url}>
+                          {row.url}
+                        </div>
+                      ),
+                    },
+                    {
+                      key: 'user',
+                      label: 'Utilisateur',
+                      priority: 'low',
+                      render: (row: ErrorLog) => (
+                        <span className="text-xs text-muted-foreground">
+                          {row.context.userId ? (
+                            <span title={row.context.userId}>
+                              {row.context.userId.substring(0, 8)}...
+                            </span>
                           ) : (
                             '-'
                           )}
-                        </TableCell>
+                        </span>
+                      ),
+                    },
+                  ]}
+                />
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Timestamp</TableHead>
+                        <TableHead>Niveau</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Message</TableHead>
+                        <TableHead>URL</TableHead>
+                        <TableHead>Utilisateur</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredLogs.map((log, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="font-mono text-xs">
+                            {new Date(log.timestamp).toLocaleString('fr-FR')}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={getLevelBadgeVariant(log.context.level)}>
+                              {getLevelIcon(log.context.level)}
+                              <span className="ml-1">{log.context.level || 'component'}</span>
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{log.error.name}</Badge>
+                          </TableCell>
+                          <TableCell className="max-w-md">
+                            <div className="truncate" title={log.error.message}>
+                              {log.error.message}
+                            </div>
+                          </TableCell>
+                          <TableCell className="max-w-xs">
+                            <div className="truncate text-xs text-muted-foreground" title={log.url}>
+                              {log.url}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            {log.context.userId ? (
+                              <div className="truncate" title={log.context.userId}>
+                                {log.context.userId.substring(0, 8)}...
+                              </div>
+                            ) : (
+                              '-'
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )
             )}
           </CardContent>
         </Card>

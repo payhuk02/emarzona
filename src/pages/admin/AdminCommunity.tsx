@@ -25,6 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import {
   Table,
   TableBody,
@@ -83,6 +85,7 @@ import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
 import type { CommunityMemberStatus, CommunityPost } from '@/types/community';
 
 export default function AdminCommunity() {
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts'>('overview');
   const [memberSearch, setMemberSearch] = useState('');
   const [memberStatusFilter, setMemberStatusFilter] = useState<CommunityMemberStatus | 'all'>('all');
@@ -348,31 +351,163 @@ export default function AdminCommunity() {
                     </Select>
                   </div>
 
-                  {/* Table - Responsive avec scroll horizontal sur mobile */}
+                  {/* Table - Responsive avec MobileTableCard */}
                   {membersLoading ? (
                     <div className="space-y-2">
                       {[...Array(5)].map((_, i) => (
                         <Skeleton key={i} className="h-16" />
                       ))}
                     </div>
-                  ) : (
-                    <div className="overflow-x-auto -mx-4 sm:mx-0">
-                      <div className="inline-block min-w-full align-middle px-4 sm:px-0">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead className="min-w-[200px]">Membre</TableHead>
-                              <TableHead className="hidden md:table-cell min-w-[200px]">Email</TableHead>
-                              <TableHead className="hidden lg:table-cell min-w-[150px]">Profession</TableHead>
-                              <TableHead className="hidden lg:table-cell min-w-[100px]">Pays</TableHead>
-                              <TableHead className="min-w-[120px]">Statut</TableHead>
-                              <TableHead className="hidden md:table-cell min-w-[150px]">Date d'adhésion</TableHead>
-                              <TableHead className="text-right min-w-[80px]">Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {members && members.length > 0 ? (
-                              members.map((member) => (
+                  ) : members && members.length > 0 ? (
+                    isMobile ? (
+                      <MobileTableCard
+                        data={members.map(m => ({ ...m, id: m.id }))}
+                        columns={[
+                          {
+                            key: 'member',
+                            label: 'Membre',
+                            priority: 'high',
+                            render: (row: any) => (
+                              <div className="flex items-center gap-2 sm:gap-3">
+                                <Avatar className="h-8 w-8 shrink-0">
+                                  <AvatarImage src={row.profile_image_url || undefined} />
+                                  <AvatarFallback>
+                                    {getInitials(row.first_name, row.last_name)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="min-w-0">
+                                  <div className="font-medium truncate text-sm">
+                                    {row.first_name} {row.last_name}
+                                  </div>
+                                  {row.company && (
+                                    <div className="text-xs text-muted-foreground truncate">
+                                      {row.company}
+                                    </div>
+                                  )}
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    {row.email}
+                                  </div>
+                                </div>
+                              </div>
+                            ),
+                          },
+                          {
+                            key: 'profession',
+                            label: 'Profession',
+                            priority: 'medium',
+                            render: (row: any) => (
+                              <span className="text-xs">{row.profession || '-'}</span>
+                            ),
+                          },
+                          {
+                            key: 'country',
+                            label: 'Pays',
+                            priority: 'low',
+                            render: (row: any) => (
+                              <span className="text-xs">{row.country || '-'}</span>
+                            ),
+                          },
+                          {
+                            key: 'status',
+                            label: 'Statut',
+                            priority: 'high',
+                            render: (row: any) => (
+                              <Badge
+                                variant={
+                                  row.status === 'approved'
+                                    ? 'default'
+                                    : row.status === 'pending'
+                                    ? 'secondary'
+                                    : 'destructive'
+                                }
+                                className="text-xs"
+                              >
+                                {row.status === 'approved' && <CheckCircle className="h-3 w-3 mr-1" />}
+                                {row.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                                {row.status === 'rejected' && <XCircle className="h-3 w-3 mr-1" />}
+                                {row.status === 'suspended' && <Ban className="h-3 w-3 mr-1" />}
+                                {row.status}
+                              </Badge>
+                            ),
+                          },
+                          {
+                            key: 'join_date',
+                            label: 'Date d\'adhésion',
+                            priority: 'low',
+                            render: (row: any) => (
+                              <span className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(new Date(row.join_date || row.created_at), { addSuffix: true, locale: fr })}
+                              </span>
+                            ),
+                          },
+                        ]}
+                        actions={(row: any) => (
+                          <div className="flex flex-col gap-2">
+                            {row.status === 'pending' && (
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => handleMemberStatusChange(row.id, 'approved')}
+                                className="min-h-[44px] w-full"
+                              >
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Approuver
+                              </Button>
+                            )}
+                            {row.status === 'approved' && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleMemberStatusChange(row.id, 'suspended')}
+                                className="min-h-[44px] w-full"
+                              >
+                                <Ban className="h-4 w-4 mr-2" />
+                                Suspendre
+                              </Button>
+                            )}
+                            {row.status === 'suspended' && (
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => handleMemberStatusChange(row.id, 'approved')}
+                                className="min-h-[44px] w-full"
+                              >
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Réactiver
+                              </Button>
+                            )}
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                setTargetMemberId(row.id);
+                                setDeleteMemberDialogOpen(true);
+                              }}
+                              className="min-h-[44px] w-full"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Supprimer
+                            </Button>
+                          </div>
+                        )}
+                      />
+                    ) : (
+                      <div className="overflow-x-auto -mx-4 sm:mx-0">
+                        <div className="inline-block min-w-full align-middle px-4 sm:px-0">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead className="min-w-[200px]">Membre</TableHead>
+                                <TableHead className="hidden md:table-cell min-w-[200px]">Email</TableHead>
+                                <TableHead className="hidden lg:table-cell min-w-[150px]">Profession</TableHead>
+                                <TableHead className="hidden lg:table-cell min-w-[100px]">Pays</TableHead>
+                                <TableHead className="min-w-[120px]">Statut</TableHead>
+                                <TableHead className="hidden md:table-cell min-w-[150px]">Date d'adhésion</TableHead>
+                                <TableHead className="text-right min-w-[80px]">Actions</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {members.map((member) => (
                                 <TableRow key={member.id}>
                                   <TableCell>
                                     <div className="flex items-center gap-2 sm:gap-3">
@@ -468,17 +603,15 @@ export default function AdminCommunity() {
                                     </DropdownMenu>
                                   </TableCell>
                                 </TableRow>
-                              ))
-                            ) : (
-                              <TableRow>
-                                <TableCell colSpan={7} className="text-center text-muted-foreground">
-                                  Aucun membre trouvé
-                                </TableCell>
-                              </TableRow>
-                            )}
-                          </TableBody>
-                        </Table>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
                       </div>
+                    )
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Aucun membre trouvé
                     </div>
                   )}
                 </CardContent>

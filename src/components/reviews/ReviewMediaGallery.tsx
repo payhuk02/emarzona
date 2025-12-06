@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { LazyImage } from '@/components/ui/lazy-image';
 import { X, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ReviewMedia } from '@/types/review';
@@ -59,18 +60,20 @@ export const ReviewMediaGallery: React.FC<ReviewMediaGalleryProps> = ({
             onClick={() => openLightbox(index)}
           >
             {item.media_type === 'image' ? (
-              <img
+              <LazyImage
                 src={item.media_url}
                 alt={`Review media ${index + 1}`}
                 className="w-full h-full object-cover rounded-md hover:opacity-90 transition-opacity"
+                aspectRatio="1/1"
               />
             ) : (
               <div className="w-full h-full bg-black rounded-md flex items-center justify-center relative">
                 {item.media_thumbnail_url ? (
-                  <img
+                  <LazyImage
                     src={item.media_thumbnail_url}
                     alt="Video thumbnail"
                     className="w-full h-full object-cover rounded-md opacity-70"
+                    aspectRatio="1/1"
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-800 rounded-md" />
@@ -122,10 +125,11 @@ export const ReviewMediaGallery: React.FC<ReviewMediaGalleryProps> = ({
             {/* Media actuel */}
             <div className="w-full h-full flex items-center justify-center p-8">
               {currentMedia?.media_type === 'image' ? (
-                <img
+                <LazyImage
                   src={currentMedia.media_url}
                   alt={`Review media ${currentIndex + 1}`}
                   className="max-w-full max-h-full object-contain rounded-lg"
+                  priority
                 />
               ) : (
                 <video
@@ -176,10 +180,11 @@ export const ReviewMediaGallery: React.FC<ReviewMediaGalleryProps> = ({
                       )}
                     >
                       {item.media_type === 'image' ? (
-                        <img
+                        <LazyImage
                           src={item.media_url}
                           alt={`Thumbnail ${index + 1}`}
                           className="w-full h-full object-cover"
+                          aspectRatio="1/1"
                         />
                       ) : (
                         <div className="w-full h-full bg-gray-800 flex items-center justify-center">
