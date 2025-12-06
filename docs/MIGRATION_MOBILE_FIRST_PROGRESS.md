@@ -170,8 +170,8 @@
 
 ## 📊 Statistiques
 
-- **Modales migrées :** 7/15+ (~47%)
-- **Formulaires migrés :** 9/20+ (~45%)
+- **Modales migrées :** 9/15+ (~60%)
+- **Formulaires migrés :** 11/20+ (~55%)
 - **Tableaux migrés :** 5/15+ (~33%)
 - **Images optimisées :** 1/15+ (~7%)
 
@@ -193,6 +193,8 @@
 4. ✅ **AdminSales** - Migré vers MobileTableCard
 5. ✅ **AdminPayments** - Migré vers MobileTableCard avec colonnes complexes
 6. ✅ **OrderEditDialog** - Migré vers BottomSheet + MobileFormField
+7. ✅ **PaymentMethodDialog** - Migré vers BottomSheet + MobileFormField
+8. ✅ **WithdrawalRequestDialog** - Migré vers BottomSheet + MobileFormField
 
 ### Priorité BASSE (Nouvelles priorités)
 
