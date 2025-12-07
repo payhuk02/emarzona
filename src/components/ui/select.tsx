@@ -130,11 +130,122 @@ const SelectContent = React.forwardRef<
 >(({ className, children, position = "popper", ...props }, ref) => {
   const isMobile = useIsMobile();
   const { isKeyboardOpen, keyboardHeight } = useMobileKeyboard();
+  const contentRef = React.useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = React.useState(false);
+  
+  // Combiner les refs
+  React.useImperativeHandle(ref, () => contentRef.current as any);
+  
+  // Détecter l'état d'ouverture via les attributs data
+  React.useEffect(() => {
+    if (!contentRef.current) return;
+    
+    const observer = new MutationObserver(() => {
+      if (contentRef.current) {
+        const state = contentRef.current.getAttribute('data-state');
+        setIsOpen(state === 'open');
+      }
+    });
+    
+    observer.observe(contentRef.current, {
+      attributes: true,
+      attributeFilter: ['data-state'],
+    });
+    
+    // Vérifier l'état initial
+    if (contentRef.current) {
+      const state = contentRef.current.getAttribute('data-state');
+      setIsOpen(state === 'open');
+    }
+    
+    return () => observer.disconnect();
+  }, []);
+  
+  // Verrouiller la position sur mobile quand le menu est ouvert pour garantir la stabilité
+  React.useEffect(() => {
+    if (!isMobile || !isOpen || !contentRef.current) return;
+    
+    const menuElement = contentRef.current;
+    let lockedPosition: { top: number; left: number; width: number } | null = null;
+    let rafId: number | null = null;
+    
+    // Fonction pour verrouiller la position
+    const lockPosition = () => {
+      if (!menuElement) return;
+      
+      const rect = menuElement.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) {
+        // Le menu n'est pas encore positionné, réessayer
+        rafId = requestAnimationFrame(lockPosition);
+        return;
+      }
+      
+      lockedPosition = {
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+      };
+      
+      // Forcer la position fixe pour éviter les mouvements
+      const originalPosition = menuElement.style.position;
+      const originalTop = menuElement.style.top;
+      const originalLeft = menuElement.style.left;
+      const originalWidth = menuElement.style.width;
+      
+      menuElement.style.position = 'fixed';
+      menuElement.style.top = `${lockedPosition.top}px`;
+      menuElement.style.left = `${lockedPosition.left}px`;
+      menuElement.style.width = `${lockedPosition.width}px`;
+      menuElement.style.maxWidth = `${lockedPosition.width}px`;
+      
+      // Surveiller les changements de position avec requestAnimationFrame
+      const checkPosition = () => {
+        if (!menuElement || !lockedPosition) return;
+        
+        const currentRect = menuElement.getBoundingClientRect();
+        
+        // Si la position a changé significativement (plus de 2px), la restaurer
+        if (
+          Math.abs(currentRect.top - lockedPosition.top) > 2 ||
+          Math.abs(currentRect.left - lockedPosition.left) > 2
+        ) {
+          menuElement.style.top = `${lockedPosition.top}px`;
+          menuElement.style.left = `${lockedPosition.left}px`;
+        }
+        
+        if (isOpen) {
+          rafId = requestAnimationFrame(checkPosition);
+        }
+      };
+      
+      rafId = requestAnimationFrame(checkPosition);
+    };
+    
+    // Attendre que le menu soit positionné par Radix UI
+    const lockTimeout = setTimeout(() => {
+      lockPosition();
+    }, 200);
+    
+    return () => {
+      clearTimeout(lockTimeout);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      if (menuElement && lockedPosition) {
+        // Restaurer les styles à la fermeture
+        menuElement.style.position = '';
+        menuElement.style.top = '';
+        menuElement.style.left = '';
+        menuElement.style.width = '';
+        menuElement.style.maxWidth = '';
+      }
+    };
+  }, [isMobile, isOpen]);
   
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
-        ref={ref}
+        ref={contentRef}
         className={cn(
           "relative z-[1060] max-h-[min(24rem,80vh)] min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg",
           // Animations optimisées pour mobile - CSS only, pas de JS
@@ -226,8 +337,16 @@ const SelectItem = React.forwardRef<
       )}
       role="option"
       // Empêcher les événements de propagation qui pourraient fermer le menu
+      // Utiliser onPointerDown pour capturer l'événement avant qu'il ne se propage
       onPointerDown={(e) => {
-        // Laisser Radix UI gérer, mais s'assurer que le clic est bien capturé
+        // Empêcher la propagation qui pourrait fermer le menu prématurément
+        // Mais ne pas empêcher le comportement par défaut pour permettre la sélection
+        e.stopPropagation();
+      }}
+      // Gérer aussi les événements tactiles sur mobile
+      onTouchStart={(e) => {
+        // Sur mobile, empêcher la propagation des événements tactiles
+        // qui pourraient causer des problèmes de stabilité
         e.stopPropagation();
       }}
       {...props}

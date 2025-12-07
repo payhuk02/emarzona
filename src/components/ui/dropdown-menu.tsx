@@ -81,18 +81,117 @@ const DropdownMenuContent = React.forwardRef<
   }
 >(({ className, sideOffset = 4, mobileOptimized = true, ...props }, ref) => {
   const isMobile = useIsMobile();
+  const contentRef = React.useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = React.useState(false);
   
-  // Empêcher le scroll du body sur mobile quand le menu est ouvert
+  // Combiner les refs
+  React.useImperativeHandle(ref, () => contentRef.current as any);
+  
+  // Détecter l'état d'ouverture via les attributs data
   React.useEffect(() => {
-    if (!isMobile || !mobileOptimized) return;
+    if (!contentRef.current) return;
     
-    // Cette logique sera gérée par Radix UI via onOpenChange si nécessaire
-  }, [isMobile, mobileOptimized]);
+    const observer = new MutationObserver(() => {
+      if (contentRef.current) {
+        const state = contentRef.current.getAttribute('data-state');
+        setIsOpen(state === 'open');
+      }
+    });
+    
+    observer.observe(contentRef.current, {
+      attributes: true,
+      attributeFilter: ['data-state'],
+    });
+    
+    // Vérifier l'état initial
+    if (contentRef.current) {
+      const state = contentRef.current.getAttribute('data-state');
+      setIsOpen(state === 'open');
+    }
+    
+    return () => observer.disconnect();
+  }, []);
+  
+  // Verrouiller la position sur mobile quand le menu est ouvert pour garantir la stabilité
+  React.useEffect(() => {
+    if (!isMobile || !mobileOptimized || !isOpen || !contentRef.current) return;
+    
+    const menuElement = contentRef.current;
+    let lockedPosition: { top: number; left: number; width: number } | null = null;
+    let rafId: number | null = null;
+    
+    // Fonction pour verrouiller la position
+    const lockPosition = () => {
+      if (!menuElement) return;
+      
+      const rect = menuElement.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) {
+        // Le menu n'est pas encore positionné, réessayer
+        rafId = requestAnimationFrame(lockPosition);
+        return;
+      }
+      
+      lockedPosition = {
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+      };
+      
+      // Forcer la position fixe pour éviter les mouvements
+      menuElement.style.position = 'fixed';
+      menuElement.style.top = `${lockedPosition.top}px`;
+      menuElement.style.left = `${lockedPosition.left}px`;
+      menuElement.style.width = `${lockedPosition.width}px`;
+      menuElement.style.maxWidth = `${lockedPosition.width}px`;
+      
+      // Surveiller les changements de position avec requestAnimationFrame
+      const checkPosition = () => {
+        if (!menuElement || !lockedPosition) return;
+        
+        const currentRect = menuElement.getBoundingClientRect();
+        
+        // Si la position a changé significativement (plus de 2px), la restaurer
+        if (
+          Math.abs(currentRect.top - lockedPosition.top) > 2 ||
+          Math.abs(currentRect.left - lockedPosition.left) > 2
+        ) {
+          menuElement.style.top = `${lockedPosition.top}px`;
+          menuElement.style.left = `${lockedPosition.left}px`;
+        }
+        
+        if (isOpen) {
+          rafId = requestAnimationFrame(checkPosition);
+        }
+      };
+      
+      rafId = requestAnimationFrame(checkPosition);
+    };
+    
+    // Attendre que le menu soit positionné par Radix UI
+    const lockTimeout = setTimeout(() => {
+      lockPosition();
+    }, 200);
+    
+    return () => {
+      clearTimeout(lockTimeout);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      if (menuElement && lockedPosition) {
+        // Restaurer les styles à la fermeture
+        menuElement.style.position = '';
+        menuElement.style.top = '';
+        menuElement.style.left = '';
+        menuElement.style.width = '';
+        menuElement.style.maxWidth = '';
+      }
+    };
+  }, [isMobile, mobileOptimized, isOpen]);
   
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
-        ref={ref}
+        ref={contentRef}
         sideOffset={sideOffset}
         side={isMobile && mobileOptimized ? "bottom" : props.side}
         align={isMobile && mobileOptimized ? "end" : props.align}
@@ -156,10 +255,21 @@ const DropdownMenuItem = React.forwardRef<
         className,
       )}
       role="menuitem"
-      onSelect={onSelect}
-      // Empêcher les événements de propagation qui pourraient fermer le menu
+      onSelect={(event) => {
+        // Laisser Radix UI gérer la sélection normalement
+        // Le menu se fermera automatiquement après la sélection
+        onSelect?.(event);
+      }}
+      // Empêcher les événements de propagation qui pourraient fermer le menu prématurément
       onPointerDown={(e) => {
-        // Laisser Radix UI gérer, mais s'assurer que le clic est bien capturé
+        // Empêcher la propagation qui pourrait fermer le menu avant la sélection
+        // Mais permettre le comportement par défaut pour la sélection
+        e.stopPropagation();
+      }}
+      // Gérer aussi les événements tactiles sur mobile
+      onTouchStart={(e) => {
+        // Sur mobile, empêcher la propagation des événements tactiles
+        // qui pourraient causer des problèmes de stabilité
         e.stopPropagation();
       }}
       {...props}
