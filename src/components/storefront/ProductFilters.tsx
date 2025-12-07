@@ -148,7 +148,7 @@ const ProductFilters = ({
                 <SelectTrigger id="mobile-category" className="h-12 touch-manipulation">
                   <SelectValue placeholder="Sélectionner une catégorie" />
                 </SelectTrigger>
-                <SelectContent className="z-[60] bg-background">
+                <SelectContent className="z-[1070] bg-background">
                   <SelectItem value="all">Toutes les catégories</SelectItem>
                   {categories.map((cat) => (
                     <SelectItem key={cat} value={cat}>
@@ -165,7 +165,7 @@ const ProductFilters = ({
                 <SelectTrigger id="mobile-type" className="h-12 touch-manipulation">
                   <SelectValue placeholder={t('storefront.filters.selectType')} />
                 </SelectTrigger>
-                <SelectContent className="z-[60] bg-background">
+                <SelectContent className="z-[1070] bg-background">
                   <SelectItem value="all">{t('storefront.filters.allTypes')}</SelectItem>
                   {productTypes.map((type) => (
                     <SelectItem key={type} value={type}>
@@ -183,7 +183,7 @@ const ProductFilters = ({
                 <SelectTrigger id="mobile-license" className="h-12 touch-manipulation">
                   <SelectValue placeholder="Sélectionner une licence" />
                 </SelectTrigger>
-                <SelectContent className="z-[60] bg-background">
+                <SelectContent className="z-[1070] bg-background">
                   <SelectItem value="all">Toutes licences</SelectItem>
                   <SelectItem value="standard">Standard</SelectItem>
                   <SelectItem value="plr">PLR</SelectItem>

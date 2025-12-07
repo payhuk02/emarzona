@@ -13,6 +13,8 @@ import { useSearchSuggestions, usePopularSearches, useSearchHistory, useSaveSear
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Link } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useMobileKeyboard } from '@/hooks/use-mobile-keyboard';
 
 interface SearchAutocompleteProps {
   value: string;
@@ -38,6 +40,8 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const debouncedQuery = useDebounce(value, 300);
+  const isMobile = useIsMobile();
+  const { isKeyboardOpen, keyboardHeight } = useMobileKeyboard();
 
   // Hooks pour suggestions et historique
   const { data: suggestions, isLoading: suggestionsLoading } = useSearchSuggestions(
@@ -118,8 +122,8 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => {
-            // Délai pour permettre le clic sur les suggestions
-            setTimeout(() => setIsFocused(false), 200);
+            // Délai réduit sur mobile pour une meilleure réactivité
+            setTimeout(() => setIsFocused(false), isMobile ? 150 : 200);
           }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
@@ -146,7 +150,20 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       {shouldShowDropdown && (
         <div
           ref={dropdownRef}
-          className="absolute z-50 w-full mt-2 bg-popover border rounded-lg shadow-lg max-h-96 overflow-y-auto"
+          className={cn(
+            "absolute z-[1060] w-full mt-2 bg-popover border rounded-lg shadow-lg overflow-y-auto",
+            // Hauteur adaptative sur mobile
+            isMobile ? "max-h-[min(24rem,calc(80vh-8rem))]" : "max-h-96",
+            // Scroll optimisé pour mobile
+            isMobile && "overscroll-contain touch-pan-y -webkit-overflow-scrolling-touch",
+          )}
+          style={{
+            // Ajuster le positionnement si le clavier est ouvert
+            ...(isMobile && isKeyboardOpen && keyboardHeight > 0 && {
+              marginBottom: `${keyboardHeight}px`,
+              maxHeight: `calc(80vh - ${keyboardHeight}px - 8rem)`,
+            }),
+          }}
         >
           {/* Suggestions de recherche */}
           {debouncedQuery.length >= 2 && (
@@ -165,7 +182,11 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                     <button
                       key={index}
                       onClick={() => handleSuggestionClick(suggestion.suggestion)}
-                      className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-md hover:bg-muted transition-colors text-left"
+                      className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-md hover:bg-muted active:bg-muted transition-colors text-left touch-manipulation"
+                      onPointerDown={(e) => {
+                        // Empêcher la propagation qui pourrait fermer le dropdown
+                        e.stopPropagation();
+                      }}
                     >
                       {suggestion.suggestion_type === 'product' && (
                         <Package className="h-4 w-4 text-muted-foreground" />
@@ -209,7 +230,10 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                   <button
                     key={item.id}
                     onClick={() => handleSuggestionClick(item.query)}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors text-left"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-md hover:bg-muted active:bg-muted transition-colors text-left touch-manipulation"
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                    }}
                   >
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="flex-1">{item.query}</span>
@@ -230,7 +254,10 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                   <button
                     key={index}
                     onClick={() => handleSuggestionClick(item.query)}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors text-left"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-md hover:bg-muted active:bg-muted transition-colors text-left touch-manipulation"
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                    }}
                   >
                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
                     <span className="flex-1">{item.query}</span>
