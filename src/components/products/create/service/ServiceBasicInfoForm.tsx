@@ -245,8 +245,8 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un modèle" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="one-time">
+              <SelectContent className="z-[1060]">
+                <SelectItem value="one-time" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Paiement unique</span>
                     <span className="text-xs text-muted-foreground">
@@ -254,7 +254,7 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
                     </span>
                   </div>
                 </SelectItem>
-                <SelectItem value="subscription">
+                <SelectItem value="subscription" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Abonnement</span>
                     <span className="text-xs text-muted-foreground">
@@ -262,7 +262,7 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
                     </span>
                   </div>
                 </SelectItem>
-                <SelectItem value="free">
+                <SelectItem value="free" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Gratuit</span>
                     <span className="text-xs text-muted-foreground">
@@ -270,7 +270,7 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
                     </span>
                   </div>
                 </SelectItem>
-                <SelectItem value="pay-what-you-want">
+                <SelectItem value="pay-what-you-want" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Prix libre</span>
                     <span className="text-xs text-muted-foreground">
