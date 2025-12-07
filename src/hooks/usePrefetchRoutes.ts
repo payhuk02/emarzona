@@ -82,16 +82,28 @@ export function usePrefetchRoutes() {
   // Prefetch au hover sur les liens de navigation
   useEffect(() => {
     const handleMouseEnter = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
+      // Vérifier que target est un Element avant d'utiliser closest
+      const target = e.target;
+      
+      // Vérifier que target est un Element (a la méthode closest)
+      if (!target || !(target instanceof Element)) {
+        return;
+      }
+      
+      // Utiliser closest seulement si c'est un Element
       const link = target.closest('a[href]') as HTMLAnchorElement;
       
       if (link && link.href) {
-        const url = new URL(link.href);
-        const pathname = url.pathname;
-        
-        // Prefetch si c'est une route hover
-        if (HOVER_ROUTES.includes(pathname)) {
-          prefetchRouteChunks(pathname);
+        try {
+          const url = new URL(link.href);
+          const pathname = url.pathname;
+          
+          // Prefetch si c'est une route hover
+          if (HOVER_ROUTES.includes(pathname)) {
+            prefetchRouteChunks(pathname);
+          }
+        } catch (error) {
+          // Ignorer les erreurs d'URL invalides (liens externes, etc.)
         }
       }
     };
