@@ -192,26 +192,36 @@ export const DigitalBasicInfoForm = ({
             variant="outline"
             size="icon"
             onClick={regenerateSlug}
-            disabled={!formData.name}
+            disabled={!formData.name || slugChecking}
             aria-label="Régénérer l'URL du produit à partir du nom"
+            className="transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <RefreshCw className="h-4 w-4" aria-hidden="true" />
+            {slugChecking ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <RefreshCw className="h-4 w-4 transition-transform duration-200 hover:rotate-180" aria-hidden="true" />
+            )}
           </Button>
         </div>
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm transition-all duration-200">
+          <span className="text-muted-foreground font-mono text-xs">
             {storeSlug}/products/{formData.slug || '...'}
           </span>
-          {slugChecking && <span className="text-muted-foreground">Vérification...</span>}
+          {slugChecking && (
+            <span className="flex items-center gap-1 text-muted-foreground animate-pulse">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Vérification...
+            </span>
+          )}
           {slugAvailable === true && (
-            <span className="flex items-center text-green-600">
-              <Check className="h-4 w-4 mr-1" />
+            <span className="flex items-center gap-1 text-green-600 transition-colors duration-200">
+              <Check className="h-4 w-4" />
               Disponible
             </span>
           )}
           {slugAvailable === false && (
-            <span className="flex items-center text-destructive">
-              <X className="h-4 w-4 mr-1" />
+            <span className="flex items-center gap-1 text-destructive transition-colors duration-200">
+              <X className="h-4 w-4" />
               Déjà utilisé
             </span>
           )}
@@ -496,7 +506,7 @@ export const DigitalBasicInfoForm = ({
                   type="button"
                   variant="destructive"
                   size="icon"
-                  className="absolute top-1 right-1 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation"
                   onClick={() => {
                     const currentImages = formData.images || [];
                     const newImages = currentImages.filter((_: string, i: number) => i !== index);
@@ -530,7 +540,7 @@ export const DigitalBasicInfoForm = ({
                   type="button"
                   variant="destructive"
                   size="icon"
-                  className="absolute top-1 right-1 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation"
                   onClick={() => {
                     updateFormData({ image_url: '' });
                   }}

@@ -100,8 +100,8 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
             className="space-y-4"
           >
             {/* Full Payment */}
-            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-colors cursor-pointer touch-manipulation">
-              <RadioGroupItem value="full" id="full" className="mt-1 min-w-[20px] min-h-[20px]" />
+            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-all duration-200 hover:shadow-md cursor-pointer touch-manipulation min-h-[120px]">
+              <RadioGroupItem value="full" id="full" className="mt-1 min-w-[24px] min-h-[24px] touch-manipulation" />
               <Label htmlFor="full" className="flex-1 cursor-pointer">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -127,8 +127,8 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
             </div>
 
             {/* Percentage Payment */}
-            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-colors cursor-pointer touch-manipulation">
-              <RadioGroupItem value="percentage" id="percentage" className="mt-1 min-w-[20px] min-h-[20px]" />
+            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-all duration-200 hover:shadow-md cursor-pointer touch-manipulation min-h-[120px]">
+              <RadioGroupItem value="percentage" id="percentage" className="mt-1 min-w-[24px] min-h-[24px] touch-manipulation" />
               <Label htmlFor="percentage" className="flex-1 cursor-pointer">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -193,8 +193,8 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
             </div>
 
             {/* Delivery Secured (Escrow) */}
-            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-colors cursor-pointer touch-manipulation">
-              <RadioGroupItem value="delivery_secured" id="delivery_secured" className="mt-1 min-w-[20px] min-h-[20px]" />
+            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-all duration-200 hover:shadow-md cursor-pointer touch-manipulation min-h-[120px]">
+              <RadioGroupItem value="delivery_secured" id="delivery_secured" className="mt-1 min-w-[24px] min-h-[24px] touch-manipulation" />
               <Label htmlFor="delivery_secured" className="flex-1 cursor-pointer">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">

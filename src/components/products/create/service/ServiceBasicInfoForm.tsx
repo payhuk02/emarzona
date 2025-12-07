@@ -368,7 +368,7 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
               />
               <button
                 onClick={() => handleRemoveImage(index)}
-                className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation min-h-[32px] min-w-[32px] flex items-center justify-center"
                 aria-label={`Supprimer l'image ${index + 1}`}
               >
                 <X className="h-4 w-4" aria-hidden="true" />
@@ -414,7 +414,7 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
               {tag}
               <button
                 onClick={() => handleTagRemove(index)}
-                className="hover:text-destructive"
+                className="hover:text-destructive transition-colors duration-200 rounded-sm p-0.5 hover:bg-destructive/10 touch-manipulation min-h-[24px] min-w-[24px] flex items-center justify-center"
                 aria-label={`Supprimer le tag "${tag}"`}
               >
                 <X className="h-3 w-3" aria-hidden="true" />

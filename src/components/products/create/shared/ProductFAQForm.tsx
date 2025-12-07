@@ -215,18 +215,20 @@ export const ProductFAQForm = ({ data, onUpdate }: ProductFAQFormProps) => {
                         size="sm"
                         onClick={() => moveFAQ(faq.id, 'up')}
                         disabled={index === 0}
-                        className="h-4 p-0"
+                        className="h-8 w-8 p-0 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation disabled:opacity-30"
+                        aria-label="Déplacer vers le haut"
                       >
-                        <ChevronUp className="h-3 w-3" />
+                        <ChevronUp className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => moveFAQ(faq.id, 'down')}
                         disabled={index === data.length - 1}
-                        className="h-4 p-0"
+                        className="h-8 w-8 p-0 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation disabled:opacity-30"
+                        aria-label="Déplacer vers le bas"
                       >
-                        <ChevronDown className="h-3 w-3" />
+                        <ChevronDown className="h-4 w-4" />
                       </Button>
                     </div>
                     <div className="flex-1">
@@ -277,6 +279,7 @@ export const ProductFAQForm = ({ data, onUpdate }: ProductFAQFormProps) => {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => setEditingId(faq.id)}
+                                className="transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[36px]"
                               >
                                 <Edit2 className="h-4 w-4 mr-1" />
                                 Modifier
@@ -285,6 +288,7 @@ export const ProductFAQForm = ({ data, onUpdate }: ProductFAQFormProps) => {
                                 size="sm"
                                 variant="destructive"
                                 onClick={() => deleteFAQ(faq.id)}
+                                className="transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[36px]"
                               >
                                 <Trash2 className="h-4 w-4 mr-1" />
                                 Supprimer
@@ -330,7 +334,11 @@ export const ProductFAQForm = ({ data, onUpdate }: ProductFAQFormProps) => {
                 />
               </div>
               <div className="flex gap-2">
-                <Button onClick={addFAQ} disabled={!newFAQ.question.trim() || !newFAQ.answer.trim()}>
+                <Button 
+                  onClick={addFAQ} 
+                  disabled={!newFAQ.question.trim() || !newFAQ.answer.trim()}
+                  className="transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <Save className="h-4 w-4 mr-2" />
                   Ajouter la FAQ
                 </Button>
