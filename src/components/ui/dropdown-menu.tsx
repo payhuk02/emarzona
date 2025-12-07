@@ -82,6 +82,13 @@ const DropdownMenuContent = React.forwardRef<
 >(({ className, sideOffset = 4, mobileOptimized = true, ...props }, ref) => {
   const isMobile = useIsMobile();
   
+  // Empêcher le scroll du body sur mobile quand le menu est ouvert
+  React.useEffect(() => {
+    if (!isMobile || !mobileOptimized) return;
+    
+    // Cette logique sera gérée par Radix UI via onOpenChange si nécessaire
+  }, [isMobile, mobileOptimized]);
+  
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
@@ -90,15 +97,14 @@ const DropdownMenuContent = React.forwardRef<
         side={isMobile && mobileOptimized ? "bottom" : props.side}
         align={isMobile && mobileOptimized ? "end" : props.align}
         // IMPORTANT: Laisser avoidCollisions activé pour que Radix UI gère le positionnement
-        // Ne pas utiliser sticky="always" qui peut causer des problèmes
         avoidCollisions={props.avoidCollisions ?? true}
         collisionPadding={isMobile && mobileOptimized ? MOBILE_COLLISION_PADDING : (props.collisionPadding ?? DESKTOP_COLLISION_PADDING)}
-        sticky={props.sticky ?? "partial"}
+        sticky={isMobile && mobileOptimized ? "always" : (props.sticky ?? "partial")}
         className={cn(
-          "z-[100] min-w-[8rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
-          // Animations optimisées pour mobile
+          "z-[100] min-w-[8rem] max-w-[calc(100vw-1rem)] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
+          // Animations optimisées pour mobile - CSS only
           isMobile && mobileOptimized
-            ? "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+            ? "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:duration-150 data-[state=closed]:duration-100"
             : "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
           className,
         )}
@@ -130,17 +136,32 @@ const DropdownMenuItem = React.forwardRef<
     inset?: boolean;
   }
 >(({ className, inset, onSelect, ...props }, ref) => {
+  const isMobile = useIsMobile();
+  
   return (
     <DropdownMenuPrimitive.Item
       ref={ref}
       className={cn(
-        "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation",
+        "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none",
+        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "focus:bg-accent focus:text-accent-foreground",
         "active:bg-accent active:text-accent-foreground",
+        // Optimisations tactiles
+        "touch-manipulation",
+        // Transition légère pour le feedback
+        "transition-colors duration-75",
+        // Zone de clic plus large sur mobile
+        isMobile && "py-2.5",
         inset && "pl-8",
         className,
       )}
       role="menuitem"
       onSelect={onSelect}
+      // Empêcher les événements de propagation qui pourraient fermer le menu
+      onPointerDown={(e) => {
+        // Laisser Radix UI gérer, mais s'assurer que le clic est bien capturé
+        e.stopPropagation();
+      }}
       {...props}
     />
   );

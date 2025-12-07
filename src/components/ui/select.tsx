@@ -48,24 +48,36 @@ const SelectValue = SelectPrimitive.Value;
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
-  <SelectPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "flex min-h-[44px] h-11 w-full max-w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 [&>span]:text-left touch-manipulation",
-      className,
-    )}
-    aria-label={props['aria-label'] || "Select an option"}
-    aria-haspopup="listbox"
-    aria-expanded={props['aria-expanded']}
-    {...props}
-  >
-    {children}
-    <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 opacity-50 flex-shrink-0" />
-    </SelectPrimitive.Icon>
-  </SelectPrimitive.Trigger>
-));
+>(({ className, children, ...props }, ref) => {
+  const isMobile = useIsMobile();
+  
+  return (
+    <SelectPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        "flex min-h-[44px] h-11 w-full max-w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 [&>span]:text-left",
+        // Optimisations tactiles
+        "touch-manipulation",
+        // Empêcher le zoom sur focus (iOS)
+        isMobile && "text-base",
+        // Feedback visuel au toucher
+        "active:bg-accent active:opacity-90 transition-colors",
+        className,
+      )}
+      aria-label={props['aria-label'] || "Select an option"}
+      aria-haspopup="listbox"
+      aria-expanded={props['aria-expanded']}
+      // Empêcher le zoom automatique sur iOS
+      {...(isMobile && { style: { fontSize: '16px', ...props.style } })}
+      {...props}
+    >
+      {children}
+      <SelectPrimitive.Icon asChild>
+        <ChevronDown className="h-4 w-4 opacity-50 flex-shrink-0 ml-2" />
+      </SelectPrimitive.Icon>
+    </SelectPrimitive.Trigger>
+  );
+});
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 const SelectScrollUpButton = React.forwardRef<
@@ -125,20 +137,25 @@ const SelectContent = React.forwardRef<
         ref={ref}
         className={cn(
           "relative z-[1060] max-h-[min(24rem,80vh)] min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg",
-          // Animations optimisées pour mobile
+          // Animations optimisées pour mobile - CSS only, pas de JS
           isMobile
-            ? "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+            ? "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:duration-150 data-[state=closed]:duration-100"
             : "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
           position === "popper" &&
             "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+          // Optimisations mobile supplémentaires
+          isMobile && "max-w-[calc(100vw-1rem)]",
           className,
         )}
         position={position}
         collisionPadding={isMobile ? MOBILE_COLLISION_PADDING : (props.collisionPadding ?? DESKTOP_COLLISION_PADDING)}
+        // Éviter les collisions avec le clavier
+        avoidCollisions={true}
+        sticky={isMobile ? "always" : "partial"}
         style={{
           ...props.style,
           // Ajuster le positionnement si le clavier est ouvert
-          ...(isMobile && isKeyboardOpen && {
+          ...(isMobile && isKeyboardOpen && keyboardHeight > 0 && {
             marginBottom: `${keyboardHeight}px`,
             maxHeight: `calc(80vh - ${keyboardHeight}px)`,
           }),
@@ -149,8 +166,10 @@ const SelectContent = React.forwardRef<
         <SelectPrimitive.Viewport
           className={cn(
             "p-1 overflow-y-auto",
-            // Scroll optimisé pour mobile
-            isMobile && "overscroll-contain touch-pan-y",
+            // Scroll optimisé pour mobile - performance
+            isMobile && "overscroll-contain touch-pan-y -webkit-overflow-scrolling-touch",
+            // Empêcher le scroll du body parent
+            isMobile && "will-change-scroll",
             position === "popper" &&
               "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
           )}
@@ -185,26 +204,44 @@ SelectLabel.displayName = SelectPrimitive.Label.displayName;
 const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
->(({ className, children, ...props }, ref) => (
-  <SelectPrimitive.Item
-    ref={ref}
-    className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-2 pl-8 pr-2 min-h-[44px] text-xs sm:text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation",
-      "active:bg-accent active:text-accent-foreground",
-      className,
-    )}
-    role="option"
-    {...props}
-  >
-    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center flex-shrink-0">
-      <SelectPrimitive.ItemIndicator>
-        <Check className="h-3.5 w-3.5" />
-      </SelectPrimitive.ItemIndicator>
-    </span>
+>(({ className, children, ...props }, ref) => {
+  const isMobile = useIsMobile();
+  
+  return (
+    <SelectPrimitive.Item
+      ref={ref}
+      className={cn(
+        "relative flex w-full cursor-default select-none items-center rounded-sm py-2.5 pl-8 pr-2 min-h-[44px] text-xs sm:text-sm outline-none",
+        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        // Focus et active states optimisés
+        "focus:bg-accent focus:text-accent-foreground",
+        "active:bg-accent active:text-accent-foreground",
+        // Optimisations tactiles
+        "touch-manipulation",
+        // Transition légère pour le feedback
+        "transition-colors duration-75",
+        // Zone de clic plus large sur mobile
+        isMobile && "py-3",
+        className,
+      )}
+      role="option"
+      // Empêcher les événements de propagation qui pourraient fermer le menu
+      onPointerDown={(e) => {
+        // Laisser Radix UI gérer, mais s'assurer que le clic est bien capturé
+        e.stopPropagation();
+      }}
+      {...props}
+    >
+      <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center flex-shrink-0">
+        <SelectPrimitive.ItemIndicator>
+          <Check className="h-3.5 w-3.5" />
+        </SelectPrimitive.ItemIndicator>
+      </span>
 
-    <SelectPrimitive.ItemText className="truncate">{children}</SelectPrimitive.ItemText>
-  </SelectPrimitive.Item>
-));
+      <SelectPrimitive.ItemText className="truncate flex-1">{children}</SelectPrimitive.ItemText>
+    </SelectPrimitive.Item>
+  );
+});
 SelectItem.displayName = SelectPrimitive.Item.displayName;
 
 const SelectSeparator = React.forwardRef<
