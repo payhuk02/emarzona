@@ -230,9 +230,9 @@ export const DigitalBasicInfoForm = ({
           <SelectTrigger>
             <SelectValue placeholder="Sélectionnez une catégorie" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="z-[1060]">
             {DIGITAL_CATEGORIES.map((cat) => (
-              <SelectItem key={cat.value} value={cat.value}>
+              <SelectItem key={cat.value} value={cat.value} className="min-h-[44px]">
                 {cat.label}
               </SelectItem>
             ))}
@@ -362,8 +362,8 @@ export const DigitalBasicInfoForm = ({
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un modèle" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="one-time">
+              <SelectContent className="z-[1060]">
+                <SelectItem value="one-time" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Achat unique</span>
                     <span className="text-xs text-muted-foreground">
@@ -371,7 +371,7 @@ export const DigitalBasicInfoForm = ({
                     </span>
                   </div>
                 </SelectItem>
-                <SelectItem value="subscription">
+                <SelectItem value="subscription" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Abonnement</span>
                     <span className="text-xs text-muted-foreground">
@@ -379,7 +379,7 @@ export const DigitalBasicInfoForm = ({
                     </span>
                   </div>
                 </SelectItem>
-                <SelectItem value="free">
+                <SelectItem value="free" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Gratuit</span>
                     <span className="text-xs text-muted-foreground">
@@ -387,7 +387,7 @@ export const DigitalBasicInfoForm = ({
                     </span>
                   </div>
                 </SelectItem>
-                <SelectItem value="pay-what-you-want">
+                <SelectItem value="pay-what-you-want" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Prix libre</span>
                     <span className="text-xs text-muted-foreground">
@@ -714,8 +714,8 @@ export const DigitalBasicInfoForm = ({
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un type de licence" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="standard">
+              <SelectContent className="z-[1060]">
+                <SelectItem value="standard" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Licence standard</span>
                     <span className="text-xs text-muted-foreground">
@@ -723,7 +723,7 @@ export const DigitalBasicInfoForm = ({
                     </span>
                   </div>
                 </SelectItem>
-                <SelectItem value="plr">
+                <SelectItem value="plr" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">PLR (Private Label Rights)</span>
                     <span className="text-xs text-muted-foreground">
@@ -731,7 +731,7 @@ export const DigitalBasicInfoForm = ({
                     </span>
                   </div>
                 </SelectItem>
-                <SelectItem value="copyrighted">
+                <SelectItem value="copyrighted" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Protégé par droit d'auteur</span>
                     <span className="text-xs text-muted-foreground">

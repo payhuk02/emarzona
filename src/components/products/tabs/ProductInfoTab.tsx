@@ -499,14 +499,14 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   )}>
                     <SelectValue placeholder="Sélectionnez une catégorie" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-600">
+                  <SelectContent className="bg-gray-800 border-gray-600 z-[1060]">
                     {categories.map((category) => {
                       const Icon = category.icon;
                       return (
                         <SelectItem 
                           key={category.value} 
                           value={category.value} 
-                          className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                          className="text-white hover:bg-gray-700 focus:bg-gray-700 min-h-[44px]"
                         >
                           <div className="flex items-center gap-2">
                             <Icon className="h-4 w-4" />
@@ -569,14 +569,14 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   )}>
                     <SelectValue placeholder="Sélectionnez un modèle" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-600">
+                  <SelectContent className="bg-gray-800 border-gray-600 z-[1060]">
                     {PRICING_MODELS.map((model) => {
                       const Icon = model.icon;
                       return (
                         <SelectItem 
                           key={model.value} 
                           value={model.value} 
-                          className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                          className="text-white hover:bg-gray-700 focus:bg-gray-700 min-h-[44px]"
                         >
                           <div className="flex items-center justify-between w-full">
                             <div className="flex items-center gap-2">
@@ -649,10 +649,10 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20">
                     <SelectValue placeholder="Sélectionner un type" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-600">
-                    <SelectItem value="standard" className="text-white">Standard (usage personnel)</SelectItem>
-                    <SelectItem value="plr" className="text-white">PLR - Private Label Rights</SelectItem>
-                    <SelectItem value="copyrighted" className="text-white">Protégé par droit d'auteur</SelectItem>
+                  <SelectContent className="bg-gray-800 border-gray-600 z-[1060]">
+                    <SelectItem value="standard" className="text-white min-h-[44px]">Standard (usage personnel)</SelectItem>
+                    <SelectItem value="plr" className="text-white min-h-[44px]">PLR - Private Label Rights</SelectItem>
+                    <SelectItem value="copyrighted" className="text-white min-h-[44px]">Protégé par droit d'auteur</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-gray-400">Applicable surtout pour produits numériques et cours</p>
@@ -844,14 +844,14 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                     <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20">
                       <SelectValue placeholder="Sélectionner le contrôle d'accès" />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectContent className="bg-gray-800 border-gray-600 z-[1060]">
                       {ACCESS_CONTROLS.map((control) => {
                         const Icon = control.icon;
                         return (
                           <SelectItem 
                             key={control.value} 
                             value={control.value} 
-                            className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                            className="text-white hover:bg-gray-700 focus:bg-gray-700 min-h-[44px]"
                           >
                             <div className="flex items-center justify-between w-full">
                               <div className="flex items-center gap-2">
