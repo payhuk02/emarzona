@@ -197,7 +197,7 @@ export const FileVersionManager = ({ fileId, fileName }: FileVersionManagerProps
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" aria-label={`Actions pour la version ${version.version_number || version.id}`}>
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>

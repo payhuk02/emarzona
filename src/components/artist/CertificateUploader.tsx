@@ -289,6 +289,7 @@ export const CertificateUploader = ({
                   size="sm"
                   onClick={handleRemove}
                   className="text-destructive hover:text-destructive"
+                  aria-label="Supprimer le certificat"
                 >
                   <X className="h-4 w-4" />
                 </Button>

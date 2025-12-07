@@ -462,7 +462,7 @@ export default function AdminReturnManagement() {
                               <TableCell>
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]">
+                                    <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]" aria-label={`Actions pour le retour ${returnRequest.id}`}>
                                       <MoreVertical className="h-4 w-4" />
                                     </Button>
                                   </DropdownMenuTrigger>

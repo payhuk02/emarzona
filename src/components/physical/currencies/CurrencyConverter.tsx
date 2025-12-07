@@ -178,6 +178,7 @@ export function CurrencyConverter() {
             size="icon" 
             onClick={handleSwapCurrencies}
             className="h-9 sm:h-10 w-9 sm:w-10"
+            aria-label="Inverser les devises"
           >
             <RefreshCw className="h-4 w-4" />
           </Button>

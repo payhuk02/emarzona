@@ -341,6 +341,7 @@ export const AdvancedSecurityPanel = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => setShowCSPPolicy(!showCSPPolicy)}
+                      aria-label={showCSPPolicy ? "Masquer la politique CSP" : "Afficher la politique CSP"}
                     >
                       {showCSPPolicy ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
@@ -425,7 +426,7 @@ export const AdvancedSecurityPanel = ({
                       {vuln.type === 'high' ? 'Élevé' : 
                        vuln.type === 'medium' ? 'Moyen' : 'Faible'}
                     </Badge>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" aria-label={`En savoir plus sur la vulnérabilité ${vuln.title}`} onClick={() => vuln.link && window.open(vuln.link, '_blank')}>
                       <ExternalLink className="h-4 w-4" />
                     </Button>
                   </div>

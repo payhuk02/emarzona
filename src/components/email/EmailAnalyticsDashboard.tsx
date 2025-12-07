@@ -173,6 +173,7 @@ export const EmailAnalyticsDashboard = ({
             onClick={handleRecalculate}
             disabled={calculateAnalytics.isPending}
             title="Recalculer les analytics"
+            aria-label="Recalculer les analytics"
           >
             {calculateAnalytics.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

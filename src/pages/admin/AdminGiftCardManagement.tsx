@@ -294,6 +294,7 @@ export default function AdminGiftCardManagement() {
                               size="icon"
                               className="absolute right-1 top-1 min-h-[44px] min-w-[44px] h-11 w-11 sm:h-12 sm:w-12"
                               onClick={() => setSearchTerm('')}
+                              aria-label="Effacer la recherche"
                             >
                               <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             </Button>
@@ -345,6 +346,7 @@ export default function AdminGiftCardManagement() {
                                     size="sm"
                                     onClick={() => handleCopyCode(row.code)}
                                     className="h-7 w-7 min-h-[44px] min-w-[44px]"
+                                    aria-label={`Copier le code ${row.code}`}
                                   >
                                     <Copy className="h-3.5 w-3.5" />
                                   </Button>
@@ -477,7 +479,7 @@ export default function AdminGiftCardManagement() {
                                       : 'Jamais'}
                                   </TableCell>
                                   <TableCell>
-                                    <Button variant="ghost" size="sm" className="min-h-[44px] min-w-[44px] h-11 w-11 sm:h-12 sm:w-12">
+                                    <Button variant="ghost" size="sm" className="min-h-[44px] min-w-[44px] h-11 w-11 sm:h-12 sm:w-12" aria-label={`Modifier la carte cadeau ${card.code || card.id}`}>
                                       <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                     </Button>
                                   </TableCell>

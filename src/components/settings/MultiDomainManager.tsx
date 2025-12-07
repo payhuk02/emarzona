@@ -166,7 +166,7 @@ export const MultiDomainManager = ({
               >
                 <Copy className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" aria-label="Ouvrir le domaine principal dans un nouvel onglet" onClick={() => window.open(`https://${primaryDomain}`, '_blank')}>
                 <ExternalLink className="h-4 w-4" />
               </Button>
             </div>
@@ -288,6 +288,7 @@ export const MultiDomainManager = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => copyToClipboard(domain.domain)}
+                      aria-label={`Copier le domaine ${domain.domain}`}
                     >
                       <Copy className="h-4 w-4" />
                     </Button>
@@ -295,6 +296,7 @@ export const MultiDomainManager = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => handleRemoveDomain(domain.domain)}
+                      aria-label={`Supprimer le domaine ${domain.domain}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

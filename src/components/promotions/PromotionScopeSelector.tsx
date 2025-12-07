@@ -323,6 +323,7 @@ export const PromotionScopeSelector: React.FC<PromotionScopeSelectorProps> = ({
               else if (appliesTo === "categories") onCategoryIdsChange([]);
               else if (appliesTo === "collections") onCollectionIdsChange([]);
             }}
+            aria-label="Effacer la sélection"
           >
             <X className="h-4 w-4" />
           </Button>

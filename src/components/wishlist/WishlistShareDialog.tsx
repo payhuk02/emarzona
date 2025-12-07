@@ -117,6 +117,7 @@ export const WishlistShareDialog = ({
                     variant="outline"
                     size="icon"
                     onClick={handleCopyLink}
+                    aria-label="Copier le lien de la liste de souhaits"
                   >
                     {copied ? (
                       <Check className="h-4 w-4 text-green-600" />

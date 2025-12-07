@@ -435,6 +435,7 @@ export const LandingPageCustomizationSection = ({ onChange }: LandingPageCustomi
                     className="absolute top-1 right-1 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90"
                     type="button"
                     size="icon"
+                    aria-label={`Supprimer l'image ${element.id}`}
                   >
                     <X className="h-3 w-3" />
                   </Button>

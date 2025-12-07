@@ -243,6 +243,7 @@ export default function MyDownloads() {
                         size="icon"
                         className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] h-11 w-11"
                         onClick={() => setSearchInput('')}
+                        aria-label="Effacer la recherche"
                       >
                         <XCircle className="h-3.5 w-3.5" />
                       </Button>

@@ -161,6 +161,7 @@ export const ProductImageGallery = ({
                 size="sm"
                 onClick={prevImage}
                 className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm border-slate-200 hover:bg-white shadow-lg h-10 w-10 p-0"
+                aria-label="Image précédente"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -169,6 +170,7 @@ export const ProductImageGallery = ({
                 size="sm"
                 onClick={nextImage}
                 className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm border-slate-200 hover:bg-white shadow-lg h-10 w-10 p-0"
+                aria-label="Image suivante"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -189,6 +191,7 @@ export const ProductImageGallery = ({
               size="sm"
               onClick={() => setIsZoomed(true)}
               className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm border-slate-200 hover:bg-white shadow-lg h-10 w-10 p-0"
+              aria-label="Zoomer l'image"
             >
               <ZoomIn className="h-4 w-4" />
             </Button>
@@ -235,6 +238,7 @@ export const ProductImageGallery = ({
               size="sm"
               onClick={() => setIsZoomed(false)}
               className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm border-slate-200 hover:bg-white shadow-lg h-10 w-10 p-0"
+              aria-label="Fermer le zoom"
             >
               <X className="h-4 w-4" />
             </Button>

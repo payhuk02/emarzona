@@ -266,6 +266,7 @@ export const AdvancedProfileSettings = () => {
                     className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-blue-600 hover:bg-blue-700"
                     onClick={handleAvatarClick}
                     disabled={uploading}
+                    aria-label="Modifier l'avatar"
                   >
                     {uploading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

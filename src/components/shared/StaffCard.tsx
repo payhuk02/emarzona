@@ -250,6 +250,7 @@ const StaffCardComponent = ({
                         variant="outline"
                         asChild
                         className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation"
+                        aria-label={`Profil LinkedIn de ${name}`}
                       >
                         <a
                           href={socialLinks.linkedin}
@@ -266,6 +267,7 @@ const StaffCardComponent = ({
                         variant="outline"
                         asChild
                         className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation"
+                        aria-label={`Profil Twitter de ${name}`}
                       >
                         <a
                           href={socialLinks.twitter}
@@ -282,6 +284,7 @@ const StaffCardComponent = ({
                         variant="outline"
                         asChild
                         className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation"
+                        aria-label={`Profil Facebook de ${name}`}
                       >
                         <a
                           href={socialLinks.facebook}
@@ -298,6 +301,7 @@ const StaffCardComponent = ({
                         variant="outline"
                         asChild
                         className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation"
+                        aria-label={`Profil Instagram de ${name}`}
                       >
                         <a
                           href={socialLinks.instagram}
@@ -425,7 +429,7 @@ const StaffCardComponent = ({
           {socialLinks && (
             <div className="flex justify-center gap-2">
               {socialLinks.linkedin && (
-                <Button size="icon" variant="outline" asChild className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation">
+                <Button size="icon" variant="outline" asChild className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation" aria-label={`Profil LinkedIn de ${name}`}>
                   <a
                     href={socialLinks.linkedin}
                     target="_blank"
@@ -436,7 +440,7 @@ const StaffCardComponent = ({
                 </Button>
               )}
               {socialLinks.twitter && (
-                <Button size="icon" variant="outline" asChild className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation">
+                <Button size="icon" variant="outline" asChild className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation" aria-label={`Profil Twitter de ${name}`}>
                   <a
                     href={socialLinks.twitter}
                     target="_blank"
@@ -447,7 +451,7 @@ const StaffCardComponent = ({
                 </Button>
               )}
               {socialLinks.facebook && (
-                <Button size="icon" variant="outline" asChild className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation">
+                <Button size="icon" variant="outline" asChild className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation" aria-label={`Profil Facebook de ${name}`}>
                   <a
                     href={socialLinks.facebook}
                     target="_blank"
@@ -458,7 +462,7 @@ const StaffCardComponent = ({
                 </Button>
               )}
               {socialLinks.instagram && (
-                <Button size="icon" variant="outline" asChild className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation">
+                <Button size="icon" variant="outline" asChild className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation" aria-label={`Profil Instagram de ${name}`}>
                   <a
                     href={socialLinks.instagram}
                     target="_blank"

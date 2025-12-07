@@ -639,6 +639,7 @@ export const CoursePackageManager: React.FC<CoursePackageManagerProps> = ({
                             variant="ghost"
                             size="icon"
                             onClick={() => removeCourseFromPackage(course.id)}
+                            aria-label={`Retirer ${course.title} du package`}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>

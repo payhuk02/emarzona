@@ -131,7 +131,7 @@ const ServiceCardComponent = ({
           <div className="absolute top-2 right-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="secondary" size="icon" className="h-8 w-8">
+                <Button variant="secondary" size="icon" className="h-8 w-8" aria-label={`Actions pour ${service.name || service.id}`}>
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

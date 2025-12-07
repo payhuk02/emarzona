@@ -370,7 +370,7 @@ const ServicesListComponent: React.FC<ServicesListProps> = ({
             {/* Actions */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="sm" className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] p-0 touch-manipulation">
+                <Button variant="ghost" size="sm" className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] p-0 touch-manipulation" aria-label={`Actions pour ${service.name}`}>
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -539,6 +539,7 @@ const ServicesListComponent: React.FC<ServicesListProps> = ({
               size="sm"
               onClick={onRefresh}
               disabled={isLoading}
+              aria-label="Actualiser la liste des services"
             >
               <RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
             </Button>

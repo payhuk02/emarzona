@@ -288,6 +288,7 @@ export const DigitalProductsCompare = () => {
                           size="icon"
                           className="absolute top-2 right-2 h-6 w-6"
                           onClick={() => removeProduct(product.id)}
+                          aria-label={`Retirer ${product.name} de la comparaison`}
                         >
                           <X className="h-4 w-4" />
                         </Button>

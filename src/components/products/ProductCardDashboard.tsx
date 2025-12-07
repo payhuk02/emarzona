@@ -298,6 +298,7 @@ const ProductCardDashboardComponent = ({
                 variant="outline" 
                 size="sm"
                 className="hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[36px] sm:min-h-[38px] min-w-[36px] sm:min-w-[38px] px-2"
+                aria-label={`Actions pour ${product.name || product.id}`}
               >
                 <MoreVertical className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4" />
               </Button>

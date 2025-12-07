@@ -552,6 +552,7 @@ export default function PhysicalProductDetail() {
                     size="icon"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     disabled={quantity <= 1}
+                    aria-label="Diminuer la quantité"
                   >
                     -
                   </Button>
@@ -563,6 +564,7 @@ export default function PhysicalProductDetail() {
                     size="icon"
                     onClick={() => setQuantity(Math.min(stockQuantity, quantity + 1))}
                     disabled={quantity >= stockQuantity}
+                    aria-label="Augmenter la quantité"
                   >
                     +
                   </Button>

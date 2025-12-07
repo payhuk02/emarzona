@@ -523,6 +523,7 @@ const ArtistProductDetail = () => {
                     size="icon"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     disabled={quantity <= 1}
+                    aria-label="Diminuer la quantité"
                   >
                     -
                   </Button>
@@ -533,6 +534,7 @@ const ArtistProductDetail = () => {
                     variant="outline"
                     size="icon"
                     onClick={() => setQuantity(quantity + 1)}
+                    aria-label="Augmenter la quantité"
                   >
                     +
                   </Button>

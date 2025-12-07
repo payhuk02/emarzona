@@ -288,6 +288,7 @@ export const LicenseManagementDashboard = ({
                           size="sm"
                           variant="ghost"
                           onClick={() => handleCopyKey(license.license_key)}
+                          aria-label="Copier la clé de licence"
                         >
                           <Copy className="h-3 w-3" />
                         </Button>
@@ -335,7 +336,7 @@ export const LicenseManagementDashboard = ({
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" aria-label={`Actions pour la licence ${license.license_key || license.id}`}>
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>

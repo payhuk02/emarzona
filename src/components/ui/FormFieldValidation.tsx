@@ -6,6 +6,7 @@
  * Améliore l'UX et l'accessibilité
  */
 
+import React from 'react';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +16,16 @@ interface FormFieldValidationProps {
   hint?: string | null;
   className?: string;
   showIcon?: boolean;
+  /**
+   * ID unique pour ce message (pour aria-describedby)
+   * Si non fourni, un ID sera généré automatiquement
+   */
+  id?: string;
+  /**
+   * ID du champ de formulaire associé (pour aria-describedby)
+   * Utilisé pour connecter le message d'erreur au champ
+   */
+  fieldId?: string;
 }
 
 export const FormFieldValidation = ({
@@ -23,11 +34,17 @@ export const FormFieldValidation = ({
   hint,
   className,
   showIcon = true,
+  id,
+  fieldId,
 }: FormFieldValidationProps) => {
+  const generatedId = React.useId();
+  const messageId = id || (error ? `${generatedId}-error` : (hint ? `${generatedId}-hint` : undefined));
+  
   if (!error && !success && !hint) return null;
 
   return (
     <div
+      id={messageId}
       className={cn(
         'flex items-start gap-2 mt-1 text-sm',
         error && 'text-destructive',

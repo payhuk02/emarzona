@@ -212,7 +212,7 @@ const AdvancedDashboard = () => {
                   <Activity className="h-3 w-3 mr-1" />
                   {t('dashboard.online')}
                 </Badge>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" aria-label="Notifications">
                   <Bell className="h-4 w-4" />
                 </Button>
               </div>

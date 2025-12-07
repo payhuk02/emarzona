@@ -95,6 +95,7 @@ const CartSummaryComponent = ({ summary, onCheckout }: CartSummaryProps) => {
                   variant="ghost"
                   onClick={removeCoupon}
                   className="text-red-600 hover:text-red-700"
+                  aria-label="Retirer le code promo"
                 >
                   <X className="h-4 w-4" />
                 </Button>

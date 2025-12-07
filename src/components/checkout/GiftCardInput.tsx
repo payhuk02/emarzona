@@ -120,6 +120,7 @@ export default function GiftCardInput({
             variant="ghost"
             size="sm"
             onClick={handleRemove}
+            aria-label="Retirer la carte cadeau"
           >
             <X className="h-4 w-4" />
           </Button>

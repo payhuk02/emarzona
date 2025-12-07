@@ -106,6 +106,7 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
             className="absolute top-2 right-2"
             onClick={handleRemove}
             disabled={disabled}
+            aria-label="Supprimer l'image"
           >
             <X className="h-4 w-4" />
           </Button>

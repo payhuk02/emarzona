@@ -313,6 +313,7 @@ export function PhysicalSizeChartSelector({
                   variant="ghost"
                   size="sm"
                   onClick={() => onSelectSizeChart(null)}
+                  aria-label="Retirer le tableau de tailles"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

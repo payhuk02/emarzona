@@ -64,6 +64,7 @@ export const WorkflowActionEditor = ({
             size="icon"
             onClick={onRemove}
             className="h-8 w-8 text-red-600"
+            aria-label="Supprimer cette action"
           >
             <X className="h-4 w-4" />
           </Button>

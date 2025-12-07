@@ -239,6 +239,7 @@ export const FileUploadAdvanced = ({
                   }
                 }}
                 disabled={isUploading}
+                aria-label="Annuler la sélection du fichier"
               >
                 <X className="h-4 w-4" />
               </Button>

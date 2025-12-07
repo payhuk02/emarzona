@@ -85,7 +85,7 @@ export const NotificationDropdown = ({ onClose }: NotificationDropdownProps) => 
                 Tout marquer lu
               </Button>
             )}
-            <Button variant="ghost" size="icon" onClick={handleSettings}>
+            <Button variant="ghost" size="icon" onClick={handleSettings} aria-label="Paramètres de notification">
               <Settings className="w-4 h-4" />
             </Button>
           </div>

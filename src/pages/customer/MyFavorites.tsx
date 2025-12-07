@@ -240,6 +240,7 @@ export default function MyFavorites() {
                     variant="ghost"
                     size="icon"
                     onClick={() => navigate('/account')}
+                    aria-label="Retour au compte"
                   >
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
@@ -372,6 +373,7 @@ export default function MyFavorites() {
                       variant={viewMode === 'grid' ? 'default' : 'outline'}
                       size="icon"
                       onClick={() => setViewMode('grid')}
+                      aria-label="Vue en grille"
                     >
                       <Grid className="h-4 w-4" />
                     </Button>
@@ -379,6 +381,7 @@ export default function MyFavorites() {
                       variant={viewMode === 'list' ? 'default' : 'outline'}
                       size="icon"
                       onClick={() => setViewMode('list')}
+                      aria-label="Vue en liste"
                     >
                       <List className="h-4 w-4" />
                     </Button>
@@ -437,6 +440,7 @@ export default function MyFavorites() {
                                 size="icon"
                                 className="absolute top-2 right-2 bg-white/90 hover:bg-white"
                                 onClick={() => handleRemoveFavorite(product.id)}
+                                aria-label={`Retirer ${product.name} des favoris`}
                               >
                                 <Heart className="h-5 w-5 text-red-500 fill-red-500" />
                               </Button>
@@ -568,6 +572,7 @@ export default function MyFavorites() {
                                         variant="ghost"
                                         size="icon"
                                         onClick={() => handleRemoveFavorite(product.id)}
+                                        aria-label={`Retirer ${product.name} des favoris`}
                                       >
                                         <Heart className="h-5 w-5 text-red-500 fill-red-500" />
                                       </Button>

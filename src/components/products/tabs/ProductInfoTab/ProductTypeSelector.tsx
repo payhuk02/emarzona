@@ -108,7 +108,7 @@ export const ProductTypeSelector = ({
           </div>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white" aria-label="Aide sur le type de produit">
                 <HelpCircle className="h-4 w-4" />
               </Button>
             </TooltipTrigger>

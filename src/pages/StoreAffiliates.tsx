@@ -478,6 +478,7 @@ export default function StoreAffiliates() {
                         size="icon"
                         onClick={() => setSearchInput('')}
                         className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 hover:bg-muted"
+                        aria-label="Effacer la recherche"
                       >
                         <X className="h-3.5 w-3.5" />
                       </Button>

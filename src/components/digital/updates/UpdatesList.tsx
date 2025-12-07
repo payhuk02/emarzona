@@ -274,7 +274,7 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" aria-label={`Actions pour la mise à jour ${update.title || update.id}`}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>

@@ -471,6 +471,7 @@ export const FileUploadEnhanced: React.FC<FileUploadEnhancedProps> = ({
                     size="icon"
                     onClick={() => handleRemovePreview(index)}
                     disabled={uploading}
+                    aria-label={`Supprimer le fichier ${index + 1}`}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

@@ -154,6 +154,7 @@ export const LicensesTab = () => {
                     size="icon"
                     onClick={() => handleCopyLicense(license.license_key, license.id)}
                     className="flex-shrink-0"
+                    aria-label="Copier la clé de licence"
                   >
                     {copiedId === license.id ? (
                       <CheckCircle2 className="h-4 w-4 text-green-600" />

@@ -111,15 +111,15 @@ function ImageCard({
 
       {/* Hover Overlay */}
       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-        <Button variant="secondary" size="sm" onClick={onView}>
+        <Button variant="secondary" size="sm" onClick={onView} aria-label="Voir l'image">
           <Eye className="h-4 w-4" />
         </Button>
         {!isPrimary && (
-          <Button variant="secondary" size="sm" onClick={onSetPrimary}>
+          <Button variant="secondary" size="sm" onClick={onSetPrimary} aria-label="Définir comme image principale">
             <Star className="h-4 w-4" />
           </Button>
         )}
-        <Button variant="destructive" size="sm" onClick={onDelete}>
+        <Button variant="destructive" size="sm" onClick={onDelete} aria-label="Supprimer l'image">
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
@@ -320,6 +320,7 @@ export function VariantImageGallery({
               variant="outline"
               size="sm"
               onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+              aria-label={viewMode === 'grid' ? 'Passer en vue liste' : 'Passer en vue grille'}
             >
               {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid3x3 className="h-4 w-4" />}
             </Button>
@@ -448,6 +449,7 @@ export function VariantImageGallery({
                     size="icon"
                     onClick={() => setUploadUrls([...uploadUrls, ''])}
                     disabled={uploadUrls.length >= maxImagesPerVariant}
+                    aria-label="Ajouter une image"
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -456,6 +458,7 @@ export function VariantImageGallery({
                     variant="outline"
                     size="icon"
                     onClick={() => setUploadUrls(uploadUrls.filter((_, i) => i !== index))}
+                    aria-label="Supprimer cette image"
                   >
                     <X className="h-4 w-4" />
                   </Button>

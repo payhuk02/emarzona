@@ -268,6 +268,7 @@ export default function SuppliersManagement() {
               size="sm"
               className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
               onClick={() => setSearchInput('')}
+              aria-label="Effacer la recherche"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -393,7 +394,7 @@ export default function SuppliersManagement() {
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions pour le fournisseur ${supplier.name || supplier.id}`}>
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -446,7 +447,7 @@ export default function SuppliersManagement() {
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions pour le fournisseur ${supplier.name || supplier.id}`}>
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>

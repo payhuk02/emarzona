@@ -395,6 +395,7 @@ export const BookingHistory: React.FC<BookingHistoryProps> = ({
                 size="sm"
                 onClick={onRefresh}
                 disabled={isLoading}
+                aria-label="Actualiser l'historique des réservations"
               >
                 <RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
               </Button>

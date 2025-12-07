@@ -189,6 +189,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
           variant="ghost"
           size="sm"
           className="shrink-0"
+          aria-label="Réessayer"
         >
           <RefreshCw className="w-4 h-4" />
         </Button>

@@ -223,6 +223,7 @@ const StoreSlugEditor = ({ currentSlug, onSlugChange, onCheckAvailability, store
                   onClick={handleCopyUrl}
                   title="Copier le lien"
                   className="h-9 w-9"
+                  aria-label="Copier le lien du slug"
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -232,6 +233,7 @@ const StoreSlugEditor = ({ currentSlug, onSlugChange, onCheckAvailability, store
                   onClick={() => window.open(getStoreUrl(currentSlug), '_blank')}
                   title="Ouvrir dans un nouvel onglet"
                   className="h-9 w-9"
+                  aria-label="Ouvrir le slug dans un nouvel onglet"
                 >
                   <ExternalLink className="h-4 w-4" />
                 </Button>

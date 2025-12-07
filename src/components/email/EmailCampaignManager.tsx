@@ -218,7 +218,7 @@ export const EmailCampaignManager = ({
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" aria-label={`Actions pour la campagne ${campaign.name}`}>
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -299,6 +299,7 @@ export const EmailCampaignManager = ({
                     setShowMetrics(false);
                     setSelectedCampaign(null);
                   }}
+                  aria-label="Fermer les métriques"
                 >
                   ×
                 </Button>

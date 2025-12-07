@@ -106,6 +106,7 @@ export const ReviewMediaGallery: React.FC<ReviewMediaGalleryProps> = ({
               size="icon"
               className="absolute top-4 right-4 z-50 text-white hover:bg-white/20"
               onClick={() => setLightboxOpen(false)}
+              aria-label="Fermer la visionneuse"
             >
               <X className="w-6 h-6" />
             </Button>
@@ -117,6 +118,7 @@ export const ReviewMediaGallery: React.FC<ReviewMediaGalleryProps> = ({
                 size="icon"
                 className="absolute left-4 z-50 text-white hover:bg-white/20"
                 onClick={prevMedia}
+                aria-label="Média précédent"
               >
                 <ChevronLeft className="w-8 h-8" />
               </Button>
@@ -150,6 +152,7 @@ export const ReviewMediaGallery: React.FC<ReviewMediaGalleryProps> = ({
                 size="icon"
                 className="absolute right-4 z-50 text-white hover:bg-white/20"
                 onClick={nextMedia}
+                aria-label="Média suivant"
               >
                 <ChevronRight className="w-8 h-8" />
               </Button>

@@ -97,6 +97,7 @@ export const AvatarUpload = ({
             className="absolute -top-2 -right-2 h-6 w-6 sm:h-7 sm:w-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
             onClick={handleRemove}
             disabled={uploading}
+            aria-label="Supprimer l'avatar"
           >
             <X className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>

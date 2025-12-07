@@ -317,7 +317,7 @@ export const TwoFactorAuth = () => {
                     readOnly 
                     className="font-mono text-sm"
                   />
-                  <Button variant="outline" size="icon" onClick={copySecret}>
+                  <Button variant="outline" size="icon" onClick={copySecret} aria-label="Copier le secret 2FA">
                     <Copy className="h-4 w-4" />
                   </Button>
                 </div>

@@ -145,6 +145,7 @@ export const CombinedCouponInput = ({
                   variant="ghost"
                   size="icon"
                   onClick={() => handleRemoveCouponField(index)}
+                  aria-label="Supprimer ce champ de code promo"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -193,6 +194,7 @@ export const CombinedCouponInput = ({
                   variant="ghost"
                   size="icon"
                   onClick={() => handleRemoveCoupon(coupon.id)}
+                  aria-label={`Supprimer le code promo ${coupon.code}`}
                 >
                   <X className="h-4 w-4" />
                 </Button>

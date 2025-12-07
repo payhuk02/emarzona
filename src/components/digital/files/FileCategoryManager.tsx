@@ -161,6 +161,7 @@ export const FileCategoryManager = () => {
                           variant="ghost"
                           size="icon"
                           onClick={() => setEditingCategory(category)}
+                          aria-label={`Modifier la catégorie ${category.name}`}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -188,6 +189,7 @@ export const FileCategoryManager = () => {
                             variant="ghost"
                             size="icon"
                             onClick={() => setEditingCategory(child)}
+                            aria-label={`Modifier la sous-catégorie ${child.name}`}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>

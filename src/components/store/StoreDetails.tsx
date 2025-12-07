@@ -1080,6 +1080,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                     onClick={handleCopyUrl}
                     title="Copier le lien"
                     className="touch-manipulation flex-1 sm:flex-none"
+                    aria-label="Copier le lien de la boutique"
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
@@ -1089,6 +1090,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                     onClick={() => window.open(storeUrl, '_blank')}
                     title="Ouvrir dans un nouvel onglet"
                     className="touch-manipulation flex-1 sm:flex-none"
+                    aria-label="Ouvrir la boutique dans un nouvel onglet"
                   >
                     <ExternalLink className="h-4 w-4" />
                   </Button>

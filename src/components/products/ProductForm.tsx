@@ -614,7 +614,7 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
                 Publier
               </Button>
               
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" aria-label="Actions supplémentaires pour le produit">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </div>

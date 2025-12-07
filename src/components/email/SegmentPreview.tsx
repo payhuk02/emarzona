@@ -73,7 +73,7 @@ export const SegmentPreview = ({ segment, onClose }: SegmentPreviewProps) => {
             </CardDescription>
           </div>
           {onClose && (
-            <Button variant="ghost" size="icon" onClick={onClose}>
+            <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fermer l'aperçu du segment">
               ×
             </Button>
           )}

@@ -437,6 +437,7 @@ export const DigitalProductsSearch = () => {
                   onClick={handleVoiceSearch}
                   disabled={isVoiceSearchActive}
                   className={cn(isVoiceSearchActive && "bg-primary text-primary-foreground")}
+                  aria-label={isVoiceSearchActive ? "Arrêter la recherche vocale" : "Activer la recherche vocale"}
                 >
                   {isVoiceSearchActive ? (
                     <MicOff className="h-5 w-5" />
@@ -452,6 +453,7 @@ export const DigitalProductsSearch = () => {
                       setSearchInput('');
                       setFilters((prev) => ({ ...prev, query: '' }));
                     }}
+                    aria-label="Effacer la recherche"
                   >
                     <X className="h-5 w-5" />
                   </Button>

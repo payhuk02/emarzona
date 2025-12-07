@@ -560,7 +560,7 @@ export default function AdminCommunity() {
                                   <TableCell className="text-right">
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px] h-11 w-11">
+                                        <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px] h-11 w-11" aria-label={`Actions pour ${member.email || member.id}`}>
                                           <MoreVertical className="h-4 w-4" />
                                         </Button>
                                       </DropdownMenuTrigger>

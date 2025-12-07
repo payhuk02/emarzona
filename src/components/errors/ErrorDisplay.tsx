@@ -96,6 +96,7 @@ export function ErrorDisplay({
               size="sm"
               onClick={onDismiss}
               className="h-8 w-8 p-0"
+              aria-label="Fermer l'erreur"
             >
               <X className="h-4 w-4" />
             </Button>

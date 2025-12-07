@@ -431,7 +431,7 @@ export default function OrderMessaging() {
                     {/* Actions Menu */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" aria-label="Menu d'actions">
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -581,6 +581,7 @@ export default function OrderMessaging() {
                             size="icon"
                             className="h-5 w-5"
                             onClick={() => removeFile(index)}
+                            aria-label={`Supprimer le fichier ${file.name}`}
                           >
                             <X className="h-3 w-3" />
                           </Button>
@@ -620,6 +621,7 @@ export default function OrderMessaging() {
                         size="icon"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={sendingMessage || uploadingFiles}
+                        aria-label="Joindre un fichier"
                       >
                         <Paperclip className="h-4 w-4" />
                       </Button>

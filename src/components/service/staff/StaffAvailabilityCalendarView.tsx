@@ -325,6 +325,7 @@ export function StaffAvailabilityCalendarView({
                 size="icon"
                 onClick={() => navigateMonth('prev')}
                 className="h-9 w-9 sm:h-10 sm:w-10"
+                aria-label="Mois précédent"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -332,6 +333,7 @@ export function StaffAvailabilityCalendarView({
                 variant="outline"
                 onClick={() => setCurrentMonth(new Date())}
                 className="flex-1 sm:flex-none h-9 sm:h-10 text-xs sm:text-sm"
+                aria-label="Aujourd'hui"
               >
                 Aujourd'hui
               </Button>
@@ -340,6 +342,7 @@ export function StaffAvailabilityCalendarView({
                 size="icon"
                 onClick={() => navigateMonth('next')}
                 className="h-9 w-9 sm:h-10 sm:w-10"
+                aria-label="Mois suivant"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>

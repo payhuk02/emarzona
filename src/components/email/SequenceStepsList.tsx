@@ -159,6 +159,7 @@ export const SequenceStepsList = ({
                         variant="ghost"
                         size="icon"
                         onClick={() => onEditStep(step)}
+                        aria-label={`Modifier l'étape ${step.name || step.id}`}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -171,6 +172,7 @@ export const SequenceStepsList = ({
                         setDeleteDialogOpen(true);
                       }}
                       className="text-destructive hover:text-destructive"
+                      aria-label={`Supprimer l'étape ${step.name || step.id}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

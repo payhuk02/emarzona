@@ -156,7 +156,7 @@ export function SecureDownloadButton({
  */
 export function SecureDownloadIconButton(props: Omit<SecureDownloadButtonProps, 'children'>) {
   return (
-    <SecureDownloadButton {...props} size="icon" variant="ghost">
+    <SecureDownloadButton {...props} size="icon" variant="ghost" aria-label={`Télécharger ${props.fileName || 'le fichier'}`}>
       <Download className="h-4 w-4" />
     </SecureDownloadButton>
   );

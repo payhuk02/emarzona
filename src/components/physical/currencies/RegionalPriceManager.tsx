@@ -200,7 +200,7 @@ export function RegionalPriceManager({
                         )}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" aria-label={`Supprimer le prix régional pour ${regionalPrice.region || regionalPrice.country_codes?.join(', ') || 'cette région'}`}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>

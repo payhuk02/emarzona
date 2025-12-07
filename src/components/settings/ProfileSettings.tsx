@@ -256,6 +256,7 @@ export const ProfileSettings = () => {
                       size="sm"
                       className="absolute -top-2 -right-2 h-6 w-6 sm:h-7 sm:w-7 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                       onClick={handleRemoveAvatar}
+                      aria-label="Supprimer l'avatar"
                     >
                       <X className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
@@ -451,6 +452,7 @@ export const ProfileSettings = () => {
                           description: "ID utilisateur copié dans le presse-papiers",
                         });
                       }}
+                      aria-label="Copier l'ID utilisateur"
                     >
                       <X className="h-4 w-4" />
                     </Button>

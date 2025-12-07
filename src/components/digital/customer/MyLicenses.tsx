@@ -271,6 +271,7 @@ export const MyLicenses = () => {
                         variant="outline"
                         size="icon"
                         onClick={() => toggleLicenseKeyVisibility(license.id)}
+                        aria-label={showLicenseKey[license.id] ? "Masquer la clé de licence" : "Afficher la clé de licence"}
                       >
                         {showLicenseKey[license.id] ? (
                           <EyeOff className="h-4 w-4" />
@@ -282,6 +283,7 @@ export const MyLicenses = () => {
                         variant="outline"
                         size="icon"
                         onClick={() => copyLicenseKey(license.license_key, license.id)}
+                        aria-label="Copier la clé de licence"
                       >
                         <Copy className="h-4 w-4" />
                       </Button>

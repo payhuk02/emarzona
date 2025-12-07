@@ -149,7 +149,7 @@ export function BarcodeScanner({
             <CardDescription>{description}</CardDescription>
           </div>
           {onClose && (
-            <Button variant="ghost" size="icon" onClick={onClose}>
+            <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fermer le scanner de code-barres">
               <X className="h-4 w-4" />
             </Button>
           )}

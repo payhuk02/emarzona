@@ -364,6 +364,7 @@ export const DigitalFilePreviewCompact = ({
           size="sm"
           disabled={isLocked}
           className="h-8 w-8 p-0"
+          aria-label={isLocked ? `Fichier ${file.name} verrouillé` : `Aperçu du fichier ${file.name}`}
         >
           <Eye className="h-4 w-4" />
         </Button>

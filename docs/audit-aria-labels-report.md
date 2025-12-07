@@ -1,50 +1,42 @@
 # 🔍 Rapport d'Audit ARIA Labels
 
-**Date**: 2025-12-06
+**Date**: 2025-12-07
 
 ## Résumé
 
-- **Total d'éléments sans aria-label**: 6147
-- **Boutons icon-only critiques**: 164
+- **Total d'éléments sans aria-label**: 19
+- **Boutons icon-only critiques**: 12
 
 ## Par Type
 
-- **input**: 3827
-- **button**: 2254
-- **link**: 66
+- **link**: 3
+- **input**: 4
+- **button**: 12
 
 ## Top 10 Fichiers
 
-- `pages\admin\AdminUsers.tsx`: 51 problème(s)
-- `pages\admin\AdminDisputes.tsx`: 50 problème(s)
-- `components\admin\customization\IntegrationsSection.tsx`: 47 problème(s)
-- `pages\admin\AdminWebhookManagement.tsx`: 47 problème(s)
-- `pages\Marketplace.tsx`: 47 problème(s)
-- `components\products\tabs\ProductFAQTab.tsx`: 44 problème(s)
-- `components\ui\rich-text-editor-pro.tsx`: 44 problème(s)
-- `components\service\ServiceBundleBuilder.tsx`: 40 problème(s)
-- `components\store\StoreDetails.tsx`: 38 problème(s)
-- `pages\admin\AdminAffiliates.tsx`: 38 problème(s)
+- `pages\admin\AdminLoyaltyManagement.tsx`: 4 problème(s)
+- `components\admin\customization\ContentManagementSection.tsx`: 2 problème(s)
+- `components\marketplace\MarketplaceHeader.tsx`: 2 problème(s)
+- `components\products\create\digital\DigitalBasicInfoForm.tsx`: 2 problème(s)
+- `components\products\create\physical\PhysicalSizeChartSelector.tsx`: 2 problème(s)
+- `components\service\ServiceBookingCalendar.tsx`: 2 problème(s)
+- `components\accessibility\SkipLink.tsx`: 1 problème(s)
+- `components\accessibility\SkipToMainContent.tsx`: 1 problème(s)
+- `components\admin\customization\PlatformSettingsSection.tsx`: 1 problème(s)
+- `components\marketplace\MarketplaceFooter.tsx`: 1 problème(s)
 
 ## Boutons Icon-Only Critiques
 
-1. `components\admin\AdminLayout.tsx` (ligne 184)
-2. `components\admin\customization\IntegrationsSection.tsx` (ligne 216)
-3. `components\admin\customization\IntegrationsSection.tsx` (ligne 285)
-4. `components\admin\customization\IntegrationsSection.tsx` (ligne 305)
-5. `components\admin\customization\IntegrationsSection.tsx` (ligne 325)
-6. `components\admin\customization\IntegrationsSection.tsx` (ligne 396)
-7. `components\admin\customization\IntegrationsSection.tsx` (ligne 416)
-8. `components\admin\customization\IntegrationsSection.tsx` (ligne 691)
-9. `components\admin\ReviewModerationTable.tsx` (ligne 454)
-10. `components\auth\TwoFactorAuth.tsx` (ligne 320)
-11. `components\cart\CartItem.tsx` (ligne 57)
-12. `components\cart\CartItem.tsx` (ligne 79)
-13. `components\cart\CartItem.tsx` (ligne 109)
-14. `components\community\CommunityPostCard.tsx` (ligne 120)
-15. `components\courses\CourseBundleBuilder.tsx` (ligne 321)
-16. `components\courses\CoursePackageManager.tsx` (ligne 638)
-17. `components\courses\CoursesDashboard.tsx` (ligne 205)
-18. `components\courses\CoursesList.tsx` (ligne 359)
-19. `components\courses\CoursesList.tsx` (ligne 630)
-20. `components\courses\EnrollmentHistory.tsx` (ligne 333)
+1. `components\marketplace\MarketplaceHeader.tsx` (ligne 76)
+2. `components\marketplace\MarketplaceHeader.tsx` (ligne 76)
+3. `components\products\create\digital\DigitalBasicInfoForm.tsx` (ligne 495)
+4. `components\products\create\digital\DigitalBasicInfoForm.tsx` (ligne 495)
+5. `components\products\create\physical\PhysicalSizeChartSelector.tsx` (ligne 277)
+6. `components\products\create\physical\PhysicalSizeChartSelector.tsx` (ligne 277)
+7. `components\service\ServiceBookingCalendar.tsx` (ligne 304)
+8. `components\service\ServiceBookingCalendar.tsx` (ligne 304)
+9. `pages\admin\AdminLoyaltyManagement.tsx` (ligne 864)
+10. `pages\admin\AdminLoyaltyManagement.tsx` (ligne 969)
+11. `pages\admin\AdminLoyaltyManagement.tsx` (ligne 864)
+12. `pages\admin\AdminLoyaltyManagement.tsx` (ligne 969)

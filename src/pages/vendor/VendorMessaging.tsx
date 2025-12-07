@@ -638,6 +638,7 @@ export default function VendorMessaging() {
                         size="icon"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploadingFiles}
+                        aria-label="Joindre un fichier"
                       >
                         <Paperclip className="h-4 w-4" />
                       </Button>
@@ -653,6 +654,7 @@ export default function VendorMessaging() {
                         onClick={handleSendMessage}
                         disabled={sendingMessage || uploadingFiles || (!messageContent.trim() && selectedFiles.length === 0)}
                         size="icon"
+                        aria-label="Envoyer le message"
                       >
                         {sendingMessage || uploadingFiles ? (
                           <Loader2 className="h-4 w-4 animate-spin" />

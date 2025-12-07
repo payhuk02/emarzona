@@ -233,6 +233,7 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
           onClick?.(event);
           toggleSidebar();
         }}
+        aria-label="Basculer la barre latérale"
         {...props}
       >
         <PanelLeft />

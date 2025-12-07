@@ -66,10 +66,8 @@
     <link rel="preconnect" href="https://api.moneroo.com" />
     
     <!-- ✅ Prefetch pour routes critiques (améliore la navigation) -->
-    <!-- Note: React Router gère déjà le prefetch via lazy loading, ceci est pour optimisation supplémentaire -->
-    <link rel="prefetch" href="/src/pages/Dashboard.tsx" as="script" />
-    <link rel="prefetch" href="/src/pages/Marketplace.tsx" as="script" />
-    <link rel="prefetch" href="/src/pages/Cart.tsx" as="script" />
+    <!-- Note: React Router gère déjà le prefetch via lazy loading -->
+    <!-- Les prefetch de routes sont gérés dynamiquement par usePrefetchRoutes et useIntelligentPrefetch -->
 
     <!-- ✅ Open Graph (Facebook, WhatsApp, LinkedIn...) -->
     <meta property="og:type" content="website" />

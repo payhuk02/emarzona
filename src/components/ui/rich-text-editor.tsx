@@ -169,6 +169,7 @@ export const RichTextEditor = ({
       disabled={disabled || btnDisabled}
       className="h-8 w-8 p-0"
       title={title}
+      aria-label={title}
     >
       <Icon className="h-4 w-4" />
     </Button>

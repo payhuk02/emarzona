@@ -375,6 +375,7 @@ export default function MyOrders() {
                     size="icon"
                     onClick={() => navigate('/account')}
                     className="touch-manipulation min-h-[44px] min-w-[44px] h-11 w-11"
+                    aria-label="Retour au compte"
                   >
                     <ArrowLeft className="h-4 w-4" />
                   </Button>

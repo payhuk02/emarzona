@@ -176,7 +176,7 @@ export const StoreDashboardMockup = () => {
 
         {/* Actions droite */}
         <div className="flex items-center gap-2 shrink-0">
-          <button className="p-1.5 rounded-md hover:bg-gray-100 transition-colors">
+          <button className="p-1.5 rounded-md hover:bg-gray-100 transition-colors" aria-label="Notifications">
             <Bell className="h-4 w-4 text-gray-600" />
           </button>
           <div className="px-2 py-1 bg-gray-100 rounded-md text-[10px] md:text-xs font-medium text-gray-700">

@@ -138,7 +138,7 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
           actions={(row) => (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px] touch-manipulation">
+                <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px] touch-manipulation" aria-label="Actions pour le client">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -209,7 +209,7 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation" aria-label={`Actions pour ${customer.email || 'le client'}`}>
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>

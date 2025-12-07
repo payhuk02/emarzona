@@ -332,6 +332,7 @@ export const RichTextEditorPro = ({
       disabled={disabled || btnDisabled}
       className="h-8 w-8 p-0"
       title={title}
+      aria-label={title}
       type="button"
     >
       <Icon className="h-4 w-4" />
@@ -384,7 +385,7 @@ export const RichTextEditorPro = ({
             <div className="flex items-center gap-1">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Couleur du texte">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Couleur du texte" aria-label="Couleur du texte">
                     <Palette className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
@@ -408,7 +409,7 @@ export const RichTextEditorPro = ({
 
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Couleur de fond">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Couleur de fond" aria-label="Couleur de fond">
                     <Highlighter className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
@@ -595,7 +596,7 @@ export const RichTextEditorPro = ({
             />
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Emoji">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Emoji" aria-label="Insérer un emoji">
                   <Smile className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>

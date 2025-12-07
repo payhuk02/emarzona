@@ -136,7 +136,7 @@ function OptionEditor({
             placeholder="Nom de l'option"
           />
         </div>
-        <Button variant="ghost" size="sm" onClick={onDelete}>
+        <Button variant="ghost" size="sm" onClick={onDelete} aria-label={`Supprimer l'option ${option.name}`}>
           <Trash2 className="h-4 w-4 text-destructive" />
         </Button>
       </CardHeader>
@@ -164,7 +164,7 @@ function OptionEditor({
             onKeyDown={(e) => e.key === 'Enter' && handleAddValue()}
             placeholder={`Ajouter une valeur (ex: ${option.name === 'Couleur' ? 'Rouge' : option.name === 'Taille' ? 'M' : 'Standard'})`}
           />
-          <Button onClick={handleAddValue} size="sm">
+          <Button onClick={handleAddValue} size="sm" aria-label={`Ajouter une valeur à l'option ${option.name}`}>
             <Plus className="h-4 w-4" />
           </Button>
         </div>
@@ -538,7 +538,7 @@ export function VariantManager({
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" aria-label={`Actions pour la variante ${variant.name || variant.id}`}>
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>

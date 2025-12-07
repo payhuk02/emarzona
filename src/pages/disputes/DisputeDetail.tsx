@@ -525,6 +525,7 @@ export default function DisputeDetail() {
                                   size="icon"
                                   className="h-5 w-5"
                                   onClick={() => removeFile(index)}
+                                  aria-label={`Supprimer le fichier ${file.name}`}
                                 >
                                   <X className="h-3 w-3" />
                                 </Button>
@@ -557,6 +558,7 @@ export default function DisputeDetail() {
                               size="icon"
                               onClick={() => fileInputRef.current?.click()}
                               disabled={uploadingFiles}
+                              aria-label="Joindre un fichier"
                             >
                               <Paperclip className="h-4 w-4" />
                             </Button>

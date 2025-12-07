@@ -256,6 +256,7 @@ export const ServiceCalendarEnhanced = ({
                 newDate.setMonth(newDate.getMonth() - 1);
                 setDate(newDate);
               }}
+              aria-label="Mois précédent"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -263,6 +264,7 @@ export const ServiceCalendarEnhanced = ({
               variant="outline"
               size="icon"
               onClick={() => setDate(new Date())}
+              aria-label="Aujourd'hui"
             >
               Aujourd'hui
             </Button>
@@ -274,6 +276,7 @@ export const ServiceCalendarEnhanced = ({
                 newDate.setMonth(newDate.getMonth() + 1);
                 setDate(newDate);
               }}
+              aria-label="Mois suivant"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>

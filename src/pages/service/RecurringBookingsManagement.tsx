@@ -301,7 +301,7 @@ export default function RecurringBookingsManagement() {
                           <TableCell className="text-xs sm:text-sm">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]">
+                                <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]" aria-label={`Actions pour le réservation récurrente ${pattern.id}`}>
                                   <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                 </Button>
                               </DropdownMenuTrigger>

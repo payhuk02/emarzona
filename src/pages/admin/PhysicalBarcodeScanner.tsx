@@ -173,6 +173,7 @@ export default function PhysicalBarcodeScanner() {
                           size="icon"
                           onClick={handleClearSearch}
                           className="min-h-[44px] min-w-[44px] h-11 w-11"
+                          aria-label="Effacer le résultat du scan"
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -274,6 +275,7 @@ export default function PhysicalBarcodeScanner() {
                             size="icon"
                             className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 sm:h-8 sm:w-8"
                             onClick={() => setSearchBarcode('')}
+                            aria-label="Effacer le code-barres"
                           >
                             <X className="w-3 h-3 sm:w-4 sm:h-4" />
                           </Button>

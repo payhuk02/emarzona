@@ -451,7 +451,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" aria-label={`Actions pour l'avis ${review.id}`}>
                             <MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           </Button>
                         </DropdownMenuTrigger>

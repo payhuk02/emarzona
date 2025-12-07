@@ -160,6 +160,7 @@ export const EmailSegmentManager = ({
                               className="h-6 w-6"
                               onClick={() => handleRefreshCount(segment.id)}
                               title="Recalculer le nombre de membres"
+                              aria-label="Recalculer le nombre de membres du segment"
                             >
                               <RefreshCw className="h-3 w-3" />
                             </Button>
@@ -178,7 +179,7 @@ export const EmailSegmentManager = ({
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" aria-label={`Actions pour le segment ${segment.name}`}>
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>

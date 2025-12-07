@@ -1,0 +1,5741 @@
+{
+  "summary": {
+    "totalImagesWithoutAlt": 205,
+    "totalInputsWithoutLabel": 914,
+    "totalLinksWithoutText": 0,
+    "totalMissingFocusStyles": 25,
+    "totalMissingLandmarks": 0
+  },
+  "details": {
+    "imagesWithoutAlt": [
+      {
+        "file": "components\\admin\\customization\\DesignBrandingSection.tsx",
+        "line": 547,
+        "content": "<ImageIcon className=\"h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2\" />"
+      },
+      {
+        "file": "components\\admin\\customization\\DesignBrandingSection.tsx",
+        "line": 667,
+        "content": "<img"
+      },
+      {
+        "file": "components\\admin\\customization\\DesignBrandingSection.tsx",
+        "line": 681,
+        "content": "<ImageIcon className=\"h-8 w-8 text-muted-foreground\" />"
+      },
+      {
+        "file": "components\\admin\\customization\\DesignBrandingSection.tsx",
+        "line": 721,
+        "content": "<img"
+      },
+      {
+        "file": "components\\admin\\customization\\DesignBrandingSection.tsx",
+        "line": 735,
+        "content": "<ImageIcon className=\"h-8 w-8 text-muted-foreground\" />"
+      },
+      {
+        "file": "components\\admin\\customization\\DesignBrandingSection.tsx",
+        "line": 775,
+        "content": "<img"
+      },
+      {
+        "file": "components\\admin\\customization\\DesignBrandingSection.tsx",
+        "line": 789,
+        "content": "<ImageIcon className=\"h-6 w-6 text-muted-foreground\" />"
+      },
+      {
+        "file": "components\\admin\\customization\\LandingPageCustomizationSection.tsx",
+        "line": 444,
+        "content": "<ImageIcon className=\"h-8 w-8 text-muted-foreground\" />"
+      },
+      {
+        "file": "components\\affiliate\\CreateAffiliateLinkDialog.tsx",
+        "line": 199,
+        "content": "<img"
+      },
+      {
+        "file": "components\\artist\\ArtistCertificateDisplay.tsx",
+        "line": 123,
+        "content": "<img"
+      },
+      {
+        "file": "components\\artist\\CertificateUploader.tsx",
+        "line": 231,
+        "content": "<img"
+      },
+      {
+        "file": "components\\community\\CommunityMemberForm.tsx",
+        "line": 178,
+        "content": "<ImageUpload"
+      },
+      {
+        "file": "components\\courses\\CoursePackageManager.tsx",
+        "line": 625,
+        "content": "<img"
+      },
+      {
+        "file": "components\\courses\\CoursesList.tsx",
+        "line": 586,
+        "content": "<img"
+      },
+      {
+        "file": "components\\courses\\create\\CourseBasicInfoForm.tsx",
+        "line": 618,
+        "content": "<img"
+      },
+      {
+        "file": "components\\courses\\create\\CourseBasicInfoForm.tsx",
+        "line": 644,
+        "content": "<img"
+      },
+      {
+        "file": "components\\courses\\create\\CourseBasicInfoForm.tsx",
+        "line": 687,
+        "content": "<ImageIcon className=\"h-6 w-6 text-muted-foreground mb-1\" />"
+      },
+      {
+        "file": "components\\courses\\create\\CourseSEOForm.tsx",
+        "line": 282,
+        "content": "<ImageIcon className=\"w-4 h-4\" />"
+      },
+      {
+        "file": "components\\courses\\EnrollmentInfoDisplay.tsx",
+        "line": 438,
+        "content": "<img"
+      },
+      {
+        "file": "components\\courses\\gamification\\AchievementsDisplay.tsx",
+        "line": 121,
+        "content": "<img"
+      },
+      {
+        "file": "components\\courses\\gamification\\BadgesDisplay.tsx",
+        "line": 112,
+        "content": "<img"
+      },
+      {
+        "file": "components\\courses\\learning-paths\\LearningPathCard.tsx",
+        "line": 37,
+        "content": "<img"
+      },
+      {
+        "file": "components\\courses\\marketplace\\CourseCard.tsx",
+        "line": 71,
+        "content": "<img"
+      },
+      {
+        "file": "components\\customer\\DownloadsTab.tsx",
+        "line": 104,
+        "content": "<img"
+      },
+      {
+        "file": "components\\customer\\FavoritesTab.tsx",
+        "line": 135,
+        "content": "<img"
+      },
+      {
+        "file": "components\\customer\\LicensesTab.tsx",
+        "line": 114,
+        "content": "<img"
+      },
+      {
+        "file": "components\\customer\\UpdatesTab.tsx",
+        "line": 96,
+        "content": "<img"
+      },
+      {
+        "file": "components\\customer\\UpdatesTab.tsx",
+        "line": 169,
+        "content": "<img"
+      },
+      {
+        "file": "components\\dashboard\\TopProductsCard.tsx",
+        "line": 71,
+        "content": "<img"
+      },
+      {
+        "file": "components\\debug\\MobileResponsiveTest.tsx",
+        "line": 147,
+        "content": "<img"
+      },
+      {
+        "file": "components\\debug\\MobileResponsiveTest.tsx",
+        "line": 167,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\BulkDigitalUpdate.tsx",
+        "line": 357,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\customer\\MyDigitalProducts.tsx",
+        "line": 242,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\customer\\MyLicenses.tsx",
+        "line": 236,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\CustomerAccessManager.tsx",
+        "line": 399,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DigitalBundleCard.tsx",
+        "line": 82,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DigitalBundleCard.tsx",
+        "line": 138,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DigitalBundleCard.tsx",
+        "line": 212,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DigitalBundleManager.tsx",
+        "line": 436,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DigitalFilePreview.tsx",
+        "line": 131,
+        "content": "<ImageIcon className=\"h-16 w-16 mb-4\" />"
+      },
+      {
+        "file": "components\\digital\\DigitalFilePreview.tsx",
+        "line": 138,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DigitalFilePreview.tsx",
+        "line": 237,
+        "content": "return <ImageIcon className=\"h-5 w-5\" />;"
+      },
+      {
+        "file": "components\\digital\\DigitalFilePreview.tsx",
+        "line": 256,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DigitalFilePreview.tsx",
+        "line": 378,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DigitalLicenseCard.tsx",
+        "line": 157,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DigitalProductRecommendations.tsx",
+        "line": 452,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DigitalProductsDashboard.tsx",
+        "line": 344,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DigitalProductsList.tsx",
+        "line": 532,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DigitalProductsListVirtualized.tsx",
+        "line": 91,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DigitalSubscriptionCard.tsx",
+        "line": 157,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DownloadInfoDisplay.tsx",
+        "line": 457,
+        "content": "<img"
+      },
+      {
+        "file": "components\\digital\\DynamicBundleSelector.tsx",
+        "line": 251,
+        "content": "<img"
+      },
+      {
+        "file": "components\\gamification\\GamificationDashboard.tsx",
+        "line": 243,
+        "content": "<img"
+      },
+      {
+        "file": "components\\gamification\\GamificationDashboard.tsx",
+        "line": 287,
+        "content": "<img"
+      },
+      {
+        "file": "components\\gamification\\GamificationDashboard.tsx",
+        "line": 346,
+        "content": "<img"
+      },
+      {
+        "file": "components\\marketplace\\BundleCard.tsx",
+        "line": 82,
+        "content": "<img"
+      },
+      {
+        "file": "components\\marketplace\\FavoritesManager.tsx",
+        "line": 334,
+        "content": "<img"
+      },
+      {
+        "file": "components\\marketplace\\MarketplaceFooter.tsx",
+        "line": 17,
+        "content": "<img"
+      },
+      {
+        "file": "components\\marketplace\\MarketplaceHeader.tsx",
+        "line": 27,
+        "content": "<img"
+      },
+      {
+        "file": "components\\marketplace\\MarketplaceHeader.tsx",
+        "line": 103,
+        "content": "<img"
+      },
+      {
+        "file": "components\\marketplace\\ProductCard.tsx",
+        "line": 185,
+        "content": "<img"
+      },
+      {
+        "file": "components\\marketplace\\ProductCardProfessional.tsx",
+        "line": 363,
+        "content": "<img"
+      },
+      {
+        "file": "components\\marketplace\\ProductComparison.tsx",
+        "line": 143,
+        "content": "<img"
+      },
+      {
+        "file": "components\\messaging\\ConversationComponent.tsx",
+        "line": 103,
+        "content": "return <Image className=\"h-4 w-4\" />;"
+      },
+      {
+        "file": "components\\messaging\\ConversationComponent.tsx",
+        "line": 169,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\alerts\\AlertsDashboard.tsx",
+        "line": 179,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\analytics\\PhysicalProductsDashboard.tsx",
+        "line": 262,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\BackorderManager.tsx",
+        "line": 429,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\barcode\\BarcodeGenerator.tsx",
+        "line": 227,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\customer\\MyOrders.tsx",
+        "line": 220,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\customer\\MyReturns.tsx",
+        "line": 243,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\customer\\MyReturns.tsx",
+        "line": 305,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\customer\\MyWarranties.tsx",
+        "line": 154,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\customer\\MyWarranties.tsx",
+        "line": 220,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\customer\\OrderDetailView.tsx",
+        "line": 154,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\customer\\OrderHistory.tsx",
+        "line": 175,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\customer\\OrderTracking.tsx",
+        "line": 319,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\customer\\PurchaseHistory.tsx",
+        "line": 328,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\customer\\ReturnDetailView.tsx",
+        "line": 214,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\PhysicalProductRecommendations.tsx",
+        "line": 360,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\PhysicalProductRecommendations.tsx",
+        "line": 520,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\PhysicalProductsList.tsx",
+        "line": 335,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\PreOrderManager.tsx",
+        "line": 400,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\ProductBundleBuilder.tsx",
+        "line": 421,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\ProductBundleBuilder.tsx",
+        "line": 508,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\returns\\ReturnRequestForm.tsx",
+        "line": 165,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\returns\\ReturnRequestForm.tsx",
+        "line": 294,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\returns\\ReturnsManagement.tsx",
+        "line": 169,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\StockMovementHistory.tsx",
+        "line": 479,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\VariantImageGallery.tsx",
+        "line": 96,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\VariantImageGallery.tsx",
+        "line": 269,
+        "content": "<ImageIcon className=\"h-4 w-4 text-muted-foreground\" />"
+      },
+      {
+        "file": "components\\physical\\VariantImageGallery.tsx",
+        "line": 382,
+        "content": "<ImageIcon className=\"h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50\" />"
+      },
+      {
+        "file": "components\\physical\\VariantImageGallery.tsx",
+        "line": 405,
+        "content": "<ImageCard"
+      },
+      {
+        "file": "components\\physical\\VariantImageGallery.tsx",
+        "line": 516,
+        "content": "<img"
+      },
+      {
+        "file": "components\\physical\\VariantManager.tsx",
+        "line": 456,
+        "content": "<img"
+      },
+      {
+        "file": "components\\pixels\\PixelInjector.tsx",
+        "line": 114,
+        "content": "noscript.innerHTML = `<img height=\"1\" width=\"1\" style=\"display:none\" src=\"https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1\"/>`;"
+      },
+      {
+        "file": "components\\pixels\\PixelInjector.tsx",
+        "line": 179,
+        "content": "noscript.innerHTML = `<img height=\"1\" width=\"1\" style=\"display:none;\" alt=\"\" src=\"https://ct.pinterest.com/v3/?event=init&tid=${pixelId}&noscript=1\" />`;"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 357,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 648,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 679,
+        "content": "<ImagePlus className=\"h-6 w-6 text-muted-foreground mb-1\" />"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistPreview.tsx",
+        "line": 87,
+        "content": "<ImageIcon className=\"h-5 w-5\" />"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistPreview.tsx",
+        "line": 99,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistPreview.tsx",
+        "line": 118,
+        "content": "<ImageIcon className=\"h-12 w-12 mx-auto mb-2 text-muted-foreground\" />"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistPreview.tsx",
+        "line": 135,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistPreview.tsx",
+        "line": 154,
+        "content": "<ImageIcon className=\"h-6 w-6 text-muted-foreground\" />"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistPreview.tsx",
+        "line": 255,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalBasicInfoForm.tsx",
+        "line": 486,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalBasicInfoForm.tsx",
+        "line": 520,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalBasicInfoForm.tsx",
+        "line": 563,
+        "content": "<ImageIcon className=\"h-6 w-6 text-muted-foreground mb-1\" />"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalPreview.tsx",
+        "line": 120,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalPreview.tsx",
+        "line": 129,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalBasicInfoForm.tsx",
+        "line": 196,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalBasicInfoForm.tsx",
+        "line": 224,
+        "content": "<ImagePlus className=\"h-8 w-8\" />"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalPreview.tsx",
+        "line": 34,
+        "content": "<ImageIcon className=\"h-5 w-5\" />"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalPreview.tsx",
+        "line": 42,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceBasicInfoForm.tsx",
+        "line": 364,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceBasicInfoForm.tsx",
+        "line": 392,
+        "content": "<ImagePlus className=\"h-8 w-8\" />"
+      },
+      {
+        "file": "components\\products\\create\\shared\\ProductSEOForm.tsx",
+        "line": 331,
+        "content": "<ImageIcon className=\"h-3 w-3\" />"
+      },
+      {
+        "file": "components\\products\\create\\shared\\ProductSEOForm.tsx",
+        "line": 344,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\CreateProductDialog.tsx",
+        "line": 169,
+        "content": "<ImageUpload"
+      },
+      {
+        "file": "components\\products\\EditProductDialog.tsx",
+        "line": 184,
+        "content": "<ImageUpload"
+      },
+      {
+        "file": "components\\products\\ImageUpload.tsx",
+        "line": 97,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\ImageUpload.tsx",
+        "line": 117,
+        "content": "<ImageIcon className=\"h-12 w-12 text-muted-foreground\" />"
+      },
+      {
+        "file": "components\\products\\ProductCreationWizard.tsx",
+        "line": 301,
+        "content": "<ImageUpload"
+      },
+      {
+        "file": "components\\products\\ProductCreationWizard.tsx",
+        "line": 346,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVisualTab.tsx",
+        "line": 184,
+        "content": "<ImageIcon className=\"h-5 w-5\" />"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVisualTab.tsx",
+        "line": 210,
+        "content": "<ImageUpload"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVisualTab.tsx",
+        "line": 242,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVisualTab.tsx",
+        "line": 256,
+        "content": "<Images className=\"h-5 w-5\" />"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVisualTab.tsx",
+        "line": 282,
+        "content": "<ImageUpload"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVisualTab.tsx",
+        "line": 297,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVisualTab.tsx",
+        "line": 454,
+        "content": "<img"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVisualTab.tsx",
+        "line": 461,
+        "content": "<ImageIcon className=\"h-12 w-12 mx-auto mb-2\" aria-hidden=\"true\" />"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVisualTab.tsx",
+        "line": 498,
+        "content": "<img"
+      },
+      {
+        "file": "components\\returns\\ReturnRequestForm.tsx",
+        "line": 225,
+        "content": "<img"
+      },
+      {
+        "file": "components\\reviews\\ReviewFilter.tsx",
+        "line": 61,
+        "content": "<Image className=\"w-4 h-4 mr-1\" />"
+      },
+      {
+        "file": "components\\reviews\\ReviewForm.tsx",
+        "line": 200,
+        "content": "<img"
+      },
+      {
+        "file": "components\\service\\BookingInfoDisplay.tsx",
+        "line": 533,
+        "content": "<img"
+      },
+      {
+        "file": "components\\service\\ServiceRecommendations.tsx",
+        "line": 338,
+        "content": "<img"
+      },
+      {
+        "file": "components\\service\\ServiceRecommendations.tsx",
+        "line": 498,
+        "content": "<img"
+      },
+      {
+        "file": "components\\settings\\StoreSettings.tsx",
+        "line": 248,
+        "content": "<img"
+      },
+      {
+        "file": "components\\shared\\OptimizedImg.tsx",
+        "line": 3,
+        "content": "* Utilise ce composant au lieu de <img> natif"
+      },
+      {
+        "file": "components\\shared\\OptimizedImg.tsx",
+        "line": 36,
+        "content": "<img"
+      },
+      {
+        "file": "components\\shared\\ProductImages.tsx",
+        "line": 89,
+        "content": "<ImageIcon className=\"h-24 w-24 text-muted-foreground/20\" />"
+      },
+      {
+        "file": "components\\shared\\ProductImages.tsx",
+        "line": 92,
+        "content": "<img"
+      },
+      {
+        "file": "components\\shared\\ProductImages.tsx",
+        "line": 162,
+        "content": "<img"
+      },
+      {
+        "file": "components\\shared\\ProductImages.tsx",
+        "line": 196,
+        "content": "<img"
+      },
+      {
+        "file": "components\\shared\\ProductImages.tsx",
+        "line": 276,
+        "content": "<ImageIcon className=\"h-12 w-12 text-muted-foreground/20\" />"
+      },
+      {
+        "file": "components\\shared\\ProductImages.tsx",
+        "line": 279,
+        "content": "<img"
+      },
+      {
+        "file": "components\\store\\StoreDetails.tsx",
+        "line": 367,
+        "content": "<img"
+      },
+      {
+        "file": "components\\store\\StoreDetails.tsx",
+        "line": 792,
+        "content": "<img"
+      },
+      {
+        "file": "components\\store\\StoreDetails.tsx",
+        "line": 802,
+        "content": "<img"
+      },
+      {
+        "file": "components\\store\\StoreForm.tsx",
+        "line": 636,
+        "content": "<ImageIcon className=\"h-4 w-4\" />"
+      },
+      {
+        "file": "components\\store\\StoreForm.tsx",
+        "line": 868,
+        "content": "<ImageIcon className=\"h-4 w-4\" />"
+      },
+      {
+        "file": "components\\store\\StoreImageUpload.tsx",
+        "line": 209,
+        "content": "<img"
+      },
+      {
+        "file": "components\\store\\StoreImageUpload.tsx",
+        "line": 275,
+        "content": "<ImageIcon className=\"h-6 w-6 text-muted-foreground\" />"
+      },
+      {
+        "file": "components\\storefront\\StoreHeader.tsx",
+        "line": 62,
+        "content": "<img"
+      },
+      {
+        "file": "components\\storefront\\StoreHeader.tsx",
+        "line": 89,
+        "content": "<img"
+      },
+      {
+        "file": "components\\ui\\file-upload-enhanced.tsx",
+        "line": 392,
+        "content": "<ImagePlus className=\"h-4 w-4 mr-2\" />"
+      },
+      {
+        "file": "components\\ui\\file-upload-enhanced.tsx",
+        "line": 423,
+        "content": "<img"
+      },
+      {
+        "file": "components\\ui\\image-upload-helper.tsx",
+        "line": 152,
+        "content": "): Promise<ImageValidationResult> {"
+      },
+      {
+        "file": "components\\ui\\image-upload.tsx",
+        "line": 276,
+        "content": "<ImageIcon className=\"h-6 w-6 text-gray-600\" />"
+      },
+      {
+        "file": "components\\ui\\image-upload.tsx",
+        "line": 386,
+        "content": "<img"
+      },
+      {
+        "file": "components\\ui\\lazy-image.tsx",
+        "line": 133,
+        "content": "<img"
+      },
+      {
+        "file": "components\\ui\\LazyImage.tsx",
+        "line": 219,
+        "content": "<img"
+      },
+      {
+        "file": "components\\ui\\LazyImage.tsx",
+        "line": 297,
+        "content": "<img"
+      },
+      {
+        "file": "components\\ui\\OptimizedImage.tsx",
+        "line": 234,
+        "content": "<img"
+      },
+      {
+        "file": "components\\ui\\ProductImageGallery.tsx",
+        "line": 135,
+        "content": "<img"
+      },
+      {
+        "file": "components\\ui\\ProductImageGallery.tsx",
+        "line": 216,
+        "content": "<img"
+      },
+      {
+        "file": "components\\ui\\ProductImageGallery.tsx",
+        "line": 231,
+        "content": "<img"
+      },
+      {
+        "file": "components\\ui\\ResponsiveProductImage.tsx",
+        "line": 112,
+        "content": "<img"
+      },
+      {
+        "file": "components\\upsell\\OneClickUpsell.tsx",
+        "line": 239,
+        "content": "<img"
+      },
+      {
+        "file": "lib\\image-transform.ts",
+        "line": 162,
+        "content": "options: Omit<ImageTransformOptions, 'width'> = {}"
+      },
+      {
+        "file": "pages\\admin\\AdminReturnManagement.tsx",
+        "line": 693,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\admin\\AdminSecurity.tsx",
+        "line": 190,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\AffiliateDashboard.tsx",
+        "line": 76,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\Auth.tsx",
+        "line": 295,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\checkout\\Checkout.tsx",
+        "line": 686,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\Checkout.tsx",
+        "line": 1501,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\Checkout.tsx",
+        "line": 1629,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\courses\\MyCourses.tsx",
+        "line": 92,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\courses\\MyCourses.tsx",
+        "line": 181,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\customer\\CustomerMyWishlist.tsx",
+        "line": 637,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\customer\\MyCourses.tsx",
+        "line": 456,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\customer\\MyDownloads.tsx",
+        "line": 318,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\customer\\MyFavorites.tsx",
+        "line": 433,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\customer\\MyFavorites.tsx",
+        "line": 514,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\customer\\SharedWishlist.tsx",
+        "line": 138,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\dashboard\\StoreAffiliateManagement.tsx",
+        "line": 244,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\dashboard\\StoreAffiliateManagement.tsx",
+        "line": 371,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\digital\\BundleDetail.tsx",
+        "line": 120,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\digital\\BundleDetail.tsx",
+        "line": 179,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\digital\\DigitalProductDetail.tsx",
+        "line": 299,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\digital\\DigitalProductsCompare.tsx",
+        "line": 298,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\digital\\DigitalProductsList.tsx",
+        "line": 666,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\digital\\DigitalProductUpdatesDashboard.tsx",
+        "line": 162,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\digital\\DigitalProductUpdatesDashboard.tsx",
+        "line": 216,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\digital\\MyDownloads.tsx",
+        "line": 228,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\disputes\\DisputeDetail.tsx",
+        "line": 521,
+        "content": "<ImageIcon className=\"h-4 w-4 text-primary\" />"
+      },
+      {
+        "file": "pages\\orders\\OrderMessaging.tsx",
+        "line": 517,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\orders\\OrderMessaging.tsx",
+        "line": 572,
+        "content": "<ImageIcon className=\"h-4 w-4 text-primary\" />"
+      },
+      {
+        "file": "pages\\Products.tsx",
+        "line": 1067,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\StoreAffiliates.tsx",
+        "line": 785,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\vendor\\VendorMessaging.tsx",
+        "line": 569,
+        "content": "<img"
+      },
+      {
+        "file": "pages\\vendor\\VendorMessaging.tsx",
+        "line": 706,
+        "content": "<img"
+      }
+    ],
+    "inputsWithoutLabel": [
+      {
+        "file": "components\\admin\\customization\\ContentManagementSection.tsx",
+        "line": 282,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\ContentManagementSection.tsx",
+        "line": 490,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\ContentManagementSection.tsx",
+        "line": 500,
+        "content": "<input"
+      },
+      {
+        "file": "components\\admin\\customization\\ContentManagementSection.tsx",
+        "line": 520,
+        "content": "<input"
+      },
+      {
+        "file": "components\\admin\\customization\\ContentManagementSection.tsx",
+        "line": 615,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\ContentManagementSection.tsx",
+        "line": 631,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\ContentManagementSection.tsx",
+        "line": 647,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\DesignBrandingSection.tsx",
+        "line": 589,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\DesignBrandingSection.tsx",
+        "line": 596,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\DesignBrandingSection.tsx",
+        "line": 684,
+        "content": "<input"
+      },
+      {
+        "file": "components\\admin\\customization\\DesignBrandingSection.tsx",
+        "line": 738,
+        "content": "<input"
+      },
+      {
+        "file": "components\\admin\\customization\\DesignBrandingSection.tsx",
+        "line": 792,
+        "content": "<input"
+      },
+      {
+        "file": "components\\admin\\customization\\DesignBrandingSection.tsx",
+        "line": 839,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\DesignBrandingSection.tsx",
+        "line": 854,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\FeaturesSection.tsx",
+        "line": 495,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 209,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 279,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 300,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 321,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 393,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 414,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 434,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 477,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 486,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 495,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 528,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 536,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 570,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 579,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 587,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 624,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 657,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 691,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 709,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 754,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 786,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\IntegrationsSection.tsx",
+        "line": 817,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\LandingPageCustomizationSection.tsx",
+        "line": 403,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\LandingPageCustomizationSection.tsx",
+        "line": 447,
+        "content": "<input"
+      },
+      {
+        "file": "components\\admin\\customization\\LandingPageCustomizationSection.tsx",
+        "line": 478,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\LandingPageCustomizationSection.tsx",
+        "line": 484,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\LandingPageCustomizationSection.tsx",
+        "line": 494,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\LandingPageCustomizationSection.tsx",
+        "line": 503,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\LandingPageCustomizationSection.tsx",
+        "line": 513,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PagesCustomizationSection.tsx",
+        "line": 2137,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PagesCustomizationSection.tsx",
+        "line": 2159,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PagesCustomizationSection.tsx",
+        "line": 2165,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PagesCustomizationSection.tsx",
+        "line": 2196,
+        "content": "<input"
+      },
+      {
+        "file": "components\\admin\\customization\\PagesCustomizationSection.tsx",
+        "line": 2250,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PagesCustomizationSection.tsx",
+        "line": 2260,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PagesCustomizationSection.tsx",
+        "line": 2272,
+        "content": "<input"
+      },
+      {
+        "file": "components\\admin\\customization\\PlatformSettingsSection.tsx",
+        "line": 59,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PlatformSettingsSection.tsx",
+        "line": 83,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PlatformSettingsSection.tsx",
+        "line": 119,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PlatformSettingsSection.tsx",
+        "line": 169,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PlatformSettingsSection.tsx",
+        "line": 196,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PlatformSettingsSection.tsx",
+        "line": 235,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PlatformSettingsSection.tsx",
+        "line": 263,
+        "content": "<input"
+      },
+      {
+        "file": "components\\admin\\customization\\PlatformSettingsSection.tsx",
+        "line": 305,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PlatformSettingsSection.tsx",
+        "line": 333,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PlatformSettingsSection.tsx",
+        "line": 371,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PlatformSettingsSection.tsx",
+        "line": 398,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\PlatformSettingsSection.tsx",
+        "line": 425,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\SecuritySection.tsx",
+        "line": 186,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\customization\\SecuritySection.tsx",
+        "line": 275,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\admin\\ReviewModerationTable.tsx",
+        "line": 118,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\affiliate\\CreateAffiliateLinkDialog.tsx",
+        "line": 157,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\affiliate\\CreateAffiliateLinkDialog.tsx",
+        "line": 268,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\affiliate\\CreateAffiliateLinkDialog.tsx",
+        "line": 280,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\affiliate\\CreateAffiliateLinkDialog.tsx",
+        "line": 292,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\affiliate\\RegistrationDialog.tsx",
+        "line": 194,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\affiliate\\RegistrationDialog.tsx",
+        "line": 216,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\affiliate\\RegistrationDialog.tsx",
+        "line": 236,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\affiliate\\RegistrationDialog.tsx",
+        "line": 260,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\affiliate\\ShortLinkManager.tsx",
+        "line": 101,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\affiliate\\ShortLinkManager.tsx",
+        "line": 116,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\affiliate\\StoreAffiliateDashboard.tsx",
+        "line": 233,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\artist\\CertificateUploader.tsx",
+        "line": 352,
+        "content": "<input"
+      },
+      {
+        "file": "components\\auth\\TwoFactorAuth.tsx",
+        "line": 315,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\auth\\TwoFactorAuth.tsx",
+        "line": 331,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\cart\\CartItem.tsx",
+        "line": 67,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\cart\\CartSummary.tsx",
+        "line": 111,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\checkout\\CouponInput.tsx",
+        "line": 213,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\checkout\\GiftCardInput.tsx",
+        "line": 136,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\community\\CommunityPostForm.tsx",
+        "line": 197,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\assignments\\AssignmentGradingForm.tsx",
+        "line": 147,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\assignments\\AssignmentGradingForm.tsx",
+        "line": 171,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\assignments\\AssignmentSubmissionForm.tsx",
+        "line": 232,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\BulkCourseUpdate.tsx",
+        "line": 442,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\CourseAccessManager.tsx",
+        "line": 300,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\CourseAccessManager.tsx",
+        "line": 529,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\CourseBundleBuilder.tsx",
+        "line": 365,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\CourseBundleBuilder.tsx",
+        "line": 379,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\CourseBundleBuilder.tsx",
+        "line": 423,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\CoursePackageManager.tsx",
+        "line": 689,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\CoursePackageManager.tsx",
+        "line": 697,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\CoursesList.tsx",
+        "line": 337,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseAdvancedConfig.tsx",
+        "line": 65,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseAdvancedConfig.tsx",
+        "line": 95,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseAdvancedConfig.tsx",
+        "line": 168,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseAdvancedConfig.tsx",
+        "line": 204,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseAdvancedConfig.tsx",
+        "line": 255,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseAdvancedConfig.tsx",
+        "line": 311,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseAffiliateSettings.tsx",
+        "line": 191,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseAffiliateSettings.tsx",
+        "line": 230,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseAffiliateSettings.tsx",
+        "line": 283,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseAffiliateSettings.tsx",
+        "line": 301,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseBasicInfoForm.tsx",
+        "line": 203,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseBasicInfoForm.tsx",
+        "line": 237,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseBasicInfoForm.tsx",
+        "line": 496,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseBasicInfoForm.tsx",
+        "line": 519,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseBasicInfoForm.tsx",
+        "line": 726,
+        "content": "<input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseCurriculumBuilder.tsx",
+        "line": 229,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseCurriculumBuilder.tsx",
+        "line": 320,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseCurriculumBuilder.tsx",
+        "line": 380,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseFAQForm.tsx",
+        "line": 220,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CoursePixelsConfig.tsx",
+        "line": 196,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CoursePixelsConfig.tsx",
+        "line": 232,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CoursePixelsConfig.tsx",
+        "line": 268,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CoursePixelsConfig.tsx",
+        "line": 304,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseSEOForm.tsx",
+        "line": 180,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseSEOForm.tsx",
+        "line": 220,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseSEOForm.tsx",
+        "line": 257,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\CourseSEOForm.tsx",
+        "line": 285,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\VideoUploader.tsx",
+        "line": 299,
+        "content": "<input"
+      },
+      {
+        "file": "components\\courses\\create\\VideoUploader.tsx",
+        "line": 400,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\VideoUploader.tsx",
+        "line": 428,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\create\\VideoUploader.tsx",
+        "line": 456,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\drip\\DripContentConfig.tsx",
+        "line": 200,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\EnrollmentHistory.tsx",
+        "line": 399,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\quiz\\QuizBuilder.tsx",
+        "line": 149,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\quiz\\QuizBuilder.tsx",
+        "line": 161,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\quiz\\QuizBuilder.tsx",
+        "line": 238,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\quiz\\QuizBuilder.tsx",
+        "line": 253,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\quiz\\QuizBuilder.tsx",
+        "line": 296,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\quiz\\QuizTaker.tsx",
+        "line": 217,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\courses\\StudentsDashboard.tsx",
+        "line": 341,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\customer\\LicensesTab.tsx",
+        "line": 147,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\customers\\CustomerFilters.tsx",
+        "line": 38,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\BulkDigitalUpdate.tsx",
+        "line": 482,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\CombinedCouponInput.tsx",
+        "line": 137,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\customer\\DigitalPreferences.tsx",
+        "line": 203,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\customer\\MyDigitalProducts.tsx",
+        "line": 145,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\customer\\MyDownloads.tsx",
+        "line": 90,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\CustomerAccessManager.tsx",
+        "line": 315,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\CustomerAccessManager.tsx",
+        "line": 443,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\CustomerAccessManager.tsx",
+        "line": 554,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\DigitalBundleManager.tsx",
+        "line": 280,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\DigitalBundleManager.tsx",
+        "line": 314,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\DigitalBundleManager.tsx",
+        "line": 373,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\DigitalBundleManager.tsx",
+        "line": 504,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\DigitalProductsList.tsx",
+        "line": 322,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\DownloadHistory.tsx",
+        "line": 340,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileCategoryForm.tsx",
+        "line": 121,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileCategoryForm.tsx",
+        "line": 132,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileCategoryForm.tsx",
+        "line": 168,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileCategoryForm.tsx",
+        "line": 201,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 126,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 156,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 170,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 182,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 195,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 212,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 224,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 238,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 253,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 266,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 281,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 296,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 310,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 346,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 361,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 376,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 392,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileMetadataEditor.tsx",
+        "line": 403,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileUploadAdvanced.tsx",
+        "line": 224,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileUploadAdvanced.tsx",
+        "line": 266,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileVersionForm.tsx",
+        "line": 91,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileVersionForm.tsx",
+        "line": 104,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileVersionForm.tsx",
+        "line": 116,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileVersionForm.tsx",
+        "line": 129,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\files\\FileVersionForm.tsx",
+        "line": 143,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\LicenseGenerator.tsx",
+        "line": 181,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\LicenseManagementDashboard.tsx",
+        "line": 235,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\LicenseManagementDashboard.tsx",
+        "line": 575,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\SubscriptionManagement.tsx",
+        "line": 154,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\SubscriptionManagement.tsx",
+        "line": 209,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\updates\\CreateUpdateDialog.tsx",
+        "line": 329,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\updates\\CreateUpdateDialog.tsx",
+        "line": 389,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\updates\\CreateUpdateDialog.tsx",
+        "line": 429,
+        "content": "<input"
+      },
+      {
+        "file": "components\\digital\\webhooks\\WebhookForm.tsx",
+        "line": 149,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\digital\\webhooks\\WebhookForm.tsx",
+        "line": 160,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\email\\ABTestSetup.tsx",
+        "line": 133,
+        "content": "<input"
+      },
+      {
+        "file": "components\\email\\ABTestSetup.tsx",
+        "line": 194,
+        "content": "<input"
+      },
+      {
+        "file": "components\\email\\ABTestSetup.tsx",
+        "line": 226,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\email\\EmailTemplateEditor.tsx",
+        "line": 144,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\email\\EmailTemplateEditor.tsx",
+        "line": 196,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\email\\SegmentPreview.tsx",
+        "line": 167,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\email\\SequenceStepEditor.tsx",
+        "line": 126,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\email\\SequenceStepEditor.tsx",
+        "line": 180,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\email\\UnsubscribePage.tsx",
+        "line": 120,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\email\\WorkflowActionEditor.tsx",
+        "line": 102,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\email\\WorkflowActionEditor.tsx",
+        "line": 137,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\email\\WorkflowActionEditor.tsx",
+        "line": 153,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\email\\WorkflowActionEditor.tsx",
+        "line": 168,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\email\\WorkflowTriggerEditor.tsx",
+        "line": 89,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\email\\WorkflowTriggerEditor.tsx",
+        "line": 102,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\import-export\\ImportExportManager.tsx",
+        "line": 268,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\import-export\\ImportExportManager.tsx",
+        "line": 330,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\inventory\\StockAdjustmentDialog.tsx",
+        "line": 158,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\inventory\\StockAdjustmentDialog.tsx",
+        "line": 172,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\live-streaming\\NativeStreamingPlayer.tsx",
+        "line": 252,
+        "content": "<input"
+      },
+      {
+        "file": "components\\marketplace\\AdvancedFilters.tsx",
+        "line": 162,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\marketplace\\FavoritesManager.tsx",
+        "line": 246,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\marketplace\\PriceStockAlertButton.tsx",
+        "line": 264,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\marketplace\\SearchAutocomplete.tsx",
+        "line": 114,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\messaging\\ConversationComponent.tsx",
+        "line": 625,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\orders\\CreateOrderDialog.tsx",
+        "line": 286,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\orders\\CreateOrderDialog.tsx",
+        "line": 298,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\orders\\OrderEditDialog.tsx",
+        "line": 308,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\orders\\OrderEditDialog.tsx",
+        "line": 319,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\orders\\OrderFilters.tsx",
+        "line": 34,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\payments\\AdvancedPaymentsComponent.tsx",
+        "line": 554,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\payments\\AdvancedPaymentsComponent.tsx",
+        "line": 1243,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\payments\\AdvancedPaymentsComponent.tsx",
+        "line": 1286,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\payments\\CreatePaymentDialog.tsx",
+        "line": 200,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\payments\\CreatePaymentDialog.tsx",
+        "line": 247,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\payments\\MonerooPaymentExample.tsx",
+        "line": 60,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\payments\\MonerooPaymentExample.tsx",
+        "line": 71,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\payments\\PaymentFilters.tsx",
+        "line": 27,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\payments\\PaymentFiltersDashboard.tsx",
+        "line": 153,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\backorders\\BackordersManager.tsx",
+        "line": 591,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\backorders\\BackordersManager.tsx",
+        "line": 637,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\backorders\\BackordersManager.tsx",
+        "line": 646,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\backorders\\BackordersManager.tsx",
+        "line": 654,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\barcode\\BarcodeGenerator.tsx",
+        "line": 154,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\batch-shipping\\BatchShippingManagement.tsx",
+        "line": 143,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\batch-shipping\\BatchShippingManagement.tsx",
+        "line": 453,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\BulkInventoryUpdate.tsx",
+        "line": 353,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\BulkInventoryUpdate.tsx",
+        "line": 434,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\BulkInventoryUpdate.tsx",
+        "line": 503,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\bundles\\BundlesManager.tsx",
+        "line": 459,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\bundles\\BundlesManager.tsx",
+        "line": 505,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\bundles\\BundlesManager.tsx",
+        "line": 556,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\bundles\\BundlesManager.tsx",
+        "line": 569,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\bundles\\BundlesManager.tsx",
+        "line": 624,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\bundles\\BundlesManager.tsx",
+        "line": 712,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\cost-optimization\\ProductCostForm.tsx",
+        "line": 95,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\cost-optimization\\ProductCostForm.tsx",
+        "line": 107,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\cost-optimization\\ProductCostForm.tsx",
+        "line": 121,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\cost-optimization\\ProductCostForm.tsx",
+        "line": 132,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\cost-optimization\\ProductCostForm.tsx",
+        "line": 146,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\cost-optimization\\ProductCostForm.tsx",
+        "line": 157,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\cost-optimization\\ProductCostForm.tsx",
+        "line": 168,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\cost-optimization\\ProductCostForm.tsx",
+        "line": 182,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\cost-optimization\\ProductCostForm.tsx",
+        "line": 193,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\cost-optimization\\ProductCostForm.tsx",
+        "line": 204,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\cost-optimization\\ProductCostForm.tsx",
+        "line": 217,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\cost-optimization\\ProductCostForm.tsx",
+        "line": 229,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\cost-optimization\\ProductCostForm.tsx",
+        "line": 241,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\currencies\\CurrencyConverter.tsx",
+        "line": 132,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\currencies\\RegionalPriceManager.tsx",
+        "line": 248,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\currencies\\RegionalPriceManager.tsx",
+        "line": 260,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\currencies\\RegionalPriceManager.tsx",
+        "line": 272,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\customer\\PurchaseHistory.tsx",
+        "line": 234,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\forecasting\\DemandForecastingDashboard.tsx",
+        "line": 408,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\inventory\\InventoryCSVManager.tsx",
+        "line": 206,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\inventory\\StockAlerts.tsx",
+        "line": 219,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\inventory\\WarehouseManager.tsx",
+        "line": 281,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\inventory\\WarehouseManager.tsx",
+        "line": 468,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\inventory\\WarehouseManager.tsx",
+        "line": 526,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\inventory\\WarehouseManager.tsx",
+        "line": 556,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\inventory\\WarehouseManager.tsx",
+        "line": 591,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\KitAssemblies.tsx",
+        "line": 85,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\KitAssemblies.tsx",
+        "line": 114,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\KitComponents.tsx",
+        "line": 182,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\KitComponents.tsx",
+        "line": 332,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\KitComponents.tsx",
+        "line": 344,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\KitComponents.tsx",
+        "line": 355,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\ProductKitsManagement.tsx",
+        "line": 221,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\ProductKitsManagement.tsx",
+        "line": 465,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\ProductKitsManagement.tsx",
+        "line": 476,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\ProductKitsManagement.tsx",
+        "line": 520,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\ProductKitsManagement.tsx",
+        "line": 531,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\ProductKitsManagement.tsx",
+        "line": 546,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\ProductKitsManagement.tsx",
+        "line": 559,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\ProductKitsManagement.tsx",
+        "line": 572,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\ProductKitsManagement.tsx",
+        "line": 588,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\kits\\ProductKitsManagement.tsx",
+        "line": 599,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\lots\\LotForm.tsx",
+        "line": 190,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\lots\\LotForm.tsx",
+        "line": 208,
+        "content": "<Input type=\"date\" {...field} />"
+      },
+      {
+        "file": "components\\physical\\lots\\LotForm.tsx",
+        "line": 222,
+        "content": "<Input type=\"date\" {...field} />"
+      },
+      {
+        "file": "components\\physical\\lots\\LotForm.tsx",
+        "line": 236,
+        "content": "<Input type=\"date\" {...field} />"
+      },
+      {
+        "file": "components\\physical\\lots\\LotForm.tsx",
+        "line": 253,
+        "content": "<Input type=\"date\" {...field} />"
+      },
+      {
+        "file": "components\\physical\\lots\\LotForm.tsx",
+        "line": 267,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\notifications\\PriceAlertForm.tsx",
+        "line": 160,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\notifications\\PriceAlertForm.tsx",
+        "line": 175,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\notifications\\StockAlertForm.tsx",
+        "line": 160,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\PhysicalProductsList.tsx",
+        "line": 265,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\preorders\\PreOrdersManager.tsx",
+        "line": 194,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\ProductBundleBuilder.tsx",
+        "line": 456,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\ProductBundleBuilder.tsx",
+        "line": 541,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\ProductBundleBuilder.tsx",
+        "line": 608,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\ProductBundleBuilder.tsx",
+        "line": 720,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\ProductBundleBuilder.tsx",
+        "line": 785,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\promotions\\PromotionsManager.tsx",
+        "line": 720,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\promotions\\PromotionsManager.tsx",
+        "line": 780,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\promotions\\PromotionsManager.tsx",
+        "line": 864,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\promotions\\PromotionsManager.tsx",
+        "line": 878,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\promotions\\PromotionsManager.tsx",
+        "line": 893,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\promotions\\PromotionsManager.tsx",
+        "line": 913,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\returns\\ReturnRequestForm.tsx",
+        "line": 260,
+        "content": "<input"
+      },
+      {
+        "file": "components\\physical\\serial-tracking\\SerialNumberForm.tsx",
+        "line": 217,
+        "content": "<Input type=\"date\" {...field} />"
+      },
+      {
+        "file": "components\\physical\\serial-tracking\\SerialNumberForm.tsx",
+        "line": 231,
+        "content": "<Input type=\"date\" {...field} />"
+      },
+      {
+        "file": "components\\physical\\serial-tracking\\SerialNumberForm.tsx",
+        "line": 245,
+        "content": "<Input type=\"date\" {...field} />"
+      },
+      {
+        "file": "components\\physical\\serial-tracking\\SerialNumberForm.tsx",
+        "line": 259,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\serial-tracking\\SerialNumbersManager.tsx",
+        "line": 202,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\shipping\\CarrierRateCalculator.tsx",
+        "line": 101,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\shipping\\CarrierRateCalculator.tsx",
+        "line": 123,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\shipping\\CarrierSettings.tsx",
+        "line": 262,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\shipping\\CarrierSettings.tsx",
+        "line": 282,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\shipping\\ShippingLabelGenerator.tsx",
+        "line": 194,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\shipping\\ShippingLabelGenerator.tsx",
+        "line": 233,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\SizeChartBuilder.tsx",
+        "line": 370,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\SizeChartBuilder.tsx",
+        "line": 406,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\SizeChartBuilder.tsx",
+        "line": 455,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\StockMovementHistory.tsx",
+        "line": 380,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\AutoReorderRules.tsx",
+        "line": 253,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\AutoReorderRules.tsx",
+        "line": 513,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\AutoReorderRules.tsx",
+        "line": 546,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\AutoReorderRules.tsx",
+        "line": 560,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\AutoReorderRules.tsx",
+        "line": 574,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SupplierOrders.tsx",
+        "line": 306,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SupplierOrders.tsx",
+        "line": 797,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SupplierOrders.tsx",
+        "line": 810,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SupplierOrders.tsx",
+        "line": 824,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SupplierProducts.tsx",
+        "line": 283,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SupplierProducts.tsx",
+        "line": 592,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SupplierProducts.tsx",
+        "line": 615,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SupplierProducts.tsx",
+        "line": 628,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SupplierProducts.tsx",
+        "line": 659,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SupplierProducts.tsx",
+        "line": 676,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SupplierProducts.tsx",
+        "line": 690,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SupplierProducts.tsx",
+        "line": 705,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SuppliersManagement.tsx",
+        "line": 256,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SuppliersManagement.tsx",
+        "line": 558,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SuppliersManagement.tsx",
+        "line": 579,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SuppliersManagement.tsx",
+        "line": 601,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SuppliersManagement.tsx",
+        "line": 623,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SuppliersManagement.tsx",
+        "line": 652,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\suppliers\\SuppliersManagement.tsx",
+        "line": 710,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\VariantImageGallery.tsx",
+        "line": 436,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\VariantManager.tsx",
+        "line": 131,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\VariantManager.tsx",
+        "line": 161,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\VariantManager.tsx",
+        "line": 583,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\VariantManager.tsx",
+        "line": 615,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\VariantManager.tsx",
+        "line": 626,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\VariantManager.tsx",
+        "line": 640,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\VariantManager.tsx",
+        "line": 659,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\VariantManager.tsx",
+        "line": 674,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\VariantManager.tsx",
+        "line": 690,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\warehouses\\WarehouseInventory.tsx",
+        "line": 178,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\warehouses\\WarehousesManagement.tsx",
+        "line": 289,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\warehouses\\WarehousesManagement.tsx",
+        "line": 500,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\warehouses\\WarehousesManagement.tsx",
+        "line": 531,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\warehouses\\WarehousesManagement.tsx",
+        "line": 588,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\warehouses\\WarehousesManagement.tsx",
+        "line": 607,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\warehouses\\WarehouseTransfers.tsx",
+        "line": 256,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\warehouses\\WarehouseTransfers.tsx",
+        "line": 479,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\warehouses\\WarehouseTransfers.tsx",
+        "line": 488,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\warehouses\\WarehouseTransfers.tsx",
+        "line": 498,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\warranties\\WarrantiesManagement.tsx",
+        "line": 229,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\warranties\\WarrantiesManagement.tsx",
+        "line": 259,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\warranties\\WarrantiesManagement.tsx",
+        "line": 392,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\warranties\\WarrantiesManagement.tsx",
+        "line": 416,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\physical\\webhooks\\WebhookForm.tsx",
+        "line": 138,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\pixels\\CreatePixelDialog.tsx",
+        "line": 77,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\pixels\\CreatePixelDialog.tsx",
+        "line": 88,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\pixels\\EditPixelDialog.tsx",
+        "line": 73,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\pixels\\EditPixelDialog.tsx",
+        "line": 84,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\AIContentGenerator.tsx",
+        "line": 203,
+        "content": "<Input value={productInfo.name} disabled className=\"mt-2\" />"
+      },
+      {
+        "file": "components\\products\\AIContentGenerator.tsx",
+        "line": 207,
+        "content": "<Input value={productInfo.type} disabled className=\"mt-2\" />"
+      },
+      {
+        "file": "components\\products\\AIContentGenerator.tsx",
+        "line": 214,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\AIContentGenerator.tsx",
+        "line": 361,
+        "content": "<Input value={generatedContent.metaTitle} readOnly className=\"mt-1\" />"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistAuthenticationConfig.tsx",
+        "line": 83,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistAuthenticationConfig.tsx",
+        "line": 116,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistAuthenticationConfig.tsx",
+        "line": 127,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 411,
+        "content": "<input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 426,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 453,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 470,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 485,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 500,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 515,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 534,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 546,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 561,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 576,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 593,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 610,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 629,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 685,
+        "content": "<input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 731,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistBasicInfoForm.tsx",
+        "line": 746,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistShippingConfig.tsx",
+        "line": 60,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistShippingConfig.tsx",
+        "line": 136,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistSpecificForms.tsx",
+        "line": 36,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistSpecificForms.tsx",
+        "line": 49,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistSpecificForms.tsx",
+        "line": 63,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistSpecificForms.tsx",
+        "line": 95,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistSpecificForms.tsx",
+        "line": 108,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistSpecificForms.tsx",
+        "line": 121,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistSpecificForms.tsx",
+        "line": 197,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistSpecificForms.tsx",
+        "line": 210,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistSpecificForms.tsx",
+        "line": 223,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistSpecificForms.tsx",
+        "line": 246,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistSpecificForms.tsx",
+        "line": 253,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistSpecificForms.tsx",
+        "line": 286,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistSpecificForms.tsx",
+        "line": 299,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\artist\\ArtistSpecificForms.tsx",
+        "line": 325,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalAffiliateSettings.tsx",
+        "line": 178,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalAffiliateSettings.tsx",
+        "line": 211,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalAffiliateSettings.tsx",
+        "line": 267,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalBasicInfoForm.tsx",
+        "line": 134,
+        "content": "<input"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalBasicInfoForm.tsx",
+        "line": 180,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalBasicInfoForm.tsx",
+        "line": 309,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalBasicInfoForm.tsx",
+        "line": 332,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalBasicInfoForm.tsx",
+        "line": 602,
+        "content": "<input"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalFilesUploader.tsx",
+        "line": 131,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalFilesUploader.tsx",
+        "line": 184,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\digital\\DigitalFilesUploader.tsx",
+        "line": 235,
+        "content": "<input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalBasicInfoForm.tsx",
+        "line": 106,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalBasicInfoForm.tsx",
+        "line": 150,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalBasicInfoForm.tsx",
+        "line": 163,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalBasicInfoForm.tsx",
+        "line": 177,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalBasicInfoForm.tsx",
+        "line": 228,
+        "content": "<input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalBasicInfoForm.tsx",
+        "line": 258,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalInventoryConfig.tsx",
+        "line": 48,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalInventoryConfig.tsx",
+        "line": 62,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalInventoryConfig.tsx",
+        "line": 74,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalShippingConfig.tsx",
+        "line": 64,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalShippingConfig.tsx",
+        "line": 115,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalShippingConfig.tsx",
+        "line": 135,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalShippingConfig.tsx",
+        "line": 155,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalVariantsBuilder.tsx",
+        "line": 206,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalVariantsBuilder.tsx",
+        "line": 229,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalVariantsBuilder.tsx",
+        "line": 272,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalVariantsBuilder.tsx",
+        "line": 280,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\physical\\PhysicalVariantsBuilder.tsx",
+        "line": 287,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceBasicInfoForm.tsx",
+        "line": 138,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceBasicInfoForm.tsx",
+        "line": 192,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceBasicInfoForm.tsx",
+        "line": 215,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceBasicInfoForm.tsx",
+        "line": 396,
+        "content": "<input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceBasicInfoForm.tsx",
+        "line": 426,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceDurationAvailabilityForm.tsx",
+        "line": 112,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceDurationAvailabilityForm.tsx",
+        "line": 173,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceDurationAvailabilityForm.tsx",
+        "line": 186,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceDurationAvailabilityForm.tsx",
+        "line": 230,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceDurationAvailabilityForm.tsx",
+        "line": 240,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceDurationAvailabilityForm.tsx",
+        "line": 274,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServicePricingOptionsForm.tsx",
+        "line": 105,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServicePricingOptionsForm.tsx",
+        "line": 162,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServicePricingOptionsForm.tsx",
+        "line": 207,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServicePricingOptionsForm.tsx",
+        "line": 225,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServicePricingOptionsForm.tsx",
+        "line": 250,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServicePricingOptionsForm.tsx",
+        "line": 274,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceStaffResourcesForm.tsx",
+        "line": 99,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceStaffResourcesForm.tsx",
+        "line": 109,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceStaffResourcesForm.tsx",
+        "line": 121,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceStaffResourcesForm.tsx",
+        "line": 156,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\service\\ServiceStaffResourcesForm.tsx",
+        "line": 211,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\shared\\PaymentOptionsForm.tsx",
+        "line": 154,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\shared\\ProductFAQForm.tsx",
+        "line": 241,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\shared\\ProductSEOForm.tsx",
+        "line": 191,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\shared\\ProductSEOForm.tsx",
+        "line": 252,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\shared\\ProductSEOForm.tsx",
+        "line": 299,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\create\\shared\\ProductSEOForm.tsx",
+        "line": 324,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\digital\\DigitalProductUpdateManager.tsx",
+        "line": 239,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\digital\\DigitalProductUpdateManager.tsx",
+        "line": 314,
+        "content": "<input"
+      },
+      {
+        "file": "components\\products\\EnhancedProductTypeSelector.tsx",
+        "line": 398,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\ImageUpload.tsx",
+        "line": 129,
+        "content": "<input"
+      },
+      {
+        "file": "components\\products\\ImportCSVDialog.tsx",
+        "line": 191,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\ProductAffiliateSettings.tsx",
+        "line": 253,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\ProductAffiliateSettings.tsx",
+        "line": 290,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\ProductAffiliateSettings.tsx",
+        "line": 343,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\ProductAffiliateSettings.tsx",
+        "line": 361,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\ProductCreationWizard.tsx",
+        "line": 218,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\ProductCreationWizard.tsx",
+        "line": 234,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\ProductFiltersDashboard.tsx",
+        "line": 147,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\ProductSlugEditor.tsx",
+        "line": 113,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\ProductTemplateSelector.tsx",
+        "line": 101,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTab.tsx",
+        "line": 455,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTab.tsx",
+        "line": 503,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTab.tsx",
+        "line": 517,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTab.tsx",
+        "line": 531,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTab.tsx",
+        "line": 545,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTab.tsx",
+        "line": 559,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTab.tsx",
+        "line": 573,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTab.tsx",
+        "line": 609,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTab.tsx",
+        "line": 624,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTab.tsx",
+        "line": 639,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTab.tsx",
+        "line": 654,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTabDark.tsx",
+        "line": 232,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTabDark.tsx",
+        "line": 243,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTabDark.tsx",
+        "line": 254,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTabDark.tsx",
+        "line": 294,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTabDark.tsx",
+        "line": 305,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTabDark.tsx",
+        "line": 319,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTabDark.tsx",
+        "line": 330,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTabModern.tsx",
+        "line": 231,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTabModern.tsx",
+        "line": 242,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTabModern.tsx",
+        "line": 253,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTabModern.tsx",
+        "line": 293,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTabModern.tsx",
+        "line": 304,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTabModern.tsx",
+        "line": 318,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductAnalyticsTabModern.tsx",
+        "line": 329,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductCustomFieldsTab.tsx",
+        "line": 458,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductCustomFieldsTab.tsx",
+        "line": 470,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductCustomFieldsTab.tsx",
+        "line": 511,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductCustomFieldsTab.tsx",
+        "line": 526,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductDescriptionTab.tsx",
+        "line": 621,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductDescriptionTab.tsx",
+        "line": 852,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductDescriptionTab.tsx",
+        "line": 885,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductDescriptionTab.tsx",
+        "line": 932,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductFAQTab.tsx",
+        "line": 373,
+        "content": "<input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductFAQTab.tsx",
+        "line": 497,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductFAQTab.tsx",
+        "line": 979,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductFAQTab.tsx",
+        "line": 1026,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductFAQTab.tsx",
+        "line": 1037,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductFilesTab.tsx",
+        "line": 306,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductFilesTab.tsx",
+        "line": 321,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductFilesTab.tsx",
+        "line": 420,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductFilesTab.tsx",
+        "line": 436,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductInfoTab\\ProductPricing.tsx",
+        "line": 130,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductInfoTab\\ProductPricing.tsx",
+        "line": 220,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductInfoTab\\ProductPricing.tsx",
+        "line": 252,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductInfoTab\\ProductPricing.tsx",
+        "line": 279,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductInfoTab.tsx",
+        "line": 344,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductInfoTab.tsx",
+        "line": 382,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductInfoTab.tsx",
+        "line": 525,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductInfoTab.tsx",
+        "line": 818,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductInfoTab.tsx",
+        "line": 914,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductInfoTab.tsx",
+        "line": 1070,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductInfoTab.tsx",
+        "line": 1078,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductInfoTab.tsx",
+        "line": 1086,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductPixelsTab\\PixelConfigCard.tsx",
+        "line": 87,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductPixelsTab.tsx",
+        "line": 291,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductPixelsTab.tsx",
+        "line": 308,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductPixelsTab.tsx",
+        "line": 501,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductPromotionsTab\\PromotionCard.tsx",
+        "line": 131,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductPromotionsTab\\PromotionCard.tsx",
+        "line": 176,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductPromotionsTab\\PromotionCard.tsx",
+        "line": 199,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductPromotionsTab\\PromotionCard.tsx",
+        "line": 220,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductPromotionsTab\\PromotionCard.tsx",
+        "line": 238,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductSeoTab.tsx",
+        "line": 256,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductSeoTab.tsx",
+        "line": 303,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductSeoTab.tsx",
+        "line": 316,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductSeoTab.tsx",
+        "line": 343,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductSeoTab.tsx",
+        "line": 370,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductSeoTab.tsx",
+        "line": 480,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVariantsTab\\VariantCard.tsx",
+        "line": 129,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVariantsTab\\VariantCard.tsx",
+        "line": 145,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVariantsTab\\VariantCard.tsx",
+        "line": 165,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVariantsTab\\VariantCard.tsx",
+        "line": 188,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVariantsTab\\VariantCard.tsx",
+        "line": 211,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\tabs\\ProductVisualTab.tsx",
+        "line": 351,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\TemplateSelector.tsx",
+        "line": 230,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\products\\TemplateSelector.tsx",
+        "line": 242,
+        "content": "<input"
+      },
+      {
+        "file": "components\\promotions\\CreatePromotionDialog.tsx",
+        "line": 206,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\promotions\\PromotionFilters.tsx",
+        "line": 55,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\promotions\\PromotionFilters.tsx",
+        "line": 143,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\promotions\\PromotionFilters.tsx",
+        "line": 154,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\promotions\\PromotionScopeSelector.tsx",
+        "line": 398,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\returns\\ReturnRequestForm.tsx",
+        "line": 242,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\reviews\\ReviewForm.tsx",
+        "line": 152,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\reviews\\ReviewForm.tsx",
+        "line": 218,
+        "content": "<input"
+      },
+      {
+        "file": "components\\seo\\SEOPagesList.tsx",
+        "line": 273,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\BookingHistory.tsx",
+        "line": 439,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\BulkServiceUpdate.tsx",
+        "line": 518,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\recurring\\RecurringBookingForm.tsx",
+        "line": 128,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\recurring\\RecurringBookingForm.tsx",
+        "line": 171,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\recurring\\RecurringBookingForm.tsx",
+        "line": 224,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\RecurringBookingForm.tsx",
+        "line": 192,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\RecurringBookingForm.tsx",
+        "line": 200,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\RecurringBookingForm.tsx",
+        "line": 233,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\RecurringBookingForm.tsx",
+        "line": 262,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\RecurringBookingForm.tsx",
+        "line": 275,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\RecurringBookingForm.tsx",
+        "line": 301,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\RecurringBookingManager.tsx",
+        "line": 460,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\RecurringBookingManager.tsx",
+        "line": 479,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\RecurringBookingManager.tsx",
+        "line": 500,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\RecurringBookingManager.tsx",
+        "line": 510,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\RecurringBookingManager.tsx",
+        "line": 526,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\RecurringBookingManager.tsx",
+        "line": 542,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\resources\\ResourceAvailabilityChecker.tsx",
+        "line": 343,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\resources\\ResourceAvailabilityChecker.tsx",
+        "line": 352,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\resources\\ResourceAvailabilityChecker.tsx",
+        "line": 386,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\resources\\ResourceConflictSettings.tsx",
+        "line": 120,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\ServicePackageManager.tsx",
+        "line": 574,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\ServicePackageManager.tsx",
+        "line": 623,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\ServicePackageManager.tsx",
+        "line": 637,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\ServicePackageManager.tsx",
+        "line": 655,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\ServicePackageManager.tsx",
+        "line": 669,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\ServicePackageManager.tsx",
+        "line": 686,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\ServicePackageManager.tsx",
+        "line": 732,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\ServicesList.tsx",
+        "line": 465,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\staff\\StaffAvailabilitySettings.tsx",
+        "line": 119,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\staff\\StaffAvailabilitySettings.tsx",
+        "line": 140,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\staff\\StaffAvailabilitySettings.tsx",
+        "line": 158,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\staff\\StaffAvailabilitySettings.tsx",
+        "line": 180,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\staff\\StaffAvailabilitySettings.tsx",
+        "line": 190,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\staff\\StaffAvailabilitySettings.tsx",
+        "line": 203,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\StaffAvailabilityManager.tsx",
+        "line": 739,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\StaffAvailabilityManager.tsx",
+        "line": 747,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\StaffAvailabilityManager.tsx",
+        "line": 757,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\StaffAvailabilityManager.tsx",
+        "line": 765,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\StaffAvailabilityManager.tsx",
+        "line": 774,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\StaffAvailabilityManager.tsx",
+        "line": 863,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\StaffAvailabilityManager.tsx",
+        "line": 895,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\StaffAvailabilityManager.tsx",
+        "line": 903,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\StaffAvailabilityManager.tsx",
+        "line": 928,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\service\\WaitlistManager.tsx",
+        "line": 364,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\AdvancedProfileSettings.tsx",
+        "line": 277,
+        "content": "<input"
+      },
+      {
+        "file": "components\\settings\\AdvancedProfileSettings.tsx",
+        "line": 478,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\AdvancedProfileSettings.tsx",
+        "line": 490,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\AdvancedProfileSettings.tsx",
+        "line": 500,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\AdvancedProfileSettings.tsx",
+        "line": 511,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\AdvancedProfileSettings.tsx",
+        "line": 522,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\AdvancedProfileSettings.tsx",
+        "line": 533,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\AdvancedProfileSettings.tsx",
+        "line": 544,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\AvatarUpload.tsx",
+        "line": 108,
+        "content": "<input"
+      },
+      {
+        "file": "components\\settings\\DomainSettings.tsx",
+        "line": 753,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\NotificationSettings.tsx",
+        "line": 590,
+        "content": "<input"
+      },
+      {
+        "file": "components\\settings\\ProfileSettings.tsx",
+        "line": 285,
+        "content": "<input"
+      },
+      {
+        "file": "components\\settings\\ProfileSettings.tsx",
+        "line": 306,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\ProfileSettings.tsx",
+        "line": 319,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\ProfileSettings.tsx",
+        "line": 333,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\ProfileSettings.tsx",
+        "line": 375,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\ProfileSettings.tsx",
+        "line": 389,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\ProfileSettings.tsx",
+        "line": 402,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\ProfileSettings.tsx",
+        "line": 415,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\ProfileSettings.tsx",
+        "line": 439,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\ProfileSettings.tsx",
+        "line": 464,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\SecuritySettings.tsx",
+        "line": 286,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\SecuritySettings.tsx",
+        "line": 308,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\SecuritySettings.tsx",
+        "line": 343,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\StoreSettings.tsx",
+        "line": 341,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\settings\\StoreSettings.tsx",
+        "line": 360,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\CreateShipmentDialog.tsx",
+        "line": 178,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\CreateShipmentDialog.tsx",
+        "line": 189,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\CreateShipmentDialog.tsx",
+        "line": 209,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\CreateShipmentDialog.tsx",
+        "line": 239,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\CreateShipmentDialog.tsx",
+        "line": 277,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\CreateShipmentDialog.tsx",
+        "line": 297,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\CreateShipmentDialog.tsx",
+        "line": 326,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\CreateShipmentDialog.tsx",
+        "line": 350,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\CreateShipmentDialog.tsx",
+        "line": 401,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\CreateShipmentDialog.tsx",
+        "line": 412,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingCarriersManager.tsx",
+        "line": 569,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingCarriersManager.tsx",
+        "line": 592,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingCarriersManager.tsx",
+        "line": 614,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingCarriersManager.tsx",
+        "line": 625,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingRatesManager.tsx",
+        "line": 445,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingRatesManager.tsx",
+        "line": 456,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingRatesManager.tsx",
+        "line": 470,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingRatesManager.tsx",
+        "line": 490,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingRatesManager.tsx",
+        "line": 505,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingRatesManager.tsx",
+        "line": 525,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingRatesManager.tsx",
+        "line": 540,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingRatesManager.tsx",
+        "line": 559,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingRatesManager.tsx",
+        "line": 570,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingRatesManager.tsx",
+        "line": 584,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingSettings.tsx",
+        "line": 224,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingZonesManager.tsx",
+        "line": 316,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\shipping\\ShippingZonesManager.tsx",
+        "line": 374,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreDetails.tsx",
+        "line": 516,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreDetails.tsx",
+        "line": 547,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreDetails.tsx",
+        "line": 565,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreDetails.tsx",
+        "line": 630,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreDetails.tsx",
+        "line": 638,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreDetails.tsx",
+        "line": 1071,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreForm.tsx",
+        "line": 671,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreForm.tsx",
+        "line": 694,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreForm.tsx",
+        "line": 775,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreForm.tsx",
+        "line": 782,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreForm.tsx",
+        "line": 918,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreForm.tsx",
+        "line": 935,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreForm.tsx",
+        "line": 965,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreForm.tsx",
+        "line": 979,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreForm.tsx",
+        "line": 993,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreForm.tsx",
+        "line": 1007,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreImageUpload.tsx",
+        "line": 305,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreLocationSettings.tsx",
+        "line": 116,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreLocationSettings.tsx",
+        "line": 127,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreLocationSettings.tsx",
+        "line": 139,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreLocationSettings.tsx",
+        "line": 150,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreLocationSettings.tsx",
+        "line": 163,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreLocationSettings.tsx",
+        "line": 174,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreLocationSettings.tsx",
+        "line": 187,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreLocationSettings.tsx",
+        "line": 199,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreLocationSettings.tsx",
+        "line": 257,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreLocationSettings.tsx",
+        "line": 268,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreSEOSettings.tsx",
+        "line": 71,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreSEOSettings.tsx",
+        "line": 146,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreSEOSettings.tsx",
+        "line": 164,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreSEOSettings.tsx",
+        "line": 193,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreSlugEditor.tsx",
+        "line": 159,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreSlugEditor.tsx",
+        "line": 214,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 138,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 145,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 158,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 165,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 178,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 185,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 198,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 205,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 218,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 225,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 238,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 245,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 262,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 269,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 281,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 288,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 300,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 307,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 319,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 326,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 343,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 350,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 362,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 369,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\StoreThemeSettings.tsx",
+        "line": 544,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\WithdrawalsFilters.tsx",
+        "line": 128,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\WithdrawalsFilters.tsx",
+        "line": 281,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\store\\WithdrawalsFilters.tsx",
+        "line": 297,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\storefront\\ProductFilters.tsx",
+        "line": 58,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\team\\StoreMemberInviteDialog.tsx",
+        "line": 120,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\team\\StoreTaskCreateDialog.tsx",
+        "line": 246,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\team\\StoreTasksList.tsx",
+        "line": 142,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\ui\\file-upload-enhanced.tsx",
+        "line": 396,
+        "content": "<input"
+      },
+      {
+        "file": "components\\ui\\image-upload.tsx",
+        "line": 367,
+        "content": "<input"
+      },
+      {
+        "file": "components\\ui\\image-upload.tsx",
+        "line": 450,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\ui\\input.tsx",
+        "line": 8,
+        "content": "<input"
+      },
+      {
+        "file": "components\\ui\\mobile-form-field.tsx",
+        "line": 122,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\ui\\rich-text-editor-pro.tsx",
+        "line": 259,
+        "content": "<input type=\"checkbox\" style=\"margin-right: 8px; cursor: pointer;\">"
+      },
+      {
+        "file": "components\\ui\\rich-text-editor.tsx",
+        "line": 143,
+        "content": "<input type=\"checkbox\" style=\"margin-right: 8px;\">"
+      },
+      {
+        "file": "components\\ui\\SearchInput.tsx",
+        "line": 118,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\ui\\sidebar.tsx",
+        "line": 293,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\ui\\__tests__\\input.test.tsx",
+        "line": 19,
+        "content": "render(<Input />);"
+      },
+      {
+        "file": "components\\ui\\__tests__\\input.test.tsx",
+        "line": 26,
+        "content": "render(<Input value=\"test value\" onChange={() => {}} />);"
+      },
+      {
+        "file": "components\\ui\\__tests__\\input.test.tsx",
+        "line": 36,
+        "content": "render(<Input onChange={handleChange} />);"
+      },
+      {
+        "file": "components\\ui\\__tests__\\input.test.tsx",
+        "line": 45,
+        "content": "render(<Input disabled />);"
+      },
+      {
+        "file": "components\\ui\\__tests__\\input.test.tsx",
+        "line": 59,
+        "content": "const { rerender } = render(<Input type=\"email\" />);"
+      },
+      {
+        "file": "components\\ui\\__tests__\\input.test.tsx",
+        "line": 64,
+        "content": "rerender(<Input type=\"password\" />);"
+      },
+      {
+        "file": "components\\ui\\__tests__\\input.test.tsx",
+        "line": 70,
+        "content": "render(<Input className=\"custom-class\" />);"
+      },
+      {
+        "file": "components\\wishlist\\WishlistShareDialog.tsx",
+        "line": 111,
+        "content": "<Input"
+      },
+      {
+        "file": "components\\wishlist\\WishlistShareDialog.tsx",
+        "line": 167,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminAffiliates.tsx",
+        "line": 451,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminAffiliates.tsx",
+        "line": 1184,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminAudit.tsx",
+        "line": 160,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminAudit.tsx",
+        "line": 167,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminAudit.tsx",
+        "line": 173,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminAudit.tsx",
+        "line": 180,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminAudit.tsx",
+        "line": 186,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminAudit.tsx",
+        "line": 209,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminCommissionPayments.tsx",
+        "line": 669,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminCommissionSettings.tsx",
+        "line": 233,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminCommissionSettings.tsx",
+        "line": 343,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminCommissionSettings.tsx",
+        "line": 444,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminCommissionSettings.tsx",
+        "line": 567,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminCommunity.tsx",
+        "line": 333,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminCommunity.tsx",
+        "line": 646,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminCourses.tsx",
+        "line": 183,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminDisputes.tsx",
+        "line": 479,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminErrorMonitoring.tsx",
+        "line": 277,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminGiftCardManagement.tsx",
+        "line": 285,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminGiftCardManagement.tsx",
+        "line": 712,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminGiftCardManagement.tsx",
+        "line": 725,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminGiftCardManagement.tsx",
+        "line": 748,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminGiftCardManagement.tsx",
+        "line": 770,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminInventory.tsx",
+        "line": 185,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminLoyaltyManagement.tsx",
+        "line": 558,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminLoyaltyManagement.tsx",
+        "line": 765,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminLoyaltyManagement.tsx",
+        "line": 791,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminLoyaltyManagement.tsx",
+        "line": 805,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminLoyaltyManagement.tsx",
+        "line": 819,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminLoyaltyManagement.tsx",
+        "line": 889,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminLoyaltyManagement.tsx",
+        "line": 935,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminLoyaltyManagement.tsx",
+        "line": 950,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminNotifications.tsx",
+        "line": 129,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminNotifications.tsx",
+        "line": 183,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminPayments.tsx",
+        "line": 200,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminProducts.tsx",
+        "line": 135,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminReferrals.tsx",
+        "line": 211,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminReturnManagement.tsx",
+        "line": 231,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminReturnManagement.tsx",
+        "line": 556,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminSales.tsx",
+        "line": 234,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminSecurity.tsx",
+        "line": 210,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminSecurity.tsx",
+        "line": 233,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminSettings.tsx",
+        "line": 133,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminSettings.tsx",
+        "line": 152,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminSettings.tsx",
+        "line": 190,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminSettings.tsx",
+        "line": 341,
+        "content": "<input type=\"file\" accept=\"application/json\" className=\"hidden\" onChange={async (e) => {"
+      },
+      {
+        "file": "pages\\admin\\AdminShipping.tsx",
+        "line": 183,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminShippingConversations.tsx",
+        "line": 455,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminStores.tsx",
+        "line": 138,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminStoreWithdrawals.tsx",
+        "line": 421,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminStoreWithdrawals.tsx",
+        "line": 864,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminSupport.tsx",
+        "line": 179,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminTaxManagement.tsx",
+        "line": 252,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminTaxManagement.tsx",
+        "line": 284,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminTaxManagement.tsx",
+        "line": 298,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminTaxManagement.tsx",
+        "line": 313,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminTaxManagement.tsx",
+        "line": 329,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminTaxManagement.tsx",
+        "line": 341,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminTaxManagement.tsx",
+        "line": 420,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminTransactionReconciliation.tsx",
+        "line": 387,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminUsers.tsx",
+        "line": 325,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminVendorConversations.tsx",
+        "line": 411,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminWebhookManagement.tsx",
+        "line": 472,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminWebhookManagement.tsx",
+        "line": 933,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminWebhookManagement.tsx",
+        "line": 976,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminWebhookManagement.tsx",
+        "line": 995,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminWebhookManagement.tsx",
+        "line": 1031,
+        "content": "<input"
+      },
+      {
+        "file": "pages\\admin\\AdminWebhookManagement.tsx",
+        "line": 1054,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminWebhookManagement.tsx",
+        "line": 1068,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\AdminWebhookManagement.tsx",
+        "line": 1082,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\IntegrationsPage.tsx",
+        "line": 614,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\IntegrationsPage.tsx",
+        "line": 627,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\IntegrationsPage.tsx",
+        "line": 640,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\IntegrationsPage.tsx",
+        "line": 657,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\IntegrationsPage.tsx",
+        "line": 670,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\IntegrationsPage.tsx",
+        "line": 689,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\IntegrationsPage.tsx",
+        "line": 702,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\IntegrationsPage.tsx",
+        "line": 715,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\IntegrationsPage.tsx",
+        "line": 736,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\MonerooReconciliation.tsx",
+        "line": 126,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\PhysicalBarcodeScanner.tsx",
+        "line": 261,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\PhysicalBarcodeScanner.tsx",
+        "line": 381,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\admin\\PlatformCustomization.tsx",
+        "line": 453,
+        "content": "<input"
+      },
+      {
+        "file": "pages\\affiliate\\CourseAffiliate.tsx",
+        "line": 259,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Auth.tsx",
+        "line": 376,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Auth.tsx",
+        "line": 451,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Auth.tsx",
+        "line": 576,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\checkout\\Checkout.tsx",
+        "line": 527,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\checkout\\Checkout.tsx",
+        "line": 544,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\checkout\\Checkout.tsx",
+        "line": 565,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\checkout\\Checkout.tsx",
+        "line": 586,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\checkout\\Checkout.tsx",
+        "line": 607,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\checkout\\Checkout.tsx",
+        "line": 628,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\checkout\\Checkout.tsx",
+        "line": 639,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Checkout.tsx",
+        "line": 1266,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Checkout.tsx",
+        "line": 1284,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Checkout.tsx",
+        "line": 1308,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Checkout.tsx",
+        "line": 1331,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Checkout.tsx",
+        "line": 1347,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Checkout.tsx",
+        "line": 1360,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Checkout.tsx",
+        "line": 1376,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\community\\CommunityPage.tsx",
+        "line": 168,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\courses\\MyCourses.tsx",
+        "line": 598,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\CustomerMyInvoices.tsx",
+        "line": 339,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\CustomerMyReturns.tsx",
+        "line": 314,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\CustomerMyWishlist.tsx",
+        "line": 492,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\MyCourses.tsx",
+        "line": 361,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\MyDownloads.tsx",
+        "line": 233,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\MyFavorites.tsx",
+        "line": 338,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\MyOrders.tsx",
+        "line": 433,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\MyProfile.tsx",
+        "line": 493,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\MyProfile.tsx",
+        "line": 508,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\MyProfile.tsx",
+        "line": 522,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\MyProfile.tsx",
+        "line": 575,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\MyProfile.tsx",
+        "line": 587,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\MyProfile.tsx",
+        "line": 599,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\MyProfile.tsx",
+        "line": 611,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\MyProfile.tsx",
+        "line": 622,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\MyProfile.tsx",
+        "line": 634,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\customer\\MyProfile.tsx",
+        "line": 790,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\digital\\DigitalBundlesList.tsx",
+        "line": 218,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\digital\\DigitalProductsList.tsx",
+        "line": 455,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\digital\\DigitalProductsSearch.tsx",
+        "line": 420,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\digital\\DigitalProductsSearch.tsx",
+        "line": 582,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\digital\\DigitalProductsSearch.tsx",
+        "line": 593,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\digital\\LicenseManagement.tsx",
+        "line": 138,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\digital\\MyDownloads.tsx",
+        "line": 141,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\digital\\MyLicenses.tsx",
+        "line": 216,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\disputes\\DisputeDetail.tsx",
+        "line": 547,
+        "content": "<input"
+      },
+      {
+        "file": "pages\\inventory\\InventoryDashboard.tsx",
+        "line": 337,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\KYC.tsx",
+        "line": 224,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\KYC.tsx",
+        "line": 249,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Marketplace.tsx",
+        "line": 947,
+        "content": "<input"
+      },
+      {
+        "file": "pages\\Marketplace.tsx",
+        "line": 960,
+        "content": "<input"
+      },
+      {
+        "file": "pages\\Marketplace.tsx",
+        "line": 973,
+        "content": "<input"
+      },
+      {
+        "file": "pages\\orders\\OrderMessaging.tsx",
+        "line": 610,
+        "content": "<input"
+      },
+      {
+        "file": "pages\\Orders.tsx",
+        "line": 431,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\payments\\PayBalanceList.tsx",
+        "line": 447,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\payments\\PaymentManagementList.tsx",
+        "line": 498,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Payments.tsx",
+        "line": 576,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Payments.tsx",
+        "line": 873,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Payments.tsx",
+        "line": 921,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\PaymentsCustomers.tsx",
+        "line": 629,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\PaymentsCustomers.tsx",
+        "line": 756,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\physical\\PhysicalProductsList.tsx",
+        "line": 174,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\PlatformRevenue.tsx",
+        "line": 108,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Referrals.tsx",
+        "line": 408,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Referrals.tsx",
+        "line": 509,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\Referrals.tsx",
+        "line": 699,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\service\\BookingsManagement.tsx",
+        "line": 715,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\service\\RecurringBookingsManagement.tsx",
+        "line": 378,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\service\\ServicesList.tsx",
+        "line": 90,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\shipping\\ContactShippingService.tsx",
+        "line": 360,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\shipping\\ShippingDashboard.tsx",
+        "line": 366,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\StoreAffiliates.tsx",
+        "line": 468,
+        "content": "<Input"
+      },
+      {
+        "file": "pages\\vendor\\VendorMessaging.tsx",
+        "line": 645,
+        "content": "<input"
+      }
+    ],
+    "linksWithoutText": [],
+    "buttonsWithoutAriaLabel": [],
+    "missingFocusStyles": [
+      {
+        "file": "components\\ui\\chart.tsx",
+        "line": 48,
+        "content": "\"flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none\","
+      },
+      {
+        "file": "components\\ui\\command.tsx",
+        "line": 47,
+        "content": "\"flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50\","
+      },
+      {
+        "file": "components\\ui\\command.tsx",
+        "line": 108,
+        "content": "\"relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50\","
+      },
+      {
+        "file": "components\\ui\\context-menu.tsx",
+        "line": 28,
+        "content": "\"flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none data-[state=open]:bg-accent data-[state=open]:text-accent-foreground focus:bg-accent focus:text-accent-foreground touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\context-menu.tsx",
+        "line": 81,
+        "content": "\"relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\context-menu.tsx",
+        "line": 97,
+        "content": "\"relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 min-h-[44px] text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\context-menu.tsx",
+        "line": 120,
+        "content": "\"relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 min-h-[44px] text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\dropdown-menu.tsx",
+        "line": 30,
+        "content": "\"flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none data-[state=open]:bg-accent focus:bg-accent touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\dropdown-menu.tsx",
+        "line": 137,
+        "content": "\"relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\dropdown-menu.tsx",
+        "line": 157,
+        "content": "\"relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 min-h-[44px] text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\dropdown-menu.tsx",
+        "line": 180,
+        "content": "\"relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 min-h-[44px] text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\hover-card.tsx",
+        "line": 19,
+        "content": "\"z-50 w-64 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2\","
+      },
+      {
+        "file": "components\\ui\\menubar.tsx",
+        "line": 36,
+        "content": "\"flex cursor-default select-none items-center rounded-sm px-3 py-1.5 min-h-[44px] text-sm font-medium outline-none data-[state=open]:bg-accent data-[state=open]:text-accent-foreground focus:bg-accent focus:text-accent-foreground touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\menubar.tsx",
+        "line": 53,
+        "content": "\"flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none data-[state=open]:bg-accent data-[state=open]:text-accent-foreground focus:bg-accent focus:text-accent-foreground touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\menubar.tsx",
+        "line": 109,
+        "content": "\"relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\menubar.tsx",
+        "line": 125,
+        "content": "\"relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 min-h-[44px] text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\menubar.tsx",
+        "line": 148,
+        "content": "\"relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 min-h-[44px] text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\popover.tsx",
+        "line": 24,
+        "content": "\"z-[100] w-[calc(100vw-2rem)] sm:w-72 max-w-[calc(100vw-2rem)] sm:max-w-sm rounded-md border bg-popover p-3 sm:p-4 text-popover-foreground shadow-md outline-none\","
+      },
+      {
+        "file": "components\\ui\\select-virtualized.tsx",
+        "line": 166,
+        "content": "\"relative flex w-full cursor-default select-none items-center rounded-sm py-2 pl-8 pr-2 min-h-[44px] text-xs sm:text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\select-virtualized.tsx",
+        "line": 198,
+        "content": "\"relative flex w-full cursor-default select-none items-center rounded-sm py-2 pl-8 pr-2 min-h-[44px] text-xs sm:text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation\","
+      },
+      {
+        "file": "components\\ui\\sidebar.tsx",
+        "line": 367,
+        "content": "\"flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring transition-[margin,opa] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0\","
+      },
+      {
+        "file": "components\\ui\\sidebar.tsx",
+        "line": 387,
+        "content": "\"absolute right-3 top-3.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0\","
+      },
+      {
+        "file": "components\\ui\\sidebar.tsx",
+        "line": 418,
+        "content": "\"peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0\","
+      },
+      {
+        "file": "components\\ui\\sidebar.tsx",
+        "line": 494,
+        "content": "\"absolute right-1 top-1.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform peer-hover/menu-button:text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0\","
+      },
+      {
+        "file": "components\\ui\\sidebar.tsx",
+        "line": 602,
+        "content": "\"flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sidebar-foreground outline-none ring-sidebar-ring aria-disabled:pointer-events-none aria-disabled:opacity-50 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground\","
+      }
+    ],
+    "missingSkipLinks": [],
+    "missingLandmarks": []
+  }
+}

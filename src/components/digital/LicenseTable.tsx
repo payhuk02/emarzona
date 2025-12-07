@@ -155,7 +155,7 @@ export const LicenseTable = ({ searchQuery, statusFilter }: LicenseTableProps) =
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" aria-label={`Actions pour la licence ${license.license_key || license.id}`}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>

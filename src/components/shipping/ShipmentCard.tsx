@@ -122,7 +122,7 @@ const ShipmentCardComponent = ({ shipment, onRefresh }: ShipmentCardProps) => {
                 </Button>
               )}
               {onRefresh && (
-                <Button variant="ghost" size="sm" onClick={onRefresh}>
+                <Button variant="ghost" size="sm" onClick={onRefresh} aria-label="Actualiser les informations d'expédition">
                   <RefreshCw className="h-4 w-4" />
                 </Button>
               )}

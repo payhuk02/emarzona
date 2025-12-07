@@ -159,6 +159,7 @@ export const DigitalFilesUploader = ({
                     setMainFileUrl('');
                     updateFormData({ main_file_url: '' });
                   }}
+                  aria-label="Supprimer le lien du produit principal"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -259,6 +260,7 @@ export const DigitalFilesUploader = ({
                     variant="ghost"
                     size="sm"
                     onClick={() => removeFile(index)}
+                    aria-label={`Supprimer le fichier ${file.name || index + 1}`}
                   >
                     <X className="h-4 w-4" />
                   </Button>

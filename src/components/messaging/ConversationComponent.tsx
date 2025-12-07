@@ -507,7 +507,7 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="shrink-0">
+                  <Button variant="ghost" size="sm" className="shrink-0" aria-label="Actions de la conversation">
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -562,6 +562,7 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
                       size="sm"
                       onClick={() => setSelectedFiles([])}
                       className="h-auto py-1"
+                      aria-label="Effacer tous les fichiers sélectionnés"
                     >
                       Effacer tout
                     </Button>
@@ -608,6 +609,7 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
                         size="sm"
                         disabled={sendingMessage}
                         className="shrink-0"
+                        aria-label="Joindre un fichier"
                       >
                         <Paperclip className="h-4 w-4" />
                       </Button>

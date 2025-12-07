@@ -227,6 +227,7 @@ const FavoritesManager = ({
                 size="sm"
                 onClick={handleClose}
                 className="text-slate-400 hover:text-white"
+                aria-label="Fermer le gestionnaire de favoris"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -362,6 +363,7 @@ const FavoritesManager = ({
                           size="sm"
                           onClick={() => onRemoveFavorite(product.id)}
                           className="absolute top-2 right-2 bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          aria-label={`Retirer ${product.name} des favoris`}
                         >
                           <X className="h-3 w-3" />
                         </Button>

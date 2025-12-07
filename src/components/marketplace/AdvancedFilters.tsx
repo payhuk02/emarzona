@@ -145,6 +145,7 @@ const AdvancedFilters = ({
               size="sm"
               onClick={onClose}
               className="text-slate-400 hover:text-white"
+              aria-label="Fermer les filtres avancés"
             >
               <X className="h-4 w-4" />
             </Button>

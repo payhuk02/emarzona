@@ -140,6 +140,7 @@ const PaymentsTableComponent = ({ payments, loading, onPaymentUpdated }: Payment
                     variant="ghost"
                     size="icon"
                     onClick={() => setDeleteId(payment.id)}
+                    aria-label={`Supprimer le paiement ${payment.id}`}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

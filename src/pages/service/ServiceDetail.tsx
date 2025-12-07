@@ -865,6 +865,7 @@ export default function ServiceDetail() {
                             setParticipants(Math.max(minParticipants, participants - 1))
                           }
                           disabled={participants <= minParticipants}
+                          aria-label="Diminuer le nombre de participants"
                         >
                           -
                         </Button>
@@ -878,6 +879,7 @@ export default function ServiceDetail() {
                             setParticipants(Math.min(maxParticipants, participants + 1))
                           }
                           disabled={participants >= maxParticipants}
+                          aria-label="Augmenter le nombre de participants"
                         >
                           +
                         </Button>

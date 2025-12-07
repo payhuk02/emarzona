@@ -180,7 +180,7 @@ export function WarrantyClaimsManager({ storeId }: WarrantyClaimsManagerProps) {
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Voir les détails de la réclamation ${claim.id || ''}`}>
                             <Eye className="h-4 w-4" />
                           </Button>
                         </TableCell>

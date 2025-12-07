@@ -536,10 +536,10 @@ export function PreOrderManager({ productId, storeId, className }: PreOrderManag
                               <Users className="h-4 w-4" />
                               {preOrder.current_pre_orders}
                             </Button>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" aria-label={`Modifier la précommande ${preOrder.product_name || preOrder.id}`}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" aria-label={`Supprimer la précommande ${preOrder.product_name || preOrder.id}`}>
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           </div>

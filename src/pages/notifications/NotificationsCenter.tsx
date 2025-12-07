@@ -242,6 +242,7 @@ const NotificationsCenter = () => {
                         size="icon"
                         onClick={(e) => handleArchive(notification.id, e)}
                         title="Archiver"
+                        aria-label="Archiver la notification"
                       >
                         <Archive className="w-4 h-4" />
                       </Button>
@@ -250,6 +251,7 @@ const NotificationsCenter = () => {
                         size="icon"
                         onClick={(e) => handleDelete(notification.id, e)}
                         title="Supprimer"
+                        aria-label="Supprimer la notification"
                       >
                         <Trash2 className="w-4 h-4 text-red-600" />
                       </Button>

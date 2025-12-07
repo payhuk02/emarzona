@@ -862,7 +862,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 sm:h-10 text-xs sm:text-sm">
+                <Button variant="outline" size="sm" className="h-9 sm:h-10 text-xs sm:text-sm" aria-label={`Actions pour le paiement ${payment.id}`}>
                   <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
                 </Button>
               </DropdownMenuTrigger>

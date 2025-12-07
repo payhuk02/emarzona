@@ -438,6 +438,7 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                                 setSelectedTemplate(template);
                                 setEditingTemplate(template);
                               }}
+                              aria-label={`Modifier le template ${template.name || template.id}`}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -476,6 +477,7 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                               setEditingTemplate(null);
                               setSelectedTemplate(null);
                             }}
+                            aria-label="Fermer l'éditeur de template"
                           >
                             <X className="h-4 w-4" />
                           </Button>

@@ -338,6 +338,7 @@ const OrderEditDialogComponent = ({ open, onOpenChange, onSuccess, order, storeI
                           size="icon"
                           onClick={() => handleRemoveItem(index)}
                           className="h-9 w-9 text-destructive hover:text-destructive"
+                          aria-label={`Supprimer l'article ${index + 1}`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

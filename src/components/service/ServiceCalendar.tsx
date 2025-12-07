@@ -251,6 +251,7 @@ export const ServiceCalendar = ({
               variant="outline"
               size="icon"
               onClick={handlePreviousMonth}
+              aria-label="Mois précédent"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -258,6 +259,7 @@ export const ServiceCalendar = ({
               variant="outline"
               size="icon"
               onClick={handleNextMonth}
+              aria-label="Mois suivant"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>

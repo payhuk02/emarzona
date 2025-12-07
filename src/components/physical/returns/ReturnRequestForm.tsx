@@ -302,6 +302,7 @@ export const ReturnRequestForm = ({
                       size="icon"
                       className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                       onClick={() => handleRemovePhoto(index)}
+                      aria-label={`Supprimer la photo ${index + 1}`}
                     >
                       <X className="h-3 w-3" />
                     </Button>

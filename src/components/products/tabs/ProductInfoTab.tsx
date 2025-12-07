@@ -410,6 +410,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                       size="sm"
                       onClick={regenerateSlug}
                       className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                      aria-label="Régénérer l'URL du produit"
                     >
                       <RefreshCw className="h-4 w-4" />
                     </Button>
@@ -450,6 +451,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                       size="sm"
                       onClick={copyProductUrl}
                       className="h-6 w-6 p-0 text-gray-400 hover:text-white"
+                      aria-label="Copier l'URL du produit"
                     >
                       <Copy className="h-3 w-3" />
                     </Button>

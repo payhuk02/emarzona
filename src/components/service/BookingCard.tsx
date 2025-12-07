@@ -130,7 +130,7 @@ const BookingCardComponent = ({
           {showActions && booking.status !== 'completed' && booking.status !== 'cancelled' && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour la réservation ${booking.id}`}>
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

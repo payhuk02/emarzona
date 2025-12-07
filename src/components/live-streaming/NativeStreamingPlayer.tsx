@@ -227,6 +227,7 @@ export const NativeStreamingPlayer = ({
                 size="icon"
                 variant="secondary"
                 onClick={togglePlay}
+                aria-label={isPlaying ? "Mettre en pause" : "Lire"}
               >
                 {isPlaying ? (
                   <Pause className="h-4 w-4" />
@@ -240,6 +241,7 @@ export const NativeStreamingPlayer = ({
                   size="icon"
                   variant="ghost"
                   onClick={toggleMute}
+                  aria-label={isMuted ? "Activer le son" : "Couper le son"}
                 >
                   {isMuted ? (
                     <VolumeX className="h-4 w-4" />
@@ -264,6 +266,7 @@ export const NativeStreamingPlayer = ({
                     size="icon"
                     variant="ghost"
                     onClick={() => {}}
+                    aria-label="Ouvrir le chat"
                   >
                     <MessageSquare className="h-4 w-4" />
                   </Button>
@@ -273,6 +276,7 @@ export const NativeStreamingPlayer = ({
                     size="icon"
                     variant="ghost"
                     onClick={handleShare}
+                    aria-label="Partager le stream"
                   >
                     <Share2 className="h-4 w-4" />
                   </Button>
@@ -281,6 +285,7 @@ export const NativeStreamingPlayer = ({
                   size="icon"
                   variant="ghost"
                   onClick={toggleFullscreen}
+                  aria-label="Plein écran"
                 >
                   <Maximize className="h-4 w-4" />
                 </Button>

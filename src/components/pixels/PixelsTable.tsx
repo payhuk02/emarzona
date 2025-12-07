@@ -120,6 +120,7 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
                           setEditDialogOpen(true);
                         }}
                           className="h-8 w-8 p-0"
+                          aria-label={`Modifier le pixel ${pixel.pixel_name || pixel.pixel_id}`}
                       >
                           <Edit className="h-3.5 w-3.5" />
                       </Button>
@@ -131,6 +132,7 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
                           setDeleteDialogOpen(true);
                         }}
                           className="h-8 w-8 p-0"
+                          aria-label={`Supprimer le pixel ${pixel.pixel_name || pixel.pixel_id}`}
                       >
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </Button>
@@ -170,7 +172,7 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour le pixel ${pixel.name || pixel.id}`}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
