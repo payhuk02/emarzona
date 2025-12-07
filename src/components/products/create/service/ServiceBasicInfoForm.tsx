@@ -119,12 +119,12 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
           <SelectTrigger id="service_type">
             <SelectValue placeholder="Sélectionnez un type" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="appointment">Rendez-vous</SelectItem>
-            <SelectItem value="class">Cours / Formation</SelectItem>
-            <SelectItem value="event">Événement</SelectItem>
-            <SelectItem value="consultation">Consultation</SelectItem>
-            <SelectItem value="other">Autre</SelectItem>
+          <SelectContent className="z-[1060]">
+            <SelectItem value="appointment" className="min-h-[44px]">Rendez-vous</SelectItem>
+            <SelectItem value="class" className="min-h-[44px]">Cours / Formation</SelectItem>
+            <SelectItem value="event" className="min-h-[44px]">Événement</SelectItem>
+            <SelectItem value="consultation" className="min-h-[44px]">Consultation</SelectItem>
+            <SelectItem value="other" className="min-h-[44px]">Autre</SelectItem>
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground">

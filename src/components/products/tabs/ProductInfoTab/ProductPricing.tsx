@@ -185,12 +185,12 @@ export const ProductPricing = ({
               >
                 <SelectValue placeholder="Sélectionnez une devise" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-600">
+              <SelectContent className="bg-gray-800 border-gray-600 z-[1060]">
                 {CURRENCIES.map((currency) => (
                   <SelectItem
                     key={currency.code}
                     value={currency.code}
-                    className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                    className="text-white hover:bg-gray-700 focus:bg-gray-700 min-h-[44px]"
                   >
                     <div className="flex items-center gap-2">
                       <span>{currency.flag}</span>
