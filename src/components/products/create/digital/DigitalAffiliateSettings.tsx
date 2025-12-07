@@ -243,12 +243,12 @@ export const DigitalAffiliateSettings = ({
                 <SelectTrigger className="max-w-xs">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="7">7 jours</SelectItem>
-                  <SelectItem value="15">15 jours</SelectItem>
-                  <SelectItem value="30">30 jours (recommandé)</SelectItem>
-                  <SelectItem value="60">60 jours</SelectItem>
-                  <SelectItem value="90">90 jours</SelectItem>
+                <SelectContent className="z-[1060]">
+                  <SelectItem value="7" className="min-h-[44px]">7 jours</SelectItem>
+                  <SelectItem value="15" className="min-h-[44px]">15 jours</SelectItem>
+                  <SelectItem value="30" className="min-h-[44px]">30 jours (recommandé)</SelectItem>
+                  <SelectItem value="60" className="min-h-[44px]">60 jours</SelectItem>
+                  <SelectItem value="90" className="min-h-[44px]">90 jours</SelectItem>
                 </SelectContent>
               </Select>
             </CardContent>

@@ -327,8 +327,8 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un type de licence" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="standard">
+              <SelectContent className="z-[1060]">
+                <SelectItem value="standard" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Licence standard</span>
                     <span className="text-xs text-muted-foreground">
@@ -336,7 +336,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
                     </span>
                   </div>
                 </SelectItem>
-                <SelectItem value="plr">
+                <SelectItem value="plr" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">PLR (Private Label Rights)</span>
                     <span className="text-xs text-muted-foreground">
@@ -344,7 +344,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
                     </span>
                   </div>
                 </SelectItem>
-                <SelectItem value="copyrighted">
+                <SelectItem value="copyrighted" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Protégé par droit d'auteur</span>
                     <span className="text-xs text-muted-foreground">
@@ -412,9 +412,9 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
               <SelectTrigger className={errors.level ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Sélectionnez un niveau" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[1060]">
                 {COURSE_LEVELS.map((level) => (
-                  <SelectItem key={level.value} value={level.value}>
+                  <SelectItem key={level.value} value={level.value} className="min-h-[44px]">
                     <div className="flex items-center gap-2">
                       <span>{level.label}</span>
                       <Badge variant="outline" className="text-xs">
@@ -439,9 +439,9 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
               <SelectTrigger className={errors.language ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Sélectionnez une langue" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[1060]">
                 {LANGUAGES.map((lang) => (
-                  <SelectItem key={lang.value} value={lang.value}>
+                  <SelectItem key={lang.value} value={lang.value} className="min-h-[44px]">
                     <div className="flex items-center gap-2">
                       <span>{lang.flag}</span>
                       <span>{lang.label}</span>
@@ -464,9 +464,9 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
               <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Sélectionnez une catégorie" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[1060]">
                 {CATEGORIES.map((category) => (
-                  <SelectItem key={category} value={category}>
+                  <SelectItem key={category} value={category} className="min-h-[44px]">
                     {category}
                   </SelectItem>
                 ))}
@@ -549,8 +549,8 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un modèle" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="one-time">
+              <SelectContent className="z-[1060]">
+                <SelectItem value="one-time" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Achat unique</span>
                     <span className="text-xs text-muted-foreground">
@@ -558,7 +558,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
                     </span>
                   </div>
                 </SelectItem>
-                <SelectItem value="subscription">
+                <SelectItem value="subscription" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Abonnement</span>
                     <span className="text-xs text-muted-foreground">
@@ -566,7 +566,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
                     </span>
                   </div>
                 </SelectItem>
-                <SelectItem value="free">
+                <SelectItem value="free" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Gratuit</span>
                     <span className="text-xs text-muted-foreground">
@@ -574,7 +574,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
                     </span>
                   </div>
                 </SelectItem>
-                <SelectItem value="pay-what-you-want">
+                <SelectItem value="pay-what-you-want" className="min-h-[44px]">
                   <div className="flex flex-col">
                     <span className="font-medium">Prix libre</span>
                     <span className="text-xs text-muted-foreground">

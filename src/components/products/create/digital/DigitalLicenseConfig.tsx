@@ -111,12 +111,12 @@ export const DigitalLicenseConfig = ({
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">1 téléchargement</SelectItem>
-                <SelectItem value="3">3 téléchargements</SelectItem>
-                <SelectItem value="5">5 téléchargements</SelectItem>
-                <SelectItem value="10">10 téléchargements</SelectItem>
-                <SelectItem value="-1">Illimité</SelectItem>
+              <SelectContent className="z-[1060]">
+                <SelectItem value="1" className="min-h-[44px]">1 téléchargement</SelectItem>
+                <SelectItem value="3" className="min-h-[44px]">3 téléchargements</SelectItem>
+                <SelectItem value="5" className="min-h-[44px]">5 téléchargements</SelectItem>
+                <SelectItem value="10" className="min-h-[44px]">10 téléchargements</SelectItem>
+                <SelectItem value="-1" className="min-h-[44px]">Illimité</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-sm text-muted-foreground">
@@ -135,14 +135,14 @@ export const DigitalLicenseConfig = ({
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7">7 jours</SelectItem>
-                <SelectItem value="14">14 jours</SelectItem>
-                <SelectItem value="30">30 jours</SelectItem>
-                <SelectItem value="60">60 jours</SelectItem>
-                <SelectItem value="90">90 jours</SelectItem>
-                <SelectItem value="365">1 an</SelectItem>
-                <SelectItem value="-1">Permanent</SelectItem>
+              <SelectContent className="z-[1060]">
+                <SelectItem value="7" className="min-h-[44px]">7 jours</SelectItem>
+                <SelectItem value="14" className="min-h-[44px]">14 jours</SelectItem>
+                <SelectItem value="30" className="min-h-[44px]">30 jours</SelectItem>
+                <SelectItem value="60" className="min-h-[44px]">60 jours</SelectItem>
+                <SelectItem value="90" className="min-h-[44px]">90 jours</SelectItem>
+                <SelectItem value="365" className="min-h-[44px]">1 an</SelectItem>
+                <SelectItem value="-1" className="min-h-[44px]">Permanent</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-sm text-muted-foreground">

@@ -78,10 +78,10 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="XOF">XOF (Franc CFA)</SelectItem>
-                  <SelectItem value="EUR">EUR (Euro)</SelectItem>
-                  <SelectItem value="USD">USD (Dollar)</SelectItem>
+                <SelectContent className="z-[1060]">
+                  <SelectItem value="XOF" className="min-h-[44px]">XOF (Franc CFA)</SelectItem>
+                  <SelectItem value="EUR" className="min-h-[44px]">EUR (Euro)</SelectItem>
+                  <SelectItem value="USD" className="min-h-[44px]">USD (Dollar)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
