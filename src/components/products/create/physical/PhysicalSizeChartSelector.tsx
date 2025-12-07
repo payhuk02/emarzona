@@ -263,10 +263,10 @@ export function PhysicalSizeChartSelector({
               <SelectTrigger className="flex-1">
                 <SelectValue placeholder="Aucun size chart sélectionné" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">Aucun size chart</SelectItem>
+              <SelectContent className="z-[1060]">
+                <SelectItem value="__none__" className="min-h-[44px]">Aucun size chart</SelectItem>
                 {sizeCharts?.map((chart) => (
-                  <SelectItem key={chart.id} value={chart.id}>
+                  <SelectItem key={chart.id} value={chart.id} className="min-h-[44px]">
                     {chart.name} ({chart.system.toUpperCase()})
                   </SelectItem>
                 ))}

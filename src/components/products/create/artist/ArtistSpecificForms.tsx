@@ -82,10 +82,10 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="paperback">Broché</SelectItem>
-                <SelectItem value="hardcover">Relié</SelectItem>
-                <SelectItem value="ebook">Ebook</SelectItem>
+              <SelectContent className="z-[1060]">
+                <SelectItem value="paperback" className="min-h-[44px]">Broché</SelectItem>
+                <SelectItem value="hardcover" className="min-h-[44px]">Relié</SelectItem>
+                <SelectItem value="ebook" className="min-h-[44px]">Ebook</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -183,11 +183,11 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="cd">CD</SelectItem>
-                <SelectItem value="vinyl">Vinyle</SelectItem>
-                <SelectItem value="digital">Digital</SelectItem>
-                <SelectItem value="cassette">Cassette</SelectItem>
+              <SelectContent className="z-[1060]">
+                <SelectItem value="cd" className="min-h-[44px]">CD</SelectItem>
+                <SelectItem value="vinyl" className="min-h-[44px]">Vinyle</SelectItem>
+                <SelectItem value="digital" className="min-h-[44px]">Digital</SelectItem>
+                <SelectItem value="cassette" className="min-h-[44px]">Cassette</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -344,10 +344,10 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="exclusive">Exclusive</SelectItem>
-                <SelectItem value="non_exclusive">Non-exclusive</SelectItem>
-                <SelectItem value="royalty_free">Royalty-free</SelectItem>
+              <SelectContent className="z-[1060]">
+                <SelectItem value="exclusive" className="min-h-[44px]">Exclusive</SelectItem>
+                <SelectItem value="non_exclusive" className="min-h-[44px]">Non-exclusive</SelectItem>
+                <SelectItem value="royalty_free" className="min-h-[44px]">Royalty-free</SelectItem>
               </SelectContent>
             </Select>
           </div>

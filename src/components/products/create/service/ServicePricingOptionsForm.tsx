@@ -42,10 +42,10 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="fixed">Prix fixe</SelectItem>
-              <SelectItem value="hourly">Tarif horaire</SelectItem>
-              <SelectItem value="per_participant">Par participant</SelectItem>
+            <SelectContent className="z-[1060]">
+              <SelectItem value="fixed" className="min-h-[44px]">Prix fixe</SelectItem>
+              <SelectItem value="hourly" className="min-h-[44px]">Tarif horaire</SelectItem>
+              <SelectItem value="per_participant" className="min-h-[44px]">Par participant</SelectItem>
             </SelectContent>
           </Select>
 
@@ -91,9 +91,9 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
                 <SelectTrigger id="deposit_type">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fixed">Montant fixe (XOF)</SelectItem>
-                  <SelectItem value="percentage">Pourcentage (%)</SelectItem>
+                <SelectContent className="z-[1060]">
+                  <SelectItem value="fixed" className="min-h-[44px]">Montant fixe (XOF)</SelectItem>
+                  <SelectItem value="percentage" className="min-h-[44px]">Pourcentage (%)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

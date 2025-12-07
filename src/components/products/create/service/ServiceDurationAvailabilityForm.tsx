@@ -138,26 +138,26 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="on_site">
+            <SelectContent className="z-[1060]">
+              <SelectItem value="on_site" className="min-h-[44px]">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   Sur place (à votre adresse)
                 </div>
               </SelectItem>
-              <SelectItem value="online">
+              <SelectItem value="online" className="min-h-[44px]">
                 <div className="flex items-center gap-2">
                   <Video className="h-4 w-4" />
                   En ligne (visioconférence)
                 </div>
               </SelectItem>
-              <SelectItem value="customer_location">
+              <SelectItem value="customer_location" className="min-h-[44px]">
                 <div className="flex items-center gap-2">
                   <Home className="h-4 w-4" />
                   Chez le client
                 </div>
               </SelectItem>
-              <SelectItem value="flexible">
+              <SelectItem value="flexible" className="min-h-[44px]">
                 <div className="flex items-center gap-2">
                   <Navigation className="h-4 w-4" />
                   Flexible
@@ -217,9 +217,9 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
                     <SelectTrigger className="w-[140px]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[1060]">
                       {DAYS_OF_WEEK.map((day) => (
-                        <SelectItem key={day.value} value={day.value.toString()}>
+                        <SelectItem key={day.value} value={day.value.toString()} className="min-h-[44px]">
                           {day.label}
                         </SelectItem>
                       ))}

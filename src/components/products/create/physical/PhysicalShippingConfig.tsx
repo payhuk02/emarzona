@@ -81,11 +81,11 @@ export const PhysicalShippingConfig = ({ data, onUpdate }: PhysicalShippingConfi
                     <SelectTrigger id="weight_unit">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="kg">Kilogrammes (kg)</SelectItem>
-                      <SelectItem value="g">Grammes (g)</SelectItem>
-                      <SelectItem value="lb">Livres (lb)</SelectItem>
-                      <SelectItem value="oz">Onces (oz)</SelectItem>
+                    <SelectContent className="z-[1060]">
+                      <SelectItem value="kg" className="min-h-[44px]">Kilogrammes (kg)</SelectItem>
+                      <SelectItem value="g" className="min-h-[44px]">Grammes (g)</SelectItem>
+                      <SelectItem value="lb" className="min-h-[44px]">Livres (lb)</SelectItem>
+                      <SelectItem value="oz" className="min-h-[44px]">Onces (oz)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -186,9 +186,9 @@ export const PhysicalShippingConfig = ({ data, onUpdate }: PhysicalShippingConfi
                     <SelectTrigger id="dim_unit">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cm">Centimètres</SelectItem>
-                      <SelectItem value="in">Pouces</SelectItem>
+                    <SelectContent className="z-[1060]">
+                      <SelectItem value="cm" className="min-h-[44px]">Centimètres</SelectItem>
+                      <SelectItem value="in" className="min-h-[44px]">Pouces</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
