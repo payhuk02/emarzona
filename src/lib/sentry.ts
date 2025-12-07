@@ -1,10 +1,22 @@
 import * as Sentry from '@sentry/react';
 import { logger } from './logger';
 
+// Variable pour suivre si Sentry a déjà été initialisé
+let isSentryInitialized = false;
+
 /**
  * Configuration de Sentry pour le monitoring d'erreurs
  */
 export const initSentry = () => {
+  // Vérifier si Sentry est déjà initialisé pour éviter les erreurs de double initialisation
+  // Cela peut arriver avec le hot reload de Vite en développement
+  if (isSentryInitialized || Sentry.getClient()) {
+    logger.debug('Sentry déjà initialisé, skip.', {
+      environment: import.meta.env.MODE,
+    });
+    return;
+  }
+  
   const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN;
   const ENV = import.meta.env.MODE;
   
@@ -53,26 +65,27 @@ export const initSentry = () => {
     // Ne pas bloquer l'initialisation, Sentry validera de toute façon
   }
 
-  Sentry.init({
-    dsn: SENTRY_DSN,
-    environment: ENV,
-    integrations: [
-      Sentry.browserTracingIntegration({
-        // Trace les navigations
-        enableInp: true, // Interaction to Next Paint
-        enableLongTask: true, // Long tasks
-        enableWebVitalsInstrumentation: true, // Web Vitals
-      }),
-      Sentry.replayIntegration({
-        maskAllText: false,
-        blockAllMedia: false,
-        // Capturer les sessions avec erreurs - Réduit pour éviter 429
-        sessionSampleRate: ENV === 'production' ? 0.05 : 0.5,
-        errorSampleRate: ENV === 'production' ? 0.5 : 1.0,
-      }),
-      // Note: React Router integration sera ajoutée si nécessaire
-      // Sentry.reactRouterV6BrowserTracingIntegration n'est pas disponible dans cette version
-    ],
+  try {
+    Sentry.init({
+      dsn: SENTRY_DSN,
+      environment: ENV,
+      integrations: [
+        Sentry.browserTracingIntegration({
+          // Trace les navigations
+          enableInp: true, // Interaction to Next Paint
+          enableLongTask: true, // Long tasks
+          enableWebVitalsInstrumentation: true, // Web Vitals
+        }),
+        Sentry.replayIntegration({
+          maskAllText: false,
+          blockAllMedia: false,
+          // Capturer les sessions avec erreurs - Réduit pour éviter 429
+          sessionSampleRate: ENV === 'production' ? 0.05 : 0.5,
+          errorSampleRate: ENV === 'production' ? 0.5 : 1.0,
+        }),
+        // Note: React Router integration sera ajoutée si nécessaire
+        // Sentry.reactRouterV6BrowserTracingIntegration n'est pas disponible dans cette version
+      ],
     
     // Performance Monitoring - APM amélioré
     // Réduire les sample rates pour éviter les erreurs 429
@@ -174,14 +187,26 @@ export const initSentry = () => {
       }
       return breadcrumb;
     },
-  });
-  
-  logger.info('Sentry initialisé avec succès', {
-    environment: ENV,
-    tracesSampleRate: ENV === 'production' ? 0.1 : 0.5,
-    profilesSampleRate: ENV === 'production' ? 0.05 : 0.5,
-    replaySampleRate: ENV === 'production' ? 0.05 : 0.5,
-  });
+    });
+    
+    // Marquer Sentry comme initialisé
+    isSentryInitialized = true;
+    
+    logger.info('Sentry initialisé avec succès', {
+      environment: ENV,
+      tracesSampleRate: ENV === 'production' ? 0.1 : 0.5,
+      profilesSampleRate: ENV === 'production' ? 0.05 : 0.5,
+      replaySampleRate: ENV === 'production' ? 0.05 : 0.5,
+    });
+  } catch (error) {
+    // Si l'initialisation échoue (par exemple, double initialisation), logger l'erreur mais ne pas la propager
+    logger.warn('Erreur lors de l\'initialisation de Sentry (peut être une double initialisation)', {
+      error: error instanceof Error ? error.message : String(error),
+      environment: ENV,
+    });
+    // Marquer comme initialisé quand même pour éviter les tentatives répétées
+    isSentryInitialized = true;
+  }
 };
 
 /**
