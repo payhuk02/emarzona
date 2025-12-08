@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProductGrid } from "@/components/ui/ProductGrid";
+import { VirtualizedProductGrid } from "@/components/ui/VirtualizedProductGrid";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -1132,30 +1133,65 @@ const Marketplace = () => {
                 </div>
               )}
 
-              <ProductGrid className={isLoadingProducts && hasLoadedOnce ? 'opacity-75 transition-opacity duration-300' : ''}>
-                {displayProducts.map((product) => {
-                  // Transformer le produit vers le format unifié
-                  const unifiedProduct = transformToUnifiedProduct(product);
-                  
-                  return (
-                    <UnifiedProductCard
-                      key={product.id}
-                      product={unifiedProduct}
-                      variant="marketplace"
-                      showAffiliate={true}
-                      showActions={true}
-                      onAction={(action, prod) => {
-                        if (action === 'view') {
-                          // Navigation gérée par le Link dans UnifiedProductCard
-                        } else if (action === 'buy') {
-                          // Logique d'achat existante
-                          handleBuyProduct(prod);
-                        }
-                      }}
-                    />
-                  );
-                })}
-              </ProductGrid>
+              {/* Utiliser VirtualizedProductGrid pour les grandes listes (20+ produits) */}
+              {displayProducts.length >= 20 ? (
+                <VirtualizedProductGrid
+                  count={displayProducts.length}
+                  renderItem={(index) => {
+                    const product = displayProducts[index];
+                    if (!product) return null;
+                    
+                    const unifiedProduct = transformToUnifiedProduct(product);
+                    
+                    return (
+                      <UnifiedProductCard
+                        key={product.id}
+                        product={unifiedProduct}
+                        variant="marketplace"
+                        showAffiliate={true}
+                        showActions={true}
+                        onAction={(action, prod) => {
+                          if (action === 'view') {
+                            // Navigation gérée par le Link dans UnifiedProductCard
+                          } else if (action === 'buy') {
+                            // Logique d'achat existante
+                            handleBuyProduct(prod);
+                          }
+                        }}
+                      />
+                    );
+                  }}
+                  loading={isLoadingProducts && hasLoadedOnce}
+                  loadingCount={pagination.itemsPerPage}
+                  className={isLoadingProducts && hasLoadedOnce ? 'opacity-75 transition-opacity duration-300' : ''}
+                  emptyMessage={t('marketplace.noProducts')}
+                />
+              ) : (
+                <ProductGrid className={isLoadingProducts && hasLoadedOnce ? 'opacity-75 transition-opacity duration-300' : ''}>
+                  {displayProducts.map((product) => {
+                    // Transformer le produit vers le format unifié
+                    const unifiedProduct = transformToUnifiedProduct(product);
+                    
+                    return (
+                      <UnifiedProductCard
+                        key={product.id}
+                        product={unifiedProduct}
+                        variant="marketplace"
+                        showAffiliate={true}
+                        showActions={true}
+                        onAction={(action, prod) => {
+                          if (action === 'view') {
+                            // Navigation gérée par le Link dans UnifiedProductCard
+                          } else if (action === 'buy') {
+                            // Logique d'achat existante
+                            handleBuyProduct(prod);
+                          }
+                        }}
+                      />
+                    );
+                  })}
+                </ProductGrid>
+              )}
 
               {/* Pagination */}
               {totalPages > 1 && (

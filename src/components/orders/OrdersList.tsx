@@ -38,7 +38,7 @@ const OrdersListComponent = ({
 
       {/* Mobile: Card View (hidden on desktop/tablet) */}
       <div className="md:hidden">
-        {orders.length > 50 ? (
+        {orders.length >= 20 ? (
           <OrdersListVirtualized
             orders={orders}
             onUpdate={onUpdate}
