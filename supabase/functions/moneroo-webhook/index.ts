@@ -513,6 +513,18 @@ serve(async (req) => {
       updates.moneroo_refund_amount = payload.amount;
       updates.moneroo_refund_reason = payload.reason;
 
+      // 🔧 CORRECTION : Mettre à jour l'order associée pour déclencher la mise à jour de store_earnings
+      if (transaction.order_id) {
+        await supabase
+          .from('orders')
+          .update({
+            payment_status: 'refunded',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', transaction.order_id)
+          .catch((err) => console.error('Error updating order with refund:', err));
+      }
+
       // Create refund notification
       if (transaction.customer_id) {
         await supabase.from('notifications').insert({

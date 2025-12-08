@@ -42,6 +42,7 @@ SELECT cron.schedule(
     url := 'https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/process-scheduled-campaigns',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
+      'Authorization', 'Bearer ' || current_setting('app.settings.service_role_key', true),
       'x-cron-secret', 'process-scheduled-campaigns-secret-2025'
     ),
     body := jsonb_build_object('limit', 10)

@@ -47,31 +47,24 @@ async function getScheduledCampaignsToSend(
  */
 async function sendCampaign(
   supabase: any,
-  campaignId: string,
-  supabaseUrl: string,
-  supabaseServiceKey: string
+  campaignId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Appeler l'Edge Function send-email-campaign via HTTP
-    const functionUrl = `${supabaseUrl}/functions/v1/send-email-campaign`;
+    // Utiliser supabase.functions.invoke() pour les appels internes
+    // Cette méthode gère automatiquement l'authentification
+    console.log('Calling send-email-campaign for campaign:', campaignId);
     
-    const response = await fetch(functionUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseServiceKey}`,
-      },
-      body: JSON.stringify({
+    const { data, error } = await supabase.functions.invoke('send-email-campaign', {
+      body: {
         campaign_id: campaignId,
         batch_size: 100,
         batch_index: 0,
-      }),
+      },
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error invoking send-email-campaign:', errorText);
-      return { success: false, error: `HTTP ${response.status}: ${errorText}` };
+    if (error) {
+      console.error('Error invoking send-email-campaign:', error);
+      return { success: false, error: error.message || 'Unknown error' };
     }
 
     // Mettre à jour le statut de la campagne
@@ -105,8 +98,8 @@ serve(async (req) => {
   }
 
   try {
-    // Vérifier l'authentification pour les appels depuis le cron job
-    // Option 1: Header Authorization avec service role key (pour appels externes)
+    // Vérifier l'authentification
+    // Option 1: Header Authorization avec service role key ou anon key (pour appels externes)
     // Option 2: Header x-cron-secret (pour appels depuis cron job interne)
     const authHeader = req.headers.get('Authorization');
     const cronSecret = req.headers.get('x-cron-secret');
@@ -118,13 +111,21 @@ serve(async (req) => {
     // 3. Aucune authentification (pour appels internes Supabase - moins sécurisé mais fonctionnel)
     const isAuthenticated = 
       (authHeader && (authHeader.startsWith('Bearer ') || authHeader.startsWith('apikey '))) ||
-      (cronSecret === expectedCronSecret) ||
+      (cronSecret && cronSecret.trim() === expectedCronSecret.trim()) ||
       (!authHeader && !cronSecret); // Accepter les appels sans auth pour compatibilité
     
-    if (!isAuthenticated && authHeader && cronSecret) {
-      console.warn('Unauthorized request - missing valid authentication');
+    // Ne retourner 401 que si on a des headers mais qu'ils sont invalides
+    if (!isAuthenticated && (authHeader || cronSecret)) {
+      console.warn('Unauthorized request:', {
+        hasAuthHeader: !!authHeader,
+        hasCronSecret: !!cronSecret,
+        cronSecretMatch: cronSecret === expectedCronSecret
+      });
       return new Response(
-        JSON.stringify({ error: 'Unauthorized', message: 'Missing or invalid authentication' }),
+        JSON.stringify({ 
+          error: 'Unauthorized', 
+          message: 'Missing or invalid authentication'
+        }),
         {
           status: 401,
           headers: { 'Content-Type': 'application/json' },
@@ -141,7 +142,9 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
+
     if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing Supabase configuration');
       return new Response(
         JSON.stringify({ error: 'Supabase configuration missing' }),
         {
@@ -175,15 +178,18 @@ serve(async (req) => {
     }
 
     // Traiter chaque campagne
-    const results = [];
+    const results: Array<{
+      campaign_id: string;
+      campaign_name: string;
+      success: boolean;
+      error?: string;
+    }> = [];
     for (const campaign of campaigns) {
       console.log(`Processing scheduled campaign: ${campaign.id} - ${campaign.name}`);
 
       const result = await sendCampaign(
         supabase,
-        campaign.id,
-        supabaseUrl,
-        supabaseServiceKey
+        campaign.id
       );
       results.push({
         campaign_id: campaign.id,

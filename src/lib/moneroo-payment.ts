@@ -614,6 +614,26 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
       logger.error("Error updating transaction with refund:", updateError);
     }
 
+    // 🔧 CORRECTION : Mettre à jour l'order associée pour déclencher la mise à jour de store_earnings
+    if (transaction.order_id) {
+      const { error: orderUpdateError } = await supabase
+        .from("orders")
+        .update({
+          payment_status: "refunded",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", transaction.order_id);
+
+      if (orderUpdateError) {
+        logger.error("Error updating order with refund:", orderUpdateError);
+      } else {
+        logger.log("Order updated with refund status:", {
+          orderId: transaction.order_id,
+          transactionId,
+        });
+      }
+    }
+
     // Log de remboursement complété
     await supabase.from("transaction_logs").insert([{
       transaction_id: transactionId,
