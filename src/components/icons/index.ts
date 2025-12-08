@@ -136,4 +136,5 @@ export {
   Upload,
   SlidersHorizontal,
   Rocket,
+  Send,
 } from 'lucide-react';
