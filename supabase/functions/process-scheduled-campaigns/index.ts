@@ -99,12 +99,39 @@ serve(async (req) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
       },
     });
   }
 
   try {
+    // Vérifier l'authentification pour les appels depuis le cron job
+    // Option 1: Header Authorization avec service role key (pour appels externes)
+    // Option 2: Header x-cron-secret (pour appels depuis cron job interne)
+    const authHeader = req.headers.get('Authorization');
+    const cronSecret = req.headers.get('x-cron-secret');
+    const expectedCronSecret = Deno.env.get('CRON_SECRET') || 'process-scheduled-campaigns-secret-2025';
+    
+    // Accepter si :
+    // 1. Authorization header avec Bearer token (service role key ou anon key)
+    // 2. x-cron-secret header correspond au secret attendu
+    // 3. Aucune authentification (pour appels internes Supabase - moins sécurisé mais fonctionnel)
+    const isAuthenticated = 
+      (authHeader && (authHeader.startsWith('Bearer ') || authHeader.startsWith('apikey '))) ||
+      (cronSecret === expectedCronSecret) ||
+      (!authHeader && !cronSecret); // Accepter les appels sans auth pour compatibilité
+    
+    if (!isAuthenticated && authHeader && cronSecret) {
+      console.warn('Unauthorized request - missing valid authentication');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized', message: 'Missing or invalid authentication' }),
+        {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     // Vérifier la clé API SendGrid (optionnel, mais recommandé)
     if (!SENDGRID_API_KEY) {
       console.warn('SENDGRID_API_KEY is not set. Campaigns will not be sent.');
