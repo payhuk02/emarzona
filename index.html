@@ -35,15 +35,17 @@
     <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     <link rel="dns-prefetch" href="https://www.google-analytics.com" />
     
-    <!-- ✅ Google Fonts avec preconnect optimisé -->
+    <!-- ✅ PERFORMANCE: Google Fonts optimisé pour FCP -->
+    <!-- Preconnect pour établir la connexion rapidement -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Font loading optimisé avec display=swap pour améliorer FCP -->
+    <!-- ✅ PERFORMANCE: Font-display swap pour éviter FOIT (Flash of Invisible Text) -->
+    <!-- ✅ PERFORMANCE: Chargement asynchrone des fonts pour ne pas bloquer le render -->
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
       media="print"
-      onload="this.media='all'"
+      onload="this.media='all';this.onload=null;"
     />
     <noscript>
       <link
@@ -58,8 +60,9 @@
     <!-- ✅ Prefetch pour les routes critiques (améliore la navigation) -->
     <!-- Note: Les prefetch sont gérés dynamiquement par React Router -->
     
-    <!-- ✅ Preload pour les ressources critiques (améliore FCP et LCP) -->
-    <link rel="preload" href="/src/main.tsx" as="script" crossorigin />
+    <!-- ✅ PERFORMANCE: Preload retiré pour éviter le warning -->
+    <!-- Le preload de main.tsx causait un warning car il n'est pas utilisé immédiatement -->
+    <!-- Le module est déjà chargé via le script type="module" dans le body -->
     
     <!-- ✅ Preconnect pour CDN et services externes (améliore TTFB) -->
     <link rel="preconnect" href="https://storage.googleapis.com" />

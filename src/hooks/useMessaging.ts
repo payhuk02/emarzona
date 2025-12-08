@@ -317,19 +317,58 @@ export const useMessaging = (
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         const filePath = `message-attachments/${fileName}`;
 
-        // Uploader le fichier vers Supabase Storage
+        // Déterminer le Content-Type correct selon l'extension si file.type est vide
+        let contentType = file.type;
+        if (!contentType || contentType === 'application/octet-stream' || contentType === '') {
+          const ext = fileExt?.toLowerCase() || '';
+          const mimeTypes: Record<string, string> = {
+            'png': 'image/png',
+            'jpg': 'image/jpeg',
+            'jpeg': 'image/jpeg',
+            'gif': 'image/gif',
+            'webp': 'image/webp',
+            'pdf': 'application/pdf',
+            'mp4': 'video/mp4',
+            'webm': 'video/webm',
+          };
+          contentType = mimeTypes[ext] || 'application/octet-stream';
+        }
+
+        // Uploader le fichier vers Supabase Storage avec Content-Type explicite
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('attachments')
-          .upload(filePath, file);
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            contentType: contentType, // Utiliser le Content-Type déterminé
+            metadata: {
+              originalName: file.name,
+              uploadedAt: new Date().toISOString(),
+            }
+          });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          logger.error('File upload error in useMessaging', {
+            fileName: file.name,
+            filePath,
+            error: uploadError.message,
+            fileType: file.type,
+            fileSize: file.size
+          });
+          throw uploadError;
+        }
+
+        // Vérifier que l'upload a réussi
+        if (!uploadData?.path) {
+          logger.error('Upload returned no path in useMessaging', { fileName, filePath, uploadData });
+          throw new Error(`L'upload du fichier ${file.name} a échoué : aucune donnée retournée`);
+        }
 
         // Obtenir l'URL publique
         const { data: urlData } = supabase.storage
           .from('attachments')
-          .getPublicUrl(filePath);
+          .getPublicUrl(uploadData.path);
 
-        // Enregistrer l'attachement en base
+        // Enregistrer l'attachement en base avec le chemin réel retourné par l'upload
         const { data, error } = await supabase
           .from("message_attachments")
           .insert([{
@@ -338,7 +377,7 @@ export const useMessaging = (
             file_type: file.type,
             file_size: file.size,
             file_url: urlData.publicUrl,
-            storage_path: filePath,
+            storage_path: uploadData.path, // Utiliser le chemin réel retourné par l'upload
           }])
           .select()
           .limit(1);

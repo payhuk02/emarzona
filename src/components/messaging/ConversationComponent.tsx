@@ -38,7 +38,10 @@ import {
   Store,
   Crown,
   Loader2,
-  X
+  X,
+  Image,
+  Video,
+  File
 } from "lucide-react";
 import { useMessaging } from "@/hooks/useMessaging";
 import { Message, MessageType, SenderType, Conversation } from "@/types/advanced-features";

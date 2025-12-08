@@ -67,6 +67,7 @@ export interface VendorMessageFormData {
     file_type: string;
     file_size: number;
     file_url: string;
+    storage_path?: string;
   }>;
 }
 
@@ -215,11 +216,34 @@ export const useVendorMessaging = (
       if (messagesError) throw messagesError;
 
       // Récupérer les profils des expéditeurs séparément
-      const senderIds = [...new Set((messagesData || []).map((m: any) => m.sender_id))];
-      const { data: profilesData } = await supabase
-        .from("profiles")
-        .select("user_id, name, avatar_url")
-        .in("user_id", senderIds);
+      // Filtrer les IDs null/invalides et valider le format UUID
+      const senderIds = [...new Set((messagesData || []).map((m: any) => m.sender_id).filter(Boolean))];
+      
+      // Valider que les IDs sont des UUIDs valides
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const validSenderIds = senderIds.filter((id: string) => {
+        if (!id || typeof id !== 'string') return false;
+        return uuidRegex.test(id);
+      });
+
+      let profilesData = null;
+      if (validSenderIds.length > 0) {
+        const { data, error: profilesError } = await supabase
+          .from("profiles")
+          .select("user_id, name, avatar_url")
+          .in("user_id", validSenderIds);
+        
+        if (profilesError) {
+          logger.error("Error fetching profiles for vendor messages", { 
+            error: profilesError,
+            senderIds: validSenderIds.length,
+            originalSenderIds: senderIds.length
+          });
+          // Ne pas bloquer l'affichage des messages si les profils échouent
+        } else {
+          profilesData = data;
+        }
+      }
 
       // Combiner les messages avec les profils
       const messagesWithSenders = (messagesData || []).map((message: any) => {
@@ -455,20 +479,28 @@ export const useVendorMessaging = (
   };
 
   // Uploader des fichiers attachés
-  const uploadAttachments = async (messageId: string, attachments: Array<{ file_name: string; file_type: string; file_size: number; file_url: string }>): Promise<void> => {
+  const uploadAttachments = async (messageId: string, attachments: Array<{ file_name: string; file_type: string; file_size: number; file_url: string; storage_path?: string }>): Promise<void> => {
     for (const attachment of attachments) {
       try {
-        // Extraire le chemin de stockage depuis l'URL
-        // Format attendu: https://xxx.supabase.co/storage/v1/object/public/attachments/vendor-message-attachments/xxx.png
-        let storagePath = attachment.file_url;
-        const urlMatch = attachment.file_url.match(/\/storage\/v1\/object\/public\/attachments\/(.+)$/);
-        if (urlMatch) {
-          storagePath = urlMatch[1];
-        } else {
-          // Si l'URL ne correspond pas au format attendu, essayer d'extraire le chemin autrement
-          const pathMatch = attachment.file_url.match(/attachments\/(.+)$/);
-          if (pathMatch) {
-            storagePath = pathMatch[1];
+        // Utiliser storage_path si fourni, sinon extraire depuis l'URL
+        let storagePath = attachment.storage_path;
+        
+        if (!storagePath) {
+          // Extraire le chemin de stockage depuis l'URL
+          // Format attendu: https://xxx.supabase.co/storage/v1/object/public/attachments/vendor-message-attachments/xxx.png
+          const urlMatch = attachment.file_url.match(/\/storage\/v1\/object\/public\/attachments\/(.+)$/);
+          if (urlMatch) {
+            storagePath = decodeURIComponent(urlMatch[1]);
+          } else {
+            // Si l'URL ne correspond pas au format attendu, essayer d'extraire le chemin autrement
+            const pathMatch = attachment.file_url.match(/attachments\/(.+)$/);
+            if (pathMatch) {
+              storagePath = decodeURIComponent(pathMatch[1]);
+            } else {
+              // Fallback : utiliser l'URL complète comme chemin (ne devrait pas arriver)
+              logger.warn('Could not extract storage_path from URL', { fileUrl: attachment.file_url });
+              storagePath = attachment.file_url;
+            }
           }
         }
 

@@ -143,20 +143,61 @@ export default function VendorMessaging() {
 
       // Upload files if any
       const fileUrls: string[] = [];
+      const storagePaths: string[] = [];
       if (selectedFiles.length > 0) {
         for (const file of selectedFiles) {
           const fileExt = file.name.split('.').pop();
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
           const filePath = `vendor-message-attachments/${fileName}`;
 
+          // Déterminer le Content-Type correct selon l'extension si file.type est vide
+          let contentType = file.type;
+          if (!contentType || contentType === 'application/octet-stream' || contentType === '') {
+            const ext = fileExt.toLowerCase();
+            const mimeTypes: Record<string, string> = {
+              'png': 'image/png',
+              'jpg': 'image/jpeg',
+              'jpeg': 'image/jpeg',
+              'gif': 'image/gif',
+              'webp': 'image/webp',
+              'pdf': 'application/pdf',
+              'mp4': 'video/mp4',
+              'webm': 'video/webm',
+            };
+            contentType = mimeTypes[ext] || 'application/octet-stream';
+          }
+
+          // Uploader avec Content-Type explicite pour garantir le bon type MIME
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('attachments')
             .upload(filePath, file, {
               cacheControl: '3600',
-              upsert: false
+              upsert: false,
+              contentType: contentType, // Utiliser le Content-Type déterminé
+              metadata: {
+                originalName: file.name,
+                uploadedAt: new Date().toISOString(),
+              }
             });
 
-          if (uploadError) throw uploadError;
+          if (uploadError) {
+            logger.error('File upload error', {
+              fileName: file.name,
+              filePath,
+              error: uploadError.message,
+              fileType: file.type,
+              fileSize: file.size
+            });
+            throw uploadError;
+          }
+
+          // Vérifier que l'upload a réussi
+          if (!uploadData?.path) {
+            logger.error('Upload returned no path', { fileName, filePath, uploadData });
+            throw new Error(`L'upload du fichier ${file.name} a échoué : aucune donnée retournée`);
+          }
+
+          storagePaths.push(uploadData.path);
 
           // Générer l'URL publique avec vérification
           const { data: urlData, error: urlError } = supabase.storage
@@ -226,6 +267,7 @@ export default function VendorMessaging() {
           file_type: file.type,
           file_size: file.size,
           file_url: fileUrls[index] || '',
+          storage_path: storagePaths[index] || `vendor-message-attachments/${Date.now()}-${Math.random().toString(36).substring(2)}.${file.name.split('.').pop()}`,
         })),
       };
 

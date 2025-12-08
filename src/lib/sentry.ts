@@ -47,13 +47,12 @@ export const initSentry = () => {
     return;
   }
 
-  // Vérifier le format du DSN Sentry (validation plus permissive)
+  // Vérifier le format du DSN Sentry
   // Format attendu: https://<key>@<host>/<project_id>
-  // Exemple: https://abc123@o123456.ingest.sentry.io/1234567
-  // Note: Le DSN peut aussi être au format https://<key>@<host>/<project_id> sans @ si c'est un format différent
-  // On laisse Sentry valider le format exact, on fait juste une vérification basique
+  // Exemple: https://abc123def456@o123456.ingest.sentry.io/7891011
   const hasAtSymbol = SENTRY_DSN.includes('@');
   const hasSlash = SENTRY_DSN.includes('/');
+  const parts = SENTRY_DSN.split('@');
   
   if (!hasAtSymbol || !hasSlash) {
     logger.warn('Sentry DSN format suspect. Format attendu: https://<key>@<host>/<project_id>', {
@@ -61,8 +60,16 @@ export const initSentry = () => {
       dsnPrefix: SENTRY_DSN.substring(0, 50) + '...',
       hasAtSymbol,
       hasSlash,
+      suggestion: hasAtSymbol === false 
+        ? 'Le DSN semble manquer le séparateur "@". Vérifiez votre DSN dans le dashboard Sentry.'
+        : 'Le DSN semble incomplet. Format attendu: https://<key>@<host>/<project_id>'
     });
     // Ne pas bloquer l'initialisation, Sentry validera de toute façon
+  } else if (parts.length > 2) {
+    logger.warn('Sentry DSN contient plusieurs "@" - format suspect', {
+      environment: ENV,
+      dsnPrefix: SENTRY_DSN.substring(0, 50) + '...',
+    });
   }
 
   try {
