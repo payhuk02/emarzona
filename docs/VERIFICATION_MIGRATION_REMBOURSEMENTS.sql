@@ -40,3 +40,4 @@ SELECT
   COUNT(*) FILTER (WHERE payment_status = 'pending') as pending_orders
 FROM orders;
 
+

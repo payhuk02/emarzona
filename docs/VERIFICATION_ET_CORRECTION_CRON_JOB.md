@@ -91,3 +91,4 @@ Puis vérifiez les invocations dans Supabase Dashboard > Edge Functions > `proce
 
 **Dernière mise à jour** : 30 Janvier 2025
 
+

@@ -65,3 +65,4 @@ Même si l'erreur `401` est résolue, vous devez **toujours configurer `SENDGRID
 
 **Dernière mise à jour** : 30 Janvier 2025
 
+

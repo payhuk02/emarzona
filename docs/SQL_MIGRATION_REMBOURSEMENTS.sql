@@ -41,3 +41,4 @@ COMMENT ON FUNCTION public.trigger_update_store_earnings_on_order() IS 'Met à j
 -- FROM pg_proc
 -- WHERE proname = 'trigger_update_store_earnings_on_order';
 
+

@@ -137,4 +137,7 @@ export {
   SlidersHorizontal,
   Rocket,
   Send,
+  Edit,
+  Play,
+  Pause,
 } from 'lucide-react';

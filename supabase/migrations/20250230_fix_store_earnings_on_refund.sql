@@ -33,3 +33,4 @@ $$;
 -- Commentaires
 COMMENT ON FUNCTION public.trigger_update_store_earnings_on_order() IS 'Met à jour automatiquement store_earnings quand une commande est complétée et payée, ou quand elle est remboursée.';
 
+

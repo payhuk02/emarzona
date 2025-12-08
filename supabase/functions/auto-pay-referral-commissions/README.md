@@ -56,3 +56,4 @@ Dans Supabase Dashboard > Database > Cron Jobs, créer un job :
 - Pour créer des retraits automatiques, il faudrait une fonction supplémentaire
 - La fonction limite à 100 commissions par exécution pour éviter la surcharge
 
+

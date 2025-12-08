@@ -171,3 +171,4 @@ WHERE store_id = 'store-uuid';
 **Dernière mise à jour** : 30 Janvier 2025  
 **Statut** : ✅ Déploiement terminé (vérification migration SQL requise)
 
+

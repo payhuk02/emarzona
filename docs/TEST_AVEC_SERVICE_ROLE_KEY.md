@@ -132,3 +132,4 @@ GROUP BY status, campaign_id;
 
 **Dernière mise à jour** : 30 Janvier 2025
 
+

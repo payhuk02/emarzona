@@ -57,3 +57,4 @@ Dans Supabase Dashboard > Database > Cron Jobs, créer un job :
 - La fonction limite à 50 stores par exécution pour éviter la surcharge
 - Les stores sans méthode de paiement par défaut sont ignorés
 
+

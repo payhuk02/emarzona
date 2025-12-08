@@ -130,3 +130,4 @@ Dans les logs des Edge Functions, vous devriez voir :
 
 **Dernière mise à jour** : 30 Janvier 2025
 
+

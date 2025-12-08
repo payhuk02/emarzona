@@ -149,3 +149,4 @@ supabase db push --include-all
 **Dernière mise à jour** : 30 Janvier 2025  
 **Statut** : ✅ Edge Function déployée, Migration SQL à appliquer manuellement
 
+

@@ -164,3 +164,4 @@ Dans SendGrid Dashboard :
 
 **Dernière mise à jour** : 30 Janvier 2025, 10:45 UTC
 
+

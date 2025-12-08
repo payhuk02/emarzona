@@ -44,3 +44,4 @@ SELECT
 FROM cron.job
 WHERE jobname = 'process-scheduled-email-campaigns';
 
+

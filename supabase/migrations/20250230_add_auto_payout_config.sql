@@ -47,3 +47,4 @@ COMMENT ON COLUMN public.platform_settings.settings IS 'Paramètres de la platef
 - auto_payout_vendors: Configuration pour reversement automatique des fonds vendeurs (enabled, delay_days, min_amount)
 - auto_pay_referral_commissions: Configuration pour paiement automatique des commissions parrainage (enabled, min_amount)';
 
+
