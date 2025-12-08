@@ -709,6 +709,8 @@ export default function VendorMessaging() {
                             src={currentConversation.product.image_url}
                             alt={currentConversation.product.name}
                             className="w-12 h-12 rounded object-cover"
+                            loading="lazy"
+                            decoding="async"
                           />
                         )}
                         <div>
