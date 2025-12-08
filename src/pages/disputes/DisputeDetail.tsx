@@ -62,6 +62,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { MediaAttachment } from '@/components/media';
+import { extractStoragePath } from '@/utils/storage';
 
 const DISPUTE_REASONS = [
   { value: 'not_received', label: 'Produit non reçu' },
@@ -483,18 +485,39 @@ export default function DisputeDetail() {
 
                                   {message.attachments && message.attachments.length > 0 && (
                                     <div className="mt-2 space-y-2">
-                                      {message.attachments.map((url: string, idx: number) => (
-                                        <a
-                                          key={idx}
-                                          href={url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="flex items-center gap-2 text-sm text-primary hover:underline"
-                                        >
-                                          <Paperclip className="h-3 w-3" />
-                                          Pièce jointe {idx + 1}
-                                        </a>
-                                      ))}
+                                      {message.attachments.map((url: string, idx: number) => {
+                                        // Extraire le nom de fichier depuis l'URL
+                                        const urlParts = url.split('/');
+                                        const fileName = urlParts[urlParts.length - 1] || `Pièce jointe ${idx + 1}`;
+                                        
+                                        // Extraire l'extension pour déterminer le type
+                                        const fileExtension = fileName.split('.').pop()?.toLowerCase() || '';
+                                        const storagePath = extractStoragePath(url);
+                                        
+                                        // Déterminer le type MIME approximatif depuis l'extension
+                                        let fileType = 'application/octet-stream';
+                                        if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(fileExtension)) {
+                                          fileType = `image/${fileExtension === 'jpg' ? 'jpeg' : fileExtension}`;
+                                        } else if (['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(fileExtension)) {
+                                          fileType = `video/${fileExtension}`;
+                                        } else if (fileExtension === 'pdf') {
+                                          fileType = 'application/pdf';
+                                        }
+                                        
+                                        return (
+                                          <MediaAttachment
+                                            key={idx}
+                                            attachment={{
+                                              id: `dispute-attachment-${idx}`,
+                                              file_name: fileName,
+                                              file_type: fileType,
+                                              file_url: url,
+                                              storage_path: storagePath || undefined,
+                                            }}
+                                            size="medium"
+                                          />
+                                        );
+                                      })}
                                     </div>
                                   )}
                                 </div>

@@ -19,7 +19,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Send,
   Paperclip,
-  Image as ImageIcon,
   MessageSquare,
   ArrowLeft,
   Loader2,
@@ -38,6 +37,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { logger } from '@/lib/logger';
+import { MediaAttachment } from '@/components/media';
 
 export default function VendorMessaging() {
   const { storeId, productId } = useParams<{ storeId?: string; productId?: string }>();
@@ -151,15 +151,56 @@ export default function VendorMessaging() {
 
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('attachments')
-            .upload(filePath, file);
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
 
           if (uploadError) throw uploadError;
 
-          const { data: urlData } = supabase.storage
+          // Générer l'URL publique avec vérification
+          const { data: urlData, error: urlError } = supabase.storage
             .from('attachments')
             .getPublicUrl(filePath);
 
-          fileUrls.push(urlData.publicUrl);
+          if (urlError || !urlData?.publicUrl) {
+            // Fallback : construire l'URL manuellement avec encodage correct
+            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+            if (supabaseUrl) {
+              const baseUrl = supabaseUrl.replace(/\/$/, '');
+              // Encoder chaque segment du chemin séparément
+              const encodedPath = filePath
+                .split('/')
+                .map(segment => encodeURIComponent(segment))
+                .join('/');
+              const fallbackUrl = `${baseUrl}/storage/v1/object/public/attachments/${encodedPath}`;
+              fileUrls.push(fallbackUrl);
+              logger.warn('Using fallback URL for attachment', { filePath, fallbackUrl });
+            } else {
+              throw new Error('Impossible de générer l\'URL publique du fichier');
+            }
+          } else {
+            // Vérifier que l'URL générée est valide
+            const publicUrl = urlData.publicUrl;
+            if (publicUrl && publicUrl.includes('/storage/v1/object/public/')) {
+              fileUrls.push(publicUrl);
+            } else {
+              // Si l'URL n'est pas valide, utiliser le fallback
+              const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+              if (supabaseUrl) {
+                const baseUrl = supabaseUrl.replace(/\/$/, '');
+                const encodedPath = filePath
+                  .split('/')
+                  .map(segment => encodeURIComponent(segment))
+                  .join('/');
+                const fallbackUrl = `${baseUrl}/storage/v1/object/public/attachments/${encodedPath}`;
+                fileUrls.push(fallbackUrl);
+                logger.warn('Invalid URL from getPublicUrl, using fallback', { originalUrl: publicUrl, fallbackUrl });
+              } else {
+                fileUrls.push(publicUrl); // Dernier recours
+              }
+            }
+          }
         }
       }
 
@@ -564,27 +605,18 @@ export default function VendorMessaging() {
                                 {message.attachments && message.attachments.length > 0 && (
                                   <div className="mt-2 space-y-2">
                                     {message.attachments.map((attachment) => (
-                                      <div key={attachment.id} className="flex items-center gap-2">
-                                        {attachment.file_type.startsWith('image/') ? (
-                                          <img
-                                            src={attachment.file_url}
-                                            alt={attachment.file_name}
-                                            className="max-w-full max-h-48 rounded"
-                                            loading="lazy"
-                                            decoding="async"
-                                          />
-                                        ) : (
-                                          <a
-                                            href={attachment.file_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-2 text-sm underline"
-                                          >
-                                            <Paperclip className="h-4 w-4" />
-                                            {attachment.file_name}
-                                          </a>
-                                        )}
-                                      </div>
+                                      <MediaAttachment
+                                        key={attachment.id}
+                                        attachment={{
+                                          id: attachment.id,
+                                          file_name: attachment.file_name,
+                                          file_type: attachment.file_type,
+                                          file_url: attachment.file_url,
+                                          storage_path: attachment.storage_path,
+                                          file_size: attachment.file_size,
+                                        }}
+                                        size="medium"
+                                      />
                                     ))}
                                   </div>
                                 )}

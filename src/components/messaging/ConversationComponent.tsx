@@ -25,9 +25,6 @@ import {
 import {
   Send,
   Paperclip,
-  Image,
-  Video,
-  File,
   MoreVertical,
   Shield,
   Lock,
@@ -49,6 +46,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
+import { MediaAttachment } from "@/components/media";
 
 interface ConversationComponentProps {
   orderId: string;
@@ -161,24 +159,18 @@ const MessageItem = memo<MessageItemProps>(({ message }) => {
         {message.attachments && message.attachments.length > 0 && (
           <div className="mt-2 space-y-2">
             {message.attachments.map((attachment) => (
-              <div 
-                key={attachment.id} 
-                className="flex items-center gap-2 p-2 bg-background/50 rounded"
-              >
-                {attachment.file_type.startsWith('image/') ? (
-                  <img
-                    src={attachment.file_url}
-                    alt={attachment.file_name}
-                    className="max-w-32 max-h-32 rounded object-contain"
-                    loading="lazy"
-                  />
-                ) : (
-                  <>
-                    <File className="h-4 w-4 flex-shrink-0" />
-                    <span className="text-xs truncate">{attachment.file_name}</span>
-                  </>
-                )}
-              </div>
+              <MediaAttachment
+                key={attachment.id}
+                attachment={{
+                  id: attachment.id,
+                  file_name: attachment.file_name,
+                  file_type: attachment.file_type,
+                  file_url: attachment.file_url,
+                  storage_path: attachment.storage_path,
+                  file_size: attachment.file_size,
+                }}
+                size="thumbnail"
+              />
             ))}
           </div>
         )}

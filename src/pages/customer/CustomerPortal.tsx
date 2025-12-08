@@ -221,7 +221,7 @@ export default function CustomerPortal() {
             <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
               {/* Header - Desktop seulement */}
               <div ref={headerRef} className="hidden lg:block space-y-2 animate-in fade-in slide-in-from-top-4">
-                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 md:gap-3 text-gray-900 dark:text-gray-50">
+                <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 md:gap-3 text-gray-900 dark:text-gray-50">
                   <div className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 flex items-center justify-center">
                     <User className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 text-purple-600 dark:text-purple-400" />
                   </div>
@@ -238,7 +238,7 @@ export default function CustomerPortal() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
               <Card className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 touch-manipulation animate-in fade-in slide-in-from-bottom-4">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 px-3 pt-3 sm:px-4 sm:pt-4">
-                  <CardTitle className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-50 leading-tight">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-gray-900 dark:text-gray-50 leading-tight">
                     Total Commandes
                   </CardTitle>
                   <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 flex items-center justify-center">
@@ -246,7 +246,7 @@ export default function CustomerPortal() {
                   </div>
                 </CardHeader>
                 <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4">
-                  <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                     {stats?.totalOrders || 0}
                   </div>
                   <p className="text-[10px] xs:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-tight">Commandes passées</p>
@@ -255,7 +255,7 @@ export default function CustomerPortal() {
 
               <Card className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 touch-manipulation animate-in fade-in slide-in-from-bottom-4">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 px-3 pt-3 sm:px-4 sm:pt-4">
-                  <CardTitle className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-50 leading-tight">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-gray-900 dark:text-gray-50 leading-tight">
                     Total Dépensé
                   </CardTitle>
                   <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 flex items-center justify-center">
@@ -272,7 +272,7 @@ export default function CustomerPortal() {
 
               <Card className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 touch-manipulation animate-in fade-in slide-in-from-bottom-4">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 px-3 pt-3 sm:px-4 sm:pt-4">
-                  <CardTitle className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-50 leading-tight">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-gray-900 dark:text-gray-50 leading-tight">
                     Produits Digitaux
                   </CardTitle>
                   <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 flex items-center justify-center">
@@ -289,7 +289,7 @@ export default function CustomerPortal() {
 
               <Card className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 touch-manipulation animate-in fade-in slide-in-from-bottom-4">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 px-3 pt-3 sm:px-4 sm:pt-4">
-                  <CardTitle className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-50 leading-tight">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-gray-900 dark:text-gray-50 leading-tight">
                     Cours En Ligne
                   </CardTitle>
                   <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5 border border-orange-500/20 flex items-center justify-center">
@@ -297,7 +297,7 @@ export default function CustomerPortal() {
                   </div>
                 </CardHeader>
                 <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4">
-                  <div className="text-lg xs:text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                     {stats?.courses || 0}
                   </div>
                   <p className="text-[10px] xs:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-tight">Inscrit(e)s</p>
@@ -327,67 +327,67 @@ export default function CustomerPortal() {
                   <TabsList className="inline-flex min-w-max sm:w-auto sm:min-w-0 flex-nowrap sm:flex-wrap gap-1.5 sm:gap-2 p-1.5 sm:p-2 h-auto touch-manipulation bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <TabsTrigger 
                       value="overview" 
-                      className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
+                      className="text-[10px] xs:text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
                     >
                       Vue d'ensemble
                     </TabsTrigger>
                     <TabsTrigger 
                       value="orders" 
-                      className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
+                      className="text-[10px] xs:text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
                     >
                       Commandes
                     </TabsTrigger>
                     <TabsTrigger 
                       value="downloads" 
-                      className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
+                      className="text-[10px] xs:text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
                     >
                       Téléchargements
                     </TabsTrigger>
                     <TabsTrigger 
                       value="licenses" 
-                      className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
+                      className="text-[10px] xs:text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
                     >
                       Licences
                     </TabsTrigger>
                     <TabsTrigger 
                       value="updates" 
-                      className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
+                      className="text-[10px] xs:text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
                     >
                       Mises à jour
                     </TabsTrigger>
                     <TabsTrigger 
                       value="courses" 
-                      className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
+                      className="text-[10px] xs:text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
                     >
                       Mes Cours
                     </TabsTrigger>
                     <TabsTrigger 
                       value="wishlist" 
-                      className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
+                      className="text-[10px] xs:text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
                     >
                       Favoris
                     </TabsTrigger>
                     <TabsTrigger 
                       value="loyalty" 
-                      className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
+                      className="text-[10px] xs:text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
                     >
                       Fidélité
                     </TabsTrigger>
                     <TabsTrigger 
                       value="gift-cards" 
-                      className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
+                      className="text-[10px] xs:text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
                     >
                       Cartes Cadeaux
                     </TabsTrigger>
                     <TabsTrigger 
                       value="returns" 
-                      className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
+                      className="text-[10px] xs:text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
                     >
                       Mes Retours
                     </TabsTrigger>
                     <TabsTrigger 
                       value="profile" 
-                      className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
+                      className="text-[10px] xs:text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 whitespace-nowrap min-h-[44px] touch-manipulation font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200 flex-shrink-0"
                     >
                       Mon Profil
                     </TabsTrigger>
@@ -401,13 +401,13 @@ export default function CustomerPortal() {
                   {/* Mes Commandes */}
                   <Card className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-lg active:scale-[0.98] transition-all duration-300 cursor-pointer group touch-manipulation animate-in fade-in slide-in-from-bottom-4" onClick={() => navigate('/account/orders')}>
                     <CardHeader className="pb-2 sm:pb-3 px-3 pt-3 sm:px-4 sm:pt-4">
-                      <CardTitle className="flex items-center gap-2 text-sm sm:text-base md:text-lg text-gray-900 dark:text-gray-50">
+                      <CardTitle className="flex items-center gap-2 text-xs sm:text-sm md:text-base lg:text-lg text-gray-900 dark:text-gray-50">
                         <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 flex items-center justify-center">
                           <Package className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                         </div>
                         <span>Mes Commandes</span>
                       </CardTitle>
-                      <CardDescription className="text-xs sm:text-sm mt-1 leading-snug">
+                      <CardDescription className="text-[10px] sm:text-xs md:text-sm mt-1 leading-snug">
                         Consultez toutes vos commandes et leur statut
                       </CardDescription>
                     </CardHeader>
@@ -422,13 +422,13 @@ export default function CustomerPortal() {
                   {/* Mes Téléchargements */}
                   <Card className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-lg active:scale-[0.98] transition-all duration-300 cursor-pointer group touch-manipulation animate-in fade-in slide-in-from-bottom-4" onClick={() => navigate('/account/downloads')}>
                     <CardHeader className="pb-2 sm:pb-3 px-3 pt-3 sm:px-4 sm:pt-4">
-                      <CardTitle className="flex items-center gap-2 text-sm sm:text-base md:text-lg text-gray-900 dark:text-gray-50">
+                      <CardTitle className="flex items-center gap-2 text-xs sm:text-sm md:text-base lg:text-lg text-gray-900 dark:text-gray-50">
                         <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 flex items-center justify-center">
                           <Download className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 dark:text-purple-400 flex-shrink-0" />
                         </div>
                         <span>Mes Téléchargements</span>
                       </CardTitle>
-                      <CardDescription className="text-xs sm:text-sm mt-1 leading-snug">
+                      <CardDescription className="text-[10px] sm:text-xs md:text-sm mt-1 leading-snug">
                         Accédez à vos produits digitaux achetés
                       </CardDescription>
                     </CardHeader>
@@ -443,13 +443,13 @@ export default function CustomerPortal() {
                   {/* Mes Cours */}
                   <Card className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-lg active:scale-[0.98] transition-all duration-300 cursor-pointer group touch-manipulation animate-in fade-in slide-in-from-bottom-4" onClick={() => navigate('/account/courses')}>
                     <CardHeader className="pb-2 sm:pb-3 px-3 pt-3 sm:px-4 sm:pt-4">
-                      <CardTitle className="flex items-center gap-2 text-sm sm:text-base md:text-lg text-gray-900 dark:text-gray-50">
+                      <CardTitle className="flex items-center gap-2 text-xs sm:text-sm md:text-base lg:text-lg text-gray-900 dark:text-gray-50">
                         <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5 border border-orange-500/20 flex items-center justify-center">
                           <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
                         </div>
                         <span>Mes Cours</span>
                       </CardTitle>
-                      <CardDescription className="text-xs sm:text-sm mt-1 leading-snug">
+                      <CardDescription className="text-[10px] sm:text-xs md:text-sm mt-1 leading-snug">
                         Continuez votre apprentissage
                       </CardDescription>
                     </CardHeader>
@@ -464,13 +464,13 @@ export default function CustomerPortal() {
                   {/* Mes Réservations */}
                   <Card className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-lg active:scale-[0.98] transition-all duration-300 cursor-pointer group touch-manipulation animate-in fade-in slide-in-from-bottom-4" onClick={() => navigate('/account/bookings')}>
                     <CardHeader className="pb-2 sm:pb-3 px-3 pt-3 sm:px-4 sm:pt-4">
-                      <CardTitle className="flex items-center gap-2 text-sm sm:text-base md:text-lg text-gray-900 dark:text-gray-50">
+                      <CardTitle className="flex items-center gap-2 text-xs sm:text-sm md:text-base lg:text-lg text-gray-900 dark:text-gray-50">
                         <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 flex items-center justify-center">
                           <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                         </div>
                         <span>Mes Réservations</span>
                       </CardTitle>
-                      <CardDescription className="text-xs sm:text-sm mt-1 leading-snug">
+                      <CardDescription className="text-[10px] sm:text-xs md:text-sm mt-1 leading-snug">
                         Gérez vos réservations de services
                       </CardDescription>
                     </CardHeader>
@@ -485,13 +485,13 @@ export default function CustomerPortal() {
                   {/* Factures */}
                   <Card className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-lg active:scale-[0.98] transition-all duration-300 cursor-pointer group touch-manipulation animate-in fade-in slide-in-from-bottom-4" onClick={() => navigate('/account/invoices')}>
                     <CardHeader className="pb-2 sm:pb-3 px-3 pt-3 sm:px-4 sm:pt-4">
-                      <CardTitle className="flex items-center gap-2 text-sm sm:text-base md:text-lg text-gray-900 dark:text-gray-50">
+                      <CardTitle className="flex items-center gap-2 text-xs sm:text-sm md:text-base lg:text-lg text-gray-900 dark:text-gray-50">
                         <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-indigo-500/10 to-blue-500/5 border border-indigo-500/20 flex items-center justify-center">
                           <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
                         </div>
                         <span>Mes Factures</span>
                       </CardTitle>
-                      <CardDescription className="text-xs sm:text-sm mt-1 leading-snug">
+                      <CardDescription className="text-[10px] sm:text-xs md:text-sm mt-1 leading-snug">
                         Téléchargez vos factures et reçus
                       </CardDescription>
                     </CardHeader>
@@ -506,13 +506,13 @@ export default function CustomerPortal() {
                   {/* Ma Wishlist */}
                   <Card className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-lg active:scale-[0.98] transition-all duration-300 cursor-pointer group touch-manipulation animate-in fade-in slide-in-from-bottom-4" onClick={() => navigate('/account/wishlist')}>
                     <CardHeader className="pb-2 sm:pb-3 px-3 pt-3 sm:px-4 sm:pt-4">
-                      <CardTitle className="flex items-center gap-2 text-sm sm:text-base md:text-lg text-gray-900 dark:text-gray-50">
+                      <CardTitle className="flex items-center gap-2 text-xs sm:text-sm md:text-base lg:text-lg text-gray-900 dark:text-gray-50">
                         <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-red-500/10 to-pink-500/5 border border-red-500/20 flex items-center justify-center">
                           <Heart className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
                         </div>
                         <span>Ma Wishlist</span>
                       </CardTitle>
-                      <CardDescription className="text-xs sm:text-sm mt-1 leading-snug">
+                      <CardDescription className="text-[10px] sm:text-xs md:text-sm mt-1 leading-snug">
                         Consultez vos produits favoris
                       </CardDescription>
                     </CardHeader>
@@ -527,13 +527,13 @@ export default function CustomerPortal() {
                   {/* Mon Profil */}
                   <Card className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-lg active:scale-[0.98] transition-all duration-300 cursor-pointer group touch-manipulation animate-in fade-in slide-in-from-bottom-4" onClick={() => navigate('/account/profile')}>
                     <CardHeader className="pb-2 sm:pb-3 px-3 pt-3 sm:px-4 sm:pt-4">
-                      <CardTitle className="flex items-center gap-2 text-sm sm:text-base md:text-lg text-gray-900 dark:text-gray-50">
+                      <CardTitle className="flex items-center gap-2 text-xs sm:text-sm md:text-base lg:text-lg text-gray-900 dark:text-gray-50">
                         <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 flex items-center justify-center">
                           <User className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 dark:text-purple-400 flex-shrink-0" />
                         </div>
                         <span>Mon Profil</span>
                       </CardTitle>
-                      <CardDescription className="text-xs sm:text-sm mt-1 leading-snug">
+                      <CardDescription className="text-[10px] sm:text-xs md:text-sm mt-1 leading-snug">
                         Gérez vos informations personnelles
                       </CardDescription>
                     </CardHeader>

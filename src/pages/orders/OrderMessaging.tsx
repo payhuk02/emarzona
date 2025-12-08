@@ -36,9 +36,6 @@ import {
 import {
   Send,
   Paperclip,
-  Image as ImageIcon,
-  Video,
-  File,
   MoreVertical,
   Shield,
   Lock,
@@ -68,6 +65,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { logger } from '@/lib/logger';
+import { MediaAttachment } from '@/components/media';
 
 export default function OrderMessaging() {
   const { orderId } = useParams<{ orderId: string }>();
@@ -158,13 +156,13 @@ export default function OrderMessaging() {
       const filePath = `messages/${orderId}/${fileName}`;
 
       const { data, error } = await supabase.storage
-        .from('message-attachments')
+        .from('attachments')
         .upload(filePath, file);
 
       if (error) throw error;
 
       const { data: { publicUrl } } = supabase.storage
-        .from('message-attachments')
+        .from('attachments')
         .getPublicUrl(filePath);
 
       return publicUrl;
@@ -512,39 +510,19 @@ export default function OrderMessaging() {
                                 {message.attachments && message.attachments.length > 0 && (
                                   <div className="mt-2 space-y-2">
                                     {message.attachments.map((attachment, idx) => (
-                                      <div key={idx}>
-                                        {attachment.file_type.startsWith('image/') ? (
-                                          <img
-                                            src={attachment.file_url}
-                                            alt={attachment.file_name}
-                                            className="rounded-lg max-w-full cursor-pointer hover:opacity-90"
-                                            onClick={() => window.open(attachment.file_url, '_blank')}
-                                          />
-                                        ) : attachment.file_type.startsWith('video/') ? (
-                                          <video
-                                            src={attachment.file_url}
-                                            controls
-                                            className="rounded-lg max-w-full"
-                                          />
-                                        ) : (
-                                          <a
-                                            href={attachment.file_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-2 p-2 rounded bg-background/10 hover:bg-background/20"
-                                          >
-                                            <File className="h-4 w-4" />
-                                            <div className="flex-1 min-w-0">
-                                              <p className="text-xs font-medium truncate">
-                                                {attachment.file_name}
-                                              </p>
-                                              <p className="text-xs opacity-75">
-                                                {formatFileSize(attachment.file_size)}
-                                              </p>
-                                            </div>
-                                          </a>
-                                        )}
-                                      </div>
+                                      <MediaAttachment
+                                        key={attachment.id || idx}
+                                        attachment={{
+                                          id: attachment.id || `attachment-${idx}`,
+                                          file_name: attachment.file_name,
+                                          file_type: attachment.file_type,
+                                          file_url: attachment.file_url,
+                                          storage_path: attachment.storage_path,
+                                          file_size: attachment.file_size,
+                                        }}
+                                        size="large"
+                                        showSize={true}
+                                      />
                                     ))}
                                   </div>
                                 )}

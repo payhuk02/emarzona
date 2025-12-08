@@ -458,6 +458,20 @@ export const useVendorMessaging = (
   const uploadAttachments = async (messageId: string, attachments: Array<{ file_name: string; file_type: string; file_size: number; file_url: string }>): Promise<void> => {
     for (const attachment of attachments) {
       try {
+        // Extraire le chemin de stockage depuis l'URL
+        // Format attendu: https://xxx.supabase.co/storage/v1/object/public/attachments/vendor-message-attachments/xxx.png
+        let storagePath = attachment.file_url;
+        const urlMatch = attachment.file_url.match(/\/storage\/v1\/object\/public\/attachments\/(.+)$/);
+        if (urlMatch) {
+          storagePath = urlMatch[1];
+        } else {
+          // Si l'URL ne correspond pas au format attendu, essayer d'extraire le chemin autrement
+          const pathMatch = attachment.file_url.match(/attachments\/(.+)$/);
+          if (pathMatch) {
+            storagePath = pathMatch[1];
+          }
+        }
+
         const { error } = await supabase
           .from("vendor_message_attachments")
           .insert([{
@@ -466,7 +480,7 @@ export const useVendorMessaging = (
             file_type: attachment.file_type,
             file_size: attachment.file_size,
             file_url: attachment.file_url,
-            storage_path: attachment.file_url, // À adapter selon votre système de stockage
+            storage_path: storagePath, // Chemin relatif dans le bucket
           }]);
 
         if (error) throw error;

@@ -39,6 +39,7 @@ import { useStore } from '@/hooks/useStore';
 import { formatDistanceToNow, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import type { ShippingServiceMessage } from '@/hooks/shipping/useShippingServiceMessaging';
+import { MediaAttachment } from '@/components/media';
 
 export default function ShippingServiceMessages() {
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -375,7 +376,29 @@ export default function ShippingServiceMessages() {
                                     : 'bg-muted'
                                 }`}
                               >
-                                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                {message.content && (
+                                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                )}
+                                
+                                {/* Attachments */}
+                                {message.attachments && message.attachments.length > 0 && (
+                                  <div className="mt-2 space-y-2">
+                                    {message.attachments.map((attachment: any) => (
+                                      <MediaAttachment
+                                        key={attachment.id}
+                                        attachment={{
+                                          id: attachment.id,
+                                          file_name: attachment.file_name,
+                                          file_type: attachment.file_type,
+                                          file_url: attachment.file_url,
+                                          storage_path: attachment.storage_path,
+                                          file_size: attachment.file_size,
+                                        }}
+                                        size="medium"
+                                      />
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               <div className={`flex items-center gap-2 text-xs text-muted-foreground ${isStore ? 'flex-row-reverse' : 'flex-row'}`}>
                                 <span>
