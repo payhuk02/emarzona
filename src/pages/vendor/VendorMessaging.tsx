@@ -570,6 +570,8 @@ export default function VendorMessaging() {
                                             src={attachment.file_url}
                                             alt={attachment.file_name}
                                             className="max-w-full max-h-48 rounded"
+                                            loading="lazy"
+                                            decoding="async"
                                           />
                                         ) : (
                                           <a

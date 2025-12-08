@@ -695,6 +695,8 @@ function ReturnDetailView({
                 src={url}
                 alt={`Photo ${index + 1}`}
                 className="w-full h-24 object-cover rounded"
+                loading="lazy"
+                decoding="async"
               />
             ))}
           </div>

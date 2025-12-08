@@ -716,7 +716,7 @@ export const DigitalProductsSearch = () => {
                     <Card className="group hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/digital/${product.id}`)}>
                       <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
                         {product.image_url ? (
-                          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <FileText className="h-16 w-16 text-muted-foreground" />
