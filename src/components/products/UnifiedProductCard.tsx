@@ -7,7 +7,7 @@
  * Optimisé pour mobile avec React.memo et LazyImage
  */
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -38,23 +38,34 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
 }) => {
   const isCompact = variant === 'compact';
 
-  // Récupérer les données formatées
-  const typeBadge = getProductTypeBadge(product);
-  const keyInfo = getProductKeyInfo(product);
-  const priceInfo = getDisplayPrice(product);
-  const ratingInfo = getRatingDisplay(product.rating, product.review_count);
-  const productImage = getProductImage(product);
+  // Mémoriser les données formatées pour éviter les recalculs
+  const typeBadge = useMemo(() => getProductTypeBadge(product), [product]);
+  const keyInfo = useMemo(() => getProductKeyInfo(product), [product]);
+  const priceInfo = useMemo(() => getDisplayPrice(product), [product]);
+  const ratingInfo = useMemo(
+    () => getRatingDisplay(product.rating, product.review_count),
+    [product.rating, product.review_count]
+  );
+  const productImage = useMemo(() => getProductImage(product), [product]);
 
-  // URL du produit
-  const productUrl = product.store?.slug
-    ? `/stores/${product.store.slug}/products/${product.slug}`
-    : `/products/${product.slug}`;
+  // Mémoriser l'URL du produit
+  const productUrl = useMemo(
+    () =>
+      product.store?.slug
+        ? `/stores/${product.store.slug}/products/${product.slug}`
+        : `/products/${product.slug}`,
+    [product.store?.slug, product.slug]
+  );
 
-  const handleAction = (action: 'view' | 'buy' | 'favorite', e?: React.MouseEvent) => {
-    e?.preventDefault();
-    e?.stopPropagation();
-    onAction?.(action, product);
-  };
+  // Mémoriser les handlers pour éviter les re-renders
+  const handleAction = useCallback(
+    (action: 'view' | 'buy' | 'favorite', e?: React.MouseEvent) => {
+      e?.preventDefault();
+      e?.stopPropagation();
+      onAction?.(action, product);
+    },
+    [onAction, product]
+  );
 
   return (
     <Card

@@ -22,7 +22,8 @@ export function getCorrectedFileUrl(fileUrl: string, storagePath?: string): stri
     return fileUrl;
   }
 
-  const baseUrl = supabaseUrl.replace(/\/$/, '');
+  // Nettoyer l'URL de base (supprimer le slash final s'il existe)
+  const baseUrl = supabaseUrl.replace(/\/+$/, '');
 
   // Si l'URL est déjà valide et contient le bon format, la décoder et la reconstruire
   if (fileUrl && fileUrl.includes('/storage/v1/object/public/attachments/')) {
@@ -53,7 +54,8 @@ export function getCorrectedFileUrl(fileUrl: string, storagePath?: string): stri
       .map(segment => encodeURIComponent(segment))
       .join('/');
 
-    const correctedUrl = `${baseUrl}/storage/v1/object/public/attachments/${encodedPath}`;
+    // S'assurer qu'il n'y a pas de double slash
+    const correctedUrl = `${baseUrl}/storage/v1/object/public/attachments/${encodedPath}`.replace(/([^:]\/)\/+/g, '$1');
     return correctedUrl;
   }
 
@@ -68,7 +70,8 @@ export function getCorrectedFileUrl(fileUrl: string, storagePath?: string): stri
       .map(segment => encodeURIComponent(segment))
       .join('/');
 
-    const correctedUrl = `${baseUrl}/storage/v1/object/public/attachments/${encodedPath}`;
+    // S'assurer qu'il n'y a pas de double slash (sauf après le protocole)
+    const correctedUrl = `${baseUrl}/storage/v1/object/public/attachments/${encodedPath}`.replace(/([^:]\/)\/+/g, '$1');
     return correctedUrl;
   }
 

@@ -89,11 +89,21 @@ export function detectMediaType(fileName: string, fileType: string): MediaType {
     VIDEO_MIME_TYPES.some(mime => fileTypeLower === mime);
 
   // Priorité : extension > MIME
-  if (isImageByExtension || isImageByMime) {
+  // Si l'extension indique un type, l'utiliser en priorité
+  if (isImageByExtension) {
     return 'image';
   }
-
-  if (isVideoByExtension || isVideoByMime) {
+  
+  if (isVideoByExtension) {
+    return 'video';
+  }
+  
+  // Sinon, utiliser le MIME type comme fallback
+  if (isImageByMime) {
+    return 'image';
+  }
+  
+  if (isVideoByMime) {
     return 'video';
   }
 

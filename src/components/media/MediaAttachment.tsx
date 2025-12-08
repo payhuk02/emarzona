@@ -5,7 +5,7 @@
  * avec gestion d'erreurs, fallback avec URL signée, et support de tous les types de fichiers.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { detectMediaType } from '@/utils/media-detection';
 import { getCorrectedFileUrl, extractStoragePath } from '@/utils/storage';
@@ -36,7 +36,7 @@ export interface MediaAttachmentProps {
   onClick?: () => void;
 }
 
-export function MediaAttachment({
+function MediaAttachmentComponent({
   attachment,
   size = 'medium',
   showSize = false,
@@ -49,51 +49,73 @@ export function MediaAttachment({
   const [triedSignedUrl, setTriedSignedUrl] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Détecter le type de média
-  const mediaType = detectMediaType(attachment.file_name, attachment.file_type);
+  // Détecter le type de média (memoized)
+  const mediaType = useMemo(
+    () => detectMediaType(attachment.file_name, attachment.file_type),
+    [attachment.file_name, attachment.file_type]
+  );
 
-  // Corriger l'URL
-  const correctedUrl = getCorrectedFileUrl(attachment.file_url, attachment.storage_path);
-  const displayUrl = signedUrl || correctedUrl;
+  // Corriger l'URL (memoized)
+  const correctedUrl = useMemo(
+    () => getCorrectedFileUrl(attachment.file_url, attachment.storage_path),
+    [attachment.file_url, attachment.storage_path]
+  );
 
-  // Obtenir les classes CSS pour la taille
-  const sizeClasses = MEDIA_SIZES[size];
+  // URL d'affichage (memoized)
+  const displayUrl = useMemo(
+    () => signedUrl || correctedUrl,
+    [signedUrl, correctedUrl]
+  );
 
-  // Logs de débogage complets
+  // Obtenir les classes CSS pour la taille (memoized)
+  const sizeClasses = useMemo(
+    () => MEDIA_SIZES[size],
+    [size]
+  );
+
+  // Logs de débogage complets (seulement en développement)
+  // Réduire les dépendances : seulement logger quand les valeurs importantes changent
   useEffect(() => {
-    logger.info('MediaAttachment - Component render', {
-      attachmentId: attachment.id,
-      fileName: attachment.file_name,
-      fileType: attachment.file_type,
-      mediaType,
-      originalUrl: attachment.file_url,
-      storagePath: attachment.storage_path,
-      correctedUrl,
-      displayUrl,
-      signedUrl,
-      imageError,
-      triedSignedUrl,
-      size,
-    });
-  }, [attachment.id, attachment.file_name, attachment.file_type, attachment.file_url, attachment.storage_path, mediaType, correctedUrl, displayUrl, signedUrl, imageError, triedSignedUrl, size]);
-
-  // Gérer l'erreur de chargement d'image
-  const handleImageError = async () => {
-    // Si on a déjà essayé l'URL signée et que ça a échoué, afficher le lien
-    if (triedSignedUrl && imageError) {
-      logger.warn('MediaAttachment - All attempts failed, showing fallback link', {
+    if (import.meta.env.DEV) {
+      logger.info('MediaAttachment - Component render', {
         attachmentId: attachment.id,
         fileName: attachment.file_name,
+        fileType: attachment.file_type,
+        mediaType,
+        originalUrl: attachment.file_url,
+        storagePath: attachment.storage_path,
+        correctedUrl,
+        displayUrl,
+        signedUrl,
+        imageError,
+        triedSignedUrl,
+        size,
       });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attachment.id, attachment.file_url, mediaType, displayUrl, imageError]);
+
+  // Gérer l'erreur de chargement d'image (memoized avec useCallback)
+  const handleImageError = useCallback(async () => {
+    // Si on a déjà essayé l'URL signée et que ça a échoué, afficher le lien
+    if (triedSignedUrl && imageError) {
+      if (import.meta.env.DEV) {
+        logger.warn('MediaAttachment - All attempts failed, showing fallback link', {
+          attachmentId: attachment.id,
+          fileName: attachment.file_name,
+        });
+      }
       return;
     }
 
     // Si on a déjà une URL signée et qu'elle échoue aussi, afficher le lien
     if (signedUrl && imageError) {
-      logger.warn('MediaAttachment - Signed URL also failed, showing fallback link', {
-        attachmentId: attachment.id,
-        fileName: attachment.file_name,
-      });
+      if (import.meta.env.DEV) {
+        logger.warn('MediaAttachment - Signed URL also failed, showing fallback link', {
+          attachmentId: attachment.id,
+          fileName: attachment.file_name,
+        });
+      }
       return;
     }
 
@@ -107,11 +129,13 @@ export function MediaAttachment({
         const path = extractStoragePath(correctedUrl) || attachment.storage_path;
         
         if (!path) {
-          logger.error('Could not extract storage path', { 
-            fileUrl: attachment.file_url,
-            correctedUrl,
-            storagePath: attachment.storage_path 
-          });
+          if (import.meta.env.DEV) {
+            logger.error('Could not extract storage path', { 
+              fileUrl: attachment.file_url,
+              correctedUrl,
+              storagePath: attachment.storage_path 
+            });
+          }
           setImageError(true);
           setIsLoading(false);
           return;
@@ -127,13 +151,15 @@ export function MediaAttachment({
             search: fileName,
           });
 
-        logger.info('File existence check', { 
-          folderPath,
-          fileName,
-          path, 
-          exists: listData && listData.length > 0,
-          listError 
-        });
+        if (import.meta.env.DEV) {
+          logger.info('File existence check', { 
+            folderPath,
+            fileName,
+            path, 
+            exists: listData && listData.length > 0,
+            listError 
+          });
+        }
 
         if (listData && listData.length > 0) {
           // Le fichier existe, générer une URL signée
@@ -142,11 +168,13 @@ export function MediaAttachment({
             .createSignedUrl(path, 3600); // Valide 1 heure
 
           if (!signedUrlError && signedUrlData?.signedUrl) {
-            logger.info('Generated signed URL, will retry with signed URL', { 
-              signedUrl: signedUrlData.signedUrl,
-              originalUrl: attachment.file_url,
-              correctedUrl 
-            });
+            if (import.meta.env.DEV) {
+              logger.info('Generated signed URL, will retry with signed URL', { 
+                signedUrl: signedUrlData.signedUrl,
+                originalUrl: attachment.file_url,
+                correctedUrl 
+              });
+            }
             setSignedUrl(signedUrlData.signedUrl);
             setImageError(false); // Réinitialiser l'erreur pour permettre le re-render
             setIsLoading(false);
@@ -154,12 +182,20 @@ export function MediaAttachment({
             return;
           }
 
-          logger.error('Could not generate signed URL', signedUrlError || undefined);
+          if (import.meta.env.DEV) {
+            logger.error('Could not generate signed URL', signedUrlError || undefined);
+          }
         } else {
-          logger.error('File does not exist in bucket', { path });
+          if (import.meta.env.DEV) {
+            logger.error('File does not exist in bucket', { path });
+          }
+          onError?.(new Error(`File does not exist in bucket: ${attachment.file_name}`));
         }
       } catch (error) {
-        logger.error('Error checking file or generating signed URL', error instanceof Error ? { message: error.message, error } : { error });
+        if (import.meta.env.DEV) {
+          logger.error('Error checking file or generating signed URL', error instanceof Error ? { message: error.message, error } : { error });
+        }
+        onError?.(error instanceof Error ? error : new Error(`Error checking file: ${attachment.file_name}`));
       } finally {
         setIsLoading(false);
         setImageError(true);
@@ -168,29 +204,31 @@ export function MediaAttachment({
       // Si on a déjà essayé l'URL signée et que ça échoue encore, c'est définitif
       setImageError(true);
     }
-  };
+  }, [triedSignedUrl, imageError, signedUrl, correctedUrl, attachment.id, attachment.file_name, attachment.file_url, attachment.storage_path]);
 
-  // Formatage de la taille du fichier
-  const formatFileSize = (bytes?: number): string => {
+  // Formatage de la taille du fichier (memoized avec useCallback)
+  const formatFileSize = useCallback((bytes?: number): string => {
     if (!bytes) return '';
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
+  }, []);
 
   // Affichage selon le type de média
   if (mediaType === 'image') {
-    // Logs de débogage pour comprendre pourquoi un lien est affiché
+    // Logs de débogage pour comprendre pourquoi un lien est affiché (seulement en développement)
     if (imageError && triedSignedUrl) {
-      logger.warn('MediaAttachment - Displaying fallback link', {
-        attachmentId: attachment.id,
-        fileName: attachment.file_name,
-        imageError,
-        triedSignedUrl,
-        displayUrl,
-        originalUrl: attachment.file_url,
-        correctedUrl,
-      });
+      if (import.meta.env.DEV) {
+        logger.warn('MediaAttachment - Displaying fallback link', {
+          attachmentId: attachment.id,
+          fileName: attachment.file_name,
+          imageError,
+          triedSignedUrl,
+          displayUrl,
+          originalUrl: attachment.file_url,
+          correctedUrl,
+        });
+      }
       
       return (
         <div className={cn('flex items-center gap-2', className)}>
@@ -219,15 +257,17 @@ export function MediaAttachment({
 
     // Toujours essayer d'afficher l'image (même si l'URL n'est pas "valide" selon la validation stricte)
     // Le navigateur et onError géreront les erreurs
-    logger.info('MediaAttachment - Attempting to display image', {
-      attachmentId: attachment.id,
-      fileName: attachment.file_name,
-      displayUrl,
-      originalUrl: attachment.file_url,
-      correctedUrl,
-      imageError,
-      triedSignedUrl,
-    });
+    if (import.meta.env.DEV) {
+      logger.info('MediaAttachment - Attempting to display image', {
+        attachmentId: attachment.id,
+        fileName: attachment.file_name,
+        displayUrl,
+        originalUrl: attachment.file_url,
+        correctedUrl,
+        imageError,
+        triedSignedUrl,
+      });
+    }
 
     return (
       <div className={cn('relative group', className)}>
@@ -253,13 +293,15 @@ export function MediaAttachment({
           onLoad={() => {
             setIsLoading(false);
             setImageError(false); // Réinitialiser l'erreur si l'image se charge
-            logger.info('Image loaded successfully', { 
-              attachmentId: attachment.id,
-              url: displayUrl,
-              originalUrl: attachment.file_url,
-              correctedUrl: correctedUrl,
-              signedUrl: signedUrl
-            });
+            if (import.meta.env.DEV) {
+              logger.info('Image loaded successfully', { 
+                attachmentId: attachment.id,
+                url: displayUrl,
+                originalUrl: attachment.file_url,
+                correctedUrl: correctedUrl,
+                signedUrl: signedUrl
+              });
+            }
           }}
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 rounded-lg transition-colors pointer-events-none" />
@@ -275,10 +317,12 @@ export function MediaAttachment({
           controls
           className={cn(sizeClasses.className, 'rounded-lg object-contain bg-muted/50')}
           onError={() => {
-            logger.error('Video load error', { 
-              attachmentId: attachment.id,
-              url: displayUrl 
-            });
+            if (import.meta.env.DEV) {
+              logger.error('Video load error', { 
+                attachmentId: attachment.id,
+                url: displayUrl 
+              });
+            }
             onError?.(new Error(`Failed to load video: ${attachment.file_name}`));
           }}
         >
@@ -289,8 +333,8 @@ export function MediaAttachment({
   }
 
   // Fichier générique
-  // Log si un fichier qui devrait être une image est traité comme fichier
-  if (attachment.file_name && (
+  // Log si un fichier qui devrait être une image est traité comme fichier (seulement en développement)
+  if (import.meta.env.DEV && attachment.file_name && (
     attachment.file_name.toLowerCase().endsWith('.png') ||
     attachment.file_name.toLowerCase().endsWith('.jpg') ||
     attachment.file_name.toLowerCase().endsWith('.jpeg') ||
@@ -329,3 +373,16 @@ export function MediaAttachment({
     </div>
   );
 }
+
+// Export avec React.memo pour optimiser les re-renders
+export const MediaAttachment = memo(MediaAttachmentComponent, (prevProps, nextProps) => {
+  // Comparaison personnalisée pour éviter les re-renders inutiles
+  return (
+    prevProps.attachment.id === nextProps.attachment.id &&
+    prevProps.attachment.file_url === nextProps.attachment.file_url &&
+    prevProps.attachment.storage_path === nextProps.attachment.storage_path &&
+    prevProps.size === nextProps.size &&
+    prevProps.showSize === nextProps.showSize &&
+    prevProps.className === nextProps.className
+  );
+});

@@ -4,7 +4,7 @@
  * Date: 2025-01-28
  */
 
-import { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,7 @@ interface OrdersListVirtualizedProps {
   containerHeight?: string;
 }
 
-export const OrdersListVirtualized = ({
+const OrdersListVirtualizedComponent = ({
   orders,
   onUpdate,
   storeId,
@@ -106,4 +106,23 @@ export const OrdersListVirtualized = ({
     </div>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const OrdersListVirtualized = React.memo(OrdersListVirtualizedComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.orders.length === nextProps.orders.length &&
+    prevProps.storeId === nextProps.storeId &&
+    prevProps.onUpdate === nextProps.onUpdate &&
+    prevProps.className === nextProps.className &&
+    prevProps.itemHeight === nextProps.itemHeight &&
+    prevProps.containerHeight === nextProps.containerHeight &&
+    // Comparaison superficielle des orders (comparer les IDs)
+    prevProps.orders.every((order, index) => 
+      order.id === nextProps.orders[index]?.id &&
+      order.status === nextProps.orders[index]?.status
+    )
+  );
+});
+
+OrdersListVirtualized.displayName = 'OrdersListVirtualized';
 

@@ -4,7 +4,7 @@
  * Date: 2025-01-28
  */
 
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,7 @@ interface PhysicalProductsListVirtualizedProps {
   containerHeight?: string;
 }
 
-export const PhysicalProductsListVirtualized = ({
+const PhysicalProductsListVirtualizedComponent = ({
   products,
   onEdit,
   onDelete,
@@ -106,4 +106,23 @@ export const PhysicalProductsListVirtualized = ({
     </div>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const PhysicalProductsListVirtualized = React.memo(PhysicalProductsListVirtualizedComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.products.length === nextProps.products.length &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.className === nextProps.className &&
+    prevProps.itemHeight === nextProps.itemHeight &&
+    prevProps.containerHeight === nextProps.containerHeight &&
+    // Comparaison superficielle des products (comparer les IDs)
+    prevProps.products.every((product, index) => 
+      product.id === nextProps.products[index]?.id &&
+      product.is_active === nextProps.products[index]?.is_active
+    )
+  );
+});
+
+PhysicalProductsListVirtualized.displayName = 'PhysicalProductsListVirtualized';
 

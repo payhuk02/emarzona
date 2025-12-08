@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -61,7 +61,7 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
     <>
       {isMobile ? (
         <MobileTableCard
-          data={customers.map((c) => ({ id: c.id, ...c }))}
+          data={useMemo(() => customers.map((c) => ({ id: c.id, ...c })), [customers])}
           columns={[
             {
               key: 'name',

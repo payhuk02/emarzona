@@ -4,7 +4,7 @@
  * Date : 27 octobre 2025
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { ReviewCard } from './ReviewCard';
 import { ReviewFilter } from './ReviewFilter';
 import { Button } from '@/components/ui/button';
@@ -42,6 +42,11 @@ const ReviewsListComponent: React.FC<ReviewsListProps> = ({
     }));
   }, []);
 
+  // Mémoriser le calcul de hasMore
+  const hasMore = useMemo(() => {
+    return reviews ? reviews.length >= (filters.limit || 10) : false;
+  }, [reviews, filters.limit]);
+
   if (isLoading) {
     return <ReviewsListSkeleton count={3} />;
   }
@@ -71,7 +76,7 @@ const ReviewsListComponent: React.FC<ReviewsListProps> = ({
         ))}
       </div>
 
-      {reviews.length >= (filters.limit || 10) && (
+      {hasMore && (
         <div className="text-center">
           <Button onClick={handleLoadMore} variant="outline">
             Charger plus d'avis

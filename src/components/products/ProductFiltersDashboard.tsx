@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import React, { useState, RefObject } from "react";
+import React, { useState, RefObject, useMemo, useCallback } from "react";
 
 interface ProductFiltersDashboardProps {
   searchQuery: string;
@@ -64,17 +64,21 @@ const ProductFiltersDashboardComponent = ({
 }: ProductFiltersDashboardProps) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   
-  const hasFilters = category !== "all" || productType !== "all" || status !== "all" || stockStatus !== "all" || searchQuery;
+  // Mémoriser les calculs coûteux
+  const hasFilters = useMemo(
+    () => category !== "all" || productType !== "all" || status !== "all" || stockStatus !== "all" || searchQuery,
+    [category, productType, status, stockStatus, searchQuery]
+  );
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     onCategoryChange("all");
     onProductTypeChange("all");
     onStatusChange("all");
     onStockStatusChange?.("all");
     onSearchChange("");
-  };
+  }, [onCategoryChange, onProductTypeChange, onStatusChange, onStockStatusChange, onSearchChange]);
 
-  const getActiveFiltersCount = () => {
+  const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (category !== "all") count++;
     if (productType !== "all") count++;
@@ -82,9 +86,9 @@ const ProductFiltersDashboardComponent = ({
     if (stockStatus !== "all") count++;
     if (searchQuery) count++;
     return count;
-  };
+  }, [category, productType, status, stockStatus, searchQuery]);
 
-  const sortOptions = [
+  const sortOptions = useMemo(() => [
     { value: "recent", label: "Plus récents" },
     { value: "oldest", label: "Plus anciens" },
     { value: "name-asc", label: "Nom (A-Z)" },
@@ -93,7 +97,7 @@ const ProductFiltersDashboardComponent = ({
     { value: "price-desc", label: "Prix décroissant" },
     { value: "popular", label: "Plus populaires" },
     { value: "rating", label: "Meilleures notes" },
-  ];
+  ], []);
 
   return (
     <div className="space-y-2 sm:space-y-3 lg:space-y-4">
@@ -178,7 +182,7 @@ const ProductFiltersDashboardComponent = ({
               <span className="sm:hidden">Filtres</span>
               {hasFilters && (
                 <Badge variant="secondary" className="ml-1.5 sm:ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] font-semibold animate-in zoom-in-95 duration-200">
-                  {getActiveFiltersCount()}
+                  {activeFiltersCount}
                 </Badge>
               )}
             </Button>

@@ -6,7 +6,7 @@
  * Date: 30 Janvier 2025
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -66,7 +66,7 @@ interface VirtualizedListProps {
  * Composant de liste virtualisée
  * Active automatiquement le virtual scrolling pour les listes de 20+ éléments
  */
-export const VirtualizedList: React.FC<VirtualizedListProps> = ({
+const VirtualizedListComponent: React.FC<VirtualizedListProps> = ({
   count,
   renderItem,
   estimateSize,
@@ -83,9 +83,9 @@ export const VirtualizedList: React.FC<VirtualizedListProps> = ({
   const internalContainerRef = useRef<HTMLDivElement>(null);
   const containerRef = externalContainerRef || internalContainerRef;
 
-  // Calculer les valeurs par défaut selon le device
-  const defaultEstimateSize = estimateSize ?? (isMobile ? 100 : 120);
-  const defaultOverscan = overscan ?? (isMobile ? 3 : 5);
+  // Mémoriser les valeurs par défaut selon le device
+  const defaultEstimateSize = useMemo(() => estimateSize ?? (isMobile ? 100 : 120), [estimateSize, isMobile]);
+  const defaultOverscan = useMemo(() => overscan ?? (isMobile ? 3 : 5), [overscan, isMobile]);
 
   // Virtualizer pour le virtual scrolling
   const virtualizer = useVirtualizer({
@@ -178,6 +178,25 @@ export const VirtualizedList: React.FC<VirtualizedListProps> = ({
     </div>
   );
 };
+
+VirtualizedListComponent.displayName = 'VirtualizedListComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const VirtualizedList = React.memo(VirtualizedListComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.count === nextProps.count &&
+    prevProps.loading === nextProps.loading &&
+    prevProps.emptyMessage === nextProps.emptyMessage &&
+    prevProps.className === nextProps.className &&
+    prevProps.itemClassName === nextProps.itemClassName &&
+    prevProps.estimateSize === nextProps.estimateSize &&
+    prevProps.overscan === nextProps.overscan &&
+    prevProps.threshold === nextProps.threshold &&
+    prevProps.loadingCount === nextProps.loadingCount &&
+    prevProps.renderItem === nextProps.renderItem &&
+    prevProps.containerRef === nextProps.containerRef
+  );
+});
 
 VirtualizedList.displayName = 'VirtualizedList';
 
