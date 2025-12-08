@@ -32,19 +32,28 @@ WHERE table_schema = 'public'
 ORDER BY ordinal_position;
 ```
 
-### 2. Vérifier les Logs d'Emails pour la Campagne
+### 2. Vérifier les Logs d'Emails pour la Campagne (Version Simple)
 
+**Option A : Voir toutes les colonnes disponibles**
+```sql
+SELECT *
+FROM public.email_logs
+WHERE campaign_id = '4f3d3b29-7643-4696-8139-3b49feed4d36'
+ORDER BY created_at DESC
+LIMIT 10;
+```
+
+**Option B : Colonnes connues (sans celles qui n'existent pas)**
 ```sql
 SELECT 
   id,
   to_email,
   subject,
-  sendgrid_status,
   created_at,
-  delivered_at,
-  opened_at,
-  clicked_at,
   campaign_id,
+  sequence_id,
+  template_id,
+  user_id,
   metadata
 FROM public.email_logs
 WHERE campaign_id = '4f3d3b29-7643-4696-8139-3b49feed4d36'
