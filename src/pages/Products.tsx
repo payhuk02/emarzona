@@ -6,12 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+// Import optimisé depuis l'index centralisé
 import { 
   Package, 
   Plus, 
   RefreshCw, 
   Download, 
-  Upload, 
   Eye, 
   ChevronLeft, 
   ChevronRight,
@@ -19,8 +19,9 @@ import {
   ChevronsRight,
   Loader2,
   AlertTriangle,
-  SlidersHorizontal
-} from "lucide-react";
+  Upload,
+  SlidersHorizontal,
+} from "@/components/icons";
 import { useStore } from "@/hooks/useStore";
 import { useProducts } from "@/hooks/useProducts";
 import { useProductsOptimized } from "@/hooks/useProductsOptimized";

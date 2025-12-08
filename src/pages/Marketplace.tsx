@@ -15,29 +15,33 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+// Import optimisé depuis l'index centralisé
 import { 
   ShoppingCart, 
-  ArrowRight, 
   Filter, 
-  SortAsc, 
-  SortDesc, 
   Heart, 
   Eye,
   Star,
   TrendingUp,
   Clock,
   Users,
-  Grid3X3,
-  List,
   ChevronLeft,
   ChevronRight,
-  X,
   AlertCircle,
   BarChart3,
   Zap,
   Sparkles,
   DollarSign,
-  Rocket
+  ArrowRight,
+  Grid3X3,
+  List,
+  Rocket,
+} from "@/components/icons";
+// Icônes non disponibles dans l'index (import direct)
+import { 
+  SortAsc, 
+  SortDesc, 
+  X,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import MarketplaceHeader from "@/components/marketplace/MarketplaceHeader";

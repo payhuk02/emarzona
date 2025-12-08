@@ -127,4 +127,13 @@ export {
   MousePointerClick,
   Link,
   Workflow,
+  // Icônes supplémentaires pour optimiser les imports
+  ArrowRight,
+  SortAsc,
+  SortDesc,
+  Grid3X3,
+  List,
+  Upload,
+  SlidersHorizontal,
+  Rocket,
 } from 'lucide-react';
