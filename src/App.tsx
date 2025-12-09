@@ -562,10 +562,9 @@ const AppContent = () => {
           <Route path="/dashboard/physical-promotions" element={<ProtectedRoute><PhysicalPromotions /></ProtectedRoute>} />
           <Route path="/dashboard/physical-analytics" element={<ProtectedRoute><PhysicalProductsAnalytics /></ProtectedRoute>} />
           <Route path="/dashboard/physical-lots" element={<ProtectedRoute><PhysicalProductsLotsManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/physical-lots/:productId" element={<ProtectedRoute><PhysicalProductsLotsManagement /></ProtectedRoute>} />
           <Route path="/dashboard/physical-lots-old" element={<ProtectedRoute><PhysicalProductsLots /></ProtectedRoute>} />
           <Route path="/dashboard/physical-serial-tracking" element={<ProtectedRoute><PhysicalProductsSerialTracking /></ProtectedRoute>} />
-          <Route path="/dashboard/physical-lots" element={<ProtectedRoute><PhysicalProductsLotsManagement /></ProtectedRoute>} />
-          <Route path="/dashboard/physical-lots/:productId" element={<ProtectedRoute><PhysicalProductsLotsManagement /></ProtectedRoute>} />
           <Route path="/dashboard/suppliers" element={<ProtectedRoute><SuppliersManagement /></ProtectedRoute>} />
           <Route path="/dashboard/demand-forecasting" element={<ProtectedRoute><DemandForecasting /></ProtectedRoute>} />
           <Route path="/dashboard/inventory-analytics" element={<ProtectedRoute><InventoryAnalytics /></ProtectedRoute>} />

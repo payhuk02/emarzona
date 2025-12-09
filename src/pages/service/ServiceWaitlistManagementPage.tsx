@@ -78,14 +78,26 @@ export default function ServiceWaitlistManagementPage() {
   };
 
   const handleNotifyAll = async (serviceId?: string) => {
-    // TODO: Implémenter la notification de tous les clients en attente
-    // Pour l'instant, on notifie les entrées une par une
+    // Notification de tous les clients en attente
     const entriesToNotify = serviceId
       ? waitlistEntries.filter((e) => e.serviceId === serviceId && e.status === 'waiting')
       : waitlistEntries.filter((e) => e.status === 'waiting');
 
+    // Notifier par batch de 10 pour éviter la surcharge
     for (const entry of entriesToNotify.slice(0, 10)) {
-      await notifyEntry.mutateAsync(entry.id);
+      try {
+        await notifyEntry.mutateAsync(entry.id);
+      } catch (error) {
+        // Continuer avec les autres entrées même en cas d'erreur
+        logger.error('Error notifying waitlist entry', { entryId: entry.id, error });
+      }
+    }
+    
+    if (entriesToNotify.length > 10) {
+      toast({
+        title: 'Notification partielle',
+        description: `${entriesToNotify.length} entrées trouvées, 10 premières notifiées.`,
+      });
     }
   };
 

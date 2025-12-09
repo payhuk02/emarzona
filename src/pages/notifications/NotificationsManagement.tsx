@@ -127,7 +127,7 @@ export default function NotificationsManagement() {
       total: notifications.length,
       unread: notifications.filter((n) => !n.is_read).length,
       read: notifications.filter((n) => n.is_read).length,
-      archived: 0, // TODO: Add archived count
+      archived: notifications.filter((n) => n.is_archived === true).length,
     };
   }, [notifications]);
 
