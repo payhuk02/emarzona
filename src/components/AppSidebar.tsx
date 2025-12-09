@@ -29,8 +29,6 @@ import {
   Warehouse,
   Calendar,
   FileText,
-  Palette,
-  Layout,
   Sparkles,
   User,
   Heart,
@@ -84,7 +82,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useStoreContext } from "@/contexts/StoreContext";
 import { logger } from "@/lib/logger";
-import { ChevronRight, Check, Plus } from "@/components/icons";
+import { Check, Plus } from "@/components/icons";
 import {
   Collapsible,
   CollapsibleContent,
@@ -600,8 +598,8 @@ const menuSections = [
   },
 ];
 
-// Menu flat pour rétrocompatibilité
-const menuItems = menuSections.flatMap(section => section.items);
+// Menu flat pour rétrocompatibilité (réservé pour usage futur)
+// const menuItems = menuSections.flatMap(section => section.items);
 
 // Menu Admin organisé par sections
 const adminMenuSections = [
@@ -912,8 +910,8 @@ const adminMenuSections = [
   },
 ];
 
-// Menu Admin flat pour rétrocompatibilité
-const adminMenuItems = adminMenuSections.flatMap(section => section.items);
+// Menu Admin flat pour rétrocompatibilité (réservé pour usage futur)
+// const adminMenuItems = adminMenuSections.flatMap(section => section.items);
 
 export function AppSidebar() {
   const { state } = useSidebar();
