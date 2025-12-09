@@ -218,7 +218,7 @@ const menuSections = [
       },
       {
         title: "Bundles Produits Digitaux",
-        url: "/dashboard/digital-products/bundles/create",
+        url: "/dashboard/digital-products/bundles",
         icon: Layers,
       },
       {
