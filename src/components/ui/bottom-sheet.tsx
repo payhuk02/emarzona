@@ -9,6 +9,8 @@ import { X } from '@/components/icons';
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+const DialogPortal = DialogPrimitive.Portal;
+
 interface BottomSheetProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
   /**
    * Titre du bottom sheet

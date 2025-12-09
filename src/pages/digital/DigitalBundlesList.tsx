@@ -274,12 +274,34 @@ export const DigitalBundlesList = () => {
               </TabsContent>
 
               <TabsContent value="featured" className="mt-6">
-                <DigitalBundlesGrid
-                  bundles={filteredBundles}
-                  loading={bundlesLoading}
-                  variant="featured"
-                  onView={handleViewBundle}
-                />
+                {bundlesLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <Skeleton key={i} className="h-64" />
+                    ))}
+                  </div>
+                ) : filteredBundles.length === 0 ? (
+                  <Card>
+                    <CardContent className="flex flex-col items-center justify-center py-12">
+                      <Package className="h-12 w-12 text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">Aucun bundle en vedette</h3>
+                      <p className="text-muted-foreground text-center">
+                        Marquez vos bundles comme "en vedette" pour les afficher ici.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}>
+                    {filteredBundles.map((bundle) => (
+                      <DigitalBundleCard
+                        key={bundle.id}
+                        bundle={bundle}
+                        variant="featured"
+                        onView={() => handleViewBundle(bundle.id)}
+                      />
+                    ))}
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </div>
