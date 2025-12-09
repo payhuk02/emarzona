@@ -238,12 +238,39 @@ export const DigitalBundlesList = () => {
               </TabsList>
 
               <TabsContent value="all" className="mt-6">
-                <DigitalBundlesGrid
-                  bundles={filteredBundles}
-                  loading={bundlesLoading}
-                  variant={viewMode === 'compact' ? 'compact' : 'default'}
-                  onView={handleViewBundle}
-                />
+                {bundlesLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <Skeleton key={i} className="h-64" />
+                    ))}
+                  </div>
+                ) : filteredBundles.length === 0 ? (
+                  <Card>
+                    <CardContent className="flex flex-col items-center justify-center py-12">
+                      <Package className="h-12 w-12 text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">Aucun bundle trouvé</h3>
+                      <p className="text-muted-foreground text-center mb-4">
+                        {searchQuery
+                          ? 'Aucun bundle ne correspond à votre recherche.'
+                          : 'Commencez par créer votre premier bundle.'}
+                      </p>
+                      <Button onClick={handleCreateBundle}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Créer un bundle
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}>
+                    {filteredBundles.map((bundle) => (
+                      <DigitalBundleCard
+                        key={bundle.id}
+                        bundle={bundle}
+                        onView={() => handleViewBundle(bundle.id)}
+                      />
+                    ))}
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="featured" className="mt-6">
