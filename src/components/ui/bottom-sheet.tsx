@@ -89,7 +89,7 @@ const BottomSheetContent = React.forwardRef<
     
     setIsDragging(false);
     setDragY(0);
-  }, [isDragging, dragY, swipeToClose, isMobile, props]);
+  }, [isDragging, dragY, swipeToClose, isMobile, onOpenChange]);
 
   return (
     <DialogPortal>

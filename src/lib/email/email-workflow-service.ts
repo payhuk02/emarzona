@@ -135,11 +135,21 @@ export class EmailWorkflowService {
 
       const { data, error } = await query;
       if (error) {
+        // Si la table n'existe pas (404), retourner un tableau vide
+        if (error.code === 'PGRST116' || error.message?.includes('404') || error.message?.includes('does not exist') || error.code === '42P01') {
+          logger.warn('Table email_workflows does not exist. Returning empty array.', { storeId });
+          return [];
+        }
         logger.error('Error fetching workflows', { error, storeId, filters });
         throw error;
       }
       return (data || []) as EmailWorkflow[];
     } catch (error: any) {
+      // Si la table n'existe pas, retourner un tableau vide au lieu de throw
+      if (error?.code === 'PGRST116' || error?.message?.includes('404') || error?.message?.includes('does not exist') || error?.code === '42P01') {
+        logger.warn('Table email_workflows does not exist. Returning empty array.', { storeId });
+        return [];
+      }
       logger.error('EmailWorkflowService.getWorkflows error', { error, storeId, filters });
       throw error;
     }
