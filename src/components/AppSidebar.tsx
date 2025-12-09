@@ -83,11 +83,6 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { useStoreContext } from "@/contexts/StoreContext";
 import { logger } from "@/lib/logger";
 import { Check, Plus } from "@/components/icons";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 
 // Menu organisé par sections
 const menuSections = [
@@ -541,9 +536,9 @@ const menuSections = [
       },
     ]
   },
-      {
-        label: "Systèmes & Intégrations",
-        items: [
+  {
+    label: "Systèmes & Intégrations",
+    items: [
       {
         title: "Intégrations",
         url: "/dashboard/integrations",
@@ -574,7 +569,7 @@ const menuSections = [
         url: "/dashboard/gift-cards",
         icon: Gift,
       },
-    ]
+    ],
   },
   {
     label: "Configuration",
