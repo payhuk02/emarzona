@@ -21,7 +21,6 @@ import {
   MessageSquare,
   Mail,
   TrendingUp,
-  BookOpen,
   GraduationCap,
   Download,
   Key,
