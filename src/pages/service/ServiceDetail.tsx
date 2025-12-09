@@ -58,6 +58,7 @@ import {
   ServiceRecommendations,
   BookedTogetherRecommendations,
 } from '@/components/service/ServiceRecommendations';
+import { JoinWaitlistButton } from '@/components/service/JoinWaitlistButton';
 
 export default function ServiceDetail() {
   const { serviceId } = useParams<{ serviceId: string }>();
@@ -946,6 +947,13 @@ export default function ServiceDetail() {
                   </Button>
 
                   <Separator />
+
+                  {/* Waitlist Button */}
+                  <JoinWaitlistButton
+                    serviceId={serviceId!}
+                    serviceName={service.name}
+                    disabled={!user}
+                  />
 
                   {/* Secondary Actions */}
                   <div className="grid grid-cols-2 gap-2">

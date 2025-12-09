@@ -52,9 +52,8 @@ export interface SessionRegistration {
   session_id: string;
   enrollment_id: string;
   user_id: string;
-  status: 'registered' | 'attended' | 'absent' | 'cancelled';
-  reminder_sent_24h: boolean;
-  reminder_sent_1h: boolean;
+  registered_at: string;
+  attended: boolean;
   joined_at?: string;
   left_at?: string;
   attendance_duration_minutes: number;
@@ -101,6 +100,13 @@ export interface CreateLiveSessionData {
   metadata?: Record<string, any>;
 }
 
+export interface UpdateLiveSessionData extends Partial<CreateLiveSessionData> {
+  status?: LiveSession['status'];
+  actual_start?: string;
+  actual_end?: string;
+  recording_url?: string;
+}
+
 // =====================================================
 // HOOKS - QUERIES
 // =====================================================
@@ -140,9 +146,13 @@ export const useUpcomingSessions = (courseId: string | undefined) => {
     queryFn: async () => {
       if (!courseId) throw new Error('Course ID manquant');
 
-      const { data, error } = await supabase.rpc('get_upcoming_sessions', {
-        p_course_id: courseId,
-      });
+      const { data, error } = await supabase
+        .from('course_live_sessions')
+        .select('*')
+        .eq('course_id', courseId)
+        .eq('status', 'scheduled')
+        .gte('scheduled_start', new Date().toISOString())
+        .order('scheduled_start', { ascending: true });
 
       if (error) {
         logger.error('Error fetching upcoming sessions', { error, courseId });
@@ -256,6 +266,99 @@ export const useCreateLiveSession = () => {
 };
 
 /**
+ * useUpdateLiveSession - Mettre à jour une session
+ */
+export const useUpdateLiveSession = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ sessionId, updates }: { sessionId: string; updates: UpdateLiveSessionData }) => {
+      const { data, error } = await supabase
+        .from('course_live_sessions')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', sessionId)
+        .select()
+        .single();
+
+      if (error) {
+        logger.error('Error updating live session', { error, sessionId, updates });
+        throw error;
+      }
+
+      return data as LiveSession;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['course-live-sessions', data.course_id] });
+      queryClient.invalidateQueries({ queryKey: ['upcoming-sessions'] });
+      toast({
+        title: '✅ Session mise à jour',
+        description: 'La session a été mise à jour avec succès',
+      });
+    },
+    onError: (error: any) => {
+      logger.error('Error in useUpdateLiveSession', { error });
+      toast({
+        title: '❌ Erreur',
+        description: error.message || 'Impossible de mettre à jour la session',
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
+/**
+ * useDeleteLiveSession - Supprimer une session
+ */
+export const useDeleteLiveSession = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (sessionId: string) => {
+      const { data: session } = await supabase
+        .from('course_live_sessions')
+        .select('course_id')
+        .eq('id', sessionId)
+        .single();
+
+      const { error } = await supabase
+        .from('course_live_sessions')
+        .delete()
+        .eq('id', sessionId);
+
+      if (error) {
+        logger.error('Error deleting live session', { error, sessionId });
+        throw error;
+      }
+
+      return { courseId: session?.course_id };
+    },
+    onSuccess: (data) => {
+      if (data.courseId) {
+        queryClient.invalidateQueries({ queryKey: ['course-live-sessions', data.courseId] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['upcoming-sessions'] });
+      toast({
+        title: '✅ Session supprimée',
+        description: 'La session a été supprimée avec succès',
+      });
+    },
+    onError: (error: any) => {
+      logger.error('Error in useDeleteLiveSession', { error });
+      toast({
+        title: '❌ Erreur',
+        description: error.message || 'Impossible de supprimer la session',
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
+/**
  * useRegisterForSession - S'inscrire à une session (étudiant)
  */
 export const useRegisterForSession = () => {
@@ -272,18 +375,22 @@ export const useRegisterForSession = () => {
       enrollmentId: string;
       userId: string;
     }) => {
-      const { data, error } = await supabase.rpc('register_for_session', {
-        p_session_id: sessionId,
-        p_enrollment_id: enrollmentId,
-        p_user_id: userId,
-      });
+      const { data, error } = await supabase
+        .from('course_live_session_registrations')
+        .insert({
+          session_id: sessionId,
+          enrollment_id: enrollmentId,
+          user_id: userId,
+        })
+        .select()
+        .single();
 
       if (error) {
         logger.error('Error registering for session', { error, sessionId });
         throw error;
       }
 
-      return data;
+      return data as SessionRegistration;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['session-registrations', variables.sessionId] });
@@ -363,4 +470,3 @@ export const useUpdateSessionStatus = () => {
     },
   });
 };
-

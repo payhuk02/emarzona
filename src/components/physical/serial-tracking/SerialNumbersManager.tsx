@@ -57,7 +57,18 @@ export function SerialNumbersManager({ physicalProductId, variantId }: SerialNum
     status: statusFilter !== 'all' ? statusFilter as any : undefined,
   });
 
-  const deleteSerial = useDeleteSerialNumber();
+  const deleteSerial = useMutation({
+    mutationFn: async (serialNumberId: string) => {
+      const { error } = await supabase
+        .from('serial_numbers')
+        .delete()
+        .eq('id', serialNumberId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['product-serial-numbers', physicalProductId] });
+    },
+  });
 
   // Refs for animations
   const statsRef = useScrollAnimation<HTMLDivElement>();

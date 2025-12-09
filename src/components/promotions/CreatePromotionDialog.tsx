@@ -22,6 +22,7 @@ import {
 import { AlertCircle, Sparkles } from "lucide-react";
 import { PreviewPromotion } from "@/components/promotions/PreviewPromotion";
 import { generateCodeSuggestions } from "@/lib/utils/codeSuggestions";
+import { PromotionScopeSelector } from "@/components/promotions/PromotionScopeSelector";
 import {
   Popover,
   PopoverContent,
@@ -54,6 +55,11 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
     start_date: "",
     end_date: "",
     is_active: true,
+    applies_to: "all_products" as "all_products" | "specific_products" | "categories" | "collections",
+    product_ids: [] as string[],
+    category_ids: [] as string[],
+    collection_ids: [] as string[],
+    product_types: [] as string[],
   });
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
@@ -113,6 +119,12 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
           start_date: formData.start_date || null,
           end_date: formData.end_date || null,
           is_active: formData.is_active,
+          applicable_to_product_ids: formData.applies_to === 'specific_products' && formData.product_ids.length > 0 
+            ? formData.product_ids 
+            : null,
+          applicable_to_product_types: formData.product_types.length > 0 
+            ? formData.product_types 
+            : null,
         });
 
       if (error) throw error;
@@ -149,6 +161,11 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
       start_date: "",
       end_date: "",
       is_active: true,
+      applies_to: "all_products",
+      product_ids: [],
+      category_ids: [],
+      collection_ids: [],
+      product_types: [],
     });
     setValidationErrors([]);
     setCodeValidation(null);
@@ -297,6 +314,36 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
                 min: "1",
                 placeholder: "Illimité",
               }}
+            />
+          </div>
+
+          {/* Sélection de portée (Produits/Catégories/Collections) */}
+          <div className="space-y-2">
+            <Label>Portée de la promotion</Label>
+            <Select
+              value={formData.applies_to}
+              onValueChange={(value: any) => setFormData({ ...formData, applies_to: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner la portée" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all_products">Tous les produits</SelectItem>
+                <SelectItem value="specific_products">Produits spécifiques</SelectItem>
+                <SelectItem value="categories">Catégories</SelectItem>
+                <SelectItem value="collections">Collections</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <PromotionScopeSelector
+              appliesTo={formData.applies_to}
+              selectedProductIds={formData.product_ids}
+              selectedCategoryIds={formData.category_ids}
+              selectedCollectionIds={formData.collection_ids}
+              onProductIdsChange={(ids) => setFormData({ ...formData, product_ids: ids })}
+              onCategoryIdsChange={(ids) => setFormData({ ...formData, category_ids: ids })}
+              onCollectionIdsChange={(ids) => setFormData({ ...formData, collection_ids: ids })}
+              storeId={storeId}
             />
           </div>
 

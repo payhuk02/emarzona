@@ -274,6 +274,40 @@ class DHLService {
   }
 
   /**
+   * Obtenir token d'accès (OAuth 2.0)
+   */
+  private async getAccessToken(): Promise<string> {
+    try {
+      const tokenUrl = this.testMode
+        ? 'https://api-sandbox.dhl.com/rest/authenticate'
+        : 'https://api.dhl.com/rest/authenticate';
+
+      const response = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: this.apiKey,
+          password: this.apiSecret,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`DHL OAuth error: ${response.statusText} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      return data.access_token || data.token;
+    } catch (error) {
+      logger.error('DHL getAccessToken error', { error });
+      // Fallback: utiliser Basic Auth si OAuth échoue
+      return btoa(`${this.apiKey}:${this.apiSecret}`);
+    }
+  }
+
+  /**
    * Suivre un colis
    */
   async trackShipment(trackingNumber: string): Promise<any[]> {

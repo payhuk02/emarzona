@@ -51,6 +51,12 @@ import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 import { SEOMeta, ProductSchema } from '@/components/seo';
 import { ArtistCertificateDisplay } from '@/components/artist/ArtistCertificateDisplay';
 import { ShippingInfoDisplay } from '@/components/physical/ShippingInfoDisplay';
+import { Artwork3DViewer } from '@/components/artist/Artwork3DViewer';
+import { ArtworkProvenanceDisplay } from '@/components/artist/ArtworkProvenanceDisplay';
+import { useArtwork3DModel, useArtworkProvenanceHistory, useArtworkCertificates, useIncrement3DModelViews } from '@/hooks/artist/useArtworkProvenance';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { FileText } from 'lucide-react';
 import { ArtistShippingCalculator } from '@/components/artist/ArtistShippingCalculator';
 
 const ArtistProductDetail = () => {
@@ -66,6 +72,12 @@ const ArtistProductDetail = () => {
 
   // Track analytics event
   const { trackView } = useAnalyticsTracking();
+
+  // Fetch 3D model and provenance
+  const { data: artwork3D } = useArtwork3DModel(productId || '');
+  const { data: provenanceHistory } = useArtworkProvenanceHistory(productId || '');
+  const { data: certificates } = useArtworkCertificates(productId || '');
+  const incrementViews = useIncrement3DModelViews();
 
   // Fetch product data with store and artist details
   const { data: product, isLoading } = useQuery({
@@ -401,14 +413,38 @@ const ArtistProductDetail = () => {
           </Button>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
-            {/* Left: Images */}
-            <ProductImages
-              images={images}
-              productName={product?.name || 'Œuvre d\'artiste'}
-              showThumbnails={true}
-              enableLightbox={true}
-              aspectRatio="square"
-            />
+            {/* Left: Images / 3D Viewer */}
+            {artwork3D ? (
+              <div className="space-y-4">
+                <Artwork3DViewer
+                  modelUrl={artwork3D.model_url}
+                  modelType={artwork3D.model_type}
+                  thumbnailUrl={artwork3D.thumbnail_url}
+                  autoRotate={artwork3D.auto_rotate}
+                  autoPlay={artwork3D.auto_play}
+                  showControls={artwork3D.show_controls}
+                  backgroundColor={artwork3D.background_color}
+                  cameraPosition={artwork3D.camera_position}
+                  cameraTarget={artwork3D.camera_target}
+                  onView={() => {
+                    if (artwork3D.id) {
+                      incrementViews.mutate(artwork3D.id);
+                    }
+                  }}
+                />
+                <div className="text-sm text-muted-foreground text-center">
+                  {artwork3D.views_count} vue{artwork3D.views_count > 1 ? 's' : ''}
+                </div>
+              </div>
+            ) : (
+              <ProductImages
+                images={images}
+                productName={product?.name || 'Œuvre d\'artiste'}
+                showThumbnails={true}
+                enableLightbox={true}
+                aspectRatio="square"
+              />
+            )}
 
             {/* Right: Product Info */}
             <div className="space-y-6">
@@ -617,9 +653,14 @@ const ArtistProductDetail = () => {
 
           {/* Content Tabs */}
           <Tabs defaultValue="description" className="mt-8 sm:mt-12 space-y-4 sm:space-y-6">
-            <TabsList className="grid w-full grid-cols-3 h-auto">
+            <TabsList className={`grid w-full h-auto ${(provenanceHistory && provenanceHistory.length > 0) || (certificates && certificates.length > 0) ? 'grid-cols-4' : 'grid-cols-3'}`}>
               <TabsTrigger value="description">Description</TabsTrigger>
               <TabsTrigger value="details">Détails</TabsTrigger>
+              {(provenanceHistory && provenanceHistory.length > 0) || (certificates && certificates.length > 0) ? (
+                <TabsTrigger value="provenance">
+                  Provenance {certificates && certificates.length > 0 && `(${certificates.length})`}
+                </TabsTrigger>
+              ) : null}
               <TabsTrigger value="reviews">Avis</TabsTrigger>
             </TabsList>
 
@@ -648,6 +689,62 @@ const ArtistProductDetail = () => {
                   productId={productId!} 
                   artworkValue={product?.price || 0} 
                 />
+              )}
+
+              {/* Provenance Display */}
+              {provenanceHistory && provenanceHistory.length > 0 && (
+                <ArtworkProvenanceDisplay provenanceHistory={provenanceHistory} />
+              )}
+
+              {/* Certificates Display */}
+              {certificates && certificates.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Award className="h-5 w-5" />
+                      Certificats
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {certificates.map((cert) => (
+                      <Card key={cert.id} className="border-l-4 border-l-primary">
+                        <CardHeader>
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg">{cert.certificate_type}</CardTitle>
+                            {cert.is_verified && (
+                              <Badge variant="default" className="bg-green-500">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Vérifié
+                              </Badge>
+                            )}
+                          </div>
+                          {cert.certificate_number && (
+                            <CardDescription>N° {cert.certificate_number}</CardDescription>
+                          )}
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2 text-sm">
+                            <div>
+                              <span className="font-medium">Émis par:</span> {cert.issued_by}
+                            </div>
+                            <div>
+                              <span className="font-medium">Date d'émission:</span>{' '}
+                              {format(new Date(cert.issued_date), 'PP', { locale: fr })}
+                            </div>
+                            {cert.certificate_pdf_url && (
+                              <Button variant="outline" size="sm" asChild>
+                                <a href={cert.certificate_pdf_url} target="_blank" rel="noopener noreferrer">
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Télécharger le certificat
+                                </a>
+                              </Button>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </CardContent>
+                </Card>
               )}
               
               <Card>
@@ -709,6 +806,101 @@ const ArtistProductDetail = () => {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            {/* Provenance Tab */}
+            {(provenanceHistory && provenanceHistory.length > 0) || (certificates && certificates.length > 0) ? (
+              <TabsContent value="provenance" className="space-y-6">
+                {provenanceHistory && provenanceHistory.length > 0 && (
+                  <ArtworkProvenanceDisplay provenanceHistory={provenanceHistory} />
+                )}
+                {certificates && certificates.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Award className="h-5 w-5" />
+                        Certificats d'Authenticité
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {certificates.map((cert) => (
+                        <Card key={cert.id} className="border-l-4 border-l-primary">
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
+                              <CardTitle className="text-lg capitalize">
+                                {cert.certificate_type === 'authenticity' ? 'Certificat d\'Authenticité' :
+                                 cert.certificate_type === 'provenance' ? 'Certificat de Provenance' :
+                                 cert.certificate_type === 'condition' ? 'Certificat d\'État' :
+                                 cert.certificate_type === 'appraisal' ? 'Certificat d\'Expertise' :
+                                 cert.certificate_type === 'export' ? 'Certificat d\'Exportation' :
+                                 cert.certificate_type}
+                              </CardTitle>
+                              {cert.is_verified && (
+                                <Badge variant="default" className="bg-green-500">
+                                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                                  Vérifié
+                                </Badge>
+                              )}
+                            </div>
+                            {cert.certificate_number && (
+                              <CardDescription>N° {cert.certificate_number}</CardDescription>
+                            )}
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <span className="font-medium text-muted-foreground">Émis par:</span>
+                                  <p>{cert.issued_by}</p>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-muted-foreground">Date d'émission:</span>
+                                  <p>{format(new Date(cert.issued_date), 'PP', { locale: fr })}</p>
+                                </div>
+                                {cert.expiry_date && (
+                                  <div>
+                                    <span className="font-medium text-muted-foreground">Date d'expiration:</span>
+                                    <p>{format(new Date(cert.expiry_date), 'PP', { locale: fr })}</p>
+                                  </div>
+                                )}
+                                {cert.verification_code && (
+                                  <div>
+                                    <span className="font-medium text-muted-foreground">Code de vérification:</span>
+                                    <p className="font-mono">{cert.verification_code}</p>
+                                  </div>
+                                )}
+                              </div>
+                              {cert.certificate_content && (
+                                <div className="mt-4 p-4 bg-muted rounded-lg">
+                                  <p className="text-sm whitespace-pre-wrap">{cert.certificate_content}</p>
+                                </div>
+                              )}
+                              <div className="flex gap-2">
+                                {cert.certificate_pdf_url && (
+                                  <Button variant="outline" size="sm" asChild>
+                                    <a href={cert.certificate_pdf_url} target="_blank" rel="noopener noreferrer">
+                                      <FileText className="h-4 w-4 mr-2" />
+                                      Télécharger le PDF
+                                    </a>
+                                  </Button>
+                                )}
+                                {cert.qr_code_url && (
+                                  <Button variant="outline" size="sm" asChild>
+                                    <a href={cert.qr_code_url} target="_blank" rel="noopener noreferrer">
+                                      <FileText className="h-4 w-4 mr-2" />
+                                      QR Code
+                                    </a>
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+            ) : null}
 
             {/* Reviews Tab */}
             <TabsContent value="reviews" className="space-y-6">

@@ -39,6 +39,8 @@ export const VideoPlayer = ({
   onSeekTo,
   currentTime
 }: VideoPlayerProps) => {
+  // Si on veut utiliser le player avancé, on peut l'importer ici
+  // Pour l'instant, on garde le player de base
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const saveIntervalRef = useRef<NodeJS.Timeout | null>(null);

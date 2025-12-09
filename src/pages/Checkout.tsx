@@ -12,7 +12,7 @@
  * - Support 4 types produits
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -26,7 +26,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useCart } from '@/hooks/cart/useCart';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useCalculateArtistShipping } from '@/hooks/artist/useArtistShipping';
 import { initiatePayment } from '@/lib/payment-service';
 import { getAffiliateInfo } from '@/lib/affiliation-tracking';
 import { safeRedirect } from '@/lib/url-validator';
@@ -34,12 +33,11 @@ import { logger } from '@/lib/logger';
 import GiftCardInput from '@/components/checkout/GiftCardInput';
 import CouponInput from '@/components/checkout/CouponInput';
 import { PaymentProviderSelector } from '@/components/checkout/PaymentProviderSelector';
+import { FormFieldWithValidation } from '@/components/checkout/FormFieldWithValidation';
 import type { CartItem } from '@/types/cart';
 import {
   ShoppingBag,
   MapPin,
-  Phone,
-  Mail,
   CreditCard,
   ArrowRight,
   AlertCircle,
@@ -307,44 +305,6 @@ export default function Checkout() {
     }
   }, [user]);
 
-  // Calculer taxes automatiquement selon le pays (estimation avant création commande)
-  // Le calcul précis se fera via la fonction RPC lors de la création de la commande
-  const taxRate = useMemo(() => {
-    // TVA par défaut selon le pays
-    const defaultRates: Record<string, number> = {
-      'BF': 0.18, // Burkina Faso
-      'CI': 0.18, // Côte d'Ivoire
-      'SN': 0.18, // Sénégal
-      'ML': 0.18, // Mali
-      'NE': 0.19, // Niger
-      'TG': 0.18, // Togo
-      'BJ': 0.18, // Bénin
-    };
-    return defaultRates[formData.country] || 0.18;
-  }, [formData.country]);
-
-  // Calculer shipping - Support spécialisé pour œuvres d'artiste
-  const shippingAmount = useMemo(() => {
-    // Vérifier si le panier contient des œuvres d'artiste nécessitant un shipping spécialisé
-    const artistProducts = items.filter(item => item.product_type === 'artist');
-    
-    if (artistProducts.length > 0) {
-      // Pour les œuvres d'artiste, utiliser le calcul spécialisé
-      // Le calcul sera fait dynamiquement via le hook useCalculateArtistShipping
-      // Pour l'instant, estimation basique
-      if (formData.country === 'BF') {
-        return 15000; // Shipping spécialisé BF (plus cher que standard)
-      }
-      return 35000; // Shipping spécialisé international (emballage + assurance)
-    }
-    
-    // Shipping standard pour autres produits
-    if (formData.country === 'BF') {
-      return 5000; // Frais de livraison Burkina Faso
-    }
-    return 15000; // International
-  }, [formData.country, items]);
-
   // ============================================
   // CALCUL AVEC USEMEMO ET DÉPENDANCES EXPLICITES POUR GARANTIR LA MISE À JOUR
   // IMPORTANT: summary.subtotal inclut déjà les remises sur items (voir useCart.ts ligne 108-111)
@@ -370,10 +330,99 @@ export default function Checkout() {
     return Math.max(0, summary.subtotal - couponDiscount);
   }, [summary.subtotal, couponDiscount]);
 
-  // 5. Calcul des taxes (18% sur le montant après remises)
+  // Calculer shipping - Support spécialisé pour œuvres d'artiste
+  const shippingAmount = useMemo(() => {
+    // Vérifier si le panier contient des œuvres d'artiste nécessitant un shipping spécialisé
+    const artistProducts = items.filter(item => item.product_type === 'artist');
+    
+    if (artistProducts.length > 0) {
+      // Pour les œuvres d'artiste, utiliser le calcul spécialisé
+      // Le calcul sera fait dynamiquement via le hook useCalculateArtistShipping
+      // Pour l'instant, estimation basique
+      if (formData.country === 'BF') {
+        return 15000; // Shipping spécialisé BF (plus cher que standard)
+      }
+      return 35000; // Shipping spécialisé international (emballage + assurance)
+    }
+    
+    // Shipping standard pour autres produits
+    if (formData.country === 'BF') {
+      return 5000; // Frais de livraison Burkina Faso
+    }
+    return 15000; // International
+  }, [formData.country, items]);
+
+  // Calculer taxes automatiquement via la fonction RPC
+  // Utilise les configurations de taxes de la base de données
+  // NOTE: Cette query doit être après la déclaration de subtotalAfterDiscounts et shippingAmount
+  const { data: taxCalculation, isLoading: taxLoading } = useQuery({
+    queryKey: ['tax-calculation', subtotalAfterDiscounts, shippingAmount, formData.country, formData.state, storeId, items.map(i => i.product_type)],
+    queryFn: async () => {
+      if (!formData.country || subtotalAfterDiscounts <= 0) {
+        return null;
+      }
+
+      const productTypes = Array.from(new Set(items.map(item => item.product_type)));
+
+      const { data, error } = await supabase.rpc('calculate_taxes_pre_order' as any, {
+        p_subtotal: subtotalAfterDiscounts,
+        p_shipping_amount: shippingAmount,
+        p_country_code: formData.country,
+        p_state_province: formData.state || null,
+        p_store_id: storeId || null,
+        p_product_types: productTypes.length > 0 ? productTypes : null,
+      });
+
+      if (error) {
+        logger.error('Error calculating taxes', { error });
+        // Fallback sur taux par défaut en cas d'erreur
+        return {
+          tax_amount: subtotalAfterDiscounts * 0.18,
+          tax_breakdown: [{
+            type: 'VAT',
+            name: 'TVA',
+            rate: 18,
+            amount: subtotalAfterDiscounts * 0.18,
+            applies_to_shipping: false,
+            tax_inclusive: false,
+            is_default: true,
+          }],
+          subtotal: subtotalAfterDiscounts,
+          shipping_amount: shippingAmount,
+          total_with_tax: subtotalAfterDiscounts + shippingAmount + (subtotalAfterDiscounts * 0.18),
+        };
+      }
+
+      return data;
+    },
+    enabled: !!formData.country && subtotalAfterDiscounts > 0,
+    staleTime: 30000, // Cache pendant 30 secondes
+  });
+
+  // 5. Calcul des taxes via RPC (utilise les configurations de la base de données)
   const taxAmount = useMemo(() => {
-    return Math.max(0, subtotalAfterDiscounts * taxRate);
-  }, [subtotalAfterDiscounts, taxRate]);
+    if (taxCalculation && typeof taxCalculation === 'object' && 'tax_amount' in taxCalculation) {
+      return Number((taxCalculation as any).tax_amount);
+    }
+    // Fallback si pas encore chargé ou erreur
+    return Math.max(0, subtotalAfterDiscounts * 0.18);
+  }, [taxCalculation, subtotalAfterDiscounts]);
+
+  // Breakdown des taxes pour affichage détaillé
+  const taxBreakdown = useMemo(() => {
+    if (taxCalculation && typeof taxCalculation === 'object' && 'tax_breakdown' in taxCalculation) {
+      return (taxCalculation as any).tax_breakdown as Array<{
+        type: string;
+        name: string;
+        rate: number;
+        amount: number;
+        applies_to_shipping: boolean;
+        tax_inclusive: boolean;
+        is_default?: boolean;
+      }>;
+    }
+    return [];
+  }, [taxCalculation]);
 
   // 6. Montant avec taxes
   const subtotalWithTaxes = useMemo(() => {
@@ -444,8 +493,7 @@ export default function Checkout() {
   const processMultiStoreCheckout = async ({
     storeGroups,
     formData,
-    user,
-    finalTotal,
+    checkoutUser,
     taxAmount,
     shippingAmount,
     couponDiscount,
@@ -453,12 +501,10 @@ export default function Checkout() {
     appliedCouponCode,
     appliedGiftCard,
     selectedPaymentProvider,
-    summary,
   }: {
     storeGroups: Map<string, StoreGroup>;
     formData: ShippingAddress;
-    user: { id: string; email: string; user_metadata?: { full_name?: string } };
-    finalTotal: number;
+    checkoutUser?: { id: string; email: string; user_metadata?: { full_name?: string } };
     taxAmount: number;
     shippingAmount: number;
     couponDiscount: number;
@@ -466,7 +512,6 @@ export default function Checkout() {
     appliedCouponCode: { id: string; discountAmount: number; code: string } | null;
     appliedGiftCard: { id: string; balance: number; code: string } | null;
     selectedPaymentProvider: 'moneroo' | 'paydunya';
-    summary: { subtotal: number; discount_amount: number };
   }) => {
     const createdOrders: Array<{ orderId: string; storeId: string; orderNumber: string; checkoutUrl?: string }> = [];
     const errors: Array<{ storeId: string; error: string }> = [];
@@ -570,7 +615,7 @@ export default function Checkout() {
           .from('orders')
           .insert({
             store_id: storeId,
-            customer_id: finalCustomerId || user.id,
+            customer_id: finalCustomerId || checkoutUser?.id || null,
             order_number: orderNumber,
             total_amount: groupTotal,
             currency: 'XOF',
@@ -635,18 +680,21 @@ export default function Checkout() {
                 promotion_id: appliedCouponCode.id,
                 order_id: order.id,
                 customer_id: finalCustomerId || null,
-                user_id: user.id || null,
+                user_id: checkoutUser?.id || null,
                 discount_amount: groupCouponDiscount,
                 order_total_before_discount: orderTotalBefore,
                 order_total_after_discount: orderTotalAfter,
               });
 
             // Incrémenter le compteur d'utilisation
-            await supabase.rpc('increment_promotion_usage', {
-              p_promotion_id: appliedCouponCode.id,
-            }).catch(() => {
+            try {
+              await supabase.rpc('increment_promotion_usage' as any, {
+                p_promotion_id: appliedCouponCode.id,
+              });
+            } catch (rpcError) {
               // Ignorer si la fonction RPC n'existe pas
-            });
+              logger.warn('increment_promotion_usage RPC not available', { error: rpcError });
+            }
           } catch (promotionError) {
             logger.error('Error recording promotion usage for store:', { storeId, error: promotionError });
           }
@@ -676,7 +724,7 @@ export default function Checkout() {
         const paymentResult = await initiatePayment({
           storeId,
           orderId: order.id,
-          customerId: user.id,
+          customerId: checkoutUser?.id || undefined,
           amount: groupTotal,
           currency: 'XOF',
           description: `Commande ${orderNumber} - ${group.items.length} article(s) - ${store.name}`,
@@ -750,58 +798,56 @@ export default function Checkout() {
     // Marquer le panier comme récupéré
     try {
       await supabase.rpc('mark_cart_recovered', {
-        p_user_id: user.id || null,
-        p_session_id: null,
+        p_user_id: checkoutUser?.id || undefined,
+        p_session_id: undefined,
       });
     } catch (recoveryError) {
       logger.warn('Failed to mark cart as recovered', { error: recoveryError });
     }
 
-    // Rediriger vers le premier paiement
-    // Note: Pour un vrai multi-stores, on pourrait créer une page de suivi
-    // qui gère tous les paiements, mais pour l'instant on redirige vers le premier
-    if (createdOrders[0]?.checkoutUrl) {
-      safeRedirect(createdOrders[0].checkoutUrl, () => {
-        toast({
-          title: 'Erreur de paiement',
-          description: 'URL de paiement invalide',
-          variant: 'destructive',
-        });
-      });
-    } else {
-      // Si pas de checkout URL, rediriger vers la page des commandes
-      navigate('/account/orders');
-    }
+    // Rediriger vers la page de suivi multi-stores
+    const orderIds = createdOrders.map(o => o.orderId).join(',');
+    navigate(`/checkout/multi-store-tracking?orders=${orderIds}`);
   };
 
-  // Validation formulaire
+  // Validation formulaire améliorée
   const validateForm = (): boolean => {
     const errors: Partial<Record<keyof ShippingAddress, string>> = {};
 
     if (!formData.full_name.trim()) {
       errors.full_name = 'Le nom complet est requis';
+    } else if (formData.full_name.trim().length < 2) {
+      errors.full_name = 'Le nom doit contenir au moins 2 caractères';
     }
 
     if (!formData.email.trim()) {
       errors.email = 'L\'email est requis';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Email invalide';
+      errors.email = 'Format d\'email invalide (ex: jean@example.com)';
     }
 
     if (!formData.phone.trim()) {
       errors.phone = 'Le téléphone est requis';
+    } else if (!/^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/.test(formData.phone.replace(/\s/g, ''))) {
+      errors.phone = 'Format de téléphone invalide (ex: +225 07 12 34 56 78)';
     }
 
     if (!formData.address_line1.trim()) {
       errors.address_line1 = 'L\'adresse est requise';
+    } else if (formData.address_line1.trim().length < 5) {
+      errors.address_line1 = 'L\'adresse doit contenir au moins 5 caractères';
     }
 
     if (!formData.city.trim()) {
       errors.city = 'La ville est requise';
+    } else if (formData.city.trim().length < 2) {
+      errors.city = 'La ville doit contenir au moins 2 caractères';
     }
 
     if (!formData.postal_code.trim()) {
       errors.postal_code = 'Le code postal est requis';
+    } else if (formData.postal_code.trim().length < 3) {
+      errors.postal_code = 'Le code postal doit contenir au moins 3 caractères';
     }
 
     if (!formData.country.trim()) {
@@ -811,6 +857,43 @@ export default function Checkout() {
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
+  
+  // Validation d'un champ spécifique
+  const validateField = useCallback((field: keyof ShippingAddress, value: string): string | null => {
+    switch (field) {
+      case 'full_name':
+        if (!value.trim()) return 'Le nom complet est requis';
+        if (value.trim().length < 2) return 'Le nom doit contenir au moins 2 caractères';
+        return null;
+      case 'email':
+        if (!value.trim()) return 'L\'email est requis';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Format d\'email invalide';
+        return null;
+      case 'phone':
+        if (!value.trim()) return 'Le téléphone est requis';
+        if (!/^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/.test(value.replace(/\s/g, ''))) {
+          return 'Format de téléphone invalide';
+        }
+        return null;
+      case 'address_line1':
+        if (!value.trim()) return 'L\'adresse est requise';
+        if (value.trim().length < 5) return 'L\'adresse doit contenir au moins 5 caractères';
+        return null;
+      case 'city':
+        if (!value.trim()) return 'La ville est requise';
+        if (value.trim().length < 2) return 'La ville doit contenir au moins 2 caractères';
+        return null;
+      case 'postal_code':
+        if (!value.trim()) return 'Le code postal est requis';
+        if (value.trim().length < 3) return 'Le code postal doit contenir au moins 3 caractères';
+        return null;
+      case 'country':
+        if (!value.trim()) return 'Le pays est requis';
+        return null;
+      default:
+        return null;
+    }
+  }, []);
 
   // Traitement de la commande
   const handleCheckout = async () => {
@@ -857,8 +940,11 @@ export default function Checkout() {
         await processMultiStoreCheckout({
           storeGroups,
           formData,
-          user,
-          finalTotal,
+          checkoutUser: user && user.email ? {
+            id: user.id || '',
+            email: user.email,
+            user_metadata: user.user_metadata as { full_name?: string } | undefined,
+          } : undefined,
           taxAmount,
           shippingAmount,
           couponDiscount,
@@ -866,7 +952,6 @@ export default function Checkout() {
           appliedCouponCode,
           appliedGiftCard,
           selectedPaymentProvider,
-          summary,
         });
         return; // processMultiStoreCheckout gère la redirection
       }
@@ -949,7 +1034,7 @@ export default function Checkout() {
           }
         }
       } catch (customerErr) {
-        logger.warn('Error in customer creation/update:', customerErr);
+        logger.warn('Error in customer creation/update:', { error: customerErr });
         // Ne pas bloquer le processus
       }
 
@@ -962,7 +1047,7 @@ export default function Checkout() {
         .from('orders')
         .insert({
           store_id: product.store_id,
-          customer_id: finalCustomerId || user.id, // Utiliser customer_id si disponible, sinon user.id
+          customer_id: finalCustomerId || user?.id || null, // Utiliser customer_id si disponible, sinon user.id
           order_number: orderNumber,
           total_amount: finalTotal,
           currency: 'XOF',
@@ -1053,7 +1138,7 @@ export default function Checkout() {
             // Note: On utilise une fonction RPC ou une mise à jour SQL directe
             try {
               // Essayer d'abord avec une fonction RPC si elle existe
-              const { error: rpcError } = await supabase.rpc('increment_promotion_usage', {
+              const { error: rpcError } = await supabase.rpc('increment_promotion_usage' as any, {
                 p_promotion_id: appliedCouponCode.id,
               });
               
@@ -1121,7 +1206,7 @@ export default function Checkout() {
       const paymentResult = await initiatePayment({
         storeId: product.store_id,
         orderId: order.id,
-        customerId: user.id,
+        customerId: user?.id || undefined,
         amount: finalTotal,
         currency: 'XOF',
         description: `Commande ${orderNumber} - ${items.length} article(s)`,
@@ -1149,8 +1234,8 @@ export default function Checkout() {
       // Marquer le panier comme récupéré (pour abandoned cart recovery)
       try {
         const { error: recoveryError } = await supabase.rpc('mark_cart_recovered', {
-          p_user_id: user?.id || null,
-          p_session_id: null, // Session ID pourrait être récupéré si nécessaire
+          p_user_id: user?.id || undefined,
+          p_session_id: undefined, // Session ID pourrait être récupéré si nécessaire
         });
         
         if (recoveryError) {
@@ -1259,86 +1344,111 @@ export default function Checkout() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="full_name">
-                          Nom complet <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="full_name"
-                          value={formData.full_name}
-                          onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-                          placeholder="Jean Dupont"
-                          className={formErrors.full_name ? 'border-red-500' : ''}
-                        />
-                        {formErrors.full_name && (
-                          <p className="text-sm text-red-500">{formErrors.full_name}</p>
-                        )}
-                      </div>
+                      <FormFieldWithValidation
+                        label="Nom complet"
+                        name="full_name"
+                        value={formData.full_name}
+                        onChange={(value) => {
+                          setFormData(prev => ({ ...prev, full_name: value }));
+                          if (formErrors.full_name) {
+                            const error = validateField('full_name', value);
+                            setFormErrors(prev => ({ ...prev, full_name: error || undefined }));
+                          }
+                        }}
+                        onBlur={() => {
+                          const error = validateField('full_name', formData.full_name);
+                          setFormErrors(prev => ({ ...prev, full_name: error || undefined }));
+                        }}
+                        error={formErrors.full_name}
+                        placeholder="Jean Dupont"
+                        required
+                        autoComplete="name"
+                        validationRules={[
+                          (value) => !value.trim() ? 'Le nom complet est requis' : null,
+                          (value) => value.trim().length < 2 ? 'Le nom doit contenir au moins 2 caractères' : null,
+                        ]}
+                      />
 
-                      <div className="space-y-2">
-                        <Label htmlFor="email">
-                          Email <span className="text-red-500">*</span>
-                        </Label>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                          <Input
-                            id="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                            placeholder="jean@example.com"
-                            className={`pl-10 ${formErrors.email ? 'border-red-500' : ''}`}
-                            aria-invalid={!!formErrors.email}
-                            aria-describedby={formErrors.email ? "email-error" : undefined}
-                            autoComplete="email"
-                          />
-                        </div>
-                        {formErrors.email && (
-                          <p id="email-error" className="text-sm text-red-500" role="alert">{formErrors.email}</p>
-                        )}
-                      </div>
+                      <FormFieldWithValidation
+                        label="Email"
+                        name="email"
+                        value={formData.email}
+                        onChange={(value) => {
+                          setFormData(prev => ({ ...prev, email: value }));
+                          if (formErrors.email) {
+                            const error = validateField('email', value);
+                            setFormErrors(prev => ({ ...prev, email: error || undefined }));
+                          }
+                        }}
+                        onBlur={() => {
+                          const error = validateField('email', formData.email);
+                          setFormErrors(prev => ({ ...prev, email: error || undefined }));
+                        }}
+                        error={formErrors.email}
+                        type="email"
+                        placeholder="jean@example.com"
+                        required
+                        autoComplete="email"
+                        validationRules={[
+                          (value) => !value.trim() ? 'L\'email est requis' : null,
+                          (value) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Format d\'email invalide' : null,
+                        ]}
+                      />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">
-                        Téléphone <span className="text-red-500">*</span>
-                      </Label>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                        <Input
-                          id="phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                          placeholder="+225 07 12 34 56 78"
-                          className={`pl-10 ${formErrors.phone ? 'border-red-500' : ''}`}
-                          aria-invalid={!!formErrors.phone}
-                          aria-describedby={formErrors.phone ? "phone-error" : undefined}
-                          autoComplete="tel"
-                        />
-                      </div>
-                      {formErrors.phone && (
-                        <p id="phone-error" className="text-sm text-red-500" role="alert">{formErrors.phone}</p>
-                      )}
-                    </div>
+                    <FormFieldWithValidation
+                      label="Téléphone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={(value) => {
+                        setFormData(prev => ({ ...prev, phone: value }));
+                        if (formErrors.phone) {
+                          const error = validateField('phone', value);
+                          setFormErrors(prev => ({ ...prev, phone: error || undefined }));
+                        }
+                      }}
+                      onBlur={() => {
+                        const error = validateField('phone', formData.phone);
+                        setFormErrors(prev => ({ ...prev, phone: error || undefined }));
+                      }}
+                      error={formErrors.phone}
+                      type="tel"
+                      placeholder="+225 07 12 34 56 78"
+                      required
+                      autoComplete="tel"
+                      validationRules={[
+                        (value) => !value.trim() ? 'Le téléphone est requis' : null,
+                        (value) => !/^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/.test(value.replace(/\s/g, '')) 
+                          ? 'Format de téléphone invalide' : null,
+                      ]}
+                    />
 
                     <Separator />
 
-                    <div className="space-y-2">
-                      <Label htmlFor="address_line1">
-                        Adresse <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id="address_line1"
-                        value={formData.address_line1}
-                        onChange={(e) => setFormData(prev => ({ ...prev, address_line1: e.target.value }))}
-                        placeholder="123 Rue principale"
-                        className={formErrors.address_line1 ? 'border-red-500' : ''}
-                      />
-                      {formErrors.address_line1 && (
-                        <p className="text-sm text-red-500">{formErrors.address_line1}</p>
-                      )}
-                    </div>
+                    <FormFieldWithValidation
+                      label="Adresse"
+                      name="address_line1"
+                      value={formData.address_line1}
+                      onChange={(value) => {
+                        setFormData(prev => ({ ...prev, address_line1: value }));
+                        if (formErrors.address_line1) {
+                          const error = validateField('address_line1', value);
+                          setFormErrors(prev => ({ ...prev, address_line1: error || undefined }));
+                        }
+                      }}
+                      onBlur={() => {
+                        const error = validateField('address_line1', formData.address_line1);
+                        setFormErrors(prev => ({ ...prev, address_line1: error || undefined }));
+                      }}
+                      error={formErrors.address_line1}
+                      placeholder="123 Rue principale"
+                      required
+                      autoComplete="street-address"
+                      validationRules={[
+                        (value) => !value.trim() ? 'L\'adresse est requise' : null,
+                        (value) => value.trim().length < 5 ? 'L\'adresse doit contenir au moins 5 caractères' : null,
+                      ]}
+                    />
 
                     <div className="space-y-2">
                       <Label htmlFor="address_line2">
@@ -1353,37 +1463,55 @@ export default function Checkout() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="city">
-                          Ville <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="city"
-                          value={formData.city}
-                          onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                          placeholder="Abidjan"
-                          className={formErrors.city ? 'border-red-500' : ''}
-                        />
-                        {formErrors.city && (
-                          <p className="text-sm text-red-500">{formErrors.city}</p>
-                        )}
-                      </div>
+                      <FormFieldWithValidation
+                        label="Ville"
+                        name="city"
+                        value={formData.city}
+                        onChange={(value) => {
+                          setFormData(prev => ({ ...prev, city: value }));
+                          if (formErrors.city) {
+                            const error = validateField('city', value);
+                            setFormErrors(prev => ({ ...prev, city: error || undefined }));
+                          }
+                        }}
+                        onBlur={() => {
+                          const error = validateField('city', formData.city);
+                          setFormErrors(prev => ({ ...prev, city: error || undefined }));
+                        }}
+                        error={formErrors.city}
+                        placeholder="Abidjan"
+                        required
+                        autoComplete="address-level2"
+                        validationRules={[
+                          (value) => !value.trim() ? 'La ville est requise' : null,
+                          (value) => value.trim().length < 2 ? 'La ville doit contenir au moins 2 caractères' : null,
+                        ]}
+                      />
 
-                      <div className="space-y-2">
-                        <Label htmlFor="postal_code">
-                          Code postal <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="postal_code"
-                          value={formData.postal_code}
-                          onChange={(e) => setFormData(prev => ({ ...prev, postal_code: e.target.value }))}
-                          placeholder="01 BP 1234"
-                          className={formErrors.postal_code ? 'border-red-500' : ''}
-                        />
-                        {formErrors.postal_code && (
-                          <p className="text-sm text-red-500">{formErrors.postal_code}</p>
-                        )}
-                      </div>
+                      <FormFieldWithValidation
+                        label="Code postal"
+                        name="postal_code"
+                        value={formData.postal_code}
+                        onChange={(value) => {
+                          setFormData(prev => ({ ...prev, postal_code: value }));
+                          if (formErrors.postal_code) {
+                            const error = validateField('postal_code', value);
+                            setFormErrors(prev => ({ ...prev, postal_code: error || undefined }));
+                          }
+                        }}
+                        onBlur={() => {
+                          const error = validateField('postal_code', formData.postal_code);
+                          setFormErrors(prev => ({ ...prev, postal_code: error || undefined }));
+                        }}
+                        error={formErrors.postal_code}
+                        placeholder="01 BP 1234"
+                        required
+                        autoComplete="postal-code"
+                        validationRules={[
+                          (value) => !value.trim() ? 'Le code postal est requis' : null,
+                          (value) => value.trim().length < 3 ? 'Le code postal doit contenir au moins 3 caractères' : null,
+                        ]}
+                      />
 
                       <div className="space-y-2">
                         <Label htmlFor="country">
@@ -1732,10 +1860,35 @@ export default function Checkout() {
                             <span>{shippingAmount.toLocaleString('fr-FR')} XOF</span>
                           </div>
 
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Taxes (TVA 18% - BF)</span>
-                            <span>{taxAmount.toLocaleString('fr-FR')} XOF</span>
-                          </div>
+                          {/* Affichage détaillé des taxes */}
+                          {taxLoading ? (
+                            <div className="flex justify-between items-center">
+                              <span className="text-muted-foreground">Taxes</span>
+                              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                            </div>
+                          ) : taxBreakdown.length > 0 ? (
+                            <div className="space-y-1">
+                              {taxBreakdown.map((tax, index) => (
+                                <div key={index} className="flex justify-between text-xs">
+                                  <span className="text-muted-foreground">
+                                    {tax.name} ({tax.rate}%)
+                                    {tax.applies_to_shipping && ' + Livraison'}
+                                    {tax.is_default && ' (par défaut)'}
+                                  </span>
+                                  <span>{Number(tax.amount).toLocaleString('fr-FR')} XOF</span>
+                                </div>
+                              ))}
+                              <div className="flex justify-between font-medium pt-1 border-t">
+                                <span className="text-muted-foreground">Total Taxes</span>
+                                <span>{taxAmount.toLocaleString('fr-FR')} XOF</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Taxes</span>
+                              <span>{taxAmount.toLocaleString('fr-FR')} XOF</span>
+                            </div>
+                          )}
                         </div>
 
                         <Separator />

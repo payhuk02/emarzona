@@ -181,6 +181,7 @@ const Storefront = lazy(() => import("./pages/Storefront"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const Marketplace = lazy(() => import("./pages/Marketplace"));
 const Cart = lazy(() => import("./pages/Cart"));
+const CartEnhanced = lazy(() => import("./pages/CartEnhanced"));
 const Checkout = lazy(() => import("./pages/checkout/Checkout"));
 const ShippingServices = lazy(() => import("./pages/shipping/ShippingServices"));
 const ContactShippingService = lazy(() => import("./pages/shipping/ContactShippingService"));
@@ -268,6 +269,9 @@ const PhysicalMultiCurrency = lazy(() => import("./pages/admin/PhysicalMultiCurr
 const AdvancedCalendarPage = lazy(() => import("./pages/service/AdvancedCalendarPage"));
 const ServiceManagementPage = lazy(() => import("./pages/service/ServiceManagementPage"));
 const RecurringBookingsPage = lazy(() => import("./pages/service/RecurringBookingsPage"));
+const CalendarIntegrationsPage = lazy(() => import("./pages/service/CalendarIntegrationsPage"));
+const ServiceWaitlistManagementPage = lazy(() => import("./pages/service/ServiceWaitlistManagementPage"));
+const BookingRemindersManagementPage = lazy(() => import("./pages/service/BookingRemindersManagementPage"));
 const IntegrationsPage = lazy(() => import("./pages/admin/IntegrationsPage"));
 const GamificationPage = lazy(() => import("./pages/gamification/GamificationPage"));
 
@@ -293,6 +297,8 @@ const MyCourses = lazy(() => import("./pages/courses/MyCourses"));
 const CreateCourse = lazy(() => import("./pages/courses/CreateCourse"));
 const CourseDetail = lazy(() => import("./pages/courses/CourseDetail"));
 const CourseAnalytics = lazy(() => import("./pages/courses/CourseAnalytics"));
+const CohortsManagementPage = lazy(() => import("./pages/courses/CohortsManagementPage"));
+const CohortDetailPage = lazy(() => import("./pages/courses/CohortDetailPage"));
 
 // Pages Notifications - Lazy loading
 const NotificationsCenter = lazy(() => import("./pages/notifications/NotificationsCenter"));
@@ -307,6 +313,25 @@ const SharedWishlist = lazy(() => import("./pages/customer/SharedWishlist"));
 const MyDownloads = lazy(() => import("./pages/digital/MyDownloads"));
 const CreateBundle = lazy(() => import("./pages/digital/CreateBundle"));
 const BundleDetail = lazy(() => import("./pages/digital/BundleDetail"));
+const DigitalBundlesManagement = lazy(() => import("./pages/dashboard/DigitalBundlesManagement"));
+const LiveSessionsManagement = lazy(() => import("./pages/dashboard/LiveSessionsManagement"));
+const AssignmentsManagement = lazy(() => import("./pages/dashboard/AssignmentsManagement"));
+const ReviewsManagement = lazy(() => import("./pages/dashboard/ReviewsManagement"));
+const CourseGamificationDashboard = lazy(() => import("./pages/courses/CourseGamificationDashboard"));
+const CouponsManagement = lazy(() => import("./pages/dashboard/CouponsManagement"));
+const AnalyticsDashboardsManagement = lazy(() => import("./pages/dashboard/AnalyticsDashboardsManagement"));
+const AbandonedCartsManagement = lazy(() => import("./pages/dashboard/AbandonedCartsManagement"));
+const TaxManagement = lazy(() => import("./pages/dashboard/TaxManagement"));
+const MultiStoreCheckoutTracking = lazy(() => import("./pages/checkout/MultiStoreCheckoutTracking"));
+const ProductsCompare = lazy(() => import("./pages/ProductsCompare"));
+const NotificationsManagement = lazy(() => import("./pages/notifications/NotificationsManagement"));
+const ServiceCalendarManagement = lazy(() => import("./pages/service/ServiceCalendarManagement"));
+const CustomerReturns = lazy(() => import("./pages/customer/CustomerReturns"));
+const CustomerWarranties = lazy(() => import("./pages/customer/CustomerWarranties"));
+const PhysicalProductsLotsManagement = lazy(() => import("./pages/dashboard/PhysicalProductsLotsManagement"));
+const SuppliersManagement = lazy(() => import("./pages/dashboard/SuppliersManagement"));
+const DemandForecasting = lazy(() => import("./pages/dashboard/DemandForecasting"));
+const InventoryAnalytics = lazy(() => import("./pages/dashboard/InventoryAnalytics"));
 const MyLicenses = lazy(() => import("./pages/digital/MyLicenses"));
 const LicenseManagement = lazy(() => import("./pages/digital/LicenseManagement"));
 const DigitalProductAnalytics = lazy(() => import("./pages/digital/DigitalProductAnalytics"));
@@ -333,6 +358,11 @@ const PhysicalProductDetail = lazy(() => import("./pages/physical/PhysicalProduc
 const ServiceDetail = lazy(() => import("./pages/service/ServiceDetail"));
 const BookingsManagement = lazy(() => import("./pages/service/BookingsManagement"));
 const ArtistProductDetail = lazy(() => import("./pages/artist/ArtistProductDetail"));
+const ArtistPortfolioPage = lazy(() => import("./pages/artist/ArtistPortfolioPage"));
+const ArtistPortfoliosManagement = lazy(() => import("./pages/dashboard/ArtistPortfoliosManagement"));
+const AuctionsManagementPage = lazy(() => import("./pages/artist/AuctionsManagementPage"));
+const AuctionDetailPage = lazy(() => import("./pages/artist/AuctionDetailPage"));
+const AuctionsWatchlistPage = lazy(() => import("./pages/artist/AuctionsWatchlistPage"));
 
 const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 const AdminErrorMonitoring = lazy(() => import("./pages/admin/AdminErrorMonitoring"));
@@ -448,13 +478,17 @@ const AppContent = () => {
           <Route path="/auth" element={<Auth />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/community" element={<CommunityPage />} />
-          <Route path="/cart" element={<Cart />} />
+          <Route path="/cart" element={<CartEnhanced />} />
+          <Route path="/cart-old" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout/multi-store-tracking" element={<ProtectedRoute><MultiStoreCheckoutTracking /></ProtectedRoute>} />
           
           {/* --- Routes Customer Portal --- */}
           <Route path="/account" element={<ProtectedRoute><CustomerPortal /></ProtectedRoute>} />
           <Route path="/account/orders" element={<ProtectedRoute><CustomerMyOrders /></ProtectedRoute>} />
           <Route path="/account/downloads" element={<ProtectedRoute><CustomerMyDownloads /></ProtectedRoute>} />
+          <Route path="/account/returns" element={<ProtectedRoute><CustomerReturns /></ProtectedRoute>} />
+          <Route path="/account/warranties" element={<ProtectedRoute><CustomerWarranties /></ProtectedRoute>} />
           <Route path="/account/digital" element={<ProtectedRoute><CustomerDigitalPortal /></ProtectedRoute>} />
           <Route path="/account/physical" element={<ProtectedRoute><CustomerPhysicalPortal /></ProtectedRoute>} />
           <Route path="/account/courses" element={<ProtectedRoute><CustomerMyCourses /></ProtectedRoute>} />
@@ -526,8 +560,14 @@ const AppContent = () => {
           <Route path="/dashboard/physical-inventory" element={<ProtectedRoute><PhysicalInventoryManagement /></ProtectedRoute>} />
           <Route path="/dashboard/physical-promotions" element={<ProtectedRoute><PhysicalPromotions /></ProtectedRoute>} />
           <Route path="/dashboard/physical-analytics" element={<ProtectedRoute><PhysicalProductsAnalytics /></ProtectedRoute>} />
-          <Route path="/dashboard/physical-lots" element={<ProtectedRoute><PhysicalProductsLots /></ProtectedRoute>} />
+          <Route path="/dashboard/physical-lots" element={<ProtectedRoute><PhysicalProductsLotsManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/physical-lots-old" element={<ProtectedRoute><PhysicalProductsLots /></ProtectedRoute>} />
           <Route path="/dashboard/physical-serial-tracking" element={<ProtectedRoute><PhysicalProductsSerialTracking /></ProtectedRoute>} />
+          <Route path="/dashboard/physical-lots" element={<ProtectedRoute><PhysicalProductsLotsManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/physical-lots/:productId" element={<ProtectedRoute><PhysicalProductsLotsManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/suppliers" element={<ProtectedRoute><SuppliersManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/demand-forecasting" element={<ProtectedRoute><DemandForecasting /></ProtectedRoute>} />
+          <Route path="/dashboard/inventory-analytics" element={<ProtectedRoute><InventoryAnalytics /></ProtectedRoute>} />
           <Route path="/dashboard/physical-barcode-scanner" element={<ProtectedRoute><PhysicalBarcodeScanner /></ProtectedRoute>} />
           <Route path="/dashboard/physical-preorders" element={<ProtectedRoute><PhysicalPreOrders /></ProtectedRoute>} />
           <Route path="/dashboard/physical-backorders" element={<ProtectedRoute><PhysicalBackorders /></ProtectedRoute>} />
@@ -553,12 +593,26 @@ const AppContent = () => {
           <Route path="/aff/:code" element={<ShortLinkRedirect />} />
 
           {/* --- Routes Notifications --- */}
-          <Route path="/notifications" element={<ProtectedRoute><NotificationsCenter /></ProtectedRoute>} />
+          <Route path="/notifications" element={<ProtectedRoute><NotificationsManagement /></ProtectedRoute>} />
+          <Route path="/notifications/center" element={<ProtectedRoute><NotificationsCenter /></ProtectedRoute>} />
           <Route path="/settings/notifications" element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>} />
 
           {/* --- Routes Cours --- */}
           <Route path="/dashboard/my-courses" element={<ProtectedRoute><MyCourses /></ProtectedRoute>} />
           <Route path="/dashboard/courses/new" element={<ProtectedRoute><CreateCourse /></ProtectedRoute>} />
+          <Route path="/dashboard/courses/live-sessions" element={<ProtectedRoute><LiveSessionsManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/courses/assignments" element={<ProtectedRoute><AssignmentsManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/reviews" element={<ProtectedRoute><ReviewsManagement /></ProtectedRoute>} />
+          <Route path="/courses/:courseId/gamification" element={<ProtectedRoute><CourseGamificationDashboard /></ProtectedRoute>} />
+          
+          {/* --- Routes Cohorts --- */}
+          <Route path="/dashboard/cohorts" element={<ProtectedRoute><CohortsManagementPage /></ProtectedRoute>} />
+          <Route path="/dashboard/cohorts/:cohortId" element={<ProtectedRoute><CohortDetailPage /></ProtectedRoute>} />
+          <Route path="/dashboard/courses/:courseId/cohorts" element={<ProtectedRoute><CohortsManagementPage /></ProtectedRoute>} />
+          <Route path="/dashboard/coupons" element={<ProtectedRoute><CouponsManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/analytics/dashboards" element={<ProtectedRoute><AnalyticsDashboardsManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/abandoned-carts" element={<ProtectedRoute><AbandonedCartsManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/taxes" element={<ProtectedRoute><TaxManagement /></ProtectedRoute>} />
           <Route path="/courses/:slug" element={<CourseDetail />} />
           <Route path="/courses/:slug/analytics" element={<ProtectedRoute><CourseAnalytics /></ProtectedRoute>} />
 
@@ -566,9 +620,11 @@ const AppContent = () => {
           <Route path="/dashboard/digital-products" element={<ProtectedRoute><DigitalProductsList /></ProtectedRoute>} />
           <Route path="/digital/search" element={<DigitalProductsSearch />} />
           <Route path="/digital/compare" element={<DigitalProductsCompare />} />
+          <Route path="/products/compare" element={<ProductsCompare />} />
           <Route path="/digital/:productId" element={<DigitalProductDetail />} />
           <Route path="/wishlist/shared/:token" element={<SharedWishlist />} />
           <Route path="/dashboard/my-downloads" element={<ProtectedRoute><MyDownloads /></ProtectedRoute>} />
+          <Route path="/dashboard/digital-products/bundles" element={<ProtectedRoute><DigitalBundlesManagement /></ProtectedRoute>} />
           <Route path="/dashboard/digital-products/bundles/create" element={<ProtectedRoute><CreateBundle /></ProtectedRoute>} />
           <Route path="/bundles/:bundleId" element={<BundleDetail />} />
           <Route path="/dashboard/my-licenses" element={<ProtectedRoute><MyLicenses /></ProtectedRoute>} />
@@ -580,9 +636,14 @@ const AppContent = () => {
           
           {/* --- Routes Services --- */}
           <Route path="/dashboard/services/staff-availability" element={<ProtectedRoute><StaffAvailabilityCalendar /></ProtectedRoute>} />
+          <Route path="/dashboard/services/calendar" element={<ProtectedRoute><ServiceCalendarManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/services/calendar/:serviceId" element={<ProtectedRoute><ServiceCalendarManagement /></ProtectedRoute>} />
           <Route path="/dashboard/services/staff-availability/:serviceId" element={<ProtectedRoute><StaffAvailabilityCalendar /></ProtectedRoute>} />
           <Route path="/dashboard/services/resource-conflicts" element={<ProtectedRoute><ResourceConflictManagement /></ProtectedRoute>} />
           <Route path="/dashboard/services/recurring-bookings" element={<ProtectedRoute><RecurringBookingsManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/services/calendar-integrations" element={<ProtectedRoute><CalendarIntegrationsPage /></ProtectedRoute>} />
+          <Route path="/dashboard/services/waitlist" element={<ProtectedRoute><ServiceWaitlistManagementPage /></ProtectedRoute>} />
+          <Route path="/dashboard/services/reminders" element={<ProtectedRoute><BookingRemindersManagementPage /></ProtectedRoute>} />
 
 
           {/* --- Routes Advanced Systems (Messaging, Payments, Disputes) --- */}
@@ -613,6 +674,15 @@ const AppContent = () => {
           <Route path="/physical/:productId" element={<PhysicalProductDetail />} />
           <Route path="/service/:serviceId" element={<ServiceDetail />} />
           <Route path="/artist/:productId" element={<ArtistProductDetail />} />
+          
+          {/* --- Routes Artist Portfolios --- */}
+          <Route path="/portfolio/:slug" element={<ArtistPortfolioPage />} />
+          <Route path="/dashboard/portfolios" element={<ProtectedRoute><ArtistPortfoliosManagement /></ProtectedRoute>} />
+          
+          {/* --- Routes Artist Auctions --- */}
+          <Route path="/auctions/:slug" element={<AuctionDetailPage />} />
+          <Route path="/dashboard/auctions" element={<ProtectedRoute><AuctionsManagementPage /></ProtectedRoute>} />
+          <Route path="/dashboard/auctions/watchlist" element={<ProtectedRoute><AuctionsWatchlistPage /></ProtectedRoute>} />
           
           {/* --- Routes Service Management --- */}
           <Route path="/bookings/manage" element={<ProtectedRoute><BookingsManagement /></ProtectedRoute>} />

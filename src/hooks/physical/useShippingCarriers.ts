@@ -415,12 +415,136 @@ export const useShippingLabels = (storeId?: string) => {
 /**
  * useTrackShipment - Suivre un colis
  */
-export const useTrackShipment = (trackingNumber?: string) => {
+export const useTrackShipment = (trackingNumber?: string, carrierId?: string) => {
   return useQuery({
-    queryKey: ['track-shipment', trackingNumber],
+    queryKey: ['track-shipment', trackingNumber, carrierId],
     queryFn: async () => {
       if (!trackingNumber) throw new Error('Tracking number manquant');
 
+      // Si un carrierId est fourni, essayer de tracker via l'API du transporteur
+      if (carrierId) {
+        try {
+          const { data: carrier, error: carrierError } = await supabase
+            .from('shipping_carriers')
+            .select('*')
+            .eq('id', carrierId)
+            .single();
+
+          if (!carrierError && carrier) {
+            // Tracker via l'API du transporteur
+            if (carrier.carrier_name === 'FedEx' || carrier.carrier_name === 'FedEx_Express') {
+              const fedexService = new FedExService({
+                apiKey: carrier.api_key || '',
+                apiSecret: carrier.api_secret || '',
+                accountNumber: carrier.account_number || '',
+                meterNumber: carrier.meter_number,
+                apiUrl: carrier.api_url,
+                testMode: carrier.test_mode,
+              });
+
+              const events = await fedexService.trackShipment(trackingNumber);
+
+              // Sauvegarder les événements en base
+              if (events.length > 0) {
+                const { data: label } = await supabase
+                  .from('shipping_labels')
+                  .select('id')
+                  .eq('tracking_number', trackingNumber)
+                  .single();
+
+                if (label) {
+                  for (const event of events) {
+                    await supabase.from('shipping_tracking_events').upsert({
+                      shipping_label_id: label.id,
+                      tracking_number: trackingNumber,
+                      event_type: event.eventType,
+                      event_description: event.eventDescription,
+                      event_location: event.eventLocation,
+                      event_timestamp: event.eventTimestamp,
+                      metadata: event,
+                      source: 'api',
+                    }, {
+                      onConflict: 'tracking_number,event_timestamp,event_type',
+                    });
+                  }
+                }
+              }
+
+              // Convertir au format ShippingTrackingEvent
+              return events.map(event => ({
+                id: '',
+                shipping_label_id: '',
+                tracking_number: trackingNumber,
+                event_type: event.eventType,
+                event_description: event.eventDescription,
+                event_location: event.eventLocation,
+                latitude: null,
+                longitude: null,
+                event_timestamp: event.eventTimestamp,
+                metadata: event,
+                source: 'api',
+                created_at: new Date().toISOString(),
+              })) as ShippingTrackingEvent[];
+            } else if (carrier.carrier_name === 'DHL' || carrier.carrier_name === 'DHL_Express') {
+              const dhlService = new DHLService({
+                apiKey: carrier.api_key || '',
+                apiSecret: carrier.api_secret || '',
+                apiUrl: carrier.api_url,
+                testMode: carrier.test_mode,
+              });
+
+              const events = await dhlService.trackShipment(trackingNumber);
+
+              // Sauvegarder les événements en base
+              if (events.length > 0) {
+                const { data: label } = await supabase
+                  .from('shipping_labels')
+                  .select('id')
+                  .eq('tracking_number', trackingNumber)
+                  .single();
+
+                if (label) {
+                  for (const event of events) {
+                    await supabase.from('shipping_tracking_events').upsert({
+                      shipping_label_id: label.id,
+                      tracking_number: trackingNumber,
+                      event_type: event.eventType,
+                      event_description: event.eventDescription,
+                      event_location: event.eventLocation,
+                      event_timestamp: event.eventTimestamp,
+                      metadata: event,
+                      source: 'api',
+                    }, {
+                      onConflict: 'tracking_number,event_timestamp,event_type',
+                    });
+                  }
+                }
+              }
+
+              // Convertir au format ShippingTrackingEvent
+              return events.map(event => ({
+                id: '',
+                shipping_label_id: '',
+                tracking_number: trackingNumber,
+                event_type: event.eventType,
+                event_description: event.eventDescription,
+                event_location: event.eventLocation,
+                latitude: null,
+                longitude: null,
+                event_timestamp: event.eventTimestamp,
+                metadata: event,
+                source: 'api',
+                created_at: new Date().toISOString(),
+              })) as ShippingTrackingEvent[];
+            }
+          }
+        } catch (error) {
+          logger.error('Error tracking via carrier API', { error, trackingNumber, carrierId });
+          // Continuer avec la méthode par défaut
+        }
+      }
+
+      // Méthode par défaut : récupérer depuis la base de données
       const { data, error } = await supabase
         .from('shipping_tracking_events')
         .select('*')

@@ -140,4 +140,5 @@ export {
   Edit,
   Play,
   Pause,
+  Gavel,
 } from 'lucide-react';

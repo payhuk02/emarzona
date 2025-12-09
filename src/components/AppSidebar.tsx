@@ -60,6 +60,7 @@ import {
   Scale,
   Headphones,
   Workflow,
+  Gavel,
 } from "@/components/icons";
 import { usePlatformLogo } from "@/hooks/usePlatformLogo";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
@@ -175,6 +176,11 @@ const menuSections = [
         url: "/dashboard/gamification",
         icon: Trophy,
       },
+      {
+        title: "Ma Watchlist Enchères",
+        url: "/dashboard/auctions/watchlist",
+        icon: Heart,
+      },
     ]
   },
   {
@@ -224,6 +230,16 @@ const menuSections = [
         title: "Analytics Digitaux",
         url: "/dashboard/digital-products",
         icon: BarChart,
+      },
+      {
+        title: "Enchères Artistes",
+        url: "/dashboard/auctions",
+        icon: Gavel,
+      },
+      {
+        title: "Cohorts Cours",
+        url: "/dashboard/cohorts",
+        icon: Users,
       },
     ]
   },
@@ -296,6 +312,21 @@ const menuSections = [
         icon: AlertTriangle,
       },
       {
+        title: "Intégrations Calendrier",
+        url: "/dashboard/services/calendar-integrations",
+        icon: Calendar,
+      },
+      {
+        title: "Liste d'Attente Services",
+        url: "/dashboard/services/waitlist",
+        icon: Users,
+      },
+      {
+        title: "Rappels Réservations",
+        url: "/dashboard/services/reminders",
+        icon: Bell,
+      },
+      {
         title: "Inventaire",
         url: "/dashboard/inventory",
         icon: Warehouse,
@@ -329,6 +360,11 @@ const menuSections = [
         title: "Prévisions Demande",
         url: "/dashboard/demand-forecasting",
         icon: TrendingUp,
+      },
+      {
+        title: "Analytics Inventaire",
+        url: "/dashboard/inventory-analytics",
+        icon: FileBarChart,
       },
       {
         title: "Optimisation Coûts",
@@ -681,6 +717,11 @@ const adminMenuSections = [
         title: "Prévisions Demande",
         url: "/dashboard/demand-forecasting",
         icon: TrendingUp,
+      },
+      {
+        title: "Analytics Inventaire",
+        url: "/dashboard/inventory-analytics",
+        icon: FileBarChart,
       },
       {
         title: "Optimisation Coûts",

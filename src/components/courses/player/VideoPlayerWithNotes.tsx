@@ -5,6 +5,7 @@
 
 import { useState, useCallback } from 'react';
 import { VideoPlayer } from './VideoPlayer';
+import { AdvancedVideoPlayer } from './AdvancedVideoPlayer';
 import { NotesPanel } from '@/components/courses/notes';
 
 interface VideoPlayerWithNotesProps {
@@ -16,6 +17,9 @@ interface VideoPlayerWithNotesProps {
   lessonId?: string;
   courseId?: string;
   isEnrolled: boolean;
+  useAdvancedPlayer?: boolean; // Option pour utiliser le player avancé
+  qualities?: Array<{ label: string; value: string; resolution?: string }>;
+  subtitles?: Array<{ lang: string; url: string; label: string }>;
 }
 
 export const VideoPlayerWithNotes = ({
@@ -27,6 +31,9 @@ export const VideoPlayerWithNotes = ({
   lessonId,
   courseId,
   isEnrolled,
+  useAdvancedPlayer = true, // Par défaut, utiliser le player avancé
+  qualities,
+  subtitles,
 }: VideoPlayerWithNotesProps) => {
   const [currentTimeSeconds, setCurrentTimeSeconds] = useState(0);
   const [seekToTime, setSeekToTime] = useState<number | undefined>(undefined);
@@ -53,16 +60,33 @@ export const VideoPlayerWithNotes = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Video Player - 2/3 width */}
         <div className="lg:col-span-2">
-          <VideoPlayer
-            videoType={videoType}
-            videoUrl={videoUrl}
-            title={title}
-            productId={productId}
-            enrollmentId={enrollmentId}
-            lessonId={lessonId}
-            onTimeUpdate={handleTimeUpdate}
-            currentTime={seekToTime}
-          />
+          {useAdvancedPlayer && videoType === 'upload' ? (
+            <AdvancedVideoPlayer
+              videoType={videoType}
+              videoUrl={videoUrl}
+              title={title}
+              productId={productId}
+              enrollmentId={enrollmentId}
+              lessonId={lessonId}
+              onTimeUpdate={handleTimeUpdate}
+              onSeekTo={setSeekToTime}
+              currentTime={seekToTime}
+              qualities={qualities}
+              subtitles={subtitles}
+            />
+          ) : (
+            <VideoPlayer
+              videoType={videoType}
+              videoUrl={videoUrl}
+              title={title}
+              productId={productId}
+              enrollmentId={enrollmentId}
+              lessonId={lessonId}
+              onTimeUpdate={handleTimeUpdate}
+              onSeekTo={setSeekToTime}
+              currentTime={seekToTime}
+            />
+          )}
         </div>
         
         {/* Notes Panel - 1/3 width (si inscrit) */}
