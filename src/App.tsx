@@ -363,6 +363,7 @@ const ArtistPortfoliosManagement = lazy(() => import("./pages/dashboard/ArtistPo
 const AuctionsManagementPage = lazy(() => import("./pages/artist/AuctionsManagementPage"));
 const AuctionDetailPage = lazy(() => import("./pages/artist/AuctionDetailPage"));
 const AuctionsWatchlistPage = lazy(() => import("./pages/artist/AuctionsWatchlistPage"));
+const AuctionsListPage = lazy(() => import("./pages/artist/AuctionsListPage"));
 
 const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 const AdminErrorMonitoring = lazy(() => import("./pages/admin/AdminErrorMonitoring"));
@@ -680,6 +681,7 @@ const AppContent = () => {
           <Route path="/dashboard/portfolios" element={<ProtectedRoute><ArtistPortfoliosManagement /></ProtectedRoute>} />
           
           {/* --- Routes Artist Auctions --- */}
+          <Route path="/auctions" element={<AuctionsListPage />} />
           <Route path="/auctions/:slug" element={<AuctionDetailPage />} />
           <Route path="/dashboard/auctions" element={<ProtectedRoute><AuctionsManagementPage /></ProtectedRoute>} />
           <Route path="/dashboard/auctions/watchlist" element={<ProtectedRoute><AuctionsWatchlistPage /></ProtectedRoute>} />
