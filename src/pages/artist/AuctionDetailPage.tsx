@@ -411,16 +411,22 @@ export default function AuctionDetailPage() {
                         )}
                       </Button>
 
-                      {auction.buy_now_price && (
+                      {auction.buy_now_price && auction.status === 'active' && (
                         <Button
                           variant="outline"
                           className="w-full"
-                          onClick={() => {
-                            // TODO: Implement buy now
-                            toast({
-                              title: 'Achat immédiat',
-                              description: 'Fonctionnalité à venir',
-                            });
+                          onClick={async () => {
+                            if (!user) {
+                              toast({
+                                title: 'Connexion requise',
+                                description: 'Vous devez être connecté pour acheter immédiatement.',
+                                variant: 'destructive',
+                              });
+                              return;
+                            }
+                            
+                            // Rediriger vers le checkout avec le prix buy now
+                            navigate(`/checkout?auction=${auction.id}&buy_now=true`);
                           }}
                         >
                           Acheter maintenant ({auction.buy_now_price.toLocaleString('fr-FR')} XOF)

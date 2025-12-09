@@ -445,32 +445,14 @@ export default function Checkout() {
     return Math.max(0, subtotalWithShipping - giftCardAmount);
   }, [subtotalWithShipping, giftCardAmount]);
 
-  // Debug: Vérifier que le coupon est bien pris en compte dans le calcul
-  // Ce useEffect se déclenche uniquement quand le coupon change (ajout ou retrait)
+  // Vérification du calcul du coupon (logs uniquement en développement)
   useEffect(() => {
-    if (appliedCouponCode) {
-      // Log uniquement pour debug en développement
-      if (import.meta.env.DEV) {
-        logger.debug('[Checkout] Coupon appliqué', {
-          couponCode: appliedCouponCode.code,
-          discountAmount: appliedCouponCode.discountAmount,
-          subtotal: summary.subtotal,
-          itemDiscounts,
-          couponDiscount,
-          subtotalAfterDiscounts,
-          taxAmount,
-          subtotalWithShipping,
-          giftCardAmount,
-          finalTotal,
-          // Vérifier qu'il n'y a pas de double application
-          summaryDiscountAmount: summary.discount_amount
-        });
-      }
-    } else {
-      // Log quand le coupon est retiré
-      if (import.meta.env.DEV) {
-        logger.debug('[Checkout] Coupon retiré', { finalTotal });
-      }
+    if (import.meta.env.DEV && appliedCouponCode) {
+      logger.debug('[Checkout] Coupon appliqué', {
+        couponCode: appliedCouponCode.code,
+        discountAmount: appliedCouponCode.discountAmount,
+        finalTotal,
+      });
     }
   }, [
     appliedCouponCode?.id, 
