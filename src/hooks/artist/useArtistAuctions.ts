@@ -320,10 +320,11 @@ export function useCreateAuction() {
         description: 'L\'enchère a été créée avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de créer l\'enchère';
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer l\'enchère',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -368,10 +369,55 @@ export function usePlaceBid() {
         description: 'Votre offre a été enregistrée avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de placer l\'offre',
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
+/**
+ * Enchère proxy (enchère automatique jusqu'à un montant maximum)
+ */
+export function useProxyBid() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({
+      auctionId,
+      maxBidAmount,
+    }: {
+      auctionId: string;
+      maxBidAmount: number;
+    }) => {
+      const { data, error } = await supabase.rpc('place_proxy_bid', {
+        p_auction_id: auctionId,
+        p_max_bid_amount: maxBidAmount,
+      });
+
+      if (error) {
+        logger.error('Error placing proxy bid', { error });
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['auction', variables.auctionId] });
+      queryClient.invalidateQueries({ queryKey: ['auction-bids', variables.auctionId] });
+      toast({
+        title: '✅ Enchère proxy activée',
+        description: `Votre enchère proxy est active jusqu'à ${variables.maxBidAmount.toLocaleString('fr-FR')} XOF`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: '❌ Erreur',
+        description: error.message || 'Impossible de placer l\'enchère proxy',
         variant: 'destructive',
       });
     },
@@ -431,7 +477,7 @@ export function useToggleWatchlist() {
           : 'L\'enchère a été retirée de votre liste de surveillance',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de modifier la liste de surveillance',
@@ -552,7 +598,7 @@ export function useUpdateWatchlistPreferences() {
         description: 'Vos préférences de notification ont été mises à jour.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Erreur',
         description: error.message || 'Impossible de mettre à jour les préférences.',
@@ -593,7 +639,7 @@ export function useRemoveFromWatchlist() {
         description: 'L\'enchère a été retirée de votre watchlist.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Erreur',
         description: error.message || 'Impossible de retirer de la watchlist.',
@@ -606,6 +652,44 @@ export function useRemoveFromWatchlist() {
 /**
  * Mettre à jour une enchère
  */
+/**
+ * Supprimer une enchère
+ */
+export function useDeleteAuction() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (auctionId: string) => {
+      const { error } = await supabase
+        .from('artist_product_auctions')
+        .delete()
+        .eq('id', auctionId);
+
+      if (error) {
+        logger.error('Error deleting auction', { error });
+        throw error;
+      }
+    },
+    onSuccess: (_, auctionId) => {
+      queryClient.invalidateQueries({ queryKey: ['store-auctions'] });
+      queryClient.invalidateQueries({ queryKey: ['auction', auctionId] });
+      toast({
+        title: 'Enchère supprimée',
+        description: 'L\'enchère a été supprimée avec succès.',
+      });
+    },
+    onError: (error) => {
+      logger.error('Error deleting auction', { error });
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de supprimer l\'enchère.',
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
 export function useUpdateAuction() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -638,7 +722,7 @@ export function useUpdateAuction() {
         description: 'L\'enchère a été mise à jour avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de mettre à jour l\'enchère',
@@ -677,7 +761,7 @@ export function useEndAuction() {
         description: 'L\'enchère a été terminée avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de terminer l\'enchère',

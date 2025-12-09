@@ -205,7 +205,7 @@ export const checkCodeUniqueness = async (
 
     // Vérifier aussi dans l'autre table pour éviter les doublons entre systèmes
     const otherTable = tableName === "promotions" ? "product_promotions" : "promotions";
-    let otherQuery = supabase
+    const otherQuery = supabase
       .from(otherTable)
       .select("id")
       .eq("code", normalizedCode)

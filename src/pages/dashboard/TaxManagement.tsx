@@ -104,7 +104,7 @@ export default function TaxManagement() {
     queryFn: async () => {
       if (!store?.id) return [];
 
-      let query = supabase
+      const query = supabase
         .from('tax_configurations')
         .select('*')
         .or(`store_id.is.null,store_id.eq.${store.id}`)

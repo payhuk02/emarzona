@@ -86,7 +86,7 @@ export default function AdminCourses() {
     }
   }, [isLoading, courses]);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+   
   const getStatusBadge = useCallback((status: string) => {
     switch (status) {
       case 'published':

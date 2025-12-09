@@ -139,7 +139,7 @@ export default function InventoryAnalytics() {
         const daysInStock = totalSold > 0 ? Math.floor((currentStock / totalSold) * days) : days;
 
         // Classification ABC (basée sur le revenu)
-        let abcCategory: 'A' | 'B' | 'C' = 'C';
+        const abcCategory: 'A' | 'B' | 'C' = 'C';
         // Sera calculé après avoir tous les produits
 
         // Type de mouvement

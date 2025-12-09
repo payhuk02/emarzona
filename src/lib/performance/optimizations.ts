@@ -36,9 +36,9 @@ export function debounce<T extends (...args: any[]) => any>(
   let maxTimeoutId: NodeJS.Timeout | null = null;
   let lastCallTime: number | null = null;
   let lastInvokeTime = 0;
-  let leading = options?.leading ?? false;
-  let trailing = options?.trailing ?? true;
-  let maxWait = options?.maxWait;
+  const leading = options?.leading ?? false;
+  const trailing = options?.trailing ?? true;
+  const maxWait = options?.maxWait;
 
   const invokeFunc = (time: number) => {
     const args = lastCallTime !== null ? [] : [];
@@ -149,8 +149,8 @@ export function throttle<T extends (...args: any[]) => any>(
 ): (...args: Parameters<T>) => void {
   let timeoutId: NodeJS.Timeout | null = null;
   let lastCallTime = 0;
-  let leading = options?.leading ?? true;
-  let trailing = options?.trailing ?? true;
+  const leading = options?.leading ?? true;
+  const trailing = options?.trailing ?? true;
 
   const invokeFunc = (time: number) => {
     lastCallTime = time;

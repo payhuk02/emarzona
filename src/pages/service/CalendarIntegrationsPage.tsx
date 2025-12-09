@@ -18,7 +18,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -38,14 +37,7 @@ import {
   Settings,
   RefreshCw,
   Trash2,
-  ExternalLink,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  Clock,
-  Activity,
-  FileText,
-  Google,
+  Globe,
   Mail,
   Calendar as CalendarIcon,
 } from 'lucide-react';
@@ -66,11 +58,8 @@ import { fr } from 'date-fns/locale';
 
 export default function CalendarIntegrationsPage() {
   const { store } = useStore();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedIntegration, setSelectedIntegration] = useState<CalendarIntegration | null>(null);
-  const [isSyncDialogOpen, setIsSyncDialogOpen] = useState(false);
 
   const { data: integrations, isLoading } = useCalendarIntegrations(store?.id || '');
   const createIntegration = useCreateCalendarIntegration();
@@ -107,7 +96,7 @@ export default function CalendarIntegrationsPage() {
   const getCalendarIcon = (type: string) => {
     switch (type) {
       case 'google_calendar':
-        return <Google className="h-4 w-4" />;
+        return <Globe className="h-4 w-4" />;
       case 'outlook':
         return <Mail className="h-4 w-4" />;
       case 'ical':
@@ -366,7 +355,7 @@ function CreateIntegrationForm({
         <Label htmlFor="sync_direction">Direction de synchronisation</Label>
         <Select
           value={formData.sync_direction}
-          onValueChange={(value) => setFormData({ ...formData, sync_direction: value as any })}
+          onValueChange={(value) => setFormData({ ...formData, sync_direction: value as 'bidirectional' | 'to_calendar' | 'from_calendar' })}
         >
           <SelectTrigger>
             <SelectValue />
@@ -418,8 +407,8 @@ function IntegrationDetailsDialog({
   integration: CalendarIntegration;
   onClose: () => void;
   onUpdate: (data: Partial<CalendarIntegration> & { id: string }) => Promise<CalendarIntegration>;
-  events: any[];
-  syncLogs: any[];
+  events: Array<{ id: string; title: string; start: string; end: string; [key: string]: unknown }>;
+  syncLogs: Array<{ id: string; status: string; created_at: string; [key: string]: unknown }>;
   onSync: (id: string, type?: 'full' | 'incremental' | 'manual') => void;
 }) {
   const [activeTab, setActiveTab] = useState('settings');
