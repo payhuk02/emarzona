@@ -2,6 +2,7 @@ import type { Store } from "@/hooks/useStore";
 import { Users } from '@/components/icons';
 import { Check } from 'lucide-react';
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { useStoreTheme } from '@/hooks/useStoreTheme';
 
 interface StoreHeaderProps {
   store: Store & {
@@ -18,8 +19,13 @@ interface StoreHeaderProps {
 }
 
 const StoreHeader = ({ store, infoMessage }: StoreHeaderProps) => {
+  const theme = useStoreTheme(store);
+  
   // Vérifier si le message existe et n'est pas vide
   const hasInfoMessage = store?.info_message && typeof store.info_message === 'string' && store.info_message.trim().length > 0;
+  
+  // Déterminer la classe CSS selon le style du header
+  const headerStyleClass = `store-header-${theme.headerStyle}`;
 
   // Utiliser infoMessage en priorité, sinon utiliser store.info_message avec styles personnalisés
   const displayMessage = infoMessage || (hasInfoMessage ? (
@@ -56,7 +62,14 @@ const StoreHeader = ({ store, infoMessage }: StoreHeaderProps) => {
       </div>
 
       {/* Banner - Hauteur agrandie pour affichage professionnel */}
-      <div className="h-64 sm:h-80 md:h-96 lg:h-[28rem] w-full overflow-visible bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 relative">
+      <div 
+        className="h-64 sm:h-80 md:h-96 lg:h-[28rem] w-full overflow-visible relative"
+        style={{
+          background: store.banner_url 
+            ? undefined 
+            : `linear-gradient(to bottom right, ${theme.primaryColor}33, ${theme.secondaryColor}33, ${theme.accentColor}33)`,
+        }}
+      >
         {store.banner_url ? (
           <>
             <img
@@ -109,7 +122,7 @@ const StoreHeader = ({ store, infoMessage }: StoreHeaderProps) => {
       </div>
       
       {/* Store Info Card */}
-      <div className="bg-card border-b shadow-soft overflow-hidden relative">
+      <div className={`bg-card border-b shadow-soft overflow-hidden relative ${headerStyleClass}`}>
         <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 py-6 sm:py-8 pt-16 sm:pt-20 md:pt-24 lg:pt-28">
             {/* Espace réservé pour le logo (maintenant sur la bannière) */}
@@ -117,15 +130,35 @@ const StoreHeader = ({ store, infoMessage }: StoreHeaderProps) => {
             
             {/* Store Details */}
             <div className="flex-1 min-w-0 w-full">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2 truncate">{store.name}</h1>
+              <h1 
+                className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 truncate"
+                style={{ 
+                  color: theme.textColor,
+                  fontFamily: theme.headingFont,
+                }}
+              >
+                {store.name}
+              </h1>
               {store.description && (
-                <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-2 line-clamp-2 break-words">
+                <p 
+                  className="text-xs sm:text-sm md:text-base mb-2 line-clamp-2 break-words"
+                  style={{ 
+                    color: theme.textSecondaryColor,
+                    fontFamily: theme.bodyFont,
+                  }}
+                >
                   {store.description}
                 </p>
               )}
               {store.active_clients !== undefined && store.active_clients > 0 && (
-                <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground bg-muted/50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full inline-flex max-w-fit">
-                  <Users className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+                <div 
+                  className="flex items-center gap-2 text-xs sm:text-sm bg-muted/50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full inline-flex max-w-fit"
+                  style={{
+                    color: theme.textSecondaryColor,
+                    borderRadius: theme.borderRadius === 'full' ? '9999px' : undefined,
+                  }}
+                >
+                  <Users className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" style={{ color: theme.primaryColor }} />
                   <span className="font-medium whitespace-nowrap">{store.active_clients} clients actifs</span>
                 </div>
               )}

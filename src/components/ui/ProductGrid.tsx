@@ -13,6 +13,9 @@ const ProductGridComponent = ({
   const gridRef = useRef<HTMLDivElement>(null);
 
   // Affichage statique et professionnel - pas de skeletons, pas de lazy loading
+  // Si la classe store-product-grid est présente, utiliser les colonnes personnalisées via CSS variables
+  const isCustomGrid = className?.includes('store-product-grid');
+  
   return (
     <div 
       ref={gridRef}
@@ -21,7 +24,10 @@ const ProductGridComponent = ({
       className={cn(
         "products-grid-mobile md:products-grid-tablet lg:products-grid-desktop",
         // Responsive exact: 1 mobile (<640px), 2 tablette (≥640px <1024px), 3 desktop (≥1024px)
-        "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 w-full max-w-full",
+        // Si store-product-grid, les colonnes seront gérées par CSS variables
+        isCustomGrid 
+          ? "grid gap-4 sm:gap-5 lg:gap-6 w-full max-w-full"
+          : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 w-full max-w-full",
         className
       )}
     >

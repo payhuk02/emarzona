@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Copy, ExternalLink, Save, X, BarChart3, Settings, Palette, Globe, AlertCircle, Search, MapPin, FileText } from "lucide-react";
+import { Copy, ExternalLink, Save, X, BarChart3, Settings, Palette, Globe, AlertCircle, Search, MapPin, FileText, MessageSquare } from "lucide-react";
 import { useStore, Store } from "@/hooks/useStore";
 import { useToast } from "@/hooks/use-toast";
 import StoreSlugEditor from "./StoreSlugEditor";
@@ -18,7 +18,8 @@ import { StoreThemeSettings } from "./StoreThemeSettings";
 import { StoreSEOSettings } from "./StoreSEOSettings";
 import { StoreLocationSettings } from "./StoreLocationSettings";
 import { StoreLegalPagesComponent } from "./StoreLegalPages";
-import type { StoreOpeningHours, StoreLegalPages } from "@/hooks/useStores";
+import { StoreMarketingContentComponent } from "./StoreMarketingContent";
+import type { StoreOpeningHours, StoreLegalPages, StoreMarketingContent } from "@/hooks/useStores";
 
 interface ExtendedStore extends Store {
   about?: string | null;
@@ -159,6 +160,9 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
   // Pages légales
   const [legalPages, setLegalPages] = useState<StoreLegalPages | null>(store.legal_pages || null);
   
+  // Contenu marketing
+  const [marketingContent, setMarketingContent] = useState<StoreMarketingContent | null>(store.marketing_content || null);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -276,6 +280,8 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
       opening_hours: openingHours || null,
       // Pages légales
       legal_pages: legalPages || null,
+      // Contenu marketing
+      marketing_content: marketingContent || null,
     };
 
     const success = await updateStore(updates);
@@ -353,6 +359,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
     setTimezone(store.timezone || "Africa/Ouagadougou");
     setOpeningHours(store.opening_hours || null);
     setLegalPages(store.legal_pages || null);
+    setMarketingContent(store.marketing_content || null);
     setValidationErrors({});
     setIsEditing(false);
   };
@@ -410,7 +417,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
       </div>
 
       <Tabs defaultValue="settings" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-8 gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto">
           {/* 1. Configuration Essentielle */}
           <TabsTrigger value="settings" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
             <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -453,7 +460,14 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
             <span className="sm:hidden">Lien</span>
           </TabsTrigger>
           
-          {/* 7. Analytics */}
+          {/* 7. Marketing */}
+          <TabsTrigger value="marketing" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
+            <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Marketing</span>
+            <span className="sm:hidden">Marketing</span>
+          </TabsTrigger>
+          
+          {/* 8. Analytics */}
           <TabsTrigger value="analytics" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
             <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Analytics</span>
@@ -1037,6 +1051,13 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="marketing" className="space-y-4 sm:space-y-6">
+          <StoreMarketingContentComponent
+            marketingContent={marketingContent}
+            onChange={setMarketingContent}
+          />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4 sm:space-y-6">

@@ -21,6 +21,7 @@ export const useAdvancedPayments = (
   const [payments, setPayments] = useState<AdvancedPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<PaymentStats | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
 
   const fetchPayments = useCallback(async () => {
@@ -69,13 +70,26 @@ export const useAdvancedPayments = (
 
       if (error) throw error;
       setPayments(data || []);
+      setError(null);
     } catch (error: any) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      setError(err);
       logger.error("Error fetching advanced payments:", error);
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
-      });
+      // Ne pas afficher de toast pour les erreurs de connexion réseau (sera géré par la page)
+      const isConnectionError = 
+        err.message.includes('upstream connect error') ||
+        err.message.includes('connection timeout') ||
+        err.message.includes('disconnect/reset') ||
+        err.message.includes('network') ||
+        err.message.includes('fetch failed');
+      
+      if (!isConnectionError) {
+        toast({
+          title: "Erreur",
+          description: err.message,
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -143,7 +157,10 @@ export const useAdvancedPayments = (
         percentage_payments: percentagePayments,
         secured_payments: securedPayments,
       });
+      setError(null);
     } catch (error: any) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      setError(err);
       logger.error("Error fetching payment stats:", error);
     }
   }, [storeId]);
@@ -483,6 +500,7 @@ export const useAdvancedPayments = (
     payments,
     loading,
     stats,
+    error,
     refetch: fetchPayments,
     createPayment,
     createPercentagePayment,

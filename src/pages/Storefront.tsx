@@ -2,17 +2,17 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useProductsOptimized } from "@/hooks/useProductsOptimized";
-import { useProductReviews } from "@/hooks/useReviews";
 import StoreHeader from "@/components/storefront/StoreHeader";
 import StoreTabs from "@/components/storefront/StoreTabs";
-import ProductCardModern from "@/components/marketplace/ProductCardModern";
 import UnifiedProductCard from "@/components/products/UnifiedProductCard";
 import { transformToUnifiedProduct } from "@/lib/product-transform";
 import ProductFilters from "@/components/storefront/ProductFilters";
 import StoreFooter from "@/components/storefront/StoreFooter";
 import ContactForm from "@/components/storefront/ContactForm";
 import ReviewsList from "@/components/storefront/ReviewsList";
+import { StoreMarketingSections } from "@/components/storefront/StoreMarketingSections";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 import { ShoppingCart, AlertCircle, ArrowRight } from "lucide-react";
 import { ProductGrid } from "@/components/ui/ProductGrid";
 import { Button } from "@/components/ui/button";
@@ -21,12 +21,14 @@ import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useToast } from '@/hooks/use-toast';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
+import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
+import type { Store } from '@/hooks/useStores';
 
 const Storefront = () => {
   const { slug } = useParams<{ slug: string }>();
   const { getValue } = usePageCustomization('storefront');
   const navigate = useNavigate();
-  const [store, setStore] = useState<any>(null);
+  const [store, setStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false); // Pour savoir si on a déjà chargé une fois
@@ -44,7 +46,7 @@ const Storefront = () => {
     itemsPerPage: 100, // Limite raisonnable pour storefront public
   });
   // Store-wide reviews not implemented yet; keep placeholders to avoid runtime errors
-  const reviews: any[] = [];
+  const reviews: unknown[] = [];
   const reviewsLoading = false;
 
   const fetchStore = useCallback(async () => {
@@ -62,20 +64,40 @@ const Storefront = () => {
         .from("stores")
         .select("*")
         .eq("slug", slug)
-        .limit(1);
+        .single();
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        // Si l'erreur est "PGRST116" (no rows returned), c'est normal
+        if (fetchError.code === 'PGRST116') {
+          setStore(null);
+          setError("Boutique introuvable");
+          setHasLoadedOnce(true);
+          return;
+        }
+        throw fetchError;
+      }
       
-      if (data && data.length > 0) {
-        const storeData = data[0];
+      if (data) {
+        // Convertir domain_status null en undefined pour correspondre au type Store
+        const storeData: Store = {
+          ...data,
+          domain_status: data.domain_status || undefined,
+        } as Store;
+        
         // Debug: Vérifier les champs récupérés
         if (process.env.NODE_ENV === 'development') {
+          const storeDataWithExtras = storeData as Store & {
+            info_message?: string | null;
+            info_message_color?: string | null;
+            info_message_font?: string | null;
+          };
           logger.debug('[Storefront] Store data loaded', {
             name: storeData.name,
-            hasInfoMessage: !!storeData.info_message,
-            infoMessage: storeData.info_message,
-            infoMessageColor: storeData.info_message_color,
-            infoMessageFont: storeData.info_message_font,
+            hasInfoMessage: !!storeDataWithExtras.info_message,
+            infoMessage: storeDataWithExtras.info_message,
+            infoMessageColor: storeDataWithExtras.info_message_color,
+            infoMessageFont: storeDataWithExtras.info_message_font,
+            hasMarketingContent: !!storeData.marketing_content,
             allFields: Object.keys(storeData),
           });
         }
@@ -87,9 +109,9 @@ const Storefront = () => {
         setError("Boutique introuvable");
         setHasLoadedOnce(true); // Même en cas d'erreur, on a tenté de charger
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error("Erreur lors du chargement de la boutique:", error);
-      const errorMessage = error?.message || "Impossible de charger la boutique. Veuillez réessayer plus tard.";
+      const errorMessage = error instanceof Error ? error.message : "Impossible de charger la boutique. Veuillez réessayer plus tard.";
       setError(errorMessage);
       setStore(null);
       setHasLoadedOnce(true); // Même en cas d'erreur, on a tenté de charger
@@ -112,7 +134,7 @@ const Storefront = () => {
       const matchesType =
         productType === "all" || product.product_type === productType;
       const matchesLicense =
-        licensingType === 'all' || (product as any).licensing_type === licensingType;
+        licensingType === 'all' || (product as { licensing_type?: string }).licensing_type === licensingType;
 
       return matchesSearch && matchesCategory && matchesType && matchesLicense;
     }), [products, searchQuery, category, productType, licensingType]
@@ -172,16 +194,26 @@ const Storefront = () => {
   // Items pour ItemListSchema (produits de la boutique)
   const itemListItems = useMemo(() => {
     if (!store || filteredProducts.length === 0) return [];
-    return filteredProducts.slice(0, 20).map(product => ({
-      id: product.id,
-      name: product.name,
-      url: `/stores/${store.slug}/products/${product.slug}`,
-      image: product.image_url,
-      description: product.short_description || product.description,
-      price: product.promotional_price || product.price,
-      currency: product.currency || 'XOF',
-      rating: product.rating
-    }));
+      const productWithExtras = filteredProducts[0] as {
+        short_description?: string;
+        promotional_price?: number;
+      } | undefined;
+      return filteredProducts.slice(0, 20).map(product => {
+        const productExtras = product as {
+          short_description?: string;
+          promotional_price?: number;
+        };
+        return {
+          id: product.id,
+          name: product.name,
+          url: `/stores/${store.slug}/products/${product.slug}`,
+          image: product.image_url || undefined,
+          description: productExtras.short_description || product.description || undefined,
+          price: productExtras.promotional_price || product.price || undefined,
+          currency: product.currency || 'XOF',
+          rating: product.rating || undefined
+        };
+      });
   }, [store, filteredProducts]);
 
   // Animations au scroll
@@ -189,7 +221,7 @@ const Storefront = () => {
   const productsRef = useScrollAnimation<HTMLDivElement>();
 
   // Handler pour l'achat - Redirige vers checkout (utilisé par UnifiedProductCard)
-  const handleBuyProduct = useCallback(async (action: 'view' | 'buy' | 'favorite', product: any) => {
+  const handleBuyProduct = useCallback(async (action: 'view' | 'buy' | 'favorite', product: { id: string; store_id?: string; name: string }) => {
     if (action !== 'buy') return;
     
     if (!product.store_id) {
@@ -221,7 +253,7 @@ const Storefront = () => {
     });
 
     navigate(`/checkout?${checkoutParams.toString()}`);
-  }, [toast, navigate, store]);
+  }, [toast, navigate]);
 
   // MAINTENANT les early returns APRÈS tous les hooks
   if (loading) {
@@ -286,7 +318,25 @@ const Storefront = () => {
       )}
       
       {/* Schema.org Store */}
-      <StoreSchema store={store} />
+      {store && (
+        <StoreSchema 
+          store={{
+            name: store.name,
+            slug: store.slug,
+            description: store.description || undefined,
+            logo_url: store.logo_url || undefined,
+            banner_url: store.banner_url || undefined,
+            contact_email: store.contact_email || undefined,
+            contact_phone: store.contact_phone || undefined,
+            facebook_url: store.facebook_url || undefined,
+            instagram_url: store.instagram_url || undefined,
+            twitter_url: store.twitter_url || undefined,
+            linkedin_url: store.linkedin_url || undefined,
+            created_at: store.created_at,
+            active_clients: (store as Store & { active_clients?: number }).active_clients,
+          }}
+        />
+      )}
       
       {/* Breadcrumb Schema */}
       {breadcrumbItems.length > 0 && <BreadcrumbSchema items={breadcrumbItems} />}
@@ -302,12 +352,29 @@ const Storefront = () => {
         />
       )}
 
-      <div className="min-h-screen flex flex-col overflow-x-hidden">
-        <StoreHeader store={store} />
+      <StoreThemeProvider store={store}>
+        <div 
+          className="min-h-screen flex flex-col overflow-x-hidden store-theme-active"
+          style={{ backgroundColor: store?.background_color || undefined }}
+        >
+          {store && (
+            <StoreHeader 
+              store={store as Store & {
+                logo_url?: string;
+                banner_url?: string;
+                active_clients?: number;
+                is_verified?: boolean;
+                info_message?: string | null;
+                info_message_color?: string | null;
+                info_message_font?: string | null;
+              }}
+            />
+          )}
 
-        <main ref={headerRef} className="flex-1 bg-background overflow-x-hidden">
+          <main ref={headerRef} className="flex-1 bg-background overflow-x-hidden">
           <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
             <StoreTabs
+              store={store}
               productsContent={
                 <>
                   <ProductFilters
@@ -332,16 +399,24 @@ const Storefront = () => {
                         </div>
                       )}
 
-                      <ProductGrid className={productsLoading && hasLoadedOnce ? 'opacity-75 transition-opacity duration-300' : ''}>
+                      <ProductGrid className={`store-product-grid ${productsLoading && hasLoadedOnce ? 'opacity-75 transition-opacity duration-300' : ''}`}>
                         {filteredProducts.map((product, index) => {
                           // Transformer le produit vers le format unifié
+                          const productWithExtras = product as {
+                            description?: string | null;
+                            short_description?: string;
+                            promotional_price?: number;
+                          };
                           const unifiedProduct = transformToUnifiedProduct({
                             ...product,
+                            description: productWithExtras.description || undefined,
+                            short_description: productWithExtras.short_description || undefined,
+                            promotional_price: productWithExtras.promotional_price || undefined,
                             stores: store ? {
                               id: store.id,
                               name: store.name,
                               slug: store.slug,
-                              logo_url: store.logo_url,
+                              logo_url: store.logo_url || undefined,
                             } : undefined,
                           });
                           
@@ -395,38 +470,82 @@ const Storefront = () => {
                 </>
               }
               aboutContent={
-                store.about ? (
-                  <div className="prose prose-sm sm:prose max-w-none px-2 sm:px-0 animate-fade-in">
-                    <p className="whitespace-pre-wrap text-foreground">{store.about}</p>
-                  </div>
-                ) : undefined
+                store ? (
+                  <>
+                    {/* Contenu marketing */}
+                    {store.marketing_content && (
+                      <StoreMarketingSections
+                        marketingContent={store.marketing_content}
+                        store={store}
+                      />
+                    )}
+                    
+                    {/* À propos classique (fallback si pas de contenu marketing) */}
+                    {store.about && !store.marketing_content && (
+                      <div className="prose prose-sm sm:prose max-w-none px-2 sm:px-0 animate-fade-in">
+                        <p className="whitespace-pre-wrap text-foreground">{store.about}</p>
+                      </div>
+                    )}
+                    
+                    {/* À propos classique (en plus du contenu marketing si présent) */}
+                    {store.about && store.marketing_content && (
+                      <section className="mt-8 animate-fade-in">
+                        <Card>
+                          <CardContent className="pt-6">
+                            <h3 className="text-lg sm:text-xl font-bold mb-4">À propos</h3>
+                            <div className="prose prose-sm sm:prose max-w-none">
+                              <p className="whitespace-pre-wrap">{store.about}</p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </section>
+                    )}
+                    
+                    {/* Message si aucun contenu */}
+                    {!store.about && !store.marketing_content && (
+                      <div className="text-center py-12 px-4 animate-fade-in">
+                        <p className="text-muted-foreground">
+                          Aucune information disponible pour le moment.
+                        </p>
+                      </div>
+                    )}
+                  </>
+                ) : null
               }
               reviewsContent={
-                <ReviewsList 
-                  reviews={reviews} 
-                  loading={reviewsLoading}
-                  storeSlug={store.slug}
-                />
+                store ? (
+                  <ReviewsList 
+                    reviews={reviews} 
+                    loading={reviewsLoading}
+                    storeSlug={store.slug}
+                  />
+                ) : null
               }
               contactContent={
-                <ContactForm 
-                  storeName={store.name}
-                  contactEmail={store.contact_email}
-                  contactPhone={store.contact_phone}
-                />
+                store ? (
+                  <ContactForm 
+                    storeName={store.name}
+                    contactEmail={store.contact_email || undefined}
+                    contactPhone={store.contact_phone || undefined}
+                  />
+                ) : null
               }
             />
           </div>
         </main>
 
-        <StoreFooter
-          storeName={store.name}
-          facebook_url={store.facebook_url}
-          instagram_url={store.instagram_url}
-          twitter_url={store.twitter_url}
-          linkedin_url={store.linkedin_url}
-        />
-      </div>
+          {store && (
+            <StoreFooter
+              storeName={store.name}
+              facebook_url={store.facebook_url || undefined}
+              instagram_url={store.instagram_url || undefined}
+              twitter_url={store.twitter_url || undefined}
+              linkedin_url={store.linkedin_url || undefined}
+              store={store}
+            />
+          )}
+        </div>
+      </StoreThemeProvider>
     </>
   );
 };
