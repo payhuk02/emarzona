@@ -14,7 +14,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Send,
@@ -27,17 +26,23 @@ import {
   Crown,
   CheckCheck,
   Check,
+  Search,
+  X,
+  ChevronUp,
 } from 'lucide-react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { useVendorMessaging } from '@/hooks/useVendorMessaging';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { logger } from '@/lib/logger';
 import { MediaAttachment } from '@/components/media';
+import { validateFile, filterValidFiles } from '@/utils/fileValidation';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import { useMessageSearch } from '@/hooks/useMessageSearch';
+import { highlightText } from '@/utils/highlightText.tsx';
 
 export default function VendorMessaging() {
   const { storeId, productId } = useParams<{ storeId?: string; productId?: string }>();
@@ -46,6 +51,7 @@ export default function VendorMessaging() {
   const { toast } = useToast();
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesTopRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Récupérer storeId et productId depuis les params ou searchParams
@@ -62,18 +68,48 @@ export default function VendorMessaging() {
     createConversation,
     sendMessage,
     openConversation,
-    closeConversation,
-    fetchConversations,
+    loadMoreMessages,
+    hasMoreMessages,
+    totalMessagesCount,
   } = useVendorMessaging(finalStoreId, finalProductId);
 
   const [messageContent, setMessageContent] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
+  
+  // Hook pour l'upload de fichiers avec progress tracking
+  const { uploadFiles: uploadFilesWithProgress, state: uploadState } = useFileUpload();
+  
+  // Hook pour la recherche de messages
+  const { searchMessages, results: searchResults, isSearching: isSearchingMessages, clearSearch } = useMessageSearch();
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom when new messages arrive (seulement pour nouveaux messages, pas lors du chargement de plus)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    // Ne scroll que si on n'est pas en train de charger plus de messages
+    if (!messagesLoading && !hasMoreMessages) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages.length, messagesLoading, hasMoreMessages]);
+  
+  // Scroll automatique vers le haut lors du chargement de plus de messages
+  useEffect(() => {
+    if (messagesLoading && messagesTopRef.current) {
+      // Sauvegarder la position actuelle
+      const scrollContainer = messagesTopRef.current.closest('[data-radix-scroll-area-viewport]') as HTMLElement;
+      if (scrollContainer) {
+        const previousScrollHeight = scrollContainer.scrollHeight;
+        // Après le chargement, ajuster la position pour rester au même endroit visuel
+        setTimeout(() => {
+          const newScrollHeight = scrollContainer.scrollHeight;
+          const scrollDifference = newScrollHeight - previousScrollHeight;
+          scrollContainer.scrollTop = scrollDifference;
+        }, 100);
+      }
+    }
+  }, [messagesLoading]);
 
   // Créer une conversation si nécessaire
   useEffect(() => {
@@ -102,17 +138,26 @@ export default function VendorMessaging() {
    */
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const validFiles = files.filter(file => {
-      if (file.size > 10 * 1024 * 1024) {
-        toast({
-          title: 'Fichier trop volumineux',
-          description: `${file.name} dépasse 10MB`,
-          variant: 'destructive',
-        });
-        return false;
-      }
-      return true;
+    
+    // Utiliser la validation centralisée
+    const validFiles = filterValidFiles(files, {
+      maxSize: 10 * 1024 * 1024, // 10MB
     });
+    
+    // Afficher les erreurs pour les fichiers invalides
+    files.forEach(file => {
+      if (!validFiles.includes(file)) {
+        const validation = validateFile(file, { maxSize: 10 * 1024 * 1024 });
+        if (!validation.valid) {
+          toast({
+            title: 'Fichier invalide',
+            description: `${file.name}: ${validation.error}`,
+            variant: 'destructive',
+          });
+        }
+      }
+    });
+    
     setSelectedFiles(prev => [...prev, ...validFiles]);
   };
 
@@ -140,108 +185,177 @@ export default function VendorMessaging() {
 
     try {
       setUploadingFiles(true);
+      setUploadProgress(0);
 
-      // Upload files if any
+      // Upload files if any (utilise le hook avec progress tracking)
       const fileUrls: string[] = [];
       const storagePaths: string[] = [];
+      let uploadResults: Array<{ path: string; publicUrl: string; fileName: string; mimeType: string; size: number; signedUrl?: string | null }> = [];
+      
       if (selectedFiles.length > 0) {
-        for (const file of selectedFiles) {
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-          const filePath = `vendor-message-attachments/${fileName}`;
-
-          // Déterminer le Content-Type correct selon l'extension si file.type est vide
-          let contentType = file.type;
-          if (!contentType || contentType === 'application/octet-stream' || contentType === '') {
-            const ext = fileExt.toLowerCase();
-            const mimeTypes: Record<string, string> = {
-              'png': 'image/png',
-              'jpg': 'image/jpeg',
-              'jpeg': 'image/jpeg',
-              'gif': 'image/gif',
-              'webp': 'image/webp',
-              'pdf': 'application/pdf',
-              'mp4': 'video/mp4',
-              'webm': 'video/webm',
-            };
-            contentType = mimeTypes[ext] || 'application/octet-stream';
+        try {
+          uploadResults = await uploadFilesWithProgress(selectedFiles, {
+            folder: `vendor-message-attachments/${currentConversation.id}`,
+            maxSize: 10 * 1024 * 1024, // 10MB
+            compressImages: true, // Activer la compression d'images
+            onProgress: (progress) => {
+              setUploadProgress(progress);
+            },
+          });
+          
+          // Vérifier que tous les fichiers ont été uploadés avec succès
+          if (uploadResults.length !== selectedFiles.length) {
+            // Récupérer les détails des fichiers échoués depuis le state du hook
+            const failedFilesDetails = uploadState.failed.map(f => `• ${f.file.name}: ${f.error}`).join('\n');
+            
+            let errorMessage = `${uploadState.failed.length} fichier(s) n'ont pas pu être uploadés`;
+            if (failedFilesDetails) {
+              errorMessage += `:\n${failedFilesDetails}`;
+            } else {
+              const failedFiles = selectedFiles.slice(uploadResults.length).map(f => f.name).join(', ');
+              errorMessage += `: ${failedFiles}`;
+            }
+            
+            // Ajouter des instructions de correction
+            errorMessage += '\n\n📋 CORRECTIONS NÉCESSAIRES:\n';
+            errorMessage += '1. Vérifiez que le bucket "attachments" est PUBLIC dans Supabase Dashboard\n';
+            errorMessage += '2. Exécutez la migration SQL: supabase/migrations/20250201_create_and_configure_attachments_bucket.sql\n';
+            errorMessage += '3. Attendez 2-3 minutes (délai de propagation) puis réessayez';
+            
+            throw new Error(errorMessage);
           }
-
-          // Uploader avec Content-Type explicite pour garantir le bon type MIME
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('attachments')
-            .upload(filePath, file, {
-              cacheControl: '3600',
-              upsert: false,
-              contentType: contentType, // Utiliser le Content-Type déterminé
-              metadata: {
-                originalName: file.name,
-                uploadedAt: new Date().toISOString(),
+          
+          // Vérifier que chaque fichier est accessible via son URL publique (avec timeout)
+          const verificationPromises = uploadResults.map(async (result) => {
+            try {
+              // Tester l'URL publique avec un HEAD request (avec timeout de 5 secondes)
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 5000);
+              
+              const testResponse = await fetch(result.publicUrl, { 
+                method: 'HEAD',
+                cache: 'no-cache',
+                signal: controller.signal,
+              });
+              
+              clearTimeout(timeoutId);
+              
+              if (!testResponse.ok) {
+                const errorDetails = {
+                  path: result.path,
+                  publicUrl: result.publicUrl,
+                  status: testResponse.status,
+                  statusText: testResponse.statusText,
+                };
+                
+                logger.error('Uploaded file not accessible via public URL', errorDetails);
+                
+                // Si c'est une erreur 403, c'est probablement un problème de permissions
+                if (testResponse.status === 403) {
+                  throw new Error(`Permission refusée pour ${result.fileName}. Vérifiez les politiques RLS du bucket "attachments".`);
+                }
+                
+                // Si c'est une erreur 404, le fichier n'existe pas
+                if (testResponse.status === 404) {
+                  throw new Error(`Le fichier ${result.fileName} n'a pas été trouvé dans le bucket après l'upload. Chemin: ${result.path}`);
+                }
+                
+                throw new Error(`Le fichier ${result.fileName} n'est pas accessible (HTTP ${testResponse.status})`);
               }
-            });
-
-          if (uploadError) {
-            logger.error('File upload error', {
-              fileName: file.name,
-              filePath,
-              error: uploadError.message,
-              fileType: file.type,
-              fileSize: file.size
-            });
+              
+              const contentType = testResponse.headers.get('content-type') || '';
+              // Vérifier que c'est bien un fichier (pas du JSON)
+              if (contentType === 'application/json') {
+                logger.error('Uploaded file returns JSON instead of file content', {
+                  path: result.path,
+                  publicUrl: result.publicUrl,
+                });
+                throw new Error(`Le fichier ${result.fileName} n'a pas pu être uploadé correctement (le serveur retourne du JSON au lieu du fichier). SOLUTION: Exécutez la migration SQL: supabase/migrations/20250201_create_and_configure_attachments_bucket.sql`);
+              }
+              
+              // Vérifier que le Content-Type correspond au type de fichier (avertissement seulement)
+              if (result.mimeType && !contentType.includes(result.mimeType.split('/')[0])) {
+                logger.warn('Content-Type mismatch', {
+                  expected: result.mimeType,
+                  actual: contentType,
+                  fileName: result.fileName,
+                });
+                // Ne pas bloquer pour un mismatch de Content-Type, juste logger
+              }
+              
+              return { success: true, result };
+            } catch (verifyError: any) {
+              // Si c'est une erreur d'abort (timeout), essayer avec signedUrl si disponible
+              if (verifyError.name === 'AbortError') {
+                logger.warn('Verification timeout, trying signed URL', {
+                  fileName: result.fileName,
+                  path: result.path,
+                });
+                // Si on a une signedUrl dans le résultat, l'utiliser
+                const resultWithSignedUrl = result as { signedUrl?: string | null };
+                if (resultWithSignedUrl.signedUrl) {
+                  return { success: true, result: { ...result, publicUrl: resultWithSignedUrl.signedUrl } };
+                }
+              }
+              
+              // Propager l'erreur pour qu'elle soit affichée à l'utilisateur
+              logger.error('File verification failed', {
+                fileName: result.fileName,
+                path: result.path,
+                publicUrl: result.publicUrl,
+                error: verifyError,
+              });
+              throw verifyError;
+            }
+          });
+          
+          // Attendre toutes les vérifications en parallèle
+          const verificationResults = await Promise.allSettled(verificationPromises);
+          
+          // Vérifier s'il y a des échecs
+          const failedVerifications = verificationResults
+            .map((result, index) => ({ result, index }))
+            .filter(({ result }) => result.status === 'rejected');
+          
+          if (failedVerifications.length > 0) {
+            const failedFiles = failedVerifications.map(({ index }) => uploadResults[index].fileName).join(', ');
+            const firstError = failedVerifications[0].result.status === 'rejected' 
+              ? failedVerifications[0].result.reason?.message || 'Erreur de vérification'
+              : 'Erreur inconnue';
+            
+            throw new Error(`${failedFiles}: ${firstError}`);
+          }
+          
+          // Extraire les résultats réussis
+          const successfulResults = verificationResults
+            .map((result, index) => {
+              if (result.status === 'fulfilled' && result.value.success) {
+                return result.value.result;
+              }
+              return uploadResults[index];
+            })
+            .filter(Boolean);
+          
+          fileUrls.push(...successfulResults.map(r => r.publicUrl));
+          storagePaths.push(...successfulResults.map(r => r.path));
+        } catch (uploadError: any) {
+          // Si l'upload échoue complètement, on peut quand même envoyer le message sans fichiers
+          logger.error('File upload failed, attempting to send message without attachments', {
+            error: uploadError,
+            selectedFilesCount: selectedFiles.length,
+          });
+          
+          // Si c'est une erreur critique (bucket n'existe pas), bloquer l'envoi
+          if (uploadError.message?.includes('bucket') || uploadError.message?.includes('n\'existe pas')) {
             throw uploadError;
           }
-
-          // Vérifier que l'upload a réussi
-          if (!uploadData?.path) {
-            logger.error('Upload returned no path', { fileName, filePath, uploadData });
-            throw new Error(`L'upload du fichier ${file.name} a échoué : aucune donnée retournée`);
-          }
-
-          storagePaths.push(uploadData.path);
-
-          // Générer l'URL publique avec vérification
-          const { data: urlData, error: urlError } = supabase.storage
-            .from('attachments')
-            .getPublicUrl(filePath);
-
-          if (urlError || !urlData?.publicUrl) {
-            // Fallback : construire l'URL manuellement avec encodage correct
-            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-            if (supabaseUrl) {
-              const baseUrl = supabaseUrl.replace(/\/$/, '');
-              // Encoder chaque segment du chemin séparément
-              const encodedPath = filePath
-                .split('/')
-                .map(segment => encodeURIComponent(segment))
-                .join('/');
-              const fallbackUrl = `${baseUrl}/storage/v1/object/public/attachments/${encodedPath}`;
-              fileUrls.push(fallbackUrl);
-              logger.warn('Using fallback URL for attachment', { filePath, fallbackUrl });
-            } else {
-              throw new Error('Impossible de générer l\'URL publique du fichier');
-            }
-          } else {
-            // Vérifier que l'URL générée est valide
-            const publicUrl = urlData.publicUrl;
-            if (publicUrl && publicUrl.includes('/storage/v1/object/public/')) {
-              fileUrls.push(publicUrl);
-            } else {
-              // Si l'URL n'est pas valide, utiliser le fallback
-              const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-              if (supabaseUrl) {
-                const baseUrl = supabaseUrl.replace(/\/$/, '');
-                const encodedPath = filePath
-                  .split('/')
-                  .map(segment => encodeURIComponent(segment))
-                  .join('/');
-                const fallbackUrl = `${baseUrl}/storage/v1/object/public/attachments/${encodedPath}`;
-                fileUrls.push(fallbackUrl);
-                logger.warn('Invalid URL from getPublicUrl, using fallback', { originalUrl: publicUrl, fallbackUrl });
-              } else {
-                fileUrls.push(publicUrl); // Dernier recours
-              }
-            }
-          }
+          
+          // Sinon, permettre d'envoyer le message sans fichiers
+          toast({
+            title: 'Avertissement',
+            description: 'Les fichiers n\'ont pas pu être uploadés, mais le message sera envoyé sans pièces jointes.',
+            variant: 'default',
+          });
         }
       }
 
@@ -262,29 +376,109 @@ export default function VendorMessaging() {
       const formData = {
         content: messageContent,
         message_type: messageType,
-        attachments: selectedFiles.map((file, index) => ({
-          file_name: file.name,
-          file_type: file.type,
-          file_size: file.size,
-          file_url: fileUrls[index] || '',
-          storage_path: storagePaths[index] || `vendor-message-attachments/${Date.now()}-${Math.random().toString(36).substring(2)}.${file.name.split('.').pop()}`,
-        })),
+        attachments: fileUrls.length > 0 ? fileUrls.map((fileUrl, index) => {
+          // Utiliser le storage_path retourné par l'upload (qui contient le chemin complet)
+          const storagePath = storagePaths[index] || '';
+          const file = selectedFiles[index];
+          
+          // S'assurer que le storage_path est valide
+          if (!storagePath) {
+            logger.error('Missing storage_path for uploaded file', {
+              fileName: file?.name,
+              index,
+              uploadResults: uploadResults,
+            });
+            // Ne pas bloquer, juste logger et utiliser l'URL comme fallback
+            return {
+              file_name: file?.name || 'unknown',
+              file_type: file?.type || 'application/octet-stream',
+              file_size: file?.size || 0,
+              file_url: fileUrl,
+              storage_path: '', // Vide si pas de chemin disponible
+            };
+          }
+          
+          // Le storage_path doit être le chemin relatif dans le bucket (ex: vendor-message-attachments/uuid/filename.jpg)
+          // Ne pas modifier le chemin, il est déjà correct depuis uploadFileToStorage
+          
+          return {
+            file_name: file?.name || 'unknown',
+            file_type: file?.type || 'application/octet-stream',
+            file_size: file?.size || 0,
+            file_url: fileUrl,
+            storage_path: storagePath, // Chemin relatif complet dans le bucket (ex: vendor-message-attachments/uuid/filename.jpg)
+          };
+        }) : [], // Si aucun fichier n'a été uploadé avec succès, envoyer un tableau vide
       };
 
-      await sendMessage(currentConversation.id, formData);
+      // Envoyer le message
+      const sentMessage = await sendMessage(currentConversation.id, formData);
+      
+      if (!sentMessage) {
+        throw new Error('Le message n\'a pas pu être envoyé. Vérifiez votre connexion et réessayez.');
+      }
 
-      // Reset form
+      // Reset form seulement si le message a été envoyé avec succès
       setMessageContent('');
       setSelectedFiles([]);
+      setUploadProgress(0);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+      
+      // Afficher un message de succès
+      toast({
+        title: 'Message envoyé',
+        description: fileUrls.length > 0 
+          ? `Votre message a été envoyé avec ${fileUrls.length} pièce(s) jointe(s)`
+          : 'Votre message a été envoyé avec succès',
+      });
     } catch (error: any) {
       logger.error('Send vendor message error', { error, storeId, productId });
+      
+      // Message d'erreur détaillé
+      let errorMessage = error.message || 'Impossible d\'envoyer le message';
+      
+      // Améliorer le message selon le type d'erreur
+      if (error.message?.includes('n\'a pas pu être uploadé') || error.message?.includes('uploadé')) {
+        errorMessage = error.message;
+        
+        // Si c'est l'erreur JSON ou bucket manquant, ajouter des instructions claires
+        if (error.message.includes('JSON au lieu') || error.message.includes('n\'existe pas') || error.message.includes('bucket')) {
+          if (!errorMessage.includes('CORRECTIONS NÉCESSAIRES')) {
+            errorMessage += '\n\n📋 CORRECTIONS NÉCESSAIRES:\n';
+            errorMessage += '1. Allez dans Supabase Dashboard > SQL Editor\n';
+            errorMessage += '2. Exécutez la migration: supabase/migrations/20250201_create_and_configure_attachments_bucket.sql\n';
+            errorMessage += '3. Vérifiez que le bucket "attachments" est PUBLIC dans Storage > Buckets\n';
+            errorMessage += '4. Attendez 2-3 minutes (délai de propagation) puis réessayez';
+          }
+        }
+      } else if (error.message?.includes('Upload failed') || error.message?.includes('upload')) {
+        errorMessage = `Erreur de stockage : ${error.message}`;
+        if (!errorMessage.includes('CORRECTIONS NÉCESSAIRES')) {
+          errorMessage += '\n\n📋 SOLUTION:\nExécutez la migration SQL: supabase/migrations/20250201_create_and_configure_attachments_bucket.sql';
+        }
+      } else if (error.message?.includes('bucket')) {
+        errorMessage = `Erreur de stockage : ${error.message}`;
+        if (!errorMessage.includes('CORRECTIONS NÉCESSAIRES')) {
+          errorMessage += '\n\n📋 SOLUTION:\nLe bucket "attachments" n\'existe pas. Exécutez: supabase/migrations/20250201_create_and_configure_attachments_bucket.sql';
+        }
+      } else if (error.message?.includes('permission') || error.message?.includes('403')) {
+        errorMessage = `Permission refusée : ${error.message}`;
+        if (!errorMessage.includes('CORRECTIONS NÉCESSAIRES')) {
+          errorMessage += '\n\n📋 SOLUTION:\nVérifiez que vous êtes connecté et que le bucket "attachments" est PUBLIC.';
+        }
+      } else if (error.message?.includes('size') || error.message?.includes('trop grand')) {
+        errorMessage = `Fichier trop volumineux : ${error.message}. Taille maximale : 10MB.`;
+      } else if (error.message?.includes('n\'a pas pu être envoyé')) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'envoyer le message',
+        description: errorMessage,
         variant: 'destructive',
+        duration: 15000, // Afficher encore plus longtemps pour les erreurs importantes avec instructions
       });
     } finally {
       setUploadingFiles(false);
@@ -574,31 +768,117 @@ export default function VendorMessaging() {
                     <div>
                       <CardTitle className="text-lg">Messages</CardTitle>
                       <CardDescription>
-                        {messages.length} message{messages.length > 1 ? 's' : ''}
+                        {searchResults ? `${searchResults.total} résultat(s)` : `${messages.length} message${messages.length > 1 ? 's' : ''}`}
                       </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {showSearch ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="text"
+                            placeholder="Rechercher dans les messages..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={async (e) => {
+                              if (e.key === 'Enter' && searchQuery.trim()) {
+                                await searchMessages({
+                                  conversationId: currentConversation?.id,
+                                  query: searchQuery.trim(),
+                                });
+                              }
+                            }}
+                            className="w-64"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={async () => {
+                              if (searchQuery.trim()) {
+                                await searchMessages({
+                                  conversationId: currentConversation?.id,
+                                  query: searchQuery.trim(),
+                                });
+                              }
+                            }}
+                            disabled={isSearchingMessages || !searchQuery.trim()}
+                          >
+                            <Search className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setSearchQuery('');
+                              setShowSearch(false);
+                              clearSearch();
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setShowSearch(true)}
+                        >
+                          <Search className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardHeader>
 
                 {/* Messages List */}
-                <ScrollArea className="flex-1 p-4">
-                  {messagesLoading ? (
+                <ScrollArea 
+                  className="flex-1 p-4"
+                  onScrollCapture={(e) => {
+                    // Infinite scroll: charger plus de messages quand on scroll en haut
+                    const target = e.target as HTMLElement;
+                    if (target.scrollTop === 0 && !messagesLoading && currentConversation) {
+                      // TODO: Implémenter loadMoreMessages pour VendorMessaging
+                      // loadMoreMessages();
+                    }
+                  }}
+                >
+                  {messagesLoading || isSearchingMessages ? (
                     <div className="flex items-center justify-center h-full">
                       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                     </div>
-                  ) : messages.length === 0 ? (
+                  ) : (searchResults ? searchResults.messages : messages).length === 0 ? (
                     <div className="flex items-center justify-center h-full">
                       <div className="text-center">
                         <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                        <p className="text-muted-foreground">Aucun message pour le moment</p>
+                        <p className="text-muted-foreground">
+                          {searchResults ? 'Aucun résultat trouvé' : 'Aucun message pour le moment'}
+                        </p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Commencez la conversation ci-dessous
+                          {searchResults ? 'Essayez avec d\'autres mots-clés' : 'Commencez la conversation ci-dessous'}
                         </p>
                       </div>
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {messages.map((message) => {
+                      {/* Référence pour le scroll automatique */}
+                      <div ref={messagesTopRef} />
+                      
+                      {/* Bouton "Charger plus" en haut si disponible */}
+                      {!searchResults && hasMoreMessages && (
+                        <div className="flex justify-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={loadMoreMessages}
+                            disabled={messagesLoading}
+                            className="text-xs"
+                          >
+                            <ChevronUp className="h-3 w-3 mr-1" />
+                            {messagesLoading ? 'Chargement...' : `Charger plus (${totalMessagesCount - messages.length} restants)`}
+                          </Button>
+                        </div>
+                      )}
+                      
+                      {(searchResults ? searchResults.messages : messages).map((message) => {
                         const isOwn = message.sender_id === user?.id;
                         const isAdmin = message.sender_type === 'admin';
 
@@ -640,7 +920,13 @@ export default function VendorMessaging() {
                                 }`}
                               >
                                 {message.content && (
-                                  <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                                  <p className="text-sm whitespace-pre-wrap break-words">
+                                    {searchResults && searchQuery ? (
+                                      <span>{highlightText(message.content, searchQuery)}</span>
+                                    ) : (
+                                      message.content
+                                    )}
+                                  </p>
                                 )}
                                 
                                 {/* Attachments */}

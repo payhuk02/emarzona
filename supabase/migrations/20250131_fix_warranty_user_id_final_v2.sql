@@ -170,7 +170,15 @@ BEGIN
     AND column_name = 'order_id'
   ) INTO v_order_id_exists;
 
-  DROP POLICY IF EXISTS "Users can view warranty history" ON public.warranty_history;
+  -- Supprimer l'ancienne politique seulement si la table existe
+  -- Utiliser EXECUTE pour éviter l'erreur si la table n'existe pas
+  BEGIN
+    EXECUTE 'DROP POLICY IF EXISTS "Users can view warranty history" ON public.warranty_history';
+  EXCEPTION
+    WHEN undefined_table THEN
+      -- Table n'existe pas, on continue
+      NULL;
+  END;
   
   IF v_order_id_exists THEN
     CREATE POLICY "Users can view warranty history"
@@ -189,7 +197,7 @@ BEGIN
           OR EXISTS (
             SELECT 1 FROM public.stores s
             WHERE s.id = pw.store_id
-            AND s.owner_id = auth.uid()
+            AND s.user_id = auth.uid()
           )
         )
       )
@@ -206,7 +214,7 @@ BEGIN
           OR EXISTS (
             SELECT 1 FROM public.stores s
             WHERE s.id = pw.store_id
-            AND s.owner_id = auth.uid()
+            AND s.user_id = auth.uid()
           )
         )
       )

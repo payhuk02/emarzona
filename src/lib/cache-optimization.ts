@@ -133,9 +133,10 @@ export function prefetchImportantData(queryClient: QueryClient): void {
 
 /**
  * Nettoyer le cache périodiquement
+ * Amélioré avec nettoyage intelligent des données obsolètes
  */
 export function setupCacheCleanup(queryClient: QueryClient, intervalMs: number = 600000): () => void {
-  const interval = setInterval(() => {
+  const cleanup = () => {
     // Nettoyer les queries inactives
     queryClient.removeQueries({
       predicate: (query) => {
@@ -147,7 +148,13 @@ export function setupCacheCleanup(queryClient: QueryClient, intervalMs: number =
     });
     
     logger.debug('Cache nettoyé');
-  }, intervalMs);
+  };
+
+  // Nettoyer immédiatement
+  cleanup();
+  
+  // Puis nettoyer périodiquement
+  const interval = setInterval(cleanup, intervalMs);
   
   return () => clearInterval(interval);
 }

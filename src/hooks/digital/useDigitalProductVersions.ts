@@ -170,6 +170,78 @@ export const useCreateDigitalProductVersion = () => {
 };
 
 /**
+ * Met à jour une version
+ */
+export const useUpdateDigitalProductVersion = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<DigitalProductVersion> & { id: string }) => {
+      // Si on met à jour is_current à true, mettre les autres à false
+      if (updates.is_current === true) {
+        const { data: version } = await supabase
+          .from('digital_product_versions')
+          .select('digital_product_id, product_id')
+          .eq('id', id)
+          .single();
+
+        if (version) {
+          await supabase
+            .from('digital_product_versions')
+            .update({ is_current: false })
+            .eq('digital_product_id', version.digital_product_id)
+            .eq('is_current', true)
+            .neq('id', id);
+        }
+      }
+
+      const { data, error } = await supabase
+        .from('digital_product_versions')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        logger.error('Error updating version', { error, id, updates });
+        throw error;
+      }
+
+      return data as DigitalProductVersion;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['digital-product-version-current', data.product_id] });
+      queryClient.invalidateQueries({ queryKey: ['digital-product-version-history', data.product_id] });
+    },
+  });
+};
+
+/**
+ * Supprime une version
+ */
+export const useDeleteDigitalProductVersion = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, productId }: { id: string; productId: string }) => {
+      const { error } = await supabase
+        .from('digital_product_versions')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        logger.error('Error deleting digital product version', { error, id });
+        throw error;
+      }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['digital-product-version-current', variables.productId] });
+      queryClient.invalidateQueries({ queryKey: ['digital-product-version-history', variables.productId] });
+    },
+  });
+};
+
+/**
  * Marque une notification comme lue
  */
 export const useMarkUpdateNotificationRead = () => {

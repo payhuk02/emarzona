@@ -337,7 +337,7 @@ USING (
   EXISTS (
     SELECT 1 FROM public.stores
     WHERE stores.id = product_warranties.store_id
-    AND stores.owner_id = auth.uid()
+    AND stores.user_id = auth.uid()
   )
 );
 
@@ -364,7 +364,7 @@ USING (
     AND EXISTS (
       SELECT 1 FROM public.stores
       WHERE stores.id = product_warranties.store_id
-      AND stores.owner_id = auth.uid()
+      AND stores.user_id = auth.uid()
     )
   )
 );
@@ -382,7 +382,7 @@ USING (
       OR EXISTS (
         SELECT 1 FROM public.stores
         WHERE stores.id = product_warranties.store_id
-        AND stores.owner_id = auth.uid()
+        AND stores.user_id = auth.uid()
       )
     )
   )

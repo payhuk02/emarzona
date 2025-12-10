@@ -258,7 +258,7 @@ CREATE POLICY "digital_product_versions_manage_owners"
       SELECT 1 FROM public.products p
       JOIN public.stores s ON s.id = p.store_id
       WHERE p.id = digital_product_versions.product_id
-      AND (s.user_id = auth.uid() OR s.owner_id = auth.uid())
+      AND s.user_id = auth.uid()
     )
   );
 

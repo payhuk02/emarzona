@@ -149,7 +149,21 @@ END $$;
 DO $$ 
 DECLARE
   v_order_id_exists BOOLEAN;
+  v_warranty_history_exists BOOLEAN;
 BEGIN
+  -- Vérifier si warranty_history existe
+  SELECT EXISTS (
+    SELECT 1 
+    FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+    AND table_name = 'warranty_history'
+  ) INTO v_warranty_history_exists;
+
+  -- Si la table n'existe pas, on ne fait rien
+  IF NOT v_warranty_history_exists THEN
+    RETURN;
+  END IF;
+
   -- Vérifier si order_id existe
   SELECT EXISTS (
     SELECT 1 
@@ -159,7 +173,14 @@ BEGIN
     AND column_name = 'order_id'
   ) INTO v_order_id_exists;
 
-  DROP POLICY IF EXISTS "Users can view warranty history" ON public.warranty_history;
+  -- Supprimer l'ancienne politique seulement si la table existe
+  BEGIN
+    EXECUTE 'DROP POLICY IF EXISTS "Users can view warranty history" ON public.warranty_history';
+  EXCEPTION
+    WHEN undefined_table THEN
+      -- Table n'existe pas, on continue
+      NULL;
+  END;
   
   IF v_order_id_exists THEN
     CREATE POLICY "Users can view warranty history"
@@ -178,7 +199,7 @@ BEGIN
           OR EXISTS (
             SELECT 1 FROM public.stores s
             WHERE s.id = pw.store_id
-            AND s.owner_id = auth.uid()
+            AND s.user_id = auth.uid()
           )
         )
       )
@@ -195,7 +216,7 @@ BEGIN
           OR EXISTS (
             SELECT 1 FROM public.stores s
             WHERE s.id = pw.store_id
-            AND s.owner_id = auth.uid()
+            AND s.user_id = auth.uid()
           )
         )
       )

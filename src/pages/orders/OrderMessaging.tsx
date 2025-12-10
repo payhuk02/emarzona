@@ -66,6 +66,12 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { logger } from '@/lib/logger';
 import { MediaAttachment } from '@/components/media';
+import { validateFile, filterValidFiles } from '@/utils/fileValidation';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import { Progress } from '@/components/ui/progress';
+import { useMessageSearch } from '@/hooks/useMessageSearch';
+import { Search, X, ChevronUp } from 'lucide-react';
+import { highlightText } from '@/utils/highlightText.tsx';
 
 export default function OrderMessaging() {
   const { orderId } = useParams<{ orderId: string }>();
@@ -88,17 +94,50 @@ export default function OrderMessaging() {
     closeConversation,
     openConversation,
     enableAdminIntervention,
+    loadMoreMessages,
+    hasMoreMessages,
+    totalMessagesCount,
   } = useMessaging(orderId);
 
   const [messageContent, setMessageContent] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
+  const messagesTopRef = useRef<HTMLDivElement>(null);
+  
+  // Hook pour la recherche de messages
+  const { searchMessages, results: searchResults, isSearching: isSearchingMessages, clearSearch } = useMessageSearch();
+  
+  // Hook pour l'upload de fichiers avec progress tracking
+  const { uploadFiles: uploadFilesWithProgress, state: uploadState } = useFileUpload();
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom when new messages arrive (seulement pour nouveaux messages, pas lors du chargement de plus)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    // Ne scroll que si on n'est pas en train de charger plus de messages
+    if (!messagesLoading && !hasMoreMessages) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages.length, messagesLoading, hasMoreMessages]);
+  
+  // Scroll vers le haut lors du chargement de plus de messages
+  useEffect(() => {
+    if (messagesLoading && messagesTopRef.current) {
+      // Sauvegarder la position actuelle
+      const scrollContainer = messagesTopRef.current.closest('[data-radix-scroll-area-viewport]') as HTMLElement;
+      if (scrollContainer) {
+        const previousScrollHeight = scrollContainer.scrollHeight;
+        // Après le chargement, ajuster la position pour rester au même endroit visuel
+        setTimeout(() => {
+          const newScrollHeight = scrollContainer.scrollHeight;
+          const scrollDifference = newScrollHeight - previousScrollHeight;
+          scrollContainer.scrollTop = scrollDifference;
+        }, 100);
+      }
+    }
+  }, [messagesLoading]);
 
   // Mark messages as read when opening conversation
   useEffect(() => {
@@ -118,22 +157,30 @@ export default function OrderMessaging() {
   }, [currentConversation, conversations, openConversation]);
 
   /**
-   * Handle file selection
+   * Handle file selection (utilise la validation centralisée)
    */
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     
-    // Validate file sizes (max 10MB per file)
-    const validFiles = files.filter(file => {
-      if (file.size > 10 * 1024 * 1024) {
-        toast({
-          title: 'Fichier trop volumineux',
-          description: `${file.name} dépasse 10MB`,
-          variant: 'destructive',
-        });
-        return false;
+    // Utiliser la validation centralisée
+    const { validateFile, filterValidFiles } = require('@/utils/fileValidation');
+    
+    const validFiles = filterValidFiles(files, {
+      maxSize: 10 * 1024 * 1024, // 10MB
+    });
+    
+    // Afficher les erreurs pour les fichiers invalides
+    files.forEach(file => {
+      if (!validFiles.includes(file)) {
+        const validation = validateFile(file, { maxSize: 10 * 1024 * 1024 });
+        if (!validation.valid) {
+          toast({
+            title: 'Fichier invalide',
+            description: `${file.name}: ${validation.error}`,
+            variant: 'destructive',
+          });
+        }
       }
-      return true;
     });
 
     setSelectedFiles(prev => [...prev, ...validFiles]);
@@ -144,31 +191,6 @@ export default function OrderMessaging() {
    */
   const removeFile = (index: number) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  /**
-   * Upload files to Supabase Storage
-   */
-  const uploadFiles = async (files: File[]): Promise<string[]> => {
-    const uploadPromises = files.map(async (file) => {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `messages/${orderId}/${fileName}`;
-
-      const { data, error } = await supabase.storage
-        .from('attachments')
-        .upload(filePath, file);
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('attachments')
-        .getPublicUrl(filePath);
-
-      return publicUrl;
-    });
-
-    return Promise.all(uploadPromises);
   };
 
   /**
@@ -195,11 +217,23 @@ export default function OrderMessaging() {
 
     try {
       setUploadingFiles(true);
+      setUploadProgress(0);
 
-      // Upload files if any
+      // Upload files if any (utilise le hook avec progress tracking)
       let fileUrls: string[] = [];
-      if (selectedFiles.length > 0) {
-        fileUrls = await uploadFiles(selectedFiles);
+      let storagePaths: string[] = [];
+      if (selectedFiles.length > 0 && currentConversation) {
+        const uploadResults = await uploadFilesWithProgress(selectedFiles, {
+          folder: `message-attachments/${currentConversation.id}`,
+          maxSize: 10 * 1024 * 1024, // 10MB
+          compressImages: true, // Activer la compression d'images
+          onProgress: (progress) => {
+            setUploadProgress(progress);
+          },
+        });
+        
+        fileUrls = uploadResults.map(r => r.publicUrl);
+        storagePaths = uploadResults.map(r => r.path);
       }
 
       // Determine message type
@@ -219,12 +253,18 @@ export default function OrderMessaging() {
       const formData = {
         content: messageContent,
         message_type: messageType,
-        attachments: selectedFiles.map((file, index) => ({
-          file_name: file.name,
-          file_type: file.type,
-          file_size: file.size,
-          file_url: fileUrls[index] || '',
-        })),
+        attachments: selectedFiles.map((file, index) => {
+          // Utiliser le storage_path retourné par l'upload (qui contient le chemin complet)
+          const storagePath = storagePaths[index] || '';
+          
+          return {
+            file_name: file.name,
+            file_type: file.type,
+            file_size: file.size,
+            file_url: fileUrls[index] || '',
+            storage_path: storagePath, // Utiliser le chemin complet retourné par l'upload
+          };
+        }),
       };
 
       await sendMessage(currentConversation.id, formData);
@@ -422,12 +462,67 @@ export default function OrderMessaging() {
                     <div>
                       <CardTitle className="text-lg">Messages</CardTitle>
                       <CardDescription>
-                        {messages.length} message{messages.length > 1 ? 's' : ''}
+                        {searchResults ? `${searchResults.total} résultat(s)` : `${messages.length} message${messages.length > 1 ? 's' : ''}`}
                       </CardDescription>
                     </div>
 
-                    {/* Actions Menu */}
-                    <DropdownMenu>
+                    <div className="flex items-center gap-2">
+                      {showSearch ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="text"
+                            placeholder="Rechercher dans les messages..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={async (e) => {
+                              if (e.key === 'Enter' && searchQuery.trim()) {
+                                await searchMessages({
+                                  conversationId: currentConversation?.id,
+                                  query: searchQuery.trim(),
+                                });
+                              }
+                            }}
+                            className="w-64"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={async () => {
+                              if (searchQuery.trim()) {
+                                await searchMessages({
+                                  conversationId: currentConversation?.id,
+                                  query: searchQuery.trim(),
+                                });
+                              }
+                            }}
+                            disabled={isSearchingMessages || !searchQuery.trim()}
+                          >
+                            <Search className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setSearchQuery('');
+                              setShowSearch(false);
+                              clearSearch();
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setShowSearch(true)}
+                        >
+                          <Search className="h-4 w-4" />
+                        </Button>
+                      )}
+
+                      {/* Actions Menu */}
+                      <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" aria-label="Menu d'actions">
                           <MoreVertical className="h-4 w-4" />
@@ -452,24 +547,60 @@ export default function OrderMessaging() {
                 </CardHeader>
 
                 {/* Messages List */}
-                <ScrollArea className="flex-1 p-4">
-                  {messagesLoading ? (
+                <ScrollArea 
+                  className="flex-1 p-4"
+                  ref={(node) => {
+                    if (node) {
+                      const scrollContainer = node.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement;
+                      if (scrollContainer) {
+                        scrollContainer.addEventListener('scroll', () => {
+                          // Infinite scroll: charger plus de messages quand on scroll en haut
+                          if (scrollContainer.scrollTop === 0 && !messagesLoading && hasMoreMessages && currentConversation) {
+                            loadMoreMessages();
+                          }
+                        });
+                      }
+                    }
+                  }}
+                >
+                  {messagesLoading || isSearchingMessages ? (
                     <div className="flex items-center justify-center h-full">
                       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                     </div>
-                  ) : messages.length === 0 ? (
+                  ) : (searchResults ? searchResults.messages : messages).length === 0 ? (
                     <div className="flex items-center justify-center h-full">
                       <div className="text-center">
                         <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                        <p className="text-muted-foreground">Aucun message pour le moment</p>
+                        <p className="text-muted-foreground">
+                          {searchResults ? 'Aucun résultat trouvé' : 'Aucun message pour le moment'}
+                        </p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Commencez la conversation ci-dessous
+                          {searchResults ? 'Essayez avec d\'autres mots-clés' : 'Commencez la conversation ci-dessous'}
                         </p>
                       </div>
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {messages.map((message) => {
+                      {/* Référence pour le scroll automatique */}
+                      <div ref={messagesTopRef} />
+                      
+                      {/* Bouton "Charger plus" en haut si disponible */}
+                      {!searchResults && hasMoreMessages && (
+                        <div className="flex justify-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={loadMoreMessages}
+                            disabled={messagesLoading}
+                            className="text-xs"
+                          >
+                            <ChevronUp className="h-3 w-3 mr-1" />
+                            {messagesLoading ? 'Chargement...' : `Charger plus (${totalMessagesCount - messages.length} restants)`}
+                          </Button>
+                        </div>
+                      )}
+                      
+                      {(searchResults ? searchResults.messages : messages).map((message) => {
                         const isOwn = message.sender_id === user?.id;
                         const isAdmin = message.sender_type === 'admin';
 
@@ -502,7 +633,11 @@ export default function OrderMessaging() {
                                 {/* Text Content */}
                                 {message.content && (
                                   <p className="text-sm whitespace-pre-wrap break-words">
-                                    {message.content}
+                                    {searchResults && searchQuery ? (
+                                      <span>{highlightText(message.content, searchQuery)}</span>
+                                    ) : (
+                                      message.content
+                                    )}
                                   </p>
                                 )}
 
@@ -619,6 +754,19 @@ export default function OrderMessaging() {
                         )}
                       </Button>
                     </div>
+                    
+                    {/* Progress indicator pour l'upload */}
+                    {uploadingFiles && uploadProgress > 0 && (
+                      <div className="px-4 pb-2">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                          <span className="text-xs text-muted-foreground">
+                            Upload en cours... {uploadProgress}%
+                          </span>
+                        </div>
+                        <Progress value={uploadProgress} className="h-1" />
+                      </div>
+                    )}
                   </div>
 
                   <p className="text-xs text-muted-foreground">

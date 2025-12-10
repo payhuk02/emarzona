@@ -72,6 +72,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_artist_dedications_updated_at ON public.artist_product_dedications;
 CREATE TRIGGER update_artist_dedications_updated_at
   BEFORE UPDATE ON public.artist_product_dedications
   FOR EACH ROW
@@ -81,6 +82,11 @@ CREATE TRIGGER update_artist_dedications_updated_at
 ALTER TABLE public.artist_product_dedications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.artist_dedication_templates ENABLE ROW LEVEL SECURITY;
 
+-- Supprimer les anciennes policies si elles existent
+DROP POLICY IF EXISTS "dedications_select_own" ON public.artist_product_dedications;
+DROP POLICY IF EXISTS "dedications_manage_owners" ON public.artist_product_dedications;
+DROP POLICY IF EXISTS "dedication_templates_manage_owners" ON public.artist_dedication_templates;
+
 -- Policy: Clients peuvent voir leurs dédicaces
 CREATE POLICY "dedications_select_own"
   ON public.artist_product_dedications FOR SELECT
@@ -88,7 +94,28 @@ CREATE POLICY "dedications_select_own"
     EXISTS (
       SELECT 1 FROM public.orders o
       WHERE o.id = artist_product_dedications.order_id
-      AND o.user_id = auth.uid()
+      AND (
+        -- Cas 1: customer_id correspond directement à auth.uid()
+        o.customer_id = auth.uid()
+        -- Cas 2: customer_id fait référence à un customer dans la table customers
+        -- et l'email du customer correspond à l'email de l'utilisateur authentifié
+        OR EXISTS (
+          SELECT 1 FROM public.customers c
+          WHERE c.id = o.customer_id
+          AND c.email = (
+            SELECT email FROM auth.users WHERE id = auth.uid() LIMIT 1
+          )
+        )
+        -- Cas 3: customer_id est dans metadata.userId (pour les commandes multi-stores)
+        OR (
+          o.metadata IS NOT NULL
+          AND o.metadata::text != 'null'
+          AND (
+            (o.metadata->>'userId')::text = auth.uid()::text
+            OR (o.metadata->>'customerId')::text = auth.uid()::text
+          )
+        )
+      )
     )
   );
 
@@ -100,7 +127,18 @@ CREATE POLICY "dedications_manage_owners"
       SELECT 1 FROM public.products p
       JOIN public.stores s ON s.id = p.store_id
       WHERE p.id = artist_product_dedications.product_id
-      AND (s.user_id = auth.uid() OR s.owner_id = auth.uid())
+      AND s.user_id = auth.uid()
+    )
+  );
+
+-- Policy: Admins peuvent tout gérer
+CREATE POLICY "dedications_manage_admins"
+  ON public.artist_product_dedications FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.user_roles ur
+      WHERE ur.user_id = auth.uid()
+      AND ur.role = 'admin'
     )
   );
 
@@ -111,11 +149,21 @@ CREATE POLICY "dedication_templates_manage_owners"
     EXISTS (
       SELECT 1 FROM public.stores s
       WHERE s.id = artist_dedication_templates.store_id
-      AND (s.user_id = auth.uid() OR s.owner_id = auth.uid())
+      AND s.user_id = auth.uid()
+    )
+  );
+
+-- Policy: Admins peuvent gérer tous les templates
+CREATE POLICY "dedication_templates_manage_admins"
+  ON public.artist_dedication_templates FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.user_roles ur
+      WHERE ur.user_id = auth.uid()
+      AND ur.role = 'admin'
     )
   );
 
 -- Commentaires
 COMMENT ON TABLE public.artist_product_dedications IS 'Dédicaces personnalisées pour œuvres d''artistes';
 COMMENT ON TABLE public.artist_dedication_templates IS 'Templates de dédicaces réutilisables';
-

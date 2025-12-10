@@ -47,6 +47,7 @@ import {
   type VersionStatus,
 } from '@/hooks/digital/useProductVersions';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CreateVersionDialog } from '@/components/digital/CreateVersionDialog';
 
 // ============================================================================
 // TYPES
@@ -54,6 +55,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 interface VersionManagementDashboardProps {
   productId: string;
+  digitalProductId?: string;
   onCreateVersion?: () => void;
   onEditVersion?: (version: ProductVersion) => void;
 }
@@ -102,12 +104,14 @@ function VersionStatusBadge({ status }: { status: VersionStatus }) {
 
 export function VersionManagementDashboard({
   productId,
+  digitalProductId,
   onCreateVersion,
   onEditVersion,
 }: VersionManagementDashboardProps) {
   const { data: versions, isLoading } = useProductVersions(productId);
   const { mutate: deleteVersion } = useDeleteVersion();
   const { mutate: notifyCustomers } = useNotifyCustomers();
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -179,12 +183,33 @@ export function VersionManagementDashboard({
               Gérez toutes les versions de votre produit digital
             </CardDescription>
           </div>
-          {onCreateVersion && (
-            <Button onClick={onCreateVersion} className="gap-2">
+          <div className="flex items-center gap-2">
+            {digitalProductId && (
+              <CreateVersionDialog
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+                digitalProductId={digitalProductId}
+                productId={productId}
+                onSuccess={() => {
+                  // Refresh versions list
+                  window.location.reload();
+                }}
+              />
+            )}
+            <Button
+              onClick={() => {
+                if (digitalProductId) {
+                  setIsCreateDialogOpen(true);
+                } else {
+                  onCreateVersion?.();
+                }
+              }}
+              className="gap-2"
+            >
               <Upload className="h-4 w-4" />
               Nouvelle Version
             </Button>
-          )}
+          </div>
         </CardHeader>
         <CardContent>
           {!versions || versions.length === 0 ? (

@@ -89,6 +89,9 @@ export const useVendorMessaging = (
   const [loading, setLoading] = useState(true);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const [messagesPage, setMessagesPage] = useState(1);
+  const [totalMessagesCount, setTotalMessagesCount] = useState(0);
   const { toast } = useToast();
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -203,7 +206,7 @@ export const useVendorMessaging = (
       const to = from + messagePageSize - 1;
 
       // Récupérer les messages avec les informations de l'expéditeur
-      const { data: messagesData, error: messagesError } = await supabase
+      const { data: messagesData, error: messagesError, count } = await supabase
         .from("vendor_messages")
         .select(`
           *,
@@ -214,6 +217,9 @@ export const useVendorMessaging = (
         .range(from, to);
 
       if (messagesError) throw messagesError;
+
+      // Récupérer le count total depuis la réponse Supabase
+      const actualTotal = count || 0;
 
       // Récupérer les profils des expéditeurs séparément
       // Filtrer les IDs null/invalides et valider le format UUID
@@ -226,22 +232,49 @@ export const useVendorMessaging = (
         return uuidRegex.test(id);
       });
 
-      let profilesData = null;
+      let profilesData: any[] = [];
       if (validSenderIds.length > 0) {
-        const { data, error: profilesError } = await supabase
-          .from("profiles")
-          .select("user_id, name, avatar_url")
-          .in("user_id", validSenderIds);
-        
-        if (profilesError) {
-          logger.error("Error fetching profiles for vendor messages", { 
-            error: profilesError,
+        try {
+          // Utiliser une requête correcte avec .in() pour les UUIDs
+          // Limiter à 50 IDs pour éviter les requêtes trop longues (Supabase limite)
+          const idsToFetch = validSenderIds.slice(0, 50);
+          
+          // Vérifier que tous les IDs sont des UUIDs valides avant la requête
+          const allValid = idsToFetch.every((id: string) => uuidRegex.test(id));
+          
+          if (!allValid) {
+            logger.warn("Some sender IDs are not valid UUIDs, skipping profile fetch", {
+              idsToFetch: idsToFetch.length,
+            });
+            profilesData = [];
+          } else {
+            const { data, error: profilesError } = await supabase
+              .from("profiles")
+              .select("user_id, display_name, avatar_url")
+              .in("user_id", idsToFetch);
+            
+            if (profilesError) {
+              logger.error("Error fetching profiles for vendor messages", { 
+                error: profilesError,
+                senderIds: validSenderIds.length,
+                idsToFetch: idsToFetch.length,
+                message: profilesError.message,
+                code: profilesError.code,
+                details: profilesError.details,
+              });
+              // Ne pas bloquer l'affichage des messages si les profils échouent
+              profilesData = [];
+            } else {
+              profilesData = data || [];
+            }
+          }
+        } catch (err: any) {
+          logger.error("Exception fetching profiles", { 
+            error: err,
             senderIds: validSenderIds.length,
-            originalSenderIds: senderIds.length
+            message: err?.message,
           });
-          // Ne pas bloquer l'affichage des messages si les profils échouent
-        } else {
-          profilesData = data;
+          profilesData = [];
         }
       }
 
@@ -251,13 +284,27 @@ export const useVendorMessaging = (
         return {
           ...message,
           sender: profile ? {
-            name: profile.name,
+            name: profile.display_name || profile.first_name || 'Utilisateur',
             avatar_url: profile.avatar_url
           } : null
         };
       });
 
-      setMessages(messagesWithSenders as VendorMessage[]);
+      // Mettre à jour le total et hasMoreMessages
+      if (messagePage === 1) {
+        setMessages(messagesWithSenders as VendorMessage[]);
+        setTotalMessagesCount(actualTotal);
+      } else {
+        // Ajouter les nouveaux messages au début (messages plus anciens)
+        setMessages(prev => [...messagesWithSenders, ...prev] as VendorMessage[]);
+      }
+      
+      // Vérifier s'il y a plus de messages à charger
+      // Calculer le nombre total de messages chargés
+      const loadedCount = messagePage === 1 
+        ? messagesWithSenders.length 
+        : (messagePage - 1) * 50 + messagesWithSenders.length; // 50 est la pageSize utilisée dans fetchMessages
+      setHasMoreMessages(loadedCount < actualTotal);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error("Error fetching vendor messages:", error);
@@ -504,7 +551,47 @@ export const useVendorMessaging = (
           }
         }
 
-        const { error } = await supabase
+        // S'assurer que storage_path est valide et nettoyé
+        let cleanStoragePath = storagePath;
+        
+        if (storagePath) {
+          // Nettoyer le chemin pour s'assurer qu'il est relatif au bucket
+          cleanStoragePath = storagePath
+            .replace(/^attachments\//, '')
+            .replace(/^\/attachments\//, '')
+            .replace(/^storage\/v1\/object\/public\/attachments\//, '')
+            .replace(/^https?:\/\/[^\/]+\/storage\/v1\/object\/public\/attachments\//, '')
+            .replace(/^https?:\/\/[^\/]+\/storage\/v1\/object\/sign\/attachments\//, '');
+        }
+        
+        // Si pas de storage_path, essayer de l'extraire depuis l'URL
+        if (!cleanStoragePath && attachment.file_url) {
+          const urlMatch = attachment.file_url.match(/\/storage\/v1\/object\/public\/attachments\/(.+)$/);
+          if (urlMatch) {
+            cleanStoragePath = decodeURIComponent(urlMatch[1]);
+          }
+        }
+        
+        if (!cleanStoragePath) {
+          logger.error('Invalid storage_path after cleaning', {
+            originalStoragePath: storagePath,
+            fileUrl: attachment.file_url,
+            fileName: attachment.file_name,
+          });
+          throw new Error(`Chemin de stockage invalide pour ${attachment.file_name}`);
+        }
+        
+        // Log pour debug (en dev seulement)
+        if (import.meta.env.DEV) {
+          logger.info('Saving vendor message attachment', {
+            messageId,
+            fileName: attachment.file_name,
+            storagePath: cleanStoragePath,
+            fileUrl: attachment.file_url,
+          });
+        }
+        
+        const { error, data } = await supabase
           .from("vendor_message_attachments")
           .insert([{
             message_id: messageId,
@@ -512,8 +599,18 @@ export const useVendorMessaging = (
             file_type: attachment.file_type,
             file_size: attachment.file_size,
             file_url: attachment.file_url,
-            storage_path: storagePath, // Chemin relatif dans le bucket
-          }]);
+            storage_path: cleanStoragePath, // Chemin relatif nettoyé dans le bucket
+          }])
+          .select();
+        
+        // Vérifier que l'insertion a réussi et log le résultat
+        if (import.meta.env.DEV && data && data.length > 0) {
+          logger.info('Vendor message attachment saved successfully', {
+            attachmentId: data[0].id,
+            storagePath: data[0].storage_path,
+            fileUrl: data[0].file_url,
+          });
+        }
 
         if (error) throw error;
       } catch (error: unknown) {
@@ -541,6 +638,15 @@ export const useVendorMessaging = (
     }
   };
 
+  // Charger plus de messages (infinite scroll)
+  const loadMoreMessages = useCallback(async () => {
+    if (!currentConversation || !hasMoreMessages || messagesLoading) return;
+    
+    const nextPage = messagesPage + 1;
+    setMessagesPage(nextPage);
+    await fetchMessages(currentConversation.id, nextPage, 50);
+  }, [currentConversation, hasMoreMessages, messagesLoading, messagesPage, fetchMessages]);
+
   // Ouvrir une conversation
   const openConversation = useCallback(async (conversationId: string) => {
     let conv = conversations.find(c => c.id === conversationId);
@@ -563,7 +669,11 @@ export const useVendorMessaging = (
     
     if (conv) {
       setCurrentConversation(conv);
-      await fetchMessages(conversationId);
+      // Réinitialiser la pagination
+      setMessagesPage(1);
+      setHasMoreMessages(true);
+      setTotalMessagesCount(0); // Réinitialiser le total
+      await fetchMessages(conversationId, 1, 50);
       
       // Marquer comme lu
       const { data: { user } } = await supabase.auth.getUser();
@@ -630,6 +740,9 @@ export const useVendorMessaging = (
     openConversation,
     closeConversation,
     fetchConversations,
+    loadMoreMessages,
+    hasMoreMessages,
+    totalMessagesCount,
   };
 };
 

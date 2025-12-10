@@ -335,6 +335,7 @@ const InventoryAnalytics = lazy(() => import("./pages/dashboard/InventoryAnalyti
 const MyLicenses = lazy(() => import("./pages/digital/MyLicenses"));
 const LicenseManagement = lazy(() => import("./pages/digital/LicenseManagement"));
 const DigitalProductAnalytics = lazy(() => import("./pages/digital/DigitalProductAnalytics"));
+const DigitalProductVersionsManagement = lazy(() => import("./pages/digital/DigitalProductVersionsManagement"));
 
 // Pages Services - Lazy loading
 const RecurringBookingsManagement = lazy(() => import("./pages/service/RecurringBookingsManagement"));
@@ -369,6 +370,7 @@ const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 const AdminErrorMonitoring = lazy(() => import("./pages/admin/AdminErrorMonitoring"));
 const AdminMonitoring = lazy(() => import("./pages/admin/AdminMonitoring"));
 const AdminAccessibilityReport = lazy(() => import("./pages/admin/AdminAccessibilityReport"));
+const StorageDiagnosticPage = lazy(() => import("./pages/admin/StorageDiagnosticPage"));
 
 // Page de test i18n (à supprimer en production)
 const I18nTest = lazy(() => import("./pages/I18nTest"));
@@ -633,6 +635,7 @@ const AppContent = () => {
           <Route path="/dashboard/digital/analytics/:productId" element={<ProtectedRoute><DigitalProductAnalytics /></ProtectedRoute>} />
           <Route path="/dashboard/digital/updates" element={<ProtectedRoute><DigitalProductUpdatesDashboard /></ProtectedRoute>} />
           <Route path="/dashboard/digital/updates/:productId" element={<ProtectedRoute><DigitalProductUpdatesDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/digital/products/:productId/versions" element={<ProtectedRoute><DigitalProductVersionsManagement /></ProtectedRoute>} />
           
           {/* --- Routes Services --- */}
           <Route path="/dashboard/services/staff-availability" element={<ProtectedRoute><StaffAvailabilityCalendar /></ProtectedRoute>} />
@@ -740,6 +743,7 @@ const AppContent = () => {
           <Route path="/admin/error-monitoring" element={<ProtectedRoute><AdminErrorMonitoring /></ProtectedRoute>} />
           <Route path="/admin/monitoring" element={<ProtectedRoute><AdminMonitoring /></ProtectedRoute>} />
           <Route path="/admin/accessibility" element={<ProtectedRoute><AdminAccessibilityReport /></ProtectedRoute>} />
+          <Route path="/admin/storage-diagnostic" element={<ProtectedRoute><StorageDiagnosticPage /></ProtectedRoute>} />
           <Route path="/admin/community" element={<ProtectedRoute><AdminCommunity /></ProtectedRoute>} />
 
           {/* --- Route de fallback --- */}

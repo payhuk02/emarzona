@@ -59,6 +59,7 @@ import {
   Workflow,
   Gavel,
 } from "@/components/icons";
+import { Database } from "lucide-react";
 import { usePlatformLogo } from "@/hooks/usePlatformLogo";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
@@ -874,6 +875,11 @@ const adminMenuSections = [
         title: "Notifications",
         url: "/admin/notifications",
         icon: Bell,
+      },
+      {
+        title: "Diagnostic Storage",
+        url: "/admin/storage-diagnostic",
+        icon: Database,
       },
     ]
   },

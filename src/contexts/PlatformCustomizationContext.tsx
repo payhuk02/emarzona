@@ -49,7 +49,9 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
   useEffect(() => {
     const initialize = async () => {
       try {
-        await load();
+        if (load) {
+          await load();
+        }
       } catch (error) {
         logger.error('Error loading customization', { error });
       } finally {
@@ -217,22 +219,33 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
   };
 
   const applyCustomization = () => {
-    if (customizationData?.design) {
-      applyDesignCustomization(customizationData.design);
+    try {
+      if (customizationData?.design) {
+        applyDesignCustomization(customizationData.design);
+      }
+    } catch (error) {
+      logger.error('Error applying customization', { error });
     }
   };
 
-  return (
-    <PlatformCustomizationContext.Provider
-      value={{
-        customizationData,
-        applyCustomization,
-        previewMode,
-      }}
-    >
-      {children}
-    </PlatformCustomizationContext.Provider>
-  );
+  // Gestion d'erreur pour éviter les crashes si le contexte échoue
+  try {
+    return (
+      <PlatformCustomizationContext.Provider
+        value={{
+          customizationData: customizationData || null,
+          applyCustomization,
+          previewMode,
+        }}
+      >
+        {children}
+      </PlatformCustomizationContext.Provider>
+    );
+  } catch (error) {
+    logger.error('Error in PlatformCustomizationProvider', { error });
+    // Retourner les enfants sans le contexte en cas d'erreur
+    return <>{children}</>;
+  }
 };
 
 export const usePlatformCustomizationContext = () => {

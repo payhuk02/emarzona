@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from '@/lib/logger';
+import { sendUnifiedNotification } from '@/lib/notifications/unified-notifications';
 import {
   Conversation,
   Message,
@@ -27,6 +28,10 @@ export const useMessaging = (
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [stats, setStats] = useState<ConversationStats | null>(null);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const [messagesPage, setMessagesPage] = useState(1);
+  const [messagesPageSize] = useState(50);
+  const [totalMessagesCount, setTotalMessagesCount] = useState(0);
   const { toast } = useToast();
   const channelRef = useRef<any>(null);
 
@@ -82,19 +87,24 @@ export const useMessaging = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId, conversationFilters]);
 
-  // Récupérer les messages d'une conversation
-  const fetchMessages = useCallback(async (conversationId: string) => {
+  // Récupérer les messages d'une conversation avec pagination
+  const fetchMessages = useCallback(async (conversationId: string, page: number = 1, reset: boolean = false) => {
     setMessagesLoading(true);
     try {
+      // Calculer l'offset pour la pagination
+      const from = (page - 1) * messagesPageSize;
+      const to = from + messagesPageSize - 1;
+
       let query = supabase
         .from("messages")
         .select(`
           *,
           sender:profiles!messages_sender_id_fkey (name, avatar_url),
           attachments:message_attachments (*)
-        `)
+        `, { count: 'exact' })
         .eq("conversation_id", conversationId)
-        .order("created_at", { ascending: true });
+        .order("created_at", { ascending: true })
+        .range(from, to);
 
       // Appliquer les filtres de messages
       if (messageFilters?.sender_type) {
@@ -107,10 +117,23 @@ export const useMessaging = (
         query = query.eq("is_read", messageFilters.is_read);
       }
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
 
       if (error) throw error;
-      setMessages(data || []);
+
+      // Mettre à jour le total de messages
+      if (count !== null) {
+        setTotalMessagesCount(count);
+        setHasMoreMessages(count > (reset ? 0 : messages.length) + (data?.length || 0));
+      }
+
+      // Ajouter ou remplacer les messages selon si on reset ou charge plus
+      if (reset) {
+        setMessages(data || []);
+        setMessagesPage(1);
+      } else {
+        setMessages(prev => [...(data || []), ...prev]);
+      }
     } catch (error: any) {
       logger.error("Error fetching messages:", error);
       toast({
@@ -122,7 +145,16 @@ export const useMessaging = (
       setMessagesLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messageFilters]);
+  }, [messageFilters, messagesPageSize]);
+
+  // Charger plus de messages (infinite scroll)
+  const loadMoreMessages = useCallback(async () => {
+    if (!currentConversation || !hasMoreMessages || messagesLoading) return;
+    
+    const nextPage = messagesPage + 1;
+    setMessagesPage(nextPage);
+    await fetchMessages(currentConversation.id, nextPage, false);
+  }, [currentConversation, hasMoreMessages, messagesLoading, messagesPage, fetchMessages]);
 
   // Récupérer les statistiques
   const fetchStats = useCallback(async () => {
@@ -273,7 +305,7 @@ export const useMessaging = (
       // Marquer les messages comme lus pour l'expéditeur
       await markMessagesAsRead(conversationId, user.id);
 
-      await fetchMessages(conversationId);
+      await fetchMessages(conversationId, 1, true);
       await fetchStats();
       
       toast({
@@ -295,95 +327,48 @@ export const useMessaging = (
     }
   };
 
-  // Uploader des fichiers attachés
+  // Uploader des fichiers attachés (utilise la fonction centralisée)
   const uploadAttachments = async (messageId: string, files: File[]): Promise<MessageAttachment[]> => {
     const attachments: MessageAttachment[] = [];
 
+    if (files.length === 0) return attachments;
+
+    // Importer la fonction d'upload
+    const { uploadFileToStorage } = await import('@/hooks/useFileUpload');
+
+    // Uploader chaque fichier
     for (const file of files) {
       try {
-        // Vérifier la taille du fichier (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-          throw new Error(`Le fichier ${file.name} est trop volumineux (max 10MB)`);
-        }
+        // Uploader le fichier
+        const uploadResult = await uploadFileToStorage(file, {
+          folder: `message-attachments/${orderId || 'general'}`,
+          maxSize: 10 * 1024 * 1024, // 10MB
+        });
 
-        // Vérifier le type de fichier
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'application/pdf', 'text/plain'];
-        if (!allowedTypes.includes(file.type)) {
-          throw new Error(`Type de fichier non autorisé: ${file.type}`);
-        }
-
-        // Générer un nom de fichier unique
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `message-attachments/${fileName}`;
-
-        // Déterminer le Content-Type correct selon l'extension si file.type est vide
-        let contentType = file.type;
-        if (!contentType || contentType === 'application/octet-stream' || contentType === '') {
-          const ext = fileExt?.toLowerCase() || '';
-          const mimeTypes: Record<string, string> = {
-            'png': 'image/png',
-            'jpg': 'image/jpeg',
-            'jpeg': 'image/jpeg',
-            'gif': 'image/gif',
-            'webp': 'image/webp',
-            'pdf': 'application/pdf',
-            'mp4': 'video/mp4',
-            'webm': 'video/webm',
-          };
-          contentType = mimeTypes[ext] || 'application/octet-stream';
-        }
-
-        // Uploader le fichier vers Supabase Storage avec Content-Type explicite
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('attachments')
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            contentType: contentType, // Utiliser le Content-Type déterminé
-            metadata: {
-              originalName: file.name,
-              uploadedAt: new Date().toISOString(),
-            }
-          });
-
-        if (uploadError) {
-          logger.error('File upload error in useMessaging', {
-            fileName: file.name,
-            filePath,
-            error: uploadError.message,
-            fileType: file.type,
-            fileSize: file.size
-          });
-          throw uploadError;
-        }
-
-        // Vérifier que l'upload a réussi
-        if (!uploadData?.path) {
-          logger.error('Upload returned no path in useMessaging', { fileName, filePath, uploadData });
-          throw new Error(`L'upload du fichier ${file.name} a échoué : aucune donnée retournée`);
-        }
-
-        // Obtenir l'URL publique
-        const { data: urlData } = supabase.storage
-          .from('attachments')
-          .getPublicUrl(uploadData.path);
-
-        // Enregistrer l'attachement en base avec le chemin réel retourné par l'upload
+        // Enregistrer l'attachment en base de données
         const { data, error } = await supabase
           .from("message_attachments")
           .insert([{
             message_id: messageId,
-            file_name: file.name,
-            file_type: file.type,
-            file_size: file.size,
-            file_url: urlData.publicUrl,
-            storage_path: uploadData.path, // Utiliser le chemin réel retourné par l'upload
+            file_name: uploadResult.fileName,
+            file_type: uploadResult.mimeType,
+            file_size: uploadResult.size,
+            file_url: uploadResult.publicUrl,
+            storage_path: uploadResult.path,
           }])
           .select()
           .limit(1);
 
-        if (error) throw error;
-        
+        if (error) {
+          logger.error("Error saving attachment to database:", error);
+          toast({
+            title: "Erreur",
+            description: `Impossible d'enregistrer ${file.name}`,
+            variant: "destructive",
+          });
+          continue;
+        }
+
         if (data && data.length > 0) {
           attachments.push(data[0]);
         }
@@ -457,9 +442,12 @@ export const useMessaging = (
         .single();
 
       if (error) throw error;
-      
+
       setCurrentConversation(data);
-      await fetchMessages(conversationId);
+      // Réinitialiser la pagination et charger les messages
+      setMessagesPage(1);
+      setHasMoreMessages(true);
+      await fetchMessages(conversationId, 1, true);
     } catch (error: any) {
       logger.error("Error opening conversation:", error);
       toast({
@@ -538,7 +526,8 @@ export const useMessaging = (
         (payload) => {
           logger.log('Message updated:', payload);
           if (currentConversation) {
-            fetchMessages(currentConversation.id);
+            // Recharger seulement les nouveaux messages (pas toute la pagination)
+            fetchMessages(currentConversation.id, 1, false);
           }
           fetchStats();
         }
@@ -583,5 +572,8 @@ export const useMessaging = (
     enableAdminIntervention,
     refetchConversations: fetchConversations,
     refetchMessages: fetchMessages,
+    loadMoreMessages,
+    hasMoreMessages,
+    totalMessagesCount,
   };
 };

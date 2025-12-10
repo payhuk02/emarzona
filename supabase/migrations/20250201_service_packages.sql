@@ -4,10 +4,182 @@
 -- Description: Packages de services (ex: 10 séances coaching)
 -- =====================================================
 
+-- Correction: Gérer le renommage de service_id en service_product_id et s'assurer que store_id existe
+DO $$
+BEGIN
+  -- Vérifier si la table existe
+  IF EXISTS (
+    SELECT 1 
+    FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+    AND table_name = 'service_packages'
+  ) THEN
+    -- Si la colonne service_id existe, la renommer
+    IF EXISTS (
+      SELECT 1 
+      FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+      AND table_name = 'service_packages' 
+      AND column_name = 'service_id'
+    ) THEN
+      -- Supprimer l'ancien index si il existe
+      DROP INDEX IF EXISTS idx_service_packages_service_id;
+      
+      -- Supprimer la contrainte de clé étrangère si elle existe
+      ALTER TABLE public.service_packages 
+        DROP CONSTRAINT IF EXISTS service_packages_service_id_fkey;
+      
+      -- Renommer la colonne
+      ALTER TABLE public.service_packages 
+        RENAME COLUMN service_id TO service_product_id;
+      
+      -- Recréer la contrainte de clé étrangère vers service_products
+      ALTER TABLE public.service_packages
+        ADD CONSTRAINT service_packages_service_product_id_fkey
+        FOREIGN KEY (service_product_id)
+        REFERENCES public.service_products(id)
+        ON DELETE CASCADE;
+    END IF;
+    
+    -- Si la colonne service_product_id n'existe toujours pas, l'ajouter
+    IF NOT EXISTS (
+      SELECT 1 
+      FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+      AND table_name = 'service_packages' 
+      AND column_name = 'service_product_id'
+    ) THEN
+      -- Ajouter la colonne service_product_id
+      ALTER TABLE public.service_packages
+        ADD COLUMN service_product_id UUID;
+      
+      -- Ajouter la contrainte de clé étrangère
+      ALTER TABLE public.service_packages
+        ADD CONSTRAINT service_packages_service_product_id_fkey
+        FOREIGN KEY (service_product_id)
+        REFERENCES public.service_products(id)
+        ON DELETE CASCADE;
+    END IF;
+    
+    -- S'assurer que store_id existe
+    IF NOT EXISTS (
+      SELECT 1 
+      FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+      AND table_name = 'service_packages' 
+      AND column_name = 'store_id'
+    ) THEN
+      -- Ajouter la colonne store_id
+      ALTER TABLE public.service_packages
+        ADD COLUMN store_id UUID;
+      
+      -- Ajouter la contrainte de clé étrangère vers stores
+      ALTER TABLE public.service_packages
+        ADD CONSTRAINT service_packages_store_id_fkey
+        FOREIGN KEY (store_id)
+        REFERENCES public.stores(id)
+        ON DELETE CASCADE;
+    END IF;
+    
+    -- S'assurer que product_id existe
+    IF NOT EXISTS (
+      SELECT 1 
+      FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+      AND table_name = 'service_packages' 
+      AND column_name = 'product_id'
+    ) THEN
+      -- Ajouter la colonne product_id
+      ALTER TABLE public.service_packages
+        ADD COLUMN product_id UUID;
+      
+      -- Ajouter la contrainte de clé étrangère vers products
+      ALTER TABLE public.service_packages
+        ADD CONSTRAINT service_packages_product_id_fkey
+        FOREIGN KEY (product_id)
+        REFERENCES public.products(id)
+        ON DELETE CASCADE;
+    END IF;
+    
+    -- Ajouter toutes les autres colonnes nécessaires si elles n'existent pas
+    -- Informations package
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'name') THEN
+      ALTER TABLE public.service_packages ADD COLUMN name TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'description') THEN
+      ALTER TABLE public.service_packages ADD COLUMN description TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'slug') THEN
+      ALTER TABLE public.service_packages ADD COLUMN slug TEXT;
+    END IF;
+    
+    -- Configuration
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'sessions_count') THEN
+      ALTER TABLE public.service_packages ADD COLUMN sessions_count INTEGER;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'price') THEN
+      ALTER TABLE public.service_packages ADD COLUMN price NUMERIC;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'compare_at_price') THEN
+      ALTER TABLE public.service_packages ADD COLUMN compare_at_price NUMERIC;
+    END IF;
+    
+    -- Gestion crédits
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'credits_per_session') THEN
+      ALTER TABLE public.service_packages ADD COLUMN credits_per_session INTEGER DEFAULT 1;
+    END IF;
+    
+    -- Note: total_credits est une colonne générée, on ne peut pas l'ajouter directement avec ALTER TABLE
+    -- Elle sera créée automatiquement lors de la création de la table si elle n'existe pas
+    -- Si la table existe déjà sans cette colonne, il faudrait recréer la table (non recommandé en production)
+    -- Pour l'instant, on laisse la création de la table gérer cette colonne
+    
+    -- Expiration
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'expires_in_days') THEN
+      ALTER TABLE public.service_packages ADD COLUMN expires_in_days INTEGER;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'expires_at') THEN
+      ALTER TABLE public.service_packages ADD COLUMN expires_at TIMESTAMPTZ;
+    END IF;
+    
+    -- Statut
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'is_active') THEN
+      ALTER TABLE public.service_packages ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'is_featured') THEN
+      ALTER TABLE public.service_packages ADD COLUMN is_featured BOOLEAN DEFAULT FALSE;
+    END IF;
+    
+    -- Métadonnées
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'image_url') THEN
+      ALTER TABLE public.service_packages ADD COLUMN image_url TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'terms_and_conditions') THEN
+      ALTER TABLE public.service_packages ADD COLUMN terms_and_conditions TEXT;
+    END IF;
+    
+    -- Timestamps
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'created_at') THEN
+      ALTER TABLE public.service_packages ADD COLUMN created_at TIMESTAMPTZ DEFAULT NOW();
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'service_packages' AND column_name = 'updated_at') THEN
+      ALTER TABLE public.service_packages ADD COLUMN updated_at TIMESTAMPTZ DEFAULT NOW();
+    END IF;
+  END IF;
+END $$;
+
 -- Table pour packages services
 CREATE TABLE IF NOT EXISTS public.service_packages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  service_id UUID NOT NULL REFERENCES public.services(id) ON DELETE CASCADE,
+  service_product_id UUID NOT NULL REFERENCES public.service_products(id) ON DELETE CASCADE,
   product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
   store_id UUID NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE,
   
@@ -87,7 +259,8 @@ CREATE TABLE IF NOT EXISTS public.service_package_credits_usage (
 );
 
 -- Indexes
-CREATE INDEX IF NOT EXISTS idx_service_packages_service_id ON public.service_packages(service_id);
+DROP INDEX IF EXISTS idx_service_packages_service_id;
+CREATE INDEX IF NOT EXISTS idx_service_packages_service_product_id ON public.service_packages(service_product_id);
 CREATE INDEX IF NOT EXISTS idx_service_packages_product_id ON public.service_packages(product_id);
 CREATE INDEX IF NOT EXISTS idx_service_packages_store_id ON public.service_packages(store_id);
 CREATE INDEX IF NOT EXISTS idx_service_packages_active ON public.service_packages(is_active) WHERE is_active = TRUE;
@@ -110,6 +283,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_service_packages_updated_at ON public.service_packages;
 CREATE TRIGGER update_service_packages_updated_at
   BEFORE UPDATE ON public.service_packages
   FOR EACH ROW
@@ -133,6 +307,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS calculate_package_expires_at_trigger ON public.service_package_purchases;
 CREATE TRIGGER calculate_package_expires_at_trigger
   BEFORE INSERT ON public.service_package_purchases
   FOR EACH ROW
@@ -160,6 +335,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_package_credits_trigger ON public.service_package_credits_usage;
 CREATE TRIGGER update_package_credits_trigger
   AFTER INSERT ON public.service_package_credits_usage
   FOR EACH ROW
@@ -185,6 +361,13 @@ ALTER TABLE public.service_packages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.service_package_purchases ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.service_package_credits_usage ENABLE ROW LEVEL SECURITY;
 
+-- Supprimer les anciennes policies si elles existent
+DROP POLICY IF EXISTS "service_packages_select_public" ON public.service_packages;
+DROP POLICY IF EXISTS "service_packages_manage_owners" ON public.service_packages;
+DROP POLICY IF EXISTS "service_packages_manage_admins" ON public.service_packages;
+DROP POLICY IF EXISTS "package_purchases_select_own" ON public.service_package_purchases;
+DROP POLICY IF EXISTS "credits_usage_select_own" ON public.service_package_credits_usage;
+
 -- Policy: Lecture publique des packages actifs
 CREATE POLICY "service_packages_select_public"
   ON public.service_packages FOR SELECT
@@ -204,7 +387,18 @@ CREATE POLICY "service_packages_manage_owners"
     EXISTS (
       SELECT 1 FROM public.stores s
       WHERE s.id = service_packages.store_id
-      AND (s.user_id = auth.uid() OR s.owner_id = auth.uid())
+      AND s.user_id = auth.uid()
+    )
+  );
+
+-- Policy: Admins peuvent tout gérer
+CREATE POLICY "service_packages_manage_admins"
+  ON public.service_packages FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.user_roles ur
+      WHERE ur.user_id = auth.uid()
+      AND ur.role = 'admin'
     )
   );
 
@@ -230,4 +424,3 @@ COMMENT ON COLUMN public.service_packages.sessions_count IS 'Nombre de séances 
 COMMENT ON COLUMN public.service_packages.total_credits IS 'Total de crédits généré automatiquement';
 COMMENT ON TABLE public.service_package_purchases IS 'Achats de packages par utilisateurs';
 COMMENT ON TABLE public.service_package_credits_usage IS 'Historique utilisation crédits packages';
-
