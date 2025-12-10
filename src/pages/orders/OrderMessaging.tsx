@@ -523,26 +523,27 @@ export default function OrderMessaging() {
 
                       {/* Actions Menu */}
                       <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" aria-label="Menu d'actions">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setShowAdminPanel(true)}>
-                          <Shield className="h-4 w-4 mr-2" />
-                          Demander intervention admin
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          onClick={() => navigate(`/disputes/create?orderId=${orderId}`)}
-                          className="text-destructive"
-                        >
-                          <AlertTriangle className="h-4 w-4 mr-2" />
-                          Ouvrir un litige
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" aria-label="Menu d'actions">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setShowAdminPanel(true)}>
+                            <Shield className="h-4 w-4 mr-2" />
+                            Demander intervention admin
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => navigate(`/disputes/create?orderId=${orderId}`)}
+                            className="text-destructive"
+                          >
+                            <AlertTriangle className="h-4 w-4 mr-2" />
+                            Ouvrir un litige
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </CardHeader>
 
@@ -847,9 +848,10 @@ export default function OrderMessaging() {
                 </Card>
               </div>
             </div>
+          </div>
 
-            {/* Admin Intervention Dialog */}
-            <Dialog open={showAdminPanel} onOpenChange={setShowAdminPanel}>
+          {/* Admin Intervention Dialog */}
+          <Dialog open={showAdminPanel} onOpenChange={setShowAdminPanel}>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
@@ -879,8 +881,7 @@ export default function OrderMessaging() {
                   </Button>
                 </div>
               </DialogContent>
-            </Dialog>
-          </div>
+          </Dialog>
         </main>
       </div>
     </SidebarProvider>
