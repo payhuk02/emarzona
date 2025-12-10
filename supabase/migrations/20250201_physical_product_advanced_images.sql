@@ -91,7 +91,7 @@ CREATE POLICY "physical_product_images_manage_owners"
       SELECT 1 FROM public.products p
       JOIN public.stores s ON s.id = p.store_id
       WHERE p.id = physical_product_images.product_id
-      AND (s.user_id = auth.uid() OR s.owner_id = auth.uid())
+      AND s.user_id = auth.uid()
     )
   );
 
