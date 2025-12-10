@@ -43,6 +43,7 @@ import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummar
 import { ReviewsList } from '@/components/reviews/ReviewsList';
 import { ReviewForm } from '@/components/reviews/ReviewForm';
 import { ProductImages } from '@/components/shared';
+import { AdvancedProductImages } from '@/components/physical/AdvancedProductImages';
 import { useCart } from '@/hooks/cart/useCart';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
@@ -491,12 +492,10 @@ export default function PhysicalProductDetail() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             {/* Left: Images */}
-            <ProductImages
-              images={images}
+            <AdvancedProductImages
+              productId={productId || ''}
               productName={product?.name || 'Produit'}
-              showThumbnails={true}
-              enableLightbox={true}
-              aspectRatio="square"
+              standardImages={images}
             />
 
             {/* Right: Product Info */}
