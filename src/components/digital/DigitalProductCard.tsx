@@ -14,8 +14,6 @@ import {
   Download,
   Star,
   FileText,
-  Shield,
-  Clock,
   TrendingUp,
   Eye,
 } from '@/components/icons';
@@ -41,6 +39,9 @@ interface DigitalProductCardProps {
     average_rating: number;
     total_reviews: number;
     version?: string;
+    hide_downloads_count?: boolean | null;
+    hide_rating?: boolean | null;
+    hide_reviews_count?: boolean | null;
     product_affiliate_settings?: Array<{
       commission_rate: number;
       affiliate_enabled: boolean;
@@ -218,17 +219,21 @@ const DigitalProductCardComponent = ({
         {!isCompact && (
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             {/* Downloads */}
-            <div className="flex items-center gap-1">
-              <Download className="h-4 w-4" />
-              <span className="font-medium">{product.total_downloads.toLocaleString()}</span>
-            </div>
+            {!product.hide_downloads_count && (
+              <div className="flex items-center gap-1">
+                <Download className="h-4 w-4" />
+                <span className="font-medium">{product.total_downloads.toLocaleString()}</span>
+              </div>
+            )}
 
             {/* Rating */}
-            {product.average_rating > 0 && (
+            {!product.hide_rating && product.average_rating > 0 && (
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                 <span className="font-medium">{product.average_rating.toFixed(1)}</span>
-                <span className="text-xs">({product.total_reviews})</span>
+                {!product.hide_reviews_count && (
+                  <span className="text-xs">({product.total_reviews})</span>
+                )}
               </div>
             )}
           </div>
@@ -331,7 +336,22 @@ export const DigitalProductsGrid = ({
   loading,
   variant,
 }: {
-  products: any[];
+  products: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    price: number;
+    currency: string;
+    image_url?: string;
+    digital_type: string;
+    license_type: string;
+    total_downloads: number;
+    average_rating: number;
+    total_reviews: number;
+    hide_downloads_count?: boolean | null;
+    hide_rating?: boolean | null;
+    hide_reviews_count?: boolean | null;
+  }>;
   loading?: boolean;
   variant?: 'default' | 'compact' | 'featured';
 }) => {

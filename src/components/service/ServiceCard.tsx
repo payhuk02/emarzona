@@ -218,22 +218,26 @@ const ServiceCardComponent = ({
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <p className="text-muted-foreground text-xs">Réservations</p>
-              <p className="font-semibold flex items-center gap-1">
-                <TrendingUp className="h-3 w-3 text-green-600" />
-                {service.total_bookings || 0}
-              </p>
+          {!service.product?.hide_purchase_count && (
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <p className="text-muted-foreground text-xs">Réservations</p>
+                <p className="font-semibold flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3 text-green-600" />
+                  {service.total_bookings || 0}
+                </p>
+              </div>
+              {!service.product?.hide_rating && (
+                <div>
+                  <p className="text-muted-foreground text-xs">Note moyenne</p>
+                  <p className="font-semibold flex items-center gap-1">
+                    <Star className="h-3 w-3 text-yellow-500" />
+                    {service.average_rating || 0}
+                  </p>
+                </div>
+              )}
             </div>
-            <div>
-              <p className="text-muted-foreground text-xs">Note moyenne</p>
-              <p className="font-semibold flex items-center gap-1">
-                <Star className="h-3 w-3 text-yellow-500" />
-                {service.average_rating || 0}
-              </p>
-            </div>
-          </div>
+          )}
 
           {/* Description preview */}
           {service.product?.description && (

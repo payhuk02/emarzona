@@ -63,6 +63,14 @@ export interface ServiceProductFormData {
   // Booking Options
   booking_options: ServiceBookingOptions;
   
+  // Statistics Display Settings
+  hide_purchase_count?: boolean;
+  hide_likes_count?: boolean;
+  hide_recommendations_count?: boolean;
+  hide_downloads_count?: boolean;
+  hide_reviews_count?: boolean;
+  hide_rating?: boolean;
+  
   // Meta
   is_active: boolean;
 }

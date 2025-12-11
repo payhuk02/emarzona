@@ -58,6 +58,7 @@ import { DigitalPreview } from './DigitalPreview';
 // Shared components
 import { ProductSEOForm } from '../shared/ProductSEOForm';
 import { ProductFAQForm } from '../shared/ProductFAQForm';
+import { ProductStatisticsDisplaySettings } from '../shared/ProductStatisticsDisplaySettings';
 
 const createDefaultAffiliate = () => ({
   enabled: false,
@@ -132,6 +133,14 @@ const getDefaultFormData = () => ({
   // Metadata
   product_type: 'digital',
   is_active: true,
+
+  // Statistics Display Settings
+  hide_purchase_count: false,
+  hide_likes_count: false,
+  hide_recommendations_count: false,
+  hide_downloads_count: false,
+  hide_reviews_count: false,
+  hide_rating: false,
 });
 
 const mergeFormDataWithDefaults = (data: Partial<DigitalProductFormData> | null | undefined): DigitalProductFormData => {
@@ -1061,10 +1070,25 @@ export const CreateDigitalProductWizard = ({
         );
       case 3:
         return (
-          <DigitalLicenseConfig
-            formData={formData}
-            updateFormData={updateFormData}
-          />
+          <div className="space-y-6">
+            <DigitalLicenseConfig
+              formData={formData}
+              updateFormData={updateFormData}
+            />
+            <ProductStatisticsDisplaySettings
+              formData={{
+                hide_purchase_count: formData.hide_purchase_count,
+                hide_likes_count: formData.hide_likes_count,
+                hide_recommendations_count: formData.hide_recommendations_count,
+                hide_downloads_count: formData.hide_downloads_count,
+                hide_reviews_count: formData.hide_reviews_count,
+                hide_rating: formData.hide_rating,
+              }}
+              updateFormData={(field, value) => updateFormData({ [field]: value })}
+              productType="digital"
+              variant="compact"
+            />
+          </div>
         );
       case 4:
         return (

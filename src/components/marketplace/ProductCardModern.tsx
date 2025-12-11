@@ -44,6 +44,9 @@ interface ProductCardModernProps {
     rating?: number | null;
     reviews_count?: number | null;
     purchases_count?: number;
+    hide_purchase_count?: boolean | null;
+    hide_rating?: boolean | null;
+    hide_reviews_count?: boolean | null;
     category?: string | null;
     product_type?: string | null;
     store_id?: string;
@@ -366,29 +369,33 @@ const ProductCardModernComponent = ({
         </Link>
 
         {/* Rating et avis */}
-        <div className="flex items-center gap-2 mb-2">
-          {product.rating !== null && product.rating !== undefined && product.rating > 0 ? (
-            <>
-              {renderStars(product.rating)}
-              <span className="text-xs font-medium text-gray-700">
-                {product.rating.toFixed(1)}
-              </span>
-              <span className="text-xs text-gray-500">
-                ({product.reviews_count || 0})
-              </span>
-            </>
-          ) : (
-            <div className="flex items-center gap-1 text-green-600">
-              <CheckCircle className="h-3 w-3" aria-hidden="true" />
-              <span className="text-xs">Vérifié</span>
-            </div>
-          )}
-        </div>
+        {!product.hide_rating && (
+          <div className="flex items-center gap-2 mb-2">
+            {product.rating !== null && product.rating !== undefined && product.rating > 0 ? (
+              <>
+                {renderStars(product.rating)}
+                <span className="text-xs font-medium text-gray-700">
+                  {product.rating.toFixed(1)}
+                </span>
+                {!product.hide_reviews_count && (
+                  <span className="text-xs text-gray-500">
+                    ({product.reviews_count || 0})
+                  </span>
+                )}
+              </>
+            ) : (
+              <div className="flex items-center gap-1 text-green-600">
+                <CheckCircle className="h-3 w-3" aria-hidden="true" />
+                <span className="text-xs">Vérifié</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Informations supplémentaires */}
         <div className="flex flex-wrap items-center gap-2 mb-3">
           {/* Nombre d'achats */}
-          {product.purchases_count !== undefined && product.purchases_count > 0 && (
+          {!product.hide_purchase_count && product.purchases_count !== undefined && product.purchases_count > 0 && (
             <div className="flex items-center gap-1 text-xs text-gray-600">
               <TrendingUp className="h-3 w-3" aria-hidden="true" />
               <span>{product.purchases_count} vente{product.purchases_count > 1 ? 's' : ''}</span>

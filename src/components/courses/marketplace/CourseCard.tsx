@@ -121,22 +121,28 @@ const CourseCardComponent = ({ course }: CourseCardProps) => {
             <BookOpen className="w-4 h-4" />
             <span>{course.total_lessons} leçons</span>
           </div>
-          <div className="flex items-center gap-1" title="Nombre d'étudiants">
-            <Users className="w-4 h-4" />
-            <span>{course.total_enrollments} étudiants</span>
-          </div>
+          {!course.product?.hide_purchase_count && (
+            <div className="flex items-center gap-1" title="Nombre d'étudiants">
+              <Users className="w-4 h-4" />
+              <span>{course.total_enrollments} étudiants</span>
+            </div>
+          )}
         </div>
 
         {/* Rating */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1">
-            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-semibold">{course.average_rating.toFixed(1)}</span>
+        {!course.product?.hide_rating && (
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              <span className="font-semibold">{course.average_rating.toFixed(1)}</span>
+            </div>
+            {!course.product?.hide_reviews_count && (
+              <span className="text-sm text-muted-foreground">
+                ({course.total_enrollments} avis)
+              </span>
+            )}
           </div>
-          <span className="text-sm text-muted-foreground">
-            ({course.total_enrollments} avis)
-          </span>
-        </div>
+        )}
 
         {/* Certificat badge */}
         {course.certificate_enabled && (

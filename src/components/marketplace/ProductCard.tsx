@@ -22,6 +22,9 @@ interface ProductCardProps {
     rating?: number;
     reviews_count?: number;
     purchases_count?: number;
+    hide_purchase_count?: boolean | null;
+    hide_rating?: boolean | null;
+    hide_reviews_count?: boolean | null;
     category?: string;
     store_id?: string;
     product_affiliate_settings?: Array<{
@@ -233,14 +236,16 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
             {product.name}
           </h3>
 
-          {product.rating ? (
+          {!product.hide_rating && product.rating ? (
             <div className="product-rating mb-3" role="img" aria-label={`Note: ${product.rating} sur 5 étoiles`}>
               {renderStars(product.rating)}
-              <span className="ml-1 text-xs" aria-label={`${product.reviews_count ?? 0} avis`}>({product.reviews_count ?? 0})</span>
+              {!product.hide_reviews_count && (
+                <span className="ml-1 text-xs" aria-label={`${product.reviews_count ?? 0} avis`}>({product.reviews_count ?? 0})</span>
+              )}
             </div>
-          ) : (
+          ) : !product.hide_rating ? (
             <div className="h-5 mb-3" />
-          )}
+          ) : null}
 
           <div className="flex items-center justify-between gap-2 mb-2" aria-label="Prix du produit">
             <div className="flex items-baseline gap-1.5 sm:gap-2 min-w-0 flex-1">
@@ -284,11 +289,13 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
             </div>
           )}
 
-          <span className="text-xs text-muted-foreground mb-4 block" aria-label="Nombre de ventes">
-            {product.purchases_count
-              ? `${product.purchases_count} ventes`
-              : "Aucune vente"}
-          </span>
+          {!product.hide_purchase_count && (
+            <span className="text-xs text-muted-foreground mb-4 block" aria-label="Nombre de ventes">
+              {product.purchases_count
+                ? `${product.purchases_count} ventes`
+                : "Aucune vente"}
+            </span>
+          )}
         </div>
 
         <div className="product-actions flex gap-1.5 sm:gap-2" role="group" aria-label="Actions du produit">

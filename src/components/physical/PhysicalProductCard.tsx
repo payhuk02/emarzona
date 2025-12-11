@@ -208,18 +208,20 @@ const PhysicalProductCardComponent = ({
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <p className="text-muted-foreground text-xs">Ventes</p>
-              <p className="font-semibold">{product.total_quantity_sold || 0}</p>
+          {!product.product?.hide_purchase_count && (
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <p className="text-muted-foreground text-xs">Ventes</p>
+                <p className="font-semibold">{product.total_quantity_sold || 0}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-xs">Revenus</p>
+                <p className="font-semibold">
+                  {(product.total_revenue || 0).toLocaleString()} XOF
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-muted-foreground text-xs">Revenus</p>
-              <p className="font-semibold">
-                {(product.total_revenue || 0).toLocaleString()} XOF
-              </p>
-            </div>
-          </div>
+          )}
 
           {/* Shipping Info */}
           {product.requires_shipping && (

@@ -49,6 +49,11 @@ interface ProductFormData {
   featured?: boolean;
   hide_from_store?: boolean;
   hide_purchase_count?: boolean;
+  hide_likes_count?: boolean;
+  hide_recommendations_count?: boolean;
+  hide_downloads_count?: boolean;
+  hide_reviews_count?: boolean;
+  hide_rating?: boolean;
 }
 
 interface ProductVisualTabProps {
@@ -428,6 +433,71 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                   checked={formData.hide_purchase_count || false}
                   onCheckedChange={(checked) => updateFormData("hide_purchase_count", checked)}
                   aria-label="Masquer le compteur d'achats"
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-4 min-h-[60px]">
+                <div className="flex-1">
+                  <Label htmlFor="hide-likes-switch">Masquer le nombre de likes</Label>
+                  <p className="text-sm text-gray-600">Ne pas afficher le nombre de likes</p>
+                </div>
+                <Switch
+                  id="hide-likes-switch"
+                  checked={formData.hide_likes_count || false}
+                  onCheckedChange={(checked) => updateFormData("hide_likes_count", checked)}
+                  aria-label="Masquer le nombre de likes"
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-4 min-h-[60px]">
+                <div className="flex-1">
+                  <Label htmlFor="hide-recommendations-switch">Masquer le nombre de recommandations</Label>
+                  <p className="text-sm text-gray-600">Ne pas afficher le nombre de recommandations</p>
+                </div>
+                <Switch
+                  id="hide-recommendations-switch"
+                  checked={formData.hide_recommendations_count || false}
+                  onCheckedChange={(checked) => updateFormData("hide_recommendations_count", checked)}
+                  aria-label="Masquer le nombre de recommandations"
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-4 min-h-[60px]">
+                <div className="flex-1">
+                  <Label htmlFor="hide-downloads-switch">Masquer le nombre de téléchargements</Label>
+                  <p className="text-sm text-gray-600">Ne pas afficher le nombre de téléchargements</p>
+                </div>
+                <Switch
+                  id="hide-downloads-switch"
+                  checked={formData.hide_downloads_count || false}
+                  onCheckedChange={(checked) => updateFormData("hide_downloads_count", checked)}
+                  aria-label="Masquer le nombre de téléchargements"
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-4 min-h-[60px]">
+                <div className="flex-1">
+                  <Label htmlFor="hide-reviews-switch">Masquer le nombre d'avis</Label>
+                  <p className="text-sm text-gray-600">Ne pas afficher le nombre d'avis</p>
+                </div>
+                <Switch
+                  id="hide-reviews-switch"
+                  checked={formData.hide_reviews_count || false}
+                  onCheckedChange={(checked) => updateFormData("hide_reviews_count", checked)}
+                  aria-label="Masquer le nombre d'avis"
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-4 min-h-[60px]">
+                <div className="flex-1">
+                  <Label htmlFor="hide-rating-switch">Masquer la note moyenne</Label>
+                  <p className="text-sm text-gray-600">Ne pas afficher la note moyenne (étoiles)</p>
+                </div>
+                <Switch
+                  id="hide-rating-switch"
+                  checked={formData.hide_rating || false}
+                  onCheckedChange={(checked) => updateFormData("hide_rating", checked)}
+                  aria-label="Masquer la note moyenne"
                 />
               </div>
             </CardContent>

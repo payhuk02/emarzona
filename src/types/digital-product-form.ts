@@ -100,6 +100,14 @@ export interface DigitalProductFormData {
   product_type: 'digital';
   is_active: boolean;
   store_id?: string;
+
+  // Statistics Display Settings
+  hide_purchase_count?: boolean;
+  hide_likes_count?: boolean;
+  hide_recommendations_count?: boolean;
+  hide_downloads_count?: boolean;
+  hide_reviews_count?: boolean;
+  hide_rating?: boolean;
 }
 
 /**

@@ -87,6 +87,11 @@ interface ProductFormDataExtended extends ProductFormData {
   product_password: string;
   purchase_limit: number | null;
   hide_purchase_count: boolean;
+  hide_likes_count: boolean;
+  hide_recommendations_count: boolean;
+  hide_downloads_count: boolean;
+  hide_reviews_count: boolean;
+  hide_rating: boolean;
   access_control: string;
   
   // Dates de vente
@@ -237,6 +242,11 @@ const getEmptyFormData = (): ProductFormDataExtended => ({
   product_password: "",
   purchase_limit: null,
   hide_purchase_count: false,
+  hide_likes_count: false,
+  hide_recommendations_count: false,
+  hide_downloads_count: false,
+  hide_reviews_count: false,
+  hide_rating: false,
   access_control: "public",
   
   // Dates de vente

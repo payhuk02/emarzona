@@ -30,6 +30,9 @@ interface ProductCardProfessionalProps {
     rating?: number;
     reviews_count?: number;
     purchases_count?: number;
+    hide_purchase_count?: boolean | null;
+    hide_rating?: boolean | null;
+    hide_reviews_count?: boolean | null;
     category?: string;
     product_type?: string;
     store_id?: string;
@@ -385,24 +388,28 @@ const ProductCardProfessionalComponent = ({
         </h3>
 
         {/* Rating et avis */}
-        <div className="flex items-center gap-2 mb-4" role="group" aria-label="Évaluation du produit">
-          {product.rating ? (
-            <>
-              {renderStars(product.rating)}
-              <span className="text-sm font-medium text-gray-700" aria-hidden="true">
-                {product.rating.toFixed(1)}
-              </span>
-              <span className="text-sm text-gray-500" aria-label={`${product.reviews_count || 0} avis client${(product.reviews_count || 0) !== 1 ? 's' : ''}`}>
-                ({product.reviews_count || 0})
-              </span>
-            </>
-          ) : (
-            <div className="flex items-center gap-1 text-green-600">
-              <CheckCircle className="h-4 w-4" aria-hidden="true" />
-              <span className="text-sm">Vérifié</span>
-            </div>
-          )}
-        </div>
+        {!product.hide_rating && (
+          <div className="flex items-center gap-2 mb-4" role="group" aria-label="Évaluation du produit">
+            {product.rating ? (
+              <>
+                {renderStars(product.rating)}
+                <span className="text-sm font-medium text-gray-700" aria-hidden="true">
+                  {product.rating.toFixed(1)}
+                </span>
+                {!product.hide_reviews_count && (
+                  <span className="text-sm text-gray-500" aria-label={`${product.reviews_count || 0} avis client${(product.reviews_count || 0) !== 1 ? 's' : ''}`}>
+                    ({product.reviews_count || 0})
+                  </span>
+                )}
+              </>
+            ) : (
+              <div className="flex items-center gap-1 text-green-600">
+                <CheckCircle className="h-4 w-4" aria-hidden="true" />
+                <span className="text-sm">Vérifié</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Tags */}
         {product.tags && product.tags.length > 0 && (
@@ -490,7 +497,7 @@ const ProductCardProfessionalComponent = ({
           </div>
           
           {/* Nombre de ventes */}
-          {product.purchases_count !== undefined && product.purchases_count > 0 && (
+          {!product.hide_purchase_count && product.purchases_count !== undefined && product.purchases_count > 0 && (
             <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-500" aria-label={`${product.purchases_count} vente${product.purchases_count !== 1 ? 's' : ''}`}>
               <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
               <span aria-hidden="true">{product.purchases_count} vente{product.purchases_count !== 1 ? 's' : ''}</span>

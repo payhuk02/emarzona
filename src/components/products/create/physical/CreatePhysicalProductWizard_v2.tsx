@@ -47,6 +47,7 @@ import { PhysicalAffiliateSettings } from './PhysicalAffiliateSettings';
 import { PhysicalSEOAndFAQs } from './PhysicalSEOAndFAQs';
 import { PhysicalPreview } from './PhysicalPreview';
 import { PaymentOptionsForm } from '../shared/PaymentOptionsForm';
+import { ProductStatisticsDisplaySettings } from '../shared/ProductStatisticsDisplaySettings';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
@@ -243,6 +244,14 @@ export const CreatePhysicalProductWizard = ({
     
     // Size Chart (Step 5)
     size_chart_id: null as string | null,
+    
+    // Statistics Display Settings
+    hide_purchase_count: false,
+    hide_likes_count: false,
+    hide_recommendations_count: false,
+    hide_downloads_count: false,
+    hide_reviews_count: false,
+    hide_rating: false,
     
     // Meta
     is_active: true,
@@ -847,7 +856,7 @@ export const CreatePhysicalProductWizard = ({
       
       case 7: // Payment Options
         return {
-          productPrice: formData.price || 0,
+          productPrice: typeof formData.price === 'number' && !isNaN(formData.price) ? formData.price : 0,
           productType: 'physical' as const,
           data: formData.payment || {},
           onUpdate: (paymentData: PhysicalProductFormDataUpdate['payment']) => handleUpdateFormData({ payment: paymentData }),
@@ -1055,6 +1064,23 @@ export const CreatePhysicalProductWizard = ({
                   handleUpdateFormData({ size_chart_id: sizeChartId });
                 }}
               />
+            ) : currentStep === 7 ? (
+              <div className="space-y-6">
+                <CurrentStepComponent {...getStepProps()} />
+                <ProductStatisticsDisplaySettings
+                  formData={{
+                    hide_purchase_count: formData.hide_purchase_count,
+                    hide_likes_count: formData.hide_likes_count,
+                    hide_recommendations_count: formData.hide_recommendations_count,
+                    hide_downloads_count: formData.hide_downloads_count,
+                    hide_reviews_count: formData.hide_reviews_count,
+                    hide_rating: formData.hide_rating,
+                  }}
+                  updateFormData={(field, value) => handleUpdateFormData({ [field]: value })}
+                  productType="physical"
+                  variant="compact"
+                />
+              </div>
             ) : CurrentStepComponent ? (
               <CurrentStepComponent {...getStepProps()} />
             ) : null}

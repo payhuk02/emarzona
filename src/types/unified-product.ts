@@ -43,6 +43,14 @@ export interface BaseProduct {
     commission_rate: number;
     affiliate_enabled: boolean;
   }> | null;
+
+  // Statistics Display Settings
+  hide_purchase_count?: boolean | null;
+  hide_likes_count?: boolean | null;
+  hide_recommendations_count?: boolean | null;
+  hide_downloads_count?: boolean | null;
+  hide_reviews_count?: boolean | null;
+  hide_rating?: boolean | null;
 }
 
 /**

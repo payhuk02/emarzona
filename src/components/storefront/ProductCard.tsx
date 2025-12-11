@@ -15,6 +15,9 @@ interface ExtendedProduct extends Product {
   licensing_type?: 'plr' | 'copyrighted' | 'standard';
   stock_quantity?: number;
   purchases_count?: number;
+  hide_purchase_count?: boolean | null;
+  hide_rating?: boolean | null;
+  hide_reviews_count?: boolean | null;
 }
 import { 
   ShoppingCart, 
@@ -320,24 +323,28 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
         </Link>
 
         {/* Rating et avis */}
-        <div className="flex items-center gap-2 mb-3">
-          {product.rating > 0 ? (
-            <>
-              {renderStars(product.rating)}
-              <span className="text-sm font-medium text-gray-700">
-                {product.rating.toFixed(1)}
-              </span>
-              <span className="text-sm text-gray-600">
-                ({product.reviews_count || 0})
-              </span>
-            </>
-          ) : (
-            <div className="flex items-center gap-1 text-green-600">
-              <CheckCircle className="h-4 w-4" />
-              <span className="text-sm">Vérifié</span>
-            </div>
-          )}
-        </div>
+        {!extendedProduct.hide_rating && (
+          <div className="flex items-center gap-2 mb-3">
+            {product.rating > 0 ? (
+              <>
+                {renderStars(product.rating)}
+                <span className="text-sm font-medium text-gray-700">
+                  {product.rating.toFixed(1)}
+                </span>
+                {!extendedProduct.hide_reviews_count && (
+                  <span className="text-sm text-gray-600">
+                    ({product.reviews_count || 0})
+                  </span>
+                )}
+              </>
+            ) : (
+              <div className="flex items-center gap-1 text-green-600">
+                <CheckCircle className="h-4 w-4" />
+                <span className="text-sm">Vérifié</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Badges type, catégorie et pricing model */}
         <div className="flex flex-wrap gap-1 mb-3">
@@ -479,7 +486,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
                 className="flex-shrink-0 h-7"
               />
             </div>
-            {extendedProduct.purchases_count !== undefined && (
+            {!extendedProduct.hide_purchase_count && extendedProduct.purchases_count !== undefined && (
               <div className="flex items-center gap-1 text-sm text-gray-600">
                 <TrendingUp className="h-4 w-4" />
                 <span>{extendedProduct.purchases_count || 0}</span>

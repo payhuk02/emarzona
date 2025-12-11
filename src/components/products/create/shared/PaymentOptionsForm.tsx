@@ -6,7 +6,7 @@
  * Support: Paiement complet, pourcentage, escrow (delivery_secured)
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -33,7 +33,7 @@ interface PaymentOptionsData {
 }
 
 interface PaymentOptionsFormProps {
-  productPrice: number;
+  productPrice?: number | null;
   productType: 'physical' | 'service';
   data: PaymentOptionsData;
   onUpdate: (data: PaymentOptionsData) => void;
@@ -47,6 +47,9 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
 }) => {
   const { trackEvent } = useAnalyticsTracking();
 
+  // Sécuriser productPrice avec une valeur par défaut
+  const safePrice = typeof productPrice === 'number' && !isNaN(productPrice) ? productPrice : 0;
+
   const handlePaymentTypeChange = (value: PaymentType) => {
     onUpdate({
       ...data,
@@ -56,7 +59,7 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
     // Track payment option selection
     trackEvent('payment_option_selected', {
       payment_type: value,
-      product_price: productPrice,
+      product_price: safePrice,
       product_type: productType,
       percentage_rate: data.percentage_rate || 30,
     });
@@ -71,7 +74,7 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
   };
 
   const calculateAmount = (percentage: number) => {
-    return (productPrice * percentage) / 100;
+    return (safePrice * percentage) / 100;
   };
 
   return (
@@ -117,7 +120,7 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
                       <div className="flex items-center gap-2 text-green-900 dark:text-green-100">
                         <CheckCircle className="h-4 w-4" />
                         <span className="text-sm font-medium">
-                          Montant reçu : {productPrice.toLocaleString()} XOF
+                          Montant reçu : {safePrice.toLocaleString()} XOF
                         </span>
                       </div>
                     </div>
@@ -181,7 +184,7 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
                           <div className="p-3 bg-orange-50 dark:bg-orange-950 rounded-md">
                             <p className="text-xs text-orange-700 dark:text-orange-300 mb-1">Solde (plus tard)</p>
                             <p className="font-semibold text-orange-900 dark:text-orange-100">
-                              {(productPrice - calculateAmount(data.percentage_rate || 30)).toLocaleString()} XOF
+                              {(safePrice - calculateAmount(data.percentage_rate || 30)).toLocaleString()} XOF
                             </p>
                           </div>
                         </div>
@@ -221,7 +224,7 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
                           <div className="text-sm text-yellow-900 dark:text-yellow-100">
                             <p className="font-medium mb-1">Protection acheteur et vendeur</p>
                             <ul className="text-xs space-y-1 text-yellow-800 dark:text-yellow-200">
-                              <li>• Client paie : {productPrice.toLocaleString()} XOF (retenu en escrow)</li>
+                              <li>• Client paie : {safePrice.toLocaleString()} XOF (retenu en escrow)</li>
                               <li>• {productType === 'physical' ? 'Après livraison confirmée' : 'Après prestation confirmée'} : transfert au vendeur</li>
                               <li>• En cas de problème : médiation plateforme</li>
                             </ul>

@@ -83,6 +83,11 @@ interface ProductFormData {
   access_control?: 'public' | 'logged_in' | 'purchasers';
   purchase_limit?: number | null;
   hide_purchase_count?: boolean;
+  hide_likes_count?: boolean;
+  hide_recommendations_count?: boolean;
+  hide_downloads_count?: boolean;
+  hide_reviews_count?: boolean;
+  hide_rating?: boolean;
   sale_start_date?: string | null;
   sale_end_date?: string | null;
   created_at?: string;
@@ -943,6 +948,122 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                 onCheckedChange={(checked) => updateFormData("hide_purchase_count", checked)}
               />
             </div>
+
+            {/* Options d'affichage des statistiques */}
+            <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-white">Affichage des Statistiques</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Contrôlez quelles statistiques sont visibles sur les cartes produits
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium text-white">Masquer le nombre de likes</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ne pas afficher le nombre de likes sur les cartes produits</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <p className="text-xs text-gray-400">Masquer le nombre de likes</p>
+                  </div>
+                  <Switch
+                    checked={formData.hide_likes_count || false}
+                    onCheckedChange={(checked) => updateFormData("hide_likes_count", checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium text-white">Masquer le nombre de recommandations</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ne pas afficher le nombre de recommandations sur les cartes produits</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <p className="text-xs text-gray-400">Masquer le nombre de recommandations</p>
+                  </div>
+                  <Switch
+                    checked={formData.hide_recommendations_count || false}
+                    onCheckedChange={(checked) => updateFormData("hide_recommendations_count", checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium text-white">Masquer le nombre de téléchargements</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ne pas afficher le nombre de téléchargements (produits digitaux uniquement)</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <p className="text-xs text-gray-400">Masquer le nombre de téléchargements</p>
+                  </div>
+                  <Switch
+                    checked={formData.hide_downloads_count || false}
+                    onCheckedChange={(checked) => updateFormData("hide_downloads_count", checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium text-white">Masquer le nombre d'avis</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ne pas afficher le nombre d'avis sur les cartes produits</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <p className="text-xs text-gray-400">Masquer le nombre d'avis</p>
+                  </div>
+                  <Switch
+                    checked={formData.hide_reviews_count || false}
+                    onCheckedChange={(checked) => updateFormData("hide_reviews_count", checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium text-white">Masquer la note moyenne</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ne pas afficher la note moyenne (étoiles) sur les cartes produits</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <p className="text-xs text-gray-400">Masquer la note moyenne</p>
+                  </div>
+                  <Switch
+                    checked={formData.hide_rating || false}
+                    onCheckedChange={(checked) => updateFormData("hide_rating", checked)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </CardContent>
         </Card>
 

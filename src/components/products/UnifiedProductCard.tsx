@@ -160,7 +160,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
         </h3>
 
         {/* Rating - Spacing cohérent */}
-        {ratingInfo.hasRating && (
+        {!product.hide_rating && ratingInfo.hasRating && (
           <div className="flex items-center gap-1.5 mb-3" role="img" aria-label={`Note: ${ratingInfo.rating} sur 5 étoiles, ${product.review_count || 0} avis`}>
             <div className="flex items-center gap-0.5" aria-hidden="true">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -177,6 +177,9 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
             </div>
             <span className="text-xs sm:text-sm text-gray-600">
               {ratingInfo.display}
+              {!product.hide_reviews_count && product.review_count !== undefined && (
+                <span className="ml-1">({product.review_count})</span>
+              )}
             </span>
           </div>
         )}

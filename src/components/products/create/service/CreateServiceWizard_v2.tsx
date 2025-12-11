@@ -44,6 +44,7 @@ import { ServiceAffiliateSettings } from './ServiceAffiliateSettings';
 import { ServiceSEOAndFAQs } from './ServiceSEOAndFAQs';
 import { ServicePreview } from './ServicePreview';
 import { PaymentOptionsForm } from '../shared/PaymentOptionsForm';
+import { ProductStatisticsDisplaySettings } from '../shared/ProductStatisticsDisplaySettings';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
@@ -254,6 +255,14 @@ export const CreateServiceWizard = ({
       payment_type: 'full', // 'full' | 'percentage' | 'delivery_secured'
       percentage_rate: 30, // Pour paiement partiel (10-90%)
     },
+    
+    // Statistics Display Settings
+    hide_purchase_count: false,
+    hide_likes_count: false,
+    hide_recommendations_count: false,
+    hide_downloads_count: false,
+    hide_reviews_count: false,
+    hide_rating: false,
   });
 
   const [validationErrors, setValidationErrors] = useState<Record<number, string[]>>({});
@@ -892,7 +901,7 @@ export const CreateServiceWizard = ({
       
       case 7: // Payment Options
         return {
-          productPrice: formData.price || 0,
+          productPrice: typeof formData.price === 'number' && !isNaN(formData.price) ? formData.price : 0,
           productType: 'service' as const,
           data: formData.payment || {},
           onUpdate: (paymentData: PaymentData) => handleUpdateFormData({ payment: paymentData }),
@@ -1093,7 +1102,26 @@ export const CreateServiceWizard = ({
             </CardDescription>
           </CardHeader>
           <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
-            <CurrentStepComponent {...getStepProps()} />
+            {currentStep === 6 ? (
+              <div className="space-y-6">
+                <CurrentStepComponent {...getStepProps()} />
+                <ProductStatisticsDisplaySettings
+                  formData={{
+                    hide_purchase_count: formData.hide_purchase_count,
+                    hide_likes_count: formData.hide_likes_count,
+                    hide_recommendations_count: formData.hide_recommendations_count,
+                    hide_downloads_count: formData.hide_downloads_count,
+                    hide_reviews_count: formData.hide_reviews_count,
+                    hide_rating: formData.hide_rating,
+                  }}
+                  updateFormData={(field, value) => handleUpdateFormData({ [field]: value })}
+                  productType="service"
+                  variant="compact"
+                />
+              </div>
+            ) : (
+              <CurrentStepComponent {...getStepProps()} />
+            )}
           </CardContent>
         </Card>
 
