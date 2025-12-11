@@ -1,7 +1,7 @@
 /**
  * Page de Gestion des Notifications In-App
  * Date: 31 Janvier 2025
- * 
+ *
  * Interface complète pour gérer les notifications avec :
  * - Liste complète des notifications
  * - Filtres avancés (type, statut, date)
@@ -17,11 +17,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -99,19 +118,19 @@ export default function NotificationsManagement() {
     let filtered = notifications;
 
     if (typeFilter !== 'all') {
-      filtered = filtered.filter((n) => n.type === typeFilter);
+      filtered = filtered.filter(n => n.type === typeFilter);
     }
 
     if (statusFilter === 'read') {
-      filtered = filtered.filter((n) => n.is_read);
+      filtered = filtered.filter(n => n.is_read);
     } else if (statusFilter === 'unread') {
-      filtered = filtered.filter((n) => !n.is_read);
+      filtered = filtered.filter(n => !n.is_read);
     }
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        (n) =>
+        n =>
           n.title.toLowerCase().includes(query) ||
           n.message?.toLowerCase().includes(query) ||
           n.type.toLowerCase().includes(query)
@@ -122,12 +141,13 @@ export default function NotificationsManagement() {
   }, [notifications, typeFilter, statusFilter, searchQuery]);
 
   // Stats
+
   const stats = useMemo(() => {
     return {
       total: notifications.length,
-      unread: notifications.filter((n) => !n.is_read).length,
-      read: notifications.filter((n) => n.is_read).length,
-      archived: notifications.filter((n) => n.is_archived === true).length,
+      unread: notifications.filter(n => !n.is_read).length,
+      read: notifications.filter(n => n.is_read).length,
+      archived: notifications.filter(n => n.is_archived === true).length,
     };
   }, [notifications]);
 
@@ -162,10 +182,12 @@ export default function NotificationsManagement() {
   const handleMarkAsRead = async (notificationId: string) => {
     try {
       await markAsRead.mutateAsync(notificationId);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Impossible de marquer comme lu';
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de marquer comme lu',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -178,10 +200,12 @@ export default function NotificationsManagement() {
         title: '✅ Toutes marquées comme lues',
         description: 'Toutes les notifications ont été marquées comme lues',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Impossible de marquer toutes comme lues';
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de marquer toutes comme lues',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -194,10 +218,12 @@ export default function NotificationsManagement() {
         title: '✅ Notification archivée',
         description: 'La notification a été archivée',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Impossible d'archiver la notification";
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'archiver la notification',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -210,16 +236,23 @@ export default function NotificationsManagement() {
         title: '✅ Notification supprimée',
         description: 'La notification a été supprimée',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Impossible de supprimer la notification';
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de supprimer la notification',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
   };
 
-  const handleNotificationClick = (notification: any) => {
+  const handleNotificationClick = (notification: {
+    id: string;
+    is_read: boolean;
+    type?: string;
+    [key: string]: unknown;
+  }) => {
     if (!notification.is_read) {
       handleMarkAsRead(notification.id);
     }
@@ -238,7 +271,7 @@ export default function NotificationsManagement() {
             <div className="container mx-auto p-4 lg:p-6 space-y-6">
               <Skeleton className="h-12 w-full" />
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map((i) => (
+                {[1, 2, 3, 4].map(i => (
                   <Skeleton key={i} className="h-24" />
                 ))}
               </div>
@@ -309,7 +342,9 @@ export default function NotificationsManagement() {
                   <BellOff className="h-4 w-4 text-yellow-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold text-yellow-600">{stats.unread}</div>
+                  <div className="text-lg sm:text-2xl font-bold text-yellow-600">
+                    {stats.unread}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -343,7 +378,7 @@ export default function NotificationsManagement() {
                     <Input
                       placeholder="Rechercher une notification..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={e => setSearchQuery(e.target.value)}
                       className="pl-10"
                     />
                   </div>
@@ -361,7 +396,10 @@ export default function NotificationsManagement() {
                       <SelectItem value="system_announcement">Système</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+                  <Select
+                    value={statusFilter}
+                    onValueChange={v => setStatusFilter(v as 'all' | 'read' | 'unread')}
+                  >
                     <SelectTrigger className="w-full sm:w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
@@ -392,7 +430,7 @@ export default function NotificationsManagement() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {filteredNotifications.map((notification) => (
+                    {filteredNotifications.map(notification => (
                       <div
                         key={notification.id}
                         className={cn(
@@ -430,28 +468,34 @@ export default function NotificationsManagement() {
                               <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                                 <Clock className="h-3 w-3" />
                                 <span>
-                                  {format(new Date(notification.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
+                                  {format(
+                                    new Date(notification.created_at),
+                                    'dd MMM yyyy à HH:mm',
+                                    { locale: fr }
+                                  )}
                                 </span>
                               </div>
                             </div>
                             <DropdownMenu>
-                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                              <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
                                 <Button variant="ghost" size="sm">
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 {!notification.is_read && (
-                                  <DropdownMenuItem onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleMarkAsRead(notification.id);
-                                  }}>
+                                  <DropdownMenuItem
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      handleMarkAsRead(notification.id);
+                                    }}
+                                  >
                                     <CheckCircle2 className="h-4 w-4 mr-2" />
                                     Marquer comme lu
                                   </DropdownMenuItem>
                                 )}
                                 <DropdownMenuItem
-                                  onClick={(e) => {
+                                  onClick={e => {
                                     e.stopPropagation();
                                     handleArchive(notification.id);
                                   }}
@@ -461,7 +505,7 @@ export default function NotificationsManagement() {
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
-                                  onClick={(e) => {
+                                  onClick={e => {
                                     e.stopPropagation();
                                     handleDelete(notification.id);
                                   }}
@@ -486,9 +530,7 @@ export default function NotificationsManagement() {
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Préférences de Notifications</DialogTitle>
-                  <DialogDescription>
-                    Configurez vos préférences de notifications
-                  </DialogDescription>
+                  <DialogDescription>Configurez vos préférences de notifications</DialogDescription>
                 </DialogHeader>
                 {preferences && (
                   <div className="space-y-6 py-4">
@@ -498,7 +540,7 @@ export default function NotificationsManagement() {
                         <Switch
                           id="email_notifications"
                           checked={preferences.email_notifications ?? true}
-                          onCheckedChange={(checked) => {
+                          onCheckedChange={checked => {
                             updatePreferences.mutate({ email_notifications: checked });
                           }}
                         />
@@ -508,7 +550,7 @@ export default function NotificationsManagement() {
                         <Switch
                           id="push_notifications"
                           checked={preferences.push_notifications ?? true}
-                          onCheckedChange={(checked) => {
+                          onCheckedChange={checked => {
                             updatePreferences.mutate({ push_notifications: checked });
                           }}
                         />
@@ -518,7 +560,7 @@ export default function NotificationsManagement() {
                         <Switch
                           id="sms_notifications"
                           checked={preferences.sms_notifications ?? false}
-                          onCheckedChange={(checked) => {
+                          onCheckedChange={checked => {
                             updatePreferences.mutate({ sms_notifications: checked });
                           }}
                         />
@@ -534,4 +576,3 @@ export default function NotificationsManagement() {
     </SidebarProvider>
   );
 }
-

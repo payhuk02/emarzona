@@ -1,7 +1,7 @@
 /**
  * Order Messaging Page - Universal Chat System
  * Date: 28 octobre 2025
- * 
+ *
  * Page de messagerie professionnelle entre vendeur et client
  * Support: Digital, Physical, Service products
  * Features: Text, Images, Videos, Files, Admin intervention
@@ -14,7 +14,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -24,7 +23,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   DropdownMenu,
@@ -38,40 +36,33 @@ import {
   Paperclip,
   MoreVertical,
   Shield,
-  Lock,
-  Unlock,
   MessageSquare,
-  Clock,
-  Check,
   CheckCheck,
   AlertCircle,
   User,
   Store,
   Crown,
   ArrowLeft,
-  Camera,
   X,
   Loader2,
   AlertTriangle,
-  Package
+  Package,
 } from 'lucide-react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { useMessaging } from '@/hooks/useMessaging';
-import { Message, MessageType, SenderType, Conversation } from '@/types/advanced-features';
+import { Message, MessageType, SenderType } from '@/types/advanced-features';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatDistanceToNow, format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { format } from 'date-fns';
 import { logger } from '@/lib/logger';
 import { MediaAttachment } from '@/components/media';
-import { validateFile, filterValidFiles } from '@/utils/fileValidation';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { Progress } from '@/components/ui/progress';
 import { useMessageSearch } from '@/hooks/useMessageSearch';
 import { Search, X, ChevronUp } from 'lucide-react';
 import { highlightText } from '@/utils/highlightText.tsx';
+import { CameraCapture } from '@/components/camera/CameraCapture';
 
 export default function OrderMessaging() {
   const { orderId } = useParams<{ orderId: string }>();
@@ -106,11 +97,17 @@ export default function OrderMessaging() {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [showCameraDialog, setShowCameraDialog] = useState(false);
   const messagesTopRef = useRef<HTMLDivElement>(null);
-  
+
   // Hook pour la recherche de messages
-  const { searchMessages, results: searchResults, isSearching: isSearchingMessages, clearSearch } = useMessageSearch();
-  
+  const {
+    searchMessages,
+    results: searchResults,
+    isSearching: isSearchingMessages,
+    clearSearch,
+  } = useMessageSearch();
+
   // Hook pour l'upload de fichiers avec progress tracking
   const { uploadFiles: uploadFilesWithProgress, state: uploadState } = useFileUpload();
 
@@ -121,12 +118,14 @@ export default function OrderMessaging() {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages.length, messagesLoading, hasMoreMessages]);
-  
+
   // Scroll vers le haut lors du chargement de plus de messages
   useEffect(() => {
     if (messagesLoading && messagesTopRef.current) {
       // Sauvegarder la position actuelle
-      const scrollContainer = messagesTopRef.current.closest('[data-radix-scroll-area-viewport]') as HTMLElement;
+      const scrollContainer = messagesTopRef.current.closest(
+        '[data-radix-scroll-area-viewport]'
+      ) as HTMLElement;
       if (scrollContainer) {
         const previousScrollHeight = scrollContainer.scrollHeight;
         // Après le chargement, ajuster la position pour rester au même endroit visuel
@@ -161,14 +160,13 @@ export default function OrderMessaging() {
    */
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    
-    // Utiliser la validation centralisée
-    const { validateFile, filterValidFiles } = require('@/utils/fileValidation');
-    
+
+    // Utiliser la validation centralisée (déjà importé en haut)
+
     const validFiles = filterValidFiles(files, {
       maxSize: 10 * 1024 * 1024, // 10MB
     });
-    
+
     // Afficher les erreurs pour les fichiers invalides
     files.forEach(file => {
       if (!validFiles.includes(file)) {
@@ -191,6 +189,11 @@ export default function OrderMessaging() {
    */
   const removeFile = (index: number) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleCameraCapture = (file: File) => {
+    setSelectedFiles(prev => [...prev, file]);
+    setShowCameraDialog(false);
   };
 
   /**
@@ -227,11 +230,11 @@ export default function OrderMessaging() {
           folder: `message-attachments/${currentConversation.id}`,
           maxSize: 10 * 1024 * 1024, // 10MB
           compressImages: true, // Activer la compression d'images
-          onProgress: (progress) => {
+          onProgress: progress => {
             setUploadProgress(progress);
           },
         });
-        
+
         fileUrls = uploadResults.map(r => r.publicUrl);
         storagePaths = uploadResults.map(r => r.path);
       }
@@ -256,7 +259,7 @@ export default function OrderMessaging() {
         attachments: selectedFiles.map((file, index) => {
           // Utiliser le storage_path retourné par l'upload (qui contient le chemin complet)
           const storagePath = storagePaths[index] || '';
-          
+
           return {
             file_name: file.name,
             file_type: file.type,
@@ -275,11 +278,13 @@ export default function OrderMessaging() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Impossible d'envoyer le message";
       logger.error('Send order message error', { error, orderId, conversationId });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'envoyer le message',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -300,10 +305,11 @@ export default function OrderMessaging() {
         description: 'Un administrateur a été notifié',
       });
       setShowAdminPanel(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -330,15 +336,15 @@ export default function OrderMessaging() {
    */
   const getMessageBubbleClass = (message: Message) => {
     const isOwn = message.sender_id === user?.id;
-    
+
     if (message.sender_type === 'admin') {
       return 'bg-yellow-100 dark:bg-yellow-900 border border-yellow-300';
     }
-    
+
     if (isOwn) {
       return 'bg-primary text-primary-foreground';
     }
-    
+
     return 'bg-muted';
   };
 
@@ -378,15 +384,11 @@ export default function OrderMessaging() {
           <AppSidebar />
           <main className="flex-1 overflow-x-hidden">
             <div className="container mx-auto p-6">
-              <Button
-                variant="ghost"
-                onClick={() => navigate(-1)}
-                className="mb-4"
-              >
+              <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Retour
               </Button>
-              
+
               <Card>
                 <CardContent className="flex items-center justify-center min-h-[60vh]">
                   <div className="text-center">
@@ -409,16 +411,12 @@ export default function OrderMessaging() {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
-        
+
         <main className="flex-1 overflow-x-hidden">
           <div className="container mx-auto p-6 max-w-7xl">
             {/* Header */}
             <div className="mb-6">
-              <Button
-                variant="ghost"
-                onClick={() => navigate(-1)}
-                className="mb-4"
-              >
+              <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Retour
               </Button>
@@ -437,11 +435,16 @@ export default function OrderMessaging() {
                 {/* Conversation Status */}
                 {currentConversation && (
                   <div className="flex items-center gap-2">
-                    <Badge variant={currentConversation.status === 'active' ? 'default' : 'secondary'}>
-                      {currentConversation.status === 'active' ? 'Active' : 
-                       currentConversation.status === 'closed' ? 'Fermée' : 'Litige'}
+                    <Badge
+                      variant={currentConversation.status === 'active' ? 'default' : 'secondary'}
+                    >
+                      {currentConversation.status === 'active'
+                        ? 'Active'
+                        : currentConversation.status === 'closed'
+                          ? 'Fermée'
+                          : 'Litige'}
                     </Badge>
-                    
+
                     {currentConversation.admin_intervention && (
                       <Badge variant="destructive" className="flex items-center gap-1">
                         <Crown className="h-3 w-3" />
@@ -462,7 +465,9 @@ export default function OrderMessaging() {
                     <div>
                       <CardTitle className="text-lg">Messages</CardTitle>
                       <CardDescription>
-                        {searchResults ? `${searchResults.total} résultat(s)` : `${messages.length} message${messages.length > 1 ? 's' : ''}`}
+                        {searchResults
+                          ? `${searchResults.total} résultat(s)`
+                          : `${messages.length} message${messages.length > 1 ? 's' : ''}`}
                       </CardDescription>
                     </div>
 
@@ -473,8 +478,8 @@ export default function OrderMessaging() {
                             type="text"
                             placeholder="Rechercher dans les messages..."
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onKeyDown={async (e) => {
+                            onChange={e => setSearchQuery(e.target.value)}
+                            onKeyDown={async e => {
                               if (e.key === 'Enter' && searchQuery.trim()) {
                                 await searchMessages({
                                   conversationId: currentConversation?.id,
@@ -512,11 +517,7 @@ export default function OrderMessaging() {
                           </Button>
                         </div>
                       ) : (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setShowSearch(true)}
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => setShowSearch(true)}>
                           <Search className="h-4 w-4" />
                         </Button>
                       )}
@@ -534,7 +535,7 @@ export default function OrderMessaging() {
                             Demander intervention admin
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={() => navigate(`/disputes/create?orderId=${orderId}`)}
                             className="text-destructive"
                           >
@@ -548,15 +549,22 @@ export default function OrderMessaging() {
                 </CardHeader>
 
                 {/* Messages List */}
-                <ScrollArea 
+                <ScrollArea
                   className="flex-1 p-4"
-                  ref={(node) => {
+                  ref={node => {
                     if (node) {
-                      const scrollContainer = node.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement;
+                      const scrollContainer = node.querySelector(
+                        '[data-radix-scroll-area-viewport]'
+                      ) as HTMLElement;
                       if (scrollContainer) {
                         scrollContainer.addEventListener('scroll', () => {
                           // Infinite scroll: charger plus de messages quand on scroll en haut
-                          if (scrollContainer.scrollTop === 0 && !messagesLoading && hasMoreMessages && currentConversation) {
+                          if (
+                            scrollContainer.scrollTop === 0 &&
+                            !messagesLoading &&
+                            hasMoreMessages &&
+                            currentConversation
+                          ) {
                             loadMoreMessages();
                           }
                         });
@@ -576,7 +584,9 @@ export default function OrderMessaging() {
                           {searchResults ? 'Aucun résultat trouvé' : 'Aucun message pour le moment'}
                         </p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          {searchResults ? 'Essayez avec d\'autres mots-clés' : 'Commencez la conversation ci-dessous'}
+                          {searchResults
+                            ? "Essayez avec d'autres mots-clés"
+                            : 'Commencez la conversation ci-dessous'}
                         </p>
                       </div>
                     </div>
@@ -584,7 +594,7 @@ export default function OrderMessaging() {
                     <div className="space-y-4">
                       {/* Référence pour le scroll automatique */}
                       <div ref={messagesTopRef} />
-                      
+
                       {/* Bouton "Charger plus" en haut si disponible */}
                       {!searchResults && hasMoreMessages && (
                         <div className="flex justify-center">
@@ -596,12 +606,14 @@ export default function OrderMessaging() {
                             className="text-xs"
                           >
                             <ChevronUp className="h-3 w-3 mr-1" />
-                            {messagesLoading ? 'Chargement...' : `Charger plus (${totalMessagesCount - messages.length} restants)`}
+                            {messagesLoading
+                              ? 'Chargement...'
+                              : `Charger plus (${totalMessagesCount - messages.length} restants)`}
                           </Button>
                         </div>
                       )}
-                      
-                      {(searchResults ? searchResults.messages : messages).map((message) => {
+
+                      {(searchResults ? searchResults.messages : messages).map(message => {
                         const isOwn = message.sender_id === user?.id;
                         const isAdmin = message.sender_type === 'admin';
 
@@ -610,14 +622,20 @@ export default function OrderMessaging() {
                             key={message.id}
                             className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                           >
-                            <div className={`max-w-[70%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
+                            <div
+                              className={`max-w-[70%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col gap-1`}
+                            >
                               {/* Sender Info */}
                               <div className="flex items-center gap-2 px-2">
                                 {!isOwn && (
                                   <div className="flex items-center gap-1">
                                     {getSenderIcon(message.sender_type)}
                                     <span className="text-xs font-medium">
-                                      {isAdmin ? 'Admin' : message.sender_type === 'store' ? 'Vendeur' : 'Client'}
+                                      {isAdmin
+                                        ? 'Admin'
+                                        : message.sender_type === 'store'
+                                          ? 'Vendeur'
+                                          : 'Client'}
                                     </span>
                                   </div>
                                 )}
@@ -630,7 +648,9 @@ export default function OrderMessaging() {
                               </div>
 
                               {/* Message Bubble */}
-                              <div className={`rounded-2xl px-4 py-3 ${getMessageBubbleClass(message)}`}>
+                              <div
+                                className={`rounded-2xl px-4 py-3 ${getMessageBubbleClass(message)}`}
+                              >
                                 {/* Text Content */}
                                 {message.content && (
                                   <p className="text-sm whitespace-pre-wrap break-words">
@@ -709,8 +729,8 @@ export default function OrderMessaging() {
                     <Textarea
                       placeholder="Écrivez votre message..."
                       value={messageContent}
-                      onChange={(e) => setMessageContent(e.target.value)}
-                      onKeyDown={(e) => {
+                      onChange={e => setMessageContent(e.target.value)}
+                      onKeyDown={e => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
                           handleSendMessage();
@@ -729,20 +749,36 @@ export default function OrderMessaging() {
                         onChange={handleFileSelect}
                         className="hidden"
                       />
-                      
+
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setShowCameraDialog(true)}
+                        disabled={sendingMessage || uploadingFiles}
+                        aria-label="Prendre une photo"
+                        title="Prendre une photo"
+                      >
+                        <Camera className="h-4 w-4" />
+                      </Button>
+
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={sendingMessage || uploadingFiles}
                         aria-label="Joindre un fichier"
+                        title="Joindre un fichier"
                       >
                         <Paperclip className="h-4 w-4" />
                       </Button>
 
                       <Button
                         onClick={handleSendMessage}
-                        disabled={sendingMessage || uploadingFiles || (!messageContent.trim() && selectedFiles.length === 0)}
+                        disabled={
+                          sendingMessage ||
+                          uploadingFiles ||
+                          (!messageContent.trim() && selectedFiles.length === 0)
+                        }
                         className="min-w-[80px]"
                       >
                         {sendingMessage || uploadingFiles ? (
@@ -755,7 +791,7 @@ export default function OrderMessaging() {
                         )}
                       </Button>
                     </div>
-                    
+
                     {/* Progress indicator pour l'upload */}
                     {uploadingFiles && uploadProgress > 0 && (
                       <div className="px-4 pb-2">
@@ -797,12 +833,13 @@ export default function OrderMessaging() {
                         <div>
                           <p className="text-sm text-muted-foreground">Montant</p>
                           <p className="font-medium">
-                            {currentConversation.order.total_amount.toLocaleString()} {currentConversation.order.currency}
+                            {currentConversation.order.total_amount.toLocaleString()}{' '}
+                            {currentConversation.order.currency}
                           </p>
                         </div>
                         <Separator />
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           className="w-full"
                           onClick={() => navigate(`/orders/${orderId}`)}
                         >
@@ -833,7 +870,7 @@ export default function OrderMessaging() {
                       <li className="flex items-start gap-2">
                         <AlertTriangle className="h-4 w-4 mt-0.5" />
                         <span>Ouvrir un litige officiel</span>
-                              </li>
+                      </li>
                     </ul>
                     <Button
                       variant="outline"
@@ -852,39 +889,46 @@ export default function OrderMessaging() {
 
           {/* Admin Intervention Dialog */}
           <Dialog open={showAdminPanel} onOpenChange={setShowAdminPanel}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <Crown className="h-5 w-5 text-yellow-500" />
-                    Intervention Administrateur
-                  </DialogTitle>
-                  <DialogDescription>
-                    Demander l'intervention d'un administrateur dans cette conversation
-                  </DialogDescription>
-                </DialogHeader>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Crown className="h-5 w-5 text-yellow-500" />
+                  Intervention Administrateur
+                </DialogTitle>
+                <DialogDescription>
+                  Demander l'intervention d'un administrateur dans cette conversation
+                </DialogDescription>
+              </DialogHeader>
 
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Un administrateur sera notifié et pourra intervenir dans la conversation
-                    pour vous aider à résoudre tout problème.
-                  </AlertDescription>
-                </Alert>
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Un administrateur sera notifié et pourra intervenir dans la conversation pour vous
+                  aider à résoudre tout problème.
+                </AlertDescription>
+              </Alert>
 
-                <div className="flex gap-2 justify-end">
-                  <Button variant="outline" onClick={() => setShowAdminPanel(false)}>
-                    Annuler
-                  </Button>
-                  <Button onClick={handleAdminIntervention}>
-                    <Crown className="h-4 w-4 mr-2" />
-                    Confirmer
-                  </Button>
-                </div>
-              </DialogContent>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setShowAdminPanel(false)}>
+                  Annuler
+                </Button>
+                <Button onClick={handleAdminIntervention}>
+                  <Crown className="h-4 w-4 mr-2" />
+                  Confirmer
+                </Button>
+              </div>
+            </DialogContent>
           </Dialog>
+
+          {/* Camera Capture Dialog */}
+          <CameraCapture
+            open={showCameraDialog}
+            onClose={() => setShowCameraDialog(false)}
+            onCapture={handleCameraCapture}
+            captureLabel="Prendre la photo"
+          />
         </main>
       </div>
     </SidebarProvider>
   );
 }
-

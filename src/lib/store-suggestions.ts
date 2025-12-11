@@ -10,7 +10,7 @@ import { generateSlug } from './store-utils';
 export function suggestSlugAlternatives(baseSlug: string, maxSuggestions: number = 5): string[] {
   const suggestions: string[] = [];
   const cleanSlug = generateSlug(baseSlug);
-  
+
   // Suggestions basées sur des variations
   const variations = [
     `${cleanSlug}-shop`,
@@ -21,11 +21,11 @@ export function suggestSlugAlternatives(baseSlug: string, maxSuggestions: number
     `${cleanSlug}${Math.floor(Math.random() * 1000)}`,
     `${cleanSlug}-${new Date().getFullYear()}`,
   ];
-  
+
   for (let i = 0; i < Math.min(maxSuggestions, variations.length); i++) {
     suggestions.push(variations[i]);
   }
-  
+
   return suggestions;
 }
 
@@ -35,18 +35,18 @@ export function suggestSlugAlternatives(baseSlug: string, maxSuggestions: number
 export function suggestMetaTitle(name: string, description?: string): string {
   const baseTitle = name.trim();
   const maxLength = 60;
-  
+
   if (baseTitle.length <= maxLength) {
     return baseTitle;
   }
-  
+
   // Tronquer intelligemment
   if (description) {
     const words = description.split(' ').slice(0, 5).join(' ');
     const suggested = `${baseTitle} - ${words}`.substring(0, maxLength);
     return suggested.substring(0, suggested.lastIndexOf(' '));
   }
-  
+
   return baseTitle.substring(0, maxLength - 3) + '...';
 }
 
@@ -55,31 +55,31 @@ export function suggestMetaTitle(name: string, description?: string): string {
  */
 export function suggestMetaDescription(name: string, description?: string): string {
   const maxLength = 160;
-  
+
   if (description && description.length <= maxLength) {
     return description;
   }
-  
+
   const baseDescription = description || '';
   const suggested = `Découvrez ${name}. ${baseDescription}`.trim();
-  
+
   if (suggested.length <= maxLength) {
     return suggested;
   }
-  
+
   // Tronquer intelligemment à la dernière phrase complète
-  let truncated = suggested.substring(0, maxLength - 3);
+  const truncated = suggested.substring(0, maxLength - 3);
   const lastPeriod = truncated.lastIndexOf('.');
   const lastSpace = truncated.lastIndexOf(' ');
-  
+
   if (lastPeriod > maxLength * 0.7) {
     return truncated.substring(0, lastPeriod + 1);
   }
-  
+
   if (lastSpace > maxLength * 0.7) {
     return truncated.substring(0, lastSpace) + '...';
   }
-  
+
   return truncated + '...';
 }
 
@@ -124,7 +124,7 @@ export function suggestColorPalette(baseColor: string): {
       text: '#1f2937',
     },
   };
-  
+
   // Détecter la couleur dominante (simple)
   const color = baseColor.toLowerCase();
   if (color.includes('blue') || color.includes('#3b82f6') || color.includes('#2563eb')) {
@@ -139,7 +139,7 @@ export function suggestColorPalette(baseColor: string): {
   if (color.includes('orange') || color.includes('#f59e0b') || color.includes('#d97706')) {
     return palettes.orange;
   }
-  
+
   return palettes.blue; // Par défaut
 }
 
@@ -148,17 +148,17 @@ export function suggestColorPalette(baseColor: string): {
  */
 export function suggestCustomDomain(slug: string): string[] {
   const suggestions: string[] = [];
-  
+
   suggestions.push(`${slug}.com`);
   suggestions.push(`${slug}.shop`);
   suggestions.push(`${slug}.store`);
   suggestions.push(`www.${slug}.com`);
-  
+
   // Ajouter des extensions par région
   if (slug.includes('africa') || slug.includes('afrique')) {
     suggestions.push(`${slug}.africa`);
   }
-  
+
   return suggestions;
 }
 
@@ -167,16 +167,16 @@ export function suggestCustomDomain(slug: string): string[] {
  */
 export function suggestKeywords(name: string, description?: string): string[] {
   const keywords: Set<string> = new Set();
-  
+
   // Extraire les mots importants du nom
   const nameWords = name
     .toLowerCase()
     .replace(/[^\w\s]/g, ' ')
     .split(' ')
     .filter(word => word.length > 3);
-  
+
   nameWords.forEach(word => keywords.add(word));
-  
+
   // Extraire les mots importants de la description
   if (description) {
     const descWords = description
@@ -185,15 +185,14 @@ export function suggestKeywords(name: string, description?: string): string[] {
       .split(' ')
       .filter(word => word.length > 4)
       .slice(0, 10);
-    
+
     descWords.forEach(word => keywords.add(word));
   }
-  
+
   // Ajouter des mots-clés génériques
   keywords.add('boutique');
   keywords.add('en ligne');
   keywords.add('ecommerce');
-  
+
   return Array.from(keywords).slice(0, 10);
 }
-
