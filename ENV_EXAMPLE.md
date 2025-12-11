@@ -69,6 +69,15 @@ VITE_SENTRY_PROJECT=your-project-slug
 SENTRY_AUTH_TOKEN=your-sentry-auth-token
 ```
 
+### Google Maps (Géocodage - Optionnel)
+
+```env
+# Clé API Google Maps pour le géocodage automatique d'adresses
+# Obtenez-la depuis: https://console.cloud.google.com/google/maps-apis/credentials
+# Activez l'API "Geocoding API" dans votre projet Google Cloud
+VITE_GOOGLE_MAPS_API_KEY=your-google-maps-api-key-here
+```
+
 ### Crisp (Chat en Direct)
 
 ```env

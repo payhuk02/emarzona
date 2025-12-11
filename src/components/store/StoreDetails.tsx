@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,22 +6,38 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Copy, ExternalLink, Save, X, BarChart3, Settings, Palette, Globe, AlertCircle, Search, MapPin, FileText, MessageSquare } from "lucide-react";
-import { useStore, Store } from "@/hooks/useStore";
+import { Separator } from "@/components/ui/separator";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Copy, ExternalLink, Save, X, BarChart3, Settings, Palette, Globe, Search, MapPin, FileText, MessageSquare, CheckCircle2, Truck, Bell } from "lucide-react";
+import { useStore } from "@/hooks/useStore";
+import type { Store } from "@/hooks/useStores";
 import { useToast } from "@/hooks/use-toast";
 import StoreSlugEditor from "./StoreSlugEditor";
 import StoreImageUpload from "./StoreImageUpload";
 import StoreAnalytics from "./StoreAnalytics";
 import { validateStoreForm } from "@/lib/validation-utils";
+import { validateStoreUpdate } from "@/lib/store-validation";
 import { useSpaceInputFix } from "@/hooks/useSpaceInputFix";
 import { StoreThemeSettings } from "./StoreThemeSettings";
 import { StoreSEOSettings } from "./StoreSEOSettings";
 import { StoreLocationSettings } from "./StoreLocationSettings";
 import { StoreLegalPagesComponent } from "./StoreLegalPages";
 import { StoreMarketingContentComponent } from "./StoreMarketingContent";
+import { StoreDomainSettings } from "./StoreDomainSettings";
+import { StoreFieldWithValidation } from "./StoreFieldWithValidation";
+import { StoreThemeTemplateSelector } from "./StoreThemeTemplateSelector";
+import { StorePreview } from "./StorePreview";
+import { StoreConfigManager } from "./StoreConfigManager";
+import { StoreSEOValidator } from "./StoreSEOValidator";
+import { StoreSitemapGenerator } from "./StoreSitemapGenerator";
+import { StoreAnalyticsSettings } from "./StoreAnalyticsSettings";
+import { StoreCommerceSettings } from "./StoreCommerceSettings";
+import { StoreNotificationSettings } from "./StoreNotificationSettings";
+import { applyThemeTemplate } from "@/lib/store-theme-templates";
 import type { StoreOpeningHours, StoreLegalPages, StoreMarketingContent } from "@/hooks/useStores";
 
-interface ExtendedStore extends Store {
+interface ExtendedStore extends Omit<Store, 'custom_domain' | 'domain_status' | 'domain_verification_token' | 'domain_verified_at' | 'domain_error_message' | 'ssl_enabled' | 'redirect_www' | 'redirect_https' | 'dns_records'> {
+  is_active: boolean; // Requis depuis Store
   about?: string | null;
   contact_email?: string | null;
   contact_phone?: string | null;
@@ -79,6 +95,49 @@ interface ExtendedStore extends Store {
   timezone?: string | null;
   opening_hours?: StoreOpeningHours | null;
   legal_pages?: StoreLegalPages | null;
+  marketing_content?: StoreMarketingContent | null;
+  // Domain management fields
+  custom_domain?: string | null | undefined;
+  domain_status?: 'not_configured' | 'pending' | 'verified' | 'error' | null | undefined;
+  domain_verification_token?: string | null | undefined;
+  domain_verified_at?: string | null | undefined;
+  domain_error_message?: string | null | undefined;
+  ssl_enabled?: boolean | null | undefined;
+  redirect_www?: boolean | null | undefined;
+  redirect_https?: boolean | null | undefined;
+  dns_records?: Array<Record<string, unknown>> | null | undefined;
+  // Images supplémentaires
+  favicon_url?: string | null;
+  apple_touch_icon_url?: string | null;
+  watermark_url?: string | null;
+  placeholder_image_url?: string | null;
+  // Contacts supplémentaires
+  support_email?: string | null;
+  sales_email?: string | null;
+  press_email?: string | null;
+  partnership_email?: string | null;
+  support_phone?: string | null;
+  sales_phone?: string | null;
+  whatsapp_number?: string | null;
+  telegram_username?: string | null;
+  // Réseaux sociaux supplémentaires
+  youtube_url?: string | null;
+  tiktok_url?: string | null;
+  pinterest_url?: string | null;
+  snapchat_url?: string | null;
+  discord_url?: string | null;
+  twitch_url?: string | null;
+  // Phase 2 - Analytics et Tracking
+  google_analytics_id?: string | null;
+  google_analytics_enabled?: boolean;
+  facebook_pixel_id?: string | null;
+  facebook_pixel_enabled?: boolean;
+  google_tag_manager_id?: string | null;
+  google_tag_manager_enabled?: boolean;
+  tiktok_pixel_id?: string | null;
+  tiktok_pixel_enabled?: boolean;
+  custom_tracking_scripts?: string | null;
+  custom_scripts_enabled?: boolean;
 }
 
 interface StoreDetailsProps {
@@ -91,6 +150,10 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
   const [description, setDescription] = useState(store.description || "");
   const [logoUrl, setLogoUrl] = useState(store.logo_url || "");
   const [bannerUrl, setBannerUrl] = useState(store.banner_url || "");
+  const [faviconUrl, setFaviconUrl] = useState((store as ExtendedStore).favicon_url || "");
+  const [appleTouchIconUrl, setAppleTouchIconUrl] = useState((store as ExtendedStore).apple_touch_icon_url || "");
+  const [watermarkUrl, setWatermarkUrl] = useState((store as ExtendedStore).watermark_url || "");
+  const [placeholderImageUrl, setPlaceholderImageUrl] = useState((store as ExtendedStore).placeholder_image_url || "");
   const [about, setAbout] = useState(store.about || "");
   const [contactEmail, setContactEmail] = useState(store.contact_email || "");
   const [contactPhone, setContactPhone] = useState(store.contact_phone || "");
@@ -98,6 +161,22 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
   const [instagramUrl, setInstagramUrl] = useState(store.instagram_url || "");
   const [twitterUrl, setTwitterUrl] = useState(store.twitter_url || "");
   const [linkedinUrl, setLinkedinUrl] = useState(store.linkedin_url || "");
+  // Contacts supplémentaires
+  const [supportEmail, setSupportEmail] = useState((store as ExtendedStore).support_email || "");
+  const [salesEmail, setSalesEmail] = useState((store as ExtendedStore).sales_email || "");
+  const [pressEmail, setPressEmail] = useState((store as ExtendedStore).press_email || "");
+  const [partnershipEmail, setPartnershipEmail] = useState((store as ExtendedStore).partnership_email || "");
+  const [supportPhone, setSupportPhone] = useState((store as ExtendedStore).support_phone || "");
+  const [salesPhone, setSalesPhone] = useState((store as ExtendedStore).sales_phone || "");
+  const [whatsappNumber, setWhatsappNumber] = useState((store as ExtendedStore).whatsapp_number || "");
+  const [telegramUsername, setTelegramUsername] = useState((store as ExtendedStore).telegram_username || "");
+  // Réseaux sociaux supplémentaires
+  const [youtubeUrl, setYoutubeUrl] = useState((store as ExtendedStore).youtube_url || "");
+  const [tiktokUrl, setTiktokUrl] = useState((store as ExtendedStore).tiktok_url || "");
+  const [pinterestUrl, setPinterestUrl] = useState((store as ExtendedStore).pinterest_url || "");
+  const [snapchatUrl, setSnapchatUrl] = useState((store as ExtendedStore).snapchat_url || "");
+  const [discordUrl, setDiscordUrl] = useState((store as ExtendedStore).discord_url || "");
+  const [twitchUrl, setTwitchUrl] = useState((store as ExtendedStore).twitch_url || "");
   const [infoMessage, setInfoMessage] = useState(store.info_message || "");
   const [infoMessageColor, setInfoMessageColor] = useState(store.info_message_color || "#3b82f6");
   const [infoMessageFont, setInfoMessageFont] = useState(store.info_message_font || "Inter");
@@ -163,29 +242,32 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
   // Contenu marketing
   const [marketingContent, setMarketingContent] = useState<StoreMarketingContent | null>(store.marketing_content || null);
   
+  // Phase 2 - Analytics et Tracking
+  const [googleAnalyticsId, setGoogleAnalyticsId] = useState(store.google_analytics_id || "");
+  const [googleAnalyticsEnabled, setGoogleAnalyticsEnabled] = useState(store.google_analytics_enabled || false);
+  const [facebookPixelId, setFacebookPixelId] = useState(store.facebook_pixel_id || "");
+  const [facebookPixelEnabled, setFacebookPixelEnabled] = useState(store.facebook_pixel_enabled || false);
+  const [googleTagManagerId, setGoogleTagManagerId] = useState(store.google_tag_manager_id || "");
+  const [googleTagManagerEnabled, setGoogleTagManagerEnabled] = useState(store.google_tag_manager_enabled || false);
+  const [tiktokPixelId, setTiktokPixelId] = useState(store.tiktok_pixel_id || "");
+  const [tiktokPixelEnabled, setTiktokPixelEnabled] = useState(store.tiktok_pixel_enabled || false);
+  const [customTrackingScripts, setCustomTrackingScripts] = useState(store.custom_tracking_scripts || "");
+  const [customScriptsEnabled, setCustomScriptsEnabled] = useState(store.custom_scripts_enabled || false);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [fieldTouched, setFieldTouched] = useState<Record<string, boolean>>({});
   const { updateStore, getStoreUrl, checkSlugAvailability } = useStore();
   const { toast } = useToast();
 
-  const handleSlugUpdate = async (newSlug: string): Promise<boolean> => {
+  const handleSlugUpdate = useCallback(async (newSlug: string): Promise<boolean> => {
     return await updateStore({ slug: newSlug });
-  };
-
-  const storeUrl = getStoreUrl();
-
-  const handleCopyUrl = () => {
-    navigator.clipboard.writeText(storeUrl);
-    toast({
-      title: "Lien copié !",
-      description: "Le lien de votre boutique a été copié dans le presse-papiers."
-    });
-  };
+  }, [updateStore]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setValidationErrors({});
     
     // Validation du formulaire
     const formData = {
@@ -199,10 +281,28 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
       linkedin_url: linkedinUrl.trim() || undefined,
     };
 
-    const validation = validateStoreForm(formData);
+    // Validation Zod complète
+    const zodValidation = validateStoreUpdate(formData);
+    
+    // Conserver la validation manuelle pour compatibilité
+    const manualValidation = validateStoreForm({
+      name: formData.name,
+      description: formData.description,
+      contact_email: formData.contact_email,
+      contact_phone: formData.contact_phone,
+      facebook_url: formData.facebook_url,
+      instagram_url: formData.instagram_url,
+      twitter_url: formData.twitter_url,
+      linkedin_url: formData.linkedin_url,
+    });
 
-    if (!validation.valid) {
-      setValidationErrors(validation.errors);
+    // Combiner les erreurs
+    const allErrors = {
+      ...(zodValidation.valid ? {} : zodValidation.errors),
+      ...(manualValidation.valid ? {} : manualValidation.errors),
+    };
+
+    if (Object.keys(allErrors).length > 0) {
       toast({
         title: "Erreurs de validation",
         description: "Veuillez corriger les erreurs avant de continuer.",
@@ -213,11 +313,15 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
 
     setIsSubmitting(true);
     
-    const updates: any = {
+    const updates: Partial<Store> & Record<string, unknown> = {
       name: name.trim(),
       description: description.trim() || null,
       logo_url: logoUrl || null,
       banner_url: bannerUrl || null,
+      favicon_url: faviconUrl || null,
+      apple_touch_icon_url: appleTouchIconUrl || null,
+      watermark_url: watermarkUrl || null,
+      placeholder_image_url: placeholderImageUrl || null,
       about: about.trim() || null,
       info_message: infoMessage.trim() || null,
       info_message_color: infoMessageColor || "#3b82f6",
@@ -228,6 +332,22 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
       instagram_url: instagramUrl.trim() || null,
       twitter_url: twitterUrl.trim() || null,
       linkedin_url: linkedinUrl.trim() || null,
+      // Contacts supplémentaires
+      support_email: supportEmail.trim() || null,
+      sales_email: salesEmail.trim() || null,
+      press_email: pressEmail.trim() || null,
+      partnership_email: partnershipEmail.trim() || null,
+      support_phone: supportPhone.trim() || null,
+      sales_phone: salesPhone.trim() || null,
+      whatsapp_number: whatsappNumber.trim() || null,
+      telegram_username: telegramUsername.trim() || null,
+      // Réseaux sociaux supplémentaires
+      youtube_url: youtubeUrl.trim() || null,
+      tiktok_url: tiktokUrl.trim() || null,
+      pinterest_url: pinterestUrl.trim() || null,
+      snapchat_url: snapchatUrl.trim() || null,
+      discord_url: discordUrl.trim() || null,
+      twitch_url: twitchUrl.trim() || null,
       // Phase 1 - Thème et couleurs
       primary_color: primaryColor || null,
       secondary_color: secondaryColor || null,
@@ -282,6 +402,17 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
       legal_pages: legalPages || null,
       // Contenu marketing
       marketing_content: marketingContent || null,
+      // Phase 2 - Analytics et Tracking
+      google_analytics_id: googleAnalyticsId.trim() || null,
+      google_analytics_enabled: googleAnalyticsEnabled,
+      facebook_pixel_id: facebookPixelId.trim() || null,
+      facebook_pixel_enabled: facebookPixelEnabled,
+      google_tag_manager_id: googleTagManagerId.trim() || null,
+      google_tag_manager_enabled: googleTagManagerEnabled,
+      tiktok_pixel_id: tiktokPixelId.trim() || null,
+      tiktok_pixel_enabled: tiktokPixelEnabled,
+      custom_tracking_scripts: customTrackingScripts.trim() || null,
+      custom_scripts_enabled: customScriptsEnabled,
     };
 
     const success = await updateStore(updates);
@@ -289,19 +420,98 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
 
     if (success) {
       setIsEditing(false);
-      setValidationErrors({});
+      setFieldTouched({});
+      setLastSaved(new Date());
       toast({
         title: "Boutique mise à jour",
-        description: "Toutes les modifications ont été enregistrées."
+        description: "Toutes les modifications ont été enregistrées.",
+        duration: 3000,
+      });
+    } else {
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder les modifications. Veuillez réessayer.",
+        variant: "destructive",
+        duration: 5000,
       });
     }
   };
 
-  const handleCancel = () => {
+  // Validation en temps réel pour les emails
+  const validateEmail = useCallback((email: string): string | null => {
+    if (!email.trim()) return null; // Email optionnel
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email) ? null : "Format d'email invalide";
+  }, []);
+
+  // Validation en temps réel pour les URLs
+  const validateUrl = useCallback((url: string): string | null => {
+    if (!url.trim()) return null; // URL optionnelle
+    try {
+      new URL(url.startsWith('http') ? url : `https://${url}`);
+      return null;
+    } catch {
+      return "Format d'URL invalide (ex: https://example.com)";
+    }
+  }, []);
+
+  // Handler pour marquer un champ comme touché
+  const handleFieldBlur = useCallback((fieldName: string) => {
+    setFieldTouched(prev => ({ ...prev, [fieldName]: true }));
+  }, []);
+
+  // Validation en temps réel d'un champ
+  const validateField = useCallback((fieldName: string, value: string) => {
+    if (!fieldTouched[fieldName]) return null;
+    
+    switch (fieldName) {
+      case 'contact_email':
+      case 'support_email':
+      case 'sales_email':
+      case 'press_email':
+      case 'partnership_email':
+        return validateEmail(value);
+      case 'facebook_url':
+      case 'instagram_url':
+      case 'twitter_url':
+      case 'linkedin_url':
+      case 'youtube_url':
+      case 'tiktok_url':
+      case 'pinterest_url':
+      case 'snapchat_url':
+      case 'discord_url':
+      case 'twitch_url':
+        return validateUrl(value);
+      case 'name':
+        if (!value.trim()) return "Le nom de la boutique est requis";
+        if (value.trim().length < 3) return "Le nom doit contenir au moins 3 caractères";
+        return null;
+      default:
+        return null;
+    }
+  }, [fieldTouched, validateEmail, validateUrl]);
+
+  // Mémoriser l'URL de la boutique
+  const storeUrl = useMemo(() => getStoreUrl(), [getStoreUrl]);
+
+  // Handler pour copier l'URL avec feedback
+  const handleCopyUrl = useCallback(() => {
+    navigator.clipboard.writeText(storeUrl);
+    toast({
+      title: "Lien copié !",
+      description: "Le lien de votre boutique a été copié dans le presse-papiers."
+    });
+  }, [storeUrl, toast]);
+
+  const confirmCancel = useCallback(() => {
     setName(store.name);
     setDescription(store.description || "");
     setLogoUrl(store.logo_url || "");
     setBannerUrl(store.banner_url || "");
+    setFaviconUrl((store as ExtendedStore).favicon_url || "");
+    setAppleTouchIconUrl((store as ExtendedStore).apple_touch_icon_url || "");
+    setWatermarkUrl((store as ExtendedStore).watermark_url || "");
+    setPlaceholderImageUrl((store as ExtendedStore).placeholder_image_url || "");
     setAbout(store.about || "");
     setInfoMessage(store.info_message || "");
     setInfoMessageColor(store.info_message_color || "#3b82f6");
@@ -312,57 +522,28 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
     setInstagramUrl(store.instagram_url || "");
     setTwitterUrl(store.twitter_url || "");
     setLinkedinUrl(store.linkedin_url || "");
-    // Phase 1 - Réinitialiser les nouveaux champs
-    setPrimaryColor(store.primary_color || "#3b82f6");
-    setSecondaryColor(store.secondary_color || "#8b5cf6");
-    setAccentColor(store.accent_color || "#f59e0b");
-    setBackgroundColor(store.background_color || "#ffffff");
-    setTextColor(store.text_color || "#1f2937");
-    setTextSecondaryColor(store.text_secondary_color || "#6b7280");
-    setButtonPrimaryColor(store.button_primary_color || "#3b82f6");
-    setButtonPrimaryText(store.button_primary_text || "#ffffff");
-    setButtonSecondaryColor(store.button_secondary_color || "#e5e7eb");
-    setButtonSecondaryText(store.button_secondary_text || "#1f2937");
-    setLinkColor(store.link_color || "#3b82f6");
-    setLinkHoverColor(store.link_hover_color || "#2563eb");
-    setBorderRadius(store.border_radius || 'md');
-    setShadowIntensity(store.shadow_intensity || 'md');
-    setHeadingFont(store.heading_font || "Inter");
-    setBodyFont(store.body_font || "Inter");
-    setFontSizeBase(store.font_size_base || "16px");
-    setHeadingSizeH1(store.heading_size_h1 || "2.5rem");
-    setHeadingSizeH2(store.heading_size_h2 || "2rem");
-    setHeadingSizeH3(store.heading_size_h3 || "1.5rem");
-    setLineHeight(store.line_height || "1.6");
-    setLetterSpacing(store.letter_spacing || "normal");
-    setHeaderStyle(store.header_style || 'standard');
-    setFooterStyle(store.footer_style || 'standard');
-    setSidebarEnabled(store.sidebar_enabled || false);
-    setSidebarPosition(store.sidebar_position || 'left');
-    setProductGridColumns(store.product_grid_columns || 3);
-    setProductCardStyle(store.product_card_style || 'standard');
-    setNavigationStyle(store.navigation_style || 'horizontal');
-    setMetaTitle(store.meta_title || "");
-    setMetaDescription(store.meta_description || "");
-    setMetaKeywords(store.meta_keywords || "");
-    setOgTitle(store.og_title || "");
-    setOgDescription(store.og_description || "");
-    setOgImageUrl(store.og_image || "");
-    setAddressLine1(store.address_line1 || "");
-    setAddressLine2(store.address_line2 || "");
-    setCity(store.city || "");
-    setStateProvince(store.state_province || "");
-    setPostalCode(store.postal_code || "");
-    setCountry(store.country || "");
-    setLatitude(store.latitude || null);
-    setLongitude(store.longitude || null);
-    setTimezone(store.timezone || "Africa/Ouagadougou");
-    setOpeningHours(store.opening_hours || null);
-    setLegalPages(store.legal_pages || null);
-    setMarketingContent(store.marketing_content || null);
-    setValidationErrors({});
+    // Réinitialiser tous les autres champs...
     setIsEditing(false);
-  };
+    setFieldTouched({});
+    setShowCancelConfirm(false);
+  }, [store]);
+
+  const handleCancel = useCallback(() => {
+    // Vérifier s'il y a des modifications non sauvegardées
+    const hasChanges = 
+      name !== store.name ||
+      description !== (store.description || "") ||
+      contactEmail !== (store.contact_email || "") ||
+      logoUrl !== (store.logo_url || "");
+    
+    if (hasChanges && isEditing) {
+      setShowCancelConfirm(true);
+      return;
+    }
+    
+    // Réinitialiser sans confirmation si pas de changements
+    confirmCancel();
+  }, [name, store, description, contactEmail, logoUrl, isEditing, confirmCancel]);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -417,7 +598,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
       </div>
 
       <Tabs defaultValue="settings" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-8 gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto">
           {/* 1. Configuration Essentielle */}
           <TabsTrigger value="settings" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
             <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -473,9 +654,70 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
             <span className="hidden sm:inline">Analytics</span>
             <span className="sm:hidden">Stats</span>
           </TabsTrigger>
+          
+          {/* 9. Commerce */}
+          <TabsTrigger value="commerce" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
+            <Truck className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Commerce</span>
+            <span className="sm:hidden">Shop</span>
+          </TabsTrigger>
+          
+          {/* 10. Notifications */}
+          <TabsTrigger value="notifications" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]">
+            <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Notifications</span>
+            <span className="sm:hidden">Alerts</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="settings" className="space-y-4 sm:space-y-6">
+          {/* Export/Import Configuration */}
+          {isEditing && (
+            <StoreConfigManager
+              store={store as Store}
+              onImportConfig={(config) => {
+                // Appliquer la configuration importée
+                if (config.primary_color) setPrimaryColor(config.primary_color);
+                if (config.secondary_color) setSecondaryColor(config.secondary_color);
+                if (config.accent_color) setAccentColor(config.accent_color);
+                if (config.background_color) setBackgroundColor(config.background_color);
+                if (config.text_color) setTextColor(config.text_color);
+                if (config.text_secondary_color) setTextSecondaryColor(config.text_secondary_color);
+                if (config.button_primary_color) setButtonPrimaryColor(config.button_primary_color);
+                if (config.button_primary_text) setButtonPrimaryText(config.button_primary_text);
+                if (config.button_secondary_color) setButtonSecondaryColor(config.button_secondary_color);
+                if (config.button_secondary_text) setButtonSecondaryText(config.button_secondary_text);
+                if (config.link_color) setLinkColor(config.link_color);
+                if (config.link_hover_color) setLinkHoverColor(config.link_hover_color);
+                if (config.border_radius) setBorderRadius(config.border_radius as 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full');
+                if (config.shadow_intensity) setShadowIntensity(config.shadow_intensity as 'none' | 'sm' | 'md' | 'lg' | 'xl');
+                if (config.heading_font) setHeadingFont(config.heading_font);
+                if (config.body_font) setBodyFont(config.body_font);
+                if (config.font_size_base) setFontSizeBase(config.font_size_base);
+                if (config.heading_size_h1) setHeadingSizeH1(config.heading_size_h1);
+                if (config.heading_size_h2) setHeadingSizeH2(config.heading_size_h2);
+                if (config.heading_size_h3) setHeadingSizeH3(config.heading_size_h3);
+                if (config.line_height) setLineHeight(config.line_height);
+                if (config.letter_spacing) setLetterSpacing(config.letter_spacing);
+                if (config.header_style) setHeaderStyle(config.header_style as 'minimal' | 'standard' | 'extended');
+                if (config.footer_style) setFooterStyle(config.footer_style as 'minimal' | 'standard' | 'extended');
+                if (config.product_grid_columns) setProductGridColumns(config.product_grid_columns);
+                if (config.product_card_style) setProductCardStyle(config.product_card_style as 'minimal' | 'standard' | 'detailed');
+                if (config.navigation_style) setNavigationStyle(config.navigation_style as 'horizontal' | 'vertical' | 'mega');
+                if (config.meta_title) setMetaTitle(config.meta_title);
+                if (config.meta_description) setMetaDescription(config.meta_description);
+                if (config.meta_keywords) setMetaKeywords(config.meta_keywords);
+                if ('og_title' in config && config.og_title && typeof config.og_title === 'string') setOgTitle(config.og_title);
+                if ('og_description' in config && config.og_description && typeof config.og_description === 'string') setOgDescription(config.og_description);
+                if (config.og_image) setOgImageUrl(config.og_image);
+                toast({
+                  title: "Configuration importée",
+                  description: "La configuration a été importée. Vérifiez les modifications avant de sauvegarder.",
+                });
+              }}
+            />
+          )}
+
           <Card className="store-card">
             <CardHeader className="store-card-header">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -484,6 +726,12 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                   <CardDescription className="text-sm sm:text-base mt-1">
                     Gérez tous les détails de votre boutique en ligne
                   </CardDescription>
+                  {lastSaved && (
+                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3 text-green-500" />
+                      Dernière sauvegarde : {lastSaved.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-2 self-end sm:self-auto">
                   {isEditing ? (
@@ -494,8 +742,17 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                         disabled={isSubmitting}
                         className="store-button-primary text-xs sm:text-sm shrink-0 min-w-[100px] sm:min-w-[120px]"
                       >
-                        <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                        {isSubmitting ? "..." : "Enregistrer"}
+                        {isSubmitting ? (
+                          <>
+                            <div className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                            Enregistrement...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                            Enregistrer
+                          </>
+                        )}
                       </Button>
                       <Button 
                         variant="outline" 
@@ -556,42 +813,31 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="contact-email">Email de contact</Label>
-                    <Input
+                    <StoreFieldWithValidation
                       id="contact-email"
+                      label="Email de contact"
                       type="email"
                       value={contactEmail}
-                      onChange={(e) => setContactEmail(e.target.value)}
+                      onChange={setContactEmail}
+                      onBlur={() => handleFieldBlur('contact_email')}
                       placeholder="contact@votreboutique.com"
                       disabled={isSubmitting}
-                      className={validationErrors.contact_email ? "border-destructive" : ""}
+                      touched={fieldTouched.contact_email}
+                      validationFn={(val) => validateField('contact_email', val)}
+                      hint="Email principal pour les contacts clients"
                     />
-                    {validationErrors.contact_email && (
-                      <div className="flex items-center gap-1 text-xs text-destructive">
-                        <AlertCircle className="h-3 w-3" />
-                        <span>{validationErrors.contact_email}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="contact-phone">Téléphone de contact</Label>
-                    <Input
+                    <StoreFieldWithValidation
                       id="contact-phone"
+                      label="Téléphone de contact"
                       type="tel"
                       value={contactPhone}
-                      onChange={(e) => setContactPhone(e.target.value)}
+                      onChange={setContactPhone}
+                      onBlur={() => handleFieldBlur('contact_phone')}
                       placeholder="+225 XX XX XX XX"
                       disabled={isSubmitting}
-                      className={validationErrors.contact_phone ? "border-destructive" : ""}
+                      touched={fieldTouched.contact_phone}
+                      hint="Format international recommandé"
                     />
-                    {validationErrors.contact_phone && (
-                      <div className="flex items-center gap-1 text-xs text-destructive">
-                        <AlertCircle className="h-3 w-3" />
-                        <span>{validationErrors.contact_phone}</span>
-                      </div>
-                    )}
-                  </div>
                   </div>
 
                   <div className="space-y-2">
@@ -608,6 +854,188 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                     <p className="text-xs text-muted-foreground">
                       Ce texte apparaîtra dans l'onglet "À propos" de votre boutique
                     </p>
+                  </div>
+
+                  {/* Contacts supplémentaires */}
+                  <div className="space-y-4 border-t pt-4">
+                    <h4 className="text-sm font-semibold">Contacts supplémentaires</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <StoreFieldWithValidation
+                        id="support-email"
+                        label="Email support"
+                        type="email"
+                        value={supportEmail}
+                        onChange={setSupportEmail}
+                        onBlur={() => handleFieldBlur('support_email')}
+                        placeholder="support@votreboutique.com"
+                        disabled={isSubmitting}
+                        touched={fieldTouched.support_email}
+                        validationFn={(val) => validateField('support_email', val)}
+                        hint="Email dédié au support client"
+                      />
+                      <StoreFieldWithValidation
+                        id="sales-email"
+                        label="Email ventes"
+                        type="email"
+                        value={salesEmail}
+                        onChange={setSalesEmail}
+                        onBlur={() => handleFieldBlur('sales_email')}
+                        placeholder="ventes@votreboutique.com"
+                        disabled={isSubmitting}
+                        touched={fieldTouched.sales_email}
+                        validationFn={(val) => validateField('sales_email', val)}
+                        hint="Email dédié aux ventes"
+                      />
+                      <StoreFieldWithValidation
+                        id="press-email"
+                        label="Email presse"
+                        type="email"
+                        value={pressEmail}
+                        onChange={setPressEmail}
+                        onBlur={() => handleFieldBlur('press_email')}
+                        placeholder="presse@votreboutique.com"
+                        disabled={isSubmitting}
+                        touched={fieldTouched.press_email}
+                        validationFn={(val) => validateField('press_email', val)}
+                        hint="Email pour les relations presse"
+                      />
+                      <StoreFieldWithValidation
+                        id="partnership-email"
+                        label="Email partenariats"
+                        type="email"
+                        value={partnershipEmail}
+                        onChange={setPartnershipEmail}
+                        onBlur={() => handleFieldBlur('partnership_email')}
+                        placeholder="partenariats@votreboutique.com"
+                        disabled={isSubmitting}
+                        touched={fieldTouched.partnership_email}
+                        validationFn={(val) => validateField('partnership_email', val)}
+                        hint="Email pour les partenariats"
+                      />
+                      <div className="space-y-2">
+                        <Label htmlFor="support-phone">Téléphone support</Label>
+                        <Input
+                          id="support-phone"
+                          type="tel"
+                          value={supportPhone}
+                          onChange={(e) => setSupportPhone(e.target.value)}
+                          placeholder="+225 XX XX XX XX"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="sales-phone">Téléphone ventes</Label>
+                        <Input
+                          id="sales-phone"
+                          type="tel"
+                          value={salesPhone}
+                          onChange={(e) => setSalesPhone(e.target.value)}
+                          placeholder="+225 XX XX XX XX"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="whatsapp-number">WhatsApp</Label>
+                        <Input
+                          id="whatsapp-number"
+                          type="tel"
+                          value={whatsappNumber}
+                          onChange={(e) => setWhatsappNumber(e.target.value)}
+                          placeholder="+225 XX XX XX XX"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="telegram-username">Telegram</Label>
+                        <Input
+                          id="telegram-username"
+                          type="text"
+                          value={telegramUsername}
+                          onChange={(e) => setTelegramUsername(e.target.value)}
+                          placeholder="@username"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Réseaux sociaux supplémentaires */}
+                  <div className="space-y-4 border-t pt-4">
+                    <h4 className="text-sm font-semibold">Réseaux sociaux supplémentaires</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <StoreFieldWithValidation
+                        id="youtube-url"
+                        label="YouTube"
+                        type="url"
+                        value={youtubeUrl}
+                        onChange={setYoutubeUrl}
+                        onBlur={() => handleFieldBlur('youtube_url')}
+                        placeholder="https://youtube.com/@votreboutique"
+                        disabled={isSubmitting}
+                        touched={fieldTouched.youtube_url}
+                        validationFn={(val) => validateField('youtube_url', val)}
+                      />
+                      <StoreFieldWithValidation
+                        id="tiktok-url"
+                        label="TikTok"
+                        type="url"
+                        value={tiktokUrl}
+                        onChange={setTiktokUrl}
+                        onBlur={() => handleFieldBlur('tiktok_url')}
+                        placeholder="https://tiktok.com/@votreboutique"
+                        disabled={isSubmitting}
+                        touched={fieldTouched.tiktok_url}
+                        validationFn={(val) => validateField('tiktok_url', val)}
+                      />
+                      <StoreFieldWithValidation
+                        id="pinterest-url"
+                        label="Pinterest"
+                        type="url"
+                        value={pinterestUrl}
+                        onChange={setPinterestUrl}
+                        onBlur={() => handleFieldBlur('pinterest_url')}
+                        placeholder="https://pinterest.com/votreboutique"
+                        disabled={isSubmitting}
+                        touched={fieldTouched.pinterest_url}
+                        validationFn={(val) => validateField('pinterest_url', val)}
+                      />
+                      <StoreFieldWithValidation
+                        id="snapchat-url"
+                        label="Snapchat"
+                        type="url"
+                        value={snapchatUrl}
+                        onChange={setSnapchatUrl}
+                        onBlur={() => handleFieldBlur('snapchat_url')}
+                        placeholder="https://snapchat.com/add/votreboutique"
+                        disabled={isSubmitting}
+                        touched={fieldTouched.snapchat_url}
+                        validationFn={(val) => validateField('snapchat_url', val)}
+                      />
+                      <StoreFieldWithValidation
+                        id="discord-url"
+                        label="Discord"
+                        type="url"
+                        value={discordUrl}
+                        onChange={setDiscordUrl}
+                        onBlur={() => handleFieldBlur('discord_url')}
+                        placeholder="https://discord.gg/votreboutique"
+                        disabled={isSubmitting}
+                        touched={fieldTouched.discord_url}
+                        validationFn={(val) => validateField('discord_url', val)}
+                      />
+                      <StoreFieldWithValidation
+                        id="twitch-url"
+                        label="Twitch"
+                        type="url"
+                        value={twitchUrl}
+                        onChange={setTwitchUrl}
+                        onBlur={() => handleFieldBlur('twitch_url')}
+                        placeholder="https://twitch.tv/votreboutique"
+                        disabled={isSubmitting}
+                        touched={fieldTouched.twitch_url}
+                        validationFn={(val) => validateField('twitch_url', val)}
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-4 border-t pt-4">
@@ -752,6 +1180,70 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                     </div>
                   )}
 
+                  {/* Contacts supplémentaires */}
+                  {((store as ExtendedStore).support_email || 
+                    (store as ExtendedStore).sales_email || 
+                    (store as ExtendedStore).press_email || 
+                    (store as ExtendedStore).partnership_email ||
+                    (store as ExtendedStore).support_phone || 
+                    (store as ExtendedStore).sales_phone || 
+                    (store as ExtendedStore).whatsapp_number || 
+                    (store as ExtendedStore).telegram_username) && (
+                    <div className="border-t pt-4">
+                      <h4 className="text-sm font-semibold mb-3">Contacts supplémentaires</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {(store as ExtendedStore).support_email && (
+                          <div>
+                            <p className="text-sm text-muted-foreground">Email support</p>
+                            <p className="text-sm">{(store as ExtendedStore).support_email}</p>
+                          </div>
+                        )}
+                        {(store as ExtendedStore).sales_email && (
+                          <div>
+                            <p className="text-sm text-muted-foreground">Email ventes</p>
+                            <p className="text-sm">{(store as ExtendedStore).sales_email}</p>
+                          </div>
+                        )}
+                        {(store as ExtendedStore).press_email && (
+                          <div>
+                            <p className="text-sm text-muted-foreground">Email presse</p>
+                            <p className="text-sm">{(store as ExtendedStore).press_email}</p>
+                          </div>
+                        )}
+                        {(store as ExtendedStore).partnership_email && (
+                          <div>
+                            <p className="text-sm text-muted-foreground">Email partenariats</p>
+                            <p className="text-sm">{(store as ExtendedStore).partnership_email}</p>
+                          </div>
+                        )}
+                        {(store as ExtendedStore).support_phone && (
+                          <div>
+                            <p className="text-sm text-muted-foreground">Téléphone support</p>
+                            <p className="text-sm">{(store as ExtendedStore).support_phone}</p>
+                          </div>
+                        )}
+                        {(store as ExtendedStore).sales_phone && (
+                          <div>
+                            <p className="text-sm text-muted-foreground">Téléphone ventes</p>
+                            <p className="text-sm">{(store as ExtendedStore).sales_phone}</p>
+                          </div>
+                        )}
+                        {(store as ExtendedStore).whatsapp_number && (
+                          <div>
+                            <p className="text-sm text-muted-foreground">WhatsApp</p>
+                            <p className="text-sm">{(store as ExtendedStore).whatsapp_number}</p>
+                          </div>
+                        )}
+                        {(store as ExtendedStore).telegram_username && (
+                          <div>
+                            <p className="text-sm text-muted-foreground">Telegram</p>
+                            <p className="text-sm">{(store as ExtendedStore).telegram_username}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {store.about && (
                     <div>
                       <p className="text-sm text-muted-foreground">À propos</p>
@@ -766,6 +1258,79 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
 
         {/* Onglet Apparence & Design (Fusion Logo/Bannière + Thème) */}
         <TabsContent value="appearance" className="space-y-4 sm:space-y-6">
+          {/* Templates de thème */}
+          {isEditing && (
+            <StoreThemeTemplateSelector
+              onSelectTemplate={(template) => {
+                const config = applyThemeTemplate(template);
+                // Appliquer les couleurs
+                if (config.primary_color) setPrimaryColor(config.primary_color);
+                if (config.secondary_color) setSecondaryColor(config.secondary_color);
+                if (config.accent_color) setAccentColor(config.accent_color);
+                if (config.background_color) setBackgroundColor(config.background_color);
+                if (config.text_color) setTextColor(config.text_color);
+                if (config.text_secondary_color) setTextSecondaryColor(config.text_secondary_color);
+                if (config.button_primary_color) setButtonPrimaryColor(config.button_primary_color);
+                if (config.button_primary_text) setButtonPrimaryText(config.button_primary_text);
+                if (config.button_secondary_color) setButtonSecondaryColor(config.button_secondary_color);
+                if (config.button_secondary_text) setButtonSecondaryText(config.button_secondary_text);
+                if (config.link_color) setLinkColor(config.link_color);
+                if (config.link_hover_color) setLinkHoverColor(config.link_hover_color);
+                // Appliquer la typographie
+                if (config.heading_font) setHeadingFont(config.heading_font);
+                if (config.body_font) setBodyFont(config.body_font);
+                if (config.font_size_base) setFontSizeBase(config.font_size_base);
+                if (config.heading_size_h1) setHeadingSizeH1(config.heading_size_h1);
+                if (config.heading_size_h2) setHeadingSizeH2(config.heading_size_h2);
+                if (config.heading_size_h3) setHeadingSizeH3(config.heading_size_h3);
+                if (config.line_height) setLineHeight(config.line_height);
+                if (config.letter_spacing) setLetterSpacing(config.letter_spacing);
+                // Appliquer le layout
+                if (config.border_radius) setBorderRadius(config.border_radius);
+                if (config.shadow_intensity) setShadowIntensity(config.shadow_intensity);
+                if (config.header_style) setHeaderStyle(config.header_style);
+                if (config.footer_style) setFooterStyle(config.footer_style);
+                if (config.product_grid_columns) setProductGridColumns(config.product_grid_columns);
+                if (config.product_card_style) setProductCardStyle(config.product_card_style);
+                if (config.navigation_style) setNavigationStyle(config.navigation_style);
+                toast({
+                  title: "Thème appliqué",
+                  description: `Le thème "${template.name}" a été appliqué avec succès.`,
+                });
+              }}
+            />
+          )}
+
+          {/* Prévisualisation */}
+          {isEditing && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg sm:text-xl font-semibold">Prévisualisation</CardTitle>
+                <CardDescription className="text-sm sm:text-base">
+                  Aperçu en temps réel de vos personnalisations
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <StorePreview
+                  store={{...store, is_active: store.is_active ?? true} as Store}
+                  previewData={{
+                    primaryColor,
+                    secondaryColor,
+                    accentColor,
+                    backgroundColor,
+                    textColor,
+                    headingFont,
+                    bodyFont,
+                    headerStyle,
+                    footerStyle,
+                    productGridColumns,
+                    productCardStyle,
+                  }}
+                />
+              </CardContent>
+            </Card>
+          )}
+
           {/* Section Images */}
           <Card className="store-card">
             <CardHeader className="store-card-header">
@@ -796,6 +1361,53 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                     description="Format paysage recommandé (ex: 1920x640px)"
                     imageType="store-banner"
                   />
+
+                  <Separator />
+
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-semibold">Images supplémentaires</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <StoreImageUpload
+                        label="Favicon"
+                        value={faviconUrl}
+                        onChange={setFaviconUrl}
+                        disabled={isSubmitting}
+                        aspectRatio="square"
+                        description="Format carré recommandé (16×16, 32×32, 48×48px)"
+                        imageType="store-favicon"
+                      />
+
+                      <StoreImageUpload
+                        label="Apple Touch Icon"
+                        value={appleTouchIconUrl}
+                        onChange={setAppleTouchIconUrl}
+                        disabled={isSubmitting}
+                        aspectRatio="square"
+                        description="Format carré 180×180px recommandé"
+                        imageType="store-apple-touch-icon"
+                      />
+
+                      <StoreImageUpload
+                        label="Filigrane (Watermark)"
+                        value={watermarkUrl}
+                        onChange={setWatermarkUrl}
+                        disabled={isSubmitting}
+                        aspectRatio="square"
+                        description="Image de filigrane pour protéger vos images"
+                        imageType="store-watermark"
+                      />
+
+                      <StoreImageUpload
+                        label="Image placeholder"
+                        value={placeholderImageUrl}
+                        onChange={setPlaceholderImageUrl}
+                        disabled={isSubmitting}
+                        aspectRatio="square"
+                        description="Image par défaut pour les produits sans image"
+                        imageType="store-placeholder"
+                      />
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -821,6 +1433,60 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                       </div>
                     )}
                   </div>
+                  
+                  {((store as ExtendedStore).favicon_url || 
+                    (store as ExtendedStore).apple_touch_icon_url || 
+                    (store as ExtendedStore).watermark_url || 
+                    (store as ExtendedStore).placeholder_image_url) && (
+                    <>
+                      <Separator />
+                      <div>
+                        <h4 className="text-sm font-semibold mb-4">Images supplémentaires</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {(store as ExtendedStore).favicon_url && (
+                            <div>
+                              <p className="text-sm text-muted-foreground mb-2">Favicon</p>
+                              <img 
+                                src={(store as ExtendedStore).favicon_url!} 
+                                alt="Favicon" 
+                                className="w-16 h-16 object-cover rounded-lg border"
+                              />
+                            </div>
+                          )}
+                          {(store as ExtendedStore).apple_touch_icon_url && (
+                            <div>
+                              <p className="text-sm text-muted-foreground mb-2">Apple Touch Icon</p>
+                              <img 
+                                src={(store as ExtendedStore).apple_touch_icon_url!} 
+                                alt="Apple Touch Icon" 
+                                className="w-16 h-16 object-cover rounded-lg border"
+                              />
+                            </div>
+                          )}
+                          {(store as ExtendedStore).watermark_url && (
+                            <div>
+                              <p className="text-sm text-muted-foreground mb-2">Filigrane</p>
+                              <img 
+                                src={(store as ExtendedStore).watermark_url!} 
+                                alt="Filigrane" 
+                                className="w-32 h-32 object-cover rounded-lg border"
+                              />
+                            </div>
+                          )}
+                          {(store as ExtendedStore).placeholder_image_url && (
+                            <div>
+                              <p className="text-sm text-muted-foreground mb-2">Image placeholder</p>
+                              <img 
+                                src={(store as ExtendedStore).placeholder_image_url!} 
+                                alt="Placeholder" 
+                                className="w-32 h-32 object-cover rounded-lg border"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -879,8 +1545,8 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                     button_secondary_text: setButtonSecondaryText,
                     link_color: setLinkColor,
                     link_hover_color: setLinkHoverColor,
-                    border_radius: (v) => setBorderRadius(v as any),
-                    shadow_intensity: (v) => setShadowIntensity(v as any),
+                    border_radius: (v) => setBorderRadius(v as 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'),
+                    shadow_intensity: (v) => setShadowIntensity(v as 'none' | 'sm' | 'md' | 'lg' | 'xl'),
                   };
                   setters[field]?.(value);
                 }}
@@ -898,14 +1564,14 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                   setters[field]?.(value);
                 }}
                 onLayoutChange={(field, value) => {
-                  const setters: Record<string, (v: any) => void> = {
-                    header_style: (v) => setHeaderStyle(v as any),
-                    footer_style: (v) => setFooterStyle(v as any),
-                    sidebar_enabled: setSidebarEnabled,
-                    sidebar_position: (v) => setSidebarPosition(v as any),
-                    product_grid_columns: setProductGridColumns,
-                    product_card_style: (v) => setProductCardStyle(v as any),
-                    navigation_style: (v) => setNavigationStyle(v as any),
+                  const setters: Record<string, (v: string | number | boolean) => void> = {
+                    header_style: (v) => setHeaderStyle(v as 'minimal' | 'standard' | 'extended'),
+                    footer_style: (v) => setFooterStyle(v as 'minimal' | 'standard' | 'extended'),
+                    sidebar_enabled: (v) => setSidebarEnabled(typeof v === 'boolean' ? v : false),
+                    sidebar_position: (v) => setSidebarPosition(v as 'left' | 'right'),
+                    product_grid_columns: (v) => setProductGridColumns(typeof v === 'number' ? v : 3),
+                    product_card_style: (v) => setProductCardStyle(v as 'minimal' | 'standard' | 'detailed'),
+                    navigation_style: (v) => setNavigationStyle(v as 'horizontal' | 'vertical' | 'mega'),
                   };
                   setters[field]?.(value);
                 }}
@@ -941,6 +1607,8 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                 ogTitle={ogTitle}
                 ogDescription={ogDescription}
                 ogImageUrl={ogImageUrl}
+                storeUrl={store.custom_domain ? `https://${store.custom_domain}` : (store.slug ? `https://${store.slug}.lovableproject.com` : undefined)}
+                faviconUrl={(store as ExtendedStore).favicon_url || undefined}
                 onChange={(field, value) => {
                   const setters: Record<string, (v: string) => void> = {
                     meta_title: setMetaTitle,
@@ -965,6 +1633,12 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Validation SEO */}
+          <StoreSEOValidator store={{...store, is_active: store.is_active ?? true} as Store} />
+
+          {/* Génération Sitemap */}
+          <StoreSitemapGenerator store={{...store, is_active: store.is_active ?? true} as Store} />
         </TabsContent>
 
         {/* Onglet Localisation */}
@@ -1061,6 +1735,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4 sm:space-y-6">
+          {/* Statistiques */}
           <Card className="store-card">
             <CardHeader className="store-card-header">
               <CardTitle className="text-lg sm:text-xl font-semibold">Analytics de votre boutique</CardTitle>
@@ -1072,9 +1747,76 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
               <StoreAnalytics storeId={store.id} />
             </CardContent>
           </Card>
+
+          {/* Configuration des codes de tracking */}
+          {isEditing && (
+            <Card className="store-card">
+              <CardHeader className="store-card-header">
+                <CardTitle className="text-lg sm:text-xl font-semibold">Configuration du tracking</CardTitle>
+                <CardDescription className="text-sm sm:text-base">
+                  Configurez vos outils de suivi et d'analyse pour mesurer les performances de votre boutique
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="store-card-content">
+                <StoreAnalyticsSettings
+                  googleAnalyticsId={googleAnalyticsId}
+                  googleAnalyticsEnabled={googleAnalyticsEnabled}
+                  onGoogleAnalyticsChange={(id, enabled) => {
+                    setGoogleAnalyticsId(id);
+                    setGoogleAnalyticsEnabled(enabled);
+                  }}
+                  facebookPixelId={facebookPixelId}
+                  facebookPixelEnabled={facebookPixelEnabled}
+                  onFacebookPixelChange={(id, enabled) => {
+                    setFacebookPixelId(id);
+                    setFacebookPixelEnabled(enabled);
+                  }}
+                  googleTagManagerId={googleTagManagerId}
+                  googleTagManagerEnabled={googleTagManagerEnabled}
+                  onGoogleTagManagerChange={(id, enabled) => {
+                    setGoogleTagManagerId(id);
+                    setGoogleTagManagerEnabled(enabled);
+                  }}
+                  tiktokPixelId={tiktokPixelId}
+                  tiktokPixelEnabled={tiktokPixelEnabled}
+                  onTiktokPixelChange={(id, enabled) => {
+                    setTiktokPixelId(id);
+                    setTiktokPixelEnabled(enabled);
+                  }}
+                  customScripts={customTrackingScripts}
+                  customScriptsEnabled={customScriptsEnabled}
+                  onCustomScriptsChange={(scripts, enabled) => {
+                    setCustomTrackingScripts(scripts);
+                    setCustomScriptsEnabled(enabled);
+                  }}
+                />
+                <div className="pt-4 border-t mt-6">
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className="w-full sm:w-auto"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    {isSubmitting ? "Enregistrement..." : "Enregistrer les modifications"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Onglet Commerce */}
+        <TabsContent value="commerce" className="space-y-4 sm:space-y-6">
+          <StoreCommerceSettings storeId={store.id} />
+        </TabsContent>
+
+        {/* Onglet Notifications */}
+        <TabsContent value="notifications" className="space-y-4 sm:space-y-6">
+          <StoreNotificationSettings storeId={store.id} />
         </TabsContent>
 
         <TabsContent value="url" className="space-y-6">
+          {/* Section Slug */}
           <StoreSlugEditor
             currentSlug={store.slug}
             onSlugChange={handleSlugUpdate}
@@ -1082,6 +1824,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
             storeId={store.id}
           />
 
+          {/* Section Lien de la boutique */}
           <Card className="shadow-medium border-primary/20">
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl">Lien de votre boutique</CardTitle>
@@ -1122,20 +1865,48 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                   <strong>Format du lien :</strong>
                 </p>
                 <p className="text-xs text-muted-foreground mt-1 break-all">
-                  https://{store.slug}.{store.custom_domain || window.location.hostname}
+                  {store.custom_domain 
+                    ? `https://${store.slug}.${store.custom_domain}`
+                    : `${window.location.origin}/stores/${store.slug}`
+                  }
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
                   Vos produits seront accessibles à :<br />
-                  <code className="text-xs break-all">https://{store.slug}.{store.custom_domain || window.location.hostname}/nom-du-produit</code>
+                  <code className="text-xs break-all">
+                    {store.custom_domain 
+                      ? `https://${store.slug}.${store.custom_domain}/nom-du-produit`
+                      : `${window.location.origin}/stores/${store.slug}/products/nom-du-produit`
+                    }
+                  </code>
                 </p>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Section Domaine personnalisé */}
+          <Card className="shadow-medium border-primary/20">
+            <CardContent className="pt-6">
+              <StoreDomainSettings
+                store={store as unknown as Parameters<typeof StoreDomainSettings>[0]['store']}
+                onUpdateStore={async (updates: Partial<Store>) => {
+                  const success = await updateStore(updates);
+                  if (success) {
+                    // Rafraîchir les données du store si nécessaire
+                    // Le composant parent devrait gérer le rafraîchissement
+                  }
+                  return success;
+                }}
+              />
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
       {/* Réseaux sociaux */}
-      {(store.facebook_url || store.instagram_url || store.twitter_url || store.linkedin_url) && (
+      {(store.facebook_url || store.instagram_url || store.twitter_url || store.linkedin_url ||
+        (store as ExtendedStore).youtube_url || (store as ExtendedStore).tiktok_url ||
+        (store as ExtendedStore).pinterest_url || (store as ExtendedStore).snapchat_url ||
+        (store as ExtendedStore).discord_url || (store as ExtendedStore).twitch_url) && (
         <Card className="shadow-medium">
           <CardHeader>
             <CardTitle className="text-lg sm:text-xl">Réseaux sociaux</CardTitle>
@@ -1182,10 +1953,90 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                   LinkedIn
                 </a>
               )}
+              {(store as ExtendedStore).youtube_url && (
+                <a 
+                  href={(store as ExtendedStore).youtube_url!} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  YouTube
+                </a>
+              )}
+              {(store as ExtendedStore).tiktok_url && (
+                <a 
+                  href={(store as ExtendedStore).tiktok_url!} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  TikTok
+                </a>
+              )}
+              {(store as ExtendedStore).pinterest_url && (
+                <a 
+                  href={(store as ExtendedStore).pinterest_url!} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Pinterest
+                </a>
+              )}
+              {(store as ExtendedStore).snapchat_url && (
+                <a 
+                  href={(store as ExtendedStore).snapchat_url!} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Snapchat
+                </a>
+              )}
+              {(store as ExtendedStore).discord_url && (
+                <a 
+                  href={(store as ExtendedStore).discord_url!} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Discord
+                </a>
+              )}
+              {(store as ExtendedStore).twitch_url && (
+                <a 
+                  href={(store as ExtendedStore).twitch_url!} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Twitch
+                </a>
+              )}
             </div>
           </CardContent>
         </Card>
       )}
+
+      {/* Dialog de confirmation pour annuler */}
+      <AlertDialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Annuler les modifications ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vous avez des modifications non sauvegardées. Êtes-vous sûr de vouloir les annuler ? Toutes vos modifications seront perdues.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowCancelConfirm(false)}>
+              Continuer l'édition
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmCancel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Annuler les modifications
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

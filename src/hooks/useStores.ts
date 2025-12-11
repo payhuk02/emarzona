@@ -91,7 +91,7 @@ export interface Store {
   ssl_enabled?: boolean;
   redirect_www?: boolean;
   redirect_https?: boolean;
-  dns_records?: any[];
+  dns_records?: Array<Record<string, unknown>>;
   // Phase 1: Thème et couleurs
   primary_color?: string | null;
   secondary_color?: string | null;
@@ -166,6 +166,17 @@ export interface Store {
   og_image?: string | null;
   seo_score?: number | null;
   theme_color?: string | null;
+  // Phase 2 - Analytics et Tracking
+  google_analytics_id?: string | null;
+  google_analytics_enabled?: boolean;
+  facebook_pixel_id?: string | null;
+  facebook_pixel_enabled?: boolean;
+  google_tag_manager_id?: string | null;
+  google_tag_manager_enabled?: boolean;
+  tiktok_pixel_id?: string | null;
+  tiktok_pixel_enabled?: boolean;
+  custom_tracking_scripts?: string | null;
+  custom_scripts_enabled?: boolean;
 }
 
 const MAX_STORES_PER_USER = 3;
@@ -255,11 +266,12 @@ export const useStores = () => {
       });
 
       return data;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Impossible de créer la boutique";
       logger.error('Erreur lors de la création de la boutique:', err);
       toast({
         title: "Erreur",
-        description: err.message || "Impossible de créer la boutique",
+        description: errorMessage,
         variant: "destructive"
       });
       throw err;
@@ -288,7 +300,7 @@ export const useStores = () => {
       });
 
       return data;
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Erreur lors de la mise à jour de la boutique:', err);
       toast({
         title: "Erreur",
@@ -317,7 +329,7 @@ export const useStores = () => {
         title: "Boutique supprimée",
         description: "La boutique a été supprimée avec succès"
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Erreur lors de la suppression de la boutique:', err);
       toast({
         title: "Erreur",
@@ -330,6 +342,7 @@ export const useStores = () => {
 
   useEffect(() => {
     fetchStores();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

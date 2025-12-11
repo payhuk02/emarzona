@@ -12,18 +12,29 @@ import { supabase } from "@/integrations/supabase/client";
 import { generateSlug } from "@/lib/store-utils";
 import { logger } from "@/lib/logger";
 import { useStoreContext } from "@/contexts/StoreContext";
+import { validateStore, validateStoreCreate, validateStoreUpdate, validateStoreStep, getFieldHelp } from "@/lib/store-validation";
 import { Loader2, Check, X, Globe, Phone, Info } from '@/components/icons';
-import { Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Linkedin, Palette, Search, MapPin, FileText } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Image as ImageIcon, Mail, Facebook, Instagram, Twitter, Linkedin, Palette, Search, MapPin, FileText, BarChart3 } from 'lucide-react';
 import StoreImageUpload from "./StoreImageUpload";
 import { useSpaceInputFix } from "@/hooks/useSpaceInputFix";
 import { StoreThemeSettings } from "./StoreThemeSettings";
 import { StoreSEOSettings } from "./StoreSEOSettings";
 import { StoreLocationSettings } from "./StoreLocationSettings";
 import { StoreLegalPagesComponent } from "./StoreLegalPages";
+import { StoreAnalyticsSettings } from "./StoreAnalyticsSettings";
+import { RequireTermsConsent } from "./RequireTermsConsent";
+import { StoreFieldHelper } from "./StoreFieldHelper";
 import type { StoreOpeningHours, StoreLegalPages } from "@/hooks/useStores";
 
 interface StoreFormProps {
   onSuccess: () => void;
+  wizardMode?: boolean;
+  wizardStep?: string;
+  onNextStep?: () => void;
+  onPreviousStep?: () => void;
+  currentStep?: number;
+  totalSteps?: number;
   initialData?: {
     id: string;
     name: string;
@@ -89,6 +100,38 @@ interface StoreFormProps {
     timezone?: string | null;
     opening_hours?: StoreOpeningHours | null;
     legal_pages?: StoreLegalPages | null;
+    // Phase 2 - Images supplémentaires
+    favicon_url?: string | null;
+    apple_touch_icon_url?: string | null;
+    watermark_url?: string | null;
+    placeholder_image_url?: string | null;
+    // Phase 2 - Contacts supplémentaires
+    support_email?: string | null;
+    sales_email?: string | null;
+    press_email?: string | null;
+    partnership_email?: string | null;
+    support_phone?: string | null;
+    sales_phone?: string | null;
+    whatsapp_number?: string | null;
+    telegram_username?: string | null;
+    // Phase 2 - Réseaux sociaux supplémentaires
+    youtube_url?: string | null;
+    tiktok_url?: string | null;
+    pinterest_url?: string | null;
+    snapchat_url?: string | null;
+    discord_url?: string | null;
+    twitch_url?: string | null;
+    // Phase 2 - Analytics et Tracking
+    google_analytics_id?: string | null;
+    google_analytics_enabled?: boolean;
+    facebook_pixel_id?: string | null;
+    facebook_pixel_enabled?: boolean;
+    google_tag_manager_id?: string | null;
+    google_tag_manager_enabled?: boolean;
+    tiktok_pixel_id?: string | null;
+    tiktok_pixel_enabled?: boolean;
+    custom_tracking_scripts?: string | null;
+    custom_scripts_enabled?: boolean;
   };
 }
 
@@ -109,6 +152,42 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
   const [infoMessage, setInfoMessage] = useState(initialData?.info_message || "");
   const [infoMessageColor, setInfoMessageColor] = useState(initialData?.info_message_color || "#3b82f6");
   const [infoMessageFont, setInfoMessageFont] = useState(initialData?.info_message_font || "Inter");
+  
+  // Phase 2 - Images supplémentaires
+  const [faviconUrl, setFaviconUrl] = useState(initialData?.favicon_url || "");
+  const [appleTouchIconUrl, setAppleTouchIconUrl] = useState(initialData?.apple_touch_icon_url || "");
+  const [watermarkUrl, setWatermarkUrl] = useState(initialData?.watermark_url || "");
+  const [placeholderImageUrl, setPlaceholderImageUrl] = useState(initialData?.placeholder_image_url || "");
+  
+  // Phase 2 - Contacts supplémentaires
+  const [supportEmail, setSupportEmail] = useState(initialData?.support_email || "");
+  const [salesEmail, setSalesEmail] = useState(initialData?.sales_email || "");
+  const [pressEmail, setPressEmail] = useState(initialData?.press_email || "");
+  const [partnershipEmail, setPartnershipEmail] = useState(initialData?.partnership_email || "");
+  const [supportPhone, setSupportPhone] = useState(initialData?.support_phone || "");
+  const [salesPhone, setSalesPhone] = useState(initialData?.sales_phone || "");
+  const [whatsappNumber, setWhatsappNumber] = useState(initialData?.whatsapp_number || "");
+  const [telegramUsername, setTelegramUsername] = useState(initialData?.telegram_username || "");
+  
+  // Phase 2 - Réseaux sociaux supplémentaires
+  const [youtubeUrl, setYoutubeUrl] = useState(initialData?.youtube_url || "");
+  const [tiktokUrl, setTiktokUrl] = useState(initialData?.tiktok_url || "");
+  const [pinterestUrl, setPinterestUrl] = useState(initialData?.pinterest_url || "");
+  const [snapchatUrl, setSnapchatUrl] = useState(initialData?.snapchat_url || "");
+  const [discordUrl, setDiscordUrl] = useState(initialData?.discord_url || "");
+  const [twitchUrl, setTwitchUrl] = useState(initialData?.twitch_url || "");
+  
+  // Phase 2 - Analytics et Tracking
+  const [googleAnalyticsId, setGoogleAnalyticsId] = useState(initialData?.google_analytics_id || "");
+  const [googleAnalyticsEnabled, setGoogleAnalyticsEnabled] = useState(initialData?.google_analytics_enabled || false);
+  const [facebookPixelId, setFacebookPixelId] = useState(initialData?.facebook_pixel_id || "");
+  const [facebookPixelEnabled, setFacebookPixelEnabled] = useState(initialData?.facebook_pixel_enabled || false);
+  const [googleTagManagerId, setGoogleTagManagerId] = useState(initialData?.google_tag_manager_id || "");
+  const [googleTagManagerEnabled, setGoogleTagManagerEnabled] = useState(initialData?.google_tag_manager_enabled || false);
+  const [tiktokPixelId, setTiktokPixelId] = useState(initialData?.tiktok_pixel_id || "");
+  const [tiktokPixelEnabled, setTiktokPixelEnabled] = useState(initialData?.tiktok_pixel_enabled || false);
+  const [customTrackingScripts, setCustomTrackingScripts] = useState(initialData?.custom_tracking_scripts || "");
+  const [customScriptsEnabled, setCustomScriptsEnabled] = useState(initialData?.custom_scripts_enabled || false);
   
   // Phase 1 - Thème et couleurs
   const [primaryColor, setPrimaryColor] = useState(initialData?.primary_color || "#3b82f6");
@@ -171,6 +250,8 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
   const [isCheckingSlug, setIsCheckingSlug] = useState(false);
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [advancedMode, setAdvancedMode] = useState(false);
   const { toast } = useToast();
   const { refreshStores } = useStoreContext();
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
@@ -218,11 +299,60 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationErrors({});
 
-    if (!name || !slug) {
+    // Préparer les données du formulaire
+    const formData = {
+      name: name.trim(),
+      slug: slug.trim(),
+      description: description.trim() || undefined,
+      default_currency: defaultCurrency,
+      contact_email: contactEmail.trim() || undefined,
+      contact_phone: contactPhone.trim() || undefined,
+      facebook_url: facebookUrl.trim() || undefined,
+      instagram_url: instagramUrl.trim() || undefined,
+      twitter_url: twitterUrl.trim() || undefined,
+      linkedin_url: linkedinUrl.trim() || undefined,
+      favicon_url: faviconUrl.trim() || undefined,
+      apple_touch_icon_url: appleTouchIconUrl.trim() || undefined,
+      watermark_url: watermarkUrl.trim() || undefined,
+      placeholder_image_url: placeholderImageUrl.trim() || undefined,
+      support_email: supportEmail.trim() || undefined,
+      sales_email: salesEmail.trim() || undefined,
+      press_email: pressEmail.trim() || undefined,
+      partnership_email: partnershipEmail.trim() || undefined,
+      support_phone: supportPhone.trim() || undefined,
+      sales_phone: salesPhone.trim() || undefined,
+      whatsapp_number: whatsappNumber.trim() || undefined,
+      telegram_username: telegramUsername.trim() || undefined,
+      youtube_url: youtubeUrl.trim() || undefined,
+      tiktok_url: tiktokUrl.trim() || undefined,
+      pinterest_url: pinterestUrl.trim() || undefined,
+      snapchat_url: snapchatUrl.trim() || undefined,
+      discord_url: discordUrl.trim() || undefined,
+      twitch_url: twitchUrl.trim() || undefined,
+      google_analytics_id: googleAnalyticsId.trim() || undefined,
+      google_analytics_enabled: googleAnalyticsEnabled,
+      facebook_pixel_id: facebookPixelId.trim() || undefined,
+      facebook_pixel_enabled: facebookPixelEnabled,
+      google_tag_manager_id: googleTagManagerId.trim() || undefined,
+      google_tag_manager_enabled: googleTagManagerEnabled,
+      tiktok_pixel_id: tiktokPixelId.trim() || undefined,
+      tiktok_pixel_enabled: tiktokPixelEnabled,
+      custom_tracking_scripts: customTrackingScripts.trim() || undefined,
+      custom_scripts_enabled: customScriptsEnabled,
+    };
+
+    // Validation Zod
+    const validation = initialData 
+      ? validateStoreUpdate(formData)
+      : validateStoreCreate(formData);
+
+    if (!validation.valid) {
+      setValidationErrors(validation.errors);
       toast({
-        title: "Erreur",
-        description: "Le nom et le slug sont obligatoires",
+        title: "Erreurs de validation",
+        description: "Veuillez corriger les erreurs avant de continuer.",
         variant: "destructive",
       });
       return;
@@ -311,6 +441,38 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
           timezone?: string | null;
           opening_hours?: StoreOpeningHours | null;
           legal_pages?: StoreLegalPages | null;
+          // Phase 2 - Images supplémentaires
+          favicon_url?: string | null;
+          apple_touch_icon_url?: string | null;
+          watermark_url?: string | null;
+          placeholder_image_url?: string | null;
+          // Phase 2 - Contacts supplémentaires
+          support_email?: string | null;
+          sales_email?: string | null;
+          press_email?: string | null;
+          partnership_email?: string | null;
+          support_phone?: string | null;
+          sales_phone?: string | null;
+          whatsapp_number?: string | null;
+          telegram_username?: string | null;
+          // Phase 2 - Réseaux sociaux supplémentaires
+          youtube_url?: string | null;
+          tiktok_url?: string | null;
+          pinterest_url?: string | null;
+          snapchat_url?: string | null;
+          discord_url?: string | null;
+          twitch_url?: string | null;
+          // Phase 2 - Analytics et Tracking
+          google_analytics_id?: string | null;
+          google_analytics_enabled?: boolean;
+          facebook_pixel_id?: string | null;
+          facebook_pixel_enabled?: boolean;
+          google_tag_manager_id?: string | null;
+          google_tag_manager_enabled?: boolean;
+          tiktok_pixel_id?: string | null;
+          tiktok_pixel_enabled?: boolean;
+          custom_tracking_scripts?: string | null;
+          custom_scripts_enabled?: boolean;
           [key: string]: unknown;
         }
         const updateData: StoreUpdateData = {
@@ -382,6 +544,38 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
           opening_hours: openingHours || null,
           // Pages légales
           legal_pages: legalPages || null,
+          // Phase 2 - Images supplémentaires
+          favicon_url: faviconUrl || null,
+          apple_touch_icon_url: appleTouchIconUrl || null,
+          watermark_url: watermarkUrl || null,
+          placeholder_image_url: placeholderImageUrl || null,
+          // Phase 2 - Contacts supplémentaires
+          support_email: supportEmail || null,
+          sales_email: salesEmail || null,
+          press_email: pressEmail || null,
+          partnership_email: partnershipEmail || null,
+          support_phone: supportPhone || null,
+          sales_phone: salesPhone || null,
+          whatsapp_number: whatsappNumber || null,
+          telegram_username: telegramUsername || null,
+          // Phase 2 - Réseaux sociaux supplémentaires
+          youtube_url: youtubeUrl || null,
+          tiktok_url: tiktokUrl || null,
+          pinterest_url: pinterestUrl || null,
+          snapchat_url: snapchatUrl || null,
+          discord_url: discordUrl || null,
+          twitch_url: twitchUrl || null,
+          // Phase 2 - Analytics et Tracking
+          google_analytics_id: googleAnalyticsId.trim() || null,
+          google_analytics_enabled: googleAnalyticsEnabled,
+          facebook_pixel_id: facebookPixelId.trim() || null,
+          facebook_pixel_enabled: facebookPixelEnabled,
+          google_tag_manager_id: googleTagManagerId.trim() || null,
+          google_tag_manager_enabled: googleTagManagerEnabled,
+          tiktok_pixel_id: tiktokPixelId.trim() || null,
+          tiktok_pixel_enabled: tiktokPixelEnabled,
+          custom_tracking_scripts: customTrackingScripts.trim() || null,
+          custom_scripts_enabled: customScriptsEnabled,
         };
 
         const { error } = await supabase
@@ -480,6 +674,27 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
           timezone?: string | null;
           opening_hours?: StoreOpeningHours | null;
           legal_pages?: StoreLegalPages | null;
+          // Phase 2 - Images supplémentaires
+          favicon_url?: string | null;
+          apple_touch_icon_url?: string | null;
+          watermark_url?: string | null;
+          placeholder_image_url?: string | null;
+          // Phase 2 - Contacts supplémentaires
+          support_email?: string | null;
+          sales_email?: string | null;
+          press_email?: string | null;
+          partnership_email?: string | null;
+          support_phone?: string | null;
+          sales_phone?: string | null;
+          whatsapp_number?: string | null;
+          telegram_username?: string | null;
+          // Phase 2 - Réseaux sociaux supplémentaires
+          youtube_url?: string | null;
+          tiktok_url?: string | null;
+          pinterest_url?: string | null;
+          snapchat_url?: string | null;
+          discord_url?: string | null;
+          twitch_url?: string | null;
           [key: string]: unknown;
         }
         const insertData: StoreInsertData = {
@@ -552,6 +767,27 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
           opening_hours: openingHours || null,
           // Pages légales
           legal_pages: legalPages || null,
+          // Phase 2 - Images supplémentaires
+          favicon_url: faviconUrl || null,
+          apple_touch_icon_url: appleTouchIconUrl || null,
+          watermark_url: watermarkUrl || null,
+          placeholder_image_url: placeholderImageUrl || null,
+          // Phase 2 - Contacts supplémentaires
+          support_email: supportEmail || null,
+          sales_email: salesEmail || null,
+          press_email: pressEmail || null,
+          partnership_email: partnershipEmail || null,
+          support_phone: supportPhone || null,
+          sales_phone: salesPhone || null,
+          whatsapp_number: whatsappNumber || null,
+          telegram_username: telegramUsername || null,
+          // Phase 2 - Réseaux sociaux supplémentaires
+          youtube_url: youtubeUrl || null,
+          tiktok_url: tiktokUrl || null,
+          pinterest_url: pinterestUrl || null,
+          snapchat_url: snapchatUrl || null,
+          discord_url: discordUrl || null,
+          twitch_url: twitchUrl || null,
         };
 
         const { error } = await supabase
@@ -607,6 +843,11 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
     metaTitle, metaDescription, metaKeywords, ogTitle, ogDescription, ogImageUrl,
     addressLine1, addressLine2, city, stateProvince, postalCode, country,
     latitude, longitude, timezone, openingHours,
+    // Phase 2
+    faviconUrl, appleTouchIconUrl, watermarkUrl, placeholderImageUrl,
+    supportEmail, salesEmail, pressEmail, partnershipEmail,
+    supportPhone, salesPhone, whatsappNumber, telegramUsername,
+    youtubeUrl, tiktokUrl, pinterestUrl, snapchatUrl, discordUrl, twitchUrl,
     legalPages,
     initialData, onSuccess, refreshStores, toast
   ]);
@@ -625,8 +866,8 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 gap-1 overflow-x-auto">
+          <Tabs defaultValue={wizardMode && wizardStep ? wizardStep : "basic"} className="w-full" value={wizardMode && wizardStep ? wizardStep : undefined}>
+            <TabsList className={`grid w-full gap-1 overflow-x-auto ${advancedMode ? 'grid-cols-3 lg:grid-cols-7' : 'grid-cols-3'}`}>
               <TabsTrigger value="basic" className="flex items-center gap-2">
                 <Info className="h-4 w-4" />
                 <span className="hidden sm:inline">Informations</span>
@@ -662,10 +903,28 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
                 <span className="hidden lg:inline">Pages Légales</span>
                 <span className="lg:hidden">Légal</span>
               </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden lg:inline">Analytics</span>
+                <span className="lg:hidden">Stats</span>
+              </TabsTrigger>
             </TabsList>
 
             {/* Onglet Informations de base */}
             <TabsContent value="basic" className="space-y-4 mt-4">
+              {/* Suggestions automatiques */}
+              <StoreSuggestions
+                name={name}
+                slug={slug}
+                description={description}
+                slugAvailable={slugAvailable}
+                onSlugSuggestion={(suggestion) => {
+                  setSlug(suggestion);
+                  checkSlugAvailability(suggestion);
+                }}
+                onMetaTitleSuggestion={(suggestion) => setMetaTitle(suggestion)}
+                onMetaDescriptionSuggestion={(suggestion) => setMetaDescription(suggestion)}
+              />
           <div className="space-y-2">
             <Label htmlFor="name">Nom de la boutique *</Label>
             <Input
@@ -679,25 +938,43 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="slug">
-              Nom d'URL (slug) *
-              {isCheckingSlug && (
-                <Loader2 className="inline-block ml-2 h-4 w-4 animate-spin" />
-              )}
-              {!isCheckingSlug && slugAvailable === true && (
-                <Check className="inline-block ml-2 h-4 w-4 text-accent" />
-              )}
-              {!isCheckingSlug && slugAvailable === false && (
-                <X className="inline-block ml-2 h-4 w-4 text-destructive" />
-              )}
-            </Label>
+            <StoreFieldHelper field="slug">
+              <Label htmlFor="slug">
+                Nom d'URL (slug) *
+                {isCheckingSlug && (
+                  <Loader2 className="inline-block ml-2 h-4 w-4 animate-spin" />
+                )}
+                {!isCheckingSlug && slugAvailable === true && (
+                  <Check className="inline-block ml-2 h-4 w-4 text-accent" />
+                )}
+                {!isCheckingSlug && slugAvailable === false && (
+                  <X className="inline-block ml-2 h-4 w-4 text-destructive" />
+                )}
+              </Label>
+            </StoreFieldHelper>
             <Input
               id="slug"
               value={slug}
-              onChange={(e) => handleSlugChange(e.target.value)}
+              onChange={(e) => {
+                handleSlugChange(e.target.value);
+                if (validationErrors.slug) {
+                  setValidationErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.slug;
+                    return newErrors;
+                  });
+                }
+              }}
               placeholder="ma-boutique-pro"
               required
+              className={validationErrors.slug ? "border-destructive" : ""}
             />
+            {validationErrors.slug && (
+              <p className="text-sm text-destructive mt-1">{validationErrors.slug}</p>
+            )}
+            {getFieldHelp('slug') && !validationErrors.slug && (
+              <p className="text-xs text-muted-foreground mt-1">💡 {getFieldHelp('slug')}</p>
+            )}
             {slug && (
               <p className="text-sm text-muted-foreground">
                 Votre boutique sera accessible à : 
@@ -893,6 +1170,52 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
                     maxSize={10}
                     imageType="store-banner"
                   />
+
+                  {/* Phase 2 - Images supplémentaires */}
+                  <div className="pt-4 border-t">
+                    <h4 className="text-sm font-semibold mb-3">Images supplémentaires</h4>
+                    <div className="space-y-4">
+                      <StoreImageUpload
+                        label="Favicon"
+                        value={faviconUrl}
+                        onChange={setFaviconUrl}
+                        aspectRatio="square"
+                        description="Format recommandé: 32×32 ou 64×64 pixels. Icône affichée dans l'onglet du navigateur."
+                        maxSize={1}
+                        imageType="store-favicon"
+                      />
+
+                      <StoreImageUpload
+                        label="Apple Touch Icon"
+                        value={appleTouchIconUrl}
+                        onChange={setAppleTouchIconUrl}
+                        aspectRatio="square"
+                        description="Format recommandé: 180×180 pixels. Icône utilisée sur iOS lorsque la boutique est ajoutée à l'écran d'accueil."
+                        maxSize={2}
+                        imageType="store-apple-touch-icon"
+                      />
+
+                      <StoreImageUpload
+                        label="Filigrane (Watermark)"
+                        value={watermarkUrl}
+                        onChange={setWatermarkUrl}
+                        aspectRatio="square"
+                        description="Format recommandé: Image transparente. Filigrane appliqué sur les images de produits (optionnel)."
+                        maxSize={5}
+                        imageType="store-watermark"
+                      />
+
+                      <StoreImageUpload
+                        label="Image de remplacement (Placeholder)"
+                        value={placeholderImageUrl}
+                        onChange={setPlaceholderImageUrl}
+                        aspectRatio="square"
+                        description="Format recommandé: 800×800 pixels. Image utilisée lorsqu'une image de produit n'est pas disponible."
+                        maxSize={5}
+                        imageType="store-placeholder"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </TabsContent>
@@ -942,6 +1265,131 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
                   <p className="text-xs text-muted-foreground">
                     Numéro de téléphone pour contacter votre boutique
                   </p>
+                </div>
+
+                {/* Phase 2 - Contacts supplémentaires */}
+                <div className="pt-4 border-t">
+                  <h4 className="text-sm font-semibold mb-3">Contacts spécialisés (optionnel)</h4>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Ajoutez des contacts dédiés pour différents services
+                  </p>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="support_email">
+                          <Mail className="inline-block h-4 w-4 mr-2" />
+                          Email Support
+                        </Label>
+                        <Input
+                          id="support_email"
+                          type="email"
+                          value={supportEmail}
+                          onChange={(e) => setSupportEmail(e.target.value)}
+                          placeholder="support@votreboutique.com"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="sales_email">
+                          <Mail className="inline-block h-4 w-4 mr-2" />
+                          Email Ventes
+                        </Label>
+                        <Input
+                          id="sales_email"
+                          type="email"
+                          value={salesEmail}
+                          onChange={(e) => setSalesEmail(e.target.value)}
+                          placeholder="ventes@votreboutique.com"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="press_email">
+                          <Mail className="inline-block h-4 w-4 mr-2" />
+                          Email Presse
+                        </Label>
+                        <Input
+                          id="press_email"
+                          type="email"
+                          value={pressEmail}
+                          onChange={(e) => setPressEmail(e.target.value)}
+                          placeholder="presse@votreboutique.com"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="partnership_email">
+                          <Mail className="inline-block h-4 w-4 mr-2" />
+                          Email Partenariats
+                        </Label>
+                        <Input
+                          id="partnership_email"
+                          type="email"
+                          value={partnershipEmail}
+                          onChange={(e) => setPartnershipEmail(e.target.value)}
+                          placeholder="partenariats@votreboutique.com"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="support_phone">
+                          <Phone className="inline-block h-4 w-4 mr-2" />
+                          Téléphone Support
+                        </Label>
+                        <Input
+                          id="support_phone"
+                          type="tel"
+                          value={supportPhone}
+                          onChange={(e) => setSupportPhone(e.target.value)}
+                          placeholder="+226 XX XX XX XX"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="sales_phone">
+                          <Phone className="inline-block h-4 w-4 mr-2" />
+                          Téléphone Ventes
+                        </Label>
+                        <Input
+                          id="sales_phone"
+                          type="tel"
+                          value={salesPhone}
+                          onChange={(e) => setSalesPhone(e.target.value)}
+                          placeholder="+226 XX XX XX XX"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="whatsapp_number">
+                          <Phone className="inline-block h-4 w-4 mr-2" />
+                          WhatsApp
+                        </Label>
+                        <Input
+                          id="whatsapp_number"
+                          type="tel"
+                          value={whatsappNumber}
+                          onChange={(e) => setWhatsappNumber(e.target.value)}
+                          placeholder="+226 XX XX XX XX"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="telegram_username">
+                          <Globe className="inline-block h-4 w-4 mr-2" />
+                          Telegram
+                        </Label>
+                        <Input
+                          id="telegram_username"
+                          type="text"
+                          value={telegramUsername}
+                          onChange={(e) => setTelegramUsername(e.target.value)}
+                          placeholder="@votre_username"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1011,6 +1459,96 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
                       onChange={(e) => setLinkedinUrl(e.target.value)}
                       placeholder="https://linkedin.com/company/votreboutique"
                     />
+                  </div>
+                </div>
+
+                {/* Phase 2 - Réseaux sociaux supplémentaires */}
+                <div className="pt-4 border-t">
+                  <h4 className="text-sm font-semibold mb-3">Autres réseaux sociaux (optionnel)</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="youtube_url" className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-red-600" />
+                        YouTube
+                      </Label>
+                      <Input
+                        id="youtube_url"
+                        type="url"
+                        value={youtubeUrl}
+                        onChange={(e) => setYoutubeUrl(e.target.value)}
+                        placeholder="https://youtube.com/@votreboutique"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="tiktok_url" className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-black" />
+                        TikTok
+                      </Label>
+                      <Input
+                        id="tiktok_url"
+                        type="url"
+                        value={tiktokUrl}
+                        onChange={(e) => setTiktokUrl(e.target.value)}
+                        placeholder="https://tiktok.com/@votreboutique"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="pinterest_url" className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-red-700" />
+                        Pinterest
+                      </Label>
+                      <Input
+                        id="pinterest_url"
+                        type="url"
+                        value={pinterestUrl}
+                        onChange={(e) => setPinterestUrl(e.target.value)}
+                        placeholder="https://pinterest.com/votreboutique"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="snapchat_url" className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-yellow-400" />
+                        Snapchat
+                      </Label>
+                      <Input
+                        id="snapchat_url"
+                        type="url"
+                        value={snapchatUrl}
+                        onChange={(e) => setSnapchatUrl(e.target.value)}
+                        placeholder="https://snapchat.com/add/votreboutique"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="discord_url" className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-indigo-600" />
+                        Discord
+                      </Label>
+                      <Input
+                        id="discord_url"
+                        type="url"
+                        value={discordUrl}
+                        onChange={(e) => setDiscordUrl(e.target.value)}
+                        placeholder="https://discord.gg/votreboutique"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="twitch_url" className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-purple-600" />
+                        Twitch
+                      </Label>
+                      <Input
+                        id="twitch_url"
+                        type="url"
+                        value={twitchUrl}
+                        onChange={(e) => setTwitchUrl(e.target.value)}
+                        placeholder="https://twitch.tv/votreboutique"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1105,6 +1643,8 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
                 ogTitle={ogTitle}
                 ogDescription={ogDescription}
                 ogImageUrl={ogImageUrl}
+                storeUrl={slug ? `https://${slug}.lovableproject.com` : undefined}
+                faviconUrl={initialData?.favicon_url || undefined}
                 onChange={(field, value) => {
                   const setters: Record<string, (v: string) => void> = {
                     meta_title: setMetaTitle,
@@ -1164,26 +1704,173 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
                 }}
               />
             </TabsContent>
+
+            {/* Onglet Analytics */}
+            <TabsContent value="analytics" className="mt-4">
+              <StoreAnalyticsSettings
+                googleAnalyticsId={googleAnalyticsId}
+                googleAnalyticsEnabled={googleAnalyticsEnabled}
+                onGoogleAnalyticsChange={(id, enabled) => {
+                  setGoogleAnalyticsId(id);
+                  setGoogleAnalyticsEnabled(enabled);
+                }}
+                facebookPixelId={facebookPixelId}
+                facebookPixelEnabled={facebookPixelEnabled}
+                onFacebookPixelChange={(id, enabled) => {
+                  setFacebookPixelId(id);
+                  setFacebookPixelEnabled(enabled);
+                }}
+                googleTagManagerId={googleTagManagerId}
+                googleTagManagerEnabled={googleTagManagerEnabled}
+                onGoogleTagManagerChange={(id, enabled) => {
+                  setGoogleTagManagerId(id);
+                  setGoogleTagManagerEnabled(enabled);
+                }}
+                tiktokPixelId={tiktokPixelId}
+                tiktokPixelEnabled={tiktokPixelEnabled}
+                onTiktokPixelChange={(id, enabled) => {
+                  setTiktokPixelId(id);
+                  setTiktokPixelEnabled(enabled);
+                }}
+                customScripts={customTrackingScripts}
+                customScriptsEnabled={customScriptsEnabled}
+                onCustomScriptsChange={(scripts, enabled) => {
+                  setCustomTrackingScripts(scripts);
+                  setCustomScriptsEnabled(enabled);
+                }}
+              />
+            </TabsContent>
           </Tabs>
 
           <div className="pt-4 border-t">
-          <Button
-            type="submit" 
-            className="w-full"
-            disabled={isSubmitting || slugAvailable === false}
-              size="lg"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {initialData ? "Mise à jour..." : "Création..."}
-              </>
+            {wizardMode ? (
+              <div className="flex items-center justify-between gap-4">
+                {onPreviousStep && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onPreviousStep}
+                    disabled={currentStep === 1}
+                    className="flex-1 sm:flex-none"
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-2" />
+                    Précédent
+                  </Button>
+                )}
+                
+                {currentStep === totalSteps ? (
+                  !initialData ? (
+                    <RequireTermsConsent 
+                      actionLabel="créer ma boutique"
+                      onAction={async () => {
+                        const form = document.querySelector('form');
+                        if (form) {
+                          form.requestSubmit();
+                        }
+                      }}
+                    >
+                      <Button
+                        type="submit" 
+                        className="flex-1 sm:flex-none"
+                        disabled={isSubmitting || slugAvailable === false}
+                        size="lg"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Création...
+                          </>
+                        ) : (
+                          <>
+                            Créer ma boutique
+                          </>
+                        )}
+                      </Button>
+                    </RequireTermsConsent>
+                  ) : (
+                    <Button
+                      type="submit" 
+                      className="flex-1 sm:flex-none"
+                      disabled={isSubmitting || slugAvailable === false}
+                      size="lg"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Mise à jour...
+                        </>
+                      ) : (
+                        <>
+                          Mettre à jour
+                        </>
+                      )}
+                    </Button>
+                  )
+                ) : (
+                  onNextStep && (
+                    <Button
+                      type="button"
+                      onClick={onNextStep}
+                      className="flex-1 sm:flex-none ml-auto"
+                      size="lg"
+                    >
+                      Suivant
+                      <ChevronRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  )
+                )}
+              </div>
             ) : (
-                <>
-                  {initialData ? "Mettre à jour la boutique" : "Créer ma boutique"}
-                </>
+              <>
+                {!initialData ? (
+                  <RequireTermsConsent 
+                    actionLabel="créer ma boutique"
+                    onAction={async () => {
+                      const form = document.querySelector('form');
+                      if (form) {
+                        form.requestSubmit();
+                      }
+                    }}
+                  >
+                    <Button
+                      type="submit" 
+                      className="w-full"
+                      disabled={isSubmitting || slugAvailable === false}
+                      size="lg"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Création...
+                        </>
+                      ) : (
+                        <>
+                          Créer ma boutique
+                        </>
+                      )}
+                    </Button>
+                  </RequireTermsConsent>
+                ) : (
+                  <Button
+                    type="submit" 
+                    className="w-full"
+                    disabled={isSubmitting || slugAvailable === false}
+                    size="lg"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Mise à jour...
+                      </>
+                    ) : (
+                      <>
+                        Mettre à jour la boutique
+                      </>
+                    )}
+                  </Button>
+                )}
+              </>
             )}
-          </Button>
           </div>
         </form>
       </CardContent>

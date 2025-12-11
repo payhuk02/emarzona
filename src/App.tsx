@@ -161,7 +161,7 @@ const MyTasks = lazy(() => import("./pages/MyTasks"));
 const Orders = lazy(() => import("./pages/Orders"));
 const Customers = lazy(() => import("./pages/Customers"));
 const Marketing = lazy(() => import("./pages/Marketing").then(m => ({ default: m.default })));
-const Promotions = lazy(() => import("./pages/Promotions"));
+const _Promotions = lazy(() => import("./pages/Promotions"));
 const UnifiedPromotionsPage = lazy(() => import("./pages/promotions/UnifiedPromotionsPage").then(m => ({ default: m.UnifiedPromotionsPage })));
 const EmailCampaignsPage = lazy(() => import("./pages/emails/EmailCampaignsPage").then(m => ({ default: m.EmailCampaignsPage })));
 const EmailSequencesPage = lazy(() => import("./pages/emails/EmailSequencesPage").then(m => ({ default: m.EmailSequencesPage })));
@@ -178,6 +178,7 @@ const Settings = lazy(() => import("./pages/Settings"));
 const CreateProduct = lazy(() => import("./pages/CreateProduct"));
 const EditProduct = lazy(() => import("./pages/EditProduct"));
 const Storefront = lazy(() => import("./pages/Storefront"));
+const StoreLegalPage = lazy(() => import("./pages/StoreLegalPage"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const Marketplace = lazy(() => import("./pages/Marketplace"));
 const Cart = lazy(() => import("./pages/Cart"));
@@ -508,6 +509,7 @@ const AppContent = () => {
           
           <Route path="/stores/:slug" element={<Storefront />} />
           <Route path="/stores/:slug/products/:productSlug" element={<ProductDetail />} />
+          <Route path="/stores/:slug/legal/:page" element={<StoreLegalPage />} />
           
           {/* --- Route de test i18n (uniquement en développement) --- */}
           {import.meta.env.DEV && (

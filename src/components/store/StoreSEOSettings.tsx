@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Search, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { Badge } from '@/components/ui/badge';
+import { SEOSerpPreview } from '@/components/seo/SEOSerpPreview';
 
 interface StoreSEOSettingsProps {
   metaTitle: string;
@@ -20,6 +21,8 @@ interface StoreSEOSettingsProps {
   ogTitle: string;
   ogDescription: string;
   ogImageUrl: string;
+  storeUrl?: string;
+  faviconUrl?: string;
   onChange: (field: string, value: string) => void;
 }
 
@@ -30,6 +33,8 @@ export const StoreSEOSettings: React.FC<StoreSEOSettingsProps> = ({
   ogTitle,
   ogDescription,
   ogImageUrl,
+  storeUrl,
+  faviconUrl,
   onChange,
 }) => {
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
@@ -204,26 +209,14 @@ export const StoreSEOSettings: React.FC<StoreSEOSettingsProps> = ({
           </div>
         </div>
 
-        {/* Aperçu */}
+        {/* Prévisualisation SERP */}
         <div className="border-t pt-4">
-          <Label>Aperçu des résultats de recherche</Label>
-          <div className="mt-2 p-4 border rounded-lg bg-white">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">Google</Badge>
-                <span className="text-xs text-muted-foreground">emarzona.com</span>
-              </div>
-              <h3 className="text-lg text-blue-600 hover:underline cursor-pointer">
-                {metaTitle || 'Titre SEO de votre boutique'}
-              </h3>
-              <p className="text-sm text-gray-600 line-clamp-2">
-                {metaDescription || 'Description SEO de votre boutique qui apparaîtra dans les résultats de recherche...'}
-              </p>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Aperçu approximatif de l'apparence dans Google
-          </p>
+          <SEOSerpPreview
+            metaTitle={metaTitle}
+            metaDescription={metaDescription}
+            url={storeUrl}
+            faviconUrl={faviconUrl}
+          />
         </div>
       </CardContent>
     </Card>

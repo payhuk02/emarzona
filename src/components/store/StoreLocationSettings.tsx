@@ -8,12 +8,15 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { MapPin, Clock, Globe } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { MapPin, Clock, Plus, Trash2, Calendar, Loader2 } from 'lucide-react';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { StoreOpeningHours } from '@/hooks/useStores';
+import { geocodeAddress, buildFullAddress } from '@/lib/geocoding';
+import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface StoreLocationSettingsProps {
   // Adresse
@@ -71,6 +74,8 @@ export const StoreLocationSettings: React.FC<StoreLocationSettingsProps> = ({
   onOpeningHoursChange,
 }) => {
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
+  const { toast } = useToast();
+  const [geocoding, setGeocoding] = useState(false);
 
   const defaultHours: StoreOpeningHours = openingHours || {
     monday: { open: '09:00', close: '18:00', closed: false },
@@ -94,6 +99,88 @@ export const StoreLocationSettings: React.FC<StoreLocationSettingsProps> = ({
     };
     onOpeningHoursChange(updatedHours);
   };
+
+  const handleAddSpecialHour = () => {
+    const newSpecialHour = {
+      date: '',
+      open: '09:00',
+      close: '18:00',
+      closed: false,
+      reason: '',
+    };
+    const updatedHours = {
+      ...defaultHours,
+      special_hours: [...(defaultHours.special_hours || []), newSpecialHour],
+    };
+    onOpeningHoursChange(updatedHours);
+  };
+
+  const handleUpdateSpecialHour = (index: number, field: string, value: string | boolean) => {
+    const updatedSpecialHours = [...(defaultHours.special_hours || [])];
+    updatedSpecialHours[index] = {
+      ...updatedSpecialHours[index],
+      [field]: value,
+    };
+    const updatedHours = {
+      ...defaultHours,
+      special_hours: updatedSpecialHours,
+    };
+    onOpeningHoursChange(updatedHours);
+  };
+
+  const handleRemoveSpecialHour = (index: number) => {
+    const updatedSpecialHours = [...(defaultHours.special_hours || [])];
+    updatedSpecialHours.splice(index, 1);
+    const updatedHours = {
+      ...defaultHours,
+      special_hours: updatedSpecialHours,
+    };
+    onOpeningHoursChange(updatedHours);
+  };
+
+  const handleGeocode = async () => {
+    const fullAddress = buildFullAddress(addressLine1, addressLine2, city, stateProvince, postalCode, country);
+    
+    if (!fullAddress || fullAddress.trim().length < 5) {
+      toast({
+        title: 'Adresse incomplète',
+        description: 'Veuillez remplir au moins une adresse ligne 1 et une ville pour géocoder.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setGeocoding(true);
+    try {
+      const result = await geocodeAddress(fullAddress);
+      
+      if (result.success) {
+        onLocationChange('latitude', result.data.latitude);
+        onLocationChange('longitude', result.data.longitude);
+        
+        toast({
+          title: 'Géocodage réussi',
+          description: `Coordonnées trouvées : ${result.data.latitude.toFixed(6)}, ${result.data.longitude.toFixed(6)}`,
+        });
+      } else {
+        toast({
+          title: 'Erreur de géocodage',
+          description: result.error.message,
+          variant: 'destructive',
+        });
+      }
+    } catch (error: unknown) {
+      toast({
+        title: 'Erreur',
+        description: 'Une erreur est survenue lors du géocodage',
+        variant: 'destructive',
+      });
+    } finally {
+      setGeocoding(false);
+    }
+  };
+
+  const hasAddress = addressLine1 || city || country;
 
   return (
     <Card>
@@ -181,30 +268,81 @@ export const StoreLocationSettings: React.FC<StoreLocationSettingsProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="latitude">Latitude</Label>
-              <Input
-                id="latitude"
-                type="number"
-                step="any"
-                value={latitude || ''}
-                onChange={(e) => onLocationChange('latitude', e.target.value ? parseFloat(e.target.value) : null)}
-                placeholder="12.3714"
-              />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Coordonnées GPS</Label>
+              {hasAddress && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGeocode}
+                  disabled={geocoding}
+                  className="flex items-center gap-2"
+                >
+                  {geocoding ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Géocodage...
+                    </>
+                  ) : (
+                    <>
+                      <Navigation className="h-4 w-4" />
+                      Géocoder automatiquement
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
+            
+            {!import.meta.env.VITE_GOOGLE_MAPS_API_KEY && (
+              <Alert>
+                <AlertDescription className="text-xs">
+                  💡 Pour activer le géocodage automatique, configurez <code className="bg-muted px-1 py-0.5 rounded">VITE_GOOGLE_MAPS_API_KEY</code> dans votre fichier .env
+                </AlertDescription>
+              </Alert>
+            )}
 
-            <div className="space-y-2">
-              <Label htmlFor="longitude">Longitude</Label>
-              <Input
-                id="longitude"
-                type="number"
-                step="any"
-                value={longitude || ''}
-                onChange={(e) => onLocationChange('longitude', e.target.value ? parseFloat(e.target.value) : null)}
-                placeholder="-1.5197"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="latitude">Latitude</Label>
+                <Input
+                  id="latitude"
+                  type="number"
+                  step="any"
+                  value={latitude || ''}
+                  onChange={(e) => onLocationChange('latitude', e.target.value ? parseFloat(e.target.value) : null)}
+                  placeholder="12.3714"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="longitude">Longitude</Label>
+                <Input
+                  id="longitude"
+                  type="number"
+                  step="any"
+                  value={longitude || ''}
+                  onChange={(e) => onLocationChange('longitude', e.target.value ? parseFloat(e.target.value) : null)}
+                  placeholder="-1.5197"
+                />
+              </div>
             </div>
+            
+            {(latitude || longitude) && (
+              <p className="text-xs text-muted-foreground">
+                📍 Coordonnées : {latitude?.toFixed(6)}, {longitude?.toFixed(6)}
+                {' '}
+                <a
+                  href={`https://www.google.com/maps?q=${latitude},${longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Voir sur Google Maps
+                </a>
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -283,6 +421,118 @@ export const StoreLocationSettings: React.FC<StoreLocationSettingsProps> = ({
           <p className="text-xs text-muted-foreground mt-4">
             Les horaires sont définis dans le fuseau horaire : {timezone}
           </p>
+        </div>
+
+        {/* Horaires spéciaux */}
+        <div className="border-t pt-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <h4 className="text-sm font-semibold">Horaires spéciaux</h4>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddSpecialHour}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Ajouter
+            </Button>
+          </div>
+
+          <p className="text-xs text-muted-foreground mb-4">
+            Définissez des horaires spéciaux pour les jours fériés, événements, ou périodes exceptionnelles
+          </p>
+
+          {defaultHours.special_hours && defaultHours.special_hours.length > 0 ? (
+            <div className="space-y-3">
+              {defaultHours.special_hours.map((specialHour, index) => (
+                <div key={index} className="p-4 border rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Horaire spécial #{index + 1}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveSpecialHour(index)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor={`special_date_${index}`}>Date *</Label>
+                      <Input
+                        id={`special_date_${index}`}
+                        type="date"
+                        value={specialHour.date}
+                        onChange={(e) => handleUpdateSpecialHour(index, 'date', e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor={`special_reason_${index}`}>Raison</Label>
+                      <Input
+                        id={`special_reason_${index}`}
+                        value={specialHour.reason}
+                        onChange={(e) => handleUpdateSpecialHour(index, 'reason', e.target.value)}
+                        placeholder="Ex: Jour férié, Événement spécial..."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      checked={!specialHour.closed}
+                      onCheckedChange={(checked) => handleUpdateSpecialHour(index, 'closed', !checked)}
+                    />
+                    <span className="text-xs text-muted-foreground">
+                      {specialHour.closed ? 'Fermé ce jour' : 'Ouvert ce jour'}
+                    </span>
+                  </div>
+
+                  {!specialHour.closed && (
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor={`special_open_${index}`} className="text-xs whitespace-nowrap">Ouverture</Label>
+                        <Input
+                          id={`special_open_${index}`}
+                          type="time"
+                          value={specialHour.open}
+                          onChange={(e) => handleUpdateSpecialHour(index, 'open', e.target.value)}
+                          className="w-28 sm:w-32"
+                        />
+                      </div>
+                      <span className="text-muted-foreground hidden sm:inline">-</span>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor={`special_close_${index}`} className="text-xs whitespace-nowrap">Fermeture</Label>
+                        <Input
+                          id={`special_close_${index}`}
+                          type="time"
+                          value={specialHour.close}
+                          onChange={(e) => handleUpdateSpecialHour(index, 'close', e.target.value)}
+                          className="w-28 sm:w-32"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 border-2 border-dashed rounded-lg">
+              <Calendar className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Aucun horaire spécial défini</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Cliquez sur "Ajouter" pour définir un horaire spécial
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

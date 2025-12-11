@@ -360,7 +360,7 @@ export function useFileUpload() {
       } = config;
 
       try {
-        // Valider le fichier
+  // Valider le fichier
         const validation = validateFile(file, {
           maxSize: config.maxSize,
         });
@@ -845,7 +845,7 @@ export function useFileUpload() {
           onProgress(100);
         }
 
-        return {
+  return {
           path: uploadData.path,
           publicUrl: urlData.publicUrl,
           signedUrl: signedUrl || null, // URL signée comme fallback
@@ -889,7 +889,7 @@ export function useFileUpload() {
       try {
         // Valider tous les fichiers d'abord
         const invalidFiles: File[] = [];
-        for (const file of files) {
+      for (const file of files) {
           const validation = validateFile(file, {
             maxSize: config.maxSize,
           });
@@ -1001,7 +1001,7 @@ export function useFileUpload() {
           failed: failed,
         }));
 
-        return results;
+      return results;
       } catch (error: any) {
         logger.error('Upload batch failed', error);
         

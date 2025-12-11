@@ -6,7 +6,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from './logger';
 
-export type ImageType = 'store-logo' | 'store-banner' | 'product-image' | 'product-gallery' | 'avatar';
+export type ImageType = 'store-logo' | 'store-banner' | 'product-image' | 'product-gallery' | 'avatar' | 'store-favicon' | 'store-apple-touch-icon' | 'store-watermark' | 'store-placeholder';
 
 interface UploadImageOptions {
   file: File;
@@ -140,11 +140,12 @@ export const uploadImage = async ({
       success: true,
       url: urlData.publicUrl
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Une erreur inattendue est survenue';
     logger.error('Unexpected image upload error', { error, fileName, type, userId });
     return {
       success: false,
-      error: error.message || 'Une erreur inattendue est survenue'
+      error: errorMessage
     };
   }
 };
@@ -208,10 +209,11 @@ export const replaceImage = async (
     }
 
     return uploadResult;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur lors du remplacement de l\'image';
     return {
       success: false,
-      error: error.message || 'Erreur lors du remplacement de l\'image'
+      error: errorMessage
     };
   }
 };
@@ -240,10 +242,11 @@ export const checkStorageBucket = async (): Promise<{ exists: boolean; error?: s
     }
 
     return { exists: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur de connexion au Storage';
     return {
       exists: false,
-      error: error.message || 'Erreur de connexion au Storage'
+      error: errorMessage
     };
   }
 };

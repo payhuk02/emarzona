@@ -11,6 +11,7 @@ import StoreFooter from '@/components/storefront/StoreFooter';
 import ContactForm from '@/components/storefront/ContactForm';
 import ReviewsList from '@/components/storefront/ReviewsList';
 import { StoreMarketingSections } from '@/components/storefront/StoreMarketingSections';
+import { StoreLocationSection } from '@/components/storefront/StoreLocationSection';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { ShoppingCart, AlertCircle, ArrowRight } from 'lucide-react';
@@ -22,6 +23,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useToast } from '@/hooks/use-toast';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
+import { StoreAnalyticsScripts } from '@/components/storefront/StoreAnalyticsScripts';
 import type { Store } from '@/hooks/useStores';
 
 const Storefront = () => {
@@ -337,6 +339,9 @@ const Storefront = () => {
         />
       )}
 
+      {/* Analytics Scripts */}
+      {store && <StoreAnalyticsScripts store={store} />}
+
       {/* Schema.org Store */}
       {store && (
         <StoreSchema
@@ -352,8 +357,20 @@ const Storefront = () => {
             instagram_url: store.instagram_url || undefined,
             twitter_url: store.twitter_url || undefined,
             linkedin_url: store.linkedin_url || undefined,
+            youtube_url: store.youtube_url || undefined,
+            tiktok_url: store.tiktok_url || undefined,
+            pinterest_url: store.pinterest_url || undefined,
             created_at: store.created_at,
             active_clients: (store as Store & { active_clients?: number }).active_clients,
+            address_line1: store.address_line1 || undefined,
+            address_line2: store.address_line2 || undefined,
+            city: store.city || undefined,
+            state_province: store.state_province || undefined,
+            postal_code: store.postal_code || undefined,
+            country: store.country || undefined,
+            latitude: store.latitude || undefined,
+            longitude: store.longitude || undefined,
+            opening_hours: store.opening_hours || undefined,
           }}
         />
       )}
@@ -575,11 +592,17 @@ const Storefront = () => {
                 }
                 contactContent={
                   store ? (
-                    <ContactForm
-                      storeName={store.name}
-                      contactEmail={store.contact_email || undefined}
-                      contactPhone={store.contact_phone || undefined}
-                    />
+                    <div className="space-y-6">
+                      {/* Section Localisation et Horaires */}
+                      <StoreLocationSection store={store} />
+                      
+                      {/* Formulaire de contact */}
+                      <ContactForm
+                        storeName={store.name}
+                        contactEmail={store.contact_email || undefined}
+                        contactPhone={store.contact_phone || undefined}
+                      />
+                    </div>
                   ) : null
                 }
               />
@@ -593,7 +616,14 @@ const Storefront = () => {
               instagram_url={store.instagram_url || undefined}
               twitter_url={store.twitter_url || undefined}
               linkedin_url={store.linkedin_url || undefined}
+              youtube_url={store.youtube_url || undefined}
+              tiktok_url={store.tiktok_url || undefined}
+              pinterest_url={store.pinterest_url || undefined}
+              snapchat_url={store.snapchat_url || undefined}
+              discord_url={store.discord_url || undefined}
+              twitch_url={store.twitch_url || undefined}
               store={store}
+              storeSlug={store.slug}
             />
           )}
         </div>
