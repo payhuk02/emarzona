@@ -1,7 +1,7 @@
 /**
  * Security Utils
  * Date: 30 Janvier 2025
- * 
+ *
  * Utilitaires de sécurité pour validation, sanitization, et protection
  */
 
@@ -19,17 +19,17 @@ export function sanitizeString(input: string): string {
 
   // Remove HTML tags
   let sanitized = input.replace(/<[^>]*>/g, '');
-  
+
   // Remove script tags and content
   sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  
+
   // Remove event handlers
   sanitized = sanitized.replace(/on\w+="[^"]*"/gi, '');
   sanitized = sanitized.replace(/on\w+='[^']*'/gi, '');
-  
+
   // Trim whitespace
   sanitized = sanitized.trim();
-  
+
   return sanitized;
 }
 
@@ -127,7 +127,7 @@ export function escapeHtml(text: string): string {
     "'": '&#039;',
   };
 
-  return text.replace(/[&<>"']/g, (m) => map[m]);
+  return text.replace(/[&<>"']/g, m => map[m]);
 }
 
 /**
@@ -137,7 +137,7 @@ export function sanitizeHtml(html: string): string {
   // Remove all HTML tags except allowed ones
   const allowedTags = ['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li'];
   const tagRegex = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi;
-  
+
   return html.replace(tagRegex, (match, tag) => {
     if (allowedTags.includes(tag.toLowerCase())) {
       // Remove attributes except href for links
@@ -164,7 +164,7 @@ export function sanitizeHtml(html: string): string {
 export function generateCSRFToken(): string {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
-  return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
 /**
@@ -196,7 +196,7 @@ export class RateLimiter {
     const requests = this.requests.get(identifier) || [];
 
     // Remove old requests outside the window
-    const validRequests = requests.filter((timestamp) => now - timestamp < this.windowMs);
+    const validRequests = requests.filter(timestamp => now - timestamp < this.windowMs);
 
     if (validRequests.length >= this.maxRequests) {
       return false;
@@ -228,7 +228,7 @@ export async function hashString(input: string): Promise<string> {
   const data = encoder.encode(input);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 /**
@@ -237,7 +237,7 @@ export async function hashString(input: string): Promise<string> {
 export function generateSecureRandomString(length: number = 32): string {
   const array = new Uint8Array(length);
   crypto.getRandomValues(array);
-  return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
 // =====================================================
@@ -252,8 +252,9 @@ export const securityHeaders = {
   'X-Frame-Options': 'DENY',
   'X-XSS-Protection': '1; mode=block',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
-  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:;",
+  'Permissions-Policy': 'geolocation=(), microphone=(self), camera=(self)',
+  'Content-Security-Policy':
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:;",
 };
 
 /**
@@ -264,4 +265,3 @@ export function applySecurityHeaders(headers: Headers): void {
     headers.set(key, value);
   });
 }
-

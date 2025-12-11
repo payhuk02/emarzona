@@ -68,6 +68,13 @@ export function CameraCapture({
       setError(null);
 
       try {
+        // Vérifier que l'API est disponible
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error(
+            "L'API de la caméra n'est pas disponible. Votre navigateur ne supporte pas l'accès à la caméra."
+          );
+        }
+
         const constraints: MediaStreamConstraints = {
           video: {
             facingMode: mode,
@@ -134,14 +141,30 @@ export function CameraCapture({
 
         const error = err as Error;
         if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-          errorMessage =
-            "Permission d'accès à la caméra refusée. Veuillez autoriser l'accès dans les paramètres de votre navigateur.";
+          // Vérifier si c'est une violation de Permissions-Policy
+          const errorMessageLower = error.message?.toLowerCase() || '';
+          if (
+            errorMessageLower.includes('permissions policy') ||
+            errorMessageLower.includes('policy violation')
+          ) {
+            errorMessage =
+              "L'accès à la caméra est bloqué par la politique de sécurité du site. Veuillez contacter l'administrateur.";
+          } else {
+            errorMessage =
+              "Permission d'accès à la caméra refusée. Veuillez autoriser l'accès dans les paramètres de votre navigateur.";
+          }
         } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
           errorMessage = 'Aucune caméra trouvée sur cet appareil.';
         } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
           errorMessage = 'La caméra est déjà utilisée par une autre application.';
         } else if (error.name === 'OverconstrainedError') {
           errorMessage = 'Les contraintes de la caméra ne peuvent pas être satisfaites.';
+        } else if (
+          error.message?.includes('Permissions policy') ||
+          error.message?.includes('policy violation')
+        ) {
+          errorMessage =
+            "L'accès à la caméra est bloqué par la politique de sécurité. Veuillez contacter l'administrateur.";
         }
 
         setError(errorMessage);
