@@ -244,26 +244,19 @@ export const DigitalBasicInfoForm = ({
       </div>
 
       {/* Category */}
-      <div className="space-y-2">
-        <Label htmlFor="category">
-          Catégorie <span className="text-destructive">*</span>
-        </Label>
-        <Select
-          value={formData.category || 'ebook'}
-          onValueChange={value => updateFormData({ category: value })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Sélectionnez une catégorie" />
-          </SelectTrigger>
-          <SelectContent className="z-[1060]">
-            {DIGITAL_CATEGORIES.map(cat => (
-              <SelectItem key={cat.value} value={cat.value} className="min-h-[44px]">
-                {cat.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <SelectField
+        label="Catégorie"
+        value={formData.category || 'ebook'}
+        onValueChange={value => updateFormData({ category: value })}
+        required
+        placeholder="Sélectionnez une catégorie"
+      >
+        {DIGITAL_CATEGORIES.map(cat => (
+          <SelectItem key={cat.value} value={cat.value}>
+            {cat.label}
+          </SelectItem>
+        ))}
+      </SelectField>
 
       {/* Short Description */}
       <div className="space-y-2">
@@ -373,10 +366,8 @@ export const DigitalBasicInfoForm = ({
 
           {/* Modèle de tarification */}
           <div className="space-y-2">
-            <Label htmlFor="pricing_model">
-              Modèle de tarification <span className="text-destructive">*</span>
-            </Label>
-            <Select
+            <SelectField
+              label="Modèle de tarification"
               value={formData.pricing_model || 'one-time'}
               onValueChange={value => {
                 updateFormData({
@@ -388,45 +379,42 @@ export const DigitalBasicInfoForm = ({
                   price: value === 'free' ? 0 : formData.price || 0,
                 });
               }}
+              required
+              placeholder="Sélectionnez un modèle"
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un modèle" />
-              </SelectTrigger>
-              <SelectContent className="z-[1060]">
-                <SelectItem value="one-time" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Achat unique</span>
-                    <span className="text-xs text-muted-foreground">
-                      Paiement une seule fois, accès permanent
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="subscription" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Abonnement</span>
-                    <span className="text-xs text-muted-foreground">
-                      Paiement récurrent (mensuel/annuel)
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="free" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Gratuit</span>
-                    <span className="text-xs text-muted-foreground">
-                      Produit téléchargeable gratuitement
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="pay-what-you-want" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Prix libre</span>
-                    <span className="text-xs text-muted-foreground">
-                      L'acheteur choisit le montant (minimum possible)
-                    </span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+              <SelectItem value="one-time">
+                <div className="flex flex-col">
+                  <span className="font-medium">Achat unique</span>
+                  <span className="text-xs text-muted-foreground">
+                    Paiement une seule fois, accès permanent
+                  </span>
+                </div>
+              </SelectItem>
+              <SelectItem value="subscription">
+                <div className="flex flex-col">
+                  <span className="font-medium">Abonnement</span>
+                  <span className="text-xs text-muted-foreground">
+                    Paiement récurrent (mensuel/annuel)
+                  </span>
+                </div>
+              </SelectItem>
+              <SelectItem value="free">
+                <div className="flex flex-col">
+                  <span className="font-medium">Gratuit</span>
+                  <span className="text-xs text-muted-foreground">
+                    Produit téléchargeable gratuitement
+                  </span>
+                </div>
+              </SelectItem>
+              <SelectItem value="pay-what-you-want">
+                <div className="flex flex-col">
+                  <span className="font-medium">Prix libre</span>
+                  <span className="text-xs text-muted-foreground">
+                    L'acheteur choisit le montant (minimum possible)
+                  </span>
+                </div>
+              </SelectItem>
+            </SelectField>
             {formData.pricing_model === 'free' && (
               <p className="text-sm text-blue-600 flex items-center gap-2">
                 <Info className="h-4 w-4" />
@@ -740,50 +728,43 @@ export const DigitalBasicInfoForm = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 sm:space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="licensing_type">
-              Type de licence <span className="text-destructive">*</span>
-            </Label>
-            <Select
-              value={formData.licensing_type || 'standard'}
-              onValueChange={value =>
-                updateFormData({ licensing_type: value as 'plr' | 'copyrighted' | 'standard' })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un type de licence" />
-              </SelectTrigger>
-              <SelectContent className="z-[1060]">
-                <SelectItem value="standard" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Licence standard</span>
-                    <span className="text-xs text-muted-foreground">
-                      Utilisation personnelle uniquement, pas de revente
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="plr" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">PLR (Private Label Rights)</span>
-                    <span className="text-xs text-muted-foreground">
-                      Droits de label privé - Peut être revendu avec modifications
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="copyrighted" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Protégé par droit d'auteur</span>
-                    <span className="text-xs text-muted-foreground">
-                      Copyright strict - Aucune utilisation commerciale sans autorisation
-                    </span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-sm text-muted-foreground">
-              Le type de licence définit comment votre produit peut être utilisé par les acheteurs
-            </p>
-          </div>
+          <SelectField
+            label="Type de licence"
+            value={formData.licensing_type || 'standard'}
+            onValueChange={value =>
+              updateFormData({ licensing_type: value as 'plr' | 'copyrighted' | 'standard' })
+            }
+            required
+            placeholder="Sélectionnez un type de licence"
+          >
+            <SelectItem value="standard">
+              <div className="flex flex-col">
+                <span className="font-medium">Licence standard</span>
+                <span className="text-xs text-muted-foreground">
+                  Utilisation personnelle uniquement, pas de revente
+                </span>
+              </div>
+            </SelectItem>
+            <SelectItem value="plr">
+              <div className="flex flex-col">
+                <span className="font-medium">PLR (Private Label Rights)</span>
+                <span className="text-xs text-muted-foreground">
+                  Droits de label privé - Peut être revendu avec modifications
+                </span>
+              </div>
+            </SelectItem>
+            <SelectItem value="copyrighted">
+              <div className="flex flex-col">
+                <span className="font-medium">Protégé par droit d'auteur</span>
+                <span className="text-xs text-muted-foreground">
+                  Copyright strict - Aucune utilisation commerciale sans autorisation
+                </span>
+              </div>
+            </SelectItem>
+          </SelectField>
+          <p className="text-sm text-muted-foreground">
+            Le type de licence définit comment votre produit peut être utilisé par les acheteurs
+          </p>
 
           <div className="space-y-2">
             <Label htmlFor="license_terms">Conditions de licence (optionnel)</Label>
