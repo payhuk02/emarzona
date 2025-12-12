@@ -330,45 +330,39 @@ export const CourseBasicInfoForm = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 sm:space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="licensing_type">
-              Type de licence <span className="text-red-500">*</span>
-            </Label>
-            <Select
-              value={formData.licensing_type || 'standard'}
-              onValueChange={value => onChange('licensing_type', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un type de licence" />
-              </SelectTrigger>
-              <SelectContent className="z-[1060]">
-                <SelectItem value="standard" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Licence standard</span>
-                    <span className="text-xs text-muted-foreground">
-                      Utilisation personnelle uniquement, pas de revente
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="plr" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">PLR (Private Label Rights)</span>
-                    <span className="text-xs text-muted-foreground">
-                      Droits de label privé - Peut être revendu avec modifications
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="copyrighted" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Protégé par droit d'auteur</span>
-                    <span className="text-xs text-muted-foreground">
-                      Copyright strict - Aucune utilisation commerciale sans autorisation
-                    </span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <SelectField
+            label="Type de licence"
+            value={formData.licensing_type || 'standard'}
+            onValueChange={value => onChange('licensing_type', value)}
+            required
+            placeholder="Sélectionnez un type de licence"
+            error={errors?.licensing_type}
+          >
+            <SelectItem value="standard">
+              <div className="flex flex-col">
+                <span className="font-medium">Licence standard</span>
+                <span className="text-xs text-muted-foreground">
+                  Utilisation personnelle uniquement, pas de revente
+                </span>
+              </div>
+            </SelectItem>
+            <SelectItem value="plr">
+              <div className="flex flex-col">
+                <span className="font-medium">PLR (Private Label Rights)</span>
+                <span className="text-xs text-muted-foreground">
+                  Droits de label privé - Peut être revendu avec modifications
+                </span>
+              </div>
+            </SelectItem>
+            <SelectItem value="copyrighted">
+              <div className="flex flex-col">
+                <span className="font-medium">Protégé par droit d'auteur</span>
+                <span className="text-xs text-muted-foreground">
+                  Copyright strict - Aucune utilisation commerciale sans autorisation
+                </span>
+              </div>
+            </SelectItem>
+          </SelectField>
 
           <div className="space-y-2">
             <Label htmlFor="license_terms">Conditions de licence (optionnel)</Label>
