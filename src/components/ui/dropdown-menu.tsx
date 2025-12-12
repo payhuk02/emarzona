@@ -130,6 +130,10 @@ const DropdownMenuContent = React.forwardRef<
       const rect = menuElement.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) {
         // Le menu n'est pas encore positionné, réessayer
+        // Limiter les tentatives pour éviter les boucles infinies
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+        }
         rafId = requestAnimationFrame(lockPosition);
         return;
       }
@@ -149,7 +153,11 @@ const DropdownMenuContent = React.forwardRef<
 
       // Surveiller les changements de position avec requestAnimationFrame
       const checkPosition = () => {
-        if (!menuElement || !lockedPosition) return;
+        // Vérifier que le menu est toujours ouvert et que l'élément existe
+        if (!menuElement || !lockedPosition || !isOpen) {
+          rafId = null;
+          return;
+        }
 
         const currentRect = menuElement.getBoundingClientRect();
 
@@ -162,11 +170,18 @@ const DropdownMenuContent = React.forwardRef<
           menuElement.style.left = `${lockedPosition.left}px`;
         }
 
-        if (isOpen) {
+        // Continuer la surveillance seulement si le menu est toujours ouvert
+        if (isOpen && menuElement.isConnected) {
           rafId = requestAnimationFrame(checkPosition);
+        } else {
+          rafId = null;
         }
       };
 
+      // Démarrer la surveillance
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
       rafId = requestAnimationFrame(checkPosition);
     };
 

@@ -81,8 +81,9 @@ const SelectTrigger = React.forwardRef<
       }}
       onTouchEnd={e => {
         // Retirer le feedback après le toucher avec un délai pour permettre l'ouverture
+        // Vérifier que l'élément est toujours connecté pour éviter les erreurs
         setTimeout(() => {
-          if (e.currentTarget) {
+          if (e.currentTarget && e.currentTarget.isConnected) {
             e.currentTarget.classList.remove('active');
           }
         }, 200);
@@ -198,6 +199,10 @@ const SelectContent = React.forwardRef<
       const rect = menuElement.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) {
         // Le menu n'est pas encore positionné, réessayer
+        // Limiter les tentatives pour éviter les boucles infinies
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+        }
         rafId = requestAnimationFrame(lockPosition);
         return;
       }
@@ -217,7 +222,11 @@ const SelectContent = React.forwardRef<
 
       // Surveiller les changements de position avec requestAnimationFrame
       const checkPosition = () => {
-        if (!menuElement || !lockedPosition) return;
+        // Vérifier que le menu est toujours ouvert et que l'élément existe
+        if (!menuElement || !lockedPosition || !isOpen) {
+          rafId = null;
+          return;
+        }
 
         const currentRect = menuElement.getBoundingClientRect();
 
@@ -230,11 +239,18 @@ const SelectContent = React.forwardRef<
           menuElement.style.left = `${lockedPosition.left}px`;
         }
 
-        if (isOpen) {
+        // Continuer la surveillance seulement si le menu est toujours ouvert
+        if (isOpen && menuElement.isConnected) {
           rafId = requestAnimationFrame(checkPosition);
+        } else {
+          rafId = null;
         }
       };
 
+      // Démarrer la surveillance
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
       rafId = requestAnimationFrame(checkPosition);
     };
 
@@ -452,11 +468,14 @@ const SelectItem = React.forwardRef<
           }
         }
         // Retirer le feedback visuel après un délai
-        setTimeout(() => {
-          if (e.currentTarget) {
+        // Utiliser une référence pour éviter les fuites mémoire si le composant est démonté
+        const timeoutId = setTimeout(() => {
+          if (e.currentTarget && e.currentTarget.isConnected) {
             e.currentTarget.classList.remove('active');
           }
         }, 200);
+
+        // Nettoyer le timeout si le composant est démonté (géré par React)
         // Laisser Radix UI gérer la sélection
         props.onTouchEnd?.(e);
       }}
