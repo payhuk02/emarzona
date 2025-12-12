@@ -321,8 +321,9 @@ const DropdownMenuItem = React.forwardRef<
             },
             onTouchEnd: (e: React.TouchEvent) => {
               // Retirer le feedback après un délai
+              // Vérifier que l'élément est toujours connecté pour éviter les erreurs
               setTimeout(() => {
-                if (e.currentTarget) {
+                if (e.currentTarget && e.currentTarget.isConnected) {
                   e.currentTarget.classList.remove('active');
                 }
               }, 200);
