@@ -39,7 +39,7 @@ export const CurrencySelect = ({ value, onValueChange, disabled }: CurrencySelec
             'RWF',
           ].includes(c.code)
         ).map(currency => (
-          <SelectItem key={currency.code} value={currency.code} className="min-h-[44px]">
+          <SelectItem key={currency.code} value={currency.code}>
             <span className="flex items-center gap-2">
               <span>{currency.flag}</span>
               <span>{currency.name}</span>
@@ -53,7 +53,7 @@ export const CurrencySelect = ({ value, onValueChange, disabled }: CurrencySelec
         {CURRENCIES.filter(c =>
           ['EUR', 'USD', 'GBP', 'CAD', 'CHF', 'JPY', 'CNY'].includes(c.code)
         ).map(currency => (
-          <SelectItem key={currency.code} value={currency.code} className="min-h-[44px]">
+          <SelectItem key={currency.code} value={currency.code}>
             <span className="flex items-center gap-2">
               <span>{currency.flag}</span>
               <span>{currency.name}</span>
