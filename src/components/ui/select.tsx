@@ -380,26 +380,45 @@ const SelectItem = React.forwardRef<
         // Sur mobile, déclencher manuellement onPointerDown pour garantir la détection par Radix UI
         // car onTouchEnd ne déclenche pas toujours onPointerDown de manière fiable
         if (isMobile && e.currentTarget) {
-          // Utiliser requestAnimationFrame pour s'assurer que l'événement est déclenché au bon moment
-          requestAnimationFrame(() => {
-            const touch = e.changedTouches[0];
-            if (touch && e.currentTarget) {
-              // Créer un événement pointerDown synthétique pour garantir la détection par Radix UI
-              const pointerEvent = new PointerEvent('pointerdown', {
-                bubbles: true,
-                cancelable: true,
-                pointerId: touch.identifier || 1,
-                pointerType: 'touch',
-                clientX: touch.clientX,
-                clientY: touch.clientY,
-                screenX: touch.screenX,
-                screenY: touch.screenY,
-                button: 0,
-                buttons: 1,
-              });
-              e.currentTarget.dispatchEvent(pointerEvent);
-            }
-          });
+          const target = e.currentTarget;
+          const touch = e.changedTouches[0];
+
+          if (touch) {
+            // Capturer les coordonnées avant que l'événement ne se termine
+            const clientX = touch.clientX;
+            const clientY = touch.clientY;
+            const screenX = touch.screenX;
+            const screenY = touch.screenY;
+            const pointerId = touch.identifier || 1;
+
+            // Utiliser requestAnimationFrame pour s'assurer que l'événement est déclenché au bon moment
+            // mais aussi essayer immédiatement pour une meilleure réactivité
+            const dispatchPointerEvent = () => {
+              if (target && target.isConnected) {
+                // Créer un événement pointerDown synthétique pour garantir la détection par Radix UI
+                const pointerEvent = new PointerEvent('pointerdown', {
+                  bubbles: true,
+                  cancelable: true,
+                  pointerId: pointerId,
+                  pointerType: 'touch',
+                  clientX: clientX,
+                  clientY: clientY,
+                  screenX: screenX,
+                  screenY: screenY,
+                  button: 0,
+                  buttons: 1,
+                  isPrimary: true,
+                });
+                target.dispatchEvent(pointerEvent);
+              }
+            };
+
+            // Essayer immédiatement d'abord
+            dispatchPointerEvent();
+
+            // Puis aussi dans requestAnimationFrame pour garantir
+            requestAnimationFrame(dispatchPointerEvent);
+          }
         }
         // Retirer le feedback visuel après un délai
         setTimeout(() => {
