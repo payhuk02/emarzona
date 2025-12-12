@@ -246,6 +246,36 @@ export const CreateDigitalProductWizard = ({
   const [formData, setFormData] = useState<DigitalProductFormData>(() => getDefaultFormData());
 
   /**
+   * Auto-save draft
+   */
+  const handleAutoSave = useCallback(
+    async (data?: DigitalProductFormData) => {
+      const dataToSave = data || formData;
+
+      // Ne pas auto-save si pas de nom
+      if (!dataToSave.name || dataToSave.name.trim() === '') {
+        return;
+      }
+
+      setIsAutoSaving(true);
+      try {
+        // Sauvegarder dans localStorage (brouillon local)
+        localStorage.setItem('digital-product-draft', JSON.stringify(dataToSave));
+        localStorage.setItem('digital-product-current-step', currentStep.toString());
+        logger.info('Brouillon auto-sauvegardé', { step: currentStep });
+      } catch (error) {
+        logger.error('Auto-save error', {
+          error: error instanceof Error ? error.message : String(error),
+          step: currentStep,
+        });
+      } finally {
+        setIsAutoSaving(false);
+      }
+    },
+    [formData, currentStep]
+  );
+
+  /**
    * Update form data with auto-save
    */
   const updateFormData = useCallback(
@@ -303,36 +333,6 @@ export const CreateDigitalProductWizard = ({
       });
     },
     [handleAutoSave]
-  );
-
-  /**
-   * Auto-save draft
-   */
-  const handleAutoSave = useCallback(
-    async (data?: DigitalProductFormData) => {
-      const dataToSave = data || formData;
-
-      // Ne pas auto-save si pas de nom
-      if (!dataToSave.name || dataToSave.name.trim() === '') {
-        return;
-      }
-
-      setIsAutoSaving(true);
-      try {
-        // Sauvegarder dans localStorage (brouillon local)
-        localStorage.setItem('digital-product-draft', JSON.stringify(dataToSave));
-        localStorage.setItem('digital-product-current-step', currentStep.toString());
-        logger.info('Brouillon auto-sauvegardé', { step: currentStep });
-      } catch (error) {
-        logger.error('Auto-save error', {
-          error: error instanceof Error ? error.message : String(error),
-          step: currentStep,
-        });
-      } finally {
-        setIsAutoSaving(false);
-      }
-    },
-    [formData, currentStep]
   );
 
   /**
@@ -726,37 +726,6 @@ export const CreateDigitalProductWizard = ({
   );
 
   /**
-   * Keyboard shortcuts
-   */
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Ne pas intercepter si on est dans un input/textarea
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-
-      // Ctrl/Cmd + S pour sauvegarder brouillon
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        handleSaveDraft();
-      }
-
-      // Flèches pour navigation
-      if (e.key === 'ArrowRight' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        handleNext();
-      }
-      if (e.key === 'ArrowLeft' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        handlePrevious();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleNext, handlePrevious, handleSaveDraft]);
-
-  /**
    * Save product to database
    */
   const saveProduct = useCallback(
@@ -1038,6 +1007,41 @@ export const CreateDigitalProductWizard = ({
   );
 
   /**
+   * Handle save draft
+   */
+  const handleSaveDraft = useCallback(async () => {
+    setIsSubmitting(true);
+
+    try {
+      const product = await saveProduct(true);
+
+      logger.info('Brouillon sauvegardé', { productId: product.id });
+
+      toast({
+        title: '✅ Brouillon sauvegardé',
+        description: `Produit "${product.name}" enregistré. Vous pouvez continuer plus tard.`,
+      });
+
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        // Rediriger vers la liste des produits digitaux
+        navigate('/dashboard/digital-products', { replace: true });
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Erreur lors de la sauvegarde du brouillon', { error: errorMessage });
+      toast({
+        title: '❌ Erreur',
+        description: errorMessage || 'Impossible de sauvegarder le brouillon',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [saveProduct, toast, onSuccess, navigate]);
+
+  /**
    * Handle submit (publish)
    */
   const handleSubmit = useCallback(async () => {
@@ -1086,39 +1090,35 @@ export const CreateDigitalProductWizard = ({
   ]);
 
   /**
-   * Handle save draft
+   * Keyboard shortcuts
    */
-  const handleSaveDraft = useCallback(async () => {
-    setIsSubmitting(true);
-
-    try {
-      const product = await saveProduct(true);
-
-      logger.info('Brouillon sauvegardé', { productId: product.id });
-
-      toast({
-        title: '✅ Brouillon sauvegardé',
-        description: `Produit "${product.name}" enregistré. Vous pouvez continuer plus tard.`,
-      });
-
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        // Rediriger vers la liste des produits digitaux
-        navigate('/dashboard/digital-products', { replace: true });
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ne pas intercepter si on est dans un input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
       }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Erreur lors de la sauvegarde du brouillon', { error: errorMessage });
-      toast({
-        title: '❌ Erreur',
-        description: errorMessage || 'Impossible de sauvegarder le brouillon',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [saveProduct, toast, onSuccess, navigate]);
+
+      // Ctrl/Cmd + S pour sauvegarder brouillon
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSaveDraft();
+      }
+
+      // Flèches pour navigation
+      if (e.key === 'ArrowRight' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        handleNext();
+      }
+      if (e.key === 'ArrowLeft' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        handlePrevious();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleNext, handlePrevious, handleSaveDraft]);
 
   /**
    * Render step content
