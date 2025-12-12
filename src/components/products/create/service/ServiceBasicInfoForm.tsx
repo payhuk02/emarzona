@@ -109,46 +109,29 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Service Type */}
-      <div className="space-y-2">
-        <Label htmlFor="service_type">Type de service *</Label>
-        <Select
-          value={data.service_type}
-          onValueChange={value =>
-            onUpdate({
-              service_type: value as
-                | 'consultation'
-                | 'workshop'
-                | 'maintenance'
-                | 'installation'
-                | 'other',
-            })
-          }
-        >
-          <SelectTrigger id="service_type">
-            <SelectValue placeholder="Sélectionnez un type" />
-          </SelectTrigger>
-          <SelectContent className="z-[1060]">
-            <SelectItem value="appointment" className="min-h-[44px]">
-              Rendez-vous
-            </SelectItem>
-            <SelectItem value="class" className="min-h-[44px]">
-              Cours / Formation
-            </SelectItem>
-            <SelectItem value="event" className="min-h-[44px]">
-              Événement
-            </SelectItem>
-            <SelectItem value="consultation" className="min-h-[44px]">
-              Consultation
-            </SelectItem>
-            <SelectItem value="other" className="min-h-[44px]">
-              Autre
-            </SelectItem>
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-muted-foreground">
-          Choisissez le type qui correspond le mieux à votre service
-        </p>
-      </div>
+      <SelectField
+        label="Type de service"
+        value={data.service_type}
+        onValueChange={value =>
+          onUpdate({
+            service_type: value as
+              | 'consultation'
+              | 'workshop'
+              | 'maintenance'
+              | 'installation'
+              | 'other',
+          })
+        }
+        required
+        placeholder="Sélectionnez un type"
+        description="Choisissez le type qui correspond le mieux à votre service"
+      >
+        <SelectItem value="appointment">Rendez-vous</SelectItem>
+        <SelectItem value="class">Cours / Formation</SelectItem>
+        <SelectItem value="event">Événement</SelectItem>
+        <SelectItem value="consultation">Consultation</SelectItem>
+        <SelectItem value="other">Autre</SelectItem>
+      </SelectField>
 
       {/* Service Name */}
       <div className="space-y-2">
@@ -251,10 +234,8 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
 
           {/* Modèle de tarification */}
           <div className="space-y-2">
-            <Label htmlFor="pricing_model">
-              Modèle de tarification <span className="text-red-500">*</span>
-            </Label>
-            <Select
+            <SelectField
+              label="Modèle de tarification"
               value={data.pricing_model || 'one-time'}
               onValueChange={value => {
                 onUpdate({ pricing_model: value });
@@ -262,45 +243,42 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
                   onUpdate({ price: 0 });
                 }
               }}
+              required
+              placeholder="Sélectionnez un modèle"
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un modèle" />
-              </SelectTrigger>
-              <SelectContent className="z-[1060]">
-                <SelectItem value="one-time" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Paiement unique</span>
-                    <span className="text-xs text-muted-foreground">
-                      Prix fixe pour une réservation
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="subscription" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Abonnement</span>
-                    <span className="text-xs text-muted-foreground">
-                      Service disponible via abonnement récurrent
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="free" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Gratuit</span>
-                    <span className="text-xs text-muted-foreground">
-                      Service accessible gratuitement
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="pay-what-you-want" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Prix libre</span>
-                    <span className="text-xs text-muted-foreground">
-                      Le client choisit le montant (minimum possible)
-                    </span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+              <SelectItem value="one-time">
+                <div className="flex flex-col">
+                  <span className="font-medium">Paiement unique</span>
+                  <span className="text-xs text-muted-foreground">
+                    Prix fixe pour une réservation
+                  </span>
+                </div>
+              </SelectItem>
+              <SelectItem value="subscription">
+                <div className="flex flex-col">
+                  <span className="font-medium">Abonnement</span>
+                  <span className="text-xs text-muted-foreground">
+                    Service disponible via abonnement récurrent
+                  </span>
+                </div>
+              </SelectItem>
+              <SelectItem value="free">
+                <div className="flex flex-col">
+                  <span className="font-medium">Gratuit</span>
+                  <span className="text-xs text-muted-foreground">
+                    Service accessible gratuitement
+                  </span>
+                </div>
+              </SelectItem>
+              <SelectItem value="pay-what-you-want">
+                <div className="flex flex-col">
+                  <span className="font-medium">Prix libre</span>
+                  <span className="text-xs text-muted-foreground">
+                    Le client choisit le montant (minimum possible)
+                  </span>
+                </div>
+              </SelectItem>
+            </SelectField>
             {data.pricing_model === 'free' && (
               <p className="text-sm text-blue-600 flex items-center gap-2">
                 <Info className="h-4 w-4" />

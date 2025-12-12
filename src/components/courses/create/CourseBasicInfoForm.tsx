@@ -415,76 +415,60 @@ export const CourseBasicInfoForm = ({
         </CardHeader>
         <CardContent className="space-y-3 sm:space-y-4">
           {/* Niveau */}
-          <div className="space-y-2">
-            <Label htmlFor="level">
-              Niveau du cours <span className="text-red-500">*</span>
-            </Label>
-            <Select value={formData.level} onValueChange={value => onChange('level', value)}>
-              <SelectTrigger className={errors.level ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Sélectionnez un niveau" />
-              </SelectTrigger>
-              <SelectContent className="z-[1060]">
-                {COURSE_LEVELS.map(level => (
-                  <SelectItem key={level.value} value={level.value} className="min-h-[44px]">
-                    <div className="flex items-center gap-2">
-                      <span>{level.label}</span>
-                      <Badge variant="outline" className="text-xs">
-                        {level.description}
-                      </Badge>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.level && <p className="text-sm text-red-500">{errors.level}</p>}
-          </div>
+          <SelectField
+            label="Niveau du cours"
+            value={formData.level}
+            onValueChange={value => onChange('level', value)}
+            required
+            placeholder="Sélectionnez un niveau"
+            error={errors?.level}
+          >
+            {COURSE_LEVELS.map(level => (
+              <SelectItem key={level.value} value={level.value}>
+                <div className="flex items-center gap-2">
+                  <span>{level.label}</span>
+                  <Badge variant="outline" className="text-xs">
+                    {level.description}
+                  </Badge>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectField>
 
           {/* Langue */}
-          <div className="space-y-2">
-            <Label htmlFor="language">
-              Langue du cours <span className="text-red-500">*</span>
-            </Label>
-            <Select value={formData.language} onValueChange={value => onChange('language', value)}>
-              <SelectTrigger className={errors.language ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Sélectionnez une langue" />
-              </SelectTrigger>
-              <SelectContent className="z-[1060]">
-                {LANGUAGES.map(lang => (
-                  <SelectItem key={lang.value} value={lang.value} className="min-h-[44px]">
-                    <div className="flex items-center gap-2">
-                      <span>{lang.flag}</span>
-                      <span>{lang.label}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.language && (
-              <p className="text-sm text-red-500 break-words max-w-full">{errors.language}</p>
-            )}
-          </div>
+          <SelectField
+            label="Langue du cours"
+            value={formData.language}
+            onValueChange={value => onChange('language', value)}
+            required
+            placeholder="Sélectionnez une langue"
+            error={errors?.language}
+          >
+            {LANGUAGES.map(lang => (
+              <SelectItem key={lang.value} value={lang.value}>
+                <div className="flex items-center gap-2">
+                  <span>{lang.flag}</span>
+                  <span>{lang.label}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectField>
 
           {/* Catégorie */}
-          <div className="space-y-2">
-            <Label htmlFor="category">
-              Catégorie <span className="text-red-500">*</span>
-            </Label>
-            <Select value={formData.category} onValueChange={value => onChange('category', value)}>
-              <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Sélectionnez une catégorie" />
-              </SelectTrigger>
-              <SelectContent className="z-[1060]">
-                {CATEGORIES.map(category => (
-                  <SelectItem key={category} value={category} className="min-h-[44px]">
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.category && (
-              <p className="text-sm text-red-500 break-words max-w-full">{errors.category}</p>
-            )}
-          </div>
+          <SelectField
+            label="Catégorie"
+            value={formData.category}
+            onValueChange={value => onChange('category', value)}
+            required
+            placeholder="Sélectionnez une catégorie"
+            error={errors?.category}
+          >
+            {CATEGORIES.map(category => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
+            ))}
+          </SelectField>
         </CardContent>
       </Card>
 
@@ -549,10 +533,8 @@ export const CourseBasicInfoForm = ({
 
           {/* Modèle de tarification */}
           <div className="space-y-2">
-            <Label htmlFor="pricing_model">
-              Modèle de tarification <span className="text-red-500">*</span>
-            </Label>
-            <Select
+            <SelectField
+              label="Modèle de tarification"
               value={formData.pricing_model || 'one-time'}
               onValueChange={value => {
                 onChange('pricing_model', value);
@@ -560,45 +542,42 @@ export const CourseBasicInfoForm = ({
                   onChange('price', 0);
                 }
               }}
+              required
+              placeholder="Sélectionnez un modèle"
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un modèle" />
-              </SelectTrigger>
-              <SelectContent className="z-[1060]">
-                <SelectItem value="one-time" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Achat unique</span>
-                    <span className="text-xs text-muted-foreground">
-                      Paiement une seule fois, accès permanent
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="subscription" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Abonnement</span>
-                    <span className="text-xs text-muted-foreground">
-                      Paiement récurrent (mensuel/annuel)
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="free" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Gratuit</span>
-                    <span className="text-xs text-muted-foreground">
-                      Cours accessible gratuitement
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="pay-what-you-want" className="min-h-[44px]">
-                  <div className="flex flex-col">
-                    <span className="font-medium">Prix libre</span>
-                    <span className="text-xs text-muted-foreground">
-                      L'étudiant choisit le montant (minimum possible)
-                    </span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+              <SelectItem value="one-time">
+                <div className="flex flex-col">
+                  <span className="font-medium">Achat unique</span>
+                  <span className="text-xs text-muted-foreground">
+                    Paiement une seule fois, accès permanent
+                  </span>
+                </div>
+              </SelectItem>
+              <SelectItem value="subscription">
+                <div className="flex flex-col">
+                  <span className="font-medium">Abonnement</span>
+                  <span className="text-xs text-muted-foreground">
+                    Paiement récurrent (mensuel/annuel)
+                  </span>
+                </div>
+              </SelectItem>
+              <SelectItem value="free">
+                <div className="flex flex-col">
+                  <span className="font-medium">Gratuit</span>
+                  <span className="text-xs text-muted-foreground">
+                    Cours accessible gratuitement
+                  </span>
+                </div>
+              </SelectItem>
+              <SelectItem value="pay-what-you-want">
+                <div className="flex flex-col">
+                  <span className="font-medium">Prix libre</span>
+                  <span className="text-xs text-muted-foreground">
+                    L'étudiant choisit le montant (minimum possible)
+                  </span>
+                </div>
+              </SelectItem>
+            </SelectField>
             {formData.pricing_model === 'free' && (
               <p className="text-sm text-blue-600 flex items-center gap-2">
                 <Info className="h-4 w-4" />
