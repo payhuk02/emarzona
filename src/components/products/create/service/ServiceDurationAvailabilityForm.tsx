@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, X, MapPin, Video, Home, Navigation } from 'lucide-react';
 import type { ServiceProductFormData, ServiceAvailabilitySlot } from '@/types/service-product';
 
@@ -43,7 +42,10 @@ const COMMON_DURATIONS = [
   { value: 180, label: '3 heures' },
 ];
 
-export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurationAvailabilityFormProps) => {
+export const ServiceDurationAvailabilityForm = ({
+  data,
+  onUpdate,
+}: ServiceDurationAvailabilityFormProps) => {
   const handleAddSlot = () => {
     const newSlot: ServiceAvailabilitySlot = {
       day: 1, // Lundi par défaut
@@ -62,7 +64,11 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
     onUpdate({ availability_slots: newSlots });
   };
 
-  const handleUpdateSlot = (index: number, field: keyof ServiceAvailabilitySlot, value: any) => {
+  const handleUpdateSlot = (
+    index: number,
+    field: keyof ServiceAvailabilitySlot,
+    value: string | number
+  ) => {
     const newSlots = [...(data.availability_slots || [])];
     newSlots[index] = { ...newSlots[index], [field]: value };
     onUpdate({ availability_slots: newSlots });
@@ -94,7 +100,7 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
         <CardContent className="space-y-4">
           {/* Quick Duration */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {COMMON_DURATIONS.map((duration) => (
+            {COMMON_DURATIONS.map(duration => (
               <Button
                 key={duration.value}
                 variant={data.duration_minutes === duration.value ? 'default' : 'outline'}
@@ -115,7 +121,7 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
               min="1"
               step="1"
               value={data.duration_minutes || ''}
-              onChange={(e) => onUpdate({ duration_minutes: parseInt(e.target.value) || 60 })}
+              onChange={e => onUpdate({ duration_minutes: parseInt(e.target.value) || 60 })}
             />
           </div>
         </CardContent>
@@ -133,31 +139,35 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
         <CardContent className="space-y-4">
           <Select
             value={data.location_type}
-            onValueChange={(value) => onUpdate({ location_type: value as any })}
+            onValueChange={value =>
+              onUpdate({
+                location_type: value as 'on_site' | 'online' | 'customer_location' | 'flexible',
+              })
+            }
           >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="z-[1060]">
-              <SelectItem value="on_site" className="min-h-[44px]">
+            <SelectContent>
+              <SelectItem value="on_site">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   Sur place (à votre adresse)
                 </div>
               </SelectItem>
-              <SelectItem value="online" className="min-h-[44px]">
+              <SelectItem value="online">
                 <div className="flex items-center gap-2">
                   <Video className="h-4 w-4" />
                   En ligne (visioconférence)
                 </div>
               </SelectItem>
-              <SelectItem value="customer_location" className="min-h-[44px]">
+              <SelectItem value="customer_location">
                 <div className="flex items-center gap-2">
                   <Home className="h-4 w-4" />
                   Chez le client
                 </div>
               </SelectItem>
-              <SelectItem value="flexible" className="min-h-[44px]">
+              <SelectItem value="flexible">
                 <div className="flex items-center gap-2">
                   <Navigation className="h-4 w-4" />
                   Flexible
@@ -174,7 +184,7 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
                 id="location_address"
                 placeholder="123 rue de la République, Paris"
                 value={data.location_address || ''}
-                onChange={(e) => onUpdate({ location_address: e.target.value })}
+                onChange={e => onUpdate({ location_address: e.target.value })}
               />
             </div>
           )}
@@ -188,7 +198,7 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
                 type="url"
                 placeholder="https://meet.google.com/xxx ou https://zoom.us/j/xxx"
                 value={data.meeting_url || ''}
-                onChange={(e) => onUpdate({ meeting_url: e.target.value })}
+                onChange={e => onUpdate({ meeting_url: e.target.value })}
               />
               <p className="text-xs text-muted-foreground">
                 Lien envoyé automatiquement au client après réservation
@@ -212,14 +222,14 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
                   {/* Day */}
                   <Select
                     value={slot.day.toString()}
-                    onValueChange={(value) => handleUpdateSlot(index, 'day', parseInt(value))}
+                    onValueChange={value => handleUpdateSlot(index, 'day', parseInt(value))}
                   >
                     <SelectTrigger className="w-[140px]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="z-[1060]">
-                      {DAYS_OF_WEEK.map((day) => (
-                        <SelectItem key={day.value} value={day.value.toString()} className="min-h-[44px]">
+                    <SelectContent>
+                      {DAYS_OF_WEEK.map(day => (
+                        <SelectItem key={day.value} value={day.value.toString()}>
                           {day.label}
                         </SelectItem>
                       ))}
@@ -230,7 +240,7 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
                   <Input
                     type="time"
                     value={slot.start_time}
-                    onChange={(e) => handleUpdateSlot(index, 'start_time', e.target.value)}
+                    onChange={e => handleUpdateSlot(index, 'start_time', e.target.value)}
                     className="w-[120px]"
                   />
 
@@ -240,25 +250,19 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
                   <Input
                     type="time"
                     value={slot.end_time}
-                    onChange={(e) => handleUpdateSlot(index, 'end_time', e.target.value)}
+                    onChange={e => handleUpdateSlot(index, 'end_time', e.target.value)}
                     className="w-[120px]"
                   />
 
                   {/* Remove */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemoveSlot(index)}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => handleRemoveSlot(index)}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              Aucun créneau ajouté
-            </p>
+            <p className="text-sm text-muted-foreground text-center py-4">Aucun créneau ajouté</p>
           )}
 
           <Button onClick={handleAddSlot} variant="outline" className="w-full">
@@ -274,7 +278,7 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
         <Input
           id="timezone"
           value={data.timezone || ''}
-          onChange={(e) => onUpdate({ timezone: e.target.value })}
+          onChange={e => onUpdate({ timezone: e.target.value })}
           disabled
         />
         <p className="text-xs text-muted-foreground">
@@ -284,4 +288,3 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
     </div>
   );
 };
-

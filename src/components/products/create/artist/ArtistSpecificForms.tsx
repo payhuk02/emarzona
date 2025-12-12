@@ -6,11 +6,16 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Plus, X } from 'lucide-react';
-import type { ArtistProductFormData, WriterProductData, MusicianProductData, VisualArtistProductData, DesignerProductData } from '@/types/artist-product';
+import type { ArtistProductFormData } from '@/types/artist-product';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 
 interface ArtistSpecificFormsProps {
@@ -25,11 +30,11 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
   // Écrivain
   if (artistType === 'writer') {
     const writerData = data.writer_specific || {};
-    
+
     return (
       <div className="space-y-4 p-4 border rounded-lg">
         <h3 className="text-lg font-semibold">Informations du Livre</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="book_isbn">ISBN</Label>
@@ -37,9 +42,11 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               id="book_isbn"
               placeholder="978-2-1234-5678-9"
               value={writerData.book_isbn || ''}
-              onChange={(e) => onUpdate({
-                writer_specific: { ...writerData, book_isbn: e.target.value },
-              })}
+              onChange={e =>
+                onUpdate({
+                  writer_specific: { ...writerData, book_isbn: e.target.value },
+                })
+              }
               onKeyDown={handleSpaceKeyDown}
             />
           </div>
@@ -52,9 +59,14 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               min="1"
               placeholder="250"
               value={writerData.book_pages || ''}
-              onChange={(e) => onUpdate({
-                writer_specific: { ...writerData, book_pages: e.target.value ? parseInt(e.target.value) : null },
-              })}
+              onChange={e =>
+                onUpdate({
+                  writer_specific: {
+                    ...writerData,
+                    book_pages: e.target.value ? parseInt(e.target.value) : null,
+                  },
+                })
+              }
             />
           </div>
 
@@ -64,9 +76,11 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               id="book_language"
               placeholder="Français"
               value={writerData.book_language || ''}
-              onChange={(e) => onUpdate({
-                writer_specific: { ...writerData, book_language: e.target.value },
-              })}
+              onChange={e =>
+                onUpdate({
+                  writer_specific: { ...writerData, book_language: e.target.value },
+                })
+              }
               onKeyDown={handleSpaceKeyDown}
             />
           </div>
@@ -75,17 +89,22 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
             <Label htmlFor="book_format">Format</Label>
             <Select
               value={writerData.book_format || 'paperback'}
-              onValueChange={(value) => onUpdate({
-                writer_specific: { ...writerData, book_format: value as any },
-              })}
+              onValueChange={value =>
+                onUpdate({
+                  writer_specific: {
+                    ...writerData,
+                    book_format: value as 'paperback' | 'hardcover' | 'ebook',
+                  },
+                })
+              }
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="z-[1060]">
-                <SelectItem value="paperback" className="min-h-[44px]">Broché</SelectItem>
-                <SelectItem value="hardcover" className="min-h-[44px]">Relié</SelectItem>
-                <SelectItem value="ebook" className="min-h-[44px]">Ebook</SelectItem>
+              <SelectContent>
+                <SelectItem value="paperback">Broché</SelectItem>
+                <SelectItem value="hardcover">Relié</SelectItem>
+                <SelectItem value="ebook">Ebook</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -96,9 +115,11 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               id="book_genre"
               placeholder="Roman, Science-fiction, etc."
               value={writerData.book_genre || ''}
-              onChange={(e) => onUpdate({
-                writer_specific: { ...writerData, book_genre: e.target.value },
-              })}
+              onChange={e =>
+                onUpdate({
+                  writer_specific: { ...writerData, book_genre: e.target.value },
+                })
+              }
               onKeyDown={handleSpaceKeyDown}
             />
           </div>
@@ -109,9 +130,11 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               id="book_publisher"
               placeholder="Nom de l'éditeur"
               value={writerData.book_publisher || ''}
-              onChange={(e) => onUpdate({
-                writer_specific: { ...writerData, book_publisher: e.target.value },
-              })}
+              onChange={e =>
+                onUpdate({
+                  writer_specific: { ...writerData, book_publisher: e.target.value },
+                })
+              }
               onKeyDown={handleSpaceKeyDown}
             />
           </div>
@@ -122,9 +145,11 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               id="book_publication_date"
               type="date"
               value={writerData.book_publication_date || ''}
-              onChange={(e) => onUpdate({
-                writer_specific: { ...writerData, book_publication_date: e.target.value || null },
-              })}
+              onChange={e =>
+                onUpdate({
+                  writer_specific: { ...writerData, book_publication_date: e.target.value || null },
+                })
+              }
             />
           </div>
         </div>
@@ -146,7 +171,7 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
       });
     };
 
-    const updateTrack = (index: number, field: string, value: any) => {
+    const updateTrack = (index: number, field: string, value: string | number) => {
       const newTracks = [...tracks];
       newTracks[index] = { ...newTracks[index], [field]: value };
       onUpdate({
@@ -170,24 +195,29 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
     return (
       <div className="space-y-4 p-4 border rounded-lg">
         <h3 className="text-lg font-semibold">Informations de l'Album</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="album_format">Format</Label>
             <Select
               value={musicianData.album_format || 'digital'}
-              onValueChange={(value) => onUpdate({
-                musician_specific: { ...musicianData, album_format: value as any },
-              })}
+              onValueChange={value =>
+                onUpdate({
+                  musician_specific: {
+                    ...musicianData,
+                    album_format: value as 'cd' | 'vinyl' | 'digital' | 'cassette',
+                  },
+                })
+              }
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="z-[1060]">
-                <SelectItem value="cd" className="min-h-[44px]">CD</SelectItem>
-                <SelectItem value="vinyl" className="min-h-[44px]">Vinyle</SelectItem>
-                <SelectItem value="digital" className="min-h-[44px]">Digital</SelectItem>
-                <SelectItem value="cassette" className="min-h-[44px]">Cassette</SelectItem>
+              <SelectContent>
+                <SelectItem value="cd">CD</SelectItem>
+                <SelectItem value="vinyl">Vinyle</SelectItem>
+                <SelectItem value="digital">Digital</SelectItem>
+                <SelectItem value="cassette">Cassette</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -198,9 +228,11 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               id="album_genre"
               placeholder="Rock, Pop, Jazz, etc."
               value={musicianData.album_genre || ''}
-              onChange={(e) => onUpdate({
-                musician_specific: { ...musicianData, album_genre: e.target.value },
-              })}
+              onChange={e =>
+                onUpdate({
+                  musician_specific: { ...musicianData, album_genre: e.target.value },
+                })
+              }
               onKeyDown={handleSpaceKeyDown}
             />
           </div>
@@ -211,9 +243,11 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               id="album_label"
               placeholder="Nom du label"
               value={musicianData.album_label || ''}
-              onChange={(e) => onUpdate({
-                musician_specific: { ...musicianData, album_label: e.target.value },
-              })}
+              onChange={e =>
+                onUpdate({
+                  musician_specific: { ...musicianData, album_label: e.target.value },
+                })
+              }
               onKeyDown={handleSpaceKeyDown}
             />
           </div>
@@ -224,9 +258,14 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               id="album_release_date"
               type="date"
               value={musicianData.album_release_date || ''}
-              onChange={(e) => onUpdate({
-                musician_specific: { ...musicianData, album_release_date: e.target.value || null },
-              })}
+              onChange={e =>
+                onUpdate({
+                  musician_specific: {
+                    ...musicianData,
+                    album_release_date: e.target.value || null,
+                  },
+                })
+              }
             />
           </div>
         </div>
@@ -240,13 +279,13 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               Ajouter une piste
             </Button>
           </div>
-          
+
           {tracks.map((track, index) => (
             <div key={index} className="flex gap-2 items-center p-2 border rounded">
               <Input
                 placeholder="Titre"
                 value={track.title}
-                onChange={(e) => updateTrack(index, 'title', e.target.value)}
+                onChange={e => updateTrack(index, 'title', e.target.value)}
                 onKeyDown={handleSpaceKeyDown}
                 className="flex-1"
               />
@@ -254,15 +293,10 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
                 type="number"
                 placeholder="Durée (s)"
                 value={track.duration}
-                onChange={(e) => updateTrack(index, 'duration', parseInt(e.target.value) || 0)}
+                onChange={e => updateTrack(index, 'duration', parseInt(e.target.value) || 0)}
                 className="w-24"
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => removeTrack(index)}
-              >
+              <Button type="button" variant="ghost" size="sm" onClick={() => removeTrack(index)}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -275,11 +309,11 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
   // Artiste visuel
   if (artistType === 'visual_artist') {
     const visualData = data.visual_artist_specific || {};
-    
+
     return (
       <div className="space-y-4 p-4 border rounded-lg">
         <h3 className="text-lg font-semibold">Informations Artistiques</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="artwork_style">Style</Label>
@@ -287,9 +321,11 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               id="artwork_style"
               placeholder="Réalisme, Abstrait, Impressionnisme, etc."
               value={visualData.artwork_style || ''}
-              onChange={(e) => onUpdate({
-                visual_artist_specific: { ...visualData, artwork_style: e.target.value },
-              })}
+              onChange={e =>
+                onUpdate({
+                  visual_artist_specific: { ...visualData, artwork_style: e.target.value },
+                })
+              }
               onKeyDown={handleSpaceKeyDown}
             />
           </div>
@@ -300,9 +336,11 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               id="artwork_subject"
               placeholder="Portrait, Paysage, Nature morte, etc."
               value={visualData.artwork_subject || ''}
-              onChange={(e) => onUpdate({
-                visual_artist_specific: { ...visualData, artwork_subject: e.target.value },
-              })}
+              onChange={e =>
+                onUpdate({
+                  visual_artist_specific: { ...visualData, artwork_subject: e.target.value },
+                })
+              }
               onKeyDown={handleSpaceKeyDown}
             />
           </div>
@@ -314,11 +352,11 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
   // Designer
   if (artistType === 'designer') {
     const designerData = data.designer_specific || {};
-    
+
     return (
       <div className="space-y-4 p-4 border rounded-lg">
         <h3 className="text-lg font-semibold">Informations du Design</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="design_category">Catégorie</Label>
@@ -326,9 +364,11 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
               id="design_category"
               placeholder="Logo, Template, Illustration, etc."
               value={designerData.design_category || ''}
-              onChange={(e) => onUpdate({
-                designer_specific: { ...designerData, design_category: e.target.value },
-              })}
+              onChange={e =>
+                onUpdate({
+                  designer_specific: { ...designerData, design_category: e.target.value },
+                })
+              }
               onKeyDown={handleSpaceKeyDown}
             />
           </div>
@@ -337,17 +377,22 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
             <Label htmlFor="design_license_type">Type de licence</Label>
             <Select
               value={designerData.design_license_type || 'non_exclusive'}
-              onValueChange={(value) => onUpdate({
-                designer_specific: { ...designerData, design_license_type: value as any },
-              })}
+              onValueChange={value =>
+                onUpdate({
+                  designer_specific: {
+                    ...designerData,
+                    design_license_type: value as 'exclusive' | 'non_exclusive' | 'royalty_free',
+                  },
+                })
+              }
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="z-[1060]">
-                <SelectItem value="exclusive" className="min-h-[44px]">Exclusive</SelectItem>
-                <SelectItem value="non_exclusive" className="min-h-[44px]">Non-exclusive</SelectItem>
-                <SelectItem value="royalty_free" className="min-h-[44px]">Royalty-free</SelectItem>
+              <SelectContent>
+                <SelectItem value="exclusive">Exclusive</SelectItem>
+                <SelectItem value="non_exclusive">Non-exclusive</SelectItem>
+                <SelectItem value="royalty_free">Royalty-free</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -360,10 +405,12 @@ const ArtistSpecificFormsComponent = ({ artistType, data, onUpdate }: ArtistSpec
 };
 
 // Optimisation avec React.memo
-export const ArtistSpecificForms = React.memo(ArtistSpecificFormsComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.artistType === nextProps.artistType &&
-    JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data)
-  );
-});
-
+export const ArtistSpecificForms = React.memo(
+  ArtistSpecificFormsComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.artistType === nextProps.artistType &&
+      JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data)
+    );
+  }
+);
