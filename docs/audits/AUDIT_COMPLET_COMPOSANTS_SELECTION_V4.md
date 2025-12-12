@@ -13,7 +13,7 @@
 Audit complet et approfondi des composants de sélection après migrations complètes vers SelectField :
 
 - ✅ **Select** : React.memo activé, exports validés, optimisations complètes
-- ✅ **SelectField** : 10 champs migrés dans 3 formulaires, utilisation standardisée
+- ✅ **SelectField** : 11 champs migrés dans 3 formulaires, utilisation standardisée
 - ✅ **CurrencySelect** : Optimisé, utilise Select optimisé
 - ✅ **DropdownMenu** : Optimisations stabilité et performance
 
@@ -210,7 +210,7 @@ Audit complet et approfondi des composants de sélection après migrations compl
 
 ### ✅ CourseBasicInfoForm
 
-**Champs migrés** : 5/5 ✅
+**Champs migrés** : 6/6 ✅
 
 1. ✅ Type de licence → `SelectField`
 2. ✅ Niveau → `SelectField`
@@ -306,10 +306,10 @@ Audit complet et approfondi des composants de sélection après migrations compl
 **Statistiques** :
 
 - Fichiers modifiés : **3 formulaires**
-- Champs migrés : **10 champs**
-- Lignes supprimées : **~190** (redondances)
-- Lignes ajoutées : **~147** (code optimisé)
-- **Net** : **-43 lignes** (code plus concis)
+- Champs migrés : **11 champs**
+- Lignes supprimées : **~200** (redondances)
+- Lignes ajoutées : **~150** (code optimisé)
+- **Net** : **-50 lignes** (code plus concis)
 
 ---
 
@@ -350,7 +350,7 @@ Audit complet et approfondi des composants de sélection après migrations compl
 - [x] Correction erreur export SelectContent/SelectItem
 - [x] **NOUVEAU** : Migration complète DigitalBasicInfoForm (3 champs)
 - [x] **NOUVEAU** : Migration complète ServiceBasicInfoForm (2 champs)
-- [x] **NOUVEAU** : Migration complète CourseBasicInfoForm (5 champs)
+- [x] **NOUVEAU** : Migration complète CourseBasicInfoForm (6 champs)
 
 ### Priorité MOYENNE
 

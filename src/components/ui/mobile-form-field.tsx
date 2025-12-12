@@ -8,7 +8,14 @@ import { cn } from '@/lib/utils';
 import { Label } from './label';
 import { Input } from './input';
 import { Textarea } from './textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectField,
+} from './select';
 
 interface MobileFormFieldProps {
   /**
@@ -42,7 +49,7 @@ interface MobileFormFieldProps {
   /**
    * Props à passer au champ
    */
-  fieldProps?: any;
+  fieldProps?: Record<string, unknown>;
   /**
    * Classe CSS supplémentaire
    */
@@ -80,11 +87,12 @@ export const MobileFormField: React.FC<MobileFormFieldProps> = ({
       id: fieldId,
       name: name || fieldId,
       'aria-invalid': !!error,
-      'aria-describedby': error ? `${fieldId}-error` : description ? `${fieldId}-description` : undefined,
-      className: cn(
-        'w-full',
-        error && 'border-destructive focus-visible:ring-destructive'
-      ),
+      'aria-describedby': error
+        ? `${fieldId}-error`
+        : description
+          ? `${fieldId}-description`
+          : undefined,
+      className: cn('w-full', error && 'border-destructive focus-visible:ring-destructive'),
       ...fieldProps,
     };
 
@@ -94,36 +102,37 @@ export const MobileFormField: React.FC<MobileFormFieldProps> = ({
           <Textarea
             {...commonProps}
             value={value as string}
-            onChange={(e) => onChange?.(e.target.value)}
+            onChange={e => onChange?.(e.target.value)}
           />
         );
-      
+
       case 'select':
         return (
-          <Select
+          <SelectField
+            label={label}
             value={value as string}
             onValueChange={onChange}
+            error={error}
+            description={description}
+            required={required}
+            placeholder={`Sélectionner ${label.toLowerCase()}`}
+            className={className}
           >
-            <SelectTrigger {...commonProps}>
-              <SelectValue placeholder={`Sélectionner ${label.toLowerCase()}`} />
-            </SelectTrigger>
-            <SelectContent>
-              {selectOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {selectOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectField>
         );
-      
+
       default:
         return (
           <Input
             {...commonProps}
             type={type}
             value={value as string}
-            onChange={(e) => onChange?.(e.target.value)}
+            onChange={e => onChange?.(e.target.value)}
           />
         );
     }
@@ -140,24 +149,17 @@ export const MobileFormField: React.FC<MobileFormFieldProps> = ({
       >
         {label}
       </Label>
-      
+
       {description && (
-        <p
-          id={`${fieldId}-description`}
-          className="text-xs text-muted-foreground"
-        >
+        <p id={`${fieldId}-description`} className="text-xs text-muted-foreground">
           {description}
         </p>
       )}
-      
+
       {renderField()}
-      
+
       {error && (
-        <p
-          id={`${fieldId}-error`}
-          className="text-sm text-destructive font-medium"
-          role="alert"
-        >
+        <p id={`${fieldId}-error`} className="text-sm text-destructive font-medium" role="alert">
           {error}
         </p>
       )}
@@ -197,18 +199,11 @@ export const MobileFormSection: React.FC<MobileFormSectionProps> = ({
     <div className={cn('space-y-4 p-4 sm:p-6 bg-card rounded-lg border', className)}>
       {(title || description) && (
         <div className="space-y-1 pb-4 border-b">
-          {title && (
-            <h3 className="text-lg font-semibold">{title}</h3>
-          )}
-          {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
-          )}
+          {title && <h3 className="text-lg font-semibold">{title}</h3>}
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>
       )}
-      <div className="space-y-4">
-        {children}
-      </div>
+      <div className="space-y-4">{children}</div>
     </div>
   );
 };
-
