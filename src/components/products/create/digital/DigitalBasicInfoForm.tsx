@@ -8,7 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RichTextEditorPro } from '@/components/ui/rich-text-editor-pro';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CurrencySelect } from '@/components/ui/currency-select';
 import { Button } from '@/components/ui/button';
@@ -24,7 +30,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 
-import type { DigitalProductFormData, DigitalProductFormDataUpdate } from '@/types/digital-product-form';
+import type {
+  DigitalProductFormData,
+  DigitalProductFormDataUpdate,
+} from '@/types/digital-product-form';
 
 interface DigitalBasicInfoFormProps {
   formData: DigitalProductFormData;
@@ -55,18 +64,22 @@ export const DigitalBasicInfoForm = ({
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
-  
+
   // Ref pour stocker la valeur réelle du champ (source de vérité)
   const inputRef = useRef<HTMLInputElement>(null);
   const nameValueRef = useRef<string>(formData.name || '');
   const isUpdatingFromFormDataRef = useRef(false);
-  
+
   // Hook pour corriger le problème d'espacement
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
 
   // Synchroniser la valeur de l'input avec formData.name seulement si elle change de l'extérieur
   useEffect(() => {
-    if (!isUpdatingFromFormDataRef.current && inputRef.current && formData.name !== inputRef.current.value) {
+    if (
+      !isUpdatingFromFormDataRef.current &&
+      inputRef.current &&
+      formData.name !== inputRef.current.value
+    ) {
       // La valeur a changé de l'extérieur, synchroniser
       inputRef.current.value = formData.name || '';
       nameValueRef.current = formData.name || '';
@@ -94,7 +107,7 @@ export const DigitalBasicInfoForm = ({
    */
   const checkSlug = async (slug: string) => {
     if (!slug || !formData.store_id) return;
-    
+
     setSlugChecking(true);
     try {
       const { data, error } = await supabase
@@ -104,7 +117,7 @@ export const DigitalBasicInfoForm = ({
         .eq('store_id', formData.store_id);
 
       if (error) throw error;
-      
+
       setSlugAvailable(data.length === 0);
     } catch (error) {
       logger.error('Error checking slug', { error, slug });
@@ -125,7 +138,7 @@ export const DigitalBasicInfoForm = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Product Name */}
       <div className="space-y-2">
         <Label htmlFor="name">
@@ -137,19 +150,19 @@ export const DigitalBasicInfoForm = ({
           type="text"
           placeholder="Ex: Ebook - Guide complet du Marketing Digital"
           value={formData.name || ''}
-          onChange={(e) => {
+          onChange={e => {
             const value = e.target.value;
             nameValueRef.current = value;
             isUpdatingFromFormDataRef.current = true;
-            logger.info('Name onChange - BEFORE updateFormData', { 
-              value, 
+            logger.info('Name onChange - BEFORE updateFormData', {
+              value,
               hasSpaces: value.includes(' '),
               length: value.length,
-              charCodes: value.split('').map(c => c.charCodeAt(0))
+              charCodes: value.split('').map(c => c.charCodeAt(0)),
             });
             updateFormData({ name: value });
           }}
-          onKeyDown={(e) => {
+          onKeyDown={e => {
             if (e.key === ' ') {
               handleSpaceKeyDown(e);
               // Mettre à jour formData après l'insertion de l'espace
@@ -172,15 +185,13 @@ export const DigitalBasicInfoForm = ({
 
       {/* Slug */}
       <div className="space-y-2">
-        <Label htmlFor="slug">
-          URL du produit
-        </Label>
+        <Label htmlFor="slug">URL du produit</Label>
         <div className="flex gap-2">
           <div className="flex-1">
             <Input
               id="slug"
               value={formData.slug || ''}
-              onChange={(e) => {
+              onChange={e => {
                 updateFormData({ slug: e.target.value });
                 checkSlug(e.target.value);
               }}
@@ -199,7 +210,10 @@ export const DigitalBasicInfoForm = ({
             {slugChecking ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
             ) : (
-              <RefreshCw className="h-4 w-4 transition-transform duration-200 hover:rotate-180" aria-hidden="true" />
+              <RefreshCw
+                className="h-4 w-4 transition-transform duration-200 hover:rotate-180"
+                aria-hidden="true"
+              />
             )}
           </Button>
         </div>
@@ -235,13 +249,13 @@ export const DigitalBasicInfoForm = ({
         </Label>
         <Select
           value={formData.category || 'ebook'}
-          onValueChange={(value) => updateFormData({ category: value })}
+          onValueChange={value => updateFormData({ category: value })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Sélectionnez une catégorie" />
           </SelectTrigger>
           <SelectContent className="z-[1060]">
-            {DIGITAL_CATEGORIES.map((cat) => (
+            {DIGITAL_CATEGORIES.map(cat => (
               <SelectItem key={cat.value} value={cat.value} className="min-h-[44px]">
                 {cat.label}
               </SelectItem>
@@ -252,17 +266,16 @@ export const DigitalBasicInfoForm = ({
 
       {/* Short Description */}
       <div className="space-y-2">
-        <Label htmlFor="short_description">
-          Description courte
-        </Label>
+        <Label htmlFor="short_description">Description courte</Label>
         <Textarea
           id="short_description"
           placeholder="Une brève description de votre produit (1-2 phrases)"
           value={formData.short_description || ''}
-          onChange={(e) => updateFormData({ short_description: e.target.value })}
+          onChange={e => updateFormData({ short_description: e.target.value })}
           onKeyDown={handleSpaceKeyDown}
           rows={2}
           maxLength={160}
+          className="min-h-[44px] sm:min-h-[auto] text-base sm:text-sm"
         />
         <p className="text-sm text-muted-foreground">
           {formData.short_description?.length || 0} / 160 caractères
@@ -271,9 +284,7 @@ export const DigitalBasicInfoForm = ({
 
       {/* Description */}
       <div className="space-y-2">
-        <Label htmlFor="description">
-          Description complète
-        </Label>
+        <Label htmlFor="description">Description complète</Label>
         {/* Génération IA */}
         <div className="mb-2">
           <AIContentGenerator
@@ -284,7 +295,7 @@ export const DigitalBasicInfoForm = ({
               price: formData.price,
               features: formData.features,
             }}
-            onContentGenerated={(content) => {
+            onContentGenerated={content => {
               updateFormData({
                 short_description: content.shortDescription,
                 description: content.longDescription,
@@ -295,7 +306,7 @@ export const DigitalBasicInfoForm = ({
         </div>
         <RichTextEditorPro
           content={formData.description || ''}
-          onChange={(content) => updateFormData({ description: content })}
+          onChange={content => updateFormData({ description: content })}
           placeholder="Décrivez votre produit en détail : contenu, bénéfices, utilisation..."
           showWordCount={true}
           maxHeight="400px"
@@ -306,11 +317,9 @@ export const DigitalBasicInfoForm = ({
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Tarification</CardTitle>
-          <CardDescription>
-            Définissez le prix de votre produit
-          </CardDescription>
+          <CardDescription>Définissez le prix de votre produit</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="price">
@@ -323,8 +332,9 @@ export const DigitalBasicInfoForm = ({
                 step="0.01"
                 placeholder="0.00"
                 value={formData.price || ''}
-                onChange={(e) => updateFormData({ price: parseFloat(e.target.value) || 0 })}
+                onChange={e => updateFormData({ price: parseFloat(e.target.value) || 0 })}
                 required
+                className="text-base sm:text-sm"
               />
             </div>
 
@@ -332,7 +342,7 @@ export const DigitalBasicInfoForm = ({
               <Label htmlFor="currency">Devise</Label>
               <CurrencySelect
                 value={formData.currency || 'XOF'}
-                onValueChange={(value) => updateFormData({ currency: value })}
+                onValueChange={value => updateFormData({ currency: value })}
               />
             </div>
           </div>
@@ -346,11 +356,16 @@ export const DigitalBasicInfoForm = ({
               step="0.01"
               placeholder="0.00"
               value={formData.promotional_price || ''}
-              onChange={(e) => updateFormData({ promotional_price: parseFloat(e.target.value) || undefined })}
+              onChange={e =>
+                updateFormData({ promotional_price: parseFloat(e.target.value) || undefined })
+              }
+              className="text-base sm:text-sm"
             />
             {formData.promotional_price && formData.promotional_price < formData.price && (
               <p className="text-sm text-green-600">
-                Réduction de {Math.round(((formData.price - formData.promotional_price) / formData.price) * 100)}%
+                Réduction de{' '}
+                {Math.round(((formData.price - formData.promotional_price) / formData.price) * 100)}
+                %
               </p>
             )}
           </div>
@@ -362,10 +377,14 @@ export const DigitalBasicInfoForm = ({
             </Label>
             <Select
               value={formData.pricing_model || 'one-time'}
-              onValueChange={(value) => {
-                updateFormData({ 
-                  pricing_model: value,
-                  price: value === 'free' ? 0 : (formData.price || 0)
+              onValueChange={value => {
+                updateFormData({
+                  pricing_model: value as
+                    | 'one-time'
+                    | 'subscription'
+                    | 'free'
+                    | 'pay-what-you-want',
+                  price: value === 'free' ? 0 : formData.price || 0,
                 });
               }}
             >
@@ -435,7 +454,7 @@ export const DigitalBasicInfoForm = ({
                 type="checkbox"
                 id="create_free_preview"
                 checked={formData.create_free_preview || false}
-                onChange={(e) => updateFormData({ create_free_preview: e.target.checked })}
+                onChange={e => updateFormData({ create_free_preview: e.target.checked })}
                 className="rounded border-gray-300"
               />
               <Label htmlFor="create_free_preview" className="font-medium cursor-pointer">
@@ -453,7 +472,7 @@ export const DigitalBasicInfoForm = ({
                     id="preview_content_description"
                     placeholder="Ex: Contient les 3 premiers chapitres sur 10 du guide complet. Inclut les bases et une introduction aux concepts avancés."
                     value={formData.preview_content_description || ''}
-                    onChange={(e) => updateFormData({ preview_content_description: e.target.value })}
+                    onChange={e => updateFormData({ preview_content_description: e.target.value })}
                     rows={3}
                     maxLength={500}
                   />
@@ -467,8 +486,14 @@ export const DigitalBasicInfoForm = ({
                   <div className="text-xs text-muted-foreground">
                     <p className="font-semibold mb-1">Comment ça fonctionne :</p>
                     <ul className="list-disc list-inside space-y-1 ml-2">
-                      <li>Un produit gratuit sera créé avec le nom "{formData.name || 'Votre produit'} - Version Preview Gratuite"</li>
-                      <li>Seuls les fichiers marqués comme "preview" seront inclus dans le produit gratuit</li>
+                      <li>
+                        Un produit gratuit sera créé avec le nom "{formData.name || 'Votre produit'}{' '}
+                        - Version Preview Gratuite"
+                      </li>
+                      <li>
+                        Seuls les fichiers marqués comme "preview" seront inclus dans le produit
+                        gratuit
+                      </li>
                       <li>Les visiteurs pourront télécharger gratuitement le preview</li>
                       <li>Un lien vers la version complète payante sera affiché sur le preview</li>
                     </ul>
@@ -486,7 +511,7 @@ export const DigitalBasicInfoForm = ({
         <p className="text-xs text-muted-foreground mb-2">
           Ajoutez plusieurs images pour montrer différents angles ou détails du produit
         </p>
-        
+
         {/* Grille d'images existantes */}
         {(formData.images && formData.images.length > 0) || formData.image_url ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
@@ -498,7 +523,7 @@ export const DigitalBasicInfoForm = ({
                   alt={`Produit ${index + 1}`}
                   className="w-full h-32 object-cover rounded-lg border"
                   loading="lazy"
-                  onError={(e) => {
+                  onError={e => {
                     e.currentTarget.style.display = 'none';
                   }}
                 />
@@ -506,59 +531,61 @@ export const DigitalBasicInfoForm = ({
                   type="button"
                   variant="destructive"
                   size="icon"
-                  className="absolute top-1 right-1 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation"
+                  className="absolute top-1 right-1 h-11 w-11 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation min-h-[44px] min-w-[44px]"
                   onClick={() => {
                     const currentImages = formData.images || [];
                     const newImages = currentImages.filter((_: string, i: number) => i !== index);
                     // Mettre à jour images et image_url (première image)
-                    updateFormData({ 
+                    updateFormData({
                       images: newImages,
-                      image_url: newImages[0] || ''
+                      image_url: newImages[0] || '',
                     });
                   }}
                   disabled={uploadingImage}
                   aria-label={`Supprimer l'image ${index + 1}`}
                 >
-                  <X className="h-3 w-3" aria-hidden="true" />
+                  <X className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </div>
             ))}
-            
+
             {/* Afficher image_url si elle existe et n'est pas dans images */}
-            {formData.image_url && (!formData.images || !formData.images.includes(formData.image_url)) && (
-              <div className="relative group">
-                <img
-                  src={formData.image_url}
-                  alt="Preview produit"
-                  className="w-full h-32 object-cover rounded-lg border"
-                  loading="lazy"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-1 right-1 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation"
-                  onClick={() => {
-                    updateFormData({ image_url: '' });
-                  }}
-                  disabled={uploadingImage}
-                  aria-label="Supprimer l'image du produit"
-                >
-                  <X className="h-3 w-3" aria-hidden="true" />
-                </Button>
-              </div>
-            )}
-            
+            {formData.image_url &&
+              (!formData.images || !formData.images.includes(formData.image_url)) && (
+                <div className="relative group">
+                  <img
+                    src={formData.image_url}
+                    alt="Preview produit"
+                    className="w-full h-32 object-cover rounded-lg border"
+                    loading="lazy"
+                    onError={e => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-1 right-1 h-11 w-11 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation min-h-[44px] min-w-[44px]"
+                    onClick={() => {
+                      updateFormData({ image_url: '' });
+                    }}
+                    disabled={uploadingImage}
+                    aria-label="Supprimer l'image du produit"
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                </div>
+              )}
+
             {/* Zone d'ajout d'image */}
             <label
               htmlFor="images_upload"
               className={cn(
-                "flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
-                uploadingImage ? "bg-muted/70 cursor-not-allowed" : "hover:bg-muted/50",
-                "border-muted-foreground/25"
+                'flex flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer transition-colors',
+                'h-32 sm:h-32 md:h-40 min-h-[120px] touch-manipulation',
+                uploadingImage ? 'bg-muted/70 cursor-not-allowed' : 'hover:bg-muted/50',
+                'border-muted-foreground/25'
               )}
             >
               {uploadingImage ? (
@@ -571,9 +598,7 @@ export const DigitalBasicInfoForm = ({
               ) : (
                 <>
                   <ImageIcon className="h-6 w-6 text-muted-foreground mb-1" />
-                  <span className="text-xs text-muted-foreground text-center px-2">
-                    Ajouter
-                  </span>
+                  <span className="text-xs text-muted-foreground text-center px-2">Ajouter</span>
                 </>
               )}
             </label>
@@ -582,9 +607,10 @@ export const DigitalBasicInfoForm = ({
           <label
             htmlFor="images_upload"
             className={cn(
-              "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
-              uploadingImage ? "bg-muted/70 cursor-not-allowed" : "hover:bg-muted/50",
-              "border-muted-foreground/25"
+              'flex flex-col items-center justify-center w-full border-2 border-dashed rounded-lg cursor-pointer transition-colors',
+              'h-32 sm:h-32 md:h-40 min-h-[120px] touch-manipulation',
+              uploadingImage ? 'bg-muted/70 cursor-not-allowed' : 'hover:bg-muted/50',
+              'border-muted-foreground/25'
             )}
           >
             {uploadingImage ? (
@@ -608,13 +634,13 @@ export const DigitalBasicInfoForm = ({
             )}
           </label>
         )}
-        
+
         <input
           id="images_upload"
           type="file"
           accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
           multiple
-          onChange={async (e) => {
+          onChange={async e => {
             const files = e.target.files;
             if (!files || files.length === 0) return;
 
@@ -636,9 +662,9 @@ export const DigitalBasicInfoForm = ({
 
             if (invalidFiles.length > 0) {
               toast({
-                title: "❌ Fichiers invalides",
+                title: '❌ Fichiers invalides',
                 description: `Les fichiers suivants ne peuvent pas être uploadés : ${invalidFiles.join(', ')}`,
-                variant: "destructive",
+                variant: 'destructive',
               });
               e.target.value = '';
               return;
@@ -653,9 +679,9 @@ export const DigitalBasicInfoForm = ({
                   bucket: 'product-images',
                   path: 'digital',
                   filePrefix: 'product',
-                  onProgress: (progress) => {
+                  onProgress: progress => {
                     // Calculer la progression globale pour tous les fichiers
-                    const fileProgress = (index / files.length) * 100 + (progress / files.length);
+                    const fileProgress = (index / files.length) * 100 + progress / files.length;
                     setUploadProgress(fileProgress);
                   },
                   maxSizeBytes: maxSize,
@@ -672,17 +698,17 @@ export const DigitalBasicInfoForm = ({
               if (validUrls.length > 0) {
                 const currentImages = formData.images || [];
                 const existingImageUrl = formData.image_url ? [formData.image_url] : [];
-                const allImages = [...existingImageUrl, ...currentImages, ...validUrls].filter((url, index, self) => 
-                  self.indexOf(url) === index // Supprimer les doublons
+                const allImages = [...existingImageUrl, ...currentImages, ...validUrls].filter(
+                  (url, index, self) => self.indexOf(url) === index // Supprimer les doublons
                 );
-                
-                updateFormData({ 
+
+                updateFormData({
                   images: allImages,
-                  image_url: allImages[0] || formData.image_url // Première image comme image_url
+                  image_url: allImages[0] || formData.image_url, // Première image comme image_url
                 });
-                
+
                 toast({
-                  title: "✅ Images uploadées",
+                  title: '✅ Images uploadées',
                   description: `${validUrls.length} image(s) uploadée(s) avec succès`,
                 });
               }
@@ -691,7 +717,7 @@ export const DigitalBasicInfoForm = ({
               toast({
                 title: "❌ Erreur d'upload",
                 description: error instanceof Error ? error.message : 'Une erreur est survenue',
-                variant: "destructive",
+                variant: 'destructive',
               });
             } finally {
               setUploadingImage(false);
@@ -712,14 +738,16 @@ export const DigitalBasicInfoForm = ({
             Définissez les droits d'utilisation et de commercialisation de votre produit
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4">
           <div className="space-y-2">
             <Label htmlFor="licensing_type">
               Type de licence <span className="text-destructive">*</span>
             </Label>
             <Select
               value={formData.licensing_type || 'standard'}
-              onValueChange={(value) => updateFormData({ licensing_type: value })}
+              onValueChange={value =>
+                updateFormData({ licensing_type: value as 'plr' | 'copyrighted' | 'standard' })
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un type de licence" />
@@ -757,16 +785,15 @@ export const DigitalBasicInfoForm = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="license_terms">
-              Conditions de licence (optionnel)
-            </Label>
+            <Label htmlFor="license_terms">Conditions de licence (optionnel)</Label>
             <Textarea
               id="license_terms"
               placeholder="Détails supplémentaires sur les conditions d'utilisation, restrictions, permissions..."
               value={formData.license_terms || ''}
-              onChange={(e) => updateFormData({ license_terms: e.target.value })}
+              onChange={e => updateFormData({ license_terms: e.target.value })}
               rows={4}
               maxLength={1000}
+              className="min-h-[44px] sm:min-h-[auto] text-base sm:text-sm"
             />
             <p className="text-sm text-muted-foreground">
               {formData.license_terms?.length || 0} / 1000 caractères
@@ -805,5 +832,3 @@ export const DigitalBasicInfoForm = ({
     </div>
   );
 };
-
-

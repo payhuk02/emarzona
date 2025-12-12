@@ -1,7 +1,7 @@
 /**
  * Types stricts pour le formulaire de création de produit digital
  * Date: 31 Janvier 2025
- * 
+ *
  * Remplace les types `any` dans CreateDigitalProductWizard_v2
  */
 
@@ -60,6 +60,10 @@ export interface DigitalProductFormData {
   price: number;
   promotional_price: number | null;
   currency: string;
+  pricing_model?: 'one-time' | 'subscription' | 'free' | 'pay-what-you-want';
+  features?: string[];
+  create_free_preview?: boolean;
+  preview_content_description?: string;
 
   // Files
   main_file_url: string;
@@ -119,4 +123,3 @@ export type DigitalProductFormDataUpdate = Partial<DigitalProductFormData> & {
   faqs?: DigitalProductFAQ[];
   downloadable_files?: DigitalProductDownloadableFile[];
 };
-

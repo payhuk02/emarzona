@@ -1,5 +1,11 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CURRENCIES } from "@/lib/currencies";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { CURRENCIES } from '@/lib/currencies';
 
 interface CurrencySelectProps {
   value: string;
@@ -17,8 +23,23 @@ export const CurrencySelect = ({ value, onValueChange, disabled }: CurrencySelec
         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
           Devises africaines
         </div>
-        {CURRENCIES.filter(c => ['XOF', 'XAF', 'NGN', 'GHS', 'KES', 'ZAR', 'MAD', 'TND', 'EGP', 'UGX', 'TZS', 'RWF'].includes(c.code)).map((currency) => (
-          <SelectItem key={currency.code} value={currency.code}>
+        {CURRENCIES.filter(c =>
+          [
+            'XOF',
+            'XAF',
+            'NGN',
+            'GHS',
+            'KES',
+            'ZAR',
+            'MAD',
+            'TND',
+            'EGP',
+            'UGX',
+            'TZS',
+            'RWF',
+          ].includes(c.code)
+        ).map(currency => (
+          <SelectItem key={currency.code} value={currency.code} className="min-h-[44px]">
             <span className="flex items-center gap-2">
               <span>{currency.flag}</span>
               <span>{currency.name}</span>
@@ -29,8 +50,10 @@ export const CurrencySelect = ({ value, onValueChange, disabled }: CurrencySelec
         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1">
           Devises internationales
         </div>
-        {CURRENCIES.filter(c => ['EUR', 'USD', 'GBP', 'CAD', 'CHF', 'JPY', 'CNY'].includes(c.code)).map((currency) => (
-          <SelectItem key={currency.code} value={currency.code}>
+        {CURRENCIES.filter(c =>
+          ['EUR', 'USD', 'GBP', 'CAD', 'CHF', 'JPY', 'CNY'].includes(c.code)
+        ).map(currency => (
+          <SelectItem key={currency.code} value={currency.code} className="min-h-[44px]">
             <span className="flex items-center gap-2">
               <span>{currency.flag}</span>
               <span>{currency.name}</span>

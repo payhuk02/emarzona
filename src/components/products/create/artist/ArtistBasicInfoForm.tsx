@@ -10,7 +10,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { RichTextEditorPro } from '@/components/ui/rich-text-editor-pro';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ImagePlus, X, Loader2, Globe, Instagram, Facebook, Twitter, Youtube, User } from 'lucide-react';
+import {
+  ImagePlus,
+  X,
+  Loader2,
+  Globe,
+  Instagram,
+  Facebook,
+  Twitter,
+  Youtube,
+  User,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import type { ArtistProductFormData, ArtistSocialLinks } from '@/types/artist-product';
@@ -26,13 +36,13 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [imageError, setImageError] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
+  const [_imageError, setImageError] = useState(false);
+  const [_imageLoading, setImageLoading] = useState(true);
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
-  
+
   // Compteurs pour éviter les boucles infinies de réessais
-  const artistPhotoRetryCount = useRef(0);
-  const artworkImageRetryCounts = useRef<Map<number, number>>(new Map());
+  const _artistPhotoRetryCount = useRef(0);
+  const _artworkImageRetryCounts = useRef<Map<number, number>>(new Map());
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -43,16 +53,19 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
 
     try {
       // Vérifier l'authentification avec getSession (plus fiable que getUser)
-      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      const {
+        data: { session },
+        error: authError,
+      } = await supabase.auth.getSession();
       if (authError || !session || !session.user) {
         logger.error('Erreur authentification upload images œuvre', { error: authError });
-        throw new Error("Non authentifié. Veuillez vous reconnecter.");
+        throw new Error('Non authentifié. Veuillez vous reconnecter.');
       }
 
       // Validation préventive : vérifier tous les fichiers AVANT upload
       const validExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
       const invalidFiles: string[] = [];
-      
+
       // Validation synchrone (type MIME et extension)
       for (const file of Array.from(files)) {
         // Vérifier le type MIME
@@ -60,7 +73,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
           invalidFiles.push(`${file.name} (type MIME: ${file.type || 'inconnu'})`);
           continue;
         }
-        
+
         // Vérifier l'extension
         const fileExt = file.name.split('.').pop()?.toLowerCase();
         if (!fileExt || !validExtensions.includes(fileExt)) {
@@ -71,9 +84,9 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
 
       if (invalidFiles.length > 0) {
         toast({
-          title: "❌ Fichiers invalides",
+          title: '❌ Fichiers invalides',
           description: `Les fichiers suivants ne sont pas des images valides : ${invalidFiles.join(', ')}. Veuillez utiliser des images (PNG, JPG, WEBP, GIF).`,
-          variant: "destructive",
+          variant: 'destructive',
         });
         setUploading(false);
         setUploadProgress(0);
@@ -84,12 +97,14 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
       const uploadPromises = Array.from(files).map(async (file, index) => {
         // Validation supplémentaire pour chaque fichier (double sécurité)
         if (!file.type || !file.type.startsWith('image/')) {
-          throw new Error(`Le fichier "${file.name}" n'est pas une image valide (type: ${file.type || 'inconnu'})`);
+          throw new Error(
+            `Le fichier "${file.name}" n'est pas une image valide (type: ${file.type || 'inconnu'})`
+          );
         }
 
         // Générer un nom de fichier unique
-        const fileExt = file.name.split(".").pop()?.toLowerCase();
-        
+        const fileExt = file.name.split('.').pop()?.toLowerCase();
+
         // Forcer le Content-Type selon l'extension (plus fiable que file.type qui peut être incorrect)
         // Cela garantit que Supabase Storage reçoit toujours un type MIME valide
         let contentType: string;
@@ -105,7 +120,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
           // Fallback : utiliser file.type si disponible, sinon image/png par défaut
           contentType = file.type && file.type.startsWith('image/') ? file.type : 'image/png';
         }
-        
+
         const fileName = `artist/artwork_${Date.now()}_${index}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
 
         logger.info('Upload image œuvre - Détails', {
@@ -114,13 +129,13 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
           originalFileType: file.type,
           correctedContentType: contentType,
           targetPath: fileName,
-          index
+          index,
         });
 
         // SOLUTION CRITIQUE : Utiliser XMLHttpRequest directement pour contrôler le Content-Type
         // Note: session est déjà déclarée dans handleImageUpload, on la réutilise
         if (!session) {
-          throw new Error("Non authentifié");
+          throw new Error('Non authentifié');
         }
 
         const projectUrl = supabase.supabaseUrl;
@@ -130,7 +145,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
         const uploadData = await new Promise<{ path: string }>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
 
-          xhr.upload.addEventListener('progress', (e) => {
+          xhr.upload.addEventListener('progress', e => {
             if (e.lengthComputable) {
               const progress = ((index + 1) / files.length) * 100;
               setUploadProgress(progress);
@@ -148,7 +163,13 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
             } else {
               try {
                 const error = JSON.parse(xhr.responseText);
-                reject(new Error(error.message || error.error || `Erreur upload: ${xhr.statusText} (${xhr.status})`));
+                reject(
+                  new Error(
+                    error.message ||
+                      error.error ||
+                      `Erreur upload: ${xhr.statusText} (${xhr.status})`
+                  )
+                );
               } catch {
                 reject(new Error(`Erreur upload: ${xhr.statusText} (${xhr.status})`));
               }
@@ -156,7 +177,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
           });
 
           xhr.addEventListener('error', () => {
-            reject(new Error('Erreur réseau lors de l\'upload'));
+            reject(new Error("Erreur réseau lors de l'upload"));
           });
 
           xhr.addEventListener('abort', () => {
@@ -175,17 +196,18 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
         const uploadError = null; // Pas d'erreur si on arrive ici
 
         if (uploadError) {
-          logger.error('Erreur upload image œuvre', { 
-            error: uploadError, 
+          logger.error('Erreur upload image œuvre', {
+            error: uploadError,
             errorMessage: uploadError.message,
             fileName: file.name,
             contentType,
             fileType: file.type,
-            index
+            index,
           });
           throw uploadError;
         }
-        if (!uploadData || !uploadData.path) throw new Error('Upload réussi mais aucun chemin retourné');
+        if (!uploadData || !uploadData.path)
+          throw new Error('Upload réussi mais aucun chemin retourné');
 
         // Construire l'URL publique
         const publicUrl = `${projectUrl}/storage/v1/object/public/product-images/${uploadData.path}`;
@@ -195,7 +217,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
           path: uploadData.path,
           fileName: file.name,
           index,
-          urlFormat: 'valid'
+          urlFormat: 'valid',
         });
 
         return publicUrl;
@@ -206,19 +228,19 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
       onUpdate({ images: [...currentImages, ...uploadedUrls] });
 
       toast({
-        title: "✅ Images uploadées",
+        title: '✅ Images uploadées',
         description: `${uploadedUrls.length} image(s) uploadée(s) avec succès`,
       });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Erreur upload images œuvre', { 
+      logger.error('Erreur upload images œuvre', {
         error: errorMessage,
-        errorDetails: error
+        errorDetails: error,
       });
       toast({
         title: "❌ Erreur d'upload",
         description: errorMessage || "Une erreur est survenue lors de l'upload",
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setUploading(false);
@@ -240,9 +262,9 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
     // Validation
     if (!file.type.startsWith('image/')) {
       toast({
-        title: "❌ Format invalide",
-        description: "Veuillez uploader une image",
-        variant: "destructive",
+        title: '❌ Format invalide',
+        description: 'Veuillez uploader une image',
+        variant: 'destructive',
       });
       return;
     }
@@ -251,12 +273,15 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
     setUploadProgress(0);
 
     try {
-      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      const {
+        data: { session },
+        error: authError,
+      } = await supabase.auth.getSession();
       if (authError || !session || !session.user) {
-        throw new Error("Non authentifié");
+        throw new Error('Non authentifié');
       }
 
-      const fileExt = file.name.split(".").pop()?.toLowerCase();
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
       let contentType: string;
       if (fileExt === 'png') {
         contentType = 'image/png';
@@ -275,7 +300,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
       const uploadData = await new Promise<{ path: string }>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
-        xhr.upload.addEventListener('progress', (e) => {
+        xhr.upload.addEventListener('progress', e => {
           if (e.lengthComputable) {
             setUploadProgress((e.loaded / e.total) * 100);
           }
@@ -292,7 +317,11 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
           } else {
             try {
               const error = JSON.parse(xhr.responseText);
-              reject(new Error(error.message || error.error || `Erreur upload: ${xhr.statusText} (${xhr.status})`));
+              reject(
+                new Error(
+                  error.message || error.error || `Erreur upload: ${xhr.statusText} (${xhr.status})`
+                )
+              );
             } catch {
               reject(new Error(`Erreur upload: ${xhr.statusText} (${xhr.status})`));
             }
@@ -300,7 +329,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
         });
 
         xhr.addEventListener('error', () => {
-          reject(new Error('Erreur réseau lors de l\'upload'));
+          reject(new Error("Erreur réseau lors de l'upload"));
         });
 
         xhr.open('POST', uploadUrl);
@@ -314,7 +343,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
       onUpdate({ artist_photo_url: publicUrl });
 
       toast({
-        title: "✅ Photo uploadée",
+        title: '✅ Photo uploadée',
         description: "La photo de l'artiste a été uploadée avec succès",
       });
     } catch (error: unknown) {
@@ -322,8 +351,8 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
       logger.error('Erreur upload photo artiste', { error: errorMessage });
       toast({
         title: "❌ Erreur d'upload",
-        description: errorMessage || "Une erreur est survenue",
-        variant: "destructive",
+        description: errorMessage || 'Une erreur est survenue',
+        variant: 'destructive',
       });
     } finally {
       setUploading(false);
@@ -333,17 +362,22 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Artist Type Badge */}
       {data.artist_type && (
         <div className="flex items-center gap-2">
           <Badge variant="outline">
-            {data.artist_type === 'writer' ? 'Écrivain' :
-             data.artist_type === 'musician' ? 'Musicien' :
-             data.artist_type === 'visual_artist' ? 'Artiste visuel' :
-             data.artist_type === 'designer' ? 'Designer' :
-             data.artist_type === 'multimedia' ? 'Multimédia' :
-             'Artiste'}
+            {data.artist_type === 'writer'
+              ? 'Écrivain'
+              : data.artist_type === 'musician'
+                ? 'Musicien'
+                : data.artist_type === 'visual_artist'
+                  ? 'Artiste visuel'
+                  : data.artist_type === 'designer'
+                    ? 'Designer'
+                    : data.artist_type === 'multimedia'
+                      ? 'Multimédia'
+                      : 'Artiste'}
           </Badge>
         </div>
       )}
@@ -371,9 +405,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
               </button>
             </div>
             <div className="flex-1">
-              <p className="text-sm text-muted-foreground">
-                Photo de l'artiste uploadée
-              </p>
+              <p className="text-sm text-muted-foreground">Photo de l'artiste uploadée</p>
               <Button
                 type="button"
                 variant="outline"
@@ -426,7 +458,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
         <Input
           id="artist_name"
           value={data.artist_name || ''}
-          onChange={(e) => onUpdate({ artist_name: e.target.value })}
+          onChange={e => onUpdate({ artist_name: e.target.value })}
           placeholder="Nom complet de l'artiste"
           onKeyDown={handleSpaceKeyDown}
         />
@@ -438,10 +470,11 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
         <Textarea
           id="artist_bio"
           value={data.artist_bio || ''}
-          onChange={(e) => onUpdate({ artist_bio: e.target.value })}
+          onChange={e => onUpdate({ artist_bio: e.target.value })}
           placeholder="Présentez l'artiste, son parcours, son style..."
           rows={4}
           onKeyDown={handleSpaceKeyDown}
+          className="min-h-[44px] sm:min-h-[auto] text-base sm:text-sm"
         />
       </div>
 
@@ -454,9 +487,10 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
             id="artist_website"
             type="url"
             value={data.artist_website || ''}
-            onChange={(e) => onUpdate({ artist_website: e.target.value })}
+            onChange={e => onUpdate({ artist_website: e.target.value })}
             placeholder="https://exemple.com"
             onKeyDown={handleSpaceKeyDown}
+            className="text-base sm:text-sm"
           />
         </div>
       </div>
@@ -471,13 +505,16 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
               type="url"
               placeholder="Instagram"
               value={(data.artist_social_links as ArtistSocialLinks)?.instagram || ''}
-              onChange={(e) => onUpdate({
-                artist_social_links: {
-                  ...(data.artist_social_links as ArtistSocialLinks || {}),
-                  instagram: e.target.value
-                }
-              })}
+              onChange={e =>
+                onUpdate({
+                  artist_social_links: {
+                    ...((data.artist_social_links as ArtistSocialLinks) || {}),
+                    instagram: e.target.value,
+                  },
+                })
+              }
               onKeyDown={handleSpaceKeyDown}
+              className="text-base sm:text-sm"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -486,13 +523,16 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
               type="url"
               placeholder="Facebook"
               value={(data.artist_social_links as ArtistSocialLinks)?.facebook || ''}
-              onChange={(e) => onUpdate({
-                artist_social_links: {
-                  ...(data.artist_social_links as ArtistSocialLinks || {}),
-                  facebook: e.target.value
-                }
-              })}
+              onChange={e =>
+                onUpdate({
+                  artist_social_links: {
+                    ...((data.artist_social_links as ArtistSocialLinks) || {}),
+                    facebook: e.target.value,
+                  },
+                })
+              }
               onKeyDown={handleSpaceKeyDown}
+              className="text-base sm:text-sm"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -501,13 +541,16 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
               type="url"
               placeholder="Twitter/X"
               value={(data.artist_social_links as ArtistSocialLinks)?.twitter || ''}
-              onChange={(e) => onUpdate({
-                artist_social_links: {
-                  ...(data.artist_social_links as ArtistSocialLinks || {}),
-                  twitter: e.target.value
-                }
-              })}
+              onChange={e =>
+                onUpdate({
+                  artist_social_links: {
+                    ...((data.artist_social_links as ArtistSocialLinks) || {}),
+                    twitter: e.target.value,
+                  },
+                })
+              }
               onKeyDown={handleSpaceKeyDown}
+              className="text-base sm:text-sm"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -516,13 +559,16 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
               type="url"
               placeholder="YouTube"
               value={(data.artist_social_links as ArtistSocialLinks)?.youtube || ''}
-              onChange={(e) => onUpdate({
-                artist_social_links: {
-                  ...(data.artist_social_links as ArtistSocialLinks || {}),
-                  youtube: e.target.value
-                }
-              })}
+              onChange={e =>
+                onUpdate({
+                  artist_social_links: {
+                    ...((data.artist_social_links as ArtistSocialLinks) || {}),
+                    youtube: e.target.value,
+                  },
+                })
+              }
               onKeyDown={handleSpaceKeyDown}
+              className="text-base sm:text-sm"
             />
           </div>
         </div>
@@ -534,7 +580,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
         <Input
           id="artwork_title"
           value={data.artwork_title || ''}
-          onChange={(e) => onUpdate({ artwork_title: e.target.value })}
+          onChange={e => onUpdate({ artwork_title: e.target.value })}
           placeholder="Titre de l'œuvre"
           onKeyDown={handleSpaceKeyDown}
         />
@@ -549,9 +595,12 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
           min="1000"
           max={new Date().getFullYear() + 1}
           value={data.artwork_year || ''}
-          onChange={(e) => onUpdate({ artwork_year: e.target.value ? parseInt(e.target.value) : null })}
+          onChange={e =>
+            onUpdate({ artwork_year: e.target.value ? parseInt(e.target.value) : null })
+          }
           placeholder="2024"
           onKeyDown={handleSpaceKeyDown}
+          className="text-base sm:text-sm"
         />
       </div>
 
@@ -561,7 +610,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
         <Input
           id="artwork_medium"
           value={data.artwork_medium || ''}
-          onChange={(e) => onUpdate({ artwork_medium: e.target.value })}
+          onChange={e => onUpdate({ artwork_medium: e.target.value })}
           placeholder="Ex: Huile sur toile, Acrylique, Aquarelle, Digital..."
           onKeyDown={handleSpaceKeyDown}
         />
@@ -570,54 +619,84 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
       {/* Artwork Dimensions */}
       <div className="space-y-2">
         <Label>Dimensions</Label>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <div>
-            <Label htmlFor="artwork_width" className="text-xs">Largeur</Label>
+            <Label htmlFor="artwork_width" className="text-xs sm:text-sm">
+              Largeur
+            </Label>
             <Input
               id="artwork_width"
               type="number"
               min="0"
               value={data.artwork_dimensions?.width || ''}
-              onChange={(e) => onUpdate({
-                artwork_dimensions: {
-                  ...(data.artwork_dimensions || { width: null, height: null, depth: null, unit: 'cm' }),
-                  width: e.target.value ? parseFloat(e.target.value) : null
-                }
-              })}
+              onChange={e =>
+                onUpdate({
+                  artwork_dimensions: {
+                    ...(data.artwork_dimensions || {
+                      width: null,
+                      height: null,
+                      depth: null,
+                      unit: 'cm',
+                    }),
+                    width: e.target.value ? parseFloat(e.target.value) : null,
+                  },
+                })
+              }
               placeholder="0"
               onKeyDown={handleSpaceKeyDown}
+              className="text-base sm:text-sm"
             />
           </div>
           <div>
-            <Label htmlFor="artwork_height" className="text-xs">Hauteur</Label>
+            <Label htmlFor="artwork_height" className="text-xs sm:text-sm">
+              Hauteur
+            </Label>
             <Input
               id="artwork_height"
               type="number"
               min="0"
               value={data.artwork_dimensions?.height || ''}
-              onChange={(e) => onUpdate({
-                artwork_dimensions: {
-                  ...(data.artwork_dimensions || { width: null, height: null, depth: null, unit: 'cm' }),
-                  height: e.target.value ? parseFloat(e.target.value) : null
-                }
-              })}
+              onChange={e =>
+                onUpdate({
+                  artwork_dimensions: {
+                    ...(data.artwork_dimensions || {
+                      width: null,
+                      height: null,
+                      depth: null,
+                      unit: 'cm',
+                    }),
+                    height: e.target.value ? parseFloat(e.target.value) : null,
+                  },
+                })
+              }
               placeholder="0"
               onKeyDown={handleSpaceKeyDown}
+              className="text-base sm:text-sm"
             />
           </div>
           <div>
-            <Label htmlFor="artwork_unit" className="text-xs">Unité</Label>
+            <Label htmlFor="artwork_unit" className="text-xs sm:text-sm">
+              Unité
+            </Label>
             <Input
               id="artwork_unit"
               value={data.artwork_dimensions?.unit || 'cm'}
-              onChange={(e) => onUpdate({
-                artwork_dimensions: {
-                  ...(data.artwork_dimensions || { width: null, height: null, depth: null, unit: 'cm' }),
-                  unit: e.target.value
-                }
-              })}
+              onChange={e =>
+                onUpdate({
+                  artwork_dimensions: {
+                    ...(data.artwork_dimensions || {
+                      width: null,
+                      height: null,
+                      depth: null,
+                      unit: 'cm',
+                    }),
+                    unit: e.target.value,
+                  },
+                })
+              }
               placeholder="cm"
               onKeyDown={handleSpaceKeyDown}
+              className="text-base sm:text-sm"
             />
           </div>
         </div>
@@ -630,9 +709,10 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
           id="artwork_link_url"
           type="url"
           value={data.artwork_link_url || ''}
-          onChange={(e) => onUpdate({ artwork_link_url: e.target.value || undefined })}
+          onChange={e => onUpdate({ artwork_link_url: e.target.value || undefined })}
           placeholder="https://exemple.com/oeuvre"
           onKeyDown={handleSpaceKeyDown}
+          className="text-base sm:text-sm"
         />
         <p className="text-xs text-muted-foreground">
           Lien vers une page dédiée, portfolio, ou galerie en ligne
@@ -642,7 +722,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
       {/* Artwork Images */}
       <div className="space-y-2">
         <Label>Images de l'œuvre *</Label>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           {(data.images || []).map((imageUrl, index) => (
             <div key={index} className="relative group">
               <img
@@ -656,30 +736,26 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
               <button
                 type="button"
                 onClick={() => handleRemoveImage(index)}
-                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation min-h-[32px] min-w-[32px] flex items-center justify-center"
+                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label={`Supprimer l'image ${index + 1} de l'œuvre`}
               >
-                <X className="h-3 w-3" aria-hidden="true" />
+                <X className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
           ))}
           <label
             htmlFor="artwork-images-upload"
-            className="flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+            className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors h-32 sm:h-32 md:h-40 min-h-[120px] touch-manipulation"
           >
             {uploading ? (
               <div className="flex flex-col items-center gap-1">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
-                  {uploadProgress.toFixed(0)}%
-                </span>
+                <span className="text-xs text-muted-foreground">{uploadProgress.toFixed(0)}%</span>
               </div>
             ) : (
               <>
                 <ImagePlus className="h-6 w-6 text-muted-foreground mb-1" />
-                <span className="text-xs text-muted-foreground text-center px-2">
-                  Ajouter
-                </span>
+                <span className="text-xs text-muted-foreground text-center px-2">Ajouter</span>
               </>
             )}
             <input
@@ -703,7 +779,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
         <Label htmlFor="description">Description complète de l'œuvre</Label>
         <RichTextEditorPro
           value={data.description || ''}
-          onChange={(value) => onUpdate({ description: value })}
+          onChange={value => onUpdate({ description: value })}
           placeholder="Décrivez l'œuvre, son histoire, sa signification, sa technique..."
         />
       </div>
@@ -714,11 +790,12 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
         <Textarea
           id="short_description"
           value={data.short_description || ''}
-          onChange={(e) => onUpdate({ short_description: e.target.value })}
+          onChange={e => onUpdate({ short_description: e.target.value })}
           placeholder="Description courte pour les aperçus (max 160 caractères)"
           rows={2}
           maxLength={160}
           onKeyDown={handleSpaceKeyDown}
+          className="min-h-[44px] sm:min-h-[auto] text-base sm:text-sm"
         />
         <p className="text-xs text-muted-foreground">
           {(data.short_description || '').length} / 160 caractères
@@ -734,9 +811,10 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
           min="0"
           step="0.01"
           value={data.price || 0}
-          onChange={(e) => onUpdate({ price: parseFloat(e.target.value) || 0 })}
+          onChange={e => onUpdate({ price: parseFloat(e.target.value) || 0 })}
           placeholder="0.00"
           onKeyDown={handleSpaceKeyDown}
+          className="text-base sm:text-sm"
         />
       </div>
 
@@ -749,26 +827,30 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate }: ArtistBasicInfoFormPro
           min="0"
           step="0.01"
           value={data.compare_at_price || ''}
-          onChange={(e) => onUpdate({ compare_at_price: e.target.value ? parseFloat(e.target.value) : null })}
+          onChange={e =>
+            onUpdate({ compare_at_price: e.target.value ? parseFloat(e.target.value) : null })
+          }
           placeholder="0.00"
           onKeyDown={handleSpaceKeyDown}
+          className="text-base sm:text-sm"
         />
-        <p className="text-xs text-muted-foreground">
-          Prix barré pour montrer une réduction
-        </p>
+        <p className="text-xs text-muted-foreground">Prix barré pour montrer une réduction</p>
       </div>
     </div>
   );
 };
 
 // Optimisation avec React.memo
-export const ArtistBasicInfoForm = React.memo(ArtistBasicInfoFormComponent, (prevProps, nextProps) => {
-  // Comparaison personnalisée pour éviter les re-renders inutiles
-  return (
-    prevProps.data.artist_type === nextProps.data.artist_type &&
-    prevProps.data.artist_name === nextProps.data.artist_name &&
-    prevProps.data.artwork_title === nextProps.data.artwork_title &&
-    prevProps.data.artist_photo_url === nextProps.data.artist_photo_url &&
-    JSON.stringify(prevProps.data.images) === JSON.stringify(nextProps.data.images)
-  );
-});
+export const ArtistBasicInfoForm = React.memo(
+  ArtistBasicInfoFormComponent,
+  (prevProps, nextProps) => {
+    // Comparaison personnalisée pour éviter les re-renders inutiles
+    return (
+      prevProps.data.artist_type === nextProps.data.artist_type &&
+      prevProps.data.artist_name === nextProps.data.artist_name &&
+      prevProps.data.artwork_title === nextProps.data.artwork_title &&
+      prevProps.data.artist_photo_url === nextProps.data.artist_photo_url &&
+      JSON.stringify(prevProps.data.images) === JSON.stringify(nextProps.data.images)
+    );
+  }
+);

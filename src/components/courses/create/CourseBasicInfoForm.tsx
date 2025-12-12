@@ -1,23 +1,29 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { RichTextEditorPro } from "@/components/ui/rich-text-editor-pro";
-import { AIContentGenerator } from "@/components/products/AIContentGenerator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { CurrencySelect } from "@/components/ui/currency-select";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditorPro } from '@/components/ui/rich-text-editor-pro';
+import { AIContentGenerator } from '@/components/products/AIContentGenerator';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { CurrencySelect } from '@/components/ui/currency-select';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { Info, Gift } from '@/components/icons';
 import { Upload, Loader2, Image as ImageIcon, X } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useSpaceInputFix } from "@/hooks/useSpaceInputFix";
-import { uploadToSupabaseStorage } from "@/utils/uploadToSupabase";
-import { useToast } from "@/hooks/use-toast";
-import { logger } from "@/lib/logger";
-import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
+import { uploadToSupabaseStorage } from '@/utils/uploadToSupabase';
+import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
+import { cn } from '@/lib/utils';
 
 interface CourseBasicInfoFormProps {
   formData: {
@@ -39,7 +45,7 @@ interface CourseBasicInfoFormProps {
     image_url?: string;
     images?: string[];
   };
-  onChange: (field: string, value: any) => void;
+  onChange: (field: string, value: string | number | boolean | null | undefined) => void;
   errors?: Record<string, string>;
 }
 
@@ -70,12 +76,16 @@ const CATEGORIES = [
   'Autre',
 ];
 
-export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseBasicInfoFormProps) => {
+export const CourseBasicInfoForm = ({
+  formData,
+  onChange,
+  errors = {},
+}: CourseBasicInfoFormProps) => {
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const { toast } = useToast();
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  
+
   // Générer le slug automatiquement à partir du titre
   const generateSlug = (title: string) => {
     return title
@@ -115,9 +125,9 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
 
     if (invalidFiles.length > 0) {
       toast({
-        title: "❌ Fichiers invalides",
+        title: '❌ Fichiers invalides',
         description: `Les fichiers suivants ne peuvent pas être uploadés : ${invalidFiles.join(', ')}`,
-        variant: "destructive",
+        variant: 'destructive',
       });
       e.target.value = '';
       return;
@@ -132,9 +142,9 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
           bucket: 'product-images',
           path: 'courses',
           filePrefix: 'course',
-          onProgress: (progress) => {
+          onProgress: progress => {
             // Calculer la progression globale pour tous les fichiers
-            const fileProgress = (index / files.length) * 100 + (progress / files.length);
+            const fileProgress = (index / files.length) * 100 + progress / files.length;
             setUploadProgress(fileProgress);
           },
           maxSizeBytes: maxSize,
@@ -151,15 +161,15 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
       if (validUrls.length > 0) {
         const currentImages = formData.images || [];
         const existingImageUrl = formData.image_url ? [formData.image_url] : [];
-        const allImages = [...existingImageUrl, ...currentImages, ...validUrls].filter((url, index, self) => 
-          self.indexOf(url) === index // Supprimer les doublons
+        const allImages = [...existingImageUrl, ...currentImages, ...validUrls].filter(
+          (url, index, self) => self.indexOf(url) === index // Supprimer les doublons
         );
-        
+
         onChange('images', allImages);
         onChange('image_url', allImages[0] || formData.image_url); // Première image comme image_url
-        
+
         toast({
-          title: "✅ Images uploadées",
+          title: '✅ Images uploadées',
           description: `${validUrls.length} image(s) uploadée(s) avec succès`,
         });
       }
@@ -168,7 +178,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
       toast({
         title: "❌ Erreur d'upload",
         description: error instanceof Error ? error.message : 'Une erreur est survenue',
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setUploadingImage(false);
@@ -185,7 +195,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Titre du cours */}
       <Card>
         <CardHeader>
@@ -194,7 +204,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
             Ces informations seront visibles par les étudiants sur la page du cours
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4">
           {/* Titre */}
           <div className="space-y-2">
             <Label htmlFor="title">
@@ -204,13 +214,11 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
               id="title"
               placeholder="Ex: Maîtriser React et TypeScript en 2025"
               value={formData.title}
-              onChange={(e) => handleTitleChange(e.target.value)}
+              onChange={e => handleTitleChange(e.target.value)}
               onKeyDown={handleSpaceKeyDown}
               className={errors.title ? 'border-red-500' : ''}
             />
-            {errors.title && (
-              <p className="text-sm text-red-500">{errors.title}</p>
-            )}
+            {errors.title && <p className="text-sm text-red-500">{errors.title}</p>}
             <p className="text-sm text-muted-foreground">
               Maximum 100 caractères. Soyez clair et descriptif.
             </p>
@@ -238,12 +246,12 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
                 id="slug"
                 placeholder="maitriser-react-typescript"
                 value={formData.slug}
-                onChange={(e) => onChange('slug', e.target.value)}
-                className={errors.slug ? 'border-red-500' : ''}
+                onChange={e => onChange('slug', e.target.value)}
+                className={cn('text-base sm:text-sm', errors.slug && 'border-red-500')}
               />
             </div>
             {errors.slug && (
-              <p className="text-sm text-red-500">{errors.slug}</p>
+              <p className="text-sm text-red-500 break-words max-w-full">{errors.slug}</p>
             )}
           </div>
 
@@ -256,13 +264,18 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
               id="short_description"
               placeholder="Résumé en une phrase de votre cours..."
               value={formData.short_description}
-              onChange={(e) => onChange('short_description', e.target.value)}
+              onChange={e => onChange('short_description', e.target.value)}
               onKeyDown={handleSpaceKeyDown}
-              className={errors.short_description ? 'border-red-500' : ''}
+              className={cn(
+                'min-h-[44px] sm:min-h-[auto] text-base sm:text-sm',
+                errors.short_description && 'border-red-500'
+              )}
               rows={2}
             />
             {errors.short_description && (
-              <p className="text-sm text-red-500">{errors.short_description}</p>
+              <p className="text-sm text-red-500 break-words max-w-full">
+                {errors.short_description}
+              </p>
             )}
             <p className="text-sm text-muted-foreground">
               {formData.short_description.length}/200 caractères
@@ -284,7 +297,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
                   category: formData.category,
                   features: [],
                 }}
-                onContentGenerated={(content) => {
+                onContentGenerated={content => {
                   onChange('short_description', content.shortDescription);
                   onChange('description', content.longDescription);
                 }}
@@ -292,13 +305,13 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
             </div>
             <RichTextEditorPro
               content={formData.description}
-              onChange={(content) => onChange('description', content)}
+              onChange={content => onChange('description', content)}
               placeholder="Décrivez en détail ce que les étudiants apprendront, les objectifs, prérequis et ce qui rend votre cours unique..."
               showWordCount={true}
               maxHeight="500px"
             />
             {errors.description && (
-              <p className="text-sm text-red-500">{errors.description}</p>
+              <p className="text-sm text-red-500 break-words max-w-full">{errors.description}</p>
             )}
             <p className="text-sm text-muted-foreground">
               {formData.description.length}/2000 caractères
@@ -315,14 +328,14 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
             Définissez les droits d'utilisation et de commercialisation de votre cours
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4">
           <div className="space-y-2">
             <Label htmlFor="licensing_type">
               Type de licence <span className="text-red-500">*</span>
             </Label>
             <Select
               value={formData.licensing_type || 'standard'}
-              onValueChange={(value) => onChange('licensing_type', value)}
+              onValueChange={value => onChange('licensing_type', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un type de licence" />
@@ -357,17 +370,16 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="license_terms">
-              Conditions de licence (optionnel)
-            </Label>
+            <Label htmlFor="license_terms">Conditions de licence (optionnel)</Label>
             <Textarea
               id="license_terms"
               placeholder="Détails supplémentaires sur les conditions d'utilisation, restrictions, permissions..."
               value={formData.license_terms || ''}
-              onChange={(e) => onChange('license_terms', e.target.value)}
+              onChange={e => onChange('license_terms', e.target.value)}
               onKeyDown={handleSpaceKeyDown}
               rows={4}
               maxLength={1000}
+              className="min-h-[44px] sm:min-h-[auto] text-base sm:text-sm"
             />
             <p className="text-sm text-muted-foreground">
               {formData.license_terms?.length || 0} / 1000 caractères
@@ -398,22 +410,20 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
       <Card>
         <CardHeader>
           <CardTitle>Configuration du cours</CardTitle>
-          <CardDescription>
-            Définissez le niveau, la langue et la catégorie
-          </CardDescription>
+          <CardDescription>Définissez le niveau, la langue et la catégorie</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4">
           {/* Niveau */}
           <div className="space-y-2">
             <Label htmlFor="level">
               Niveau du cours <span className="text-red-500">*</span>
             </Label>
-            <Select value={formData.level} onValueChange={(value) => onChange('level', value)}>
+            <Select value={formData.level} onValueChange={value => onChange('level', value)}>
               <SelectTrigger className={errors.level ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Sélectionnez un niveau" />
               </SelectTrigger>
               <SelectContent className="z-[1060]">
-                {COURSE_LEVELS.map((level) => (
+                {COURSE_LEVELS.map(level => (
                   <SelectItem key={level.value} value={level.value} className="min-h-[44px]">
                     <div className="flex items-center gap-2">
                       <span>{level.label}</span>
@@ -425,9 +435,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
                 ))}
               </SelectContent>
             </Select>
-            {errors.level && (
-              <p className="text-sm text-red-500">{errors.level}</p>
-            )}
+            {errors.level && <p className="text-sm text-red-500">{errors.level}</p>}
           </div>
 
           {/* Langue */}
@@ -435,12 +443,12 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
             <Label htmlFor="language">
               Langue du cours <span className="text-red-500">*</span>
             </Label>
-            <Select value={formData.language} onValueChange={(value) => onChange('language', value)}>
+            <Select value={formData.language} onValueChange={value => onChange('language', value)}>
               <SelectTrigger className={errors.language ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Sélectionnez une langue" />
               </SelectTrigger>
               <SelectContent className="z-[1060]">
-                {LANGUAGES.map((lang) => (
+                {LANGUAGES.map(lang => (
                   <SelectItem key={lang.value} value={lang.value} className="min-h-[44px]">
                     <div className="flex items-center gap-2">
                       <span>{lang.flag}</span>
@@ -451,7 +459,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
               </SelectContent>
             </Select>
             {errors.language && (
-              <p className="text-sm text-red-500">{errors.language}</p>
+              <p className="text-sm text-red-500 break-words max-w-full">{errors.language}</p>
             )}
           </div>
 
@@ -460,12 +468,12 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
             <Label htmlFor="category">
               Catégorie <span className="text-red-500">*</span>
             </Label>
-            <Select value={formData.category} onValueChange={(value) => onChange('category', value)}>
+            <Select value={formData.category} onValueChange={value => onChange('category', value)}>
               <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Sélectionnez une catégorie" />
               </SelectTrigger>
               <SelectContent className="z-[1060]">
-                {CATEGORIES.map((category) => (
+                {CATEGORIES.map(category => (
                   <SelectItem key={category} value={category} className="min-h-[44px]">
                     {category}
                   </SelectItem>
@@ -473,7 +481,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
               </SelectContent>
             </Select>
             {errors.category && (
-              <p className="text-sm text-red-500">{errors.category}</p>
+              <p className="text-sm text-red-500 break-words max-w-full">{errors.category}</p>
             )}
           </div>
         </CardContent>
@@ -483,11 +491,9 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Tarification</CardTitle>
-          <CardDescription>
-            Définissez le prix de votre cours
-          </CardDescription>
+          <CardDescription>Définissez le prix de votre cours</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="price">
@@ -500,8 +506,9 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
                 step="0.01"
                 placeholder="0.00"
                 value={formData.price || ''}
-                onChange={(e) => onChange('price', parseFloat(e.target.value) || 0)}
+                onChange={e => onChange('price', parseFloat(e.target.value) || 0)}
                 required
+                className="text-base sm:text-sm"
               />
             </div>
 
@@ -509,7 +516,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
               <Label htmlFor="currency">Devise</Label>
               <CurrencySelect
                 value={formData.currency || 'XOF'}
-                onValueChange={(value) => onChange('currency', value)}
+                onValueChange={value => onChange('currency', value)}
               />
             </div>
           </div>
@@ -523,13 +530,20 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
               step="0.01"
               placeholder="0.00"
               value={formData.promotional_price || ''}
-              onChange={(e) => onChange('promotional_price', parseFloat(e.target.value) || undefined)}
+              onChange={e => onChange('promotional_price', parseFloat(e.target.value) || undefined)}
+              className="text-base sm:text-sm"
             />
-            {formData.promotional_price && formData.price && formData.promotional_price < formData.price && (
-              <p className="text-sm text-green-600">
-                Réduction de {Math.round(((formData.price - formData.promotional_price) / formData.price) * 100)}%
-              </p>
-            )}
+            {formData.promotional_price &&
+              formData.price &&
+              formData.promotional_price < formData.price && (
+                <p className="text-sm text-green-600">
+                  Réduction de{' '}
+                  {Math.round(
+                    ((formData.price - formData.promotional_price) / formData.price) * 100
+                  )}
+                  %
+                </p>
+              )}
           </div>
 
           {/* Modèle de tarification */}
@@ -539,7 +553,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
             </Label>
             <Select
               value={formData.pricing_model || 'one-time'}
-              onValueChange={(value) => {
+              onValueChange={value => {
                 onChange('pricing_model', value);
                 if (value === 'free') {
                   onChange('price', 0);
@@ -598,9 +612,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
       <Card>
         <CardHeader>
           <CardTitle>Images du cours</CardTitle>
-          <CardDescription>
-            Ajoutez plusieurs images pour présenter votre cours
-          </CardDescription>
+          <CardDescription>Ajoutez plusieurs images pour présenter votre cours</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -608,10 +620,10 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
             <p className="text-xs text-muted-foreground mb-2">
               Ajoutez plusieurs images pour montrer différents aspects de votre cours
             </p>
-            
+
             {/* Grille d'images existantes */}
-            {((formData.images && formData.images.length > 0) || formData.image_url) ? (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+            {(formData.images && formData.images.length > 0) || formData.image_url ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-3">
                 {/* Afficher les images du tableau images */}
                 {(formData.images || []).map((imageUrl: string, index: number) => (
                   <div key={index} className="relative group">
@@ -620,7 +632,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
                       alt={`Cours ${index + 1}`}
                       className="w-full h-32 object-cover rounded-lg border"
                       loading="lazy"
-                      onError={(e) => {
+                      onError={e => {
                         e.currentTarget.style.display = 'none';
                       }}
                     />
@@ -628,51 +640,53 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
                       type="button"
                       variant="destructive"
                       size="icon"
-                      className="absolute top-1 right-1 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-1 right-1 h-11 w-11 rounded-full opacity-0 group-hover:opacity-100 transition-opacity touch-manipulation min-h-[44px] min-w-[44px]"
                       onClick={() => handleRemoveImage(index)}
                       disabled={uploadingImage}
                       aria-label={`Supprimer l'image ${index + 1} du cours`}
                     >
-                      <X className="h-3 w-3" aria-hidden="true" />
+                      <X className="h-4 w-4" aria-hidden="true" />
                     </Button>
                   </div>
                 ))}
-                
+
                 {/* Afficher image_url si elle existe et n'est pas dans images */}
-                {formData.image_url && (!formData.images || !formData.images.includes(formData.image_url)) && (
-                  <div className="relative group">
-                    <img
-                      src={formData.image_url}
-                      alt="Preview cours"
-                      className="w-full h-32 object-cover rounded-lg border"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-1 right-1 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => {
-                        onChange('image_url', '');
-                      }}
-                      disabled={uploadingImage}
-                      aria-label="Supprimer l'image principale du cours"
-                    >
-                      <X className="h-3 w-3" aria-hidden="true" />
-                    </Button>
-                  </div>
-                )}
-                
+                {formData.image_url &&
+                  (!formData.images || !formData.images.includes(formData.image_url)) && (
+                    <div className="relative group">
+                      <img
+                        src={formData.image_url}
+                        alt="Preview cours"
+                        className="w-full h-32 object-cover rounded-lg border"
+                        loading="lazy"
+                        onError={e => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-1 right-1 h-11 w-11 rounded-full opacity-0 group-hover:opacity-100 transition-opacity touch-manipulation min-h-[44px] min-w-[44px]"
+                        onClick={() => {
+                          onChange('image_url', '');
+                        }}
+                        disabled={uploadingImage}
+                        aria-label="Supprimer l'image principale du cours"
+                      >
+                        <X className="h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    </div>
+                  )}
+
                 {/* Zone d'ajout d'image */}
                 <label
                   htmlFor="images_upload"
                   className={cn(
-                    "flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
-                    uploadingImage ? "bg-muted/70 cursor-not-allowed" : "hover:bg-muted/50",
-                    "border-muted-foreground/25"
+                    'flex flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer transition-colors',
+                    'h-32 sm:h-32 md:h-40 min-h-[120px] touch-manipulation',
+                    uploadingImage ? 'bg-muted/70 cursor-not-allowed' : 'hover:bg-muted/50',
+                    'border-muted-foreground/25'
                   )}
                 >
                   {uploadingImage ? (
@@ -696,9 +710,10 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
               <label
                 htmlFor="images_upload"
                 className={cn(
-                  "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
-                  uploadingImage ? "bg-muted/70 cursor-not-allowed" : "hover:bg-muted/50",
-                  "border-muted-foreground/25"
+                  'flex flex-col items-center justify-center w-full border-2 border-dashed rounded-lg cursor-pointer transition-colors',
+                  'h-32 sm:h-32 md:h-40 min-h-[120px] touch-manipulation',
+                  uploadingImage ? 'bg-muted/70 cursor-not-allowed' : 'hover:bg-muted/50',
+                  'border-muted-foreground/25'
                 )}
               >
                 {uploadingImage ? (
@@ -722,7 +737,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
                 )}
               </label>
             )}
-            
+
             <input
               id="images_upload"
               type="file"
@@ -748,13 +763,13 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
               Créez une version gratuite qui présente un aperçu du contenu payant
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4">
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 id="create_free_preview"
                 checked={formData.create_free_preview || false}
-                onChange={(e) => onChange('create_free_preview', e.target.checked)}
+                onChange={e => onChange('create_free_preview', e.target.checked)}
                 className="rounded border-gray-300"
               />
               <Label htmlFor="create_free_preview" className="font-medium cursor-pointer">
@@ -772,7 +787,7 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
                     id="preview_content_description"
                     placeholder="Ex: Contient les 2 premiers chapitres sur 10 du cours complet. Inclut les bases et une introduction aux concepts avancés."
                     value={formData.preview_content_description || ''}
-                    onChange={(e) => onChange('preview_content_description', e.target.value)}
+                    onChange={e => onChange('preview_content_description', e.target.value)}
                     onKeyDown={handleSpaceKeyDown}
                     rows={3}
                     maxLength={500}
@@ -787,11 +802,20 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
                   <div className="text-xs text-muted-foreground">
                     <p className="font-semibold mb-1">Comment ça fonctionne :</p>
                     <ul className="list-disc list-inside space-y-1 ml-2">
-                      <li>Un cours gratuit sera créé avec le nom "{formData.title || 'Votre cours'} - Version Preview Gratuite"</li>
-                      <li>Seules les leçons marquées comme "preview" dans le curriculum seront incluses dans le cours gratuit</li>
+                      <li>
+                        Un cours gratuit sera créé avec le nom "{formData.title || 'Votre cours'} -
+                        Version Preview Gratuite"
+                      </li>
+                      <li>
+                        Seules les leçons marquées comme "preview" dans le curriculum seront
+                        incluses dans le cours gratuit
+                      </li>
                       <li>Les étudiants pourront s'inscrire gratuitement au preview</li>
                       <li>Un lien vers la version complète payante sera affiché sur le preview</li>
-                      <li>Dans l'étape "Curriculum", cochez "Preview gratuit" pour chaque leçon que vous souhaitez inclure dans la version gratuite</li>
+                      <li>
+                        Dans l'étape "Curriculum", cochez "Preview gratuit" pour chaque leçon que
+                        vous souhaitez inclure dans la version gratuite
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -803,4 +827,3 @@ export const CourseBasicInfoForm = ({ formData, onChange, errors = {} }: CourseB
     </div>
   );
 };
-
