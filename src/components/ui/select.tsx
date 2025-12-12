@@ -74,14 +74,18 @@ const SelectTrigger = React.forwardRef<
       // Améliorer la réactivité tactile
       onTouchStart={e => {
         // Feedback visuel immédiat au toucher
-        e.currentTarget.classList.add('active');
+        if (e.currentTarget) {
+          e.currentTarget.classList.add('active');
+        }
         props.onTouchStart?.(e);
       }}
       onTouchEnd={e => {
-        // Retirer le feedback après le toucher
+        // Retirer le feedback après le toucher avec un délai pour permettre l'ouverture
         setTimeout(() => {
-          e.currentTarget.classList.remove('active');
-        }, 150);
+          if (e.currentTarget) {
+            e.currentTarget.classList.remove('active');
+          }
+        }, 200);
         props.onTouchEnd?.(e);
       }}
       {...props}
@@ -305,13 +309,6 @@ const SelectContent = React.forwardRef<
             position === 'popper' &&
               'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]'
           )}
-          // Empêcher la propagation des événements tactiles qui pourraient fermer le menu
-          onTouchStart={e => {
-            e.stopPropagation();
-          }}
-          onTouchMove={e => {
-            e.stopPropagation();
-          }}
         >
           {children}
         </SelectPrimitive.Viewport>
@@ -368,37 +365,34 @@ const SelectItem = React.forwardRef<
         className
       )}
       role="option"
-      // Empêcher les événements de propagation qui pourraient fermer le menu
-      // Utiliser onPointerDown pour capturer l'événement avant qu'il ne se propage
+      // Gestion optimisée des événements tactiles pour mobile
+      // IMPORTANT: Ne pas utiliser stopPropagation sur onClick car cela empêche Radix UI de détecter la sélection
       onPointerDown={e => {
-        // Empêcher la propagation qui pourrait fermer le menu prématurément
-        // Mais ne pas empêcher le comportement par défaut pour permettre la sélection
-        e.stopPropagation();
-        // Forcer le focus pour améliorer la réactivité tactile
-        if (e.currentTarget) {
-          e.currentTarget.focus();
+        // Sur mobile, améliorer le feedback visuel immédiat
+        if (isMobile && e.currentTarget) {
+          e.currentTarget.classList.add('active');
         }
+        // Laisser Radix UI gérer la sélection normalement
+        props.onPointerDown?.(e);
       }}
-      // Gérer aussi les événements tactiles sur mobile
+      // Gérer les événements tactiles sur mobile pour le feedback visuel
       onTouchStart={e => {
-        // Sur mobile, empêcher la propagation des événements tactiles
-        // qui pourraient causer des problèmes de stabilité
-        e.stopPropagation();
         // Ajouter un feedback visuel immédiat au toucher
         if (e.currentTarget) {
           e.currentTarget.classList.add('active');
         }
+        // Laisser Radix UI gérer la sélection
+        props.onTouchStart?.(e);
       }}
       onTouchEnd={e => {
-        // Retirer le feedback visuel après le toucher
-        if (e.currentTarget) {
-          e.currentTarget.classList.remove('active');
-        }
-      }}
-      // Améliorer la réactivité sur mobile avec onClick
-      onClick={e => {
-        // S'assurer que le clic est bien pris en compte
-        e.stopPropagation();
+        // Retirer le feedback visuel après le toucher avec un léger délai
+        // pour permettre à Radix UI de traiter la sélection
+        setTimeout(() => {
+          if (e.currentTarget) {
+            e.currentTarget.classList.remove('active');
+          }
+        }, 200);
+        props.onTouchEnd?.(e);
       }}
       {...props}
     >
