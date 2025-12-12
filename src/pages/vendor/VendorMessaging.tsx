@@ -625,7 +625,7 @@ Le message sera envoyé sans pièces jointes.`;
         <div className="min-h-screen flex w-full bg-background">
           <AppSidebar />
           <main className="flex-1 overflow-x-hidden">
-            <div className="container mx-auto p-6 max-w-7xl">
+            <div className="container mx-auto p-3 sm:p-4 md:p-6 max-w-7xl">
               <div className="mb-6">
                 <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
                   <MessageSquare className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
@@ -636,51 +636,56 @@ Le message sera envoyé sans pièces jointes.`;
                 </p>
               </div>
 
-              <div className="grid lg:grid-cols-[350px_1fr] gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 md:gap-6">
                 {/* Liste des conversations */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Conversations ({conversations.length})</CardTitle>
+                    <CardTitle className="text-base md:text-lg">
+                      Conversations ({conversations.length})
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <ScrollArea className="h-[calc(100vh-280px)]">
+                    <ScrollArea className="h-[calc(100vh-280px)] md:h-[calc(100vh-280px)] max-h-[500px] md:max-h-none">
                       <div className="space-y-1">
                         {conversations.map(conv => (
                           <button
                             key={conv.id}
                             onClick={() => openConversation(conv.id)}
-                            className="w-full text-left p-3 hover:bg-accent transition-colors border-b last:border-b-0"
+                            className="w-full text-left p-2 md:p-3 hover:bg-accent transition-colors border-b last:border-b-0"
                           >
-                            <div className="flex items-start gap-3">
-                              <Avatar className="h-10 w-10">
+                            <div className="flex items-start gap-2 md:gap-3">
+                              <Avatar className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0">
                                 <AvatarImage src={conv.store?.logo_url || undefined} />
                                 <AvatarFallback>
-                                  <Store className="h-4 w-4" />
+                                  <Store className="h-3 w-3 md:h-4 md:w-4" />
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-1">
-                                  <p className="font-medium text-sm truncate">
+                                <div className="flex items-center justify-between mb-1 gap-2">
+                                  <p className="font-medium text-xs md:text-sm truncate">
                                     {conv.store?.name || 'Boutique'}
                                   </p>
                                   {conv.unread_count && conv.unread_count > 0 && (
-                                    <Badge variant="destructive" className="text-xs">
+                                    <Badge
+                                      variant="destructive"
+                                      className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 flex-shrink-0"
+                                    >
                                       {conv.unread_count}
                                     </Badge>
                                   )}
                                 </div>
                                 {conv.product && (
-                                  <p className="text-xs text-muted-foreground truncate mb-1">
+                                  <p className="text-[10px] md:text-xs text-muted-foreground truncate mb-1">
                                     {conv.product.name}
                                   </p>
                                 )}
                                 {conv.last_message && (
-                                  <p className="text-xs text-muted-foreground truncate">
+                                  <p className="text-[10px] md:text-xs text-muted-foreground truncate">
                                     {conv.last_message.content || 'Pièce jointe'}
                                   </p>
                                 )}
                                 {conv.last_message_at && (
-                                  <p className="text-xs text-muted-foreground mt-1">
+                                  <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
                                     {format(new Date(conv.last_message_at), 'dd MMM yyyy HH:mm', {
                                       locale: fr,
                                     })}
@@ -753,7 +758,7 @@ Le message sera envoyé sans pièces jointes.`;
         <AppSidebar />
 
         <main className="flex-1 overflow-x-hidden">
-          <div className="container mx-auto p-6 max-w-7xl">
+          <div className="container mx-auto p-3 sm:p-4 md:p-6 max-w-7xl">
             {/* Header */}
             <div className="mb-6">
               <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
@@ -806,50 +811,55 @@ Le message sera envoyé sans pièces jointes.`;
             </div>
 
             {/* Main Chat Interface */}
-            <div className="grid lg:grid-cols-[350px_1fr_300px] gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[280px_1fr_220px] gap-3 md:gap-4">
               {/* Liste des conversations (si pas de storeId spécifique) */}
               {!finalStoreId && conversations.length > 1 && (
-                <Card className="hidden lg:block">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Conversations</CardTitle>
-                    <CardDescription>{conversations.length} conversation(s)</CardDescription>
+                <Card className="md:block">
+                  <CardHeader className="p-3 md:p-6">
+                    <CardTitle className="text-base md:text-lg">Conversations</CardTitle>
+                    <CardDescription className="text-xs md:text-sm">
+                      {conversations.length} conversation(s)
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <ScrollArea className="h-[calc(100vh-280px)]">
+                    <ScrollArea className="h-[calc(100vh-280px)] md:h-[calc(100vh-280px)] max-h-[600px] md:max-h-none">
                       <div className="space-y-1">
                         {conversations.map(conv => (
                           <button
                             key={conv.id}
                             onClick={() => openConversation(conv.id)}
-                            className={`w-full text-left p-3 hover:bg-accent transition-colors border-b last:border-b-0 ${
+                            className={`w-full text-left p-2 md:p-3 hover:bg-accent transition-colors border-b last:border-b-0 ${
                               currentConversation?.id === conv.id ? 'bg-accent' : ''
                             }`}
                           >
-                            <div className="flex items-start gap-3">
-                              <Avatar className="h-10 w-10">
+                            <div className="flex items-start gap-2 md:gap-3">
+                              <Avatar className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0">
                                 <AvatarImage src={conv.store?.logo_url || undefined} />
                                 <AvatarFallback>
-                                  <Store className="h-4 w-4" />
+                                  <Store className="h-3 w-3 md:h-4 md:w-4" />
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-1">
-                                  <p className="font-medium text-sm truncate">
+                                <div className="flex items-center justify-between mb-1 gap-2">
+                                  <p className="font-medium text-xs md:text-sm truncate">
                                     {conv.store?.name || 'Boutique'}
                                   </p>
                                   {conv.unread_count && conv.unread_count > 0 && (
-                                    <Badge variant="destructive" className="text-xs">
+                                    <Badge
+                                      variant="destructive"
+                                      className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 flex-shrink-0"
+                                    >
                                       {conv.unread_count}
                                     </Badge>
                                   )}
                                 </div>
                                 {conv.product && (
-                                  <p className="text-xs text-muted-foreground truncate mb-1">
+                                  <p className="text-[10px] md:text-xs text-muted-foreground truncate mb-1">
                                     {conv.product.name}
                                   </p>
                                 )}
                                 {conv.last_message && (
-                                  <p className="text-xs text-muted-foreground truncate">
+                                  <p className="text-[10px] md:text-xs text-muted-foreground truncate">
                                     {conv.last_message.content || 'Pièce jointe'}
                                   </p>
                                 )}
@@ -863,12 +873,12 @@ Le message sera envoyé sans pièces jointes.`;
                 </Card>
               )}
               {/* Messages Thread */}
-              <Card className="flex flex-col h-[calc(100vh-280px)] min-h-[500px]">
-                <CardHeader className="border-b">
-                  <div className="flex items-center justify-between">
+              <Card className="flex flex-col h-[calc(100vh-280px)] md:h-[calc(100vh-280px)] min-h-[400px] md:min-h-[500px]">
+                <CardHeader className="border-b p-3 md:p-6">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
-                      <CardTitle className="text-lg">Messages</CardTitle>
-                      <CardDescription>
+                      <CardTitle className="text-base md:text-lg">Messages</CardTitle>
+                      <CardDescription className="text-xs md:text-sm">
                         {searchResults
                           ? `${searchResults.total} résultat(s)`
                           : `${messages.length} message${messages.length > 1 ? 's' : ''}`}
@@ -890,7 +900,7 @@ Le message sera envoyé sans pièces jointes.`;
                                 });
                               }
                             }}
-                            className="w-64"
+                            className="w-full sm:w-48 md:w-64"
                           />
                           <Button
                             variant="ghost"
@@ -930,7 +940,7 @@ Le message sera envoyé sans pièces jointes.`;
 
                 {/* Messages List */}
                 <ScrollArea
-                  className="flex-1 p-4"
+                  className="flex-1 p-2 sm:p-3 md:p-4"
                   onScrollCapture={e => {
                     // Infinite scroll: charger plus de messages quand on scroll en haut
                     const target = e.target as HTMLElement;
@@ -991,7 +1001,7 @@ Le message sera envoyé sans pièces jointes.`;
                             className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                           >
                             <div
-                              className={`max-w-[70%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col gap-1`}
+                              className={`max-w-[85%] sm:max-w-[75%] md:max-w-[70%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col gap-1`}
                             >
                               {/* Sender Info */}
                               <div className="flex items-center gap-2 px-2">
@@ -1068,7 +1078,7 @@ Le message sera envoyé sans pièces jointes.`;
                 </ScrollArea>
 
                 {/* Message Input */}
-                <div className="border-t p-4">
+                <div className="border-t p-2 sm:p-3 md:p-4">
                   {/* Selected Files Preview */}
                   {selectedFiles.length > 0 && (
                     <div className="mb-2 flex flex-wrap gap-2">
@@ -1097,7 +1107,7 @@ Le message sera envoyé sans pièces jointes.`;
                       value={messageContent}
                       onChange={e => setMessageContent(e.target.value)}
                       placeholder="Tapez votre message..."
-                      className="min-h-[80px] resize-none"
+                      className="min-h-[60px] sm:min-h-[80px] resize-none text-sm sm:text-base"
                       onKeyDown={e => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
@@ -1105,7 +1115,7 @@ Le message sera envoyé sans pièces jointes.`;
                         }
                       }}
                     />
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-row sm:flex-col gap-2">
                       <Button
                         variant="outline"
                         size="icon"
@@ -1113,8 +1123,9 @@ Le message sera envoyé sans pièces jointes.`;
                         disabled={uploadingFiles}
                         aria-label="Prendre une photo"
                         title="Prendre une photo"
+                        className="h-9 w-9 sm:h-10 sm:w-10"
                       >
-                        <Camera className="h-4 w-4" />
+                        <Camera className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                       <Button
                         variant="outline"
@@ -1123,8 +1134,9 @@ Le message sera envoyé sans pièces jointes.`;
                         disabled={uploadingFiles}
                         aria-label="Joindre un fichier"
                         title="Joindre un fichier"
+                        className="h-9 w-9 sm:h-10 sm:w-10"
                       >
-                        <Paperclip className="h-4 w-4" />
+                        <Paperclip className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                       <input
                         ref={fileInputRef}
@@ -1143,11 +1155,12 @@ Le message sera envoyé sans pièces jointes.`;
                         }
                         size="icon"
                         aria-label="Envoyer le message"
+                        className="h-9 w-9 sm:h-10 sm:w-10"
                       >
                         {sendingMessage || uploadingFiles ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
                         ) : (
-                          <Send className="h-4 w-4" />
+                          <Send className="h-3 w-3 sm:h-4 sm:w-4" />
                         )}
                       </Button>
                     </div>
@@ -1155,14 +1168,14 @@ Le message sera envoyé sans pièces jointes.`;
                 </div>
               </Card>
 
-              {/* Sidebar - Store/Product Info */}
-              <div className="space-y-4">
+              {/* Sidebar - Store/Product Info (Desktop) */}
+              <div className="space-y-4 hidden lg:block">
                 {currentConversation?.store && (
                   <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Boutique</CardTitle>
+                    <CardHeader className="p-3 md:p-6">
+                      <CardTitle className="text-base md:text-lg">Boutique</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-3 md:p-6">
                       <div className="flex items-center gap-3">
                         {currentConversation.store.logo_url && (
                           <Avatar>
@@ -1173,8 +1186,10 @@ Le message sera envoyé sans pièces jointes.`;
                           </Avatar>
                         )}
                         <div>
-                          <p className="font-medium">{currentConversation.store.name}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="font-medium text-sm md:text-base">
+                            {currentConversation.store.name}
+                          </p>
+                          <p className="text-xs md:text-sm text-muted-foreground">
                             {currentConversation.store.slug}
                           </p>
                         </div>
@@ -1185,22 +1200,24 @@ Le message sera envoyé sans pièces jointes.`;
 
                 {currentConversation?.product && (
                   <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Produit</CardTitle>
+                    <CardHeader className="p-3 md:p-6">
+                      <CardTitle className="text-base md:text-lg">Produit</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-3 md:p-6">
                       <div className="flex items-center gap-3">
                         {currentConversation.product.image_url && (
                           <img
                             src={currentConversation.product.image_url}
                             alt={currentConversation.product.name}
-                            className="w-12 h-12 rounded object-cover"
+                            className="w-10 h-10 md:w-12 md:h-12 rounded object-cover"
                             loading="lazy"
                             decoding="async"
                           />
                         )}
                         <div>
-                          <p className="font-medium text-sm">{currentConversation.product.name}</p>
+                          <p className="font-medium text-xs md:text-sm">
+                            {currentConversation.product.name}
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -1208,6 +1225,61 @@ Le message sera envoyé sans pièces jointes.`;
                 )}
               </div>
             </div>
+
+            {/* Sidebar - Store/Product Info (Mobile/Tablet - Below) */}
+            {(currentConversation?.store || currentConversation?.product) && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 lg:hidden mt-4">
+                {currentConversation?.store && (
+                  <Card>
+                    <CardHeader className="p-3">
+                      <CardTitle className="text-base">Boutique</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3">
+                      <div className="flex items-center gap-3">
+                        {currentConversation.store.logo_url && (
+                          <Avatar>
+                            <AvatarImage src={currentConversation.store.logo_url} />
+                            <AvatarFallback>
+                              <Store className="h-4 w-4" />
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div>
+                          <p className="font-medium text-sm">{currentConversation.store.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {currentConversation.store.slug}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {currentConversation?.product && (
+                  <Card>
+                    <CardHeader className="p-3">
+                      <CardTitle className="text-base">Produit</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3">
+                      <div className="flex items-center gap-3">
+                        {currentConversation.product.image_url && (
+                          <img
+                            src={currentConversation.product.image_url}
+                            alt={currentConversation.product.name}
+                            className="w-10 h-10 rounded object-cover"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        )}
+                        <div>
+                          <p className="font-medium text-xs">{currentConversation.product.name}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
           </div>
         </main>
       </div>
