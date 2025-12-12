@@ -398,6 +398,9 @@ const SelectContentComponent = React.forwardRef<
     </SelectPrimitive.Portal>
   );
 });
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+const SelectContent = React.memo(SelectContentComponent);
 SelectContent.displayName = SelectPrimitive.Content.displayName;
 
 const SelectLabel = React.forwardRef<
@@ -531,6 +534,9 @@ const SelectItemComponent = React.forwardRef<
     </SelectPrimitive.Item>
   );
 });
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+const SelectItem = React.memo(SelectItemComponent);
 SelectItem.displayName = SelectPrimitive.Item.displayName;
 
 const SelectSeparator = React.forwardRef<
