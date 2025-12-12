@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Product } from "@/hooks/useProducts";
-import type { UnifiedProduct } from "@/types/unified-product";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Product } from '@/hooks/useProducts';
+import type { UnifiedProduct } from '@/types/unified-product';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 /**
  * Type étendu pour Product avec propriétés optionnelles supplémentaires
@@ -19,13 +19,13 @@ interface ExtendedProduct extends Product {
   hide_rating?: boolean | null;
   hide_reviews_count?: boolean | null;
 }
-import { 
-  ShoppingCart, 
-  Star, 
-  Download, 
-  Crown, 
-  Sparkles, 
-  Package, 
+import {
+  ShoppingCart,
+  Star,
+  Download,
+  Crown,
+  Sparkles,
+  Package,
   Zap,
   RefreshCw,
   DollarSign,
@@ -36,16 +36,17 @@ import {
   CheckCircle,
   Loader2,
   Shield,
-  MessageSquare
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import { ResponsiveProductImage } from "@/components/ui/ResponsiveProductImage";
-import { initiateMonerooPayment } from "@/lib/moneroo-payment";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { safeRedirect } from "@/lib/url-validator";
-import { PriceStockAlertButton } from "@/components/marketplace/PriceStockAlertButton";
-import "@/styles/product-grid-professional.css";
+  MessageSquare,
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
+import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { safeRedirect } from '@/lib/url-validator';
+import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
+import { stripHtmlTags as safeStripHtml } from '@/lib/utils';
+import '@/styles/product-grid-professional.css';
 
 interface ProductCardProps {
   product: ExtendedProduct & Partial<UnifiedProduct>;
@@ -55,13 +56,15 @@ interface ProductCardProps {
 const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
   const [loading, setLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [_userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Récupérer l'utilisateur pour les alertes
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setUserId(user?.id || null);
     };
     fetchUser();
@@ -102,14 +105,11 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
       // Pas de HTML, retourner directement
       return html;
     }
-    
-    // Si contient du HTML, utiliser la fonction sécurisée de utils
-    // qui utilise htmlToPlainText de html-sanitizer
+
+    // Utiliser la fonction sécurisée de utils
     try {
-      // Utiliser la fonction sécurisée de utils
-      const { stripHtmlTags: safeStripHtml } = require('@/lib/utils');
       return safeStripHtml(html);
-    } catch (e) {
+    } catch (_e) {
       // Fallback : utiliser textContent (plus sûr que innerHTML)
       const temp = document.createElement('div');
       temp.textContent = html; // textContent échappe automatiquement
@@ -118,9 +118,9 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
   }, []);
 
   // Générer une description courte - mémorisé
-  const shortDescription = useMemo((): string | undefined => {
+  const _shortDescription = useMemo((): string | undefined => {
     let rawText = '';
-    
+
     const extendedProduct = product as Product & Partial<UnifiedProduct>;
     if (extendedProduct.short_description && extendedProduct.short_description.trim()) {
       rawText = extendedProduct.short_description;
@@ -129,51 +129,58 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     } else {
       return undefined;
     }
-    
+
     const cleanText = stripHtmlTags(rawText).trim();
-    
+
     if (cleanText.length > 120) {
       return cleanText.substring(0, 117) + '...';
     }
-    
+
     return cleanText;
   }, [product.description, product.short_description, stripHtmlTags]);
 
   // Gérer les favoris - mémorisé
-  const handleFavorite = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsFavorite(prev => {
-      const newValue = !prev;
-      toast({
-        title: prev ? "Retiré des favoris" : "Ajouté aux favoris",
-        description: prev ? `${product.name} a été retiré de vos favoris` : `${product.name} a été ajouté à vos favoris`,
+  const handleFavorite = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsFavorite(prev => {
+        const newValue = !prev;
+        toast({
+          title: prev ? 'Retiré des favoris' : 'Ajouté aux favoris',
+          description: prev
+            ? `${product.name} a été retiré de vos favoris`
+            : `${product.name} a été ajouté à vos favoris`,
+        });
+        return newValue;
       });
-      return newValue;
-    });
-  }, [product.name, toast]);
+    },
+    [product.name, toast]
+  );
 
   // Gérer l'achat - mémorisé
   const handleBuyNow = useCallback(async () => {
     if (!product.store_id) {
       toast({
-        title: "Erreur",
-        description: "Boutique non disponible",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Boutique non disponible',
+        variant: 'destructive',
       });
       return;
     }
 
     try {
       setLoading(true);
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user?.email) {
         toast({
-          title: "Authentification requise",
-          description: "Veuillez vous connecter pour effectuer un achat",
-          variant: "destructive",
+          title: 'Authentification requise',
+          description: 'Veuillez vous connecter pour effectuer un achat',
+          variant: 'destructive',
         });
         setLoading(false);
         return;
@@ -183,23 +190,23 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
         storeId: product.store_id,
         productId: product.id,
         amount: price,
-        currency: product.currency ?? "XOF",
+        currency: product.currency ?? 'XOF',
         description: `Achat de ${product.name}`,
         customerEmail: user.email,
         customerName: user.user_metadata?.full_name || user.email.split('@')[0],
-        metadata: { 
-          productName: product.name, 
+        metadata: {
+          productName: product.name,
           storeSlug,
-          userId: user.id
-        }
+          userId: user.id,
+        },
       });
 
       if (result.success && result.checkout_url) {
         safeRedirect(result.checkout_url, () => {
           toast({
-            title: "Erreur",
-            description: "URL de paiement invalide. Veuillez réessayer.",
-            variant: "destructive",
+            title: 'Erreur',
+            description: 'URL de paiement invalide. Veuillez réessayer.',
+            variant: 'destructive',
           });
         });
       } else {
@@ -208,31 +215,34 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible d'initier le paiement",
-        variant: "destructive",
+        title: 'Erreur',
+        description: errorMessage || "Impossible d'initier le paiement",
+        variant: 'destructive',
       });
       setLoading(false);
     }
   }, [product.store_id, product.id, product.name, product.currency, price, storeSlug, toast]);
 
   // Rendre les étoiles - mémorisé
-  const renderStars = useCallback((rating: number) => (
-    <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <Star
-          key={star}
-          className={`h-4 w-4 ${
-            star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-          }`}
-        />
-      ))}
-    </div>
-  ), []);
+  const renderStars = useCallback(
+    (rating: number) => (
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map(star => (
+          <Star
+            key={star}
+            className={`h-4 w-4 ${
+              star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+            }`}
+          />
+        ))}
+      </div>
+    ),
+    []
+  );
 
   return (
-    <Card 
-      className="product-card-professional group relative overflow-hidden bg-transparent rounded-lg flex flex-col min-h-[500px] md:min-h-[600px] lg:min-h-[700px]"
+    <Card
+      className="product-card-professional group relative overflow-hidden bg-transparent rounded-lg flex flex-col min-h-[400px] xs:min-h-[450px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px]"
       role="article"
       aria-labelledby={`product-title-${product.id}`}
       aria-describedby={`product-price-${product.id}`}
@@ -248,7 +258,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
           priority={true}
         />
         <div className="product-image-overlay" aria-hidden="true"></div>
-        
+
         {/* Overlay avec badge promotionnel */}
         {hasPromo && (
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
@@ -268,7 +278,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
               Nouveau
             </Badge>
           )}
-          
+
           {extendedProduct.is_featured && (
             <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0">
               <Crown className="h-3 w-3 mr-1" />
@@ -279,36 +289,52 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
 
         {/* Licensing badges - Position après les badges Nouveau/Vedette pour éviter conflit */}
         {extendedProduct.licensing_type && (
-          <div className="absolute top-3 left-3 flex flex-col gap-1 z-10" style={{ marginTop: (isNew() || extendedProduct.is_featured) ? '48px' : '0px' }}>
+          <div
+            className="absolute top-3 left-3 flex flex-col gap-1 z-10"
+            style={{ marginTop: isNew() || extendedProduct.is_featured ? '48px' : '0px' }}
+          >
             {extendedProduct.licensing_type === 'plr' && (
-              <Badge className="bg-emerald-500 text-white border-0 hover:bg-emerald-600" title="PLR (Private Label Rights) : peut être modifié et revendu selon conditions" aria-label="Licence PLR - Droits de label privé">
+              <Badge
+                className="bg-emerald-500 text-white border-0 hover:bg-emerald-600"
+                title="PLR (Private Label Rights) : peut être modifié et revendu selon conditions"
+                aria-label="Licence PLR - Droits de label privé"
+              >
                 <Shield className="h-3 w-3 mr-1" /> PLR
               </Badge>
             )}
             {extendedProduct.licensing_type === 'copyrighted' && (
-              <Badge className="bg-red-500 text-white border-0 hover:bg-red-600" title="Protégé par droit d'auteur : revente/modification non autorisées" aria-label="Protégé par droit d'auteur">
+              <Badge
+                className="bg-red-500 text-white border-0 hover:bg-red-600"
+                title="Protégé par droit d'auteur : revente/modification non autorisées"
+                aria-label="Protégé par droit d'auteur"
+              >
                 <Shield className="h-3 w-3 mr-1" /> Droit d'auteur
               </Badge>
             )}
             {extendedProduct.licensing_type === 'standard' && (
-              <Badge className="bg-blue-500 text-white border-0 hover:bg-blue-600" title="Licence standard : utilisation personnelle uniquement" aria-label="Licence standard">
+              <Badge
+                className="bg-blue-500 text-white border-0 hover:bg-blue-600"
+                title="Licence standard : utilisation personnelle uniquement"
+                aria-label="Licence standard"
+              >
                 <Shield className="h-3 w-3 mr-1" /> Standard
               </Badge>
             )}
           </div>
         )}
 
-
         {/* Bouton favori */}
         <button
           onClick={handleFavorite}
           className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none z-10"
-          aria-label={isFavorite ? `Retirer ${product.name} des favoris` : `Ajouter ${product.name} aux favoris`}
+          aria-label={
+            isFavorite
+              ? `Retirer ${product.name} des favoris`
+              : `Ajouter ${product.name} aux favoris`
+          }
         >
-          <Heart 
-            className={`h-5 w-5 ${
-              isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'
-            }`} 
+          <Heart
+            className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
           />
         </button>
       </div>
@@ -332,9 +358,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
                   {product.rating.toFixed(1)}
                 </span>
                 {!extendedProduct.hide_reviews_count && (
-                  <span className="text-sm text-gray-600">
-                    ({product.reviews_count || 0})
-                  </span>
+                  <span className="text-sm text-gray-600">({product.reviews_count || 0})</span>
                 )}
               </>
             ) : (
@@ -354,19 +378,24 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
               {product.category}
             </Badge>
           )}
-          
+
           {product.product_type && (
-            <Badge 
+            <Badge
               variant="secondary"
               className={`text-xs border-0 ${
-                product.product_type === 'digital' ? 'bg-blue-100 text-blue-800' :
-                product.product_type === 'physical' ? 'bg-green-100 text-green-800' :
-                'bg-purple-100 text-purple-800'
+                product.product_type === 'digital'
+                  ? 'bg-blue-100 text-blue-800'
+                  : product.product_type === 'physical'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-purple-100 text-purple-800'
               }`}
             >
               <Zap className="h-3 w-3 mr-1" />
-              {product.product_type === 'digital' ? 'Numérique' : 
-               product.product_type === 'physical' ? 'Physique' : 'Service'}
+              {product.product_type === 'digital'
+                ? 'Numérique'
+                : product.product_type === 'physical'
+                  ? 'Physique'
+                  : 'Service'}
             </Badge>
           )}
 
@@ -374,24 +403,25 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
           {(() => {
             // Gérer le cas où Supabase retourne un objet, un tableau, ou null
             let affiliateSettings = null;
-            
+
             if (product.product_affiliate_settings) {
               if (Array.isArray(product.product_affiliate_settings)) {
                 // Tableau : prendre le premier élément s'il existe
-                affiliateSettings = product.product_affiliate_settings.length > 0 
-                  ? product.product_affiliate_settings[0] 
-                  : null;
+                affiliateSettings =
+                  product.product_affiliate_settings.length > 0
+                    ? product.product_affiliate_settings[0]
+                    : null;
               } else {
                 // Objet direct
                 affiliateSettings = product.product_affiliate_settings;
               }
             }
-            
+
             // Afficher le badge si l'affiliation est activée et le taux > 0
             if (affiliateSettings?.affiliate_enabled && affiliateSettings?.commission_rate > 0) {
               return (
-                <Badge 
-                  variant="secondary" 
+                <Badge
+                  variant="secondary"
                   className="text-xs bg-gradient-to-r from-orange-500 to-pink-500 text-white border-0"
                   title={`Taux de commission d'affiliation: ${affiliateSettings.commission_rate}%`}
                 >
@@ -400,10 +430,10 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
                 </Badge>
               );
             }
-            
+
             return null;
           })()}
-          
+
           {extendedProduct.pricing_model && (
             <Badge variant="secondary" className="text-xs bg-indigo-100 text-indigo-800 border-0">
               {extendedProduct.pricing_model === 'subscription' && (
@@ -435,29 +465,47 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
         </div>
 
         {/* Badge fichiers téléchargeables */}
-        {extendedProduct.downloadable_files && Array.isArray(extendedProduct.downloadable_files) && extendedProduct.downloadable_files.length > 0 && (
-          <div className="mb-3">
-            <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-700 border-green-500/20">
-              <Download className="h-3 w-3 mr-1" />
-              {extendedProduct.downloadable_files.length} fichier{extendedProduct.downloadable_files.length > 1 ? 's' : ''}
-            </Badge>
-          </div>
-        )}
+        {extendedProduct.downloadable_files &&
+          Array.isArray(extendedProduct.downloadable_files) &&
+          extendedProduct.downloadable_files.length > 0 && (
+            <div className="mb-3">
+              <Badge
+                variant="secondary"
+                className="text-xs bg-green-500/10 text-green-700 border-green-500/20"
+              >
+                <Download className="h-3 w-3 mr-1" />
+                {extendedProduct.downloadable_files.length} fichier
+                {extendedProduct.downloadable_files.length > 1 ? 's' : ''}
+              </Badge>
+            </div>
+          )}
 
         {/* Licensing details (amélioré) */}
         {extendedProduct.licensing_type && (
           <div className="mb-3 flex items-center gap-2">
-            <Shield className={`h-3.5 w-3.5 flex-shrink-0 ${
-              extendedProduct.licensing_type === 'plr' ? 'text-emerald-500' : 
-              extendedProduct.licensing_type === 'copyrighted' ? 'text-red-500' : 
-              'text-blue-500'
-            }`} />
-            <span className={`text-xs font-medium ${
-              extendedProduct.licensing_type === 'plr' ? 'text-emerald-700 dark:text-emerald-400' : 
-              extendedProduct.licensing_type === 'copyrighted' ? 'text-red-700 dark:text-red-400' : 
-              'text-blue-700 dark:text-blue-400'
-            }`}>
-              {extendedProduct.licensing_type === 'plr' ? 'Licence PLR (droits de label privé)' : extendedProduct.licensing_type === 'copyrighted' ? 'Protégé par droit d\'auteur' : 'Licence standard'}
+            <Shield
+              className={`h-3.5 w-3.5 flex-shrink-0 ${
+                extendedProduct.licensing_type === 'plr'
+                  ? 'text-emerald-500'
+                  : extendedProduct.licensing_type === 'copyrighted'
+                    ? 'text-red-500'
+                    : 'text-blue-500'
+              }`}
+            />
+            <span
+              className={`text-xs font-medium ${
+                extendedProduct.licensing_type === 'plr'
+                  ? 'text-emerald-700 dark:text-emerald-400'
+                  : extendedProduct.licensing_type === 'copyrighted'
+                    ? 'text-red-700 dark:text-red-400'
+                    : 'text-blue-700 dark:text-blue-400'
+              }`}
+            >
+              {extendedProduct.licensing_type === 'plr'
+                ? 'Licence PLR (droits de label privé)'
+                : extendedProduct.licensing_type === 'copyrighted'
+                  ? "Protégé par droit d'auteur"
+                  : 'Licence standard'}
             </span>
           </div>
         )}
@@ -486,12 +534,13 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
                 className="flex-shrink-0 h-7"
               />
             </div>
-            {!extendedProduct.hide_purchase_count && extendedProduct.purchases_count !== undefined && (
-              <div className="flex items-center gap-1 text-sm text-gray-600">
-                <TrendingUp className="h-4 w-4" />
-                <span>{extendedProduct.purchases_count || 0}</span>
-              </div>
-            )}
+            {!extendedProduct.hide_purchase_count &&
+              extendedProduct.purchases_count !== undefined && (
+                <div className="flex items-center gap-1 text-sm text-gray-600">
+                  <TrendingUp className="h-4 w-4" />
+                  <span>{extendedProduct.purchases_count || 0}</span>
+                </div>
+              )}
           </div>
         </div>
 
@@ -503,7 +552,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
             className="product-action-button flex-1 h-10 text-white bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 border-amber-500 transition-all duration-200"
             asChild
           >
-            <Link 
+            <Link
               to={`/stores/${storeSlug}/products/${product.slug}`}
               className="flex items-center justify-center gap-1.5"
             >
@@ -511,7 +560,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
               <span className="font-medium text-white">Voir</span>
             </Link>
           </Button>
-          
+
           {product.store_id && (
             <Button
               variant="outline"
@@ -519,7 +568,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
               className="product-action-button flex-1 h-10 text-white bg-gradient-to-r from-purple-700 to-purple-900 hover:from-purple-800 hover:to-purple-950 border-purple-700 transition-all duration-200"
               asChild
             >
-              <Link 
+              <Link
                 to={`/vendor/messaging/${product.store_id}?productId=${product.id}`}
                 className="flex items-center justify-center gap-1.5"
               >
@@ -528,13 +577,17 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
               </Link>
             </Button>
           )}
-          
+
           <Button
             onClick={handleBuyNow}
             disabled={loading}
             size="sm"
             className="product-action-button flex-1 h-10 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium"
-            aria-label={loading ? `Traitement de l'achat de ${product.name} en cours` : `Acheter ${product.name} pour ${formatPrice(price)} ${product.currency || 'XOF'}`}
+            aria-label={
+              loading
+                ? `Traitement de l'achat de ${product.name} en cours`
+                : `Acheter ${product.name} pour ${formatPrice(price)} ${product.currency || 'XOF'}`
+            }
           >
             <div className="flex items-center justify-center gap-1.5">
               {loading ? (
@@ -560,7 +613,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
 const ProductCard = React.memo(ProductCardComponent, (prevProps, nextProps) => {
   const prevProduct = prevProps.product as ExtendedProduct;
   const nextProduct = nextProps.product as ExtendedProduct;
-  
+
   return (
     prevProduct.id === nextProduct.id &&
     prevProduct.price === nextProduct.price &&

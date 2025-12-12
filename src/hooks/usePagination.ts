@@ -1,7 +1,7 @@
 /**
  * Hook usePagination - Gestion réutilisable de la pagination
  * Simplifie la gestion de la pagination dans les composants
- * 
+ *
  * @example
  * ```tsx
  * const {
@@ -184,7 +184,17 @@ export function usePagination(options: UsePaginationOptions): UsePaginationRetur
   const setPageSize = useCallback(
     (newPageSize: number) => {
       if (!pageSizeOptions.includes(newPageSize)) {
-        console.warn(`Page size ${newPageSize} is not in available options`);
+        // ✅ PHASE 2: Remplacer console.warn par logger
+        import('@/lib/logger')
+          .then(({ logger }) => {
+            logger.warn(`Page size ${newPageSize} is not in available options`, {
+              newPageSize,
+              pageSizeOptions,
+            });
+          })
+          .catch(() => {
+            // Fallback silencieux
+          });
         return;
       }
 
@@ -246,12 +256,21 @@ export function useInfinitePagination<T>(
     setIsLoading(true);
     try {
       const result = await fetchPage(page, initialPageSize);
-      setAllData((prev) => [...prev, ...result.data]);
+      setAllData(prev => [...prev, ...result.data]);
       setTotal(result.total);
-      setHasMore(result.data.length === initialPageSize && allData.length + result.data.length < result.total);
-      setPage((prev) => prev + 1);
+      setHasMore(
+        result.data.length === initialPageSize && allData.length + result.data.length < result.total
+      );
+      setPage(prev => prev + 1);
     } catch (error) {
-      console.error('Error loading more:', error);
+      // ✅ PHASE 2: Remplacer console.error par logger
+      import('@/lib/logger')
+        .then(({ logger }) => {
+          logger.error('Error loading more', { error });
+        })
+        .catch(() => {
+          // Fallback silencieux
+        });
     } finally {
       setIsLoading(false);
     }
@@ -273,4 +292,3 @@ export function useInfinitePagination<T>(
     reset,
   };
 }
-

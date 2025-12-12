@@ -43,13 +43,10 @@ export interface CookieOptions {
 /**
  * Définit un cookie
  */
-export function setCookie(
-  name: string,
-  value: string,
-  options: CookieOptions = {}
-): void {
+export function setCookie(name: string, value: string, options: CookieOptions = {}): void {
   if (typeof document === 'undefined') {
-    console.warn('setCookie: document is not available');
+    // ✅ PHASE 2: Remplacer console.warn par logger
+    logger.warn('setCookie: document is not available');
     return;
   }
 
@@ -176,16 +173,13 @@ export function clearAllCookies(): void {
 /**
  * Définit un cookie JSON
  */
-export function setCookieJSON<T>(
-  name: string,
-  value: T,
-  options: CookieOptions = {}
-): void {
+export function setCookieJSON<T>(name: string, value: T, options: CookieOptions = {}): void {
   try {
     const jsonString = JSON.stringify(value);
     setCookie(name, jsonString, options);
   } catch (error) {
-    console.error(`Error setting cookie ${name}:`, error);
+    // ✅ PHASE 2: Remplacer console.error par logger
+    logger.error(`Error setting cookie ${name}`, { error, name });
   }
 }
 
@@ -201,7 +195,8 @@ export function getCookieJSON<T>(name: string): T | null {
   try {
     return JSON.parse(cookieValue) as T;
   } catch (error) {
-    console.error(`Error parsing cookie ${name}:`, error);
+    // ✅ PHASE 2: Remplacer console.error par logger
+    logger.error(`Error parsing cookie ${name}`, { error, name });
     return null;
   }
 }
@@ -258,4 +253,3 @@ export function areCookiesSupported(): boolean {
     return false;
   }
 }
-

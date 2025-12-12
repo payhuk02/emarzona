@@ -41,6 +41,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- ✅ PERFORMANCE: Font-display swap pour éviter FOIT (Flash of Invisible Text) -->
     <!-- ✅ PERFORMANCE: Chargement asynchrone des fonts pour ne pas bloquer le render -->
+    <!-- ✅ PHASE 1: Optimisé pour améliorer FCP - Preload des fonts critiques -->
+    <link
+      rel="preload"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
@@ -57,16 +64,19 @@
     <!-- ✅ Preconnect pour Supabase (améliore TTFB) -->
     <link rel="preconnect" href="https://hbdnzajbyjakdhuavrvb.supabase.co" />
     
+    <!-- ✅ PHASE 1: Preload des ressources critiques pour améliorer FCP -->
+    <!-- Preload du CSS principal (chargé immédiatement) -->
+    <link rel="preload" href="/src/index.css" as="style" />
+    
     <!-- ✅ Prefetch pour les routes critiques (améliore la navigation) -->
     <!-- Note: Les prefetch sont gérés dynamiquement par React Router -->
-    
-    <!-- ✅ PERFORMANCE: Preload retiré pour éviter le warning -->
-    <!-- Le preload de main.tsx causait un warning car il n'est pas utilisé immédiatement -->
-    <!-- Le module est déjà chargé via le script type="module" dans le body -->
     
     <!-- ✅ Preconnect pour CDN et services externes (améliore TTFB) -->
     <link rel="preconnect" href="https://storage.googleapis.com" />
     <link rel="preconnect" href="https://api.moneroo.com" />
+    
+    <!-- ✅ PHASE 1: Preconnect pour améliorer TTFB sur les domaines critiques -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     
     <!-- ✅ Prefetch pour routes critiques (améliore la navigation) -->
     <!-- Note: React Router gère déjà le prefetch via lazy loading -->

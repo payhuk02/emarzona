@@ -3,6 +3,9 @@
  * Fournit des fonctions réutilisables pour gérer le stockage de manière sécurisée
  */
 
+// ✅ PHASE 2: Import logger pour remplacer console.*
+import { logger } from '@/lib/logger';
+
 export type StorageType = 'localStorage' | 'sessionStorage';
 
 export interface StorageOptions {
@@ -55,16 +58,13 @@ export function isStorageAvailable(type: StorageType = 'localStorage'): boolean 
 /**
  * Définit une valeur dans le stockage
  */
-export function setStorageItem(
-  key: string,
-  value: any,
-  options: StorageOptions = {}
-): boolean {
+export function setStorageItem(key: string, value: unknown, options: StorageOptions = {}): boolean {
   const { type = 'localStorage', json = true } = options;
   const storage = getStorage(type);
 
   if (!storage) {
-    console.warn(`Storage (${type}) is not available`);
+    // ✅ PHASE 2: Remplacer console.warn par logger
+    logger.warn(`Storage (${type}) is not available`);
     return false;
   }
 
@@ -73,7 +73,8 @@ export function setStorageItem(
     storage.setItem(key, stringValue);
     return true;
   } catch (error) {
-    console.error(`Error setting storage item ${key}:`, error);
+    // ✅ PHASE 2: Remplacer console.error par logger
+    logger.error(`Error setting storage item ${key}`, { error, key, type });
     return false;
   }
 }
@@ -81,10 +82,7 @@ export function setStorageItem(
 /**
  * Obtient une valeur du stockage
  */
-export function getStorageItem<T = any>(
-  key: string,
-  options: StorageOptions = {}
-): T | null {
+export function getStorageItem<T = unknown>(key: string, options: StorageOptions = {}): T | null {
   const { type = 'localStorage', json = true } = options;
   const storage = getStorage(type);
 
@@ -104,7 +102,8 @@ export function getStorageItem<T = any>(
 
     return item as T;
   } catch (error) {
-    console.error(`Error getting storage item ${key}:`, error);
+    // ✅ PHASE 2: Remplacer console.error par logger
+    logger.error(`Error getting storage item ${key}`, { error, key, type });
     return null;
   }
 }
@@ -112,10 +111,7 @@ export function getStorageItem<T = any>(
 /**
  * Supprime une valeur du stockage
  */
-export function removeStorageItem(
-  key: string,
-  type: StorageType = 'localStorage'
-): boolean {
+export function removeStorageItem(key: string, type: StorageType = 'localStorage'): boolean {
   const storage = getStorage(type);
 
   if (!storage) {
@@ -126,7 +122,8 @@ export function removeStorageItem(
     storage.removeItem(key);
     return true;
   } catch (error) {
-    console.error(`Error removing storage item ${key}:`, error);
+    // ✅ PHASE 2: Remplacer console.error par logger
+    logger.error(`Error removing storage item ${key}`, { error, key, type });
     return false;
   }
 }
@@ -134,10 +131,7 @@ export function removeStorageItem(
 /**
  * Vérifie si une clé existe dans le stockage
  */
-export function hasStorageItem(
-  key: string,
-  type: StorageType = 'localStorage'
-): boolean {
+export function hasStorageItem(key: string, type: StorageType = 'localStorage'): boolean {
   const storage = getStorage(type);
   if (!storage) {
     return false;
@@ -168,15 +162,13 @@ export function getStorageKeys(type: StorageType = 'localStorage'): string[] {
 /**
  * Obtient toutes les valeurs du stockage
  */
-export function getAllStorageItems(
-  type: StorageType = 'localStorage'
-): Record<string, any> {
+export function getAllStorageItems(type: StorageType = 'localStorage'): Record<string, unknown> {
   const storage = getStorage(type);
   if (!storage) {
     return {};
   }
 
-  const items: Record<string, any> = {};
+  const items: Record<string, unknown> = {};
   for (let i = 0; i < storage.length; i++) {
     const key = storage.key(i);
     if (key) {
@@ -210,7 +202,8 @@ export function clearStorage(type: StorageType = 'localStorage'): boolean {
     storage.clear();
     return true;
   } catch (error) {
-    console.error(`Error clearing storage (${type}):`, error);
+    // ✅ PHASE 2: Remplacer console.error par logger
+    logger.error(`Error clearing storage (${type})`, { error, type });
     return false;
   }
 }
@@ -257,10 +250,7 @@ export function getOrSetStorageItem<T>(
 /**
  * Supprime plusieurs clés du stockage
  */
-export function removeStorageItems(
-  keys: string[],
-  type: StorageType = 'localStorage'
-): number {
+export function removeStorageItems(keys: string[], type: StorageType = 'localStorage'): number {
   let removed = 0;
   for (const key of keys) {
     if (removeStorageItem(key, type)) {
@@ -278,18 +268,14 @@ export function removeStorageItemsByPrefix(
   type: StorageType = 'localStorage'
 ): number {
   const keys = getStorageKeys(type);
-  const matchingKeys = keys.filter((key) => key.startsWith(prefix));
+  const matchingKeys = keys.filter(key => key.startsWith(prefix));
   return removeStorageItems(matchingKeys, type);
 }
 
 /**
  * Migre une valeur d'un type de stockage à un autre
  */
-export function migrateStorageItem(
-  key: string,
-  from: StorageType,
-  to: StorageType
-): boolean {
+export function migrateStorageItem(key: string, from: StorageType, to: StorageType): boolean {
   const value = getStorageItem(key, { type: from });
   if (value === null) {
     return false;
@@ -301,4 +287,3 @@ export function migrateStorageItem(
   }
   return success;
 }
-

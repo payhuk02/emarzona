@@ -1,7 +1,7 @@
 /**
  * Hook useStorage - Gestion unifiée du localStorage et sessionStorage
  * Fournit une API simple et type-safe pour le stockage
- * 
+ *
  * @example
  * ```tsx
  * const [value, setValue, removeValue] = useStorage('key', 'default', 'local');
@@ -9,6 +9,8 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+// ✅ PHASE 2: Import logger pour remplacer console.*
+import { logger } from '@/lib/logger';
 
 type StorageType = 'local' | 'session';
 
@@ -76,10 +78,11 @@ export function useStorage<T>(
       }
       return serializer.read(item);
     } catch (error) {
-      console.warn(`Error reading storage key "${key}":`, error);
+      // ✅ PHASE 2: Remplacer console.warn par logger
+      logger.warn(`Error reading storage key "${key}"`, { error, key, storageType });
       return initialValue;
     }
-  }, [key, initialValue, storage, serializer]);
+  }, [key, initialValue, storage, serializer, storageType]);
 
   // État initial
   const [storedValue, setStoredValue] = useState<T>(readValue);
@@ -104,10 +107,11 @@ export function useStorage<T>(
         // Appeler le callback
         onUpdate?.(valueToStore);
       } catch (error) {
-        console.warn(`Error setting storage key "${key}":`, error);
+        // ✅ PHASE 2: Remplacer console.warn par logger
+        logger.warn(`Error setting storage key "${key}"`, { error, key, storageType });
       }
     },
-    [key, storedValue, storage, serializer, onUpdate]
+    [key, storedValue, storage, serializer, onUpdate, storageType]
   );
 
   // Fonction pour supprimer la valeur
@@ -121,9 +125,10 @@ export function useStorage<T>(
       }
       onUpdate?.(initialValue);
     } catch (error) {
-      console.warn(`Error removing storage key "${key}":`, error);
+      // ✅ PHASE 2: Remplacer console.warn par logger
+      logger.warn(`Error removing storage key "${key}"`, { error, key, storageType });
     }
-  }, [key, initialValue, storage, onUpdate]);
+  }, [key, initialValue, storage, onUpdate, storageType]);
 
   // Écouter les changements depuis d'autres onglets/fenêtres
   useEffect(() => {
@@ -170,4 +175,3 @@ export function useSessionStorage<T>(
 ) {
   return useStorage(key, initialValue, { ...options, storageType: 'session' });
 }
-

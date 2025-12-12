@@ -1,7 +1,7 @@
 /**
  * Hook useSmartQuery - Wrapper intelligent pour React Query
  * Combine les meilleures pratiques : cache, error handling, prefetching, optimizations
- * 
+ *
  * @example
  * ```tsx
  * const { data, isLoading, error } = useSmartQuery({
@@ -18,8 +18,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useErrorHandler } from './useErrorHandler';
 import { useToastHelpers } from './useToastHelpers';
 import { cacheStrategies } from '@/lib/cache-optimization';
+// ✅ PHASE 2: Import logger pour remplacer console.*
+import { logger } from '@/lib/logger';
 
-export interface SmartQueryOptions<TData, TError = Error> extends Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'> {
+export interface SmartQueryOptions<TData, TError = Error> extends Omit<
+  UseQueryOptions<TData, TError>,
+  'queryKey' | 'queryFn'
+> {
   /**
    * Clé de la requête
    */
@@ -90,7 +95,7 @@ export function useSmartQuery<TData = unknown, TError = Error>(
   // Gestion du cache LocalStorage
   const getCachedData = useCallback((): TData | undefined => {
     if (!useLocalCache || typeof window === 'undefined') return undefined;
-    
+
     try {
       const cacheKey = `smart-query-${JSON.stringify(queryKey)}`;
       const cached = localStorage.getItem(cacheKey);
@@ -103,46 +108,51 @@ export function useSmartQuery<TData = unknown, TError = Error>(
         localStorage.removeItem(cacheKey);
       }
     } catch (error) {
-      console.warn('Failed to read from localStorage cache', error);
+      // ✅ PHASE 2: Remplacer console.warn par logger
+      logger.warn('Failed to read from localStorage cache', { error, queryKey });
     }
     return undefined;
   }, [useLocalCache, queryKey, localCacheTTL]);
 
-  const setCachedData = useCallback((data: TData) => {
-    if (!useLocalCache || typeof window === 'undefined') return;
-    
-    try {
-      const cacheKey = `smart-query-${JSON.stringify(queryKey)}`;
-      localStorage.setItem(
-        cacheKey,
-        JSON.stringify({
-          data,
-          timestamp: Date.now(),
-        })
-      );
-    } catch (error) {
-      console.warn('Failed to write to localStorage cache', error);
-    }
-  }, [useLocalCache, queryKey]);
+  const setCachedData = useCallback(
+    (data: TData) => {
+      if (!useLocalCache || typeof window === 'undefined') return;
+
+      try {
+        const cacheKey = `smart-query-${JSON.stringify(queryKey)}`;
+        localStorage.setItem(
+          cacheKey,
+          JSON.stringify({
+            data,
+            timestamp: Date.now(),
+          })
+        );
+      } catch (error) {
+        // ✅ PHASE 2: Remplacer console.warn par logger
+        logger.warn('Failed to write to localStorage cache', { error, queryKey });
+      }
+    },
+    [useLocalCache, queryKey]
+  );
 
   // Prefetching intelligent pour pagination
   useEffect(() => {
     if (!enablePrefetch) return;
 
     const isPaginated = queryKey.some(
-      (key) => typeof key === 'object' && key !== null && ('page' in key || 'offset' in key)
+      key => typeof key === 'object' && key !== null && ('page' in key || 'offset' in key)
     );
 
     if (isPaginated) {
       const pageKey = queryKey.find(
-        (key) => typeof key === 'object' && key !== null && ('page' in key || 'offset' in key)
+        key => typeof key === 'object' && key !== null && ('page' in key || 'offset' in key)
       ) as { page?: number; offset?: number } | undefined;
 
       if (pageKey) {
         const currentPage = pageKey.page || 1;
         const nextPage = currentPage + 1;
 
-        const nextPageKey = queryKey.map((key) => {
+        const nextPageKey = queryKey.map(key => {
           if (typeof key === 'object' && key !== null && ('page' in key || 'offset' in key)) {
             return { ...key, page: nextPage };
           }
@@ -167,18 +177,18 @@ export function useSmartQuery<TData = unknown, TError = Error>(
     queryKey,
     queryFn: async () => {
       const data = await queryFn();
-      
+
       // Sauvegarder dans le cache LocalStorage si activé
       if (useLocalCache && data) {
         setCachedData(data);
       }
-      
+
       return data;
     },
     staleTime,
     gcTime,
     retry: queryOptions.retry ?? 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
     refetchOnWindowFocus: false, // Éviter les refetch inutiles
     refetchOnMount: queryOptions.refetchOnMount ?? true,
     refetchOnReconnect: true,
@@ -241,4 +251,3 @@ export function useSmartSearchQuery<TData = unknown>(
     dataType: 'search',
   });
 }
-

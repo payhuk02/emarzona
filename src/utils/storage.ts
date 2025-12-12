@@ -2,13 +2,16 @@
  * Utilitaires pour la gestion des URLs de stockage Supabase
  */
 
+// ✅ PHASE 2: Import logger pour remplacer console.*
+import { logger } from '@/lib/logger';
+
 /**
  * Corrige et normalise une URL de fichier Supabase Storage
- * 
+ *
  * @param fileUrl - URL originale du fichier
  * @param storagePath - Chemin de stockage relatif (optionnel)
  * @returns URL corrigée et normalisée
- * 
+ *
  * @example
  * getCorrectedFileUrl(
  *   'https://xxx.supabase.co/storage/v1/object/public/attachments/vendor-message-attachments/file.png',
@@ -18,7 +21,8 @@
 export function getCorrectedFileUrl(fileUrl: string, storagePath?: string): string {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   if (!supabaseUrl) {
-    console.error('VITE_SUPABASE_URL not defined');
+    // ✅ PHASE 2: Remplacer console.error par logger
+    logger.error('VITE_SUPABASE_URL not defined');
     return fileUrl;
   }
 
@@ -47,7 +51,7 @@ export function getCorrectedFileUrl(fileUrl: string, storagePath?: string): stri
       .replace(/^attachments\//, '')
       .replace(/^\/attachments\//, '')
       .replace(/^storage\/v1\/object\/public\/attachments\//, '')
-      .replace(/^https?:\/\/[^\/]+\/storage\/v1\/object\/public\/attachments\//, '');
+      .replace(/^https?:\/\/[^/]+\/storage\/v1\/object\/public\/attachments\//, '');
 
     const encodedPath = cleanPath
       .split('/')
@@ -55,15 +59,16 @@ export function getCorrectedFileUrl(fileUrl: string, storagePath?: string): stri
       .join('/');
 
     // S'assurer qu'il n'y a pas de double slash
-    const correctedUrl = `${baseUrl}/storage/v1/object/public/attachments/${encodedPath}`.replace(/([^:]\/)\/+/g, '$1');
+    const correctedUrl = `${baseUrl}/storage/v1/object/public/attachments/${encodedPath}`.replace(
+      /([^:]\/)\/+/g,
+      '$1'
+    );
     return correctedUrl;
   }
 
   // Si fileUrl est un chemin relatif, l'utiliser directement
   if (fileUrl && !fileUrl.startsWith('http')) {
-    const cleanPath = fileUrl
-      .replace(/^attachments\//, '')
-      .replace(/^\/attachments\//, '');
+    const cleanPath = fileUrl.replace(/^attachments\//, '').replace(/^\/attachments\//, '');
 
     const encodedPath = cleanPath
       .split('/')
@@ -71,7 +76,10 @@ export function getCorrectedFileUrl(fileUrl: string, storagePath?: string): stri
       .join('/');
 
     // S'assurer qu'il n'y a pas de double slash (sauf après le protocole)
-    const correctedUrl = `${baseUrl}/storage/v1/object/public/attachments/${encodedPath}`.replace(/([^:]\/)\/+/g, '$1');
+    const correctedUrl = `${baseUrl}/storage/v1/object/public/attachments/${encodedPath}`.replace(
+      /([^:]\/)\/+/g,
+      '$1'
+    );
     return correctedUrl;
   }
 
@@ -81,7 +89,7 @@ export function getCorrectedFileUrl(fileUrl: string, storagePath?: string): stri
 
 /**
  * Extrait le chemin de stockage depuis une URL Supabase
- * 
+ *
  * @param fileUrl - URL complète du fichier
  * @returns Chemin relatif dans le bucket, ou null si l'URL n'est pas valide
  */
@@ -108,7 +116,9 @@ export function extractStoragePath(fileUrl: string): string | null {
  */
 export function isValidSupabaseStorageUrl(url: string): boolean {
   if (!url || !url.startsWith('http')) return false;
-  
-  return url.includes('/storage/v1/object/public/attachments/') || 
-         url.includes('/storage/v1/object/sign/attachments/');
+
+  return (
+    url.includes('/storage/v1/object/public/attachments/') ||
+    url.includes('/storage/v1/object/sign/attachments/')
+  );
 }

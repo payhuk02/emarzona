@@ -3,6 +3,9 @@
  * Fournit des fonctions réutilisables pour sérialiser/désérialiser des données
  */
 
+// ✅ PHASE 2: Import logger pour remplacer console.*
+import { logger } from '@/lib/logger';
+
 export interface SerializationOptions {
   /**
    * Espacement pour le formatage JSON
@@ -12,11 +15,11 @@ export interface SerializationOptions {
   /**
    * Replacer pour la sérialisation JSON personnalisée
    */
-  replacer?: (key: string, value: any) => any;
+  replacer?: (key: string, value: unknown) => unknown;
   /**
    * Reviver pour la désérialisation JSON personnalisée
    */
-  reviver?: (key: string, value: any) => any;
+  reviver?: (key: string, value: unknown) => unknown;
 }
 
 /**
@@ -27,7 +30,8 @@ export function serialize<T>(value: T, options: SerializationOptions = {}): stri
   try {
     return JSON.stringify(value, replacer, space);
   } catch (error) {
-    console.error('Error serializing value:', error);
+    // ✅ PHASE 2: Remplacer console.error par logger
+    logger.error('Error serializing value', { error });
     throw new Error('Failed to serialize value');
   }
 }
@@ -35,15 +39,13 @@ export function serialize<T>(value: T, options: SerializationOptions = {}): stri
 /**
  * Désérialise une chaîne JSON en objet
  */
-export function deserialize<T>(
-  json: string,
-  options: SerializationOptions = {}
-): T {
+export function deserialize<T>(json: string, options: SerializationOptions = {}): T {
   const { reviver } = options;
   try {
     return JSON.parse(json, reviver) as T;
   } catch (error) {
-    console.error('Error deserializing JSON:', error);
+    // ✅ PHASE 2: Remplacer console.error par logger
+    logger.error('Error deserializing JSON', { error });
     throw new Error('Failed to deserialize JSON');
   }
 }
@@ -51,10 +53,7 @@ export function deserialize<T>(
 /**
  * Sérialise avec gestion d'erreur (retourne null en cas d'erreur)
  */
-export function safeSerialize<T>(
-  value: T,
-  options: SerializationOptions = {}
-): string | null {
+export function safeSerialize<T>(value: T, options: SerializationOptions = {}): string | null {
   try {
     return serialize(value, options);
   } catch {
@@ -65,10 +64,7 @@ export function safeSerialize<T>(
 /**
  * Désérialise avec gestion d'erreur (retourne null en cas d'erreur)
  */
-export function safeDeserialize<T>(
-  json: string,
-  options: SerializationOptions = {}
-): T | null {
+export function safeDeserialize<T>(json: string, options: SerializationOptions = {}): T | null {
   try {
     return deserialize<T>(json, options);
   } catch {
@@ -228,4 +224,3 @@ export function getSerializedSize<T>(value: T): number {
   const json = serialize(value);
   return new Blob([json]).size;
 }
-

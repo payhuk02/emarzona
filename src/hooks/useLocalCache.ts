@@ -1,18 +1,19 @@
 /**
  * Hook useLocalCache - Gestion simplifiée du cache local
  * Fournit une API simple pour gérer le cache avec TTL
- * 
+ *
  * @example
  * ```tsx
  * const { get, set, remove, clear } = useLocalCache('my-key', 60000);
- * 
+ *
  * const data = get();
  * set(data);
  * ```
  */
 
-import { useCallback, useRef } from 'react';
-import { cache } from '@/lib/cache';
+import { useCallback } from 'react';
+// ✅ PHASE 2: Import logger pour remplacer console.*
+import { logger } from '@/lib/logger';
 
 export interface UseLocalCacheOptions {
   /**
@@ -84,7 +85,8 @@ export function useLocalCache<T>(
 
       return JSON.parse(cached) as T;
     } catch (error) {
-      console.error(`Error getting cache for key "${key}":`, error);
+      // ✅ PHASE 2: Remplacer console.error par logger
+      logger.error(`Error getting cache for key "${key}"`, { error, key });
       return null;
     }
   }, [key, ttlKey, storage]);
@@ -98,7 +100,8 @@ export function useLocalCache<T>(
         storage.setItem(key, JSON.stringify(value));
         storage.setItem(ttlKey, String(expiry));
       } catch (error) {
-        console.error(`Error setting cache for key "${key}":`, error);
+        // ✅ PHASE 2: Remplacer console.error par logger
+        logger.error(`Error setting cache for key "${key}"`, { error, key });
       }
     },
     [key, ttlKey, ttl, storage]
@@ -109,7 +112,8 @@ export function useLocalCache<T>(
       storage.removeItem(key);
       storage.removeItem(ttlKey);
     } catch (error) {
-      console.error(`Error removing cache for key "${key}":`, error);
+      // ✅ PHASE 2: Remplacer console.error par logger
+      logger.error(`Error removing cache for key "${key}"`, { error, key });
     }
   }, [key, ttlKey, storage]);
 
@@ -131,7 +135,7 @@ export function useLocalCache<T>(
       }
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }, [key, ttlKey, storage]);
@@ -163,4 +167,3 @@ export function useLocalCache<T>(
     getOrSet,
   };
 }
-

@@ -1,9 +1,9 @@
 /**
  * Script de diagnostic pour vérifier l'existence des fichiers dans Supabase Storage
- * 
+ *
  * Ce script vérifie que tous les fichiers référencés dans vendor_message_attachments
  * existent réellement dans le bucket 'attachments'.
- * 
+ *
  * Date: 2 Février 2025
  */
 
@@ -43,7 +43,7 @@ async function checkFileExists(storagePath: string): Promise<{ exists: boolean; 
       .replace(/^attachments\//, '')
       .replace(/^\/attachments\//, '')
       .replace(/^storage\/v1\/object\/public\/attachments\//, '')
-      .replace(/^https?:\/\/[^\/]+\/storage\/v1\/object\/public\/attachments\//, '');
+      .replace(/^https?:\/\/[^/]+\/storage\/v1\/object\/public\/attachments\//, '');
 
     // Essayer de générer une URL signée (si ça fonctionne, le fichier existe)
     const { data: signedUrlData, error: signedUrlError } = await supabase.storage
@@ -52,14 +52,15 @@ async function checkFileExists(storagePath: string): Promise<{ exists: boolean; 
 
     if (signedUrlError) {
       // Si l'erreur indique que le fichier n'existe pas
-      const isNotFound = signedUrlError.message?.toLowerCase().includes('not found') ||
-                        signedUrlError.message?.toLowerCase().includes('does not exist') ||
-                        signedUrlError.code === '404' ||
-                        signedUrlError.status === 404;
+      const isNotFound =
+        signedUrlError.message?.toLowerCase().includes('not found') ||
+        signedUrlError.message?.toLowerCase().includes('does not exist') ||
+        signedUrlError.code === '404' ||
+        signedUrlError.status === 404;
 
       return {
         exists: false,
-        error: isNotFound 
+        error: isNotFound
           ? 'Fichier introuvable dans le bucket'
           : signedUrlError.message || 'Erreur inconnue',
       };
@@ -68,11 +69,11 @@ async function checkFileExists(storagePath: string): Promise<{ exists: boolean; 
     if (signedUrlData?.signedUrl) {
       // Vérifier que l'URL signée fonctionne réellement en essayant de charger le fichier
       try {
-        const response = await fetch(signedUrlData.signedUrl, { 
+        const response = await fetch(signedUrlData.signedUrl, {
           method: 'HEAD',
           cache: 'no-cache',
         });
-        
+
         if (response.ok) {
           // Vérifier aussi le Content-Type pour s'assurer que c'est bien une image
           const contentType = response.headers.get('content-type') || '';
@@ -80,19 +81,19 @@ async function checkFileExists(storagePath: string): Promise<{ exists: boolean; 
             // Si le serveur retourne du JSON, le fichier n'existe probablement pas
             return {
               exists: false,
-              error: 'Le serveur retourne du JSON au lieu d\'une image (fichier introuvable)',
+              error: "Le serveur retourne du JSON au lieu d'une image (fichier introuvable)",
             };
           }
-          
+
           return { exists: true };
         } else {
           // Si HEAD échoue, essayer GET pour voir la réponse complète
           try {
-            const getResponse = await fetch(signedUrlData.signedUrl, { 
+            const getResponse = await fetch(signedUrlData.signedUrl, {
               method: 'GET',
               cache: 'no-cache',
             });
-            
+
             if (getResponse.ok) {
               const contentType = getResponse.headers.get('content-type') || '';
               if (contentType.includes('application/json')) {
@@ -106,7 +107,7 @@ async function checkFileExists(storagePath: string): Promise<{ exists: boolean; 
                 } catch {
                   return {
                     exists: false,
-                    error: 'Le serveur retourne du JSON au lieu d\'une image',
+                    error: "Le serveur retourne du JSON au lieu d'une image",
                   };
                 }
               }
@@ -117,14 +118,15 @@ async function checkFileExists(storagePath: string): Promise<{ exists: boolean; 
                 error: `HTTP ${getResponse.status}: ${getResponse.statusText}`,
               };
             }
-          } catch (getError: any) {
+          } catch (getError: unknown) {
+            const errorMessage = getError instanceof Error ? getError.message : 'Erreur inconnue';
             return {
               exists: false,
-              error: `Erreur lors de la vérification GET: ${getError.message}`,
+              error: `Erreur lors de la vérification GET: ${errorMessage}`,
             };
           }
         }
-      } catch (fetchError: any) {
+      } catch (fetchError: unknown) {
         return {
           exists: false,
           error: `Erreur lors de la vérification: ${fetchError.message}`,
@@ -133,7 +135,7 @@ async function checkFileExists(storagePath: string): Promise<{ exists: boolean; 
     }
 
     return { exists: false, error: 'Impossible de générer une URL signée' };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       exists: false,
       error: error.message || 'Erreur inconnue',
@@ -182,11 +184,13 @@ export async function diagnoseVendorMessageAttachments(): Promise<DiagnosticRepo
     // Vérifier chaque fichier
     for (let i = 0; i < attachments.length; i++) {
       const attachment = attachments[i];
-      const progress = ((i + 1) / attachments.length * 100).toFixed(1);
+      const progress = (((i + 1) / attachments.length) * 100).toFixed(1);
 
       logger.info(`[${progress}%] Vérification: ${attachment.file_name}...`);
 
-      const { exists, error } = await checkFileExists(attachment.storage_path || attachment.file_url);
+      const { exists, error } = await checkFileExists(
+        attachment.storage_path || attachment.file_url
+      );
 
       // Vérifier aussi si on peut générer une URL signée
       let canGenerateSignedUrl = false;
@@ -198,7 +202,7 @@ export async function diagnoseVendorMessageAttachments(): Promise<DiagnosticRepo
           .replace(/^attachments\//, '')
           .replace(/^\/attachments\//, '')
           .replace(/^storage\/v1\/object\/public\/attachments\//, '')
-          .replace(/^https?:\/\/[^\/]+\/storage\/v1\/object\/public\/attachments\//, '');
+          .replace(/^https?:\/\/[^/]+\/storage\/v1\/object\/public\/attachments\//, '');
 
         const { data: signData, error: signError } = await supabase.storage
           .from('attachments')
@@ -211,24 +215,32 @@ export async function diagnoseVendorMessageAttachments(): Promise<DiagnosticRepo
           canGenerateSignedUrl = true;
           // Vérifier que l'URL signée fonctionne réellement
           try {
-            const testResponse = await fetch(signData.signedUrl, { method: 'HEAD', cache: 'no-cache' });
-            if (!testResponse.ok || testResponse.headers.get('content-type')?.includes('application/json')) {
+            const testResponse = await fetch(signData.signedUrl, {
+              method: 'HEAD',
+              cache: 'no-cache',
+            });
+            if (
+              !testResponse.ok ||
+              testResponse.headers.get('content-type')?.includes('application/json')
+            ) {
               canGenerateSignedUrl = false;
               signedUrlError = `URL signée générée mais retourne ${testResponse.status} ou JSON`;
             }
-          } catch (fetchErr: any) {
+          } catch (fetchErr: unknown) {
             canGenerateSignedUrl = false;
-            signedUrlError = `Erreur lors du test de l'URL signée: ${fetchErr.message}`;
+            const errorMessage = fetchErr instanceof Error ? fetchErr.message : 'Erreur inconnue';
+            signedUrlError = `Erreur lors du test de l'URL signée: ${errorMessage}`;
           }
         }
-      } catch (err: any) {
-        signedUrlError = err.message || 'Erreur lors de la génération de l\'URL signée';
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+        signedUrlError = errorMessage || "Erreur lors de la génération de l'URL signée";
       }
 
       // Si checkFileExists dit que le fichier existe mais que l'URL signée ne fonctionne pas,
       // considérer le fichier comme manquant
       const actuallyExists = exists && canGenerateSignedUrl;
-      
+
       if (actuallyExists) {
         existingCount++;
       } else {
@@ -241,20 +253,20 @@ export async function diagnoseVendorMessageAttachments(): Promise<DiagnosticRepo
         storagePath: attachment.storage_path || attachment.file_url,
         fileUrl: attachment.file_url,
         exists: actuallyExists,
-        error: actuallyExists ? undefined : (error || signedUrlError || 'Fichier introuvable ou inaccessible'),
+        error: actuallyExists
+          ? undefined
+          : error || signedUrlError || 'Fichier introuvable ou inaccessible',
         canGenerateSignedUrl,
         signedUrlError,
       });
     }
 
     // Générer le résumé
-    const missingPaths = diagnostics
-      .filter(d => !d.exists)
-      .map(d => d.storagePath);
-    
+    const missingPaths = diagnostics.filter(d => !d.exists).map(d => d.storagePath);
+
     // Compter les fichiers qui ont des problèmes avec les URLs signées
-    const filesWithSignedUrlIssues = diagnostics.filter(d => 
-      !d.exists && d.canGenerateSignedUrl && d.signedUrlError
+    const filesWithSignedUrlIssues = diagnostics.filter(
+      d => !d.exists && d.canGenerateSignedUrl && d.signedUrlError
     ).length;
 
     const recommendations: string[] = [];
@@ -263,17 +275,17 @@ export async function diagnoseVendorMessageAttachments(): Promise<DiagnosticRepo
       recommendations.push(
         `${missingCount} fichier(s) manquant(s) ou inaccessible(s). Actions recommandées:`,
         '1. Vérifier dans Supabase Dashboard (Storage → attachments) si les fichiers existent',
-        '2. Si les fichiers n\'existent pas:',
+        "2. Si les fichiers n'existent pas:",
         '   - Supprimer les entrées invalides de vendor_message_attachments',
         '   - Ou ré-uploader les fichiers manquants',
         '3. Si les fichiers existent mais avec un chemin différent:',
         '   - Corriger le storage_path en base de données',
         '4. Si les URLs signées sont générées mais retournent du JSON:',
-        '   - Les fichiers n\'existent probablement pas dans le bucket',
+        "   - Les fichiers n'existent probablement pas dans le bucket",
         '   - Vérifier les politiques RLS du bucket attachments',
         '   - Vérifier que les fichiers ont bien été uploadés'
       );
-      
+
       if (filesWithSignedUrlIssues > 0) {
         recommendations.push(
           `⚠️ ${filesWithSignedUrlIssues} fichier(s) ont des URLs signées générées mais retournent du JSON (fichiers introuvables)`
@@ -302,8 +314,9 @@ export async function diagnoseVendorMessageAttachments(): Promise<DiagnosticRepo
     });
 
     return report;
-  } catch (error: any) {
-    logger.error('❌ Erreur lors du diagnostic', { error: error.message });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    logger.error('❌ Erreur lors du diagnostic', { error: errorMessage });
     throw error;
   }
 }
@@ -335,8 +348,9 @@ export async function cleanupMissingFiles(
       } else {
         deleted.push(file.attachmentId);
       }
-    } catch (err: any) {
-      errors.push(`Exception lors de la suppression de ${file.fileName}: ${err.message}`);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+      errors.push(`Exception lors de la suppression de ${file.fileName}: ${errorMessage}`);
     }
   }
 
@@ -352,7 +366,15 @@ export async function cleanupMissingFiles(
  * Exporte le rapport de diagnostic en CSV
  */
 export function exportDiagnosticReportToCSV(report: DiagnosticReport): string {
-  const headers = ['ID', 'Nom du fichier', 'Chemin storage', 'URL', 'Existe', 'Erreur', 'URL signée possible'];
+  const headers = [
+    'ID',
+    'Nom du fichier',
+    'Chemin storage',
+    'URL',
+    'Existe',
+    'Erreur',
+    'URL signée possible',
+  ];
   const rows = report.files.map(f => [
     f.attachmentId,
     f.fileName,
@@ -375,32 +397,36 @@ export function exportDiagnosticReportToCSV(report: DiagnosticReport): string {
  * Affiche le rapport de diagnostic dans la console
  */
 export function displayDiagnosticReport(report: DiagnosticReport): void {
-  console.group('📊 Rapport de Diagnostic - Fichiers Storage');
-  console.log(`Total: ${report.totalFiles} fichiers`);
-  console.log(`✅ Existants: ${report.existingFiles}`);
-  console.log(`❌ Manquants: ${report.missingFiles}`);
-  
+  // ✅ PHASE 2: Remplacer console.* par logger
+  logger.info('📊 Rapport de Diagnostic - Fichiers Storage');
+  logger.info(`Total: ${report.totalFiles} fichiers`);
+  logger.info(`✅ Existants: ${report.existingFiles}`);
+  logger.info(`❌ Manquants: ${report.missingFiles}`);
+
   if (report.missingFiles > 0) {
-    console.group('❌ Fichiers manquants:');
+    logger.warn('❌ Fichiers manquants:');
     report.files
       .filter(f => !f.exists)
       .forEach(f => {
-        console.log(`- ${f.fileName}`);
-        console.log(`  Chemin: ${f.storagePath}`);
+        logger.warn(`- ${f.fileName}`, { fileName: f.fileName, storagePath: f.storagePath });
+        logger.info(`  Chemin: ${f.storagePath}`);
         if (f.error) {
-          console.log(`  Erreur: ${f.error}`);
+          logger.error(`  Erreur: ${f.error}`, {
+            fileName: f.fileName,
+            storagePath: f.storagePath,
+            error: f.error,
+          });
         }
         if (f.signedUrlError) {
-          console.log(`  Erreur URL signée: ${f.signedUrlError}`);
+          logger.error(`  Erreur URL signée: ${f.signedUrlError}`, {
+            fileName: f.fileName,
+            storagePath: f.storagePath,
+            signedUrlError: f.signedUrlError,
+          });
         }
       });
-    console.groupEnd();
   }
 
-  console.group('💡 Recommandations:');
-  report.summary.recommendations.forEach(rec => console.log(rec));
-  console.groupEnd();
-
-  console.groupEnd();
+  logger.info('💡 Recommandations:');
+  report.summary.recommendations.forEach(rec => logger.info(rec));
 }
-

@@ -1,11 +1,11 @@
 /**
  * Hook useClipboard - Gestion simplifiée du presse-papier
  * Fournit une API simple pour copier du texte avec feedback automatique
- * 
+ *
  * @example
  * ```tsx
  * const { copy, copied, error } = useClipboard();
- * 
+ *
  * <Button onClick={() => copy('Text to copy')}>
  *   {copied ? 'Copié !' : 'Copier'}
  * </Button>
@@ -14,6 +14,8 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useToastHelpers } from './useToastHelpers';
+// ✅ PHASE 2: Import logger pour remplacer console.*
+import { logger } from '@/lib/logger';
 
 interface UseClipboardOptions {
   /**
@@ -120,7 +122,15 @@ export function useClipboard(options: UseClipboardOptions = {}) {
         return false;
       }
     },
-    [resetDelay, showSuccessToast, successMessage, showErrorToast, errorMessage, showCopySuccess, showError]
+    [
+      resetDelay,
+      showSuccessToast,
+      successMessage,
+      showErrorToast,
+      errorMessage,
+      showCopySuccess,
+      showError,
+    ]
   );
 
   // Nettoyer le timeout au démontage
@@ -161,7 +171,8 @@ export function useCopyUrl(url?: string) {
     (urlToCopy?: string) => {
       const urlToUse = urlToCopy || url;
       if (!urlToUse) {
-        console.warn('No URL provided to copy');
+        // ✅ PHASE 2: Remplacer console.warn par logger
+        logger.warn('No URL provided to copy');
         return false;
       }
       return copy(urlToUse);
@@ -175,4 +186,3 @@ export function useCopyUrl(url?: string) {
     error,
   };
 }
-

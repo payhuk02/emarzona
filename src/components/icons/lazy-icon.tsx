@@ -1,7 +1,7 @@
 /**
  * Composant LazyIcon - Import dynamique des icônes lucide-react
  * Réduit la taille du bundle initial en chargeant les icônes à la demande
- * 
+ *
  * @example
  * ```tsx
  * <LazyIcon name="ShoppingCart" className="h-4 w-4" />
@@ -11,12 +11,17 @@
 import React, { Suspense, lazy, ComponentType } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+// ✅ PHASE 2: Import logger pour remplacer console.*
+import { logger } from '@/lib/logger';
 
 // Cache pour les composants d'icônes déjà chargés
-const iconCache = new Map<string, ComponentType<any>>();
+const iconCache = new Map<string, ComponentType<Record<string, never>>>();
 
 // Mapping des noms d'icônes vers leurs imports
-const iconImports: Record<string, () => Promise<{ default: ComponentType<any> }>> = {
+const iconImports: Record<
+  string,
+  () => Promise<{ default: ComponentType<Record<string, never>> }>
+> = {
   // Navigation et layout
   LayoutDashboard: () => import('lucide-react').then(m => ({ default: m.LayoutDashboard })),
   Package: () => import('lucide-react').then(m => ({ default: m.Package })),
@@ -30,7 +35,7 @@ const iconImports: Record<string, () => Promise<{ default: ComponentType<any> }>
   RotateCcw: () => import('lucide-react').then(m => ({ default: m.RotateCcw })),
   Download: () => import('lucide-react').then(m => ({ default: m.Download })),
   Bell: () => import('lucide-react').then(m => ({ default: m.Bell })),
-  
+
   // Commerce
   CreditCard: () => import('lucide-react').then(m => ({ default: m.CreditCard })),
   DollarSign: () => import('lucide-react').then(m => ({ default: m.DollarSign })),
@@ -38,32 +43,32 @@ const iconImports: Record<string, () => Promise<{ default: ComponentType<any> }>
   Percent: () => import('lucide-react').then(m => ({ default: m.Percent })),
   Gift: () => import('lucide-react').then(m => ({ default: m.Gift })),
   ShoppingBag: () => import('lucide-react').then(m => ({ default: m.ShoppingBag })),
-  
+
   // Analytics
   BarChart3: () => import('lucide-react').then(m => ({ default: m.BarChart3 })),
   TrendingUp: () => import('lucide-react').then(m => ({ default: m.TrendingUp })),
   Target: () => import('lucide-react').then(m => ({ default: m.Target })),
-  
+
   // Sécurité
   Shield: () => import('lucide-react').then(m => ({ default: m.Shield })),
   ShieldCheck: () => import('lucide-react').then(m => ({ default: m.ShieldCheck })),
   Key: () => import('lucide-react').then(m => ({ default: m.Key })),
-  
+
   // Communication
   MessageSquare: () => import('lucide-react').then(m => ({ default: m.MessageSquare })),
   Search: () => import('lucide-react').then(m => ({ default: m.Search })),
   Mail: () => import('lucide-react').then(m => ({ default: m.Mail })),
-  
+
   // Contenu
   BookOpen: () => import('lucide-react').then(m => ({ default: m.BookOpen })),
   GraduationCap: () => import('lucide-react').then(m => ({ default: m.GraduationCap })),
   FileText: () => import('lucide-react').then(m => ({ default: m.FileText })),
-  
+
   // Logistique
   Truck: () => import('lucide-react').then(m => ({ default: m.Truck })),
   Warehouse: () => import('lucide-react').then(m => ({ default: m.Warehouse })),
   Calendar: () => import('lucide-react').then(m => ({ default: m.Calendar })),
-  
+
   // Utilitaires
   LogOut: () => import('lucide-react').then(m => ({ default: m.LogOut })),
   UserPlus: () => import('lucide-react').then(m => ({ default: m.UserPlus })),
@@ -150,66 +155,66 @@ interface LazyIconProps extends React.SVGProps<SVGSVGElement> {
 /**
  * Charge une icône de manière dynamique
  */
-function loadIcon(name: keyof typeof iconImports): ComponentType<any> | null {
+function _loadIcon(name: keyof typeof iconImports): ComponentType<Record<string, never>> | null {
   // Vérifier le cache
   if (iconCache.has(name)) {
     return iconCache.get(name)!;
   }
-  
+
   // Si l'icône n'est pas dans le mapping, retourner null
   if (!iconImports[name]) {
-    console.warn(`Icon "${name}" not found in iconImports mapping`);
+    // ✅ PHASE 2: Remplacer console.warn par logger
+    logger.warn(`Icon "${name}" not found in iconImports mapping`, { iconName: name });
     return null;
   }
-  
+
   return null; // Sera chargé par lazy()
 }
 
 /**
  * Composant LazyIcon avec chargement dynamique
  */
-export const LazyIcon: React.FC<LazyIconProps> = ({ 
-  name, 
-  size = "1em", 
+export const LazyIcon: React.FC<LazyIconProps> = ({
+  name,
+  size = '1em',
   className,
   fallback,
-  ...props 
+  ...props
 }) => {
   // Créer un composant lazy pour cette icône
   const LazyIconComponent = React.useMemo(() => {
     if (!iconImports[name]) {
-      console.warn(`Icon "${name}" not found`);
+      // ✅ PHASE 2: Remplacer console.warn par logger
+      logger.warn(`Icon "${name}" not found`, { iconName: name });
       return null;
     }
-    
+
     // Vérifier le cache
     if (iconCache.has(name)) {
       const CachedIcon = iconCache.get(name)!;
       return CachedIcon;
     }
-    
+
     // Créer un composant lazy
     const Lazy = lazy(iconImports[name]);
-    
+
     // Mettre en cache après le premier chargement
-    iconImports[name]().then((module) => {
+    iconImports[name]().then(module => {
       iconCache.set(name, module.default);
     });
-    
+
     return Lazy;
   }, [name]);
-  
+
   if (!LazyIconComponent) {
-    return fallback || <span className={cn("inline-block", className)} aria-hidden="true" />;
+    return fallback || <span className={cn('inline-block', className)} aria-hidden="true" />;
   }
-  
+
   return (
-    <Suspense fallback={fallback || <Loader2 className={cn("animate-spin", className)} size={size} />}>
-      <LazyIconComponent 
-        size={size} 
-        className={className}
-        {...props}
-      />
+    <Suspense
+      fallback={fallback || <Loader2 className={cn('animate-spin', className)} size={size} />}
+    >
+      <LazyIconComponent size={size} className={className} {...props} />
     </Suspense>
   );
 };
@@ -220,10 +225,9 @@ export const LazyIcon: React.FC<LazyIconProps> = ({
 export function usePreloadIcon(name: keyof typeof iconImports) {
   React.useEffect(() => {
     if (iconImports[name] && !iconCache.has(name)) {
-      iconImports[name]().then((module) => {
+      iconImports[name]().then(module => {
         iconCache.set(name, module.default);
       });
     }
   }, [name]);
 }
-

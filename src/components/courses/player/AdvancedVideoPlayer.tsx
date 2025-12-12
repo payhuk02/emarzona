@@ -1,7 +1,7 @@
 /**
  * Lecteur Vidéo Avancé avec Qualité Adaptive et Contrôles Avancés
  * Date : 1 Février 2025
- * 
+ *
  * Fonctionnalités :
  * - Qualité adaptive (auto, 360p, 480p, 720p, 1080p, 4K)
  * - Contrôles avancés (vitesse, sous-titres, pip, mini-player)
@@ -14,11 +14,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -26,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Play,
@@ -38,16 +33,12 @@ import {
   Settings,
   SkipBack,
   SkipForward,
-  RotateCcw,
   PictureInPicture,
-  Monitor,
-  Gauge,
-  Subtitles,
   AlertCircle,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 import { useUpdateVideoPosition, useLessonProgress } from '@/hooks/courses/useCourseProgress';
+// ✅ PHASE 2: Import logger pour remplacer console.*
+import { logger } from '@/lib/logger';
 import { useVideoTracking, useWatchTime } from '@/hooks/courses/useVideoTracking';
 import { getSessionId } from '@/hooks/courses/useCourseAnalytics';
 import { useAuth } from '@/contexts/AuthContext';
@@ -68,7 +59,7 @@ interface AdvancedVideoPlayerProps {
   lessonId?: string;
   onEnded?: () => void;
   onTimeUpdate?: (currentTime: number) => void;
-  onSeekTo?: (seconds: number) => void;
+  onSeekTo?: (_seconds: number) => void;
   currentTime?: number;
   qualities?: VideoQuality[]; // Qualités disponibles
   subtitles?: Array<{ lang: string; url: string; label: string }>;
@@ -84,7 +75,7 @@ export const AdvancedVideoPlayer = ({
   lessonId,
   onEnded,
   onTimeUpdate,
-  onSeekTo,
+  onSeekTo: _onSeekTo,
   currentTime,
   qualities = [],
   subtitles = [],
@@ -127,13 +118,16 @@ export const AdvancedVideoPlayer = ({
   const watchTime = useWatchTime(enrollmentId, lessonId);
 
   // Qualités par défaut si non fournies
-  const defaultQualities: VideoQuality[] = qualities.length > 0 ? qualities : [
-    { label: 'Auto', value: 'auto' },
-    { label: '1080p', value: '1080p', resolution: '1920x1080' },
-    { label: '720p', value: '720p', resolution: '1280x720' },
-    { label: '480p', value: '480p', resolution: '854x480' },
-    { label: '360p', value: '360p', resolution: '640x360' },
-  ];
+  const defaultQualities: VideoQuality[] =
+    qualities.length > 0
+      ? qualities
+      : [
+          { label: 'Auto', value: 'auto' },
+          { label: '1080p', value: '1080p', resolution: '1920x1080' },
+          { label: '720p', value: '720p', resolution: '1280x720' },
+          { label: '480p', value: '480p', resolution: '854x480' },
+          { label: '360p', value: '360p', resolution: '640x360' },
+        ];
 
   // Restaurer la position sauvegardée
   useEffect(() => {
@@ -183,16 +177,20 @@ export const AdvancedVideoPlayer = ({
     const video = videoRef.current;
     if (!video) return;
 
-    video.play().then(() => {
-      setIsPlaying(true);
-      if (videoTracking) {
-        videoTracking.handlePlay(video.currentTime, video.duration);
-      }
-      watchTime.startWatching();
-    }).catch((err) => {
-      setError('Impossible de lire la vidéo');
-      console.error(err);
-    });
+    video
+      .play()
+      .then(() => {
+        setIsPlaying(true);
+        if (videoTracking) {
+          videoTracking.handlePlay(video.currentTime, video.duration);
+        }
+        watchTime.startWatching();
+      })
+      .catch(err => {
+        setError('Impossible de lire la vidéo');
+        // ✅ PHASE 2: Remplacer console.error par logger
+        logger.error('Error loading video', { error: err });
+      });
   }, [videoTracking, watchTime]);
 
   const handlePause = useCallback(() => {
@@ -225,7 +223,7 @@ export const AdvancedVideoPlayer = ({
     }
   }, [onTimeUpdate, videoTracking]);
 
-  const handleSeek = useCallback((value: number[]) => {
+  const _handleSeek = useCallback((value: number[]) => {
     const video = videoRef.current;
     if (!video) return;
 
@@ -261,7 +259,8 @@ export const AdvancedVideoPlayer = ({
         await document.exitFullscreen();
       }
     } catch (err) {
-      console.error('Erreur fullscreen:', err);
+      // ✅ PHASE 2: Remplacer console.error par logger
+      logger.error('Erreur fullscreen', { error: err });
     }
   }, [isFullscreen]);
 
@@ -276,7 +275,8 @@ export const AdvancedVideoPlayer = ({
         await document.exitPictureInPicture();
       }
     } catch (err) {
-      console.error('Erreur Picture-in-Picture:', err);
+      // ✅ PHASE 2: Remplacer console.error par logger
+      logger.error('Erreur Picture-in-Picture', { error: err });
     }
   }, [isPictureInPicture]);
 
@@ -298,7 +298,11 @@ export const AdvancedVideoPlayer = ({
         case ' ':
         case 'k':
           e.preventDefault();
-          isPlaying ? handlePause() : handlePlay();
+          if (isPlaying) {
+            handlePause();
+          } else {
+            handlePlay();
+          }
           break;
         case 'ArrowLeft':
           e.preventDefault();
@@ -332,7 +336,16 @@ export const AdvancedVideoPlayer = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isPlaying, handlePlay, handlePause, skip, volume, handleVolumeChange, isMuted, handleFullscreen]);
+  }, [
+    isPlaying,
+    handlePlay,
+    handlePause,
+    skip,
+    volume,
+    handleVolumeChange,
+    isMuted,
+    handleFullscreen,
+  ]);
 
   // Gérer fullscreen
   useEffect(() => {
@@ -384,7 +397,9 @@ export const AdvancedVideoPlayer = ({
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = Math.floor(seconds % 60);
-    return h > 0 ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}` : `${m}:${s.toString().padStart(2, '0')}`;
+    return h > 0
+      ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+      : `${m}:${s.toString().padStart(2, '0')}`;
   };
 
   const progressPercentage = duration > 0 ? (currentVideoTime / duration) * 100 : 0;
@@ -428,7 +443,7 @@ export const AdvancedVideoPlayer = ({
               playsInline
             >
               <source src={videoUrl} type="video/mp4" />
-              {subtitles.map((sub) => (
+              {subtitles.map(sub => (
                 <track
                   key={sub.lang}
                   kind="subtitles"
@@ -450,13 +465,16 @@ export const AdvancedVideoPlayer = ({
           >
             {/* Barre de progression */}
             <div className="px-4 pt-2 pb-1">
-              <div className="relative h-1 bg-white/20 rounded-full cursor-pointer" onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const percent = (e.clientX - rect.left) / rect.width;
-                if (videoRef.current) {
-                  videoRef.current.currentTime = percent * duration;
-                }
-              }}>
+              <div
+                className="relative h-1 bg-white/20 rounded-full cursor-pointer"
+                onClick={e => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const percent = (e.clientX - rect.left) / rect.width;
+                  if (videoRef.current) {
+                    videoRef.current.currentTime = percent * duration;
+                  }
+                }}
+              >
                 <div
                   className="absolute top-0 left-0 h-full bg-blue-500 rounded-full"
                   style={{ width: `${progressPercentage}%` }}
@@ -514,7 +532,7 @@ export const AdvancedVideoPlayer = ({
               <div className="w-24">
                 <Slider
                   value={[volume]}
-                  onValueChange={(value) => handleVolumeChange(value)}
+                  onValueChange={value => handleVolumeChange(value)}
                   min={0}
                   max={1}
                   step={0.01}
@@ -531,11 +549,7 @@ export const AdvancedVideoPlayer = ({
               {/* Paramètres */}
               <Popover open={showSettings} onOpenChange={setShowSettings}>
                 <PopoverTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="text-white hover:bg-white/20"
-                  >
+                  <Button size="icon" variant="ghost" className="text-white hover:bg-white/20">
                     <Settings className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
@@ -546,7 +560,7 @@ export const AdvancedVideoPlayer = ({
                       <label className="text-sm font-medium mb-2 block">Vitesse</label>
                       <Select
                         value={playbackRate.toString()}
-                        onValueChange={(value) => handlePlaybackRateChange(parseFloat(value))}
+                        onValueChange={value => handlePlaybackRateChange(parseFloat(value))}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -568,15 +582,12 @@ export const AdvancedVideoPlayer = ({
                     {defaultQualities.length > 1 && (
                       <div>
                         <label className="text-sm font-medium mb-2 block">Qualité</label>
-                        <Select
-                          value={selectedQuality}
-                          onValueChange={setSelectedQuality}
-                        >
+                        <Select value={selectedQuality} onValueChange={setSelectedQuality}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {defaultQualities.map((q) => (
+                            {defaultQualities.map(q => (
                               <SelectItem key={q.value} value={q.value}>
                                 {q.label}
                               </SelectItem>
@@ -590,16 +601,13 @@ export const AdvancedVideoPlayer = ({
                     {subtitles.length > 0 && (
                       <div>
                         <label className="text-sm font-medium mb-2 block">Sous-titres</label>
-                        <Select
-                          value={selectedSubtitle}
-                          onValueChange={setSelectedSubtitle}
-                        >
+                        <Select value={selectedSubtitle} onValueChange={setSelectedSubtitle}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="none">Désactivés</SelectItem>
-                            {subtitles.map((sub) => (
+                            {subtitles.map(sub => (
                               <SelectItem key={sub.lang} value={sub.lang}>
                                 {sub.label}
                               </SelectItem>
@@ -655,4 +663,3 @@ export const AdvancedVideoPlayer = ({
     </Card>
   );
 };
-

@@ -1,7 +1,7 @@
 /**
  * Hook useDragAndDrop - Gestion simplifiée du drag and drop
  * Fournit une API simple pour gérer le drag and drop de fichiers
- * 
+ *
  * @example
  * ```tsx
  * const { isDragging, dragProps, dropProps } = useDragAndDrop({
@@ -80,7 +80,7 @@ function isFileAccepted(file: File, accept?: string | string[]): boolean {
 
   const acceptArray = Array.isArray(accept) ? accept : [accept];
 
-  return acceptArray.some((pattern) => {
+  return acceptArray.some(pattern => {
     if (pattern.startsWith('.')) {
       // Extension de fichier
       return file.name.toLowerCase().endsWith(pattern.toLowerCase());
@@ -110,7 +110,7 @@ export function useDragAndDrop(options: UseDragAndDropOptions): UseDragAndDropRe
   } = options;
 
   const [isDragging, setIsDragging] = useState(false);
-  const dragCounterRef = useState(0)[0]; // Pour gérer les drag enter/leave imbriqués
+  // const dragCounterRef = useState(0)[0]; // Pour gérer les drag enter/leave imbriqués - non utilisé actuellement
 
   const handleDragOver = useCallback(
     (e: DragEvent) => {
@@ -173,13 +173,34 @@ export function useDragAndDrop(options: UseDragAndDropOptions): UseDragAndDropRe
       for (const file of files) {
         // Vérifier le type
         if (accept && !isFileAccepted(file, accept)) {
-          console.warn(`File ${file.name} is not in accepted formats`);
+          // ✅ PHASE 2: Remplacer console.warn par logger
+          import('@/lib/logger')
+            .then(({ logger }) => {
+              logger.warn(`File ${file.name} is not in accepted formats`, {
+                fileName: file.name,
+                accept,
+              });
+            })
+            .catch(() => {
+              // Fallback silencieux
+            });
           continue;
         }
 
         // Vérifier la taille
         if (maxSize && file.size > maxSize) {
-          console.warn(`File ${file.name} exceeds max size of ${maxSize} bytes`);
+          // ✅ PHASE 2: Remplacer console.warn par logger
+          import('@/lib/logger')
+            .then(({ logger }) => {
+              logger.warn(`File ${file.name} exceeds max size of ${maxSize} bytes`, {
+                fileName: file.name,
+                fileSize: file.size,
+                maxSize,
+              });
+            })
+            .catch(() => {
+              // Fallback silencieux
+            });
           continue;
         }
 
@@ -188,7 +209,17 @@ export function useDragAndDrop(options: UseDragAndDropOptions): UseDragAndDropRe
 
       // Vérifier le nombre maximum
       if (maxFiles && validFiles.length > maxFiles) {
-        console.warn(`Too many files. Maximum is ${maxFiles}`);
+        // ✅ PHASE 2: Remplacer console.warn par logger
+        import('@/lib/logger')
+          .then(({ logger }) => {
+            logger.warn(`Too many files. Maximum is ${maxFiles}`, {
+              fileCount: validFiles.length,
+              maxFiles,
+            });
+          })
+          .catch(() => {
+            // Fallback silencieux
+          });
         validFiles.splice(maxFiles);
       }
 
@@ -199,11 +230,14 @@ export function useDragAndDrop(options: UseDragAndDropOptions): UseDragAndDropRe
     [enabled, onDrop, accept, maxSize, maxFiles]
   );
 
-  const handleDragStart = useCallback((e: DragEvent) => {
-    if (!enabled) return;
-    // Permettre le drag d'éléments (pas seulement de fichiers)
-    e.dataTransfer.effectAllowed = 'move';
-  }, [enabled]);
+  const handleDragStart = useCallback(
+    (e: DragEvent) => {
+      if (!enabled) return;
+      // Permettre le drag d'éléments (pas seulement de fichiers)
+      e.dataTransfer.effectAllowed = 'move';
+    },
+    [enabled]
+  );
 
   const reset = useCallback(() => {
     setIsDragging(false);
@@ -224,4 +258,3 @@ export function useDragAndDrop(options: UseDragAndDropOptions): UseDragAndDropRe
     reset,
   };
 }
-

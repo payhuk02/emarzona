@@ -1,18 +1,18 @@
 /**
  * Hook useErrorBoundary - Gestion simplifiée des erreurs dans les composants
  * Fournit une API simple pour gérer les erreurs avec Error Boundary
- * 
+ *
  * @example
  * ```tsx
  * const { error, resetError, ErrorFallback } = useErrorBoundary();
- * 
+ *
  * if (error) {
  *   return <ErrorFallback />;
  * }
  * ```
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { ErrorFallback } from '@/components/error/ErrorFallback';
 
 export interface UseErrorBoundaryReturn {
@@ -48,13 +48,17 @@ export function useErrorBoundary(): UseErrorBoundaryReturn {
     setError(err);
   }, []);
 
-  const ErrorFallbackComponent = useMemo(
-    () => (props: { level?: 'component' | 'section' | 'page' | 'app' }) => {
+  const ErrorFallbackComponent = useMemo(() => {
+    const Component = (props: { level?: 'component' | 'section' | 'page' | 'app' }) => {
       if (!error) return null;
-      return <ErrorFallback error={error} resetError={resetError} level={props.level || 'component'} />;
-    },
-    [error, resetError]
-  );
+      return React.createElement(ErrorFallback, {
+        error,
+        resetError,
+        level: props.level || 'component',
+      });
+    };
+    return Component;
+  }, [error, resetError]);
 
   return {
     error,
@@ -67,7 +71,7 @@ export function useErrorBoundary(): UseErrorBoundaryReturn {
 /**
  * Hook pour wrapper une fonction avec gestion d'erreur
  */
-export function useErrorHandler<T extends (...args: any[]) => any>(
+export function useErrorHandler<T extends (...args: unknown[]) => unknown>(
   fn: T,
   options?: {
     onError?: (error: Error) => void;
@@ -88,7 +92,14 @@ export function useErrorHandler<T extends (...args: any[]) => any>(
               // Import dynamique pour éviter les dépendances circulaires
               import('@/hooks/useToastHelpers').then(({ useToastHelpers }) => {
                 // Note: Ceci nécessiterait un contexte, donc on utilise une approche différente
-                console.error('Error in async function:', error);
+                // ✅ PHASE 2: Remplacer console.error par logger
+                import('@/lib/logger')
+                  .then(({ logger }) => {
+                    logger.error('Error in async function', { error });
+                  })
+                  .catch(() => {
+                    // Fallback silencieux
+                  });
               });
             }
             throw error;
@@ -99,7 +110,14 @@ export function useErrorHandler<T extends (...args: any[]) => any>(
         const err = error instanceof Error ? error : new Error(String(error));
         onError?.(err);
         if (showToast) {
-          console.error('Error in function:', err);
+          // ✅ PHASE 2: Remplacer console.error par logger
+          import('@/lib/logger')
+            .then(({ logger }) => {
+              logger.error('Error in function', { error: err });
+            })
+            .catch(() => {
+              // Fallback silencieux
+            });
         }
         throw err;
       }
@@ -107,4 +125,3 @@ export function useErrorHandler<T extends (...args: any[]) => any>(
     [fn, onError, showToast]
   );
 }
-

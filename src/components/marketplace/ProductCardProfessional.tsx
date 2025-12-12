@@ -1,20 +1,32 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { ShoppingCart, Star, Heart, Eye, CheckCircle, Clock, TrendingUp, Loader2, BarChart3, Download, Shield, ShoppingBag, Store } from "lucide-react";
-import { initiateMonerooPayment } from "@/lib/moneroo-payment";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { safeRedirect } from "@/lib/url-validator";
-import { ProductBanner } from "@/components/ui/ResponsiveProductImage";
-import { ResponsiveProductImage } from "@/components/ui/ResponsiveProductImage";
-import { supabase } from "@/integrations/supabase/client";
-import { logger } from "@/lib/logger";
-import { useMarketplaceFavorites } from "@/hooks/useMarketplaceFavorites";
-import { useCart } from "@/hooks/cart/useCart";
-import { PriceStockAlertButton } from "@/components/marketplace/PriceStockAlertButton";
-import "@/styles/product-grid-professional.css";
+import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  ShoppingCart,
+  Star,
+  Heart,
+  Eye,
+  CheckCircle,
+  TrendingUp,
+  Loader2,
+  BarChart3,
+  Download,
+  Shield,
+  ShoppingBag,
+  Store,
+} from 'lucide-react';
+import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { safeRedirect } from '@/lib/url-validator';
+import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
+import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
+import { useCart } from '@/hooks/cart/useCart';
+import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
+import '@/styles/product-grid-professional.css';
 
 interface ProductCardProfessionalProps {
   product: {
@@ -34,7 +46,8 @@ interface ProductCardProfessionalProps {
     hide_rating?: boolean | null;
     hide_reviews_count?: boolean | null;
     category?: string;
-    product_type?: string;
+    product_type?: 'digital' | 'physical' | 'service' | 'course';
+    stock_quantity?: number | null;
     store_id?: string;
     stores?: {
       id: string;
@@ -44,26 +57,30 @@ interface ProductCardProfessionalProps {
     };
     tags?: string[];
     created_at?: string;
-    licensing_type?: string;
+    licensing_type?: 'plr' | 'copyrighted' | 'standard';
     license_terms?: string;
     downloadable_files?: string[];
+    product_affiliate_settings?: Array<{
+      commission_rate: number;
+      affiliate_enabled: boolean;
+    }> | null;
   };
   storeSlug: string;
   onAddToComparison?: () => void;
   isInComparison?: boolean;
 }
 
-const ProductCardProfessionalComponent = ({ 
-  product, 
+const ProductCardProfessionalComponent = ({
+  product,
   storeSlug,
   onAddToComparison,
-  isInComparison = false
+  isInComparison = false,
 }: ProductCardProfessionalProps) => {
   const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [_userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
   const { addItem } = useCart();
-  
+
   // Hook centralisé pour favoris synchronisés
   const { favorites, toggleFavorite } = useMarketplaceFavorites();
   const isFavorite = favorites.has(product.id);
@@ -71,78 +88,40 @@ const ProductCardProfessionalComponent = ({
   // Récupérer l'utilisateur pour les alertes
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setUserId(user?.id || null);
     };
     fetchUser();
   }, []);
 
-  const price = product.promotional_price ?? product.price;
-  const hasPromo = product.promotional_price && product.promotional_price < product.price;
-  const discountPercent = hasPromo
-    ? Math.round(((product.price - product.promotional_price!) / product.price) * 100)
-    : 0;
-
-  // Fonction pour nettoyer les balises HTML - SÉCURISÉE
-  const stripHtmlTags = (html: string): string => {
-    // SÉCURISÉ : Extraire le texte sans utiliser innerHTML (évite XSS)
-    if (!html.includes('<')) {
-      // Pas de HTML, retourner directement
-      return html;
-    }
-    
-    // Si contient du HTML, utiliser DOMPurify si disponible
-    try {
-      if (typeof window !== 'undefined' && (window as any).DOMPurify) {
-        const DOMPurify = (window as any).DOMPurify;
-        const cleanHtml = DOMPurify.sanitize(html, { ALLOWED_TAGS: [] });
-        const temp = document.createElement('div');
-        temp.innerHTML = cleanHtml; // Sécurisé car nettoyé par DOMPurify
-        return temp.textContent || temp.innerText || '';
-      }
-    } catch (e) {
-      // Fallback silencieux
-    }
-    
-    // Fallback : utiliser textContent (plus sûr que innerHTML)
-    // textContent échappe automatiquement le HTML
-    const temp = document.createElement('div');
-    temp.textContent = html; // textContent échappe automatiquement
-    return temp.textContent || '';
-  };
-
-  // Générer une description courte si manquante (fallback frontend)
-  const getShortDescription = (): string | undefined => {
-    let rawText = '';
-    
-    if (product.short_description && product.short_description.trim()) {
-      rawText = product.short_description;
-    } else if (product.description && product.description.trim()) {
-      rawText = product.description;
-    } else {
-      return undefined; // Pas de description du tout
-    }
-    
-    // Nettoyer les balises HTML
-    const cleanText = stripHtmlTags(rawText).trim();
-    
-    // Tronquer si trop long
-    if (cleanText.length > 120) {
-      return cleanText.substring(0, 117) + '...';
-    }
-    
-    return cleanText;
-  };
-  
-  const shortDescription = getShortDescription();
+  // ✅ PHASE 5: Mémoriser les calculs de prix pour éviter recalculs à chaque render
+  const { price, hasPromo, discountPercent } = useMemo(() => {
+    const calculatedPrice = product.promotional_price ?? product.price;
+    const calculatedHasPromo =
+      product.promotional_price && product.promotional_price < product.price;
+    const calculatedDiscountPercent = calculatedHasPromo
+      ? Math.round(((product.price - product.promotional_price!) / product.price) * 100)
+      : 0;
+    return {
+      price: calculatedPrice,
+      hasPromo: calculatedHasPromo,
+      discountPercent: calculatedDiscountPercent,
+    };
+  }, [product.promotional_price, product.price]);
 
   const renderStars = (rating: number) => (
-    <div className="flex items-center gap-0.5" role="img" aria-label={`Note: ${rating.toFixed(1)} sur 5 étoiles`}>
-      {[1, 2, 3, 4, 5].map((star) => (
+    <div
+      className="flex items-center gap-0.5"
+      role="img"
+      aria-label={`Note: ${rating.toFixed(1)} sur 5 étoiles`}
+    >
+      {[1, 2, 3, 4, 5].map(star => (
         <Star
           key={star}
           className={`h-4 w-4 ${
-            star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+            star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
           }`}
           aria-hidden="true"
         />
@@ -153,24 +132,26 @@ const ProductCardProfessionalComponent = ({
   const handleBuyNow = async () => {
     if (!product.store_id) {
       toast({
-        title: "Erreur",
-        description: "Boutique non disponible",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Boutique non disponible',
+        variant: 'destructive',
       });
       return;
     }
 
     try {
       setLoading(true);
-      
+
       // Récupérer l'utilisateur authentifié
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user?.email) {
         toast({
-          title: "Authentification requise",
-          description: "Veuillez vous connecter pour effectuer un achat",
-          variant: "destructive",
+          title: 'Authentification requise',
+          description: 'Veuillez vous connecter pour effectuer un achat',
+          variant: 'destructive',
         });
         setLoading(false);
         return;
@@ -180,33 +161,41 @@ const ProductCardProfessionalComponent = ({
         storeId: product.store_id,
         productId: product.id,
         amount: price,
-        currency: product.currency ?? "XOF",
+        currency: (product.currency ?? 'XOF') as
+          | 'XOF'
+          | 'EUR'
+          | 'USD'
+          | 'GBP'
+          | 'NGN'
+          | 'GHS'
+          | 'KES'
+          | 'ZAR',
         description: `Achat de ${product.name}`,
         customerEmail: user.email,
         customerName: user.user_metadata?.full_name || user.email.split('@')[0],
-        metadata: { 
-          productName: product.name, 
+        metadata: {
+          productName: product.name,
           storeSlug,
-          userId: user.id
+          userId: user.id,
         },
       });
 
       if (result.checkout_url) {
         safeRedirect(result.checkout_url, () => {
           toast({
-            title: "Erreur de paiement",
-            description: "URL de paiement invalide. Veuillez réessayer.",
-            variant: "destructive",
+            title: 'Erreur de paiement',
+            description: 'URL de paiement invalide. Veuillez réessayer.',
+            variant: 'destructive',
           });
         });
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
-      logger.error("Erreur lors de l'achat:", error);
+      logger.error("Erreur lors de l'achat:", { error: errorMessage, productId: product.id });
       toast({
-        title: "Erreur de paiement",
-        description: error.message || "Impossible d'initialiser le paiement",
-        variant: "destructive",
+        title: 'Erreur de paiement',
+        description: errorMessage || "Impossible d'initialiser le paiement",
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -216,9 +205,9 @@ const ProductCardProfessionalComponent = ({
   const handleAddToCart = async () => {
     if (!product.store_id) {
       toast({
-        title: "Erreur",
-        description: "Boutique non disponible",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Boutique non disponible',
+        variant: 'destructive',
       });
       return;
     }
@@ -226,12 +215,19 @@ const ProductCardProfessionalComponent = ({
     try {
       await addItem({
         product_id: product.id,
-        product_type: (product.product_type || 'digital') as any,
+        product_type: (product.product_type || 'digital') as
+          | 'digital'
+          | 'physical'
+          | 'service'
+          | 'course',
         quantity: 1,
       });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
-      logger.error("Erreur lors de l'ajout au panier:", error);
+      logger.error("Erreur lors de l'ajout au panier:", {
+        error: errorMessage,
+        productId: product.id,
+      });
       // Error already handled in hook
     }
   };
@@ -248,21 +244,25 @@ const ProductCardProfessionalComponent = ({
 
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
-      'SEO': 'bg-blue-100 text-blue-800',
-      'Marketing': 'bg-green-100 text-green-800',
-      'Design': 'bg-purple-100 text-purple-800',
-      'Développement': 'bg-orange-100 text-orange-800',
-      'Rédaction': 'bg-pink-100 text-pink-800',
-      'Traduction': 'bg-indigo-100 text-indigo-800',
-      'Audio': 'bg-yellow-100 text-yellow-800',
-      'Vidéo': 'bg-red-100 text-red-800',
-      'Business': 'bg-gray-100 text-gray-800',
+      SEO: 'bg-blue-100 text-blue-800',
+      Marketing: 'bg-green-100 text-green-800',
+      Design: 'bg-purple-100 text-purple-800',
+      Développement: 'bg-orange-100 text-orange-800',
+      Rédaction: 'bg-pink-100 text-pink-800',
+      Traduction: 'bg-indigo-100 text-indigo-800',
+      Audio: 'bg-yellow-100 text-yellow-800',
+      Vidéo: 'bg-red-100 text-red-800',
+      Business: 'bg-gray-100 text-gray-800',
     };
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
 
   return (
-    <Card className="product-card-professional group relative overflow-hidden bg-white dark:bg-gray-800 transition-all duration-300 hover:-translate-y-2 rounded-lg flex flex-col min-h-[500px] md:min-h-[600px] lg:min-h-[700px] shadow-sm hover:shadow-lg" style={{ willChange: 'transform' }} role="article" aria-label={`Produit: ${product.name}`}>
+    <Card
+      className="product-card-professional group relative overflow-hidden bg-white dark:bg-gray-800 transition-all duration-300 hover:-translate-y-2 rounded-lg flex flex-col min-h-[400px] xs:min-h-[450px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] shadow-sm hover:shadow-lg will-change-transform"
+      role="article"
+      aria-label={`Produit: ${product.name}`}
+    >
       {/* Image avec overlay et badges - Prend plus d'espace, contenu repoussé en bas */}
       <div className="product-image-container relative overflow-hidden bg-muted/30 flex-grow">
         <ResponsiveProductImage
@@ -272,12 +272,19 @@ const ProductCardProfessionalComponent = ({
           priority={false}
         />
         <div className="product-image-overlay" aria-hidden="true"></div>
-        
+
         {/* Overlay avec badge promotionnel seulement */}
         {hasPromo && (
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" aria-hidden="true">
+          <div
+            className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"
+            aria-hidden="true"
+          >
             <div className="absolute bottom-4 left-4 right-4">
-              <div className="bg-yellow-500 text-white font-bold text-sm px-3 py-1 rounded-full inline-block" role="status" aria-label={`Promotion de ${discountPercent}%`}>
+              <div
+                className="bg-yellow-500 text-white font-bold text-sm px-3 py-1 rounded-full inline-block"
+                role="status"
+                aria-label={`Promotion de ${discountPercent}%`}
+              >
                 -{discountPercent}% OFF
               </div>
             </div>
@@ -285,38 +292,51 @@ const ProductCardProfessionalComponent = ({
         )}
 
         {/* Badge Licensing (PLR / Copyrighted) - Amélioré pour meilleure visibilité */}
-        {product && (product as any).licensing_type && (
+        {product && product.licensing_type && (
           <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
-            {(product as any).licensing_type === 'plr' && (
-              <Badge className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-all hover:scale-105" style={{ willChange: 'transform' }} aria-label="Licence: PLR - Private Label Rights" title="PLR (Private Label Rights) : peut être modifié et revendu selon conditions">
+            {product.licensing_type === 'plr' && (
+              <Badge
+                className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-all hover:scale-105 will-change-transform"
+                aria-label="Licence: PLR - Private Label Rights"
+                title="PLR (Private Label Rights) : peut être modifié et revendu selon conditions"
+              >
                 <Shield className="h-3.5 w-3.5 mr-1.5" /> PLR
               </Badge>
             )}
             {product.licensing_type === 'copyrighted' && (
-              <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white border-0 shadow-lg hover:shadow-xl transition-all hover:scale-105" style={{ willChange: 'transform' }} aria-label="Produit protégé par droit d'auteur" title="Protégé par droit d'auteur : revente/modification non autorisées">
+              <Badge
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white border-0 shadow-lg hover:shadow-xl transition-all hover:scale-105 will-change-transform"
+                aria-label="Produit protégé par droit d'auteur"
+                title="Protégé par droit d'auteur : revente/modification non autorisées"
+              >
                 <Shield className="h-3.5 w-3.5 mr-1.5" /> Droit d'auteur
               </Badge>
             )}
             {product.licensing_type === 'standard' && (
-              <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all hover:scale-105" style={{ willChange: 'transform' }} aria-label="Licence standard" title="Licence standard : utilisation personnelle uniquement">
+              <Badge
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all hover:scale-105 will-change-transform"
+                aria-label="Licence standard"
+                title="Licence standard : utilisation personnelle uniquement"
+              >
                 <Shield className="h-3.5 w-3.5 mr-1.5" /> Standard
               </Badge>
             )}
           </div>
         )}
 
-
         {/* Bouton favori */}
         <button
           onClick={handleFavorite}
           className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
-          aria-label={isFavorite ? `Retirer ${product.name} des favoris` : `Ajouter ${product.name} aux favoris`}
+          aria-label={
+            isFavorite
+              ? `Retirer ${product.name} des favoris`
+              : `Ajouter ${product.name} aux favoris`
+          }
           aria-pressed={isFavorite}
         >
-          <Heart 
-            className={`h-5 w-5 ${
-              isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'
-            }`} 
+          <Heart
+            className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
             aria-hidden="true"
           />
         </button>
@@ -324,24 +344,24 @@ const ProductCardProfessionalComponent = ({
         {/* Bouton comparer */}
         {onAddToComparison && (
           <button
-            onClick={(e) => {
+            onClick={e => {
               e.preventDefault();
               e.stopPropagation();
               onAddToComparison();
             }}
             disabled={isInComparison}
             className={`absolute top-3 right-14 p-2 backdrop-blur-sm rounded-full transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none ${
-              isInComparison 
-                ? 'bg-blue-500/90 cursor-not-allowed' 
-                : 'bg-white/90 hover:bg-white'
+              isInComparison ? 'bg-blue-500/90 cursor-not-allowed' : 'bg-white/90 hover:bg-white'
             }`}
-            aria-label={isInComparison ? `${product.name} déjà dans la comparaison` : `Ajouter ${product.name} à la comparaison`}
+            aria-label={
+              isInComparison
+                ? `${product.name} déjà dans la comparaison`
+                : `Ajouter ${product.name} à la comparaison`
+            }
             aria-pressed={isInComparison}
           >
-            <BarChart3 
-              className={`h-5 w-5 ${
-                isInComparison ? 'text-white' : 'text-gray-600'
-              }`} 
+            <BarChart3
+              className={`h-5 w-5 ${isInComparison ? 'text-white' : 'text-gray-600'}`}
               aria-hidden="true"
             />
           </button>
@@ -350,7 +370,10 @@ const ProductCardProfessionalComponent = ({
         {/* Badge de catégorie */}
         {product.category && (
           <div className="absolute top-3 left-3">
-            <Badge className={`${getCategoryColor(product.category)} border-0`} aria-label={`Catégorie: ${product.category}`}>
+            <Badge
+              className={`${getCategoryColor(product.category)} border-0`}
+              aria-label={`Catégorie: ${product.category}`}
+            >
               {product.category}
             </Badge>
           </div>
@@ -361,10 +384,14 @@ const ProductCardProfessionalComponent = ({
       <CardContent className="p-4 sm:p-5 flex-shrink-0 flex flex-col gap-2 sm:gap-3">
         {/* Logo et nom de la boutique */}
         {product.stores && (
-          <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4" role="group" aria-label="Informations du vendeur">
+          <div
+            className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4"
+            role="group"
+            aria-label="Informations du vendeur"
+          >
             {product.stores.logo_url ? (
-              <img 
-                src={product.stores.logo_url} 
+              <img
+                src={product.stores.logo_url}
                 alt={`Logo de ${product.stores.name}`}
                 className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
                 loading="lazy"
@@ -378,18 +405,28 @@ const ProductCardProfessionalComponent = ({
             <span className="text-xs sm:text-sm font-semibold text-white truncate">
               {product.stores.name}
             </span>
-            <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500 flex-shrink-0 -ml-2" aria-label="Vendeur vérifié" />
+            <CheckCircle
+              className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500 flex-shrink-0 -ml-2"
+              aria-label="Vendeur vérifié"
+            />
           </div>
         )}
 
         {/* Titre du produit */}
-        <h3 className="font-semibold text-lg text-gray-900 mb-3 line-clamp-2 leading-tight" id={`product-title-${product.id}`}>
+        <h3
+          className="font-semibold text-lg text-gray-900 mb-3 line-clamp-2 leading-tight"
+          id={`product-title-${product.id}`}
+        >
           {product.name}
         </h3>
 
         {/* Rating et avis */}
         {!product.hide_rating && (
-          <div className="flex items-center gap-2 mb-4" role="group" aria-label="Évaluation du produit">
+          <div
+            className="flex items-center gap-2 mb-4"
+            role="group"
+            aria-label="Évaluation du produit"
+          >
             {product.rating ? (
               <>
                 {renderStars(product.rating)}
@@ -397,7 +434,10 @@ const ProductCardProfessionalComponent = ({
                   {product.rating.toFixed(1)}
                 </span>
                 {!product.hide_reviews_count && (
-                  <span className="text-sm text-gray-500" aria-label={`${product.reviews_count || 0} avis client${(product.reviews_count || 0) !== 1 ? 's' : ''}`}>
+                  <span
+                    className="text-sm text-gray-500"
+                    aria-label={`${product.reviews_count || 0} avis client${(product.reviews_count || 0) !== 1 ? 's' : ''}`}
+                  >
                     ({product.reviews_count || 0})
                   </span>
                 )}
@@ -421,46 +461,70 @@ const ProductCardProfessionalComponent = ({
             ))}
           </div>
         )}
-        
+
         {/* Licensing details (short) - Amélioré */}
-        {(product as any).licensing_type && (
+        {product.licensing_type && (
           <div className="mb-3 flex items-center gap-2">
-            <Shield className={`h-3.5 w-3.5 flex-shrink-0 ${
-              (product as any).licensing_type === 'plr' ? 'text-emerald-500' : 
-              (product as any).licensing_type === 'copyrighted' ? 'text-red-500' : 
-              'text-blue-500'
-            }`} />
-            <span className={`text-xs font-medium ${
-              (product as any).licensing_type === 'plr' ? 'text-emerald-700' : 
-              (product as any).licensing_type === 'copyrighted' ? 'text-red-700' : 
-              'text-blue-700'
-            }`}>
-              {(product as any).licensing_type === 'plr' ? 'Licence PLR (droits de label privé)' : (product as any).licensing_type === 'copyrighted' ? 'Protégé par droit d\'auteur' : 'Licence standard'}
+            <Shield
+              className={`h-3.5 w-3.5 flex-shrink-0 ${
+                product.licensing_type === 'plr'
+                  ? 'text-emerald-500'
+                  : product.licensing_type === 'copyrighted'
+                    ? 'text-red-500'
+                    : 'text-blue-500'
+              }`}
+            />
+            <span
+              className={`text-xs font-medium ${
+                product.licensing_type === 'plr'
+                  ? 'text-emerald-700'
+                  : product.licensing_type === 'copyrighted'
+                    ? 'text-red-700'
+                    : 'text-blue-700'
+              }`}
+            >
+              {product.licensing_type === 'plr'
+                ? 'Licence PLR (droits de label privé)'
+                : product.licensing_type === 'copyrighted'
+                  ? "Protégé par droit d'auteur"
+                  : 'Licence standard'}
             </span>
           </div>
         )}
 
         {/* 📎 NOUVEAU: Badge fichiers téléchargeables */}
-        {product.downloadable_files && Array.isArray(product.downloadable_files) && product.downloadable_files.length > 0 && (
-          <div className="mb-3">
-            <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-700 border-green-500/20">
-              <Download className="h-3 w-3 mr-1" />
-              {product.downloadable_files.length} fichier{product.downloadable_files.length > 1 ? 's' : ''}
-            </Badge>
-          </div>
-        )}
+        {product.downloadable_files &&
+          Array.isArray(product.downloadable_files) &&
+          product.downloadable_files.length > 0 && (
+            <div className="mb-3">
+              <Badge
+                variant="secondary"
+                className="text-xs bg-green-500/10 text-green-700 border-green-500/20"
+              >
+                <Download className="h-3 w-3 mr-1" />
+                {product.downloadable_files.length} fichier
+                {product.downloadable_files.length > 1 ? 's' : ''}
+              </Badge>
+            </div>
+          )}
 
         {/* Badge taux d'affiliation */}
         {(() => {
           // Gérer le cas où Supabase retourne un objet ou un tableau
-          const affiliateSettings = Array.isArray(product.product_affiliate_settings) 
-            ? product.product_affiliate_settings[0]
-            : product.product_affiliate_settings;
-          
+          const productWithAffiliate = product as typeof product & {
+            product_affiliate_settings?: Array<{
+              commission_rate: number;
+              affiliate_enabled: boolean;
+            }> | null;
+          };
+          const affiliateSettings = Array.isArray(productWithAffiliate.product_affiliate_settings)
+            ? productWithAffiliate.product_affiliate_settings[0]
+            : productWithAffiliate.product_affiliate_settings;
+
           return affiliateSettings?.affiliate_enabled && affiliateSettings?.commission_rate > 0 ? (
             <div className="mb-3">
-              <Badge 
-                variant="secondary" 
+              <Badge
+                variant="secondary"
                 className="text-xs bg-gradient-to-r from-orange-500 to-pink-500 text-white border-0"
                 title={`Taux de commission d'affiliation: ${affiliateSettings.commission_rate}%`}
               >
@@ -474,9 +538,16 @@ const ProductCardProfessionalComponent = ({
         {/* Prix et actions */}
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-baseline gap-1.5 sm:gap-2 min-w-0 flex-1" role="group" aria-label="Prix du produit">
+            <div
+              className="flex items-baseline gap-1.5 sm:gap-2 min-w-0 flex-1"
+              role="group"
+              aria-label="Prix du produit"
+            >
               {hasPromo && (
-                <span className="text-xs sm:text-sm text-gray-600 line-through flex-shrink-0 whitespace-nowrap" aria-label={`Prix original: ${formatPrice(product.price)} ${product.currency || 'FCFA'}`}>
+                <span
+                  className="text-xs sm:text-sm text-gray-600 line-through flex-shrink-0 whitespace-nowrap"
+                  aria-label={`Prix original: ${formatPrice(product.price)} ${product.currency || 'FCFA'}`}
+                >
                   {formatPrice(product.price)} {product.currency || 'FCFA'}
                 </span>
               )}
@@ -495,14 +566,21 @@ const ProductCardProfessionalComponent = ({
               className="flex-shrink-0"
             />
           </div>
-          
+
           {/* Nombre de ventes */}
-          {!product.hide_purchase_count && product.purchases_count !== undefined && product.purchases_count > 0 && (
-            <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-500" aria-label={`${product.purchases_count} vente${product.purchases_count !== 1 ? 's' : ''}`}>
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
-              <span aria-hidden="true">{product.purchases_count} vente{product.purchases_count !== 1 ? 's' : ''}</span>
-            </div>
-          )}
+          {!product.hide_purchase_count &&
+            product.purchases_count !== undefined &&
+            product.purchases_count > 0 && (
+              <div
+                className="flex items-center gap-1 text-xs sm:text-sm text-gray-500"
+                aria-label={`${product.purchases_count} vente${product.purchases_count !== 1 ? 's' : ''}`}
+              >
+                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+                <span aria-hidden="true">
+                  {product.purchases_count} vente{product.purchases_count !== 1 ? 's' : ''}
+                </span>
+              </div>
+            )}
         </div>
 
         {/* Boutons d'action - OPTIMISÉS SANS DÉBORDEMENT */}
@@ -514,7 +592,7 @@ const ProductCardProfessionalComponent = ({
               className="product-action-button flex-1 min-h-[44px] h-11 px-3 text-sm text-white border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               asChild
             >
-              <Link 
+              <Link
                 to={`/stores/${storeSlug}/products/${product.slug}`}
                 aria-label={`Voir les détails de ${product.name}`}
                 className="flex items-center justify-center gap-1.5 truncate"
@@ -524,7 +602,7 @@ const ProductCardProfessionalComponent = ({
                 <span className="lg:hidden truncate text-white">Voir</span>
               </Link>
             </Button>
-            
+
             <Button
               onClick={handleAddToCart}
               disabled={loading}
@@ -536,13 +614,17 @@ const ProductCardProfessionalComponent = ({
               <ShoppingBag className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
-          
+
           <Button
             onClick={handleBuyNow}
             disabled={loading}
             size="sm"
             className="product-action-button w-full min-h-[44px] h-11 px-3 text-sm bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 active:from-blue-800 active:to-purple-800 text-white font-medium transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-            aria-label={loading ? `Traitement de l'achat de ${product.name} en cours` : `Acheter ${product.name} pour ${formatPrice(price)} ${product.currency || 'FCFA'}`}
+            aria-label={
+              loading
+                ? `Traitement de l'achat de ${product.name} en cours`
+                : `Acheter ${product.name} pour ${formatPrice(price)} ${product.currency || 'FCFA'}`
+            }
           >
             <div className="flex items-center justify-center gap-1.5 truncate w-full">
               {loading ? (
@@ -565,20 +647,23 @@ const ProductCardProfessionalComponent = ({
 };
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
-const ProductCardProfessional = React.memo(ProductCardProfessionalComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.product.id === nextProps.product.id &&
-    prevProps.product.price === nextProps.product.price &&
-    prevProps.product.promotional_price === nextProps.product.promotional_price &&
-    prevProps.product.image_url === nextProps.product.image_url &&
-    prevProps.product.name === nextProps.product.name &&
-    prevProps.product.rating === nextProps.product.rating &&
-    prevProps.product.reviews_count === nextProps.product.reviews_count &&
-    prevProps.storeSlug === nextProps.storeSlug &&
-    prevProps.isInComparison === nextProps.isInComparison &&
-    prevProps.onAddToComparison === nextProps.onAddToComparison
-  );
-});
+const ProductCardProfessional = React.memo(
+  ProductCardProfessionalComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.product.id === nextProps.product.id &&
+      prevProps.product.price === nextProps.product.price &&
+      prevProps.product.promotional_price === nextProps.product.promotional_price &&
+      prevProps.product.image_url === nextProps.product.image_url &&
+      prevProps.product.name === nextProps.product.name &&
+      prevProps.product.rating === nextProps.product.rating &&
+      prevProps.product.reviews_count === nextProps.product.reviews_count &&
+      prevProps.storeSlug === nextProps.storeSlug &&
+      prevProps.isInComparison === nextProps.isInComparison &&
+      prevProps.onAddToComparison === nextProps.onAddToComparison
+    );
+  }
+);
 
 ProductCardProfessional.displayName = 'ProductCardProfessional';
 
