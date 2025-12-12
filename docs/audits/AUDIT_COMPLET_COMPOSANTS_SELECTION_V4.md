@@ -118,7 +118,7 @@ Audit complet et approfondi des composants de sélection après migrations compl
   - Langue
   - Catégorie
   - Modèle de tarification
-- ✅ **Total** : 10 champs migrés vers SelectField
+- ✅ **Total** : 11 champs migrés vers SelectField
 
 **Code Quality** (95/100)
 
