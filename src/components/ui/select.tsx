@@ -366,39 +366,34 @@ const SelectItem = React.forwardRef<
       )}
       role="option"
       // Gestion optimisée des événements tactiles pour mobile
-      // IMPORTANT: Sur mobile, onTouchEnd déclenche onPointerDown, mais on s'assure que ça fonctionne
-      // en déclenchant manuellement un événement pointerDown si nécessaire
+      // IMPORTANT: Laisser Radix UI gérer complètement la sélection
+      // Sur mobile, onTouchEnd déclenche automatiquement onPointerDown après ~300ms
+      // On s'assure que les événements sont bien transmis sans les bloquer
       onTouchStart={e => {
         // Ajouter un feedback visuel immédiat au toucher
         if (e.currentTarget) {
           e.currentTarget.classList.add('active');
         }
-        // Laisser Radix UI gérer la sélection
+        // Laisser Radix UI gérer la sélection - ne pas bloquer
         props.onTouchStart?.(e);
       }}
       onTouchEnd={e => {
-        // Sur mobile, s'assurer que l'événement pointerDown est déclenché
-        // pour que Radix UI détecte la sélection
-        if (isMobile && e.currentTarget) {
-          // Déclencher un événement pointerDown pour garantir la détection
-          const pointerEvent = new PointerEvent('pointerdown', {
-            bubbles: true,
-            cancelable: true,
-            pointerId: 1,
-            pointerType: 'touch',
-            clientX: e.changedTouches[0]?.clientX || 0,
-            clientY: e.changedTouches[0]?.clientY || 0,
-          });
-          e.currentTarget.dispatchEvent(pointerEvent);
-        }
         // Retirer le feedback visuel après un délai
         setTimeout(() => {
           if (e.currentTarget) {
             e.currentTarget.classList.remove('active');
           }
         }, 200);
-        // Laisser Radix UI gérer la sélection
+        // Laisser Radix UI gérer la sélection - ne pas bloquer
+        // onTouchEnd déclenche automatiquement onPointerDown sur mobile après ~300ms
         props.onTouchEnd?.(e);
+      }}
+      // S'assurer que onPointerDown est bien transmis à Radix UI
+      // (déclenché automatiquement par onTouchEnd sur mobile)
+      onPointerDown={e => {
+        // Laisser Radix UI gérer la sélection normalement
+        // Ne pas utiliser stopPropagation car cela empêche Radix UI de détecter la sélection
+        props.onPointerDown?.(e);
       }}
       {...props}
     >
