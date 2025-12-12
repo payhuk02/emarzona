@@ -366,16 +366,8 @@ const SelectItem = React.forwardRef<
       )}
       role="option"
       // Gestion optimisée des événements tactiles pour mobile
-      // IMPORTANT: Ne pas utiliser stopPropagation sur onClick car cela empêche Radix UI de détecter la sélection
-      onPointerDown={e => {
-        // Sur mobile, améliorer le feedback visuel immédiat
-        if (isMobile && e.currentTarget) {
-          e.currentTarget.classList.add('active');
-        }
-        // Laisser Radix UI gérer la sélection normalement
-        props.onPointerDown?.(e);
-      }}
-      // Gérer les événements tactiles sur mobile pour le feedback visuel
+      // IMPORTANT: Sur mobile, onTouchEnd déclenche onPointerDown, mais on s'assure que ça fonctionne
+      // en déclenchant manuellement un événement pointerDown si nécessaire
       onTouchStart={e => {
         // Ajouter un feedback visuel immédiat au toucher
         if (e.currentTarget) {
@@ -385,13 +377,27 @@ const SelectItem = React.forwardRef<
         props.onTouchStart?.(e);
       }}
       onTouchEnd={e => {
-        // Retirer le feedback visuel après le toucher avec un léger délai
-        // pour permettre à Radix UI de traiter la sélection
+        // Sur mobile, s'assurer que l'événement pointerDown est déclenché
+        // pour que Radix UI détecte la sélection
+        if (isMobile && e.currentTarget) {
+          // Déclencher un événement pointerDown pour garantir la détection
+          const pointerEvent = new PointerEvent('pointerdown', {
+            bubbles: true,
+            cancelable: true,
+            pointerId: 1,
+            pointerType: 'touch',
+            clientX: e.changedTouches[0]?.clientX || 0,
+            clientY: e.changedTouches[0]?.clientY || 0,
+          });
+          e.currentTarget.dispatchEvent(pointerEvent);
+        }
+        // Retirer le feedback visuel après un délai
         setTimeout(() => {
           if (e.currentTarget) {
             e.currentTarget.classList.remove('active');
           }
         }, 200);
+        // Laisser Radix UI gérer la sélection
         props.onTouchEnd?.(e);
       }}
       {...props}
