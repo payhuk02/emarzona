@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
-import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -78,7 +78,7 @@ const SelectTrigger = React.forwardRef<
         isMobile && 'cursor-pointer',
         className
       )}
-      aria-label={props['aria-label'] || 'Select an option'}
+      aria-label={props['aria-label'] || 'Sélectionner une option'}
       aria-haspopup="listbox"
       aria-expanded={props['aria-expanded']}
       aria-invalid={hasError}
@@ -173,18 +173,27 @@ const SelectContent = React.forwardRef<
     () => contentRef.current as React.ElementRef<typeof SelectPrimitive.Content>
   );
 
+  // Référence pour stocker l'observer et éviter les créations multiples
+  const observerRef = React.useRef<MutationObserver | null>(null);
+
   // Détecter l'état d'ouverture via les attributs data
   React.useEffect(() => {
     if (!contentRef.current) return;
 
-    const observer = new MutationObserver(() => {
+    // Nettoyer l'observer existant s'il y en a un
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+
+    observerRef.current = new MutationObserver(() => {
       if (contentRef.current) {
         const state = contentRef.current.getAttribute('data-state');
         setIsOpen(state === 'open');
       }
     });
 
-    observer.observe(contentRef.current, {
+    observerRef.current.observe(contentRef.current, {
       attributes: true,
       attributeFilter: ['data-state'],
     });
@@ -195,7 +204,12 @@ const SelectContent = React.forwardRef<
       setIsOpen(state === 'open');
     }
 
-    return () => observer.disconnect();
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+    };
   }, []);
 
   // Verrouiller la position sur mobile quand le menu est ouvert pour garantir la stabilité
@@ -235,6 +249,8 @@ const SelectContent = React.forwardRef<
       menuElement.style.maxWidth = `${lockedPosition.width}px`;
 
       // Surveiller les changements de position avec requestAnimationFrame
+      // Throttler les vérifications pour optimiser les performances (1 vérification toutes les 3 frames)
+      let frameCount = 0;
       const checkPosition = () => {
         // Vérifier que le menu est toujours ouvert et que l'élément existe
         if (!menuElement || !lockedPosition || !isOpen) {
@@ -242,15 +258,19 @@ const SelectContent = React.forwardRef<
           return;
         }
 
-        const currentRect = menuElement.getBoundingClientRect();
+        frameCount++;
+        // Throttler: vérifier seulement toutes les 3 frames (réduit de 60fps à ~20fps)
+        if (frameCount % 3 === 0) {
+          const currentRect = menuElement.getBoundingClientRect();
 
-        // Si la position a changé significativement (plus de 2px), la restaurer
-        if (
-          Math.abs(currentRect.top - lockedPosition.top) > 2 ||
-          Math.abs(currentRect.left - lockedPosition.left) > 2
-        ) {
-          menuElement.style.top = `${lockedPosition.top}px`;
-          menuElement.style.left = `${lockedPosition.left}px`;
+          // Si la position a changé significativement (plus de 2px), la restaurer
+          if (
+            Math.abs(currentRect.top - lockedPosition.top) > 2 ||
+            Math.abs(currentRect.left - lockedPosition.left) > 2
+          ) {
+            menuElement.style.top = `${lockedPosition.top}px`;
+            menuElement.style.left = `${lockedPosition.left}px`;
+          }
         }
 
         // Continuer la surveillance seulement si le menu est toujours ouvert
