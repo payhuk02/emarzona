@@ -47,15 +47,27 @@ const SelectValue = SelectPrimitive.Value;
  */
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & {
+    /**
+     * Message d'erreur à afficher
+     */
+    error?: string;
+    /**
+     * ID de l'élément d'erreur (pour aria-describedby)
+     */
+    errorId?: string;
+  }
+>(({ className, children, error, errorId, ...props }, ref) => {
   const isMobile = useIsMobile();
+  const hasError = !!error;
 
   return (
     <SelectPrimitive.Trigger
       ref={ref}
       className={cn(
         'flex min-h-[44px] h-11 w-full max-w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 [&>span]:text-left',
+        // État d'erreur
+        hasError && 'border-destructive focus-visible:ring-destructive',
         // Optimisations tactiles
         'touch-manipulation',
         // Empêcher le zoom sur focus (iOS)
@@ -69,6 +81,8 @@ const SelectTrigger = React.forwardRef<
       aria-label={props['aria-label'] || 'Select an option'}
       aria-haspopup="listbox"
       aria-expanded={props['aria-expanded']}
+      aria-invalid={hasError}
+      aria-describedby={hasError && errorId ? errorId : props['aria-describedby']}
       // Empêcher le zoom automatique sur iOS
       {...(isMobile && { style: { fontSize: '16px', ...props.style } })}
       // Améliorer la réactivité tactile
