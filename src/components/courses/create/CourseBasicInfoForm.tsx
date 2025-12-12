@@ -11,6 +11,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectField,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { CurrencySelect } from '@/components/ui/currency-select';
