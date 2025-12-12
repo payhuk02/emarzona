@@ -284,6 +284,27 @@ const SelectContent = React.forwardRef<
         // Éviter les collisions avec le clavier
         avoidCollisions={true}
         sticky={isMobile ? 'always' : 'partial'}
+        // Empêcher la fermeture du menu lors d'interactions à l'intérieur
+        onInteractOutside={e => {
+          // Sur mobile, empêcher la fermeture si l'interaction est dans le menu
+          if (isMobile && contentRef.current) {
+            const target = e.target as HTMLElement;
+            if (contentRef.current.contains(target)) {
+              e.preventDefault();
+            }
+          }
+          props.onInteractOutside?.(e);
+        }}
+        onPointerDownOutside={e => {
+          // Sur mobile, empêcher la fermeture si le clic est dans le menu
+          if (isMobile && contentRef.current) {
+            const target = e.target as HTMLElement;
+            if (contentRef.current.contains(target)) {
+              e.preventDefault();
+            }
+          }
+          props.onPointerDownOutside?.(e);
+        }}
         style={{
           ...props.style,
           // Ajuster le positionnement si le clavier est ouvert
@@ -309,6 +330,16 @@ const SelectContent = React.forwardRef<
             position === 'popper' &&
               'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]'
           )}
+          // Empêcher la fermeture du menu lors du scroll
+          onTouchStart={e => {
+            // Empêcher la propagation des événements tactiles de scroll
+            // pour éviter que le menu ne se ferme pendant le scroll
+            e.stopPropagation();
+          }}
+          onTouchMove={e => {
+            // Permettre le scroll mais empêcher la fermeture du menu
+            e.stopPropagation();
+          }}
         >
           {children}
         </SelectPrimitive.Viewport>

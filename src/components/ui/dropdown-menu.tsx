@@ -206,6 +206,27 @@ const DropdownMenuContent = React.forwardRef<
             : (props.collisionPadding ?? DESKTOP_COLLISION_PADDING)
         }
         sticky={isMobile && mobileOptimized ? 'always' : (props.sticky ?? 'partial')}
+        // Empêcher la fermeture du menu lors d'interactions à l'intérieur
+        onInteractOutside={e => {
+          // Sur mobile, empêcher la fermeture si l'interaction est dans le menu
+          if (isMobile && mobileOptimized && contentRef.current) {
+            const target = e.target as HTMLElement;
+            if (contentRef.current.contains(target)) {
+              e.preventDefault();
+            }
+          }
+          props.onInteractOutside?.(e);
+        }}
+        onPointerDownOutside={e => {
+          // Sur mobile, empêcher la fermeture si le clic est dans le menu
+          if (isMobile && mobileOptimized && contentRef.current) {
+            const target = e.target as HTMLElement;
+            if (contentRef.current.contains(target)) {
+              e.preventDefault();
+            }
+          }
+          props.onPointerDownOutside?.(e);
+        }}
         className={cn(
           'z-[100] min-w-[8rem] max-w-[calc(100vw-1rem)] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md',
           // Animations optimisées pour mobile - CSS only
