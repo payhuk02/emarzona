@@ -72,11 +72,12 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
         title: "Succès",
         description: "Image téléchargée avec succès",
       });
-    } catch (error: any) {
-      logger.error("Error uploading image", { error });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error("Error uploading image", { error: errorMessage });
       toast({
         title: "Erreur",
-        description: error.message || "Impossible de télécharger l'image",
+        description: errorMessage || "Impossible de télécharger l'image",
         variant: "destructive",
       });
     } finally {

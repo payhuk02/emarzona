@@ -144,11 +144,12 @@ export function CreateUpdateDialog({
         .getPublicUrl(filePath);
 
       return urlData.publicUrl;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error uploading update file', { error, digitalProductId });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de télécharger le fichier',
+        description: errorMessage || 'Impossible de télécharger le fichier',
         variant: 'destructive',
       });
       return null;
@@ -265,11 +266,12 @@ export function CreateUpdateDialog({
       setIsForced(false);
       setPublishImmediately(true);
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error creating update', { error, digitalProductId });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer la mise à jour',
+        description: errorMessage || 'Impossible de créer la mise à jour',
         variant: 'destructive',
       });
     } finally {
@@ -349,7 +351,7 @@ export function CreateUpdateDialog({
 
             <div className="space-y-2">
               <Label htmlFor="releaseType">Type de release *</Label>
-              <Select value={releaseType} onValueChange={(value: any) => setReleaseType(value)}>
+              <Select value={releaseType} onValueChange={(value: string) => setReleaseType(value)}>
                 <SelectTrigger id="releaseType">
                   <SelectValue />
                 </SelectTrigger>

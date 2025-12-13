@@ -242,8 +242,8 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
 
     // Tri
     result.sort((a, b) => {
-      let aValue: any = a[sortField];
-      let bValue: any = b[sortField];
+      let aValue: string | number | Date | undefined = a[sortField as keyof DigitalProductListItem];
+      let bValue: string | number | Date | undefined = b[sortField as keyof DigitalProductListItem];
 
       // Convertir les dates en timestamps
       if (sortField === 'created_at' || sortField === 'updated_at') {

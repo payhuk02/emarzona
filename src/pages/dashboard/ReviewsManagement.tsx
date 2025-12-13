@@ -268,10 +268,11 @@ export default function ReviewsManagement() {
   const handleDeleteReview = async (reviewId: string) => {
     try {
       await deleteReview.mutateAsync(reviewId);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer la review',
+        description: errorMessage || 'Impossible de supprimer la review',
         variant: 'destructive',
       });
     }

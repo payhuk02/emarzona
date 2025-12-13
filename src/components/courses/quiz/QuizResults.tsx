@@ -18,10 +18,21 @@ import {
   Download
 } from 'lucide-react';
 import { useQuizQuestions } from '@/hooks/courses/useQuiz';
+import { QuizAttempt, QuizQuestion } from '@/types/courses';
+
+interface DetailedResult {
+  question_id: string;
+  is_correct: boolean;
+  user_answer: string | number | boolean | null;
+}
+
+interface QuizAttemptWithDetails extends QuizAttempt {
+  detailed_results?: DetailedResult[];
+}
 
 interface QuizResultsProps {
   quizId: string;
-  attempt: any;
+  attempt: QuizAttemptWithDetails;
   onRetry?: () => void;
   onDownloadCertificate?: () => void;
   showCertificateButton?: boolean;
@@ -77,7 +88,7 @@ export const QuizResults = ({
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium">Score obtenu</span>
               <span className="text-muted-foreground">
-                {detailedResults.filter((r: any) => r.is_correct).length}/{questions.length} correct(s)
+                {detailedResults.filter((r: DetailedResult) => r.is_correct).length}/{questions.length} correct(s)
               </span>
             </div>
             <Progress 
@@ -126,8 +137,8 @@ export const QuizResults = ({
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Détail des réponses</h3>
         
-        {questions.map((question: any, index: number) => {
-          const result = detailedResults.find((r: any) => r.question_id === question.id);
+        {questions.map((question: QuizQuestion, index: number) => {
+          const result = detailedResults.find((r: DetailedResult) => r.question_id === question.id);
           const isCorrect = result?.is_correct;
           const userAnswer = result?.user_answer;
 
@@ -189,11 +200,12 @@ export const QuizResults = ({
 /**
  * Formatte une réponse selon le type de question
  */
-function formatAnswer(question: any, answer: any): string {
-  switch (question.question_type) {
+function formatAnswer(question: QuizQuestion, answer: string | number | boolean | null | undefined): string {
+  switch (question.type) {
     case 'multiple_choice':
       if (question.options && typeof answer === 'number') {
-        return question.options[answer] || 'Aucune réponse';
+        const option = question.options[answer];
+        return option?.text || 'Aucune réponse';
       }
       return 'Aucune réponse';
     
@@ -201,7 +213,7 @@ function formatAnswer(question: any, answer: any): string {
       return answer === true ? 'Vrai' : answer === false ? 'Faux' : 'Aucune réponse';
     
     case 'text':
-      return answer || 'Aucune réponse';
+      return String(answer || 'Aucune réponse');
     
     default:
       return String(answer || 'Aucune réponse');

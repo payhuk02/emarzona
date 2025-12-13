@@ -184,10 +184,11 @@ export default function CouponsManagement() {
         title: '✅ Coupon supprimé',
         description: 'Le coupon a été supprimé avec succès',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer le coupon',
+        description: errorMessage || 'Impossible de supprimer le coupon',
         variant: 'destructive',
       });
     }
@@ -201,7 +202,12 @@ export default function CouponsManagement() {
     });
   };
 
-  const getStatusBadge = (promotion: any) => {
+  interface PromotionData {
+    is_active?: boolean;
+    ends_at?: string;
+    starts_at?: string;
+  }
+  const getStatusBadge = (promotion: PromotionData) => {
     const now = new Date();
     if (!promotion.is_active) {
       return <Badge variant="secondary">Inactif</Badge>;

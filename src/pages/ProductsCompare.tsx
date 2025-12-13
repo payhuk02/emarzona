@@ -159,7 +159,27 @@ export default function ProductsCompare() {
         throw error;
       }
 
-      return (data || []).map((product: any) => ({
+      interface ProductFromSupabase {
+        id: string;
+        name: string;
+        description?: string;
+        price: number;
+        promotional_price?: number | null;
+        currency: string;
+        image_url?: string;
+        category?: string;
+        product_type: string;
+        store_id: string;
+        is_featured?: boolean;
+        created_at?: string;
+        stores?: { id: string; name: string };
+        digital_products?: Array<{ license_type?: string; file_format?: string; file_size_mb?: number }>;
+        physical_products?: Array<{ stock_quantity?: number; weight_kg?: number }>;
+        service_products?: Array<{ duration_hours?: number }>;
+        course_products?: Array<{ total_lessons?: number }>;
+        artist_products?: Array<{ artist_type?: string }>;
+      }
+      return (data || []).map((product: ProductFromSupabase) => ({
         id: product.id,
         name: product.name,
         description: product.description,
@@ -318,7 +338,7 @@ export default function ProductsCompare() {
   };
 
   // Rendre une valeur selon son type
-  const renderValue = (value: any, type: string) => {
+  const renderValue = (value: string | number | boolean | null | undefined, type: string) => {
     if (value === null || value === undefined) return <span className="text-muted-foreground">-</span>;
 
     switch (type) {

@@ -56,8 +56,8 @@ export default function AdminSecurity() {
       if (data.totp?.uri) {
         setUri(data.totp.uri);
       }
-    } catch (e: any) {
-      const errorMsg = e.message || 'Erreur lors de l\'enrollment 2FA';
+    } catch (e: unknown) {
+      const errorMsg = e instanceof Error ? e.message : String(e) || 'Erreur lors de l\'enrollment 2FA';
       setError(errorMsg);
       toast({
         title: 'Erreur d\'activation',
@@ -124,10 +124,11 @@ export default function AdminSecurity() {
       setSecret(null);
       setUri(null);
       setVerifyCode('');
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
       toast({
         title: 'Erreur',
-        description: e.message || 'Erreur lors de la vérification',
+        description: errorMessage || 'Erreur lors de la vérification',
         variant: 'destructive',
       });
     }

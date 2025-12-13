@@ -15,9 +15,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { useCurrentAffiliate, useAffiliates } from '@/hooks/useAffiliates';
-import { useAffiliateLinks } from '@/hooks/useAffiliateLinks';
+import { useAffiliateLinks, type AffiliateLink } from '@/hooks/useAffiliateLinks';
 import { CreateAffiliateLinkDialog } from '@/components/affiliate/CreateAffiliateLinkDialog';
-import { useAffiliateCommissions } from '@/hooks/useAffiliateCommissions';
+import { useAffiliateCommissions, type AffiliateCommission } from '@/hooks/useAffiliateCommissions';
 import { useAffiliateBalance, useAffiliateWithdrawals } from '@/hooks/useAffiliateWithdrawals';
 import { PaginationControls } from '@/components/affiliate/PaginationControls';
 import { 
@@ -53,7 +53,7 @@ import {
 import { Download } from 'lucide-react';
 
 // Composant mémorisé pour les liens d'affiliation
-const AffiliateLinkCard = memo(({ link, index }: { link: any, index: number }) => {
+const AffiliateLinkCard = memo(({ link, index }: { link: AffiliateLink, index: number }) => {
   const handleCopy = useCallback(async () => {
     await navigator.clipboard.writeText(link.full_url);
   }, [link.full_url]);
@@ -154,7 +154,7 @@ const AffiliateLinkCard = memo(({ link, index }: { link: any, index: number }) =
 AffiliateLinkCard.displayName = 'AffiliateLinkCard';
 
 // Composant mémorisé pour la liste des liens
-const AffiliateLinksList = memo(({ links }: { links: any[] }) => {
+const AffiliateLinksList = memo(({ links }: { links: AffiliateLink[] }) => {
   return (
     <div className="space-y-3 sm:space-y-4">
       {links.map((link, index) => (
@@ -175,7 +175,7 @@ const AffiliateLinksList = memo(({ links }: { links: any[] }) => {
 AffiliateLinksList.displayName = 'AffiliateLinksList';
 
 // Composant mémorisé pour les lignes de commission
-const CommissionRow = memo(({ commission }: { commission: any }) => {
+const CommissionRow = memo(({ commission }: { commission: AffiliateCommission }) => {
   return (
     <TableRow key={commission.id}>
       <TableCell className="text-xs sm:text-sm">
@@ -326,10 +326,11 @@ const AffiliateDashboard = () => {
         setShowRegisterDialog(false);
         await refetchAffiliate();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur d\'inscription',
-        description: error?.message || 'Une erreur est survenue lors de l\'inscription',
+        description: errorMessage || 'Une erreur est survenue lors de l\'inscription',
         variant: 'destructive',
       });
     } finally {
@@ -722,10 +723,11 @@ const AffiliateDashboard = () => {
                                     title: "Export réussi",
                                     description: `${links.length} lien(s) exporté(s) en CSV`,
                                   });
-                                } catch (error: any) {
+                                } catch (error: unknown) {
+                                  const errorMessage = error instanceof Error ? error.message : String(error);
                                   toast({
                                     title: "Erreur d'export",
-                                    description: error?.message || "Impossible d'exporter les liens",
+                                    description: errorMessage || "Impossible d'exporter les liens",
                                     variant: "destructive",
                                   });
                                 }
@@ -811,10 +813,11 @@ const AffiliateDashboard = () => {
                                   title: "Export réussi",
                                   description: `${commissions.length} commission(s) exportée(s) en CSV`,
                                 });
-                              } catch (error: any) {
+                              } catch (error: unknown) {
+                                const errorMessage = error instanceof Error ? error.message : String(error);
                                 toast({
                                   title: "Erreur d'export",
-                                  description: error?.message || "Impossible d'exporter les commissions",
+                                  description: errorMessage || "Impossible d'exporter les commissions",
                                   variant: "destructive",
                                 });
                               }

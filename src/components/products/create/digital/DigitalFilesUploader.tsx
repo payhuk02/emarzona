@@ -10,10 +10,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { X, CheckCircle2, AlertCircle, Link2, Plus } from '@/components/icons';
 import { useToast } from '@/hooks/use-toast';
+import type { DigitalProductFormData, DigitalProductDownloadableFile } from '@/types/digital-product-form';
 
 interface DigitalFilesUploaderProps {
-  formData: any;
-  updateFormData: (updates: any) => void;
+  formData: DigitalProductFormData;
+  updateFormData: (updates: Partial<DigitalProductFormData>) => void;
 }
 
 export const DigitalFilesUploader = ({
@@ -214,7 +215,7 @@ export const DigitalFilesUploader = ({
           {formData.downloadable_files && formData.downloadable_files.length > 0 && (
             <div className="space-y-2">
               <Label>Liens additionnels ({formData.downloadable_files.length})</Label>
-              {formData.downloadable_files.map((file: any, index: number) => (
+              {formData.downloadable_files.map((file: DigitalProductDownloadableFile, index: number) => (
                 <div
                   key={index}
                   className="flex items-center justify-between p-3 border rounded-lg space-x-3"

@@ -151,9 +151,10 @@ export const sendPriceDropNotification = async (
       .eq('variant_id', notification.variantId || null);
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error sending price drop notification', { error, notification });
-    return { success: false, error: error.message };
+    return { success: false, error: errorMessage };
   }
 };
 
@@ -215,9 +216,10 @@ export const sendStockAlertNotification = async (
       .eq('variant_id', notification.variantId || null);
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error sending stock alert notification', { error, notification });
-    return { success: false, error: error.message };
+    return { success: false, error: errorMessage };
   }
 };
 
@@ -280,9 +282,10 @@ export const sendPromotionAlertNotification = async (
       .eq('product_id', notification.productId);
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error sending promotion alert notification', { error, notification });
-    return { success: false, error: error.message };
+    return { success: false, error: errorMessage };
   }
 };
 
@@ -344,9 +347,10 @@ export const sendShipmentNotification = async (
       .eq('shipment_status', notification.shipmentStatus);
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error sending shipment notification', { error, notification });
-    return { success: false, error: error.message };
+    return { success: false, error: errorMessage };
   }
 };
 
@@ -412,9 +416,10 @@ export const sendReturnNotification = async (
       .eq('return_status', notification.returnStatus);
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error sending return notification', { error, notification });
-    return { success: false, error: error.message };
+    return { success: false, error: errorMessage };
   }
 };
 

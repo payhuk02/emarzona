@@ -79,10 +79,11 @@ const OrdersTableComponent = ({ orders, onUpdate, storeId, sortBy, sortDirection
       });
 
       onUpdate();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -103,10 +104,11 @@ const OrdersTableComponent = ({ orders, onUpdate, storeId, sortBy, sortDirection
       });
 
       onUpdate();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }

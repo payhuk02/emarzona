@@ -17,8 +17,10 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
+import type { DigitalProductFormData, DigitalProductDownloadableFile } from '@/types/digital-product-form';
+
 interface DigitalPreviewProps {
-  formData: any;
+  formData: DigitalProductFormData;
 }
 
 export const DigitalPreview = ({ formData }: DigitalPreviewProps) => {
@@ -40,7 +42,7 @@ export const DigitalPreview = ({ formData }: DigitalPreviewProps) => {
     if (!formData.downloadable_files || formData.downloadable_files.length === 0) {
       return 0;
     }
-    return formData.downloadable_files.reduce((total: number, file: any) => total + (file.size || 0), 0);
+    return formData.downloadable_files.reduce((total: number, file: DigitalProductDownloadableFile) => total + (file.size || 0), 0);
   };
 
   /**
@@ -225,7 +227,7 @@ export const DigitalPreview = ({ formData }: DigitalPreviewProps) => {
                 Fichiers additionnels ({formData.downloadable_files.length})
               </p>
               <div className="space-y-2">
-                {formData.downloadable_files.map((file: any, index: number) => (
+                {formData.downloadable_files.map((file: DigitalProductDownloadableFile, index: number) => (
                   <div key={index} className="flex items-center justify-between p-2 border rounded">
                     <span className="text-sm">{file.name}</span>
                     <span className="text-xs text-muted-foreground">

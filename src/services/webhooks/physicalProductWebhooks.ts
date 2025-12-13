@@ -24,12 +24,14 @@ export interface PhysicalProductWebhook {
   max_attempts?: number;
 }
 
+import type { RecordString } from '@/types/common';
+
 export interface PhysicalProductWebhookLog {
   id: string;
   webhook_id: string;
   event_type: string;
   event_id: string | null;
-  payload: Record<string, any>;
+  payload: RecordString;
   response_status_code: number | null;
   response_body: string | null;
   error_message: string | null;
@@ -45,7 +47,7 @@ export interface WebhookPayload {
   event: string;
   event_id?: string;
   timestamp: string;
-  data: Record<string, any>;
+  data: RecordString;
 }
 
 export interface SendWebhookResult {
@@ -118,8 +120,8 @@ export async function sendWebhook(
       throw new Error(`HTTP error! status: ${statusCode}, body: ${responseBody}`);
     }
     success = true;
-  } catch (e: any) {
-    error = e.message;
+  } catch (e: unknown) {
+    error = e instanceof Error ? e.message : String(e);
     logger.error(`Webhook send failed for ${webhook.id} (attempt ${attempt}): ${error}`, {
       webhookId: webhook.id,
       targetUrl: webhook.target_url,
@@ -175,7 +177,7 @@ export async function sendWebhook(
 export async function triggerWebhooks(
   storeId: string,
   eventType: string,
-  eventData: Record<string, any>,
+  eventData: RecordString,
   eventId: string // ID de l'entité qui a déclenché l'événement
 ) {
   const { data: webhooks, error: fetchError } = await supabase

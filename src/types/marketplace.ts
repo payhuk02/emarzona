@@ -1,4 +1,6 @@
 // Types partagés pour le Marketplace
+import type { JSONValue } from './common';
+
 export interface Product {
   id: string;
   store_id: string;
@@ -10,7 +12,7 @@ export interface Product {
   promotional_price?: number | null;
   currency: string;
   image_url: string | null;
-  images?: any; // Json field
+  images?: JSONValue; // Json field
   category: string | null;
   product_type: string | null;
   rating: number | null;

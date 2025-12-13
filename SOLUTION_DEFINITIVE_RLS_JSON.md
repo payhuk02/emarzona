@@ -181,3 +181,5 @@ Après avoir exécuté le script de diagnostic et rechargé l'application :
 
 - `supabase/migrations/20250201_diagnose_and_fix_rls_attachments.sql` (nouveau)
 - `src/hooks/useFileUpload.ts` (vérification URL publique améliorée)
+
+

@@ -73,19 +73,19 @@ describe('AppSidebar', () => {
       switchStore: vi.fn(),
       storesLoading: false,
       canCreateStore: () => true,
-    } as any);
+    } as ReturnType<typeof StoreContext.useStoreContext>);
 
     // Mock AuthContext
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       user: mockUser,
       loading: false,
-    } as any);
+    } as ReturnType<typeof AuthContext.useAuth>);
 
     // Mock useAdmin
     vi.mocked(AdminHook.useAdmin).mockReturnValue({
       isAdmin: false,
       loading: false,
-    } as any);
+    } as ReturnType<typeof AdminHook.useAdmin>);
   });
 
   it('should render the sidebar with logo', () => {
@@ -185,7 +185,7 @@ describe('AppSidebar', () => {
     vi.mocked(AdminHook.useAdmin).mockReturnValue({
       isAdmin: true,
       loading: false,
-    } as any);
+    } as ReturnType<typeof AdminHook.useAdmin>);
 
     render(
       <BrowserRouter>
@@ -218,7 +218,7 @@ describe('AppSidebar', () => {
       switchStore,
       storesLoading: false,
       canCreateStore: () => true,
-    } as any);
+    } as ReturnType<typeof StoreContext.useStoreContext>);
 
     render(
       <BrowserRouter>

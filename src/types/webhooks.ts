@@ -2,6 +2,8 @@
 // TYPES: Webhooks System
 // ============================================================================
 
+import type { RecordString } from './common';
+
 export type WebhookEventType =
   // Commandes
   | 'order.created'
@@ -74,7 +76,7 @@ export interface Webhook {
   custom_headers: Record<string, string>;
   verify_ssl: boolean;
   include_payload: boolean;
-  metadata: Record<string, any>;
+  metadata: RecordString;
   total_deliveries: number;
   successful_deliveries: number;
   failed_deliveries: number;
@@ -94,7 +96,7 @@ export interface WebhookDelivery {
   webhook_id: string;
   event_type: WebhookEventType;
   event_id: string;
-  event_data: Record<string, any>;
+  event_data: RecordString;
   status: WebhookDeliveryStatus;
   url: string;
   request_headers: Record<string, string>;
@@ -108,7 +110,7 @@ export interface WebhookDelivery {
   error_message: string | null;
   error_type: string | null;
   duration_ms: number | null;
-  metadata: Record<string, any>;
+  metadata: RecordString;
   triggered_at: string;
   delivered_at: string | null;
   failed_at: string | null;
@@ -287,7 +289,7 @@ export interface WebhookPayload {
   id: string; // delivery_id
   event: WebhookEventType;
   timestamp: string;
-  data: Record<string, any>;
+  data: RecordString;
   metadata?: {
     store_id?: string;
     version?: string;

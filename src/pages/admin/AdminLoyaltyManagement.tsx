@@ -48,6 +48,7 @@ import {
   useCreateLoyaltyTier,
   useCreateLoyaltyReward,
 } from '@/hooks/loyalty/useLoyalty';
+import type { LoyaltyTransaction } from '@/types/loyalty';
 import {
   LoyaltyTierType,
   LoyaltyRewardType,
@@ -404,7 +405,7 @@ export default function AdminLoyaltyManagement() {
                               key: 'date',
                               label: 'Date',
                               priority: 'high',
-                              render: (row: any) => (
+                              render: (row: LoyaltyTransaction) => (
                                 <span className="text-xs text-muted-foreground">
                                   {format(new Date(row.created_at), 'PPp', { locale: fr })}
                                 </span>
@@ -414,7 +415,7 @@ export default function AdminLoyaltyManagement() {
                               key: 'type',
                               label: 'Type',
                               priority: 'high',
-                              render: (row: any) => (
+                              render: (row: LoyaltyTransaction) => (
                                 <Badge variant="outline" className="text-xs">{row.transaction_type}</Badge>
                               ),
                             },
@@ -422,7 +423,7 @@ export default function AdminLoyaltyManagement() {
                               key: 'points',
                               label: 'Points',
                               priority: 'high',
-                              render: (row: any) => (
+                              render: (row: LoyaltyTransaction) => (
                                 <span className={`text-sm font-medium ${row.points_amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
                                   {row.points_amount > 0 ? '+' : ''}{row.points_amount}
                                 </span>
@@ -432,7 +433,7 @@ export default function AdminLoyaltyManagement() {
                               key: 'description',
                               label: 'Description',
                               priority: 'medium',
-                              render: (row: any) => (
+                              render: (row: LoyaltyTransaction) => (
                                 <p className="text-xs">{row.description || '-'}</p>
                               ),
                             },

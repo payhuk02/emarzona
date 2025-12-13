@@ -197,9 +197,11 @@ export function WarrantyClaimsManager({ storeId }: WarrantyClaimsManagerProps) {
   );
 }
 
+import type { WarrantyClaim } from '@/hooks/physical/useSerialTracking';
+
 // Claim Card Component for Mobile View
 interface ClaimCardProps {
-  claim: any;
+  claim: WarrantyClaim;
   getStatusBadge: (status: string) => JSX.Element;
   animationDelay?: number;
 }

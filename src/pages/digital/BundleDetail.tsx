@@ -52,10 +52,11 @@ export default function BundleDetail() {
         title: 'Bundle ajouté au panier',
         description: `${bundle.name} a été ajouté à votre panier`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'ajouter au panier',
+        description: errorMessage || 'Impossible d\'ajouter au panier',
         variant: 'destructive',
       });
     }
@@ -269,7 +270,7 @@ export default function BundleDetail() {
                     <div>
                       <h3 className="font-semibold mb-4">Caractéristiques</h3>
                       <ul className="space-y-2">
-                        {bundle.features.map((feature: any, index: number) => (
+                        {bundle.features.map((feature: string, index: number) => (
                           <li key={index} className="flex items-start gap-2">
                             <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
                             <span>{feature.title || feature}</span>

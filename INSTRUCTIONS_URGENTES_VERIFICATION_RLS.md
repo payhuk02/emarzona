@@ -107,3 +107,5 @@ Après correction :
 
 **Date**: 1 Février 2025
 **Fichier créé**: `supabase/migrations/20250201_verify_rls_policies_exact.sql`
+
+

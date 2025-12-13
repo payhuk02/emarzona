@@ -100,12 +100,13 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       
       setDisputes(data || []);
       setTotalCount(count || 0);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error fetching disputes:", error);
-      setError(error.message || "Erreur lors du chargement des litiges");
+      setError(errorMessage || "Erreur lors du chargement des litiges");
       toast({
         title: "Erreur",
-        description: error.message || "Erreur lors du chargement des litiges",
+        description: errorMessage || "Erreur lors du chargement des litiges",
         variant: "destructive",
       });
     } finally {
@@ -160,7 +161,8 @@ export const useDisputes = (options?: UseDisputesOptions) => {
         unassigned,
         avgResolutionTime,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error fetching dispute stats:", error);
     }
   }, []);
@@ -197,11 +199,12 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       await fetchDisputes();
       await fetchStats();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error assigning dispute:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
       return false;
@@ -228,11 +231,12 @@ export const useDisputes = (options?: UseDisputesOptions) => {
 
       await fetchDisputes();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error updating admin notes:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
       return false;
@@ -262,11 +266,12 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       await fetchDisputes();
       await fetchStats();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error resolving dispute:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
       return false;
@@ -294,11 +299,12 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       await fetchDisputes();
       await fetchStats();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error closing dispute:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
       return false;
@@ -308,7 +314,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
   // Changer le statut d'un litige
   const updateDisputeStatus = async (disputeId: string, status: DisputeStatus): Promise<boolean> => {
     try {
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         status,
         updated_at: new Date().toISOString(),
       };
@@ -333,11 +339,12 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       await fetchDisputes();
       await fetchStats();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error updating dispute status:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
       return false;
@@ -367,11 +374,12 @@ export const useDisputes = (options?: UseDisputesOptions) => {
 
       await fetchDisputes();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error updating dispute priority:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
       return false;

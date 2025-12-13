@@ -55,6 +55,22 @@ import {
   BoughtTogetherPhysicalRecommendations,
 } from '@/components/physical/PhysicalProductRecommendations';
 import type { PhysicalProductVariant } from '@/types/physical-product';
+import type { InventoryItem } from '@/hooks/physical/useInventory';
+
+// Types pour les APIs externes de tracking
+interface WindowWithGtag extends Window {
+  gtag?: (...args: unknown[]) => void;
+}
+
+interface WindowWithFbq extends Window {
+  fbq?: (...args: unknown[]) => void;
+}
+
+interface WindowWithTtq extends Window {
+  ttq?: {
+    track: (event: string, data?: Record<string, unknown>) => void;
+  };
+}
 
 export default function PhysicalProductDetail() {
   const { productId } = useParams<{ productId: string }>();
@@ -191,8 +207,9 @@ export default function PhysicalProductDetail() {
       // Track with external pixels (Google Analytics, Facebook, TikTok)
       if (typeof window !== 'undefined') {
         // Google Analytics
-        if ((window as any).gtag) {
-          (window as any).gtag('event', 'view_item', {
+        const windowWithGtag = window as WindowWithGtag;
+        if (windowWithGtag.gtag) {
+          windowWithGtag.gtag('event', 'view_item', {
             items: [{
               item_id: productId,
               item_name: product?.name || 'Physical Product',
@@ -204,8 +221,9 @@ export default function PhysicalProductDetail() {
         }
 
         // Facebook Pixel
-        if ((window as any).fbq) {
-          (window as any).fbq('track', 'ViewContent', {
+        const windowWithFbq = window as WindowWithFbq;
+        if (windowWithFbq.fbq) {
+          windowWithFbq.fbq('track', 'ViewContent', {
             content_type: 'product',
             content_ids: [productId],
             content_category: 'physical',
@@ -215,8 +233,9 @@ export default function PhysicalProductDetail() {
         }
 
         // TikTok Pixel
-        if ((window as any).ttq) {
-          (window as any).ttq.track('ViewContent', {
+        const windowWithTtq = window as WindowWithTtq;
+        if (windowWithTtq.ttq) {
+          windowWithTtq.ttq.track('ViewContent', {
             content_type: 'product',
             content_id: productId,
             value: product?.price,
@@ -273,11 +292,12 @@ export default function PhysicalProductDetail() {
           description: 'Le produit a été ajouté à votre liste de souhaits',
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la gestion de la wishlist', error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de modifier la wishlist',
+        description: errorMessage || 'Impossible de modifier la wishlist',
         variant: 'destructive',
       });
     }
@@ -331,7 +351,7 @@ export default function PhysicalProductDetail() {
 
     // Vérifier le stock
     const availableStock = selectedVariant
-      ? product?.inventory?.find((inv: any) => inv.variant_id === selectedVariant.id)?.quantity || 0
+      ? product?.inventory?.find((inv: InventoryItem) => inv.variant_id === selectedVariant.id)?.quantity || 0
       : product?.physical?.total_stock || 0;
 
     if (availableStock < quantity) {
@@ -377,11 +397,12 @@ export default function PhysicalProductDetail() {
 
       // Optionnel : Rediriger vers le panier ou réinitialiser la quantité
       setQuantity(1);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de l\'ajout au panier', error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'ajouter au panier',
+        description: errorMessage || 'Impossible d\'ajouter au panier',
         variant: 'destructive',
       });
     } finally {
@@ -430,7 +451,7 @@ export default function PhysicalProductDetail() {
 
   const images = product?.images || [product?.image_url] || [];
   const stockQuantity = selectedVariant
-    ? product?.inventory?.find((inv: any) => inv.variant_id === selectedVariant.id)?.quantity || 0
+    ? product?.inventory?.find((inv: InventoryItem) => inv.variant_id === selectedVariant.id)?.quantity || 0
     : product?.physical?.total_stock || 0;
   const availability = stockQuantity > 0 ? 'instock' : 'outofstock';
   const currentPrice = product?.promotional_price || product?.price;
@@ -537,7 +558,7 @@ export default function PhysicalProductDetail() {
                   <h3 className="font-semibold mb-3">Variantes</h3>
                   <VariantSelector
                     variants={product.variants}
-                    onSelect={(variant: any) => setSelectedVariant(variant)}
+                    onSelect={(variant: PhysicalProductVariant) => setSelectedVariant(variant)}
                   />
                 </div>
               )}

@@ -40,7 +40,7 @@ interface ProductPricingProps {
   /** Données du formulaire */
   formData: ProductPricingData;
   /** Fonction pour mettre à jour les données */
-  updateFormData: (field: string, value: any) => void;
+  updateFormData: (field: string, value: unknown) => void;
   /** Erreurs de validation */
   validationErrors?: Record<string, string>;
   /** Devise de la boutique (pour comparaison) */

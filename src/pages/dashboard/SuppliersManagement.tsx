@@ -180,10 +180,11 @@ export default function SuppliersManagement() {
         description: 'Le fournisseur a été créé avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer le fournisseur',
+        description: errorMessage || 'Impossible de créer le fournisseur',
         variant: 'destructive',
       });
     },
@@ -216,10 +217,11 @@ export default function SuppliersManagement() {
         description: 'Le fournisseur a été mis à jour avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de mettre à jour le fournisseur',
+        description: errorMessage || 'Impossible de mettre à jour le fournisseur',
         variant: 'destructive',
       });
     },
@@ -245,10 +247,11 @@ export default function SuppliersManagement() {
         description: 'Le fournisseur a été supprimé avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer le fournisseur',
+        description: errorMessage || 'Impossible de supprimer le fournisseur',
         variant: 'destructive',
       });
     },

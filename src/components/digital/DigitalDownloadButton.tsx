@@ -108,7 +108,7 @@ export const DigitalDownloadButton = ({
           licenseKey,
         });
         setDownloadProgress(50);
-      } catch (trackError: any) {
+      } catch (trackError: unknown) {
         // Ne pas bloquer le téléchargement si le tracking échoue
         logger.warn('Download tracking failed', { error: trackError });
         setDownloadProgress(50);
@@ -141,14 +141,15 @@ export const DigitalDownloadButton = ({
           setIsDownloading(false);
           setTimeout(() => setShowDialog(false), 1500);
         }, 500);
-      } catch (downloadError: any) {
+      } catch (downloadError: unknown) {
         logger.error('Error starting download', { error: downloadError });
         throw new Error('Erreur lors du démarrage du téléchargement. Veuillez réessayer.');
       }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       logger.error('Download error', {
-        error: err.message,
+        error: errorMessage,
         fileId,
         fileName,
         retryAttempt,

@@ -364,7 +364,7 @@ const LicenseManagementDialog = ({
               </div>
             </Card>
           ) : (
-            activations.map((activation: any) => (
+            activations.map((activation: LicenseActivation) => (
               <Card key={activation.id} className={!activation.is_active ? 'opacity-50' : ''}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-4">

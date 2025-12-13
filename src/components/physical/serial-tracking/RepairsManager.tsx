@@ -204,7 +204,7 @@ export function RepairsManager({ storeId }: RepairsManagerProps) {
 
 // Repair Card Component for Mobile View
 interface RepairCardProps {
-  repair: any;
+  repair: Repair;
   getStatusBadge: (status: string) => JSX.Element;
   animationDelay?: number;
 }

@@ -148,7 +148,12 @@ export default function CustomerMyWishlist() {
         throw favoritesError;
       }
 
-      return (favoritesData || []).map((item: any) => ({
+      interface FavoriteItemData {
+        products: FavoriteProduct;
+        price_drop_alert_enabled?: boolean;
+        price_when_added?: number;
+      }
+      return (favoritesData || []).map((item: FavoriteItemData) => ({
         ...item.products,
         price_alert_enabled: item.price_drop_alert_enabled,
         price_when_added: item.price_when_added,
@@ -214,10 +219,11 @@ export default function CustomerMyWishlist() {
         description: `${product.name} a été ajouté à votre panier`,
       });
       logger.info('Produit ajouté au panier depuis wishlist', { productId: product.id });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'ajouter au panier',
+        description: errorMessage || 'Impossible d\'ajouter au panier',
         variant: 'destructive',
       });
       logger.error(error instanceof Error ? error : 'Erreur ajout au panier depuis wishlist', { error, productId: product.id });
@@ -423,7 +429,7 @@ export default function CustomerMyWishlist() {
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                      priceDrops.forEach((drop: any) => {
+                      priceDrops.forEach((drop: { product_id: string; old_price: number; new_price: number; currency?: string }) => {
                         markAsRead.mutate(drop.product_id);
                       });
                     }}

@@ -72,8 +72,8 @@ export async function testStorageUpload() {
     console.error('❌ Erreur lors de l\'upload:', uploadError);
     console.error('Détails:', {
       message: uploadError.message,
-      statusCode: (uploadError as any).statusCode,
-      error: (uploadError as any).error,
+      statusCode: (uploadError as { statusCode?: number }).statusCode,
+      error: (uploadError as { error?: string }).error,
     });
     return { success: false, error: uploadError.message, uploadError };
   }

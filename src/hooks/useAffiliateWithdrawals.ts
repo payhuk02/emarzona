@@ -60,11 +60,12 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
       if (error) throw error;
 
       setWithdrawals(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching withdrawals:', error);
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -125,11 +126,12 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error requesting withdrawal:', error);
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
       return null;
@@ -158,11 +160,12 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error approving withdrawal:', error);
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
       return false;
@@ -192,11 +195,12 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error rejecting withdrawal:', error);
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
       return false;
@@ -251,11 +255,12 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error completing withdrawal:', error);
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
       return false;
@@ -286,11 +291,12 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error marking withdrawal as failed:', error);
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
       return false;
@@ -315,11 +321,12 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error cancelling withdrawal:', error);
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
       return false;

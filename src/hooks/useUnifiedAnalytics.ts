@@ -280,7 +280,16 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
       };
 
       // Revenus dans le temps
-      const revenueByDate: Record<string, any> = {};
+      interface RevenueByDateData {
+        revenue: number;
+        orders: number;
+        digital: number;
+        physical: number;
+        service: number;
+        course: number;
+        artist: number;
+      }
+      const revenueByDate: Record<string, RevenueByDateData> = {};
       completedOrders.forEach((order: any) => {
         const date = new Date(order.created_at).toISOString().split('T')[0];
         if (!revenueByDate[date]) {
@@ -308,7 +317,15 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
         .sort((a, b) => a.date.localeCompare(b.date));
 
       // Top produits
-      const productRevenue: Record<string, any> = {};
+      interface ProductRevenueData {
+        id: string;
+        name: string;
+        type: string;
+        revenue: number;
+        orders: number;
+        units: number;
+      }
+      const productRevenue: Record<string, ProductRevenueData> = {};
       completedOrders.forEach((order: any) => {
         const items = order.order_items || [];
         items.forEach((item: any) => {
@@ -337,7 +354,13 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
         .map((p: any) => ({ ...p, growth: 0 }));
 
       // Top clients
-      const customerStats: Record<string, any> = {};
+      interface CustomerStatsData {
+        id: string;
+        totalSpent: number;
+        orders: number;
+        lastOrderDate: string;
+      }
+      const customerStats: Record<string, CustomerStatsData> = {};
       completedOrders.forEach((order: any) => {
         if (order.customer_id) {
           if (!customerStats[order.customer_id]) {
@@ -357,7 +380,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
       });
 
       const topCustomers = Object.values(customerStats)
-        .map((c: any) => {
+        .map((c: { customer_id: string; total_amount: number; created_at: string }) => {
           const customer = customers?.find(cust => cust.id === c.id);
           return {
             ...c,
@@ -366,7 +389,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
             averageOrderValue: c.orders > 0 ? c.totalSpent / c.orders : 0,
           };
         })
-        .sort((a: any, b: any) => b.totalSpent - a.totalSpent)
+        .sort((a: { totalSpent: number }, b: { totalSpent: number }) => b.totalSpent - a.totalSpent)
         .slice(0, 10);
 
       // Tendances
@@ -407,9 +430,10 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
       });
 
       logger.info('Unified analytics loaded', { storeId: store.id, timeRange });
-    } catch (error: any) {
-      logger.error('Error fetching unified analytics', { error: error.message });
-      setError(error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error fetching unified analytics', { error: errorMessage });
+      setError(errorMessage);
       setAnalytics(getFallbackAnalytics());
     } finally {
       setLoading(false);

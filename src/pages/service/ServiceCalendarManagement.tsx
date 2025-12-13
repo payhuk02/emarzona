@@ -44,6 +44,7 @@ import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameDay } f
 import { fr } from 'date-fns/locale';
 import AdvancedServiceCalendar from '@/components/service/AdvancedServiceCalendar';
 import { useCalendarBookings, useCalendarStaff } from '@/hooks/services/useAdvancedCalendar';
+import type { CalendarBooking, CalendarStaff } from '@/hooks/services/useAdvancedCalendar';
 
 export default function ServiceCalendarManagement() {
   const { serviceId } = useParams<{ serviceId?: string }>();
@@ -79,14 +80,14 @@ export default function ServiceCalendarManagement() {
     const now = new Date();
     return {
       total: bookings.length,
-      confirmed: bookings.filter((b: any) => b.status === 'confirmed').length,
-      pending: bookings.filter((b: any) => b.status === 'pending').length,
-      cancelled: bookings.filter((b: any) => b.status === 'cancelled').length,
-      today: bookings.filter((b: any) => isSameDay(new Date(b.booking_date), now)).length,
+      confirmed: bookings.filter((b: CalendarBooking) => b.status === 'confirmed').length,
+      pending: bookings.filter((b: CalendarBooking) => b.status === 'pending').length,
+      cancelled: bookings.filter((b: CalendarBooking) => b.status === 'cancelled').length,
+      today: bookings.filter((b: CalendarBooking) => isSameDay(b.start, now)).length,
       totalRevenue: bookings
-        .filter((b: any) => b.status === 'confirmed')
-        .reduce((sum: number, b: any) => sum + (b.total_amount || 0), 0),
-      upcoming: bookings.filter((b: any) => new Date(b.booking_date) > now).length,
+        .filter((b: CalendarBooking) => b.status === 'confirmed')
+        .reduce((sum: number, b: CalendarBooking) => sum + (b.price || 0), 0),
+      upcoming: bookings.filter((b: CalendarBooking) => b.start > now).length,
     };
   }, [bookings]);
 
@@ -236,7 +237,7 @@ export default function ServiceCalendarManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Tous les staff</SelectItem>
-                      {staff.map((s: any) => (
+                      {staff.map((s: CalendarStaff) => (
                         <SelectItem key={s.id} value={s.id}>
                           {s.name}
                         </SelectItem>

@@ -2,6 +2,8 @@
 // TYPES: Loyalty Program System
 // ============================================================================
 
+import type { RecordString } from './common';
+
 export type LoyaltyTierType = 'bronze' | 'silver' | 'gold' | 'platinum';
 
 export type LoyaltyTransactionType = 
@@ -66,7 +68,7 @@ export interface LoyaltyPoints {
   last_activity_at: string | null;
   points_expiring_soon: number;
   next_expiration_date: string | null;
-  metadata: Record<string, any>;
+  metadata: RecordString;
   created_at: string;
   updated_at: string;
   
@@ -92,7 +94,7 @@ export interface LoyaltyTransaction {
   description: string | null;
   reference_number: string | null;
   expires_at: string | null;
-  metadata: Record<string, any>;
+  metadata: RecordString;
   created_at: string;
   created_by: string | null;
 }
@@ -116,7 +118,7 @@ export interface LoyaltyReward {
   free_product_id: string | null;
   gift_card_amount: number | null;
   cash_back_amount: number | null;
-  custom_value: Record<string, any> | null;
+  custom_value: RecordString | null;
   
   // Limitations
   max_redemptions: number | null;
@@ -159,7 +161,7 @@ export interface LoyaltyRewardRedemption {
   expires_at: string | null;
   applied_to_order_id: string | null;
   applied_at: string | null;
-  metadata: Record<string, any>;
+  metadata: RecordString;
   created_at: string;
   
   // Relations
@@ -199,7 +201,7 @@ export interface CreateLoyaltyRewardForm {
   free_product_id?: string;
   gift_card_amount?: number;
   cash_back_amount?: number;
-  custom_value?: Record<string, any>;
+  custom_value?: RecordString;
   
   // Limitations
   max_redemptions?: number;

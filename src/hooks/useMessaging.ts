@@ -74,11 +74,12 @@ export const useMessaging = (
 
       if (error) throw error;
       setConversations(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error fetching conversations:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -134,11 +135,12 @@ export const useMessaging = (
       } else {
         setMessages(prev => [...(data || []), ...prev]);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error fetching messages:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -188,7 +190,8 @@ export const useMessaging = (
         unread_messages: unreadMessages,
         admin_interventions: adminInterventions,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error fetching conversation stats:", error);
     }
   }, [orderId, currentConversation?.id]);
@@ -236,11 +239,12 @@ export const useMessaging = (
       await fetchStats();
       
       return data && data.length > 0 ? data[0] : null;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error creating conversation:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
       return null;
@@ -314,11 +318,12 @@ export const useMessaging = (
       });
       
       return message;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error sending message:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
       return null;
@@ -372,11 +377,12 @@ export const useMessaging = (
         if (data && data.length > 0) {
           attachments.push(data[0]);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error("Error uploading attachment:", error);
         toast({
           title: "Erreur d'upload",
-          description: `Impossible d'uploader ${file.name}: ${error.message}`,
+          description: `Impossible d'uploader ${file.name}: ${errorMessage}`,
           variant: "destructive",
         });
       }
@@ -397,7 +403,8 @@ export const useMessaging = (
         .eq("conversation_id", conversationId)
         .neq("sender_id", userId)
         .eq("is_read", false);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error marking messages as read:", error);
     }
   };
@@ -417,11 +424,12 @@ export const useMessaging = (
         title: "Conversation fermée",
         description: "La conversation a été fermée",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error closing conversation:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -448,11 +456,12 @@ export const useMessaging = (
       setMessagesPage(1);
       setHasMoreMessages(true);
       await fetchMessages(conversationId, 1, true);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error opening conversation:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -479,11 +488,12 @@ export const useMessaging = (
         title: "Intervention admin activée",
         description: "Un administrateur peut maintenant intervenir dans cette conversation",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error enabling admin intervention:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }

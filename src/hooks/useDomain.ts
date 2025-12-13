@@ -396,7 +396,8 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error connecting domain', { error });
       toast({
         title: "Erreur",
@@ -489,7 +490,8 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error verifying domain', { error });
       toast({
         title: "Erreur de vérification",
@@ -530,7 +532,8 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error disconnecting domain', { error });
       toast({
         title: "Erreur",
@@ -560,7 +563,8 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error updating SSL', { error });
       toast({
         title: "Erreur",
@@ -575,7 +579,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
     if (!storeId) return false;
 
     try {
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       if (redirects.www !== undefined) updateData.redirect_www = redirects.www;
       if (redirects.https !== undefined) updateData.redirect_https = redirects.https;
 
@@ -592,7 +596,8 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error updating redirects', { error });
       toast({
         title: "Erreur",

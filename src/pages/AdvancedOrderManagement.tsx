@@ -105,8 +105,8 @@ const AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
         title: t('common.refreshed', 'Actualisé'),
         description: t('common.refreshedDesc', 'Les données ont été actualisées'),
       });
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Erreur de connexion';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       const isConnectionError = 
         errorMessage.includes('upstream connect error') ||
         errorMessage.includes('connection timeout') ||

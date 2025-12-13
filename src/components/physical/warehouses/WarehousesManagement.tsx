@@ -157,10 +157,11 @@ export default function WarehousesManagement() {
         });
       }
       handleCloseDialog();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Une erreur est survenue',
+        description: errorMessage || 'Une erreur est survenue',
         variant: 'destructive',
       });
     }
@@ -182,10 +183,11 @@ export default function WarehousesManagement() {
         title: '✅ Entrepôt supprimé',
         description: 'L\'entrepôt a été supprimé avec succès',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer l\'entrepôt',
+        description: errorMessage || 'Impossible de supprimer l\'entrepôt',
         variant: 'destructive',
       });
     }

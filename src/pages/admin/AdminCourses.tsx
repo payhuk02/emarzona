@@ -73,7 +73,7 @@ export default function AdminCourses() {
       ? courses.reduce((sum, c) => {
           const ratings = c.reviews || [];
           const avgRating = ratings.length
-            ? ratings.reduce((s: number, r: any) => s + (r.rating || 0), 0) / ratings.length
+            ? ratings.reduce((s: number, r: { rating?: number }) => s + (r.rating || 0), 0) / ratings.length
             : 0;
           return sum + avgRating;
         }, 0) / courses.length
@@ -208,7 +208,7 @@ export default function AdminCourses() {
                       data={filteredCourses.map((c) => {
                         const ratings = c.reviews || [];
                         const avgRating = ratings.length
-                          ? ratings.reduce((s: number, r: any) => s + (r.rating || 0), 0) / ratings.length
+                          ? ratings.reduce((s: number, r: { rating?: number }) => s + (r.rating || 0), 0) / ratings.length
                           : 0;
                         return { id: c.id, ...c, avgRating };
                       })}
@@ -285,7 +285,7 @@ export default function AdminCourses() {
                         {filteredCourses.map((course) => {
                           const ratings = course.reviews || [];
                           const avgRating = ratings.length
-                            ? ratings.reduce((s: number, r: any) => s + (r.rating || 0), 0) / ratings.length
+                            ? ratings.reduce((s: number, r: { rating?: number }) => s + (r.rating || 0), 0) / ratings.length
                             : 0;
 
                           return (

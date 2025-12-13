@@ -150,7 +150,7 @@ export default function AdminShippingConversations() {
 
       // Enrichir avec les informations utilisateur et messages
       const enrichedConversations = await Promise.all(
-        (data || []).map(async (conv: any) => {
+        (data || []).map(async (conv: ShippingConversation) => {
           // Récupérer l'utilisateur du store
           const { data: storeUser } = await supabase
             .from('profiles')
@@ -752,19 +752,36 @@ function ConversationMessagesView({
 
       if (messagesError) throw messagesError;
 
-      const senderIds = [...new Set((messagesData || []).map((m: any) => m.sender_id))];
+      interface MessageData {
+        sender_id: string;
+      }
+      const senderIds = [...new Set((messagesData || []).map((m: MessageData) => m.sender_id))];
       const { data: profilesData } = await supabase
         .from('profiles')
         .select('user_id, display_name, first_name, last_name, avatar_url')
         .in('user_id', senderIds);
 
-      const messagesWithSenders = (messagesData || []).map((message: any) => ({
-        ...message,
-        sender: profilesData?.find((p: any) => p.user_id === message.sender_id),
+      interface ProfileData {
+        user_id: string;
+        display_name?: string;
+        first_name?: string;
+        last_name?: string;
+        avatar_url?: string;
+      }
+      interface MessageWithSender extends MessageData {
+        id: string;
+        content: string;
+        sender_type: string;
+        created_at: string;
+        sender?: ProfileData;
+      }
+      const messagesWithSenders = (messagesData || []).map((message: MessageData): MessageWithSender => ({
+        ...message as MessageWithSender,
+        sender: profilesData?.find((p: ProfileData) => p.user_id === message.sender_id),
       }));
 
       setMessages(messagesWithSenders);
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error loading messages', error);
       toast({
         title: '❌ Erreur',
@@ -811,11 +828,12 @@ function ConversationMessagesView({
         title: '✅ Message envoyé',
         description: 'Votre intervention a été envoyée.',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error sending intervention', error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'envoyer le message.',
+        description: errorMessage || 'Impossible d\'envoyer le message.',
         variant: 'destructive',
       });
     } finally {
@@ -861,7 +879,7 @@ function ConversationMessagesView({
           </div>
         ) : (
           <div className="space-y-4">
-            {messages.map((message: any) => {
+            {messages.map((message: MessageWithSender) => {
               const isStore = message.sender_type === 'store';
               const isAdmin = message.sender_type === 'admin';
 

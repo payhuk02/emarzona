@@ -49,7 +49,12 @@ interface AbandonedCart {
   user_id: string | null;
   session_id: string | null;
   customer_email: string | null;
-  cart_items: any[];
+  cart_items: Array<{
+    product_name?: string;
+    variant_name?: string;
+    quantity: number;
+    unit_price: number;
+  }>;
   total_amount: number;
   currency: string;
   recovery_attempts: number;
@@ -108,10 +113,11 @@ export default function AbandonedCartsManagement() {
         description: 'L\'email de récupération a été envoyé avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'envoyer l\'email',
+        description: errorMessage || 'Impossible d\'envoyer l\'email',
         variant: 'destructive',
       });
     },
@@ -481,7 +487,7 @@ export default function AbandonedCartsManagement() {
                           <div>
                             <Label>Articles du Panier</Label>
                             <div className="mt-2 space-y-2">
-                              {(cart.cart_items || []).map((item: any, index: number) => (
+                              {(cart.cart_items || []).map((item: { product_name?: string; variant_name?: string; quantity: number; unit_price: number }, index: number) => (
                                 <Card key={index}>
                                   <CardContent className="p-3">
                                     <div className="flex items-center justify-between">

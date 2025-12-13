@@ -139,7 +139,7 @@ export default function CustomerPortal() {
 
         // Compter par type de produit
         if (orderItemsWithProducts) {
-          orderItemsWithProducts.forEach((item: any) => {
+          orderItemsWithProducts.forEach((item: { products?: { product_type?: string } }) => {
             const productType = item.products?.product_type;
             if (productType === 'digital') typeCounts.digital++;
             else if (productType === 'physical') typeCounts.physical++;

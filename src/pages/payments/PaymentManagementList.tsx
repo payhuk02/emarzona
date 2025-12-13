@@ -8,6 +8,40 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+// Type pour les commandes avec relations depuis Supabase
+// Basé sur la structure réelle retournée par Supabase
+type OrderWithRelations = {
+  id: string;
+  store_id: string | null;
+  customer_id: string | null;
+  order_number: string;
+  total_amount: number;
+  currency: string;
+  status: string;
+  payment_status: string;
+  created_at: string;
+  // Tous les autres champs sont optionnels car Supabase peut ne pas les retourner
+  payment_method?: string | null;
+  notes?: string | null;
+  updated_at?: string;
+  payment_type?: 'full' | 'percentage' | 'delivery_secured' | null;
+  percentage_paid?: number | null;
+  remaining_amount?: number | null;
+  delivery_status?: string | null;
+  order_items?: Array<{ 
+    id: string;
+    product_name?: string;
+    quantity?: number;
+    unit_price?: number;
+    total_price?: number;
+  }>;
+  customers?: { 
+    name?: string; 
+    email?: string; 
+  } | null;
+  // Index signature pour accepter tous les autres champs de Supabase
+  [key: string]: unknown;
+};
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,7 +81,6 @@ import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 
 export default function PaymentManagementList() {
   const navigate = useNavigate();
@@ -94,7 +127,7 @@ export default function PaymentManagementList() {
         }
       }
 
-      let query = (supabase as any)
+      let query = supabase
         .from('orders')
         .select(`
           *,
@@ -129,11 +162,12 @@ export default function PaymentManagementList() {
       }
 
       // Filtrer les commandes avec paiements avancés
-      const filtered = data?.filter((order: any) => {
-        const hasPercentagePayment = (order.percentage_paid || 0) > 0 && (order.percentage_paid || 0) < 100;
-        const hasRemainingAmount = (order.remaining_amount || 0) > 0;
+      const filtered = data?.filter((order) => {
+        const orderTyped = order as OrderWithRelations;
+        const hasPercentagePayment = (orderTyped.percentage_paid || 0) > 0 && (orderTyped.percentage_paid || 0) < 100;
+        const hasRemainingAmount = (orderTyped.remaining_amount || 0) > 0;
         // Also include orders with payment_status pending that might have advanced payment
-        const hasAdvancedPaymentStatus = order.payment_status === 'pending' || order.payment_status === 'partial';
+        const hasAdvancedPaymentStatus = orderTyped.payment_status === 'pending' || orderTyped.payment_status === 'partial';
         return hasPercentagePayment || hasRemainingAmount || hasAdvancedPaymentStatus;
       }) || [];
 
@@ -146,24 +180,25 @@ export default function PaymentManagementList() {
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
 
-    return orders.filter((order: any) => {
+    return orders.filter((order) => {
+      const orderTyped = order as OrderWithRelations;
       // Search filter
       const searchLower = debouncedSearch.toLowerCase();
     const matchesSearch =
-        order.order_number?.toLowerCase().includes(searchLower) ||
-        order.order_items?.[0]?.product_name?.toLowerCase().includes(searchLower) ||
-        order.customers?.name?.toLowerCase().includes(searchLower) ||
-        order.customers?.email?.toLowerCase().includes(searchLower);
+        orderTyped.order_number?.toLowerCase().includes(searchLower) ||
+        orderTyped.order_items?.[0]?.product_name?.toLowerCase().includes(searchLower) ||
+        orderTyped.customers?.name?.toLowerCase().includes(searchLower) ||
+        orderTyped.customers?.email?.toLowerCase().includes(searchLower);
 
       // Tab filter - simplified logic
-      const hasPercentagePayment = (order.percentage_paid || 0) > 0 && (order.percentage_paid || 0) < 100;
-      const hasRemainingAmount = (order.remaining_amount || 0) > 0;
+      const hasPercentagePayment = (orderTyped.percentage_paid || 0) > 0 && (orderTyped.percentage_paid || 0) < 100;
+      const hasRemainingAmount = (orderTyped.remaining_amount || 0) > 0;
 
     const matchesTab =
       activeTab === 'all' ||
         (activeTab === 'percentage' && hasPercentagePayment) ||
-        (activeTab === 'escrow' && (order.payment_status === 'pending' || order.payment_status === 'partial')) ||
-        (activeTab === 'pending' && (order.payment_status === 'pending' || hasRemainingAmount));
+        (activeTab === 'escrow' && (orderTyped.payment_status === 'pending' || orderTyped.payment_status === 'partial')) ||
+        (activeTab === 'pending' && (orderTyped.payment_status === 'pending' || hasRemainingAmount));
 
     return matchesSearch && matchesTab;
   });
@@ -174,23 +209,26 @@ export default function PaymentManagementList() {
     if (!orders) return { total: 0, percentage: 0, escrow: 0, pending: 0 };
 
     const total = orders.length;
-    const percentage = orders.filter((o: any) => {
-      const hasPercentage = (o.percentage_paid || 0) > 0 && (o.percentage_paid || 0) < 100;
+    const percentage = orders.filter((o) => {
+      const oTyped = o as OrderWithRelations;
+      const hasPercentage = (oTyped.percentage_paid || 0) > 0 && (oTyped.percentage_paid || 0) < 100;
       return hasPercentage;
     }).length;
-    const escrow = orders.filter((o: any) => {
+    const escrow = orders.filter((o) => {
+      const oTyped = o as OrderWithRelations;
       // Check if order has escrow/delivery_secured payment type
-      return o.payment_status === 'pending' || o.payment_status === 'partial';
+      return oTyped.payment_status === 'pending' || oTyped.payment_status === 'partial';
     }).length;
-    const pending = orders.filter((o: any) => {
-      return o.payment_status === 'pending' || (o.remaining_amount || 0) > 0;
+    const pending = orders.filter((o) => {
+      const oTyped = o as OrderWithRelations;
+      return oTyped.payment_status === 'pending' || (oTyped.remaining_amount || 0) > 0;
     }).length;
 
     return { total, percentage, escrow, pending };
   }, [orders]);
 
-  const getPaymentTypeBadge = (order: any) => {
-    const hasPercentage = (order.percentage_paid || 0) > 0 && (order.percentage_paid || 0) < 100;
+  const getPaymentTypeBadge = (order: OrderWithRelations) => {
+    const hasPercentage = ((order.percentage_paid as number | null | undefined) || 0) > 0 && ((order.percentage_paid as number | null | undefined) || 0) < 100;
     const isEscrow = order.payment_status === 'pending' || order.payment_status === 'partial';
     
     if (isEscrow) {
@@ -217,8 +255,8 @@ export default function PaymentManagementList() {
     );
   };
 
-  const getStatusBadge = (order: any) => {
-    const hasRemaining = (order.remaining_amount || 0) > 0;
+  const getStatusBadge = (order: OrderWithRelations) => {
+    const hasRemaining = ((order.remaining_amount as number | null | undefined) || 0) > 0;
     const paymentStatus = order.payment_status;
     
     if (paymentStatus === 'completed' || !hasRemaining) {
@@ -263,20 +301,23 @@ export default function PaymentManagementList() {
         'Statut Escrow',
         'Date Création',
       ];
-      const rows = filteredOrders.map((order: any) => [
-        order.order_number || '',
-        format(new Date(order.created_at), 'dd/MM/yyyy', { locale: fr }),
-        order.customers?.name || '',
-        order.order_items?.[0]?.product_name || 'N/A',
-        (order.percentage_paid || 0) > 0 ? 'Pourcentage' : 'Escrow',
-        order.total_amount || 0,
-        order.payment_status || 'N/A',
-        format(new Date(order.created_at), 'dd/MM/yyyy HH:mm', { locale: fr }),
-      ]);
+      const rows = filteredOrders.map((order) => {
+        const orderTyped = order as OrderWithRelations;
+        return [
+          orderTyped.order_number || '',
+          format(new Date(orderTyped.created_at), 'dd/MM/yyyy', { locale: fr }),
+          orderTyped.customers?.name || '',
+          orderTyped.order_items?.[0]?.product_name || 'N/A',
+          ((orderTyped.percentage_paid as number | null | undefined) || 0) > 0 ? 'Pourcentage' : 'Escrow',
+          orderTyped.total_amount || 0,
+          orderTyped.payment_status || 'N/A',
+          format(new Date(orderTyped.created_at), 'dd/MM/yyyy HH:mm', { locale: fr }),
+        ];
+      });
 
       const csvContent = [
         headers.join(','),
-        ...rows.map((row: any[]) => row.map((cell: any) => `"${String(cell)}"`).join(','))
+        ...rows.map((row: (string | number)[]) => row.map((cell: string | number) => `"${String(cell)}"`).join(','))
       ].join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -294,8 +335,9 @@ export default function PaymentManagementList() {
         description: `${filteredOrders.length} commande(s) exportée(s) en CSV.`,
       });
       logger.info('Payment management orders exported to CSV', { count: filteredOrders.length });
-    } catch (error: any) {
-      logger.error('Error exporting orders to CSV', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error exporting orders to CSV', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'exporter les commandes.',
@@ -315,8 +357,9 @@ export default function PaymentManagementList() {
         description: 'La liste des paiements a été mise à jour.',
       });
       logger.info('Payment management orders refreshed');
-    } catch (error: any) {
-      logger.error('Error refreshing orders', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error refreshing orders', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'actualiser les paiements.',
@@ -615,33 +658,35 @@ export default function PaymentManagementList() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                              {filteredOrders.map((order: any, index: number) => (
+                              {filteredOrders.map((order, index: number) => {
+                                const orderTyped = order as OrderWithRelations;
+                                return (
                                 <TableRow
-                                  key={order.id}
+                                  key={orderTyped.id}
                                   className="animate-in fade-in slide-in-from-left-4"
                                   style={{ animationDelay: `${index * 50}ms` }}
                                 >
                           <TableCell className="font-medium">
-                            {order.order_number}
+                            {orderTyped.order_number}
                           </TableCell>
                                   <TableCell className="hidden sm:table-cell">
-                                    {format(new Date(order.created_at), 'dd/MM/yyyy', { locale: fr })}
+                                    {format(new Date(orderTyped.created_at), 'dd/MM/yyyy', { locale: fr })}
                                   </TableCell>
                                   <TableCell className="hidden md:table-cell">
-                                    {order.customers?.name || 'N/A'}
+                                    {orderTyped.customers?.name || 'N/A'}
                                   </TableCell>
                                   <TableCell>
-                                    {order.order_items?.[0]?.product_name || 'N/A'}
+                                    {orderTyped.order_items?.[0]?.product_name || 'N/A'}
                                   </TableCell>
-                          <TableCell>{getPaymentTypeBadge(order)}</TableCell>
+                          <TableCell>{getPaymentTypeBadge(orderTyped)}</TableCell>
                                   <TableCell className="hidden lg:table-cell">
-                                    {order.total_amount?.toLocaleString('fr-FR')} XOF
+                                    {orderTyped.total_amount?.toLocaleString('fr-FR')} XOF
                                   </TableCell>
-                          <TableCell>{getStatusBadge(order)}</TableCell>
+                          <TableCell>{getStatusBadge(orderTyped)}</TableCell>
                           <TableCell className="text-right">
                             <Button
                               size="sm"
-                              onClick={() => navigate(`/payments/${order.id}/manage`)}
+                              onClick={() => navigate(`/payments/${orderTyped.id}/manage`)}
                                       className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white"
                             >
                                       <span className="hidden sm:inline">Gérer</span>
@@ -650,7 +695,8 @@ export default function PaymentManagementList() {
                             </Button>
                           </TableCell>
                         </TableRow>
-                      ))}
+                                );
+                              })}
                     </TableBody>
                   </Table>
                         </div>

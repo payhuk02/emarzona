@@ -191,10 +191,11 @@ export default function SuppliersManagement() {
         });
       }
       handleCloseDialog();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Une erreur est survenue',
+        description: errorMessage || 'Une erreur est survenue',
         variant: 'destructive',
       });
     }
@@ -223,10 +224,11 @@ export default function SuppliersManagement() {
       });
       setDeleteDialogOpen(false);
       setSupplierToDelete(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer le fournisseur',
+        description: errorMessage || 'Impossible de supprimer le fournisseur',
         variant: 'destructive',
       });
     }

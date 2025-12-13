@@ -40,7 +40,7 @@ import {
   AlertCircle,
   X,
 } from 'lucide-react';
-import { useUserDownloads } from '@/hooks/digital/useDownloads';
+import { useUserDownloads, type DigitalDownload } from '@/hooks/digital/useDownloads';
 import { DigitalDownloadButton } from '@/components/digital';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -101,7 +101,7 @@ export default function MyDownloads() {
   const filteredDownloads = useMemo(() => {
     if (!downloads) return [];
     
-    return downloads.filter((d: any) => {
+    return downloads.filter((d: DigitalDownload) => {
       const productName = d.digital_product?.product?.name || '';
       const matchesSearch = productName.toLowerCase().includes(debouncedSearch.toLowerCase());
       const matchesStatus = 
@@ -117,9 +117,9 @@ export default function MyDownloads() {
   const stats = useMemo(() => {
     return {
       total: downloads?.length || 0,
-      successful: downloads?.filter((d: any) => d.download_success).length || 0,
-      failed: downloads?.filter((d: any) => !d.download_success).length || 0,
-      uniqueProducts: new Set(downloads?.map((d: any) => d.digital_product_id)).size || 0,
+      successful: downloads?.filter((d: DigitalDownload) => d.download_success).length || 0,
+      failed: downloads?.filter((d: DigitalDownload) => !d.download_success).length || 0,
+      uniqueProducts: new Set(downloads?.map((d: DigitalDownload) => d.digital_product_id)).size || 0,
     };
   }, [downloads]);
 
@@ -308,7 +308,7 @@ export default function MyDownloads() {
                   </div>
                 ) : (
                   <div className="space-y-3 sm:space-y-4">
-                    {filteredDownloads.map((download: any) => (
+                    {filteredDownloads.map((download: DigitalDownload) => (
                       <Card key={download.id} className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.01]">
                         <CardContent className="p-3 sm:p-4 md:p-6">
                           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">

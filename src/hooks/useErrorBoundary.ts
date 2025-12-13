@@ -14,6 +14,8 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { ErrorFallback } from '@/components/error/ErrorFallback';
+// ✅ PHASE 2: Import logger pour remplacer console.*
+import { logger } from '@/lib/logger';
 
 export interface UseErrorBoundaryReturn {
   /**
@@ -89,18 +91,8 @@ export function useErrorHandler<T extends (...args: unknown[]) => unknown>(
           return result.catch((error: Error) => {
             onError?.(error);
             if (showToast) {
-              // Import dynamique pour éviter les dépendances circulaires
-              import('@/hooks/useToastHelpers').then(({ useToastHelpers }) => {
-                // Note: Ceci nécessiterait un contexte, donc on utilise une approche différente
-                // ✅ PHASE 2: Remplacer console.error par logger
-                import('@/lib/logger')
-                  .then(({ logger }) => {
-                    logger.error('Error in async function', { error });
-                  })
-                  .catch(() => {
-                    // Fallback silencieux
-                  });
-              });
+              // ✅ PHASE 2: Remplacer console.error par logger
+              logger.error('Error in async function', { error });
             }
             throw error;
           });
@@ -111,13 +103,7 @@ export function useErrorHandler<T extends (...args: unknown[]) => unknown>(
         onError?.(err);
         if (showToast) {
           // ✅ PHASE 2: Remplacer console.error par logger
-          import('@/lib/logger')
-            .then(({ logger }) => {
-              logger.error('Error in function', { error: err });
-            })
-            .catch(() => {
-              // Fallback silencieux
-            });
+          logger.error('Error in function', { error: err });
         }
         throw err;
       }

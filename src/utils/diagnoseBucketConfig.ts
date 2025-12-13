@@ -82,8 +82,9 @@ export async function diagnoseAttachmentsBucket(): Promise<BucketDiagnosticResul
         result.solutions.push('Exécutez la migration SQL: supabase/migrations/20250201_create_and_configure_attachments_bucket.sql');
         result.solutions.push('Dans Supabase Dashboard > SQL Editor, exécutez cette migration');
       }
-    } catch (error: any) {
-      result.issues.push(`Erreur lors de la vérification des politiques: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      result.issues.push(`Erreur lors de la vérification des politiques: ${errorMessage}`);
     }
 
     // 4. Générer un exemple d'URL publique
@@ -118,9 +119,10 @@ export async function diagnoseAttachmentsBucket(): Promise<BucketDiagnosticResul
     logger.info('Bucket diagnostic completed', result);
 
     return result;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error diagnosing bucket configuration', { error });
-    result.issues.push(`Erreur lors du diagnostic: ${error.message}`);
+    result.issues.push(`Erreur lors du diagnostic: ${errorMessage}`);
     return result;
   }
 }

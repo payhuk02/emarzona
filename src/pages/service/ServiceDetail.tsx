@@ -48,6 +48,7 @@ import { ReviewsList } from '@/components/reviews/ReviewsList';
 import { ReviewForm } from '@/components/reviews/ReviewForm';
 import { StaffCard } from '@/components/shared';
 import { ProductImages } from '@/components/shared';
+import type { StaffMember } from '@/hooks/service/useAvailability';
 import { useCreateServiceOrder } from '@/hooks/orders/useCreateServiceOrder';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
@@ -271,11 +272,12 @@ export default function ServiceDetail() {
           description: 'Le service a été ajouté à votre liste de souhaits',
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la gestion de la wishlist', error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de modifier la wishlist',
+        description: errorMessage || 'Impossible de modifier la wishlist',
         variant: 'destructive',
       });
     }
@@ -408,11 +410,12 @@ export default function ServiceDetail() {
         // Rediriger vers la page de confirmation ou les réservations
         navigate('/dashboard/my-bookings');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la réservation', error);
       toast({
         title: '❌ Erreur de réservation',
-        description: error.message || 'Une erreur est survenue lors de la réservation',
+        description: errorMessage || 'Une erreur est survenue lors de la réservation',
         variant: 'destructive',
       });
     } finally {
@@ -681,7 +684,7 @@ export default function ServiceDetail() {
                     <div className="space-y-4">
                       <h2 className="text-lg sm:text-xl md:text-2xl font-bold">Notre équipe</h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {service.staff.map((member: any) => (
+                        {service.staff.map((member: StaffMember) => (
                           <StaffCard
                             key={member.id}
                             name={member.name}

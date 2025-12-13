@@ -171,14 +171,14 @@ export const useVendorMessaging = (
 
       // Grouper les messages par conversation et prendre le premier (le plus récent)
       const lastMessagesMap = new Map();
-      (lastMessagesData || []).forEach((msg: any) => {
+      (lastMessagesData || []).forEach((msg: { conversation_id: string; created_at: string }) => {
         if (!lastMessagesMap.has(msg.conversation_id)) {
           lastMessagesMap.set(msg.conversation_id, msg);
         }
       });
 
       // Combiner les conversations avec leur dernier message
-      const conversationsWithLastMessage = (data || []).map((conv: any) => ({
+      const conversationsWithLastMessage = (data || []).map((conv: VendorConversation) => ({
         ...conv,
         last_message: lastMessagesMap.get(conv.id) || null,
       }));
@@ -189,7 +189,7 @@ export const useVendorMessaging = (
       logger.error("Error fetching vendor conversations:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -223,7 +223,7 @@ export const useVendorMessaging = (
 
       // Récupérer les profils des expéditeurs séparément
       // Filtrer les IDs null/invalides et valider le format UUID
-      const senderIds = [...new Set((messagesData || []).map((m: any) => m.sender_id).filter(Boolean))];
+      const senderIds = [...new Set((messagesData || []).map((m: { sender_id: string }) => m.sender_id).filter(Boolean))];
       
       // Valider que les IDs sont des UUIDs valides
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -232,7 +232,12 @@ export const useVendorMessaging = (
         return uuidRegex.test(id);
       });
 
-      let profilesData: any[] = [];
+      interface ProfileData {
+        user_id: string;
+        display_name?: string | null;
+        avatar_url?: string | null;
+      }
+      let profilesData: ProfileData[] = [];
       if (validSenderIds.length > 0) {
         try {
           // Utiliser une requête correcte avec .in() pour les UUIDs
@@ -268,11 +273,12 @@ export const useVendorMessaging = (
               profilesData = data || [];
             }
           }
-        } catch (err: any) {
+        } catch (err: unknown) {
+          const errorMessage = err instanceof Error ? err.message : String(err);
           logger.error("Exception fetching profiles", { 
             error: err,
             senderIds: validSenderIds.length,
-            message: err?.message,
+            message: errorMessage,
           });
           profilesData = [];
         }

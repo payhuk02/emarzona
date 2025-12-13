@@ -30,7 +30,7 @@ export interface StoreWithdrawal {
   amount: number;
   currency: string;
   payment_method: StorePaymentMethod;
-  payment_details: Record<string, any>;
+  payment_details: Record<string, unknown>;
   status: StoreWithdrawalStatus;
   approved_at: string | null;
   approved_by: string | null;

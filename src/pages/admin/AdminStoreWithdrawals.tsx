@@ -48,6 +48,7 @@ import {
   Download
 } from 'lucide-react';
 import { useStoreWithdrawals } from '@/hooks/useStoreWithdrawals';
+import type { StoreWithdrawal } from '@/types/store-withdrawals';
 import { StoreWithdrawal, StoreWithdrawalStatus, StorePaymentMethod } from '@/types/store-withdrawals';
 import { WithdrawalsFilters } from '@/components/store/WithdrawalsFilters';
 import { downloadWithdrawalsCSV, downloadWithdrawalsJSON } from '@/lib/withdrawal-export';
@@ -179,7 +180,8 @@ const AdminStoreWithdrawals = () => {
       await refetch();
       setShowApproveDialog(false);
       setSelectedWithdrawal(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error approving withdrawal', { error });
       toast({
         title: 'Erreur',
@@ -213,7 +215,8 @@ const AdminStoreWithdrawals = () => {
       setShowRejectDialog(false);
       setRejectReason('');
       setSelectedWithdrawal(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error rejecting withdrawal', { error });
       toast({
         title: 'Erreur',
@@ -250,7 +253,8 @@ const AdminStoreWithdrawals = () => {
       setTransactionReference('');
       setProofUrl('');
       setSelectedWithdrawal(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error completing withdrawal', { error });
       toast({
         title: 'Erreur',
@@ -261,7 +265,8 @@ const AdminStoreWithdrawals = () => {
   }, [selectedWithdrawal, transactionReference, proofUrl, toast, refetch]);
 
   const getStatusBadge = (status: StoreWithdrawalStatus) => {
-    const variants: Record<StoreWithdrawalStatus, { variant: 'default' | 'secondary' | 'destructive' | 'outline', icon: any, label: string }> = {
+    type IconComponent = React.ComponentType<{ className?: string }>;
+    const variants: Record<StoreWithdrawalStatus, { variant: 'default' | 'secondary' | 'destructive' | 'outline', icon: IconComponent, label: string }> = {
       pending: { variant: 'secondary', icon: Clock, label: 'En attente' },
       processing: { variant: 'default', icon: Loader2, label: 'En cours' },
       completed: { variant: 'default', icon: CheckCircle2, label: 'Complété' },
@@ -426,7 +431,7 @@ const AdminStoreWithdrawals = () => {
                     />
                   </div>
                 </div>
-                <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+                <Select value={statusFilter} onValueChange={(value: string) => setStatusFilter(value)}>
                   <SelectTrigger className="w-full sm:w-[200px] text-sm sm:text-base">
                     <SelectValue />
                   </SelectTrigger>

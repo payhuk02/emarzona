@@ -30,7 +30,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useWarehouses, useWarehouseTransfers, useCreateWarehouseTransfer, useUpdateTransferStatus } from '@/hooks/physical/useWarehouses';
+import { useWarehouses, useWarehouseTransfers, useCreateWarehouseTransfer, useUpdateTransferStatus, WarehouseTransfer } from '@/hooks/physical/useWarehouses';
+
+type TransferStatus = WarehouseTransfer['status'];
 import { useStore } from '@/hooks/useStore';
 import { Plus, Truck, ArrowRight, Calendar, Search, X, RefreshCw, Package, Clock, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -42,7 +44,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { cn } from '@/lib/utils';
 
-const TRANSFER_STATUSES: { value: any; label: string; color: string }[] = [
+const TRANSFER_STATUSES: { value: TransferStatus; label: string; color: string }[] = [
   { value: 'pending', label: 'En attente', color: 'bg-yellow-500' },
   { value: 'approved', label: 'Approuvé', color: 'bg-blue-500' },
   { value: 'in_transit', label: 'En transit', color: 'bg-purple-500' },
@@ -87,8 +89,8 @@ export default function WarehouseTransfers() {
       const searchLower = debouncedSearch.toLowerCase();
       const matchesSearch = 
         transfer.transfer_number.toLowerCase().includes(searchLower) ||
-        (transfer.from_warehouse as any)?.name?.toLowerCase().includes(searchLower) ||
-        (transfer.to_warehouse as any)?.name?.toLowerCase().includes(searchLower);
+        (transfer.from_warehouse as { name?: string } | null)?.name?.toLowerCase().includes(searchLower) ||
+        (transfer.to_warehouse as { name?: string } | null)?.name?.toLowerCase().includes(searchLower);
       return matchesStatus && matchesSearch;
     });
   }, [transfers, statusFilter, debouncedSearch]);
@@ -111,7 +113,7 @@ export default function WarehouseTransfers() {
     setTransferItems(transferItems.filter((_, i) => i !== index));
   };
 
-  const handleUpdateItem = (index: number, field: string, value: any) => {
+  const handleUpdateItem = (index: number, field: string, value: string | number) => {
     const updated = [...transferItems];
     updated[index] = { ...updated[index], [field]: value };
     setTransferItems(updated);
@@ -152,10 +154,11 @@ export default function WarehouseTransfers() {
       setNotes('');
       setFromWarehouse('');
       setToWarehouse('');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer le transfert',
+        description: errorMessage || 'Impossible de créer le transfert',
         variant: 'destructive',
       });
     }
@@ -556,8 +559,11 @@ export default function WarehouseTransfers() {
 
 // Transfer Card Component for Mobile View
 interface TransferCardProps {
-  transfer: any;
-  status: { value: any; label: string; color: string } | undefined;
+  transfer: WarehouseTransfer & {
+    from_warehouse?: { id: string; name: string; code: string } | null;
+    to_warehouse?: { id: string; name: string; code: string } | null;
+  };
+  status: { value: TransferStatus; label: string; color: string } | undefined;
   onStatusUpdate: (transferId: string, newStatus: string) => void;
   animationDelay?: number;
 }

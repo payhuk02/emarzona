@@ -84,7 +84,17 @@ export default function MultiStoreCheckoutTracking() {
         throw error;
       }
 
-      return (data || []).map((order: any) => ({
+      interface OrderData {
+        id: string;
+        store_id: string;
+        order_number: string;
+        total_amount: number;
+        payment_status: string;
+        status: string;
+        created_at: string;
+        stores?: { name: string };
+      }
+      return (data || []).map((order: OrderData) => ({
         orderId: order.id,
         storeId: order.store_id,
         orderNumber: order.order_number,
@@ -118,7 +128,11 @@ export default function MultiStoreCheckoutTracking() {
       }
 
       const urls: Record<string, string> = {};
-      (data || []).forEach((tx: any) => {
+      interface TransactionData {
+        order_id: string;
+        checkout_url?: string;
+      }
+      (data || []).forEach((tx: TransactionData) => {
         if (tx.checkout_url && !urls[tx.order_id]) {
           urls[tx.order_id] = tx.checkout_url;
         }

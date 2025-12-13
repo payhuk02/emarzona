@@ -37,6 +37,7 @@ import { formatPrice, getDisplayPrice, hasPromotion, calculateDiscount } from '@
 import { useToast } from '@/hooks/use-toast';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { cn } from '@/lib/utils';
+import type { ProductSpecification, ProductFAQ } from '@/types/product-form';
 
 const ProductDetails = () => {
   const { slug, productSlug } = useParams<{ slug: string; productSlug: string }>();
@@ -150,10 +151,11 @@ const ProductDetails = () => {
           promotional_price: product.promotional_price,
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Erreur lors du chargement du produit:", error);
-      const errorMessage = error?.message || "Impossible de charger le produit. Veuillez réessayer plus tard.";
-      setError(errorMessage);
+      const finalErrorMessage = errorMessage || "Impossible de charger le produit. Veuillez réessayer plus tard.";
+      setError(finalErrorMessage);
       setStore(null);
       setProduct(null);
     } finally {
@@ -241,7 +243,7 @@ const ProductDetails = () => {
       }
       
       navigate(`/checkout?${checkoutParams.toString()}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error("Erreur lors de la redirection vers checkout:", error);
       toast({
         title: "Erreur",
@@ -442,11 +444,11 @@ const ProductDetails = () => {
                   
                   // Ajouter les images secondaires
                   if (Array.isArray(product.images)) {
-                    product.images.forEach((img: any) => {
+                    product.images.forEach((img: unknown) => {
                       if (typeof img === 'string' && img && img !== product.image_url) {
                         allImages.push(img);
-                      } else if (typeof img === 'object' && img?.url && img.url !== product.image_url) {
-                        allImages.push(img.url);
+                      } else if (typeof img === 'object' && img !== null && 'url' in img && typeof (img as { url: unknown }).url === 'string' && (img as { url: string }).url !== product.image_url) {
+                        allImages.push((img as { url: string }).url);
                       }
                     });
                   }
@@ -853,7 +855,7 @@ const ProductDetails = () => {
                     <div className="rounded-lg border border-border overflow-hidden bg-card">
                       <Table>
                         <TableBody>
-                          {product.specifications.map((spec: any, index: number) => (
+                          {product.specifications.map((spec: ProductSpecification, index: number) => (
                             <TableRow key={index} className={index % 2 === 0 ? 'bg-muted/50' : ''}>
                               <TableCell className="font-medium w-1/3 py-3">
                                 {spec.name || spec.label || spec.key}
@@ -947,7 +949,7 @@ const ProductDetails = () => {
                   <h2 className="text-xl sm:text-2xl font-bold">Questions fréquentes</h2>
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-2">
-                  {product.faqs.map((faq: any, index: number) => (
+                  {product.faqs.map((faq: ProductFAQ, index: number) => (
                     <AccordionItem 
                       key={index} 
                       value={`faq-${index}`}

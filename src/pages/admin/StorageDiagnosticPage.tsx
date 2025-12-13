@@ -111,10 +111,11 @@ export default function StorageDiagnosticPage() {
         title: 'Diagnostic terminé',
         description: `${diagnosticReport.existingFiles} fichiers existants, ${diagnosticReport.missingFiles} fichiers manquants`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'exécuter le diagnostic',
+        description: errorMessage || 'Impossible d\'exécuter le diagnostic',
         variant: 'destructive',
       });
     } finally {
@@ -158,10 +159,11 @@ export default function StorageDiagnosticPage() {
       // Re-run diagnostic pour mettre à jour le rapport
       await handleRunDiagnostic();
       setShowDeleteDialog(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de nettoyer les fichiers manquants',
+        description: errorMessage || 'Impossible de nettoyer les fichiers manquants',
         variant: 'destructive',
       });
     } finally {

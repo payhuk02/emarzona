@@ -137,7 +137,7 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
       onSuccess();
       onOpenChange(false);
       resetForm();
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage = getErrorMessage(error);
       setValidationErrors([errorMessage]);
       toast({
@@ -322,7 +322,7 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
             <Label>Portée de la promotion</Label>
             <Select
               value={formData.applies_to}
-              onValueChange={(value: any) => setFormData({ ...formData, applies_to: value })}
+              onValueChange={(value: "all_products" | "specific_products" | "categories" | "collections") => setFormData({ ...formData, applies_to: value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner la portée" />

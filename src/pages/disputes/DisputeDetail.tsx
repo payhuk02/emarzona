@@ -196,11 +196,12 @@ export default function DisputeDetail() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Send dispute message error', { error, disputeId });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'envoyer le message',
+        description: errorMessage || 'Impossible d\'envoyer le message',
         variant: 'destructive',
       });
     } finally {
@@ -234,11 +235,12 @@ export default function DisputeDetail() {
       setShowResolveDialog(false);
       setResolution('');
       setAdminNotes('');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Resolve dispute error', { error, disputeId });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de résoudre le litige',
+        description: errorMessage || 'Impossible de résoudre le litige',
         variant: 'destructive',
       });
     } finally {
@@ -457,7 +459,7 @@ export default function DisputeDetail() {
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          {dispute.messages.map((message: any, index: number) => (
+                          {dispute.messages?.map((message: { id: string; content: string; sender_type: string; created_at: string; attachments?: string[] }, index: number) => (
                             <div
                               key={index}
                               className="p-4 rounded-lg bg-muted"

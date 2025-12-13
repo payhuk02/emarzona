@@ -403,10 +403,26 @@ export const TrafficSourceChart: React.FC<TrafficSourceChartProps> = ({
   );
 };
 
+interface AnalyticsData {
+  views?: number;
+  clicks?: number;
+  conversions?: number;
+  revenue?: number;
+  [key: string]: unknown;
+}
+
+interface ChangePercentages {
+  views?: number;
+  clicks?: number;
+  conversions?: number;
+  revenue?: number;
+  [key: string]: unknown;
+}
+
 // Composant pour les métriques en temps réel
 interface RealtimeMetricsProps {
-  analytics: any;
-  changePercentages: any;
+  analytics: AnalyticsData;
+  changePercentages: ChangePercentages;
   isRealTimeActive: boolean;
   onToggleRealTime: () => void;
 }

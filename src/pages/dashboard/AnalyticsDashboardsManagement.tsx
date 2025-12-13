@@ -152,10 +152,11 @@ export default function AnalyticsDashboardsManagement() {
         layout: {},
         widgets: [],
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer le dashboard',
+        description: errorMessage || 'Impossible de créer le dashboard',
         variant: 'destructive',
       });
     }
@@ -175,10 +176,11 @@ export default function AnalyticsDashboardsManagement() {
         title: '✅ Dashboard supprimé',
         description: 'Le dashboard a été supprimé avec succès',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer le dashboard',
+        description: errorMessage || 'Impossible de supprimer le dashboard',
         variant: 'destructive',
       });
     }
@@ -203,10 +205,11 @@ export default function AnalyticsDashboardsManagement() {
         title: '✅ Dashboard par défaut',
         description: 'Le dashboard a été défini comme défaut',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de définir le dashboard par défaut',
+        description: errorMessage || 'Impossible de définir le dashboard par défaut',
         variant: 'destructive',
       });
     }
@@ -484,7 +487,7 @@ export default function AnalyticsDashboardsManagement() {
                       <Label htmlFor="date_range_type">Période par Défaut</Label>
                       <Select
                         value={formData.date_range_type}
-                        onValueChange={(value: any) => setFormData({ ...formData, date_range_type: value })}
+                        onValueChange={(value: string) => setFormData({ ...formData, date_range_type: value })}
                       >
                         <SelectTrigger id="date_range_type">
                           <SelectValue />

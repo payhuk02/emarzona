@@ -76,6 +76,13 @@ interface DNSRecord {
   priority?: number;
 }
 
+interface DNSAnswer {
+  name: string;
+  type: number;
+  TTL: number;
+  data: string;
+}
+
 export const DomainSettings = () => {
   const { stores, updateStore, loading: storesLoading } = useStores();
   const { toast } = useToast();
@@ -327,7 +334,7 @@ export const DomainSettings = () => {
         
         if (aData.Answer && aData.Answer.length > 0) {
           const targetIP = '185.158.133.1';
-          details.aRecord = aData.Answer.some((answer: any) => answer.data === targetIP);
+          details.aRecord = (aData.Answer as DNSAnswer[]).some((answer) => answer.data === targetIP);
           if (!details.aRecord) {
             errors.push(`Enregistrement A incorrect: pointetoward ${aData.Answer[0].data} au lieu de ${targetIP}`);
           }
@@ -345,7 +352,7 @@ export const DomainSettings = () => {
         
         if (wwwData.Answer && wwwData.Answer.length > 0) {
           const targetIP = '185.158.133.1';
-          details.wwwRecord = wwwData.Answer.some((answer: any) => answer.data === targetIP);
+          details.wwwRecord = (wwwData.Answer as DNSAnswer[]).some((answer) => answer.data === targetIP);
           if (!details.wwwRecord) {
             errors.push(`Enregistrement WWW incorrect: pointe vers ${wwwData.Answer[0].data} au lieu de ${targetIP}`);
           }

@@ -6,7 +6,19 @@
  */
 
 import { useState } from 'react';
-import { useUserDownloads } from '@/hooks/digital/useDownloads';
+import { useUserDownloads, type DigitalDownload } from '@/hooks/digital/useDownloads';
+
+// Type pour les téléchargements avec relations depuis Supabase
+type DownloadWithRelations = DigitalDownload & {
+  digital_product?: {
+    id: string;
+    product?: {
+      id: string;
+      name: string;
+      image_url?: string;
+    };
+  };
+};
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,7 +47,7 @@ export const MyDownloads = () => {
   /**
    * Filter downloads
    */
-  const filteredDownloads = downloads?.filter((d: any) => {
+  const filteredDownloads = downloads?.filter((d: DownloadWithRelations) => {
     const productName = d.digital_product?.product?.name || '';
     return productName.toLowerCase().includes(searchQuery.toLowerCase());
   });
@@ -43,8 +55,8 @@ export const MyDownloads = () => {
   /**
    * Group downloads by status
    */
-  const successfulDownloads = filteredDownloads?.filter((d: any) => d.download_success);
-  const failedDownloads = filteredDownloads?.filter((d: any) => !d.download_success);
+  const successfulDownloads = filteredDownloads?.filter((d: DownloadWithRelations) => d.download_success);
+  const failedDownloads = filteredDownloads?.filter((d: DownloadWithRelations) => !d.download_success);
 
   /**
    * Calculate stats
@@ -53,7 +65,7 @@ export const MyDownloads = () => {
     total: downloads?.length || 0,
     successful: successfulDownloads?.length || 0,
     failed: failedDownloads?.length || 0,
-    products: new Set(downloads?.map((d: any) => d.digital_product_id)).size,
+    products: new Set(downloads?.map((d: DownloadWithRelations) => d.digital_product_id)).size,
   };
 
   return (
@@ -184,7 +196,7 @@ export const MyDownloads = () => {
 /**
  * Downloads List Component
  */
-const DownloadsList = ({ downloads, loading }: { downloads: any[]; loading: boolean }) => {
+const DownloadsList = ({ downloads, loading }: { downloads: DownloadWithRelations[]; loading: boolean }) => {
   if (loading) {
     return (
       <div className="space-y-4">
@@ -218,7 +230,7 @@ const DownloadsList = ({ downloads, loading }: { downloads: any[]; loading: bool
 
   return (
     <div className="space-y-4">
-      {downloads.map((download: any) => (
+      {downloads.map((download: DownloadWithRelations) => (
         <Card key={download.id} className="overflow-hidden">
           <CardContent className="p-3 sm:p-4 md:p-6">
             <div className="flex items-start justify-between gap-2 sm:gap-3 md:gap-4">

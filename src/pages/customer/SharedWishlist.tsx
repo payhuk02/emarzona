@@ -43,7 +43,13 @@ export default function SharedWishlist() {
     }
   };
 
-  const handleViewProduct = (product: any) => {
+  interface WishlistProductItem {
+    product_type: string;
+    stores?: { slug: string };
+    id: string;
+    slug?: string;
+  }
+  const handleViewProduct = (product: WishlistProductItem) => {
     const productType = product.product_type;
     const storeSlug = product.stores?.slug;
 
@@ -130,7 +136,7 @@ export default function SharedWishlist() {
           </Alert>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((item: any) => {
+            {products.map((item: WishlistProduct) => {
               const product = item.products;
               return (
                 <Card key={product.id} className="hover:shadow-lg transition-shadow">

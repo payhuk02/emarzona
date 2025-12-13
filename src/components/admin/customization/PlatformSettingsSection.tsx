@@ -20,7 +20,7 @@ export const PlatformSettingsSection = ({ onChange }: PlatformSettingsSectionPro
   const { customizationData, save } = usePlatformCustomization();
   const { settings, updateSettings, isLoading } = usePlatformSettingsDirect();
 
-  const handleSettingChange = (updates: any) => {
+  const handleSettingChange = (updates: Record<string, unknown>) => {
     if (settings) {
       updateSettings(updates);
     }

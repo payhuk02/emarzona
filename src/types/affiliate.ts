@@ -35,7 +35,7 @@ export interface Affiliate {
   
   // Payment info
   payment_method?: PaymentMethod;
-  payment_details?: Record<string, any>;
+  payment_details?: Record<string, unknown>;
   
   // Status
   status: AffiliateStatus;
@@ -74,7 +74,7 @@ export interface ProductAffiliateSettings {
   
   // Content
   terms_and_conditions?: string;
-  promotional_materials?: Record<string, any>;
+  promotional_materials?: Record<string, unknown>;
   
   // Dates
   created_at: string;
@@ -115,7 +115,7 @@ export interface AffiliateLink {
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
-  custom_parameters?: Record<string, any>;
+  custom_parameters?: Record<string, unknown>;
   
   // Status
   status: LinkStatus;
@@ -256,7 +256,7 @@ export interface AffiliateCommission {
   
   // Meta
   notes?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   
@@ -289,7 +289,7 @@ export interface AffiliateWithdrawal {
   
   // Payment method
   payment_method: PaymentMethod;
-  payment_details: Record<string, any>;
+  payment_details: Record<string, unknown>;
   
   // Status
   status: WithdrawalStatus;
@@ -337,7 +337,7 @@ export interface AffiliateRegistrationForm {
   display_name?: string;
   password?: string;
   payment_method?: PaymentMethod;
-  payment_details?: Record<string, any>;
+  payment_details?: Record<string, unknown>;
 }
 
 export interface ProductAffiliateSettingsForm {
@@ -351,7 +351,7 @@ export interface ProductAffiliateSettingsForm {
   allow_self_referral: boolean;
   require_approval: boolean;
   terms_and_conditions?: string;
-  promotional_materials?: Record<string, any>;
+  promotional_materials?: Record<string, unknown>;
 }
 
 export interface CreateAffiliateLinkForm {
@@ -359,13 +359,13 @@ export interface CreateAffiliateLinkForm {
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
-  custom_parameters?: Record<string, any>;
+  custom_parameters?: Record<string, unknown>;
 }
 
 export interface WithdrawalRequestForm {
   amount: number;
   payment_method: PaymentMethod;
-  payment_details: Record<string, any>;
+  payment_details: Record<string, unknown>;
   notes?: string;
 }
 
@@ -594,7 +594,7 @@ export interface AffiliateNotification {
   type: 'new_sale' | 'commission_approved' | 'commission_paid' | 'withdrawal_approved' | 'withdrawal_completed' | 'new_product_available';
   title: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   read: boolean;
   created_at: string;
 }

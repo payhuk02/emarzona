@@ -48,7 +48,7 @@ interface UserProfile {
   full_name?: string;
   phone?: string;
   avatar_url?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 interface ShippingAddress {
@@ -190,11 +190,12 @@ export default function MyProfile() {
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       logger.info('Profile updated successfully');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error updating profile:', error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de mettre à jour le profil',
+        description: errorMessage || 'Impossible de mettre à jour le profil',
         variant: 'destructive',
       });
     },

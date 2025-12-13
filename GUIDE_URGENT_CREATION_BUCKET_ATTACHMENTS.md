@@ -139,3 +139,5 @@ Après avoir exécuté la migration:
 
 **Date**: 1 Février 2025
 **Priorité**: 🔴 URGENT - Bloque le système de messaging
+
+

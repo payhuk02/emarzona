@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAffiliates } from '@/hooks/useAffiliates';
 import { useAffiliateCommissions } from '@/hooks/useAffiliateCommissions';
 import { useAffiliateWithdrawals, usePendingWithdrawals } from '@/hooks/useAffiliateWithdrawals';
+import type { AffiliateCommission, AffiliateWithdrawal, Affiliate } from '@/types/affiliate';
 import { PaginationControls } from '@/components/affiliate/PaginationControls';
 import {
   Dialog,
@@ -146,7 +147,7 @@ const AdminAffiliates = () => {
     }
   }, [commissionsPagination?.page, commissionsPagination?.pageSize]);
 
-  const handleApproveCommission = useCallback(async (commission: any) => {
+  const handleApproveCommission = useCallback(async (commission: AffiliateCommission) => {
     logger.info(`Approbation commission ${commission.id}`);
     const success = await approveCommission({ commission_id: commission.id });
     if (success) {
@@ -190,7 +191,7 @@ const AdminAffiliates = () => {
     }
   }, [selectedCommission, paymentReference, markAsPaid]);
 
-  const handleApproveWithdrawal = useCallback(async (withdrawal: any) => {
+  const handleApproveWithdrawal = useCallback(async (withdrawal: AffiliateWithdrawal) => {
     logger.info(`Approbation retrait ${withdrawal.id}`);
     const success = await approveWithdrawal(withdrawal.id);
     if (success) {
@@ -241,7 +242,7 @@ const AdminAffiliates = () => {
     }
   }, [selectedAffiliate, suspendReason, suspendAffiliate]);
 
-  const handleActivateAffiliate = useCallback(async (affiliate: any) => {
+  const handleActivateAffiliate = useCallback(async (affiliate: Affiliate) => {
     logger.info(`Activation affilié ${affiliate.id}`);
     const success = await activateAffiliate(affiliate.id);
     if (success) {

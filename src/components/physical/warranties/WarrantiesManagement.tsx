@@ -82,10 +82,11 @@ export default function WarrantiesManagement() {
 
       if (error) throw error;
       setWarranties(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de charger les garanties',
+        description: errorMessage || 'Impossible de charger les garanties',
         variant: 'destructive',
       });
     } finally {
@@ -165,10 +166,11 @@ export default function WarrantiesManagement() {
       }
       handleCloseDialog();
       loadWarranties();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Une erreur est survenue',
+        description: errorMessage || 'Une erreur est survenue',
         variant: 'destructive',
       });
     }
@@ -190,10 +192,11 @@ export default function WarrantiesManagement() {
         description: 'La garantie a été supprimée avec succès',
       });
       loadWarranties();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer la garantie',
+        description: errorMessage || 'Impossible de supprimer la garantie',
         variant: 'destructive',
       });
     }
@@ -373,7 +376,7 @@ export default function WarrantiesManagement() {
                   <Label htmlFor="warranty_type">Type de garantie *</Label>
                   <Select
                     value={formData.warranty_type || 'store'}
-                    onValueChange={(value: any) => setFormData({ ...formData, warranty_type: value })}
+                    onValueChange={(value: string) => setFormData({ ...formData, warranty_type: value })}
                     required
                   >
                     <SelectTrigger>
@@ -426,7 +429,7 @@ export default function WarrantiesManagement() {
                   <Label htmlFor="starts_from">Début *</Label>
                   <Select
                     value={formData.starts_from || 'purchase'}
-                    onValueChange={(value: any) => setFormData({ ...formData, starts_from: value })}
+                    onValueChange={(value: string) => setFormData({ ...formData, starts_from: value })}
                     required
                   >
                     <SelectTrigger>
@@ -443,7 +446,7 @@ export default function WarrantiesManagement() {
                   <Label htmlFor="coverage_type">Couverture *</Label>
                   <Select
                     value={formData.coverage_type || 'full'}
-                    onValueChange={(value: any) => setFormData({ ...formData, coverage_type: value })}
+                    onValueChange={(value: string) => setFormData({ ...formData, coverage_type: value })}
                     required
                   >
                     <SelectTrigger>

@@ -11,6 +11,7 @@ import {
   useUpdateGiftCard,
   useStoreGiftCardTransactions
 } from '@/hooks/giftCards/useGiftCards';
+import type { GiftCard } from '@/types/giftCards';
 import {
   Card,
   CardContent,
@@ -336,7 +337,7 @@ export default function AdminGiftCardManagement() {
                               key: 'code',
                               label: 'Code',
                               priority: 'high',
-                              render: (row: any) => (
+                              render: (row: GiftCard) => (
                                 <div className="flex items-center gap-2">
                                   <code className="text-xs font-mono bg-muted px-2 py-1 rounded">
                                     {row.code}
@@ -357,7 +358,7 @@ export default function AdminGiftCardManagement() {
                               key: 'amount',
                               label: 'Montant Initial',
                               priority: 'high',
-                              render: (row: any) => (
+                              render: (row: GiftCard) => (
                                 <span className="font-medium text-sm">{formatCurrency(row.initial_amount)}</span>
                               ),
                             },
@@ -365,7 +366,7 @@ export default function AdminGiftCardManagement() {
                               key: 'balance',
                               label: 'Solde Restant',
                               priority: 'high',
-                              render: (row: any) => (
+                              render: (row: GiftCard) => (
                                 <span className="text-sm">{formatCurrency(row.current_balance)}</span>
                               ),
                             },
@@ -373,13 +374,13 @@ export default function AdminGiftCardManagement() {
                               key: 'status',
                               label: 'Statut',
                               priority: 'high',
-                              render: (row: any) => getStatusBadge(row.status),
+                              render: (row: GiftCard) => getStatusBadge(row.status),
                             },
                             {
                               key: 'recipient',
                               label: 'Bénéficiaire',
                               priority: 'medium',
-                              render: (row: any) => (
+                              render: (row: GiftCard) => (
                                 row.recipient_email ? (
                                   <div>
                                     <div className="font-medium text-xs">{row.recipient_name || 'N/A'}</div>
@@ -394,7 +395,7 @@ export default function AdminGiftCardManagement() {
                               key: 'issued',
                               label: 'Date d\'émission',
                               priority: 'low',
-                              render: (row: any) => (
+                              render: (row: GiftCard) => (
                                 <span className="text-xs">{new Date(row.issued_at).toLocaleDateString('fr-FR')}</span>
                               ),
                             },
@@ -402,14 +403,14 @@ export default function AdminGiftCardManagement() {
                               key: 'expires',
                               label: 'Expiration',
                               priority: 'low',
-                              render: (row: any) => (
+                              render: (row: GiftCard) => (
                                 <span className="text-xs">
                                   {row.expires_at ? new Date(row.expires_at).toLocaleDateString('fr-FR') : 'Jamais'}
                                 </span>
                               ),
                             },
                           ]}
-                          actions={(row: any) => (
+                          actions={(row: GiftCard) => (
                             <Button variant="ghost" size="sm" className="min-h-[44px] w-full">
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
@@ -677,10 +678,11 @@ function CreateGiftCardDialog({
         auto_activate: true,
         notes: ''
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de créer la carte cadeau',
+        description: errorMessage || 'Impossible de créer la carte cadeau',
         variant: 'destructive'
       });
     }

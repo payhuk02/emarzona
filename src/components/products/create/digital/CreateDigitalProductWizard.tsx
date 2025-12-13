@@ -311,11 +311,12 @@ export const CreateDigitalProductWizard = ({
       } else {
         navigate(`/${storeSlug}/products/${slug}`);
       }
-    } catch (error: any) {
-      logger.error('Error creating digital product', { error });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error creating digital product', { error: errorMessage });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Une erreur est survenue lors de la création',
+        description: errorMessage || 'Une erreur est survenue lors de la création',
         variant: 'destructive',
       });
     } finally {

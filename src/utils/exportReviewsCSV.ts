@@ -65,7 +65,8 @@ export function reviewsToCSV(
         : review.created_at;
 
     const mediaUrls = review.review_media
-      ?.map((m: any) => m.media_url)
+      ?.map((m: { media_url?: string }) => m.media_url)
+      .filter(Boolean)
       .join(' | ') || '';
 
     const row = [

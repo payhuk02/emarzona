@@ -124,11 +124,12 @@ export default function ArtistPortfoliosManagement() {
 
       refetch();
       setDeletingPortfolio(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error deleting portfolio', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Une erreur est survenue lors de la suppression.',
+        description: errorMessage || 'Une erreur est survenue lors de la suppression.',
         variant: 'destructive',
       });
     }

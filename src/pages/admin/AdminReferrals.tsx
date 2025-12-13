@@ -16,6 +16,26 @@ import { formatCurrency } from '@/lib/utils';
 import { UserPlus, Download, Search, TrendingUp, Users } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Type pour les parrainages avec relations depuis Supabase
+type ReferralWithRelations = {
+  id: string;
+  referrer_id: string;
+  referred_id: string;
+  referral_code: string;
+  status: string;
+  created_at: string;
+  referrer?: {
+    display_name?: string;
+    first_name?: string;
+    last_name?: string;
+  } | null;
+  referred?: {
+    display_name?: string;
+    first_name?: string;
+    last_name?: string;
+  } | null;
+};
+
 const AdminReferrals = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
@@ -74,7 +94,7 @@ const AdminReferrals = () => {
 
     const csvContent = [
       ['Parrain', 'Filleul', 'Code', 'Statut', 'Date'].join(','),
-      ...referrals.map((ref: any) =>
+      ...referrals.map((ref: ReferralWithRelations) =>
         [
           ref.referrer?.display_name || 'N/A',
           ref.referred?.display_name || 'N/A',
@@ -100,7 +120,7 @@ const AdminReferrals = () => {
     });
   }, [referrals, toast]);
 
-  const filteredReferrals = useMemo(() => referrals?.filter((ref: any) =>
+  const filteredReferrals = useMemo(() => referrals?.filter((ref: ReferralWithRelations) =>
     ref.referrer?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     ref.referred?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     ref.referral_code?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -220,13 +240,13 @@ const AdminReferrals = () => {
             {filteredReferrals && filteredReferrals.length > 0 ? (
               isMobile ? (
                 <MobileTableCard
-                  data={filteredReferrals.map((r: any) => ({ ...r, id: r.id }))}
+                  data={filteredReferrals.map((r: ReferralWithRelations) => ({ ...r, id: r.id }))}
                   columns={[
                     {
                       key: 'referrer',
                       header: 'Parrain',
                       priority: 'high',
-                      render: (row: any) => (
+                      render: (row: ReferralWithRelations) => (
                         <span className="font-medium">
                           {row.referrer?.display_name || 
                            `${row.referrer?.first_name || ''} ${row.referrer?.last_name || ''}`.trim() || 
@@ -238,7 +258,7 @@ const AdminReferrals = () => {
                       key: 'referred',
                       header: 'Filleul',
                       priority: 'high',
-                      render: (row: any) => (
+                      render: (row: ReferralWithRelations) => (
                         row.referred?.display_name || 
                         `${row.referred?.first_name || ''} ${row.referred?.last_name || ''}`.trim() || 
                         'N/A'
@@ -248,7 +268,7 @@ const AdminReferrals = () => {
                       key: 'referral_code',
                       header: 'Code',
                       priority: 'medium',
-                      render: (row: any) => (
+                      render: (row: ReferralWithRelations) => (
                         <Badge variant="outline">{row.referral_code}</Badge>
                       ),
                     },
@@ -256,7 +276,7 @@ const AdminReferrals = () => {
                       key: 'status',
                       header: 'Statut',
                       priority: 'high',
-                      render: (row: any) => (
+                      render: (row: ReferralWithRelations) => (
                         <Badge variant={row.status === 'active' ? 'default' : 'secondary'}>
                           {row.status}
                         </Badge>
@@ -266,7 +286,7 @@ const AdminReferrals = () => {
                       key: 'created_at',
                       header: 'Date',
                       priority: 'low',
-                      render: (row: any) => (
+                      render: (row: ReferralWithRelations) => (
                         <span className="text-xs text-muted-foreground">
                           {new Date(row.created_at).toLocaleDateString('fr-FR')}
                         </span>
@@ -287,7 +307,7 @@ const AdminReferrals = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredReferrals.map((referral: any) => (
+                      {filteredReferrals.map((referral: ReferralWithRelations) => (
                         <TableRow key={referral.id}>
                           <TableCell className="font-medium">
                             {referral.referrer?.display_name || 

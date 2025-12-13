@@ -194,11 +194,12 @@ export default function Payments() {
       await refetch();
       setEditDialogOpen(false);
       setSelectedPayment(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la mise à jour du paiement', error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de mettre à jour le paiement',
+        description: errorMessage || 'Impossible de mettre à jour le paiement',
         variant: 'destructive',
       });
     } finally {
@@ -227,11 +228,12 @@ export default function Payments() {
       await refetch();
       setDeleteDialogOpen(false);
       setSelectedPayment(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la suppression du paiement', error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer le paiement',
+        description: errorMessage || 'Impossible de supprimer le paiement',
         variant: 'destructive',
       });
     } finally {
@@ -248,8 +250,9 @@ export default function Payments() {
         description: 'La liste des paiements a été mise à jour.',
       });
       logger.info('Payments refreshed');
-    } catch (error: any) {
-      logger.error('Error refreshing payments', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error refreshing payments', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'actualiser les paiements.',
@@ -298,7 +301,7 @@ export default function Payments() {
 
       const csvContent = [
         headers.join(','),
-        ...rows.map((row: any[]) => row.map((cell: any) => `"${String(cell)}"`).join(','))
+        ...rows.map((row: Array<string | number>) => row.map((cell: string | number) => `"${String(cell)}"`).join(','))
       ].join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -316,8 +319,9 @@ export default function Payments() {
         description: `${filteredPayments.length} paiement(s) exporté(s) en CSV.`,
       });
       logger.info('Payments exported to CSV', { count: filteredPayments.length });
-    } catch (error: any) {
-      logger.error('Error exporting payments to CSV', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error exporting payments to CSV', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'exporter les paiements.',

@@ -217,10 +217,11 @@ export default function LiveSessionsManagement() {
         title: '✅ Session supprimée',
         description: 'La session a été supprimée avec succès',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer la session',
+        description: errorMessage || 'Impossible de supprimer la session',
         variant: 'destructive',
       });
     }
@@ -281,8 +282,9 @@ export default function LiveSessionsManagement() {
 
       setIsCreateDialogOpen(false);
       setEditingSessionId(null);
-    } catch (error: any) {
-      logger.error('Error saving session', { error, formData });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error saving session', { error: errorMessage, formData });
       // Les erreurs sont gérées par les hooks
     }
   };
@@ -383,7 +385,7 @@ export default function LiveSessionsManagement() {
                     <SelectValue placeholder="Choisir un cours..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {courses.map((course: any) => (
+                    {courses.map((course: { id: string; title: string }) => (
                       <SelectItem key={course.id} value={course.id}>
                         {course.title}
                       </SelectItem>

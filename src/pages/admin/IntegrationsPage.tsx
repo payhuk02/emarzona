@@ -132,10 +132,11 @@ export default function IntegrationsPage() {
         description: 'La configuration a été sauvegardée avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de sauvegarder la configuration',
+        description: errorMessage || 'Impossible de sauvegarder la configuration',
         variant: 'destructive',
       });
     },
@@ -158,10 +159,11 @@ export default function IntegrationsPage() {
         description: 'L\'intégration a été supprimée avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer l\'intégration',
+        description: errorMessage || 'Impossible de supprimer l\'intégration',
         variant: 'destructive',
       });
     },
@@ -190,10 +192,11 @@ export default function IntegrationsPage() {
         description: 'Le statut de l\'intégration a été mis à jour',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de mettre à jour le statut',
+        description: errorMessage || 'Impossible de mettre à jour le statut',
         variant: 'destructive',
       });
     },

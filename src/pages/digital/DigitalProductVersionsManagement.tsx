@@ -64,10 +64,11 @@ export default function DigitalProductVersionsManagement() {
         title: 'Version supprimée',
         description: 'La version a été supprimée avec succès',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de supprimer la version',
+        description: errorMessage || 'Impossible de supprimer la version',
         variant: 'destructive',
       });
     }

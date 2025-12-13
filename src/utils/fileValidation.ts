@@ -119,7 +119,7 @@ export function validateFile(
   const fileExtension = getFileExtension(file.name).toLowerCase();
   
   // Vérifier les extensions dangereuses
-  if (FILE_VALIDATION_CONFIG.DANGEROUS_EXTENSIONS.includes(fileExtension as any)) {
+  if (FILE_VALIDATION_CONFIG.DANGEROUS_EXTENSIONS.includes(fileExtension as string)) {
     return {
       valid: false,
       error: `Extension de fichier interdite: ${fileExtension}. Ce type de fichier peut être dangereux.`,
@@ -127,7 +127,7 @@ export function validateFile(
   }
 
   // Vérifier les extensions autorisées (si pas allowUnknownTypes)
-  if (!allowUnknownTypes && !allowedExtensions.includes(fileExtension as any)) {
+  if (!allowUnknownTypes && !allowedExtensions.includes(fileExtension as string)) {
     return {
       valid: false,
       error: `Extension de fichier non autorisée: ${fileExtension}. Extensions autorisées: ${allowedExtensions.join(', ')}`,
@@ -153,7 +153,7 @@ export function validateFile(
   }
 
   // Vérifier que le type MIME est autorisé (si pas allowUnknownTypes)
-  if (!allowUnknownTypes && !allowedMimeTypes.includes(detectedMimeType as any)) {
+  if (!allowUnknownTypes && !allowedMimeTypes.includes(detectedMimeType as string)) {
     return {
       valid: false,
       error: `Type de fichier non autorisé: ${detectedMimeType || 'inconnu'}. Types autorisés: ${allowedMimeTypes.join(', ')}`,

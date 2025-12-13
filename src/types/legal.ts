@@ -3,6 +3,8 @@
  * Date: 27 octobre 2025
  */
 
+import type { RecordString } from './common';
+
 export type LegalDocumentType = 'terms' | 'privacy' | 'cookies' | 'refund';
 export type ConsentMethod = 'signup' | 'banner' | 'settings' | 'checkout';
 export type GDPRRequestType = 'data_export' | 'data_deletion' | 'data_rectification';
@@ -31,7 +33,7 @@ export interface UserConsent {
   consent_method: ConsentMethod;
   is_revoked: boolean;
   revoked_at?: string;
-  metadata?: Record<string, any>;
+  metadata?: RecordString;
 }
 
 export interface CookiePreferences {
@@ -54,7 +56,7 @@ export interface GDPRRequest {
   completed_at?: string;
   export_url?: string;
   notes?: string;
-  metadata?: Record<string, any>;
+  metadata?: RecordString;
 }
 
 export interface LegalPageProps {

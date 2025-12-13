@@ -84,10 +84,11 @@ const CreateCustomerDialogComponent = ({ open, onOpenChange, onSuccess, storeId 
       onSuccess();
       onOpenChange(false);
       resetForm();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

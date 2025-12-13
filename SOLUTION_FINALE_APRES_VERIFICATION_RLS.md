@@ -111,3 +111,5 @@ Si après toutes ces étapes le problème persiste :
 
 - `supabase/migrations/20250201_test_upload_and_access.sql` (nouveau)
 - Code amélioré pour lire l'erreur JSON exacte
+
+

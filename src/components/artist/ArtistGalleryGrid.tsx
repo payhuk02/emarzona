@@ -13,13 +13,33 @@ import {
   Dialog,
   DialogContent,
 } from '@/components/ui/dialog';
-import { useGalleryArtworks } from '@/hooks/artist/useArtistPortfolios';
+import { useGalleryArtworks, GalleryArtwork } from '@/hooks/artist/useArtistPortfolios';
 import { LazyImage } from '@/components/ui/LazyImage';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronLeft, ChevronRight, ExternalLink, Heart, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import type { GalleryArtwork } from '@/hooks/artist/useArtistPortfolios';
+
+interface ProductRelation {
+  id: string;
+  name?: string;
+  slug?: string;
+  image_url?: string | null;
+  price?: number;
+  currency?: string;
+}
+
+interface ArtistProductRelation {
+  id: string;
+  artwork_title?: string;
+  artwork_year?: number | null;
+  artwork_medium?: string;
+}
+
+interface GalleryArtworkWithRelations extends GalleryArtwork {
+  products?: ProductRelation | null;
+  artist_products?: ArtistProductRelation | null;
+}
 
 interface ArtistGalleryGridProps {
   galleryId: string;
@@ -57,9 +77,9 @@ export const ArtistGalleryGrid = ({
     setSelectedIndex((prev) => (prev - 1 + artworks.length) % artworks.length);
   };
 
-  const selectedArtwork = artworks[selectedIndex];
-  const product = selectedArtwork?.products as any;
-  const artistProduct = selectedArtwork?.artist_products as any;
+  const selectedArtwork = artworks[selectedIndex] as GalleryArtworkWithRelations | undefined;
+  const product = selectedArtwork?.products;
+  const artistProduct = selectedArtwork?.artist_products;
 
   if (isLoading) {
     return (
@@ -83,8 +103,9 @@ export const ArtistGalleryGrid = ({
     <>
       <div className={cn('grid gap-4', className)} style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
         {artworks.map((artwork, index) => {
-          const product = artwork.products as any;
-          const artistProduct = artwork.artist_products as any;
+          const artworkWithRelations = artwork as GalleryArtworkWithRelations;
+          const product = artworkWithRelations.products;
+          const artistProduct = artworkWithRelations.artist_products;
           const imageUrl = artwork.artwork_image_url || product?.image_url;
           const title = artwork.artwork_title || product?.name || artistProduct?.artwork_title;
 
@@ -176,7 +197,7 @@ export const ArtistGalleryGrid = ({
               {/* Image principale */}
               <div className="relative aspect-video bg-black">
                 {(() => {
-                  const product = selectedArtwork.products as any;
+                  const product = selectedArtwork.products;
                   const imageUrl = selectedArtwork.artwork_image_url || product?.image_url;
                   
                   return imageUrl ? (
@@ -228,20 +249,20 @@ export const ArtistGalleryGrid = ({
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h2 className="text-2xl font-bold mb-2">
-                      {selectedArtwork.artwork_title || (selectedArtwork.products as any)?.name || 'Œuvre'}
+                      {selectedArtwork.artwork_title || selectedArtwork.products?.name || 'Œuvre'}
                     </h2>
-                    {(selectedArtwork.artist_products as any)?.artwork_year && (
+                    {selectedArtwork.artist_products?.artwork_year && (
                       <p className="text-muted-foreground">
-                        {(selectedArtwork.artist_products as any).artwork_year}
+                        {selectedArtwork.artist_products.artwork_year}
                       </p>
                     )}
                   </div>
-                  {(selectedArtwork.products as any)?.slug && (
+                  {selectedArtwork.products?.slug && (
                     <Button
                       variant="outline"
                       onClick={() => {
                         setLightboxOpen(false);
-                        navigate(`/product/${(selectedArtwork.products as any).slug}`);
+                        navigate(`/product/${selectedArtwork.products?.slug}`);
                       }}
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
@@ -254,17 +275,17 @@ export const ArtistGalleryGrid = ({
                   <p className="text-muted-foreground mb-4">{selectedArtwork.artwork_description}</p>
                 )}
 
-                {(selectedArtwork.artist_products as any)?.artwork_medium && (
+                {selectedArtwork.artist_products?.artwork_medium && (
                   <Badge variant="outline" className="mr-2">
-                    {(selectedArtwork.artist_products as any).artwork_medium}
+                    {selectedArtwork.artist_products.artwork_medium}
                   </Badge>
                 )}
 
-                {(selectedArtwork.products as any)?.price && (
+                {selectedArtwork.products?.price && (
                   <div className="mt-4">
                     <p className="text-2xl font-bold">
-                      {(selectedArtwork.products as any).price.toLocaleString()}{' '}
-                      {(selectedArtwork.products as any).currency || 'XOF'}
+                      {selectedArtwork.products.price.toLocaleString()}{' '}
+                      {selectedArtwork.products.currency || 'XOF'}
                     </p>
                   </div>
                 )}

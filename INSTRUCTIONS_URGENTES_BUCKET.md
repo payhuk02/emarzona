@@ -182,3 +182,5 @@ Dans **Storage** > **Buckets** > **"attachments"** > **Policies**, vous devriez 
 ---
 
 **Fichier complet**: `supabase/migrations/20250201_create_and_configure_attachments_bucket.sql`
+
+

@@ -51,8 +51,30 @@ const useProductRecommendations = (
       try {
         const { data: { user } } = await supabase.auth.getUser();
 
+        interface ProductWithStore {
+          id: string;
+          name: string;
+          slug?: string;
+          description?: string;
+          price: number;
+          currency: string;
+          image_url?: string;
+          category?: string;
+          tags?: string[];
+          sales_count?: number;
+          average_rating?: number;
+          total_reviews?: number;
+          total_downloads?: number;
+          digital_type?: string;
+          stores: {
+            id: string;
+            name: string;
+            slug: string;
+          };
+          recommendationScore?: number;
+        }
         // 1. Recommandations basées sur la catégorie
-        let categoryRecommendations: any[] = [];
+        let categoryRecommendations: ProductWithStore[] = [];
         if (category) {
           const { data: categoryProducts } = await supabase
             .from('products')
@@ -76,7 +98,7 @@ const useProductRecommendations = (
         }
 
         // 2. Recommandations basées sur les tags
-        let tagRecommendations: any[] = [];
+        let tagRecommendations: ProductWithStore[] = [];
         if (tags && tags.length > 0) {
           // Rechercher produits avec tags similaires
           const { data: tagProducts } = await supabase
@@ -108,7 +130,7 @@ const useProductRecommendations = (
         }
 
         // 3. Recommandations basées sur les achats précédents (si utilisateur connecté)
-        let purchaseBasedRecommendations: any[] = [];
+        let purchaseBasedRecommendations: ProductWithStore[] = [];
         if (user) {
           // Récupérer les produits achetés par l'utilisateur
           const { data: purchasedProducts } = await supabase
@@ -221,7 +243,8 @@ const useProductRecommendations = (
         return scored
           .sort((a, b) => b.recommendationScore - a.recommendationScore)
           .slice(0, limit);
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error fetching product recommendations', { error });
         return [];
       }
@@ -311,7 +334,7 @@ export const DigitalProductRecommendations = ({
           variant === 'compact' && 'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4'
         )}
       >
-        {recommendations.map((product: any) => (
+        {recommendations.map((product: ProductWithStore) => (
           <DigitalProductCard
             key={product.id}
             product={{
@@ -400,7 +423,8 @@ export const BoughtTogetherRecommendations = ({
           .eq('is_active', true);
 
         return products || [];
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error fetching bought together recommendations', { error });
         return [];
       }
@@ -441,7 +465,7 @@ export const BoughtTogetherRecommendations = ({
         Achetés ensemble
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {recommendations.map((product: any) => (
+        {recommendations.map((product: ProductWithStore) => (
           <Card
             key={product.id}
             className="group hover:shadow-lg transition-shadow cursor-pointer"
@@ -586,7 +610,8 @@ export const YouMightLikeRecommendations = ({
           .limit(limit);
 
         return popular || [];
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error fetching you might like', { error });
         return [];
       }
@@ -620,7 +645,7 @@ export const YouMightLikeRecommendations = ({
         Vous pourriez aimer
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {recommendations.map((product: any) => (
+        {recommendations.map((product: ProductWithStore) => (
           <DigitalProductCard
             key={product.id}
             product={{

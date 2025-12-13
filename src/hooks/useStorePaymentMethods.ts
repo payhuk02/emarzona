@@ -57,9 +57,10 @@ export const useStorePaymentMethods = (options: UseStorePaymentMethodsOptions = 
       if (fetchError) throw fetchError;
 
       setPaymentMethods(data || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       logger.error('Error fetching payment methods', { error: err });
-      setError(err);
+      setError(err instanceof Error ? err : new Error(String(err)));
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les méthodes de paiement',
@@ -104,11 +105,12 @@ export const useStorePaymentMethods = (options: UseStorePaymentMethodsOptions = 
 
       await fetchPaymentMethods();
       return data;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       logger.error('Error creating payment method', { error: err });
       toast({
         title: 'Erreur',
-        description: err.message || 'Impossible d\'ajouter la méthode de paiement',
+        description: errorMessage || 'Impossible d\'ajouter la méthode de paiement',
         variant: 'destructive',
       });
       return null;
@@ -120,7 +122,7 @@ export const useStorePaymentMethods = (options: UseStorePaymentMethodsOptions = 
     formData: Partial<StorePaymentMethodForm>
   ): Promise<SavedStorePaymentMethod | null> => {
     try {
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       
       if (formData.label !== undefined) updateData.label = formData.label;
       if (formData.payment_details !== undefined) updateData.payment_details = formData.payment_details;
@@ -144,11 +146,12 @@ export const useStorePaymentMethods = (options: UseStorePaymentMethodsOptions = 
 
       await fetchPaymentMethods();
       return data;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       logger.error('Error updating payment method', { error: err });
       toast({
         title: 'Erreur',
-        description: err.message || 'Impossible de mettre à jour la méthode de paiement',
+        description: errorMessage || 'Impossible de mettre à jour la méthode de paiement',
         variant: 'destructive',
       });
       return null;
@@ -171,11 +174,12 @@ export const useStorePaymentMethods = (options: UseStorePaymentMethodsOptions = 
 
       await fetchPaymentMethods();
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       logger.error('Error deleting payment method', { error: err });
       toast({
         title: 'Erreur',
-        description: err.message || 'Impossible de supprimer la méthode de paiement',
+        description: errorMessage || 'Impossible de supprimer la méthode de paiement',
         variant: 'destructive',
       });
       return false;
@@ -212,11 +216,12 @@ export const useStorePaymentMethods = (options: UseStorePaymentMethodsOptions = 
       });
 
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       logger.error('Error setting default payment method', { error: err });
       toast({
         title: 'Erreur',
-        description: err.message || 'Impossible de définir la méthode par défaut',
+        description: errorMessage || 'Impossible de définir la méthode par défaut',
         variant: 'destructive',
       });
       return false;

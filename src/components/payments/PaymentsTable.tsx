@@ -37,10 +37,11 @@ const PaymentsTableComponent = ({ payments, loading, onPaymentUpdated }: Payment
       });
 
       onPaymentUpdated();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

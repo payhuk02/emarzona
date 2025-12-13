@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/select';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MobileTableCard } from '@/components/ui/mobile-table-card';
+import type { CommunityMember } from '@/types/community';
 import {
   Table,
   TableBody,
@@ -367,7 +368,7 @@ export default function AdminCommunity() {
                             key: 'member',
                             label: 'Membre',
                             priority: 'high',
-                            render: (row: any) => (
+                            render: (row: CommunityMember) => (
                               <div className="flex items-center gap-2 sm:gap-3">
                                 <Avatar className="h-8 w-8 shrink-0">
                                   <AvatarImage src={row.profile_image_url || undefined} />
@@ -395,7 +396,7 @@ export default function AdminCommunity() {
                             key: 'profession',
                             label: 'Profession',
                             priority: 'medium',
-                            render: (row: any) => (
+                            render: (row: CommunityMember) => (
                               <span className="text-xs">{row.profession || '-'}</span>
                             ),
                           },
@@ -403,7 +404,7 @@ export default function AdminCommunity() {
                             key: 'country',
                             label: 'Pays',
                             priority: 'low',
-                            render: (row: any) => (
+                            render: (row: CommunityMember) => (
                               <span className="text-xs">{row.country || '-'}</span>
                             ),
                           },
@@ -411,7 +412,7 @@ export default function AdminCommunity() {
                             key: 'status',
                             label: 'Statut',
                             priority: 'high',
-                            render: (row: any) => (
+                            render: (row: CommunityMember) => (
                               <Badge
                                 variant={
                                   row.status === 'approved'
@@ -434,14 +435,14 @@ export default function AdminCommunity() {
                             key: 'join_date',
                             label: 'Date d\'adhésion',
                             priority: 'low',
-                            render: (row: any) => (
+                            render: (row: CommunityMember) => (
                               <span className="text-xs text-muted-foreground">
                                 {formatDistanceToNow(new Date(row.join_date || row.created_at), { addSuffix: true, locale: fr })}
                               </span>
                             ),
                           },
                         ]}
-                        actions={(row: any) => (
+                        actions={(row: CommunityMember) => (
                           <div className="flex flex-col gap-2">
                             {row.status === 'pending' && (
                               <Button

@@ -60,7 +60,7 @@ import { usePageCustomization } from "@/hooks/usePageCustomization";
 import { Product, FilterState, PaginationState } from '@/types/marketplace';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useProductSearch, useSaveSearchHistory } from '@/hooks/useProductSearch';
+import { useProductSearch, useSaveSearchHistory, type SearchResult } from '@/hooks/useProductSearch';
 import { SearchAutocomplete } from '@/components/marketplace/SearchAutocomplete';
 import '@/styles/marketplace-professional.css';
 import { SEOMeta, WebsiteSchema, BreadcrumbSchema, ItemListSchema } from '@/components/seo';
@@ -299,9 +299,10 @@ const Marketplace = () => {
         setHasLoadedOnce(true); // Marquer qu'on a chargé au moins une fois
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("❌ Erreur lors du chargement des produits :", error);
-      const errorMessage = error?.message || "Impossible de charger les produits. Veuillez réessayer plus tard.";
+      const finalErrorMessage = errorMessage || "Impossible de charger les produits. Veuillez réessayer plus tard.";
       setError(errorMessage);
       setHasLoadedOnce(true); // Même en cas d'erreur, on a tenté de charger
       toast({
@@ -359,7 +360,7 @@ const Marketplace = () => {
     // Si recherche active, utiliser les résultats de recherche full-text
     if (hasSearchQuery && searchResults && Array.isArray(searchResults)) {
       // Convertir les résultats de recherche en format Product
-      return searchResults.map((result: any) => ({
+      return searchResults.map((result: SearchResult) => ({
         id: result.id,
         name: result.name,
         slug: result.slug,
@@ -476,7 +477,7 @@ const Marketplace = () => {
   }, [products, favorites]);
 
   // Fonction d'achat (utilisée par UnifiedProductCard) - Redirige vers checkout
-  const handleBuyProduct = useCallback(async (product: any) => {
+  const handleBuyProduct = useCallback(async (product: { id: string; store_id?: string; slug?: string }) => {
     if (!product.store_id) {
       toast({
         title: "Erreur",

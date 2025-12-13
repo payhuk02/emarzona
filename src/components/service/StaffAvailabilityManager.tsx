@@ -50,6 +50,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { StaffMember } from '@/hooks/service/useAvailability';
 
 interface StaffAvailabilityManagerProps {
   storeId: string;
@@ -223,10 +224,11 @@ export const StaffAvailabilityManager = ({
         description: 'Le congé a été créé avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer le congé',
+        description: errorMessage || 'Impossible de créer le congé',
         variant: 'destructive',
       });
     },
@@ -261,10 +263,11 @@ export const StaffAvailabilityManager = ({
         description: 'Le statut du congé a été mis à jour',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de mettre à jour le statut',
+        description: errorMessage || 'Impossible de mettre à jour le statut',
         variant: 'destructive',
       });
     },
@@ -294,10 +297,11 @@ export const StaffAvailabilityManager = ({
         description: 'Les heures personnalisées ont été créées avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer les heures personnalisées',
+        description: errorMessage || 'Impossible de créer les heures personnalisées',
         variant: 'destructive',
       });
     },
@@ -326,10 +330,11 @@ export const StaffAvailabilityManager = ({
         description: 'L\'alerte de surcharge a été marquée comme résolue',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de résoudre l\'alerte',
+        description: errorMessage || 'Impossible de résoudre l\'alerte',
         variant: 'destructive',
       });
     },
@@ -677,7 +682,7 @@ const TimeOffForm = ({
   onSubmit,
 }: {
   storeId: string;
-  staffMembers: any[];
+  staffMembers: StaffMember[];
   timeOff: TimeOff | null;
   onSubmit: (data: Partial<TimeOff>) => void;
 }) => {
@@ -797,7 +802,7 @@ const CustomHoursForm = ({
   onSubmit,
 }: {
   storeId: string;
-  staffMembers: any[];
+  staffMembers: StaffMember[];
   customHours: CustomHours | null;
   onSubmit: (data: Partial<CustomHours>) => void;
 }) => {

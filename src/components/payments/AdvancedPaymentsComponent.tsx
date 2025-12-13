@@ -71,7 +71,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAdvancedPayments } from "@/hooks/useAdvancedPayments";
-import { AdvancedPayment, PaymentType, PaymentStatus } from "@/types/advanced-features";
+import { AdvancedPayment, PaymentType, PaymentStatus, PaymentResponse } from "@/types/advanced-features";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
@@ -1150,11 +1150,13 @@ const DisputeDialog: React.FC<DisputeDialogProps> = ({
 };
 
 // Composant PaymentForm optimisé
+import type { PaymentResponse } from '@/types/advanced-features';
+
 interface PaymentFormProps {
   storeId: string;
   orderId?: string;
   customerId?: string;
-  onCreatePayment: (result: any) => void;
+  onCreatePayment: (result: PaymentResponse) => void;
 }
 
 const PaymentForm: React.FC<PaymentFormProps> = ({

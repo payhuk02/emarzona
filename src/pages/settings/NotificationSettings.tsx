@@ -25,6 +25,7 @@ import {
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
+import type { NotificationPreferences } from '@/types/notifications';
 
 const NotificationSettings = () => {
   const { toast } = useToast();
@@ -61,8 +62,11 @@ const NotificationSettings = () => {
     );
   }
 
-  const handleToggle = (field: string, value: boolean) => {
-    setLocalPrefs((prev: any) => ({ ...prev, [field]: value }));
+  const handleToggle = (field: string, value: boolean | string) => {
+    setLocalPrefs((prev: NotificationPreferences | null) => {
+      if (!prev) return prev;
+      return { ...prev, [field]: value } as NotificationPreferences;
+    });
   };
 
   const handleSave = async () => {
@@ -337,7 +341,7 @@ const NotificationSettings = () => {
               <Label htmlFor="digest">Fréquence</Label>
               <Select
                 value={localPrefs.email_digest_frequency}
-                onValueChange={(value: any) => handleToggle('email_digest_frequency', value)}
+                onValueChange={(value: string) => handleToggle('email_digest_frequency', value)}
               >
                 <SelectTrigger className="w-48">
                   <SelectValue />

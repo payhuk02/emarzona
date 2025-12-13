@@ -234,7 +234,7 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
   }, [enabled, customEvents, productId, trackCustomEvent]);
 
   // Tracker les conversions (achats)
-  const trackPurchase = useCallback((revenue: number, orderId?: string, additionalData?: Record<string, any>) => {
+  const trackPurchase = useCallback((revenue: number, orderId?: string, additionalData?: Record<string, unknown>) => {
     if (!enabled || !productId) return;
 
     trackCustomEvent(productId, 'purchase', {
@@ -252,10 +252,13 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
     if (!enabled || !productId) return;
 
     // Exposer la fonction globalement pour qu'elle puisse être appelée depuis d'autres composants
-    (window as any).trackPurchase = trackPurchase;
+    interface WindowWithTrackPurchase extends Window {
+      trackPurchase?: (revenue: number, orderId?: string, additionalData?: Record<string, unknown>) => void;
+    }
+    (window as WindowWithTrackPurchase).trackPurchase = trackPurchase;
 
     return () => {
-      delete (window as any).trackPurchase;
+      delete (window as WindowWithTrackPurchase).trackPurchase;
     };
   }, [enabled, productId, trackPurchase]);
 
@@ -264,7 +267,7 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
 
 // Hook pour utiliser le tracking depuis d'autres composants
 export const useAnalyticsTracker = () => {
-  const trackCustomEvent = useCallback((productId: string, eventName: string, eventData?: Record<string, any>) => {
+  const trackCustomEvent = useCallback((productId: string, eventName: string, eventData?: Record<string, unknown>) => {
     // Dispatcher un événement personnalisé
     const event = new CustomEvent(`analytics_${eventName}`, {
       detail: {
@@ -276,7 +279,7 @@ export const useAnalyticsTracker = () => {
     document.dispatchEvent(event);
   }, []);
 
-  const trackPurchase = useCallback((productId: string, revenue: number, orderId?: string, additionalData?: Record<string, any>) => {
+  const trackPurchase = useCallback((productId: string, revenue: number, orderId?: string, additionalData?: Record<string, unknown>) => {
     trackCustomEvent(productId, 'purchase', {
       revenue,
       order_id: orderId,
@@ -284,7 +287,7 @@ export const useAnalyticsTracker = () => {
     });
   }, [trackCustomEvent]);
 
-  const trackConversion = useCallback((productId: string, conversionType: string, additionalData?: Record<string, any>) => {
+  const trackConversion = useCallback((productId: string, conversionType: string, additionalData?: Record<string, unknown>) => {
     trackCustomEvent(productId, 'conversion', {
       conversion_type: conversionType,
       ...additionalData

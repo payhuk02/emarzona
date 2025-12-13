@@ -34,6 +34,8 @@ import {
   DollarSign
 } from 'lucide-react';
 import { useCourseDetail } from '@/hooks/courses/useCourseDetail';
+import type { CourseLesson } from '@/types/courses';
+import type { ProductFAQ } from '@/types/product-form';
 import { VideoPlayerWithNotes } from '@/components/courses/player/VideoPlayerWithNotes';
 import { CourseCurriculum } from '@/components/courses/detail/CourseCurriculum';
 import { CourseProgressBar } from '@/components/courses/detail/CourseProgressBar';
@@ -130,7 +132,7 @@ const CourseDetail = () => {
   const { product, course, sections, store, isEnrolled, enrollment, lastViewedLesson } = data;
 
   // Récupérer les FAQs du produit
-  const faqs = product.faqs as any[] || [];
+  const faqs = (product.faqs as ProductFAQ[]) || [];
 
   // Récupérer la leçon à afficher : dernière vue > première preview > première leçon
   const getInitialLesson = () => {
@@ -143,7 +145,7 @@ const CourseDetail = () => {
     
     // Sinon chercher la première leçon preview
     for (const section of sections) {
-      const previewLesson = section.lessons.find((l: any) => l.is_preview);
+      const previewLesson = section.lessons?.find((l: CourseLesson) => l.is_preview);
       if (previewLesson) return previewLesson;
       
       if (isEnrolled && section.lessons.length > 0) {
@@ -153,7 +155,7 @@ const CourseDetail = () => {
     return null;
   };
 
-  const handleLessonClick = (lesson: any) => {
+  const handleLessonClick = (lesson: CourseLesson) => {
     setCurrentLesson(lesson);
   };
 
@@ -442,7 +444,7 @@ const CourseDetail = () => {
                     Questions fréquentes
                   </h2>
                   <Accordion type="single" collapsible className="w-full">
-                    {faqs.map((faq: any, index: number) => (
+                    {faqs.map((faq: ProductFAQ, index: number) => (
                       <AccordionItem key={index} value={`faq-${index}`}>
                         <AccordionTrigger className="text-left">
                           {faq.question}

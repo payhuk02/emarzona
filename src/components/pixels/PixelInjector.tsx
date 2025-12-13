@@ -2,20 +2,38 @@ import { useEffect } from 'react';
 import { usePixels } from '@/hooks/usePixels';
 
 // Interfaces pour les APIs de tracking
+interface PixelEventData {
+  product_id?: string;
+  product_name?: string;
+  amount?: number;
+  order_id?: string;
+  content_ids?: string[];
+  content_name?: string;
+  value?: number;
+  currency?: string;
+  items?: Array<{
+    id: string;
+    name: string;
+    price: number;
+  }>;
+  transaction_id?: string;
+  content_id?: string;
+}
+
 interface FacebookPixel {
-  (action: string, event: string, data?: any): void;
+  (action: string, event: string, data?: PixelEventData): void;
 }
 
 interface GoogleTag {
-  (command: string, targetId: string, config?: any): void;
+  (command: string, targetId: string, config?: PixelEventData): void;
 }
 
 interface TikTokPixel {
-  track: (event: string, data?: any) => void;
+  track: (event: string, data?: PixelEventData) => void;
 }
 
 interface PinterestPixel {
-  track: (event: string, data?: any) => void;
+  track: (event: string, data?: PixelEventData) => void;
 }
 
 declare global {
@@ -190,7 +208,7 @@ const injectCustomCode = (code: string) => {
 };
 
 // Export tracking functions for use in other components
-export const trackAddToCart = (pixelId: string, pixelType: string, data: any) => {
+export const trackAddToCart = (pixelId: string, pixelType: string, data: PixelEventData) => {
   switch (pixelType) {
     case 'facebook':
       if (window.fbq) {
@@ -226,7 +244,7 @@ export const trackAddToCart = (pixelId: string, pixelType: string, data: any) =>
   }
 };
 
-export const trackPurchase = (pixelId: string, pixelType: string, data: any) => {
+export const trackPurchase = (pixelId: string, pixelType: string, data: PixelEventData) => {
   switch (pixelType) {
     case 'facebook':
       if (window.fbq) {

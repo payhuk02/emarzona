@@ -204,10 +204,11 @@ export default function SupplierProducts() {
         });
       }
       handleCloseDialog();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Une erreur est survenue',
+        description: errorMessage || 'Une erreur est survenue',
         variant: 'destructive',
       });
     }
@@ -236,10 +237,11 @@ export default function SupplierProducts() {
       });
       setDeleteDialogOpen(false);
       setProductToDelete(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer le produit',
+        description: errorMessage || 'Impossible de supprimer le produit',
         variant: 'destructive',
       });
     }

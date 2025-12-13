@@ -35,7 +35,7 @@ import {
   useUnreadCount,
 } from '@/hooks/useNotifications';
 import { NotificationItem } from '@/components/notifications/NotificationItem';
-import type { NotificationType } from '@/types/notifications';
+import type { NotificationType, Notification } from '@/types/notifications';
 import { useToast } from '@/hooks/use-toast';
 
 const NotificationsCenter = () => {
@@ -61,7 +61,7 @@ const NotificationsCenter = () => {
     return notif.type === filter;
   });
 
-  const handleNotificationClick = async (notification: any) => {
+  const handleNotificationClick = async (notification: Notification) => {
     // Marquer comme lu
     if (!notification.is_read) {
       await markAsRead.mutateAsync(notification.id);
@@ -186,7 +186,7 @@ const NotificationsCenter = () => {
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3">
                 <Filter className="w-5 h-5 text-muted-foreground" />
-                <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
+                <Select value={filter} onValueChange={(value: 'all' | NotificationType | 'unread') => setFilter(value)}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Filtrer" />
                   </SelectTrigger>

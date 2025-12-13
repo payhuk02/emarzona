@@ -138,10 +138,11 @@ export default function ProductKitsManagement() {
         });
       }
       handleCloseDialog();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Une erreur est survenue',
+        description: errorMessage || 'Une erreur est survenue',
         variant: 'destructive',
       });
     }
@@ -163,10 +164,11 @@ export default function ProductKitsManagement() {
         title: '✅ Kit supprimé',
         description: 'Le kit a été supprimé avec succès',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer le kit',
+        description: errorMessage || 'Impossible de supprimer le kit',
         variant: 'destructive',
       });
     }
@@ -487,7 +489,7 @@ export default function ProductKitsManagement() {
                 <Label htmlFor="kit_type" className="text-xs sm:text-sm">Type de kit *</Label>
                 <Select
                   value={formData.kit_type || 'fixed'}
-                  onValueChange={(value: any) => setFormData({ ...formData, kit_type: value })}
+                  onValueChange={(value: string) => setFormData({ ...formData, kit_type: value })}
                   required
                 >
                   <SelectTrigger className="text-sm h-9 sm:h-10">

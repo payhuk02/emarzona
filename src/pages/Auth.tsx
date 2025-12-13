@@ -117,15 +117,16 @@ const Auth = () => {
         title: t('auth.forgotPassword.successTitle', 'Email envoyé'),
         description: t('auth.forgotPassword.successDescription', `Un email de réinitialisation a été envoyé à ${resetEmail}. Vérifiez votre boîte de réception.`),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Reset password error', {
-        error: error.message,
+        error: errorMessage,
         email: resetEmail,
       });
-      setResetError(error.message || t('auth.forgotPassword.error', 'Une erreur est survenue lors de l\'envoi de l\'email'));
+      setResetError(errorMessage || t('auth.forgotPassword.error', 'Une erreur est survenue lors de l\'envoi de l\'email'));
       toast({
         title: t('auth.forgotPassword.errorTitle', 'Erreur'),
-        description: error.message || t('auth.forgotPassword.error', 'Une erreur est survenue'),
+        description: errorMessage || t('auth.forgotPassword.error', 'Une erreur est survenue'),
         variant: 'destructive',
       });
     } finally {
@@ -196,10 +197,11 @@ const Auth = () => {
                 referredId: data.user.id 
               });
             }
-          } catch (referralError: any) {
+          } catch (referralError: unknown) {
             // Ne pas bloquer l'inscription si l'erreur est sur le parrainage
+            const referralErrorMessage = referralError instanceof Error ? referralError.message : String(referralError);
             logger.error('Error processing referral on signup', { 
-              error: referralError.message,
+              error: referralErrorMessage,
               referralCode 
             });
           }
@@ -211,12 +213,13 @@ const Auth = () => {
         });
         navigate("/dashboard");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Signup error', {
-        error: error.message,
+        error: errorMessage,
         email: signupEmail,
       });
-      setError(error.message || t('auth.signup.error'));
+      setError(errorMessage || t('auth.signup.error'));
     } finally {
       setIsLoading(false);
     }
@@ -251,15 +254,16 @@ const Auth = () => {
         });
         navigate("/dashboard");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Login error', {
-        error: error.message,
+        error: errorMessage,
         email: loginEmail,
       });
-      if (error.message.includes('Invalid login credentials')) {
+      if (errorMessage.includes('Invalid login credentials')) {
         setError(t('auth.login.error'));
       } else {
-        setError(error.message || t('auth.login.error'));
+        setError(errorMessage || t('auth.login.error'));
       }
     } finally {
       setIsLoading(false);

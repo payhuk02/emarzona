@@ -218,8 +218,9 @@ export function CreateVersionDialog({
       });
 
       return uploadResults;
-    } catch (error: any) {
-      logger.error('Error uploading files', { error });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error uploading files', { error: errorMessage });
 
       // Mettre à jour les fichiers en erreur
       setSelectedFiles((prev) =>
@@ -302,11 +303,12 @@ export function CreateVersionDialog({
       setUploadProgress(0);
       onOpenChange(false);
       onSuccess?.();
-    } catch (error: any) {
-      logger.error('Error creating version', { error });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error creating version', { error: errorMessage });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de créer la version',
+        description: errorMessage || 'Impossible de créer la version',
         variant: 'destructive',
       });
     }

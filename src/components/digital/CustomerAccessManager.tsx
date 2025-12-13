@@ -328,7 +328,7 @@ export const CustomerAccessManager: React.FC<CustomerAccessManagerProps> = ({
             </div>
 
             {/* Filtre statut */}
-            <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+            <Select value={statusFilter} onValueChange={(value: string) => setStatusFilter(value)}>
               <SelectTrigger className="w-[160px]">
                 <SelectValue />
               </SelectTrigger>

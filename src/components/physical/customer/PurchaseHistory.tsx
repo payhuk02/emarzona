@@ -30,6 +30,27 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useState } from 'react';
 
+interface OrderItemWithProduct {
+  id: string;
+  quantity: number;
+  price: number;
+  products?: {
+    name?: string;
+    image_url?: string | null;
+    product_type?: string;
+  } | null;
+}
+
+interface OrderWithItems {
+  id: string;
+  order_number?: string | null;
+  status: string;
+  total_amount?: number | null;
+  currency?: string | null;
+  created_at: string;
+  order_items?: OrderItemWithProduct[] | null;
+}
+
 export const PurchaseHistory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -105,7 +126,7 @@ export const PurchaseHistory = () => {
       const physicalOrders = (ordersData || []).filter((order) => {
         const items = order.order_items || [];
         return items.some(
-          (item: any) => item.products?.product_type === 'physical'
+          (item: OrderItemWithProduct) => item.products?.product_type === 'physical'
         );
       });
 
@@ -119,7 +140,7 @@ export const PurchaseHistory = () => {
     const searchLower = searchTerm.toLowerCase();
     return (
       order.order_number?.toLowerCase().includes(searchLower) ||
-      order.order_items?.some((item: any) =>
+      order.order_items?.some((item: OrderItemWithProduct) =>
         item.products?.name?.toLowerCase().includes(searchLower)
       )
     );
@@ -282,7 +303,7 @@ export const PurchaseHistory = () => {
             <div className="space-y-4">
               {filteredOrders.map((order) => {
                 const physicalItems = (order.order_items || []).filter(
-                  (item: any) => item.products?.product_type === 'physical'
+                  (item: OrderItemWithProduct) => item.products?.product_type === 'physical'
                 );
 
                 return (
@@ -319,7 +340,7 @@ export const PurchaseHistory = () => {
 
                           {/* Produits */}
                           <div className="mt-3 space-y-2">
-                            {physicalItems.map((item: any, index: number) => (
+                            {physicalItems.map((item: OrderItemWithProduct, index: number) => (
                               <div
                                 key={index}
                                 className="flex items-center gap-3 p-2 bg-muted rounded-lg"

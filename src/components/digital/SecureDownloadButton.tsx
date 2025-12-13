@@ -97,8 +97,9 @@ export function SecureDownloadButton({
       // Reset success state after 3 seconds
       setTimeout(() => setDownloadSuccess(false), 3000);
 
-    } catch (error: any) {
-      logger.error('Download error', { error, productId, fileUrl });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Download error', { error: errorMessage, productId, fileUrl });
       
       // Log the failed download
       logDownload({

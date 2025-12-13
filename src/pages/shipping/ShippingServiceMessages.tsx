@@ -110,20 +110,33 @@ export default function ShippingServiceMessages() {
       }
 
       // Récupérer les profils des expéditeurs
-      const senderIds = [...new Set((messagesData || []).map((m: any) => m.sender_id))];
+      interface MessageData {
+        sender_id: string;
+      }
+      const senderIds = [...new Set((messagesData || []).map((m: MessageData) => m.sender_id))];
       const { data: profilesData } = await supabase
         .from('profiles')
         .select('user_id, display_name, first_name, last_name, avatar_url')
         .in('user_id', senderIds);
 
       // Combiner les données
-      const messagesWithSenders = (messagesData || []).map((message: any) => ({
-        ...message,
-        sender: profilesData?.find((p: any) => p.user_id === message.sender_id),
+      interface ProfileData {
+        user_id: string;
+        display_name?: string;
+        first_name?: string;
+        last_name?: string;
+        avatar_url?: string;
+      }
+      interface MessageWithSender extends ShippingServiceMessage {
+        sender?: ProfileData;
+      }
+      const messagesWithSenders = (messagesData || []).map((message: MessageData): MessageWithSender => ({
+        ...message as MessageWithSender,
+        sender: profilesData?.find((p: ProfileData) => p.user_id === message.sender_id),
       }));
 
       setMessages(messagesWithSenders as ShippingServiceMessage[]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error loading messages', error);
       toast({
         title: '❌ Erreur',
@@ -186,7 +199,7 @@ export default function ShippingServiceMessages() {
 
       setMessageContent('');
       await loadMessages();
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error sending message', error);
     }
   };
@@ -383,7 +396,7 @@ export default function ShippingServiceMessages() {
                                 {/* Attachments */}
                                 {message.attachments && message.attachments.length > 0 && (
                                   <div className="mt-2 space-y-2">
-                                    {message.attachments.map((attachment: any) => (
+                                    {message.attachments?.map((attachment: ShippingServiceMessageAttachment) => (
                                       <MediaAttachment
                                         key={attachment.id}
                                         attachment={{

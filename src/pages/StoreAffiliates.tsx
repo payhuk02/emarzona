@@ -45,6 +45,16 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import type { Affiliate } from '@/types/affiliate';
+
+// Type pour les performances d'affiliés
+type AffiliatePerformance = {
+  affiliate?: Affiliate;
+  total_clicks: number;
+  total_sales: number;
+  total_revenue: number;
+  total_commission: number;
+};
 
 export default function StoreAffiliates() {
   const { store, loading: storeLoading } = useStore();
@@ -67,6 +77,7 @@ export default function StoreAffiliates() {
   const tableRef = useScrollAnimation<HTMLDivElement>();
 
   // Regrouper les affiliés par performance
+  type AffiliatePerformanceWithCount = AffiliatePerformance & { links_count: number };
   const affiliatePerformance = useMemo(() => {
     return links.reduce((acc, link) => {
     const affiliateId = link.affiliate_id;
@@ -86,12 +97,12 @@ export default function StoreAffiliates() {
     acc[affiliateId].total_commission += link.total_commission;
     acc[affiliateId].links_count += 1;
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, AffiliatePerformanceWithCount>);
   }, [links]);
 
   const topAffiliates = useMemo(() => {
     return Object.values(affiliatePerformance)
-      .sort((a: any, b: any) => b.total_revenue - a.total_revenue);
+      .sort((a: AffiliatePerformance, b: AffiliatePerformance) => b.total_revenue - a.total_revenue);
   }, [affiliatePerformance]);
 
   // Filtrer les commissions
@@ -142,7 +153,7 @@ export default function StoreAffiliates() {
     if (!topAffiliates) return [];
 
     const searchLower = debouncedSearch.toLowerCase();
-    return topAffiliates.filter((aff: any) =>
+    return topAffiliates.filter((aff: AffiliatePerformance) =>
       searchLower === '' ||
       aff.affiliate?.display_name?.toLowerCase().includes(searchLower) ||
       aff.affiliate?.email?.toLowerCase().includes(searchLower) ||
@@ -170,11 +181,11 @@ export default function StoreAffiliates() {
     setIsExporting(true);
     try {
       let headers: string[] = [];
-      let rows: any[][] = [];
+      let rows: Array<Array<string | number>> = [];
 
       if (activeTab === 'affiliates') {
         headers = ['Rang', 'Affilié', 'Email', 'Code', 'Clics', 'Ventes', 'CA Généré', 'Commissions', 'Conversion %'];
-        rows = filteredTopAffiliates.map((aff: any, index: number) => {
+        rows = filteredTopAffiliates.map((aff: AffiliatePerformance, index: number) => {
           const conversionRate = aff.total_clicks > 0 
             ? ((aff.total_sales / aff.total_clicks) * 100).toFixed(1)
             : '0';
@@ -236,7 +247,7 @@ export default function StoreAffiliates() {
 
       const csvContent = [
         headers.join(','),
-        ...rows.map((row: any[]) => row.map((cell: any) => `"${String(cell)}"`).join(','))
+        ...rows.map((row: Array<string | number>) => row.map((cell: string | number) => `"${String(cell)}"`).join(','))
       ].join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -254,8 +265,9 @@ export default function StoreAffiliates() {
         description: `${rows.length} ligne(s) exportée(s) en CSV.`,
       });
       logger.info(`Affiliation ${activeTab} exported to CSV`, { count: rows.length });
-    } catch (error: any) {
-      logger.error('Error exporting to CSV', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error exporting to CSV', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'exporter les données.',
@@ -275,8 +287,9 @@ export default function StoreAffiliates() {
         description: 'Les données ont été mises à jour.',
       });
       logger.info('Affiliation data refreshed');
-    } catch (error: any) {
-      logger.error('Error refreshing data', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error refreshing data', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'actualiser les données.',
@@ -608,7 +621,7 @@ export default function StoreAffiliates() {
                               </TableRow>
                             </TableHeader>
                       <TableBody>
-                              {filteredTopAffiliates.map((aff: any, index: number) => {
+                              {filteredTopAffiliates.map((aff: AffiliatePerformance, index: number) => {
                           const conversionRate = aff.total_clicks > 0 
                             ? ((aff.total_sales / aff.total_clicks) * 100).toFixed(1) 
                             : '0';
@@ -660,7 +673,7 @@ export default function StoreAffiliates() {
 
                       {/* Mobile Card View */}
                       <div className="lg:hidden space-y-3 sm:space-y-4 p-4 sm:p-5">
-                        {filteredTopAffiliates.map((aff: any, index: number) => {
+                        {filteredTopAffiliates.map((aff: AffiliatePerformance, index: number) => {
                           const conversionRate = aff.total_clicks > 0 
                             ? ((aff.total_sales / aff.total_clicks) * 100).toFixed(1) 
                             : '0';

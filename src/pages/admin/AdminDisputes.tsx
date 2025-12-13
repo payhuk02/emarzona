@@ -138,11 +138,12 @@ const AdminDisputes = () => {
         title: "Export réussi",
         description: `${allDisputes.length} litige(s) exporté(s) en CSV`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de l\'export CSV:', error);
       toast({
         title: "Erreur d'export",
-        description: error.message || "Impossible d'exporter les litiges",
+        description: errorMessage || "Impossible d'exporter les litiges",
         variant: "destructive",
       });
     } finally {
@@ -205,7 +206,8 @@ const AdminDisputes = () => {
   }, [selectedDispute, actionType, inputValue, assignDispute, updateAdminNotes, resolveDispute, toast]);
 
   const getStatusBadge = (status: DisputeStatus) => {
-    const config: Record<DisputeStatus, { color: string; icon: any; label: string }> = {
+    type IconComponent = React.ComponentType<{ className?: string }>;
+    const config: Record<DisputeStatus, { color: string; icon: IconComponent; label: string }> = {
       open: { color: "bg-yellow-100 text-yellow-800 border-yellow-300", icon: AlertTriangle, label: "Ouvert" },
       investigating: { color: "bg-blue-100 text-blue-800 border-blue-300", icon: Clock, label: "En investigation" },
       waiting_customer: { color: "bg-orange-100 text-orange-800 border-orange-300", icon: Clock, label: "Attente client" },
@@ -225,7 +227,8 @@ const AdminDisputes = () => {
   };
 
   const getInitiatorBadge = (type: InitiatorType) => {
-    const config: Record<InitiatorType, { color: string; icon: any; label: string }> = {
+    type IconComponent = React.ComponentType<{ className?: string }>;
+    const config: Record<InitiatorType, { color: string; icon: IconComponent; label: string }> = {
       customer: { color: "bg-blue-50 text-blue-700 border-blue-200", icon: User, label: "Client" },
       seller: { color: "bg-green-50 text-green-700 border-green-200", icon: Store, label: "Vendeur" },
       admin: { color: "bg-red-50 text-red-700 border-red-200", icon: Shield, label: "Admin" },

@@ -20,7 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Loader2, Search, AlertCircle } from '@/components/icons';
 import { useAffiliateProducts } from '@/hooks/useAffiliateProducts';
 import { useAffiliateLinks } from '@/hooks/useAffiliateLinks';
-import { CreateAffiliateLinkForm } from '@/types/affiliate';
+import { CreateAffiliateLinkForm, AffiliateLink } from '@/types/affiliate';
 import { useDebounce } from '@/hooks/useDebounce';
 import { formatCurrency } from '@/lib/utils';
 import { z } from 'zod';
@@ -31,7 +31,7 @@ interface CreateAffiliateLinkDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   affiliateId: string;
-  onSuccess?: (link: any) => void;
+  onSuccess?: (link: AffiliateLink) => void;
 }
 
 // Schéma de validation

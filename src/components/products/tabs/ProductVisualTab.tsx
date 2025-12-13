@@ -58,7 +58,7 @@ interface ProductFormData {
 
 interface ProductVisualTabProps {
   formData: ProductFormData;
-  updateFormData: (field: string, value: any) => void;
+  updateFormData: (field: string, value: unknown) => void;
   storeId: string;
 }
 
@@ -117,7 +117,7 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
     if (type === 'main') {
       updateFormData("image_url", "");
     } else {
-      const newGallery = (formData.gallery_images || []).filter((_: any, i: number) => i !== index);
+      const newGallery = (formData.gallery_images || []).filter((_: string, i: number) => i !== index);
       updateFormData("gallery_images", newGallery);
     }
   };

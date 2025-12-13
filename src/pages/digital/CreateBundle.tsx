@@ -13,6 +13,7 @@ import { DigitalBundleManager } from '@/components/digital/DigitalBundleManager'
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useCreateBundle } from '@/hooks/digital/useDigitalBundles';
+import type { DigitalBundle } from '@/components/digital/DigitalBundleManager';
 import { generateSlug } from '@/lib/store-utils';
 import { Package, AlertTriangle, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,7 +32,18 @@ export default function CreateBundle() {
   const contentRef = useScrollAnimation<HTMLDivElement>();
 
   // Récupérer les produits digitaux de la boutique depuis la table products
-  const [digitalProducts, setDigitalProducts] = React.useState<any[]>([]);
+  interface DigitalProductData {
+    id: string;
+    name: string;
+    description?: string;
+    price: number;
+    currency: string;
+    category?: string;
+    image_url?: string;
+    is_active?: boolean;
+    is_draft?: boolean;
+  }
+  const [digitalProducts, setDigitalProducts] = React.useState<DigitalProductData[]>([]);
   // productsLoading doit rester true tant que storeLoading est true
   const [productsLoading, setProductsLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | null>(null);
@@ -95,7 +107,7 @@ export default function CreateBundle() {
   }, [store?.id, storeLoading, toast]);
 
   // Convertir les produits au format attendu par DigitalBundleManager
-  const availableProducts = (digitalProducts || []).map((product: any) => ({
+  const availableProducts = (digitalProducts || []).map((product: DigitalProductData) => ({
     id: product.id,
     name: product.name || 'Produit sans nom',
     description: product.description,
@@ -106,7 +118,7 @@ export default function CreateBundle() {
     isAvailable: product.is_active !== false && product.is_draft !== true,
   }));
 
-  const handleSave = useCallback(async (bundle: any) => {
+  const handleSave = useCallback(async (bundle: DigitalBundle) => {
     if (!store?.id) {
       toast({
         title: 'Erreur',
@@ -142,7 +154,7 @@ export default function CreateBundle() {
       });
 
       navigate(`/dashboard/digital-products/bundles`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error('Erreur lors de la création du bundle');
       logger.error(err, {
         error,

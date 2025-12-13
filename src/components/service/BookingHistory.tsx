@@ -52,8 +52,8 @@ export interface BookingHistoryEvent {
   timestamp: Date | string;
   description: string;
   metadata?: {
-    oldValue?: any;
-    newValue?: any;
+    oldValue?: unknown;
+    newValue?: unknown;
     amount?: number;
     currency?: string;
     reason?: string;

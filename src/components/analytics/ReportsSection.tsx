@@ -265,7 +265,7 @@ export const ReportsSection: React.FC<ReportsSectionProps> = ({ productId }) => 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-white">Période d'export</Label>
-              <Select value={selectedPeriod} onValueChange={(value: any) => setSelectedPeriod(value)}>
+              <Select value={selectedPeriod} onValueChange={(value: string) => setSelectedPeriod(value)}>
                 <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                   <SelectValue />
                 </SelectTrigger>
@@ -280,7 +280,7 @@ export const ReportsSection: React.FC<ReportsSectionProps> = ({ productId }) => 
 
             <div className="space-y-2">
               <Label className="text-sm font-medium text-white">Format d'export</Label>
-              <Select value={selectedFormat} onValueChange={(value: any) => setSelectedFormat(value)}>
+              <Select value={selectedFormat} onValueChange={(value: string) => setSelectedFormat(value)}>
                 <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                   <SelectValue />
                 </SelectTrigger>

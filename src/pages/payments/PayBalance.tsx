@@ -107,10 +107,11 @@ export default function PayBalance() {
         });
       }
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'initier le paiement',
+        description: errorMessage || 'Impossible d\'initier le paiement',
         variant: 'destructive',
       });
     },
@@ -268,7 +269,7 @@ export default function PayBalance() {
                 <div>
                   <h3 className="font-semibold mb-3">Articles de la commande</h3>
                   <div className="space-y-2">
-                    {order.order_items?.map((item: any) => (
+                    {order.order_items?.map((item: { id: string; product_name: string; quantity: number; unit_price: number; total_price: number }) => (
                       <div
                         key={item.id}
                         className="flex justify-between p-3 bg-muted/50 rounded"

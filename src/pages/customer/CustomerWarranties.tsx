@@ -45,6 +45,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import type { WarrantyRegistration, WarrantyClaim } from '@/hooks/physical/useWarranties';
 
 export default function CustomerWarranties() {
   const { user } = useAuth();
@@ -283,7 +284,8 @@ export default function CustomerWarranties() {
         description: 'Votre garantie a été enregistrée avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible d\'enregistrer la garantie',
@@ -335,7 +337,8 @@ export default function CustomerWarranties() {
         description: 'Votre réclamation de garantie a été soumise avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de soumettre la réclamation',
@@ -345,7 +348,7 @@ export default function CustomerWarranties() {
   });
 
   // Get status badge
-  const getWarrantyStatusBadge = (warranty: any) => {
+  const getWarrantyStatusBadge = (warranty: WarrantyRegistration) => {
     const endDate = new Date(warranty.end_date);
     const isExpired = isBefore(endDate, new Date());
     const isExpiringSoon = isAfter(endDate, new Date()) && isBefore(endDate, new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
@@ -364,7 +367,8 @@ export default function CustomerWarranties() {
 
   // Get claim status badge
   const getClaimStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: any }> = {
+    type IconComponent = React.ComponentType<{ className?: string }>;
+    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: IconComponent }> = {
       submitted: { label: 'Soumise', variant: 'secondary', icon: Clock },
       under_review: { label: 'En révision', variant: 'secondary', icon: AlertCircle },
       approved: { label: 'Approuvée', variant: 'default', icon: CheckCircle2 },
@@ -391,11 +395,11 @@ export default function CustomerWarranties() {
 
   // Stats
   const stats = useMemo(() => {
-    const activeWarranties = warranties.filter((w: any) => {
+    const activeWarranties = warranties.filter((w: WarrantyRegistration) => {
       const endDate = new Date(w.end_date);
       return w.status === 'active' && isAfter(endDate, new Date());
     });
-    const expiredWarranties = warranties.filter((w: any) => {
+    const expiredWarranties = warranties.filter((w: WarrantyRegistration) => {
       const endDate = new Date(w.end_date);
       return w.status === 'expired' || isBefore(endDate, new Date());
     });
@@ -405,7 +409,7 @@ export default function CustomerWarranties() {
       active: activeWarranties.length,
       expired: expiredWarranties.length,
       claims: claims.length,
-      pendingClaims: claims.filter((c: any) => c.status === 'submitted' || c.status === 'under_review').length,
+      pendingClaims: claims.filter((c: WarrantyClaim) => c.status === 'submitted' || c.status === 'under_review').length,
     };
   }, [warranties, claims]);
 
@@ -538,7 +542,7 @@ export default function CustomerWarranties() {
                   </Card>
                 ) : (
                   <div className="space-y-4">
-                    {warranties.map((warranty: any) => {
+                    {warranties.map((warranty: WarrantyRegistration) => {
                       const endDate = new Date(warranty.end_date);
                       const isExpired = isBefore(endDate, new Date());
                       const daysRemaining = Math.ceil((endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -628,7 +632,7 @@ export default function CustomerWarranties() {
                   </Card>
                 ) : (
                   <div className="space-y-4">
-                    {claims.map((claim: any) => (
+                    {claims.map((claim: WarrantyClaim) => (
                       <Card key={claim.id}>
                         <CardHeader>
                           <div className="flex items-center justify-between">
@@ -698,7 +702,13 @@ export default function CustomerWarranties() {
                       value={registerForm.order_id}
                       onValueChange={(value) => {
                         setRegisterForm({ ...registerForm, order_id: value });
-                        const order = orders.find((o: any) => o.id === value);
+                        type OrderWithItems = {
+                          id: string;
+                          order_number: string;
+                          created_at: string;
+                          order_items?: Array<{ product_id: string }>;
+                        };
+                        const order = orders.find((o: OrderWithItems) => o.id === value);
                         if (order && order.order_items && order.order_items.length > 0) {
                           setRegisterForm({
                             ...registerForm,
@@ -713,7 +723,14 @@ export default function CustomerWarranties() {
                         <SelectValue placeholder="Sélectionner une commande" />
                       </SelectTrigger>
                       <SelectContent>
-                        {orders.map((order: any) => (
+                        {orders.map((order) => {
+                          type OrderWithItems = {
+                            id: string;
+                            order_number: string;
+                            created_at: string;
+                          };
+                          const orderTyped = order as OrderWithItems;
+                          return (
                           <SelectItem key={order.id} value={order.id}>
                             {order.order_number} - {format(new Date(order.created_at), 'dd MMM yyyy', { locale: fr })}
                           </SelectItem>

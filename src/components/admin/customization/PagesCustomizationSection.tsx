@@ -1987,7 +1987,7 @@ export const PagesCustomizationSection = ({ onChange }: PagesCustomizationSectio
   const { toast } = useToast();
   const [selectedPage, setSelectedPage] = useState<string>('landing');
   const [selectedSection, setSelectedSection] = useState<string>('');
-  const [pageValues, setPageValues] = useState<Record<string, Record<string, any>>>({});
+  const [pageValues, setPageValues] = useState<Record<string, Record<string, unknown>>>({});
   const [uploadingImages, setUploadingImages] = useState<Record<string, boolean>>({});
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -2014,9 +2014,9 @@ export const PagesCustomizationSection = ({ onChange }: PagesCustomizationSectio
 
   // Debounce pour les sauvegardes automatiques
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const pendingChangesRef = useRef<Record<string, Record<string, any>>>({});
+  const pendingChangesRef = useRef<Record<string, Record<string, unknown>>>({});
 
-  const handleElementChange = useCallback((pageId: string, elementKey: string, value: any) => {
+  const handleElementChange = useCallback((pageId: string, elementKey: string, value: unknown) => {
     setPageValues(prev => {
       const updated = {
         ...prev,
@@ -2113,10 +2113,11 @@ export const PagesCustomizationSection = ({ onChange }: PagesCustomizationSectio
         title: 'Image uploadée',
         description: 'L\'image a été uploadée avec succès.',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'uploader l\'image.',
+        description: errorMessage || 'Impossible d\'uploader l\'image.',
         variant: 'destructive',
       });
     } finally {

@@ -126,11 +126,12 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
           variant: "destructive"
         });
       }
-    } catch (error: any) {
-      logger.error('Erreur lors de la suppression', { error, storeId: storeToDelete.id });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Erreur lors de la suppression', { error: errorMessage, storeId: storeToDelete.id });
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue",
+        description: errorMessage || "Une erreur est survenue",
         variant: "destructive"
       });
     }
@@ -157,11 +158,12 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
           variant: "destructive"
         });
       }
-    } catch (error: any) {
-      logger.error('Erreur lors de l\'archivage', { error, storeId });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Erreur lors de l\'archivage', { error: errorMessage, storeId });
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue",
+        description: errorMessage || "Une erreur est survenue",
         variant: "destructive"
       });
     }

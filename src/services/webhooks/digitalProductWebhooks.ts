@@ -8,11 +8,13 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
+import type { RecordString } from '@/types/common';
+
 export interface WebhookPayload {
   event: string;
   event_id?: string;
   timestamp: string;
-  data: Record<string, any>;
+  data: RecordString;
 }
 
 export interface SendWebhookResult {
@@ -50,7 +52,7 @@ async function generateHMACSignature(payload: string, secret: string): Promise<s
 export async function sendWebhook(
   webhookId: string,
   eventType: string,
-  eventData: Record<string, any>,
+  eventData: RecordString,
   eventId?: string
 ): Promise<SendWebhookResult> {
   const startTime = Date.now();
@@ -163,8 +165,8 @@ export async function sendWebhook(
         }
 
         lastResponse = response;
-      } catch (error: any) {
-        lastError = error;
+      } catch (error: unknown) {
+        lastError = error instanceof Error ? error : new Error(String(error));
 
         // Si c'est la dernière tentative, enregistrer l'erreur
         if (attempt === webhook.retry_count + 1) {
@@ -202,11 +204,12 @@ export async function sendWebhook(
       error: lastError?.message || 'Échec après toutes les tentatives',
       durationMs: Date.now() - startTime,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error sending webhook', { error, webhookId, eventType });
     return {
       success: false,
-      error: error.message || 'Erreur inconnue',
+      error: errorMessage || 'Erreur inconnue',
       durationMs: Date.now() - startTime,
     };
   }
@@ -259,7 +262,7 @@ async function logWebhookResult(
 export async function triggerWebhooks(
   storeId: string,
   eventType: string,
-  eventData: Record<string, any>,
+  eventData: RecordString,
   eventId?: string
 ): Promise<void> {
   try {

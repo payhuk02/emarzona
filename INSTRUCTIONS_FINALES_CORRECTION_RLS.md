@@ -144,3 +144,5 @@ Après avoir exécuté la migration et rechargé l'application :
 - `src/hooks/useFileUpload.ts` (toujours passer contentType)
 - `src/utils/checkStoragePermissions.ts` (retry et test direct)
 - `supabase/migrations/20250201_fix_rls_policies_attachments_final.sql` (nouveau)
+
+

@@ -205,10 +205,11 @@ export default function DemandForecasting() {
         description: `${count} suggestion(s) de réapprovisionnement créée(s)`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de générer les suggestions',
+        description: errorMessage || 'Impossible de générer les suggestions',
         variant: 'destructive',
       });
     },
@@ -234,10 +235,11 @@ export default function DemandForecasting() {
         description: 'Le statut de la suggestion a été mis à jour',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de mettre à jour le statut',
+        description: errorMessage || 'Impossible de mettre à jour le statut',
         variant: 'destructive',
       });
     },
@@ -357,10 +359,11 @@ export default function DemandForecasting() {
                         title: '✅ Export réussi',
                         description: `${suggestions.length} suggestion(s) exportée(s) en CSV`,
                       });
-                    } catch (error: any) {
+                    } catch (error: unknown) {
+                      const errorMessage = error instanceof Error ? error.message : String(error);
                       toast({
                         title: '❌ Erreur',
-                        description: error.message || 'Impossible d\'exporter les données',
+                        description: errorMessage || 'Impossible d\'exporter les données',
                         variant: 'destructive',
                       });
                     }
@@ -658,10 +661,11 @@ export default function DemandForecasting() {
                               title: '✅ Export réussi',
                               description: `${forecasts.length} prévision(s) exportée(s) en CSV`,
                             });
-                          } catch (error: any) {
+                          } catch (error: unknown) {
+                      const errorMessage = error instanceof Error ? error.message : String(error);
                             toast({
                               title: '❌ Erreur',
-                              description: error.message || 'Impossible d\'exporter les données',
+                              description: errorMessage || 'Impossible d\'exporter les données',
                               variant: 'destructive',
                             });
                           }

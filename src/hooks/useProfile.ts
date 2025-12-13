@@ -132,11 +132,12 @@ export const useProfile = () => {
         logger.info('Profile found', { profile: data });
         setProfile(data[0]);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching profile', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de charger le profil',
+        description: errorMessage || 'Impossible de charger le profil',
         variant: 'destructive',
       });
       setProfile(null);
@@ -213,11 +214,12 @@ export const useProfile = () => {
       });
 
       return publicUrl;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error uploading avatar', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors du téléchargement',
+        description: errorMessage || 'Erreur lors du téléchargement',
         variant: 'destructive',
       });
       return null;
@@ -254,11 +256,12 @@ export const useProfile = () => {
         title: 'Succès',
         description: 'Photo de profil supprimée',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error removing avatar', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la suppression',
+        description: errorMessage || 'Erreur lors de la suppression',
         variant: 'destructive',
       });
     } finally {
@@ -285,11 +288,12 @@ export const useProfile = () => {
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error updating display name', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la mise à jour',
+        description: errorMessage || 'Erreur lors de la mise à jour',
         variant: 'destructive',
       });
       return false;
@@ -309,7 +313,7 @@ export const useProfile = () => {
 
     try {
       // Mettre à jour tous les champs disponibles
-      const safeUpdates: any = {};
+      const safeUpdates: Record<string, unknown> = {};
       
       if (updates.first_name !== undefined) safeUpdates.first_name = updates.first_name;
       if (updates.last_name !== undefined) safeUpdates.last_name = updates.last_name;
@@ -334,11 +338,12 @@ export const useProfile = () => {
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error updating profile', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la mise à jour',
+        description: errorMessage || 'Erreur lors de la mise à jour',
         variant: 'destructive',
       });
       return false;
@@ -355,7 +360,8 @@ export const useProfile = () => {
 
       if (error) throw error;
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error getting profile stats', { error });
       return null;
     }
@@ -393,7 +399,8 @@ export const useProfile = () => {
 
       if (error) throw error;
       return data && data.length > 0 ? data[0] : null;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error getting referral info', { error });
       return null;
     }
@@ -412,7 +419,8 @@ export const useProfile = () => {
 
       if (error) throw error;
       return data || [];
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error getting referred profiles', { error });
       return [];
     }

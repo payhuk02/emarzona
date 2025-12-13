@@ -48,6 +48,7 @@ import {
 } from 'lucide-react';
 import { useMyEnrollments } from '@/hooks/courses/useCourseEnrollment';
 import { useCourseProgressPercentage } from '@/hooks/courses/useCourseProgress';
+import type { CourseEnrollment } from '@/types/courses';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
@@ -57,7 +58,7 @@ const ITEMS_PER_PAGE = 9;
 const PAGINATION_OPTIONS = [9, 18, 27, 36];
 
 interface CourseCardProps {
-  enrollment: any;
+  enrollment: CourseEnrollment;
   viewMode?: 'grid' | 'list';
 }
 
@@ -291,10 +292,10 @@ const MyCourses = () => {
     if (!enrollments) return { total: 0, completed: 0, inProgress: 0, notStarted: 0 };
 
     const total = enrollments.length;
-    const completed = enrollments.filter((e: any) => {
+    const completed = enrollments.filter((e: CourseEnrollment) => {
       return e.completed_lessons === e.total_lessons && e.total_lessons > 0;
     }).length;
-    const inProgress = enrollments.filter((e: any) => {
+    const inProgress = enrollments.filter((e: CourseEnrollment) => {
       return e.completed_lessons > 0 && e.completed_lessons < e.total_lessons;
     }).length;
     const notStarted = total - completed - inProgress;
@@ -311,7 +312,7 @@ const MyCourses = () => {
     // Filtre de recherche
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((enrollment: any) => {
+      filtered = filtered.filter((enrollment: CourseEnrollment) => {
         const product = enrollment.course?.product;
         return (
           product?.name?.toLowerCase().includes(query) ||
@@ -323,7 +324,7 @@ const MyCourses = () => {
 
     // Filtre de statut
     if (statusFilter !== 'all') {
-      filtered = filtered.filter((enrollment: any) => {
+      filtered = filtered.filter((enrollment: CourseEnrollment) => {
         if (statusFilter === 'completed') {
           return enrollment.completed_lessons === enrollment.total_lessons && enrollment.total_lessons > 0;
         }
@@ -338,7 +339,7 @@ const MyCourses = () => {
     }
 
     // Tri
-    filtered.sort((a: any, b: any) => {
+    filtered.sort((a: CourseEnrollment, b: CourseEnrollment) => {
       if (sortBy === 'recent') {
         return new Date(b.created_at || b.enrolled_at || 0).getTime() - new Date(a.created_at || a.enrolled_at || 0).getTime();
       }
@@ -623,7 +624,7 @@ const MyCourses = () => {
 
                       {/* Filtres */}
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+                        <Select value={statusFilter} onValueChange={(value: string) => setStatusFilter(value)}>
                           <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px] h-9 sm:h-10 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200 text-[10px] sm:text-xs md:text-sm">
                             <Filter className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
                             <SelectValue placeholder={t('courses.filters.status', 'Statut')} />
@@ -636,7 +637,7 @@ const MyCourses = () => {
                           </SelectContent>
                         </Select>
 
-                        <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+                        <Select value={sortBy} onValueChange={(value: string) => setSortBy(value)}>
                           <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px] h-9 sm:h-10 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200 text-[10px] sm:text-xs md:text-sm">
                             <BarChart3 className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
                             <SelectValue placeholder={t('courses.sort.placeholder', 'Trier par')} />
@@ -768,7 +769,7 @@ const MyCourses = () => {
                         role="region"
                         aria-label={t('courses.list.ariaLabel', 'Liste des cours')}
                       >
-                        {paginatedCourses.map((enrollment: any, index) => (
+                        {paginatedCourses.map((enrollment: CourseEnrollment, index) => (
                           <div
                             key={enrollment.id}
                             className="animate-in fade-in"

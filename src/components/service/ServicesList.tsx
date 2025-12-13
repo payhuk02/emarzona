@@ -226,8 +226,8 @@ const ServicesListComponent: React.FC<ServicesListProps> = ({
     // Sorting
     if (filters.sortBy) {
       result.sort((a, b) => {
-        let aValue: any = a[filters.sortBy!];
-        let bValue: any = b[filters.sortBy!];
+        let aValue: string | number | Date | undefined = a[filters.sortBy as keyof typeof a];
+        let bValue: string | number | Date | undefined = b[filters.sortBy as keyof typeof b];
 
         // Handle dates
         if (filters.sortBy === 'createdAt' || filters.sortBy === 'updatedAt') {

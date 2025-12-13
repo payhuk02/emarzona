@@ -179,7 +179,7 @@ export default function MyFavorites() {
     course: favoriteProducts?.filter(p => p.product?.product_type === 'course').length || 0,
   };
 
-  const handleAddToCart = async (product: any) => {
+  const handleAddToCart = async (product: FavoriteProduct['product'] & { id: string; product_type: string }) => {
     try {
       await addItem({
         product_id: product.id,

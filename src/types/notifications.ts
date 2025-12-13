@@ -3,6 +3,8 @@
  * Date : 27 octobre 2025
  */
 
+import type { RecordString } from './common';
+
 export type NotificationType =
   | 'course_enrollment'
   | 'lesson_complete'
@@ -28,7 +30,7 @@ export interface Notification {
   type: NotificationType;
   title: string;
   message: string;
-  metadata?: Record<string, any>;
+  metadata?: RecordString;
   action_url?: string;
   action_label?: string;
   is_read: boolean;
@@ -81,7 +83,7 @@ export interface CreateNotificationData {
   type: NotificationType;
   title: string;
   message: string;
-  metadata?: Record<string, any>;
+  metadata?: RecordString;
   action_url?: string;
   action_label?: string;
   priority?: NotificationPriority;

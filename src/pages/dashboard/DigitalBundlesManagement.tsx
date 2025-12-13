@@ -101,7 +101,18 @@ export default function DigitalBundlesManagement() {
         throw error;
       }
 
-      return (data || []).map((p: any) => ({
+      interface ProductData {
+        id: string;
+        name?: string;
+        description?: string;
+        price?: number;
+        currency?: string;
+        category?: string;
+        image_url?: string;
+        is_active?: boolean;
+        is_draft?: boolean;
+      }
+      return (data || []).map((p: ProductData) => ({
         id: p.id,
         name: p.name || 'Produit sans nom',
         description: p.description,
@@ -176,10 +187,11 @@ export default function DigitalBundlesManagement() {
         title: '✅ Bundle supprimé',
         description: 'Le bundle a été supprimé avec succès',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer le bundle',
+        description: errorMessage || 'Impossible de supprimer le bundle',
         variant: 'destructive',
       });
     }
@@ -192,7 +204,7 @@ export default function DigitalBundlesManagement() {
     }
   };
 
-  const handleSaveBundle = async (bundleData: any) => {
+  const handleSaveBundle = async (bundleData: { name: string; description: string; productIds: string[]; discountType: string; discountValue: number; originalTotalPrice?: number; discountedPrice?: number }) => {
     if (!store?.id) {
       toast({
         title: 'Erreur',
@@ -238,7 +250,8 @@ export default function DigitalBundlesManagement() {
 
       setIsCreateDialogOpen(false);
       setEditingBundleId(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       // Les erreurs sont gérées par les hooks
       logger.error('Error saving bundle', { error, bundleData });
     }

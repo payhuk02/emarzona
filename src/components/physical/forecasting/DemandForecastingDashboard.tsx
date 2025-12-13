@@ -83,10 +83,11 @@ export default function DemandForecastingDashboard() {
       });
       setIsForecastDialogOpen(false);
       setSelectedProductId('');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de calculer la prévision',
+        description: errorMessage || 'Impossible de calculer la prévision',
         variant: 'destructive',
       });
     }
@@ -97,10 +98,11 @@ export default function DemandForecastingDashboard() {
 
     try {
       await generateRecommendations.mutateAsync(store.id);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de générer les recommandations',
+        description: errorMessage || 'Impossible de générer les recommandations',
         variant: 'destructive',
       });
     }
@@ -419,7 +421,7 @@ export default function DemandForecastingDashboard() {
                   <Label htmlFor="forecast_type" className="text-xs sm:text-sm">Type de prévision *</Label>
                   <Select
                     value={forecastType}
-                    onValueChange={(value: any) => setForecastType(value)}
+                    onValueChange={(value: string) => setForecastType(value)}
                     required
                   >
                     <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
@@ -436,7 +438,7 @@ export default function DemandForecastingDashboard() {
                   <Label htmlFor="forecast_method" className="text-xs sm:text-sm">Méthode *</Label>
                   <Select
                     value={forecastMethod}
-                    onValueChange={(value: any) => setForecastMethod(value)}
+                    onValueChange={(value: string) => setForecastMethod(value)}
                     required
                   >
                     <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">

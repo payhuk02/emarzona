@@ -158,3 +158,5 @@ Si le problème persiste, vérifiez les logs dans la console et partagez le mess
 
 - `src/utils/checkStoragePermissions.ts`
 - `src/hooks/useFileUpload.ts`
+
+

@@ -27,6 +27,8 @@ import {
   useTopDownloadedFiles,
   useUserDownloadStats,
   useLicenseAnalytics,
+  DownloadTrend,
+  TopFile,
 } from '@/hooks/digital/useDigitalAnalytics';
 import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
 import { format } from 'date-fns';
@@ -74,12 +76,12 @@ export const DigitalAnalyticsDashboard = ({
           success_rate: analytics?.success_rate || 0,
           total_revenue: analytics?.total_revenue || 0,
           total_bandwidth: analytics?.total_bandwidth || 0,
-          trends: trends?.map((t: any) => ({
+          trends: trends?.map((t: DownloadTrend) => ({
             date: t.date,
             downloads: t.downloads,
             users: t.users,
           })),
-          topFiles: topFiles?.map((f: any) => ({
+          topFiles: topFiles?.map((f: TopFile) => ({
             filename: f.filename,
             downloads: f.downloads,
             size: f.size,
@@ -120,12 +122,12 @@ export const DigitalAnalyticsDashboard = ({
           success_rate: analytics?.success_rate || 0,
           total_revenue: analytics?.total_revenue || 0,
           total_bandwidth: analytics?.total_bandwidth || 0,
-          trends: trends?.map((t: any) => ({
+          trends: trends?.map((t: DownloadTrend) => ({
             date: t.date,
             downloads: t.downloads,
             users: t.users,
           })),
-          topFiles: topFiles?.map((f: any) => ({
+          topFiles: topFiles?.map((f: TopFile) => ({
             filename: f.filename,
             downloads: f.downloads,
             size: f.size,
@@ -165,12 +167,12 @@ export const DigitalAnalyticsDashboard = ({
           success_rate: analytics?.success_rate || 0,
           total_revenue: analytics?.total_revenue || 0,
           total_bandwidth: analytics?.total_bandwidth || 0,
-          trends: trends?.map((t: any) => ({
+          trends: trends?.map((t: DownloadTrend) => ({
             date: t.date,
             downloads: t.downloads,
             users: t.users,
           })),
-          topFiles: topFiles?.map((f: any) => ({
+          topFiles: topFiles?.map((f: TopFile) => ({
             filename: f.filename,
             downloads: f.downloads,
             size: f.size,

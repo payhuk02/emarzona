@@ -5,10 +5,30 @@
  * Badge pour afficher les notifications de nouvelles versions
  */
 
-import { useDigitalProductUpdateNotifications, useMarkUpdateNotificationRead } from '@/hooks/digital/useDigitalProductVersions';
+import { useDigitalProductUpdateNotifications, useMarkUpdateNotificationRead, DigitalProductVersion } from '@/hooks/digital/useDigitalProductVersions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Bell, X } from 'lucide-react';
+
+interface UpdateNotification {
+  id: string;
+  user_id: string;
+  digital_product_id: string;
+  version_id: string;
+  is_read: boolean;
+  created_at: string;
+  version?: DigitalProductVersion;
+  product?: {
+    id: string;
+    digital_type: string;
+    product?: {
+      id: string;
+      name: string;
+      slug?: string;
+      image_url?: string;
+    };
+  };
+}
 import {
   Popover,
   PopoverContent,
@@ -28,7 +48,7 @@ export const VersionNotificationBadge = () => {
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
-  const handleNotificationClick = async (notification: any) => {
+  const handleNotificationClick = async (notification: UpdateNotification) => {
     if (!notification.is_read) {
       await markAsRead.mutateAsync(notification.id);
     }

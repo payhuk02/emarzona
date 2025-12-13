@@ -146,10 +146,11 @@ export default function TaxManagement() {
       });
       setIsCreateDialogOpen(false);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer la configuration',
+        description: errorMessage || 'Impossible de créer la configuration',
         variant: 'destructive',
       });
     },
@@ -175,10 +176,11 @@ export default function TaxManagement() {
       });
       setEditingTaxId(null);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de mettre à jour la configuration',
+        description: errorMessage || 'Impossible de mettre à jour la configuration',
         variant: 'destructive',
       });
     },
@@ -201,10 +203,11 @@ export default function TaxManagement() {
       });
       setDeletingTaxId(null);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer la configuration',
+        description: errorMessage || 'Impossible de supprimer la configuration',
         variant: 'destructive',
       });
     },
@@ -652,7 +655,7 @@ export default function TaxManagement() {
                       <Label htmlFor="tax_type">Type de Taxe *</Label>
                       <Select
                         value={formData.tax_type}
-                        onValueChange={(value: any) => setFormData({ ...formData, tax_type: value })}
+                        onValueChange={(value: string) => setFormData({ ...formData, tax_type: value })}
                       >
                         <SelectTrigger id="tax_type">
                           <SelectValue />

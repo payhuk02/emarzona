@@ -158,10 +158,15 @@ export default function AdminVendorConversations() {
       }
 
       // Récupérer les profils des utilisateurs
+      type ConversationData = {
+        customer_user_id: string;
+        store_user_id: string;
+        id: string;
+      };
       const userIds = [
         ...new Set([
-          ...(data || []).map((c: any) => c.customer_user_id),
-          ...(data || []).map((c: any) => c.store_user_id),
+          ...(data || []).map((c: ConversationData) => c.customer_user_id),
+          ...(data || []).map((c: ConversationData) => c.store_user_id),
         ]),
       ];
 
@@ -171,17 +176,25 @@ export default function AdminVendorConversations() {
         .in('user_id', userIds);
 
       // Récupérer les compteurs de messages
-      const conversationIds = (data || []).map((c: any) => c.id);
+      const conversationIds = (data || []).map((c: ConversationData) => c.id);
       const { data: messageCounts } = await supabase
         .from('vendor_messages')
         .select('conversation_id')
         .in('conversation_id', conversationIds);
 
       // Combiner les données
-      return (data || []).map((conv: any) => {
-        const customerProfile = profiles?.find((p: any) => p.user_id === conv.customer_user_id);
-        const storeProfile = profiles?.find((p: any) => p.user_id === conv.store_user_id);
-        const messageCount = messageCounts?.filter((m: any) => m.conversation_id === conv.id).length || 0;
+      type Profile = {
+        user_id: string;
+        name: string | null;
+        avatar_url: string | null;
+      };
+      type MessageCount = {
+        conversation_id: string;
+      };
+      return (data || []).map((conv: ConversationData) => {
+        const customerProfile = profiles?.find((p: Profile) => p.user_id === conv.customer_user_id);
+        const storeProfile = profiles?.find((p: Profile) => p.user_id === conv.store_user_id);
+        const messageCount = messageCounts?.filter((m: MessageCount) => m.conversation_id === conv.id).length || 0;
 
         return {
           ...conv,
@@ -208,14 +221,23 @@ export default function AdminVendorConversations() {
       if (error) throw error;
 
       // Récupérer les profils des expéditeurs
-      const senderIds = [...new Set((messagesData || []).map((m: any) => m.sender_id))];
+      type MessageData = {
+        sender_id: string;
+        [key: string]: unknown;
+      };
+      type Profile = {
+        user_id: string;
+        name: string | null;
+        avatar_url: string | null;
+      };
+      const senderIds = [...new Set((messagesData || []).map((m: MessageData) => m.sender_id))];
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, name, avatar_url')
         .in('user_id', senderIds);
 
-      return (messagesData || []).map((message: any) => {
-        const profile = profiles?.find((p: any) => p.user_id === message.sender_id);
+      return (messagesData || []).map((message: MessageData) => {
+        const profile = profiles?.find((p: Profile) => p.user_id === message.sender_id);
         return {
           ...message,
           sender: profile ? {
@@ -299,11 +321,12 @@ export default function AdminVendorConversations() {
       queryClient.invalidateQueries({ queryKey: ['admin-vendor-conversations'] });
       refetch();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error sending intervention message:', error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'envoyer le message',
+        description: errorMessage || 'Impossible d\'envoyer le message',
         variant: 'destructive',
       });
     },
@@ -327,11 +350,12 @@ export default function AdminVendorConversations() {
       queryClient.invalidateQueries({ queryKey: ['admin-vendor-conversations'] });
       refetch();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error marking as disputed:', error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de marquer comme litige',
+        description: errorMessage || 'Impossible de marquer comme litige',
         variant: 'destructive',
       });
     },

@@ -19,18 +19,29 @@ import {
   Package,
   Key,
 } from 'lucide-react';
-import { useUserDownloads } from '@/hooks/digital/useDownloads';
+import { useUserDownloads, DigitalDownload } from '@/hooks/digital/useDownloads';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useState } from 'react';
 
+interface DownloadWithRelations extends DigitalDownload {
+  digital_product?: {
+    id: string;
+    product?: {
+      id: string;
+      name: string;
+      image_url?: string | null;
+    } | null;
+  } | null;
+}
+
 export const MyDownloads = () => {
   const { data: downloads, isLoading, error } = useUserDownloads();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredDownloads = downloads?.filter((download: any) => {
+  const filteredDownloads = (downloads as DownloadWithRelations[] | undefined)?.filter((download: DownloadWithRelations) => {
     const productName = download.digital_product?.product?.name || '';
     return productName.toLowerCase().includes(searchQuery.toLowerCase());
   }) || [];
@@ -108,7 +119,7 @@ export const MyDownloads = () => {
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold text-green-600">
-              {downloads.filter((d: any) => d.download_success).length}
+              {(downloads as DownloadWithRelations[]).filter((d: DownloadWithRelations) => d.download_success).length}
             </div>
             <div className="text-sm text-muted-foreground">Réussis</div>
           </CardContent>
@@ -116,7 +127,7 @@ export const MyDownloads = () => {
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold text-red-600">
-              {downloads.filter((d: any) => !d.download_success).length}
+              {(downloads as DownloadWithRelations[]).filter((d: DownloadWithRelations) => !d.download_success).length}
             </div>
             <div className="text-sm text-muted-foreground">Échoués</div>
           </CardContent>
@@ -124,7 +135,7 @@ export const MyDownloads = () => {
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold">
-              {new Set(downloads.map((d: any) => d.digital_product?.product?.id).filter(Boolean)).size}
+              {new Set((downloads as DownloadWithRelations[]).map((d: DownloadWithRelations) => d.digital_product?.product?.id).filter(Boolean)).size}
             </div>
             <div className="text-sm text-muted-foreground">Produits uniques</div>
           </CardContent>
@@ -144,7 +155,7 @@ export const MyDownloads = () => {
             </CardContent>
           </Card>
         ) : (
-          filteredDownloads.map((download: any) => (
+          filteredDownloads.map((download: DownloadWithRelations) => (
             <Card key={download.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">

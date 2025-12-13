@@ -23,6 +23,8 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
+// ✅ PHASE 2: Import logger pour remplacer console.*
+import { logger } from '@/lib/logger';
 
 export interface UsePaginationOptions {
   /**
@@ -185,16 +187,10 @@ export function usePagination(options: UsePaginationOptions): UsePaginationRetur
     (newPageSize: number) => {
       if (!pageSizeOptions.includes(newPageSize)) {
         // ✅ PHASE 2: Remplacer console.warn par logger
-        import('@/lib/logger')
-          .then(({ logger }) => {
-            logger.warn(`Page size ${newPageSize} is not in available options`, {
-              newPageSize,
-              pageSizeOptions,
-            });
-          })
-          .catch(() => {
-            // Fallback silencieux
-          });
+        logger.warn(`Page size ${newPageSize} is not in available options`, {
+          newPageSize,
+          pageSizeOptions,
+        });
         return;
       }
 
@@ -264,13 +260,7 @@ export function useInfinitePagination<T>(
       setPage(prev => prev + 1);
     } catch (error) {
       // ✅ PHASE 2: Remplacer console.error par logger
-      import('@/lib/logger')
-        .then(({ logger }) => {
-          logger.error('Error loading more', { error });
-        })
-        .catch(() => {
-          // Fallback silencieux
-        });
+      logger.error('Error loading more', { error });
     } finally {
       setIsLoading(false);
     }

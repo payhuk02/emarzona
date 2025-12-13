@@ -326,10 +326,11 @@ export default function InventoryAnalytics() {
                       title: '✅ Export réussi',
                       description: `${filteredAnalytics.length} produit(s) exporté(s) en CSV`,
                     });
-                  } catch (error: any) {
+                  } catch (error: unknown) {
+                    const errorMessage = error instanceof Error ? error.message : String(error);
                     toast({
                       title: '❌ Erreur',
-                      description: error.message || 'Impossible d\'exporter les données',
+                      description: errorMessage || 'Impossible d\'exporter les données',
                       variant: 'destructive',
                     });
                   }

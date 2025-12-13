@@ -386,7 +386,7 @@ export function SerialNumbersManager({ physicalProductId, variantId }: SerialNum
 
 // Serial Card Component for Mobile View
 interface SerialCardProps {
-  serial: any;
+  serial: SerialNumber;
   getStatusBadge: (status: string) => JSX.Element;
   onViewTraceability: () => void;
   onEdit: () => void;

@@ -52,6 +52,7 @@ import { logger } from '@/lib/logger';
 import { fr } from 'date-fns/locale';
 import { CountdownTimer } from '@/components/ui/countdown-timer';
 import { useQueryClient } from '@tanstack/react-query';
+import type { AdvancedPayment } from '@/types/advanced-features';
 
 export default function PaymentManagement() {
   const { orderId } = useParams<{ orderId: string }>();
@@ -68,7 +69,7 @@ export default function PaymentManagement() {
     openDispute,
   } = useAdvancedPayments();
 
-  const [selectedPayment, setSelectedPayment] = useState<any>(null);
+  const [selectedPayment, setSelectedPayment] = useState<AdvancedPayment | null>(null);
   const [showReleaseDialog, setShowReleaseDialog] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -99,11 +100,12 @@ export default function PaymentManagement() {
 
       setShowReleaseDialog(false);
       setSelectedPayment(null);
-    } catch (error: any) {
-      logger.error('Release payment error', { error, paymentId: payment.id });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Release payment error', { error, paymentId: selectedPayment.id });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de relâcher le paiement',
+        description: errorMessage || 'Impossible de relâcher le paiement',
         variant: 'destructive',
       });
     } finally {
@@ -130,11 +132,12 @@ export default function PaymentManagement() {
 
       setShowConfirmDialog(false);
       setSelectedPayment(null);
-    } catch (error: any) {
-      logger.error('Confirm delivery error', { error, paymentId: payment.id });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Confirm delivery error', { error, paymentId: selectedPayment.id });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de confirmer la livraison',
+        description: errorMessage || 'Impossible de confirmer la livraison',
         variant: 'destructive',
       });
     } finally {

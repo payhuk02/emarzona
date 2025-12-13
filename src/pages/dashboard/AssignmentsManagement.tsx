@@ -231,10 +231,11 @@ export default function AssignmentsManagement() {
         title: '✅ Assignment supprimé',
         description: 'Le devoir a été supprimé avec succès',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer l\'assignment',
+        description: errorMessage || 'Impossible de supprimer l\'assignment',
         variant: 'destructive',
       });
     }
@@ -286,7 +287,8 @@ export default function AssignmentsManagement() {
 
       setIsCreateDialogOpen(false);
       setEditingAssignmentId(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error saving assignment', { error, formData });
       // Les erreurs sont gérées par les hooks
     }
@@ -376,7 +378,7 @@ export default function AssignmentsManagement() {
                     <SelectValue placeholder="Choisir un cours..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {courses.map((course: any) => (
+                    {courses.map((course: { id: string; title: string }) => (
                       <SelectItem key={course.id} value={course.id}>
                         {course.title}
                       </SelectItem>
@@ -789,7 +791,7 @@ export default function AssignmentsManagement() {
                                 <div>
                                   <Label>Fichiers soumis</Label>
                                   <div className="mt-2 space-y-2">
-                                    {submission.submission_files.map((file: any, index: number) => (
+                                    {submission.submission_files.map((file: { url: string; name: string; size?: number; type?: string }, index: number) => (
                                       <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-lg">
                                         <div className="flex items-center gap-2">
                                           <FileText className="h-4 w-4" />

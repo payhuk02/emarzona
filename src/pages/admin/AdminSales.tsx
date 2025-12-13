@@ -16,6 +16,8 @@ import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/utils';
 import { ShoppingCart, Download, Search, TrendingUp, DollarSign } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { Payment } from '@/hooks/usePayments';
+import type { PlatformCommission } from '@/hooks/usePlatformCommissions';
 
 const AdminSales = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -81,7 +83,7 @@ const AdminSales = () => {
       type === 'sales'
         ? ['Date', 'Montant', 'Boutique', 'Commande', 'Statut'].join(',')
         : ['Date', 'Montant Total', 'Commission', 'Vendeur', 'Statut'].join(','),
-      ...data.map((item: any) =>
+      ...data.map((item: Payment | PlatformCommission) =>
         type === 'sales'
           ? [
               new Date(item.created_at).toLocaleDateString(),
@@ -115,7 +117,7 @@ const AdminSales = () => {
     });
   }, [sales, commissions, toast]);
 
-  const filteredSales = useMemo(() => sales?.filter((sale: any) => {
+  const filteredSales = useMemo(() => sales?.filter((sale: Payment) => {
     const storeName = sale.stores?.[0]?.name || '';
     const orderNumber = sale.orders?.[0]?.order_number || '';
     return storeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -302,7 +304,7 @@ const AdminSales = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredSales?.map((sale: any) => (
+                      {filteredSales?.map((sale: Payment) => (
                         <TableRow key={sale.id}>
                           <TableCell>
                             {new Date(sale.created_at).toLocaleDateString('fr-FR')}

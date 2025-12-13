@@ -21,7 +21,7 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
   const [withdrawals, setWithdrawals] = useState<StoreWithdrawal[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const channelRef = useRef<any>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const previousStatusesRef = useRef<Map<string, StoreWithdrawalStatus>>(new Map());
 
   const fetchWithdrawals = useCallback(async () => {
@@ -69,7 +69,8 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
       if (error) throw error;
 
       setWithdrawals(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching withdrawals', { error });
       toast({
         title: 'Erreur',
@@ -168,11 +169,12 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
 
       await fetchWithdrawals();
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error requesting withdrawal', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de créer la demande de retrait',
+        description: errorMessage || 'Impossible de créer la demande de retrait',
         variant: 'destructive',
       });
       return null;
@@ -196,7 +198,8 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error cancelling withdrawal', { error });
       toast({
         title: 'Erreur',
@@ -233,7 +236,8 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
       };
 
       return stats;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error getting withdrawal stats', { error });
       return null;
     }

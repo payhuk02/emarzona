@@ -34,8 +34,27 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import type { ServiceBooking } from '@/hooks/service';
 
+interface BookingProduct {
+  id: string;
+  name: string;
+  price: number;
+  currency: string;
+}
+
+interface BookingCustomer {
+  full_name: string;
+  email: string;
+  phone?: string;
+}
+
+interface BookingStaff {
+  id: string;
+  name: string;
+  email?: string;
+}
+
 interface BookingCardProps {
-  booking: ServiceBooking & { product?: any; customer?: any; staff?: any };
+  booking: ServiceBooking & { product?: BookingProduct; customer?: BookingCustomer; staff?: BookingStaff };
   onConfirm?: (id: string) => void;
   onCancel?: (id: string) => void;
   onComplete?: (id: string) => void;

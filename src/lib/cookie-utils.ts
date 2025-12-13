@@ -3,6 +3,9 @@
  * Fournit des fonctions réutilisables pour gérer les cookies de manière sécurisée
  */
 
+// ✅ PHASE 2: Import logger pour remplacer console.*
+import { logger } from '@/lib/logger';
+
 export interface CookieOptions {
   /**
    * Durée de vie en jours

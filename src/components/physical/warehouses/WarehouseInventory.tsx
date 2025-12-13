@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useWarehouses, useWarehouseInventory } from '@/hooks/physical/useWarehouses';
+import { useWarehouses, useWarehouseInventory, WarehouseInventory as WarehouseInventoryType } from '@/hooks/physical/useWarehouses';
 import { useStore } from '@/hooks/useStore';
 import { Package, Search, AlertTriangle, MapPin, X, RefreshCw, Warehouse as WarehouseIcon, DollarSign, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -337,7 +337,7 @@ export default function WarehouseInventory() {
 
 // Inventory Card Component for Mobile View
 interface InventoryCardProps {
-  item: any;
+  item: WarehouseInventoryType;
   isLowStock: boolean;
   animationDelay?: number;
 }

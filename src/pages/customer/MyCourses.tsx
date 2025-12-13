@@ -44,6 +44,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import type { CourseEnrollment as CourseEnrollmentType } from '@/types/courses';
 
 interface CourseEnrollment {
   id: string;
@@ -117,14 +118,14 @@ export default function MyCourses() {
 
       // Fetch progress for each enrollment
       const enrollmentsWithProgress = await Promise.all(
-        (enrollmentsData || []).map(async (enrollment: any) => {
+        (enrollmentsData || []).map(async (enrollment: { course_id: string; course?: { product?: { id: string; name: string; description: string; image_url?: string; slug: string } } }) => {
           // Get course sections first
           const { data: sectionsData } = await (supabase
             .from('course_sections' as any)
             .select('id')
             .eq('course_id', enrollment.course_id) as any);
           
-          const sectionIds = sectionsData?.map((s: any) => s.id) || [];
+          const sectionIds = sectionsData?.map((s: { id: string }) => s.id) || [];
 
           // Get course lessons count
           const { count: totalLessons } = await (supabase
@@ -138,7 +139,7 @@ export default function MyCourses() {
             .select('id')
             .in('section_id', sectionIds.length > 0 ? sectionIds : ['']) as any);
           
-          const lessonIds = lessonsData?.map((l: any) => l.id) || [];
+          const lessonIds = lessonsData?.map((l: { id: string }) => l.id) || [];
 
           // Get completed lessons count
           const { count: completedLessons } = await (supabase

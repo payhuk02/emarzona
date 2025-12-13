@@ -4,6 +4,8 @@
  * Support: Produits digitaux, physiques, services, cours, œuvres d'artistes
  */
 
+import type { RecordString } from './common';
+
 export type ProductType = 'digital' | 'physical' | 'service' | 'course' | 'artist';
 
 export interface CartItem {
@@ -20,7 +22,7 @@ export interface CartItem {
   discount_amount?: number;
   discount_percentage?: number;
   coupon_code?: string | null;
-  metadata?: Record<string, any>;
+  metadata?: RecordString;
   added_at?: string;
   updated_at?: string;
 }
@@ -47,7 +49,7 @@ export interface AddToCartOptions {
   quantity?: number;
   variant_id?: string;
   variant_name?: string;
-  metadata?: Record<string, any>;
+  metadata?: RecordString;
   coupon_code?: string;
 }
 

@@ -48,6 +48,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummary';
 import { ReviewsList } from '@/components/reviews/ReviewsList';
 import { ReviewForm } from '@/components/reviews/ReviewForm';
+import type { ProductFAQ } from '@/types/product-form';
 import { useEffect, useState } from 'react';
 import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 import { useCreateDigitalOrder } from '@/hooks/orders/useCreateDigitalOrder';
@@ -195,15 +196,16 @@ export default function DigitalProductDetail() {
       } else {
         throw new Error('URL de paiement non disponible');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error initiating purchase', {
-        error: error.message,
+        error: errorMessage,
         digitalProductId: digitalProduct.id,
         productId: product.id,
       });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'initialiser le paiement. Veuillez réessayer.',
+        description: errorMessage || 'Impossible d\'initialiser le paiement. Veuillez réessayer.',
         variant: 'destructive',
       });
     } finally {
@@ -680,7 +682,7 @@ export default function DigitalProductDetail() {
               <CardContent>
                 {faqs.length > 0 ? (
                   <Accordion type="single" collapsible className="w-full">
-                    {faqs.map((faq: any, index: number) => (
+                    {faqs.map((faq: ProductFAQ, index: number) => (
                       <AccordionItem key={index} value={`faq-${index}`}>
                         <AccordionTrigger className="text-left">
                           {faq.question}

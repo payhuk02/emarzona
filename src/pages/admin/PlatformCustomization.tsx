@@ -202,10 +202,11 @@ export const PlatformCustomization = () => {
         title: '✅ Sauvegarde réussie',
         description: 'Toutes les modifications ont été enregistrées.',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de sauvegarder les modifications.',
+        description: errorMessage || 'Impossible de sauvegarder les modifications.',
         variant: 'destructive',
       });
     }
@@ -226,10 +227,11 @@ export const PlatformCustomization = () => {
         title: '✅ Export réussi',
         description: 'Les personnalisations ont été exportées avec succès.',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur d\'export',
-        description: error.message || 'Impossible d\'exporter les personnalisations.',
+        description: errorMessage || 'Impossible d\'exporter les personnalisations.',
         variant: 'destructive',
       });
     }
@@ -259,10 +261,11 @@ export const PlatformCustomization = () => {
         setShowImportDialog(false);
         setImportFile(null);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur d\'import',
-        description: error.message || 'Impossible d\'importer le fichier.',
+        description: errorMessage || 'Impossible d\'importer le fichier.',
         variant: 'destructive',
       });
     } finally {

@@ -71,7 +71,8 @@ export const useAdvancedPayments = (
       if (error) throw error;
       setPayments(data || []);
       setError(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       const err = error instanceof Error ? error : new Error(String(error));
       setError(err);
       logger.error("Error fetching advanced payments:", error);
@@ -158,7 +159,8 @@ export const useAdvancedPayments = (
         secured_payments: securedPayments,
       });
       setError(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       const err = error instanceof Error ? error : new Error(String(error));
       setError(err);
       logger.error("Error fetching payment stats:", error);
@@ -195,11 +197,12 @@ export const useAdvancedPayments = (
         success: true,
         data: data && data.length > 0 ? data[0] : undefined,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error creating payment:", error);
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
   };
@@ -252,11 +255,12 @@ export const useAdvancedPayments = (
         success: true,
         data: data && data.length > 0 ? data[0] : undefined,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error creating percentage payment:", error);
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
   };
@@ -308,11 +312,12 @@ export const useAdvancedPayments = (
         success: true,
         data: data && data.length > 0 ? data[0] : undefined,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error creating secured payment:", error);
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
   };
@@ -356,11 +361,12 @@ export const useAdvancedPayments = (
         success: true,
         data: data && data.length > 0 ? data[0] : undefined,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error releasing payment:", error);
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
   };
@@ -404,11 +410,12 @@ export const useAdvancedPayments = (
         success: true,
         data: data && data.length > 0 ? data[0] : undefined,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error opening dispute:", error);
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
   };
@@ -432,11 +439,12 @@ export const useAdvancedPayments = (
         success: true,
         data: data && data.length > 0 ? data[0] : undefined,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error updating payment:", error);
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
   };
@@ -460,11 +468,12 @@ export const useAdvancedPayments = (
       });
       
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error deleting payment:", error);
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
   };

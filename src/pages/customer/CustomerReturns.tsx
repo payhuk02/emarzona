@@ -46,6 +46,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import type { ProductReturn } from '@/hooks/physical/useReturns';
 
 export default function CustomerReturns() {
   const { user } = useAuth();
@@ -185,10 +186,11 @@ export default function CustomerReturns() {
         description: 'Votre demande de retour a été soumise avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer la demande de retour',
+        description: errorMessage || 'Impossible de créer la demande de retour',
         variant: 'destructive',
       });
     },
@@ -196,7 +198,8 @@ export default function CustomerReturns() {
 
   // Get status badge
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: any }> = {
+    type IconComponent = React.ComponentType<{ className?: string }>;
+    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: IconComponent }> = {
       pending: { label: 'En attente', variant: 'secondary', icon: Clock },
       approved: { label: 'Approuvé', variant: 'default', icon: CheckCircle2 },
       rejected: { label: 'Rejeté', variant: 'destructive', icon: XCircle },
@@ -246,15 +249,19 @@ export default function CustomerReturns() {
   const stats = useMemo(() => {
     return {
       total: returns.length,
-      pending: returns.filter((r: any) => r.status === 'pending').length,
-      approved: returns.filter((r: any) => r.status === 'approved').length,
-      refunded: returns.filter((r: any) => r.status === 'refunded').length,
+      pending: returns.filter((r: ProductReturn) => r.status === 'pending').length,
+      approved: returns.filter((r: ProductReturn) => r.status === 'approved').length,
+      refunded: returns.filter((r: ProductReturn) => r.status === 'refunded').length,
     };
   }, [returns]);
 
   // Filter orders that can be returned (delivered within return window)
+  type OrderWithDelivery = {
+    delivered_at?: string;
+    created_at: string;
+  };
   const returnableOrders = useMemo(() => {
-    return orders.filter((order: any) => {
+    return orders.filter((order: OrderWithDelivery) => {
       // Check if order was delivered within last 30 days (default return window)
       const deliveredDate = new Date(order.delivered_at || order.created_at);
       const daysSinceDelivery = (Date.now() - deliveredDate.getTime()) / (1000 * 60 * 60 * 24);
@@ -386,7 +393,7 @@ export default function CustomerReturns() {
                   </Card>
                 ) : (
                   <div className="space-y-4">
-                    {returns.map((returnItem: any) => (
+                    {returns.map((returnItem: ProductReturn) => (
                       <Card key={returnItem.id}>
                         <CardHeader>
                           <div className="flex items-center justify-between">
@@ -467,7 +474,7 @@ export default function CustomerReturns() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {returns.map((returnItem: any) => (
+                      {returns.map((returnItem: ProductReturn) => (
                         <div key={returnItem.id} className="flex items-center justify-between p-4 border rounded-lg">
                           <div>
                             <p className="font-medium">{returnItem.return_number}</p>
@@ -502,11 +509,21 @@ export default function CustomerReturns() {
                         <SelectValue placeholder="Sélectionner une commande" />
                       </SelectTrigger>
                       <SelectContent>
-                        {returnableOrders.map((order: any) => (
-                          <SelectItem key={order.id} value={order.id}>
-                            {order.order_number} - {format(new Date(order.created_at), 'dd MMM yyyy', { locale: fr })}
+                        {returnableOrders.map((order) => {
+                          type OrderWithItems = {
+                            id: string;
+                            order_number: string;
+                            created_at: string;
+                            delivered_at?: string;
+                            order_items?: Array<{ product_id: string; product_name?: string }>;
+                          };
+                          const orderTyped = order as OrderWithItems;
+                          return (
+                          <SelectItem key={orderTyped.id} value={orderTyped.id}>
+                            {orderTyped.order_number} - {format(new Date(orderTyped.created_at), 'dd MMM yyyy', { locale: fr })}
                           </SelectItem>
-                        ))}
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </div>
@@ -568,7 +585,14 @@ export default function CustomerReturns() {
                         </Button>
                         <Button
                           onClick={() => {
-                            const order = returnableOrders.find((o: any) => o.id === selectedOrder);
+                            type OrderWithItems = {
+                              id: string;
+                              order_number: string;
+                              created_at: string;
+                              delivered_at?: string;
+                              order_items?: Array<{ product_id: string; product_name?: string }>;
+                            };
+                            const order = returnableOrders.find((o: OrderWithItems) => o.id === selectedOrder);
                             if (!order || !order.order_items || order.order_items.length === 0) {
                               toast({
                                 title: 'Erreur',

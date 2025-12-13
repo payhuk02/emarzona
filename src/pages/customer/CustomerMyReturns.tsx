@@ -117,7 +117,8 @@ export default function CustomerMyReturns() {
   }, [returns, activeTab, debouncedSearch]);
 
   const getStatusBadge = useCallback((status: string) => {
-    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: any }> = {
+    type IconComponent = React.ComponentType<{ className?: string }>;
+    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: IconComponent }> = {
       requested: { label: 'En attente', variant: 'secondary', icon: Clock },
       approved: { label: 'Approuvé', variant: 'default', icon: CheckCircle2 },
       rejected: { label: 'Rejeté', variant: 'destructive', icon: XCircle },

@@ -249,10 +249,11 @@ export default function PhysicalProductsLotsManagement() {
         description: 'Le lot a été créé avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer le lot',
+        description: errorMessage || 'Impossible de créer le lot',
         variant: 'destructive',
       });
     },
@@ -295,7 +296,8 @@ export default function PhysicalProductsLotsManagement() {
 
   // Get status badge
   const getStatusBadge = (lot: ProductLot) => {
-    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: any }> = {
+    type IconComponent = React.ComponentType<{ className?: string }>;
+    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: IconComponent }> = {
       active: { label: 'Actif', variant: 'default', icon: CheckCircle2 },
       expired: { label: 'Expiré', variant: 'destructive', icon: XCircle },
       expiring_soon: { label: 'Expire bientôt', variant: 'secondary', icon: AlertTriangle },
@@ -627,7 +629,7 @@ export default function PhysicalProductsLotsManagement() {
                   </Card>
                 ) : (
                   <div className="space-y-4">
-                    {alerts.map((alert: any) => (
+                    {alerts.map((alert: { id: string; product_lots?: { physical_products?: { name?: string } }; alert_type?: string; days_until_expiration?: number }) => (
                       <Card key={alert.id}>
                         <CardHeader>
                           <div className="flex items-center justify-between">

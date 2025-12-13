@@ -270,7 +270,8 @@ export default function PaymentsCustomers() {
         title: '✅ Export réussi',
         description: `Données exportées en CSV`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error exporting to CSV', { error });
       toast({
         title: '❌ Erreur',
@@ -321,7 +322,8 @@ export default function PaymentsCustomers() {
         title: '✅ Actualisation réussie',
         description: 'Les données ont été mises à jour',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'actualiser les données',

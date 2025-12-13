@@ -188,10 +188,11 @@ export default function AutoReorderRules() {
         });
       }
       handleCloseDialog();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Une erreur est survenue',
+        description: errorMessage || 'Une erreur est survenue',
         variant: 'destructive',
       });
     }
@@ -220,10 +221,11 @@ export default function AutoReorderRules() {
       });
       setDeleteDialogOpen(false);
       setRuleToDelete(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de supprimer la règle',
+        description: errorMessage || 'Impossible de supprimer la règle',
         variant: 'destructive',
       });
     }

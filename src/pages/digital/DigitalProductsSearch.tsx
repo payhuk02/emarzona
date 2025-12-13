@@ -196,7 +196,7 @@ export const DigitalProductsSearch = () => {
         ];
 
         return suggestions.slice(0, 10);
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('Error fetching search suggestions', { error });
         return [];
       }
@@ -263,7 +263,7 @@ export const DigitalProductsSearch = () => {
 
         if (error) throw error;
         return data || [];
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('Error searching digital products', { error });
         throw error;
       }
@@ -347,7 +347,7 @@ export const DigitalProductsSearch = () => {
       setIsVoiceSearchActive(true);
     };
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
       setSearchInput(transcript);
       saveToHistory(transcript);
@@ -711,7 +711,7 @@ export const DigitalProductsSearch = () => {
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {searchResults.map((product: any) => (
+                {searchResults.map((product: { id: string; name: string; image_url?: string; price: number; currency: string; slug: string }) => (
                   <div key={product.id}>
                     <Card className="group hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/digital/${product.id}`)}>
                       <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">

@@ -114,10 +114,11 @@ export const ProfileSettings = () => {
           description: "Profil mis à jour avec succès",
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
-        description: error.message || "Erreur lors de la mise à jour",
+        description: errorMessage || "Erreur lors de la mise à jour",
         variant: "destructive",
       });
     } finally {

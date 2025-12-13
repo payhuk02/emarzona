@@ -285,7 +285,7 @@ export const LandingPageCustomizationSection = ({ onChange }: LandingPageCustomi
   const { customizationData, save } = usePlatformCustomization();
   const { toast } = useToast();
   const [selectedSection, setSelectedSection] = useState<string>('hero');
-  const [pageValues, setPageValues] = useState<Record<string, any>>({});
+  const [pageValues, setPageValues] = useState<Record<string, unknown>>({});
   const [uploadingImage, setUploadingImage] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {

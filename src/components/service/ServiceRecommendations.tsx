@@ -52,8 +52,32 @@ const useServiceRecommendations = (
       try {
         const { data: { user } } = await supabase.auth.getUser();
 
+        interface ServiceWithStore {
+          id: string;
+          name: string;
+          slug?: string;
+          description?: string;
+          short_description?: string;
+          price: number;
+          promotional_price?: number;
+          currency: string;
+          image_url?: string;
+          category?: string;
+          tags?: string[];
+          sales_count?: number;
+          average_rating?: number;
+          stores: {
+            id: string;
+            name: string;
+            slug: string;
+          };
+          service_products?: Array<{
+            duration_minutes?: number;
+          }>;
+          recommendationScore?: number;
+        }
         // 1. Recommandations basées sur la catégorie
-        let categoryRecommendations: any[] = [];
+        let categoryRecommendations: ServiceWithStore[] = [];
         if (category) {
           const { data: categoryServices } = await supabase
             .from('products')
@@ -80,7 +104,7 @@ const useServiceRecommendations = (
         }
 
         // 2. Recommandations basées sur les tags
-        let tagRecommendations: any[] = [];
+        let tagRecommendations: ServiceWithStore[] = [];
         if (tags && tags.length > 0) {
           // Rechercher services avec tags similaires
           const { data: tagServices } = await supabase
@@ -115,7 +139,7 @@ const useServiceRecommendations = (
         }
 
         // 3. Recommandations basées sur les réservations précédentes (si utilisateur connecté)
-        let bookingBasedRecommendations: any[] = [];
+        let bookingBasedRecommendations: ServiceWithStore[] = [];
         if (user) {
           // Récupérer les services réservés par l'utilisateur
           const { data: bookedServices } = await supabase
@@ -237,7 +261,8 @@ const useServiceRecommendations = (
         return scored
           .sort((a, b) => b.recommendationScore - a.recommendationScore)
           .slice(0, limit);
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error fetching service recommendations', { error });
         return [];
       }
@@ -327,7 +352,7 @@ export const ServiceRecommendations = ({
           variant === 'compact' && 'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4'
         )}
       >
-        {recommendations.map((service: any) => (
+        {recommendations.map((service: ServiceWithStore) => (
           <Card
             key={service.id}
             className="group hover:shadow-lg transition-shadow cursor-pointer"
@@ -446,7 +471,8 @@ export const BookedTogetherRecommendations = ({
           .eq('is_active', true);
 
         return services || [];
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error fetching booked together recommendations', { error });
         return [];
       }
@@ -487,7 +513,7 @@ export const BookedTogetherRecommendations = ({
         Réservés ensemble
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {recommendations.map((service: any) => (
+        {recommendations.map((service: ServiceWithStore) => (
           <Card
             key={service.id}
             className="group hover:shadow-lg transition-shadow cursor-pointer"

@@ -12,6 +12,8 @@
  */
 
 import { useState, useCallback, DragEvent } from 'react';
+// ✅ PHASE 2: Import logger pour remplacer console.*
+import { logger } from '@/lib/logger';
 
 export interface UseDragAndDropOptions {
   /**
@@ -174,33 +176,21 @@ export function useDragAndDrop(options: UseDragAndDropOptions): UseDragAndDropRe
         // Vérifier le type
         if (accept && !isFileAccepted(file, accept)) {
           // ✅ PHASE 2: Remplacer console.warn par logger
-          import('@/lib/logger')
-            .then(({ logger }) => {
-              logger.warn(`File ${file.name} is not in accepted formats`, {
-                fileName: file.name,
-                accept,
-              });
-            })
-            .catch(() => {
-              // Fallback silencieux
-            });
+          logger.warn(`File ${file.name} is not in accepted formats`, {
+            fileName: file.name,
+            accept,
+          });
           continue;
         }
 
         // Vérifier la taille
         if (maxSize && file.size > maxSize) {
           // ✅ PHASE 2: Remplacer console.warn par logger
-          import('@/lib/logger')
-            .then(({ logger }) => {
-              logger.warn(`File ${file.name} exceeds max size of ${maxSize} bytes`, {
-                fileName: file.name,
-                fileSize: file.size,
-                maxSize,
-              });
-            })
-            .catch(() => {
-              // Fallback silencieux
-            });
+          logger.warn(`File ${file.name} exceeds max size of ${maxSize} bytes`, {
+            fileName: file.name,
+            fileSize: file.size,
+            maxSize,
+          });
           continue;
         }
 
@@ -210,13 +200,10 @@ export function useDragAndDrop(options: UseDragAndDropOptions): UseDragAndDropRe
       // Vérifier le nombre maximum
       if (maxFiles && validFiles.length > maxFiles) {
         // ✅ PHASE 2: Remplacer console.warn par logger
-        import('@/lib/logger')
-          .then(({ logger }) => {
-            logger.warn(`Too many files. Maximum is ${maxFiles}`, {
-              fileCount: validFiles.length,
-              maxFiles,
-            });
-          })
+        logger.warn(`Too many files. Maximum is ${maxFiles}`, {
+          fileCount: validFiles.length,
+          maxFiles,
+        });
           .catch(() => {
             // Fallback silencieux
           });
