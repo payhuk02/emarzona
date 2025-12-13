@@ -3,7 +3,15 @@
  * vers le format UnifiedProduct
  */
 
-import { UnifiedProduct, DigitalProduct, PhysicalProduct, ServiceProduct, CourseProduct, ArtistProduct, BaseProduct } from '@/types/unified-product';
+import {
+  UnifiedProduct,
+  DigitalProduct,
+  PhysicalProduct,
+  ServiceProduct,
+  CourseProduct,
+  ArtistProduct,
+  BaseProduct,
+} from '@/types/unified-product';
 
 /**
  * Type pour un produit brut de la base de données (non typé)
@@ -12,8 +20,8 @@ type DatabaseProduct = {
   id: string;
   name: string;
   slug: string;
-  description?: string;
-  short_description?: string;
+  description?: string | null;
+  short_description?: string | null;
   price?: number;
   promotional_price?: number;
   promo_price?: number;
@@ -61,12 +69,14 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
     image_url: product.image_url,
     images: product.images || (product.image_url ? [product.image_url] : []),
     store_id: product.store_id || product.stores?.id,
-    store: product.stores ? {
-      id: product.stores.id,
-      name: product.stores.name,
-      slug: product.stores.slug,
-      logo_url: product.stores.logo_url,
-    } : undefined,
+    store: product.stores
+      ? {
+          id: product.stores.id,
+          name: product.stores.name,
+          slug: product.stores.slug,
+          logo_url: product.stores.logo_url,
+        }
+      : undefined,
     type: product.product_type || 'digital',
     rating: product.rating || product.average_rating,
     review_count: product.reviews_count || product.total_reviews || 0,
@@ -76,7 +86,7 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
     status: product.is_active === false ? 'archived' : product.is_draft ? 'draft' : 'active',
     created_at: product.created_at,
     updated_at: product.updated_at || product.created_at,
-    
+
     // Affiliation
     is_affiliate: product.product_affiliate_settings?.[0]?.affiliate_enabled || false,
     affiliate_percentage: product.product_affiliate_settings?.[0]?.commission_rate,
@@ -108,11 +118,13 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
         type: 'physical',
         stock: product.stock || product.quantity_available,
         weight: product.weight,
-        dimensions: product.dimensions ? {
-          length: product.dimensions.length || 0,
-          width: product.dimensions.width || 0,
-          height: product.dimensions.height || 0,
-        } : undefined,
+        dimensions: product.dimensions
+          ? {
+              length: product.dimensions.length || 0,
+              width: product.dimensions.width || 0,
+              height: product.dimensions.height || 0,
+            }
+          : undefined,
         shipping_required: product.collect_shipping_address !== false,
         variants: product.variants || [],
         sku: product.sku,
@@ -144,7 +156,7 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
         difficulty: product.difficulty,
       } as CourseProduct;
 
-    case 'artist':
+    case 'artist': {
       // Récupérer les données artist depuis artist_products si disponible
       const artistData = product.artist || product.artist_products?.[0];
       return {
@@ -166,6 +178,7 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
         certificate_of_authenticity: artistData?.certificate_of_authenticity || false,
         signature_authenticated: artistData?.signature_authenticated || false,
       } as ArtistProduct;
+    }
 
     default:
       // Par défaut, traiter comme digital
@@ -192,9 +205,9 @@ interface FileItem {
  */
 function extractFormatsFromFiles(files: FileItem[] | unknown[]): string[] {
   if (!files || !Array.isArray(files)) return [];
-  
+
   const formats = new Set<string>();
-  files.forEach((file) => {
+  files.forEach(file => {
     const fileItem = file as FileItem;
     if (fileItem.format) {
       formats.add(fileItem.format);
@@ -203,7 +216,7 @@ function extractFormatsFromFiles(files: FileItem[] | unknown[]): string[] {
       if (ext) formats.add(ext);
     }
   });
-  
+
   return Array.from(formats);
 }
 
@@ -213,5 +226,3 @@ function extractFormatsFromFiles(files: FileItem[] | unknown[]): string[] {
 export function transformProducts(products: DatabaseProduct[]): UnifiedProduct[] {
   return products.map(transformToUnifiedProduct);
 }
-
-

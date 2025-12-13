@@ -51,6 +51,31 @@ export interface FilterState {
   verifiedOnly: boolean;
   featuredOnly: boolean;
   inStock: boolean;
+
+  // Filtres spécifiques Digital
+  digitalSubType?: string;
+  instantDelivery?: boolean;
+
+  // Filtres spécifiques Physical
+  stockAvailability?: 'all' | 'in_stock' | 'low_stock' | 'out_of_stock';
+  shippingType?: 'all' | 'free' | 'paid' | 'pickup';
+  physicalCategory?: string;
+
+  // Filtres spécifiques Service
+  serviceType?: string;
+  locationType?: 'all' | 'online' | 'on_site' | 'customer_location';
+  calendarAvailable?: boolean;
+
+  // Filtres spécifiques Course
+  difficulty?: 'all' | 'beginner' | 'intermediate' | 'advanced';
+  accessType?: 'all' | 'lifetime' | 'subscription';
+  courseDuration?: 'all' | '<1h' | '1-5h' | '5-10h' | '10h+';
+
+  // Filtres spécifiques Artist
+  artistType?: string;
+  editionType?: 'all' | 'original' | 'limited_edition' | 'print' | 'reproduction';
+  certificateOfAuthenticity?: boolean;
+  artworkAvailability?: 'all' | 'available' | 'limited' | 'sold_out';
 }
 
 export interface PaginationState {

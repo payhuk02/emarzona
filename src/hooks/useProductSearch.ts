@@ -13,6 +13,10 @@ export interface SearchFilters {
   min_price?: number | null;
   max_price?: number | null;
   min_rating?: number | null;
+  // Filtres spécifiques Artist
+  artist_type?: string | null;
+  edition_type?: string | null;
+  certificate_of_authenticity?: boolean | null;
 }
 
 export interface SearchSuggestion {
@@ -75,6 +79,10 @@ export function useProductSearch(
           p_min_price: filters.min_price || null,
           p_max_price: filters.max_price || null,
           p_min_rating: filters.min_rating || null,
+          // Filtres spécifiques Artist
+          p_artist_type: filters.artist_type || null,
+          p_edition_type: filters.edition_type || null,
+          p_certificate_of_authenticity: filters.certificate_of_authenticity || null,
         });
 
         if (error) {
@@ -97,11 +105,7 @@ export function useProductSearch(
 /**
  * Hook pour obtenir des suggestions de recherche (auto-complétion)
  */
-export function useSearchSuggestions(
-  query: string,
-  limit: number = 10,
-  enabled: boolean = true
-) {
+export function useSearchSuggestions(query: string, limit: number = 10, enabled: boolean = true) {
   return useQuery<SearchSuggestion[]>({
     queryKey: ['search-suggestions', query, limit],
     queryFn: async () => {
@@ -167,7 +171,9 @@ export function usePopularSearches(limit: number = 10, days: number = 30) {
 export function useSaveSearchHistory() {
   return async (query: string, resultsCount: number = 0) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       await supabase.from('search_history').insert({
@@ -189,7 +195,9 @@ export function useSearchHistory(limit: number = 10) {
     queryKey: ['search-history', limit],
     queryFn: async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return [];
 
         const { data, error } = await supabase
@@ -213,10 +221,3 @@ export function useSearchHistory(limit: number = 10) {
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
-
-
-
-
-
-
-
