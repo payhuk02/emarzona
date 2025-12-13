@@ -12,11 +12,11 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { logger } from '@/lib/logger';
-import { 
-  BookOpen, 
-  Clock, 
-  Users, 
-  Star, 
+import {
+  BookOpen,
+  Clock,
+  Users,
+  Star,
   ShoppingCart,
   PlayCircle,
   CheckCircle2,
@@ -31,7 +31,7 @@ import {
   Eye,
   Package,
   RefreshCw,
-  DollarSign
+  DollarSign,
 } from 'lucide-react';
 import { useCourseDetail } from '@/hooks/courses/useCourseDetail';
 import type { CourseLesson } from '@/types/courses';
@@ -40,13 +40,23 @@ import { VideoPlayerWithNotes } from '@/components/courses/player/VideoPlayerWit
 import { CourseCurriculum } from '@/components/courses/detail/CourseCurriculum';
 import { CourseProgressBar } from '@/components/courses/detail/CourseProgressBar';
 import { LessonCompletionButton } from '@/components/courses/player/LessonCompletionButton';
-import { PointsDisplay, BadgesDisplay, Leaderboard, AchievementsDisplay } from '@/components/courses/gamification';
+import {
+  PointsDisplay,
+  BadgesDisplay,
+  Leaderboard,
+  AchievementsDisplay,
+} from '@/components/courses/gamification';
 import { NotesPanel } from '@/components/courses/notes';
 import { CohortsList } from '@/components/courses/cohorts';
 import { AssignmentsList } from '@/components/courses/assignments';
 import { LiveSessionsList } from '@/components/courses/live';
 import { CourseSchema, minutesToISO8601 } from '@/components/seo/CourseSchema';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { HelpCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -63,8 +73,8 @@ const CourseDetail = () => {
   const { user } = useAuth();
   const { data, isLoading, error } = useCourseDetail(slug || '');
   const trackEvent = useTrackAnalyticsEvent();
-  
-  const [currentLesson, setCurrentLesson] = useState<any>(null);
+
+  const [currentLesson, setCurrentLesson] = useState<CourseLesson | null>(null);
   const [hasTrackedView, setHasTrackedView] = useState(false);
 
   // Récupérer les infos d'affiliation
@@ -75,7 +85,7 @@ const CourseDetail = () => {
     data?.product?.id || '',
     data?.product?.price || 0
   );
-  
+
   // Récupérer la configuration des pixels
   const { data: pixelsConfig } = useProductPixels(data?.product?.id || '');
 
@@ -118,9 +128,7 @@ const CourseDetail = () => {
       <div className="container mx-auto py-8">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            {error?.message || 'Cours non trouvé'}
-          </AlertDescription>
+          <AlertDescription>{error?.message || 'Cours non trouvé'}</AlertDescription>
         </Alert>
         <Button onClick={() => navigate('/marketplace')} className="mt-4">
           Retour à la marketplace
@@ -137,17 +145,17 @@ const CourseDetail = () => {
   // Récupérer la leçon à afficher : dernière vue > première preview > première leçon
   const getInitialLesson = () => {
     if (currentLesson) return currentLesson;
-    
+
     // Si inscrit et a une dernière leçon vue, reprendre là où on s'était arrêté
     if (isEnrolled && lastViewedLesson) {
       return lastViewedLesson;
     }
-    
+
     // Sinon chercher la première leçon preview
     for (const section of sections) {
       const previewLesson = section.lessons?.find((l: CourseLesson) => l.is_preview);
       if (previewLesson) return previewLesson;
-      
+
       if (isEnrolled && section.lessons.length > 0) {
         return section.lessons[0];
       }
@@ -194,7 +202,7 @@ const CourseDetail = () => {
           tiktokPixelId={pixelsConfig.tiktok_pixel_id}
         />
       )}
-      
+
       {/* SEO - Schema.org Course markup */}
       <CourseSchema
         courseName={product.name}
@@ -239,12 +247,18 @@ const CourseDetail = () => {
             {/* Licensing banner (courses are products with product_type='course') */}
             {product?.licensing_type && (
               <div className="mb-4 flex items-start gap-3 p-3 rounded-lg bg-white/10">
-                <div className={`h-8 w-8 rounded-full flex items-center justify-center ${product.licensing_type === 'plr' ? 'bg-emerald-500/20' : product.licensing_type === 'copyrighted' ? 'bg-red-500/20' : 'bg-white/20'}`}>
+                <div
+                  className={`h-8 w-8 rounded-full flex items-center justify-center ${product.licensing_type === 'plr' ? 'bg-emerald-500/20' : product.licensing_type === 'copyrighted' ? 'bg-red-500/20' : 'bg-white/20'}`}
+                >
                   <Shield className="h-4 w-4 text-white" />
                 </div>
                 <div className="text-sm">
                   <p className="font-semibold">
-                    {product.licensing_type === 'plr' ? 'Licence PLR (droits de label privé)' : product.licensing_type === 'copyrighted' ? "Protégé par droit d'auteur" : 'Licence standard'}
+                    {product.licensing_type === 'plr'
+                      ? 'Licence PLR (droits de label privé)'
+                      : product.licensing_type === 'copyrighted'
+                        ? "Protégé par droit d'auteur"
+                        : 'Licence standard'}
                   </p>
                   {product.license_terms && (
                     <p className="opacity-90 mt-1 whitespace-pre-wrap">{product.license_terms}</p>
@@ -282,7 +296,11 @@ const CourseDetail = () => {
               <div className="mt-6 flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                   {store.logo_url ? (
-                    <img src={store.logo_url} alt={store.name} className="w-full h-full rounded-full object-cover" />
+                    <img
+                      src={store.logo_url}
+                      alt={store.name}
+                      className="w-full h-full rounded-full object-cover"
+                    />
                   ) : (
                     <Users className="w-6 h-6" />
                   )}
@@ -304,10 +322,7 @@ const CourseDetail = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Barre de progression (si inscrit) */}
             {isEnrolled && enrollment && (
-              <CourseProgressBar 
-                enrollmentId={enrollment.id}
-                totalLessons={course.total_lessons}
-              />
+              <CourseProgressBar enrollmentId={enrollment.id} totalLessons={course.total_lessons} />
             )}
 
             {/* Video Player */}
@@ -323,16 +338,20 @@ const CourseDetail = () => {
                   courseId={course.id}
                   isEnrolled={isEnrolled}
                 />
-                
+
                 {/* Message "Reprendre où on s'est arrêté" */}
-                {isEnrolled && lastViewedLesson && displayLesson?.id === lastViewedLesson.id && !currentLesson && (
-                  <Alert className="mt-4 bg-blue-50 border-blue-200">
-                    <PlayCircle className="h-4 w-4 text-blue-600" />
-                    <AlertDescription className="text-blue-800">
-                      Vous reprenez là où vous vous êtes arrêté : <strong>{displayLesson.title}</strong>
-                    </AlertDescription>
-                  </Alert>
-                )}
+                {isEnrolled &&
+                  lastViewedLesson &&
+                  displayLesson?.id === lastViewedLesson.id &&
+                  !currentLesson && (
+                    <Alert className="mt-4 bg-blue-50 border-blue-200">
+                      <PlayCircle className="h-4 w-4 text-blue-600" />
+                      <AlertDescription className="text-blue-800">
+                        Vous reprenez là où vous vous êtes arrêté :{' '}
+                        <strong>{displayLesson.title}</strong>
+                      </AlertDescription>
+                    </Alert>
+                  )}
 
                 {/* Bouton de complétion (si inscrit) */}
                 {isEnrolled && enrollment && (
@@ -358,20 +377,17 @@ const CourseDetail = () => {
 
             {/* Prérequis (si inscrit) */}
             {isEnrolled && enrollment && (
-              <PrerequisitesList
-                courseId={course.id}
-                enrollmentId={enrollment.id}
-              />
+              <PrerequisitesList courseId={course.id} enrollmentId={enrollment.id} />
             )}
 
             {/* Description */}
             <Card>
               <CardContent className="p-6">
-                <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold mb-3 sm:mb-4">À propos de ce cours</h2>
+                <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold mb-3 sm:mb-4">
+                  À propos de ce cours
+                </h2>
                 <div className="prose prose-sm max-w-none">
-                  <p className="text-gray-700 whitespace-pre-line">
-                    {product.description}
-                  </p>
+                  <p className="text-gray-700 whitespace-pre-line">{product.description}</p>
                 </div>
               </CardContent>
             </Card>
@@ -380,10 +396,19 @@ const CourseDetail = () => {
             {product.licensing_type && (
               <Card>
                 <CardContent className="p-6">
-                  <h2 className="text-sm sm:text-base md:text-lg font-bold mb-2 sm:mb-3">Conditions de licence</h2>
+                  <h2 className="text-sm sm:text-base md:text-lg font-bold mb-2 sm:mb-3">
+                    Conditions de licence
+                  </h2>
                   <div className="text-[10px] sm:text-xs md:text-sm text-gray-700 space-y-2">
                     <p>
-                      Type de licence: <strong>{product.licensing_type === 'plr' ? 'PLR (droits de label privé)' : product.licensing_type === 'copyrighted' ? "Protégé par droit d'auteur" : 'Standard'}</strong>
+                      Type de licence:{' '}
+                      <strong>
+                        {product.licensing_type === 'plr'
+                          ? 'PLR (droits de label privé)'
+                          : product.licensing_type === 'copyrighted'
+                            ? "Protégé par droit d'auteur"
+                            : 'Standard'}
+                      </strong>
                     </p>
                     {product.license_terms ? (
                       <p className="whitespace-pre-wrap">{product.license_terms}</p>
@@ -446,9 +471,7 @@ const CourseDetail = () => {
                   <Accordion type="single" collapsible className="w-full">
                     {faqs.map((faq: ProductFAQ, index: number) => (
                       <AccordionItem key={index} value={`faq-${index}`}>
-                        <AccordionTrigger className="text-left">
-                          {faq.question}
-                        </AccordionTrigger>
+                        <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground">
                           {faq.answer}
                         </AccordionContent>
@@ -477,10 +500,7 @@ const CourseDetail = () => {
                     <BookOpen className="w-5 h-5 text-orange-600" />
                     Devoirs
                   </h2>
-                  <AssignmentsList 
-                    courseId={course.id}
-                    enrollmentId={enrollment.id}
-                  />
+                  <AssignmentsList courseId={course.id} enrollmentId={enrollment.id} />
                 </CardContent>
               </Card>
             )}
@@ -493,9 +513,9 @@ const CourseDetail = () => {
                     <Users className="w-5 h-5 text-blue-600" />
                     Mes Groupes
                   </h2>
-                  <CohortsList 
+                  <CohortsList
                     courseId={course.id}
-                    onCohortClick={(cohort) => {
+                    onCohortClick={cohort => {
                       // TODO: Naviguer vers la page du cohort
                       logger.debug('Navigate to cohort', { cohortId: cohort.id });
                     }}
@@ -512,7 +532,7 @@ const CourseDetail = () => {
                     <PlayCircle className="w-5 h-5 text-green-600" />
                     Sessions en Direct
                   </h2>
-                  <LiveSessionsList 
+                  <LiveSessionsList
                     courseId={course.id}
                     enrollmentId={enrollment.id}
                     userId={user.id}
@@ -530,10 +550,7 @@ const CourseDetail = () => {
                     courseId={course.id}
                     showLocked={false}
                   />
-                  <Leaderboard
-                    courseId={course.id}
-                    limit={10}
-                  />
+                  <Leaderboard courseId={course.id} limit={10} />
                 </div>
               </div>
             )}
@@ -544,10 +561,7 @@ const CourseDetail = () => {
             {/* Gamification - Points & Badges (si inscrit) */}
             {isEnrolled && enrollment && (
               <>
-                <PointsDisplay 
-                  enrollmentId={enrollment.id}
-                  compact={false}
-                />
+                <PointsDisplay enrollmentId={enrollment.id} compact={false} />
                 <BadgesDisplay
                   enrollmentId={enrollment.id}
                   courseId={course.id}
@@ -565,39 +579,57 @@ const CourseDetail = () => {
                   {product.pricing_model && (
                     <div className="flex items-center gap-2 flex-wrap">
                       {product.pricing_model === 'subscription' && (
-                        <Badge variant="outline" className="text-sm bg-blue-500/10 text-blue-700 border-blue-500/20">
+                        <Badge
+                          variant="outline"
+                          className="text-sm bg-blue-500/10 text-blue-700 border-blue-500/20"
+                        >
                           <RefreshCw className="h-3 w-3 mr-1" />
                           Abonnement
                         </Badge>
                       )}
                       {product.pricing_model === 'one-time' && (
-                        <Badge variant="outline" className="text-sm bg-purple-500/10 text-purple-700 border-purple-500/20">
+                        <Badge
+                          variant="outline"
+                          className="text-sm bg-purple-500/10 text-purple-700 border-purple-500/20"
+                        >
                           <DollarSign className="h-3 w-3 mr-1" />
                           Achat unique
                         </Badge>
                       )}
                       {product.pricing_model === 'free' && (
-                        <Badge variant="outline" className="text-sm bg-green-500/10 text-green-700 border-green-500/20">
+                        <Badge
+                          variant="outline"
+                          className="text-sm bg-green-500/10 text-green-700 border-green-500/20"
+                        >
                           <Gift className="h-3 w-3 mr-1" />
                           Gratuit
                         </Badge>
                       )}
                       {product.pricing_model === 'pay-what-you-want' && (
-                        <Badge variant="outline" className="text-sm bg-orange-500/10 text-orange-700 border-orange-500/20">
+                        <Badge
+                          variant="outline"
+                          className="text-sm bg-orange-500/10 text-orange-700 border-orange-500/20"
+                        >
                           <DollarSign className="h-3 w-3 mr-1" />
                           Prix libre
                         </Badge>
                       )}
                       {/* Badge Preview Gratuit */}
                       {product.is_free_preview && (
-                        <Badge variant="outline" className="text-sm bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-700 border-purple-500/20">
+                        <Badge
+                          variant="outline"
+                          className="text-sm bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-700 border-purple-500/20"
+                        >
                           <Eye className="h-3 w-3 mr-1" />
                           Version Preview Gratuite
                         </Badge>
                       )}
                       {/* Badge si cours payant a un preview */}
                       {product.free_product && !product.is_free_preview && (
-                        <Badge variant="outline" className="text-sm bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-700 border-green-500/20">
+                        <Badge
+                          variant="outline"
+                          className="text-sm bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-700 border-green-500/20"
+                        >
                           <Gift className="h-3 w-3 mr-1" />
                           Version Preview Disponible
                         </Badge>
@@ -646,7 +678,9 @@ const CourseDetail = () => {
                           size="sm"
                         >
                           <Package className="h-4 w-4 mr-2" />
-                          Accéder à la version complète ({product.paid_product.price.toLocaleString()} {product.paid_product.currency})
+                          Accéder à la version complète (
+                          {product.paid_product.price.toLocaleString()}{' '}
+                          {product.paid_product.currency})
                         </Button>
                       </div>
                     </div>
@@ -663,7 +697,8 @@ const CourseDetail = () => {
                           Version Preview Gratuite Disponible
                         </p>
                         <p className="text-sm text-green-800 dark:text-green-200 mb-3">
-                          Inscrivez-vous gratuitement au preview avant d'acheter la version complète.
+                          Inscrivez-vous gratuitement au preview avant d'acheter la version
+                          complète.
                         </p>
                         <Button
                           onClick={() => navigate(`/courses/${product.free_product.slug}`)}
@@ -686,8 +721,8 @@ const CourseDetail = () => {
                     Déjà inscrit - Continuer
                   </Button>
                 ) : (
-                  <Button 
-                    className="w-full bg-orange-600 hover:bg-orange-700" 
+                  <Button
+                    className="w-full bg-orange-600 hover:bg-orange-700"
                     size="lg"
                     onClick={handleEnroll}
                   >
@@ -705,7 +740,10 @@ const CourseDetail = () => {
                   </div>
                   <div className="flex items-center gap-2 text-gray-700">
                     <Clock className="w-4 h-4 text-orange-600" />
-                    <span>{Math.floor(course.total_duration_minutes / 60)}h {course.total_duration_minutes % 60}m de contenu</span>
+                    <span>
+                      {Math.floor(course.total_duration_minutes / 60)}h{' '}
+                      {course.total_duration_minutes % 60}m de contenu
+                    </span>
                   </div>
                   {course.certificate_enabled && (
                     <div className="flex items-center gap-2 text-gray-700">
@@ -768,7 +806,7 @@ const CourseDetail = () => {
                     </div>
 
                     {user ? (
-                      <Button 
+                      <Button
                         className="w-full bg-green-600 hover:bg-green-700"
                         onClick={() => navigate(`/affiliate/courses/${product.slug}`)}
                       >
@@ -776,7 +814,7 @@ const CourseDetail = () => {
                         Devenir affilié
                       </Button>
                     ) : (
-                      <Button 
+                      <Button
                         className="w-full bg-green-600 hover:bg-green-700"
                         onClick={() => navigate('/auth/login')}
                       >
@@ -816,10 +854,7 @@ const CourseDetail = () => {
         {/* Reviews & Ratings - Full Width */}
         {product && (
           <div className="mt-12">
-            <ProductReviewsSummary
-              productId={product.id}
-              productType="course"
-            />
+            <ProductReviewsSummary productId={product.id} productType="course" />
           </div>
         )}
       </div>

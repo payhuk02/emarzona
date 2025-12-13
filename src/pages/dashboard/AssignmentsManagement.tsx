@@ -1,7 +1,7 @@
 /**
  * Page de Gestion Complète des Assignments
  * Date: 31 Janvier 2025
- * 
+ *
  * Interface complète pour gérer les assignments/devoirs avec soumissions et notation
  */
 
@@ -13,12 +13,40 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -73,8 +101,10 @@ export default function AssignmentsManagement() {
   const { store, loading: storeLoading } = useStore();
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null);
-  const { data: assignments = [], isLoading: assignmentsLoading } = useCourseAssignments(selectedCourseId);
-  const { data: submissions = [], isLoading: submissionsLoading } = useAssignmentSubmissions(selectedAssignmentId);
+  const { data: assignments = [], isLoading: assignmentsLoading } =
+    useCourseAssignments(selectedCourseId);
+  const { data: submissions = [], isLoading: submissionsLoading } =
+    useAssignmentSubmissions(selectedAssignmentId);
   const queryClient = useQueryClient();
   const createAssignment = useCreateAssignment();
   const updateAssignment = useUpdateAssignment();
@@ -83,7 +113,9 @@ export default function AssignmentsManagement() {
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'graded' | 'returned'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'graded' | 'returned'>(
+    'all'
+  );
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingAssignmentId, setEditingAssignmentId] = useState<string | null>(null);
   const [deletingAssignmentId, setDeletingAssignmentId] = useState<string | null>(null);
@@ -139,9 +171,7 @@ export default function AssignmentsManagement() {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        (a) =>
-          a.title.toLowerCase().includes(query) ||
-          a.description?.toLowerCase().includes(query)
+        a => a.title.toLowerCase().includes(query) || a.description?.toLowerCase().includes(query)
       );
     }
 
@@ -154,7 +184,7 @@ export default function AssignmentsManagement() {
 
     // Filtre par statut
     if (statusFilter !== 'all') {
-      filtered = filtered.filter((s) => {
+      filtered = filtered.filter(s => {
         if (statusFilter === 'pending') return s.status === 'submitted';
         if (statusFilter === 'graded') return s.status === 'graded';
         if (statusFilter === 'returned') return s.status === 'returned';
@@ -171,15 +201,16 @@ export default function AssignmentsManagement() {
     return {
       total: assignments.length,
       totalSubmissions: allSubmissions.length,
-      pending: allSubmissions.filter((s) => s.status === 'submitted').length,
-      graded: allSubmissions.filter((s) => s.status === 'graded').length,
-      returned: allSubmissions.filter((s) => s.status === 'returned').length,
-      averageGrade: allSubmissions.length > 0
-        ? allSubmissions
-            .filter((s) => s.grade !== null && s.grade !== undefined)
-            .reduce((sum, s) => sum + (s.grade || 0), 0) /
-          allSubmissions.filter((s) => s.grade !== null && s.grade !== undefined).length
-        : 0,
+      pending: allSubmissions.filter(s => s.status === 'submitted').length,
+      graded: allSubmissions.filter(s => s.status === 'graded').length,
+      returned: allSubmissions.filter(s => s.status === 'returned').length,
+      averageGrade:
+        allSubmissions.length > 0
+          ? allSubmissions
+              .filter(s => s.grade !== null && s.grade !== undefined)
+              .reduce((sum, s) => sum + (s.grade || 0), 0) /
+            allSubmissions.filter(s => s.grade !== null && s.grade !== undefined).length
+          : 0,
     };
   }, [assignments, submissions]);
 
@@ -203,7 +234,7 @@ export default function AssignmentsManagement() {
   };
 
   const handleEditAssignment = (assignmentId: string) => {
-    const assignment = assignments.find((a) => a.id === assignmentId);
+    const assignment = assignments.find(a => a.id === assignmentId);
     if (assignment) {
       setFormData({
         title: assignment.title,
@@ -212,7 +243,9 @@ export default function AssignmentsManagement() {
         assignment_type: assignment.assignment_type,
         points_possible: assignment.points_possible.toString(),
         grading_type: assignment.grading_type,
-        due_date: assignment.due_date ? new Date(assignment.due_date).toISOString().slice(0, 16) : '',
+        due_date: assignment.due_date
+          ? new Date(assignment.due_date).toISOString().slice(0, 16)
+          : '',
         allow_late_submission: assignment.allow_late_submission,
         late_penalty_percentage: assignment.late_penalty_percentage.toString(),
         is_required: assignment.is_required,
@@ -235,7 +268,7 @@ export default function AssignmentsManagement() {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: errorMessage || 'Impossible de supprimer l\'assignment',
+        description: errorMessage || "Impossible de supprimer l'assignment",
         variant: 'destructive',
       });
     }
@@ -300,7 +333,14 @@ export default function AssignmentsManagement() {
   };
 
   const getStatusBadge = (status: string) => {
-    const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
+    const badges: Record<
+      string,
+      {
+        label: string;
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        className?: string;
+      }
+    > = {
       draft: { label: 'Brouillon', variant: 'secondary' },
       submitted: { label: 'Soumis', variant: 'default', className: 'bg-blue-600' },
       graded: { label: 'Noté', variant: 'default', className: 'bg-green-600' },
@@ -325,7 +365,7 @@ export default function AssignmentsManagement() {
             <div className="container mx-auto p-4 lg:p-6 space-y-6">
               <Skeleton className="h-12 w-full" />
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map((i) => (
+                {[1, 2, 3, 4].map(i => (
                   <Skeleton key={i} className="h-24" />
                 ))}
               </div>
@@ -361,7 +401,11 @@ export default function AssignmentsManagement() {
                   Créez et gérez les devoirs pour vos cours avec notation et feedback
                 </p>
               </div>
-              <Button onClick={handleCreateAssignment} className="shrink-0" disabled={!selectedCourseId}>
+              <Button
+                onClick={handleCreateAssignment}
+                className="shrink-0"
+                disabled={!selectedCourseId}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvel Assignment
               </Button>
@@ -421,7 +465,9 @@ export default function AssignmentsManagement() {
                       <Clock className="h-4 w-4 text-orange-600" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-lg sm:text-2xl font-bold text-orange-600">{stats.pending}</div>
+                      <div className="text-lg sm:text-2xl font-bold text-orange-600">
+                        {stats.pending}
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -431,7 +477,9 @@ export default function AssignmentsManagement() {
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-lg sm:text-2xl font-bold text-green-600">{stats.graded}</div>
+                      <div className="text-lg sm:text-2xl font-bold text-green-600">
+                        {stats.graded}
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -463,7 +511,7 @@ export default function AssignmentsManagement() {
                         <Input
                           placeholder="Rechercher un assignment..."
                           value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
+                          onChange={e => setSearchQuery(e.target.value)}
                           className="pl-10"
                         />
                       </div>
@@ -506,9 +554,9 @@ export default function AssignmentsManagement() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {filteredAssignments.map((assignment) => {
+                            {filteredAssignments.map(assignment => {
                               const assignmentSubmissions = submissions.filter(
-                                (s) => s.assignment_id === assignment.id
+                                s => s.assignment_id === assignment.id
                               );
                               return (
                                 <TableRow key={assignment.id}>
@@ -526,14 +574,22 @@ export default function AssignmentsManagement() {
                                     <Badge variant="outline">{assignment.assignment_type}</Badge>
                                   </TableCell>
                                   <TableCell>
-                                    <div className="font-semibold">{assignment.points_possible} pts</div>
+                                    <div className="font-semibold">
+                                      {assignment.points_possible} pts
+                                    </div>
                                   </TableCell>
                                   <TableCell>
                                     {assignment.due_date ? (
                                       <div className="text-sm">
-                                        <div>{format(new Date(assignment.due_date), 'dd MMM yyyy', { locale: fr })}</div>
+                                        <div>
+                                          {format(new Date(assignment.due_date), 'dd MMM yyyy', {
+                                            locale: fr,
+                                          })}
+                                        </div>
                                         <div className="text-muted-foreground">
-                                          {format(new Date(assignment.due_date), 'HH:mm', { locale: fr })}
+                                          {format(new Date(assignment.due_date), 'HH:mm', {
+                                            locale: fr,
+                                          })}
                                         </div>
                                       </div>
                                     ) : (
@@ -554,11 +610,15 @@ export default function AssignmentsManagement() {
                                         </Button>
                                       </DropdownMenuTrigger>
                                       <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => handleViewSubmissions(assignment.id)}>
+                                        <DropdownMenuItem
+                                          onClick={() => handleViewSubmissions(assignment.id)}
+                                        >
                                           <Eye className="h-4 w-4 mr-2" />
                                           Voir soumissions ({assignmentSubmissions.length})
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleEditAssignment(assignment.id)}>
+                                        <DropdownMenuItem
+                                          onClick={() => handleEditAssignment(assignment.id)}
+                                        >
                                           <Edit className="h-4 w-4 mr-2" />
                                           Éditer
                                         </DropdownMenuItem>
@@ -589,11 +649,11 @@ export default function AssignmentsManagement() {
               <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
-                    {editingAssignmentId ? 'Éditer l\'Assignment' : 'Créer un Assignment'}
+                    {editingAssignmentId ? "Éditer l'Assignment" : 'Créer un Assignment'}
                   </DialogTitle>
                   <DialogDescription>
                     {editingAssignmentId
-                      ? 'Modifiez les informations de l\'assignment'
+                      ? "Modifiez les informations de l'assignment"
                       : 'Créez un nouveau devoir pour votre cours'}
                   </DialogDescription>
                 </DialogHeader>
@@ -603,7 +663,7 @@ export default function AssignmentsManagement() {
                     <Input
                       id="title"
                       value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      onChange={e => setFormData({ ...formData, title: e.target.value })}
                       placeholder="Ex: Projet Final React"
                     />
                   </div>
@@ -613,7 +673,7 @@ export default function AssignmentsManagement() {
                     <Textarea
                       id="description"
                       value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      onChange={e => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Description de l'assignment..."
                       rows={3}
                     />
@@ -624,7 +684,7 @@ export default function AssignmentsManagement() {
                     <Textarea
                       id="instructions"
                       value={formData.instructions}
-                      onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
+                      onChange={e => setFormData({ ...formData, instructions: e.target.value })}
                       placeholder="Instructions détaillées pour les étudiants..."
                       rows={5}
                     />
@@ -635,7 +695,12 @@ export default function AssignmentsManagement() {
                       <Label htmlFor="assignment_type">Type d'Assignment</Label>
                       <Select
                         value={formData.assignment_type}
-                        onValueChange={(v) => setFormData({ ...formData, assignment_type: v as any })}
+                        onValueChange={v =>
+                          setFormData({
+                            ...formData,
+                            assignment_type: v as 'file_upload' | 'text' | 'url' | 'code' | 'mixed',
+                          })
+                        }
                       >
                         <SelectTrigger id="assignment_type">
                           <SelectValue />
@@ -654,7 +719,12 @@ export default function AssignmentsManagement() {
                       <Label htmlFor="grading_type">Type de Notation</Label>
                       <Select
                         value={formData.grading_type}
-                        onValueChange={(v) => setFormData({ ...formData, grading_type: v as any })}
+                        onValueChange={v =>
+                          setFormData({
+                            ...formData,
+                            grading_type: v as 'points' | 'percentage' | 'letter' | 'pass_fail',
+                          })
+                        }
                       >
                         <SelectTrigger id="grading_type">
                           <SelectValue />
@@ -676,7 +746,9 @@ export default function AssignmentsManagement() {
                         id="points_possible"
                         type="number"
                         value={formData.points_possible}
-                        onChange={(e) => setFormData({ ...formData, points_possible: e.target.value })}
+                        onChange={e =>
+                          setFormData({ ...formData, points_possible: e.target.value })
+                        }
                         min="0"
                       />
                     </div>
@@ -687,7 +759,7 @@ export default function AssignmentsManagement() {
                         id="due_date"
                         type="datetime-local"
                         value={formData.due_date}
-                        onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                        onChange={e => setFormData({ ...formData, due_date: e.target.value })}
                       />
                     </div>
                   </div>
@@ -699,7 +771,9 @@ export default function AssignmentsManagement() {
                         id="late_penalty_percentage"
                         type="number"
                         value={formData.late_penalty_percentage}
-                        onChange={(e) => setFormData({ ...formData, late_penalty_percentage: e.target.value })}
+                        onChange={e =>
+                          setFormData({ ...formData, late_penalty_percentage: e.target.value })
+                        }
                         min="0"
                         max="100"
                       />
@@ -710,7 +784,10 @@ export default function AssignmentsManagement() {
                     <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                       Annuler
                     </Button>
-                    <Button onClick={handleSaveAssignment} disabled={createAssignment.isPending || updateAssignment.isPending}>
+                    <Button
+                      onClick={handleSaveAssignment}
+                      disabled={createAssignment.isPending || updateAssignment.isPending}
+                    >
                       {editingAssignmentId ? 'Sauvegarder' : 'Créer'}
                     </Button>
                   </div>
@@ -719,7 +796,10 @@ export default function AssignmentsManagement() {
             </Dialog>
 
             {/* Dialog Soumissions */}
-            <Dialog open={!!viewingSubmissionsId} onOpenChange={(open) => !open && setViewingSubmissionsId(null)}>
+            <Dialog
+              open={!!viewingSubmissionsId}
+              onOpenChange={open => !open && setViewingSubmissionsId(null)}
+            >
               <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Soumissions ({filteredSubmissions.length})</DialogTitle>
@@ -729,7 +809,12 @@ export default function AssignmentsManagement() {
                 </DialogHeader>
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
-                    <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+                    <Select
+                      value={statusFilter}
+                      onValueChange={v =>
+                        setStatusFilter(v as 'all' | 'pending' | 'graded' | 'returned')
+                      }
+                    >
                       <SelectTrigger className="w-[180px]">
                         <SelectValue />
                       </SelectTrigger>
@@ -749,7 +834,7 @@ export default function AssignmentsManagement() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {filteredSubmissions.map((submission) => (
+                      {filteredSubmissions.map(submission => (
                         <Card key={submission.id}>
                           <CardHeader>
                             <div className="flex items-start justify-between">
@@ -758,7 +843,14 @@ export default function AssignmentsManagement() {
                                   Soumission #{submission.version}
                                 </CardTitle>
                                 <CardDescription>
-                                  Soumis le {submission.submitted_at ? format(new Date(submission.submitted_at), 'dd MMM yyyy à HH:mm', { locale: fr }) : 'N/A'}
+                                  Soumis le{' '}
+                                  {submission.submitted_at
+                                    ? format(
+                                        new Date(submission.submitted_at),
+                                        'dd MMM yyyy à HH:mm',
+                                        { locale: fr }
+                                      )
+                                    : 'N/A'}
                                   {submission.is_late && (
                                     <Badge variant="destructive" className="ml-2">
                                       En retard ({submission.late_hours}h)
@@ -770,7 +862,8 @@ export default function AssignmentsManagement() {
                                 {getStatusBadge(submission.status)}
                                 {submission.grade !== null && submission.grade !== undefined && (
                                   <Badge variant="default" className="bg-green-600">
-                                    {submission.grade}/{submission.assignment?.points_possible || 100}
+                                    {submission.grade}/
+                                    {submission.assignment?.points_possible || 100}
                                   </Badge>
                                 )}
                               </div>
@@ -782,42 +875,60 @@ export default function AssignmentsManagement() {
                                 <div>
                                   <Label>Texte de soumission</Label>
                                   <div className="mt-2 p-3 bg-muted rounded-lg">
-                                    <p className="text-sm whitespace-pre-wrap">{submission.submission_text}</p>
+                                    <p className="text-sm whitespace-pre-wrap">
+                                      {submission.submission_text}
+                                    </p>
                                   </div>
                                 </div>
                               )}
 
-                              {submission.submission_files && submission.submission_files.length > 0 && (
-                                <div>
-                                  <Label>Fichiers soumis</Label>
-                                  <div className="mt-2 space-y-2">
-                                    {submission.submission_files.map((file: { url: string; name: string; size?: number; type?: string }, index: number) => (
-                                      <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-lg">
-                                        <div className="flex items-center gap-2">
-                                          <FileText className="h-4 w-4" />
-                                          <span className="text-sm">{file.name}</span>
-                                          <span className="text-xs text-muted-foreground">
-                                            ({(file.size / 1024).toFixed(1)} KB)
-                                          </span>
-                                        </div>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => window.open(file.url, '_blank')}
-                                        >
-                                          <Download className="h-4 w-4" />
-                                        </Button>
-                                      </div>
-                                    ))}
+                              {submission.submission_files &&
+                                submission.submission_files.length > 0 && (
+                                  <div>
+                                    <Label>Fichiers soumis</Label>
+                                    <div className="mt-2 space-y-2">
+                                      {submission.submission_files.map(
+                                        (
+                                          file: {
+                                            url: string;
+                                            name: string;
+                                            size?: number;
+                                            type?: string;
+                                          },
+                                          index: number
+                                        ) => (
+                                          <div
+                                            key={index}
+                                            className="flex items-center justify-between p-2 bg-muted rounded-lg"
+                                          >
+                                            <div className="flex items-center gap-2">
+                                              <FileText className="h-4 w-4" />
+                                              <span className="text-sm">{file.name}</span>
+                                              <span className="text-xs text-muted-foreground">
+                                                ({(file.size / 1024).toFixed(1)} KB)
+                                              </span>
+                                            </div>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => window.open(file.url, '_blank')}
+                                            >
+                                              <Download className="h-4 w-4" />
+                                            </Button>
+                                          </div>
+                                        )
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              )}
+                                )}
 
                               {submission.feedback && (
                                 <div>
                                   <Label>Feedback</Label>
                                   <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                    <p className="text-sm whitespace-pre-wrap">{submission.feedback}</p>
+                                    <p className="text-sm whitespace-pre-wrap">
+                                      {submission.feedback}
+                                    </p>
                                   </div>
                                 </div>
                               )}
@@ -854,48 +965,57 @@ export default function AssignmentsManagement() {
             </Dialog>
 
             {/* Dialog Notation */}
-            <Dialog open={!!gradingSubmissionId} onOpenChange={(open) => !open && setGradingSubmissionId(null)}>
+            <Dialog
+              open={!!gradingSubmissionId}
+              onOpenChange={open => !open && setGradingSubmissionId(null)}
+            >
               <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Noter la soumission</DialogTitle>
                 </DialogHeader>
-                {gradingSubmissionId && (() => {
-                  const submission = submissions.find((s) => s.id === gradingSubmissionId);
-                  if (!submission || !submission.assignment) {
-                    return <div className="py-8 text-center text-muted-foreground">Chargement...</div>;
-                  }
-                  
-                  return (
-                    <AssignmentGradingForm
-                      assignment={submission.assignment}
-                      submission={submission}
-                      onSuccess={() => {
-                        setGradingSubmissionId(null);
-                        queryClient.invalidateQueries({ queryKey: ['assignment-submissions'] });
-                      }}
-                      onCancel={() => setGradingSubmissionId(null)}
-                    />
-                  );
-                })()}
+                {gradingSubmissionId &&
+                  (() => {
+                    const submission = submissions.find(s => s.id === gradingSubmissionId);
+                    if (!submission || !submission.assignment) {
+                      return (
+                        <div className="py-8 text-center text-muted-foreground">Chargement...</div>
+                      );
+                    }
+
+                    return (
+                      <AssignmentGradingForm
+                        assignment={submission.assignment}
+                        submission={submission}
+                        onSuccess={() => {
+                          setGradingSubmissionId(null);
+                          queryClient.invalidateQueries({ queryKey: ['assignment-submissions'] });
+                        }}
+                        onCancel={() => setGradingSubmissionId(null)}
+                      />
+                    );
+                  })()}
               </DialogContent>
             </Dialog>
 
             {/* Dialog Suppression */}
             <AlertDialog
               open={!!deletingAssignmentId}
-              onOpenChange={(open) => !open && setDeletingAssignmentId(null)}
+              onOpenChange={open => !open && setDeletingAssignmentId(null)}
             >
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Supprimer cet assignment ?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Cette action est irréversible. L'assignment sera définitivement supprimé ainsi que toutes ses soumissions.
+                    Cette action est irréversible. L'assignment sera définitivement supprimé ainsi
+                    que toutes ses soumissions.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() => deletingAssignmentId && handleDeleteAssignment(deletingAssignmentId)}
+                    onClick={() =>
+                      deletingAssignmentId && handleDeleteAssignment(deletingAssignmentId)
+                    }
                     className="bg-red-600 hover:bg-red-700"
                   >
                     Supprimer
@@ -909,4 +1029,3 @@ export default function AssignmentsManagement() {
     </SidebarProvider>
   );
 }
-

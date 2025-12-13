@@ -1,7 +1,7 @@
 /**
  * Page My Downloads - Mes Téléchargements (Customer Portal)
  * Date: 26 Janvier 2025
- * 
+ *
  * Fonctionnalités:
  * - Liste tous téléchargements produits digitaux
  * - Statistiques téléchargements
@@ -9,7 +9,7 @@
  * - Recherche par produit
  * - Bouton re-télécharger
  * - Historique complet
- * 
+ *
  * Style inspiré de la page Inventaire avec design responsive et animations
  */
 
@@ -26,6 +26,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import type { User } from '@supabase/supabase-js';
 import {
   Download,
   Search,
@@ -50,7 +51,7 @@ import { logger } from '@/lib/logger';
 // Composant interne pour utiliser useSidebar
 function MobileHeader() {
   const { toggleSidebar } = useSidebar();
-  
+
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm lg:hidden">
       <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-3 px-3 sm:px-4">
@@ -62,12 +63,13 @@ function MobileHeader() {
         >
           <Menu className="h-6 w-6 sm:h-7 sm:w-7" aria-hidden="true" />
         </button>
-        
+
         <div className="flex-1 min-w-0 flex items-center gap-2">
-          <Download className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0" aria-hidden="true" />
-          <h1 className="text-sm sm:text-base font-bold truncate">
-            Mes Téléchargements
-          </h1>
+          <Download
+            className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0"
+            aria-hidden="true"
+          />
+          <h1 className="text-sm sm:text-base font-bold truncate">Mes Téléchargements</h1>
         </div>
       </div>
     </header>
@@ -77,7 +79,7 @@ function MobileHeader() {
 export default function MyDownloads() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [searchInput, setSearchInput] = useState('');
   const debouncedSearch = useDebounce(searchInput, 300);
   const [statusFilter, setStatusFilter] = useState<'all' | 'success' | 'failed'>('all');
@@ -100,15 +102,15 @@ export default function MyDownloads() {
   // Filter downloads with useMemo
   const filteredDownloads = useMemo(() => {
     if (!downloads) return [];
-    
+
     return downloads.filter((d: DigitalDownload) => {
       const productName = d.digital_product?.product?.name || '';
       const matchesSearch = productName.toLowerCase().includes(debouncedSearch.toLowerCase());
-      const matchesStatus = 
+      const matchesStatus =
         statusFilter === 'all' ||
         (statusFilter === 'success' && d.download_success) ||
         (statusFilter === 'failed' && !d.download_success);
-      
+
       return matchesSearch && matchesStatus;
     });
   }, [downloads, debouncedSearch, statusFilter]);
@@ -119,7 +121,8 @@ export default function MyDownloads() {
       total: downloads?.length || 0,
       successful: downloads?.filter((d: DigitalDownload) => d.download_success).length || 0,
       failed: downloads?.filter((d: DigitalDownload) => !d.download_success).length || 0,
-      uniqueProducts: new Set(downloads?.map((d: DigitalDownload) => d.digital_product_id)).size || 0,
+      uniqueProducts:
+        new Set(downloads?.map((d: DigitalDownload) => d.digital_product_id)).size || 0,
     };
   }, [downloads]);
 
@@ -160,11 +163,17 @@ export default function MyDownloads() {
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
             {/* Header avec animation - Style Inventory */}
-            <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
+            <div
+              ref={headerRef}
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+            >
               <div>
                 <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                   <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                    <Download className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                    <Download
+                      className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400"
+                      aria-hidden="true"
+                    />
                   </div>
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     Mes Téléchargements
@@ -185,15 +194,39 @@ export default function MyDownloads() {
             </div>
 
             {/* Stats Cards - Style Inventory (Purple-Pink Gradient) */}
-            <div 
+            <div
               ref={statsRef}
               className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
             >
               {[
-                { label: 'Total Téléchargements', value: stats.total, icon: Download, color: "from-purple-600 to-pink-600", subtitle: "Depuis le début" },
-                { label: 'Réussis', value: stats.successful, icon: CheckCircle2, color: "from-green-600 to-emerald-600", subtitle: `${stats.total > 0 ? Math.round((stats.successful / stats.total) * 100) : 0}% de succès` },
-                { label: 'Échoués', value: stats.failed, icon: XCircle, color: "from-red-600 to-rose-600", subtitle: "À réessayer" },
-                { label: 'Produits Uniques', value: stats.uniqueProducts, icon: Package, color: "from-blue-600 to-cyan-600", subtitle: "Produits différents" },
+                {
+                  label: 'Total Téléchargements',
+                  value: stats.total,
+                  icon: Download,
+                  color: 'from-purple-600 to-pink-600',
+                  subtitle: 'Depuis le début',
+                },
+                {
+                  label: 'Réussis',
+                  value: stats.successful,
+                  icon: CheckCircle2,
+                  color: 'from-green-600 to-emerald-600',
+                  subtitle: `${stats.total > 0 ? Math.round((stats.successful / stats.total) * 100) : 0}% de succès`,
+                },
+                {
+                  label: 'Échoués',
+                  value: stats.failed,
+                  icon: XCircle,
+                  color: 'from-red-600 to-rose-600',
+                  subtitle: 'À réessayer',
+                },
+                {
+                  label: 'Produits Uniques',
+                  value: stats.uniqueProducts,
+                  icon: Package,
+                  color: 'from-blue-600 to-cyan-600',
+                  subtitle: 'Produits différents',
+                },
               ].map((stat, index) => {
                 const Icon = stat.icon;
                 return (
@@ -209,7 +242,9 @@ export default function MyDownloads() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-3 sm:p-4 pt-0">
-                      <div className={`text-base sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                      <div
+                        className={`text-base sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                      >
                         {stat.value}
                       </div>
                       {stat.subtitle && (
@@ -224,7 +259,10 @@ export default function MyDownloads() {
             </div>
 
             {/* Search & Filters - Style Inventory */}
-            <Card ref={filtersRef} className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <Card
+              ref={filtersRef}
+              className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700"
+            >
               <CardContent className="p-3 sm:p-4">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                   {/* Search */}
@@ -233,7 +271,7 @@ export default function MyDownloads() {
                     <Input
                       placeholder="Rechercher un produit..."
                       value={searchInput}
-                      onChange={(e) => setSearchInput(e.target.value)}
+                      onChange={e => setSearchInput(e.target.value)}
                       className="pl-8 sm:pl-10 pr-12 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
                       aria-label="Rechercher"
                     />
@@ -251,22 +289,25 @@ export default function MyDownloads() {
                   </div>
 
                   {/* Status Filter */}
-                  <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+                  <Tabs
+                    value={statusFilter}
+                    onValueChange={v => setStatusFilter(v as 'all' | 'success' | 'failed')}
+                  >
                     <TabsList className="grid w-full sm:w-auto grid-cols-3 h-auto p-1 bg-muted/50 backdrop-blur-sm">
-                      <TabsTrigger 
-                        value="all" 
+                      <TabsTrigger
+                        value="all"
                         className="text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
                       >
                         Tous
                       </TabsTrigger>
-                      <TabsTrigger 
-                        value="success" 
+                      <TabsTrigger
+                        value="success"
                         className="text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white transition-all duration-300"
                       >
                         Réussis
                       </TabsTrigger>
-                      <TabsTrigger 
-                        value="failed" 
+                      <TabsTrigger
+                        value="failed"
                         className="text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-rose-600 data-[state=active]:text-white transition-all duration-300"
                       >
                         Échoués
@@ -278,10 +319,14 @@ export default function MyDownloads() {
             </Card>
 
             {/* Downloads List */}
-            <Card ref={listRef} className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
+            <Card
+              ref={listRef}
+              className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150"
+            >
               <CardHeader>
                 <CardTitle className="text-sm sm:text-base md:text-lg lg:text-xl">
-                  {filteredDownloads?.length || 0} {filteredDownloads?.length === 1 ? 'téléchargement' : 'téléchargements'}
+                  {filteredDownloads?.length || 0}{' '}
+                  {filteredDownloads?.length === 1 ? 'téléchargement' : 'téléchargements'}
                 </CardTitle>
                 <CardDescription className="text-sm sm:text-base">
                   Liste de tous vos téléchargements de produits digitaux
@@ -291,14 +336,16 @@ export default function MyDownloads() {
                 {!filteredDownloads || filteredDownloads.length === 0 ? (
                   <div className="text-center py-8 sm:py-12">
                     <Download className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-base sm:text-lg font-semibold mb-2">Aucun téléchargement</h3>
+                    <h3 className="text-base sm:text-lg font-semibold mb-2">
+                      Aucun téléchargement
+                    </h3>
                     <p className="text-sm sm:text-base text-muted-foreground mb-4 px-4">
                       {debouncedSearch || statusFilter !== 'all'
                         ? 'Aucun téléchargement ne correspond à vos critères'
-                        : 'Vous n\'avez pas encore téléchargé de produits digitaux'}
+                        : "Vous n'avez pas encore téléchargé de produits digitaux"}
                     </p>
                     {!debouncedSearch && statusFilter === 'all' && (
-                      <Button 
+                      <Button
                         onClick={() => navigate('/marketplace')}
                         className="min-h-[44px] touch-manipulation bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                       >
@@ -309,7 +356,10 @@ export default function MyDownloads() {
                 ) : (
                   <div className="space-y-3 sm:space-y-4">
                     {filteredDownloads.map((download: DigitalDownload) => (
-                      <Card key={download.id} className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.01]">
+                      <Card
+                        key={download.id}
+                        className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.01]"
+                      >
                         <CardContent className="p-3 sm:p-4 md:p-6">
                           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
                             {/* Product Info */}
@@ -321,14 +371,17 @@ export default function MyDownloads() {
                                   className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover flex-shrink-0 border border-border/50"
                                 />
                               )}
-                              
+
                               <div className="flex-1 min-w-0">
                                 <h3 className="font-semibold text-sm sm:text-base md:text-lg mb-2 break-words">
                                   {download.digital_product?.product?.name || 'Produit inconnu'}
                                 </h3>
-                                
+
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 flex-wrap">
-                                  <Badge variant={download.download_success ? 'default' : 'destructive'} className="text-xs">
+                                  <Badge
+                                    variant={download.download_success ? 'default' : 'destructive'}
+                                    className="text-xs"
+                                  >
                                     {download.download_success ? (
                                       <>
                                         <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -341,7 +394,7 @@ export default function MyDownloads() {
                                       </>
                                     )}
                                   </Badge>
-                                  
+
                                   <span className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
                                     <Calendar className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                                     {new Date(download.download_date).toLocaleDateString('fr-FR', {
@@ -407,4 +460,3 @@ export default function MyDownloads() {
     </SidebarProvider>
   );
 }
-

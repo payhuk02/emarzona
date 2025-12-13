@@ -204,9 +204,6 @@ export function useDragAndDrop(options: UseDragAndDropOptions): UseDragAndDropRe
           fileCount: validFiles.length,
           maxFiles,
         });
-          .catch(() => {
-            // Fallback silencieux
-          });
         validFiles.splice(maxFiles);
       }
 

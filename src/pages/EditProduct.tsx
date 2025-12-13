@@ -1,44 +1,43 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState, lazy, Suspense } from "react";
-import { useStore } from "@/hooks/useStore";
-import { supabase } from "@/integrations/supabase/client";
-import { ProductForm } from "@/components/products/ProductForm";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import { Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useParams } from 'react-router-dom';
+import { useEffect, useState, lazy, Suspense } from 'react';
+import { useStore } from '@/hooks/useStore';
+import { supabase } from '@/integrations/supabase/client';
+import { ProductForm } from '@/components/products/ProductForm';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
+import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import type { Product } from '@/types/marketplace';
 
 // Lazy load artist product wizard
-const EditArtistProductWizard = lazy(() => 
-  import("@/components/products/edit/EditArtistProductWizard").then(m => ({ default: m.EditArtistProductWizard }))
+const EditArtistProductWizard = lazy(() =>
+  import('@/components/products/edit/EditArtistProductWizard').then(m => ({
+    default: m.EditArtistProductWizard,
+  }))
 );
 
 const EditProduct = () => {
   const { id } = useParams();
   const { store, loading: storeLoading } = useStore();
   const { toast } = useToast();
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id) return;
-      
+
       try {
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .eq("id", id)
-          .single();
+        const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
 
         if (error) throw error;
         setProduct(data);
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
-          title: "Erreur",
+          title: 'Erreur',
           description: errorMessage,
-          variant: "destructive",
+          variant: 'destructive',
         });
       } finally {
         setLoading(false);
@@ -88,11 +87,13 @@ const EditProduct = () => {
         <div className="min-h-screen flex w-full bg-background">
           <AppSidebar />
           <main className="flex-1">
-            <Suspense fallback={
-              <div className="flex items-center justify-center min-h-screen">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            }>
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              }
+            >
               <EditArtistProductWizard
                 productId={id}
                 storeId={store.id}

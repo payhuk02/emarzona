@@ -1,21 +1,48 @@
-import React, { useState, useCallback } from "react";
-import { Card } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MobileTableCard } from "@/components/ui/mobile-table-card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Eye, Trash2, Edit, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { supabase } from "@/integrations/supabase/client";
-import { Order, SortColumn, SortDirection } from "@/hooks/useOrders";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { OrderDetailDialog } from "./OrderDetailDialog";
-import { OrderEditDialog } from "./OrderEditDialog";
+import React, { useState, useCallback } from 'react';
+import { Card } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { MoreHorizontal, Eye, Trash2, Edit, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/integrations/supabase/client';
+import { Order, SortColumn, SortDirection } from '@/hooks/useOrders';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { OrderDetailDialog } from './OrderDetailDialog';
+import { OrderEditDialog } from './OrderEditDialog';
 
 interface OrdersTableProps {
   orders: Order[];
@@ -26,7 +53,14 @@ interface OrdersTableProps {
   onSort: (column: SortColumn) => void;
 }
 
-const OrdersTableComponent = ({ orders, onUpdate, storeId, sortBy, sortDirection, onSort }: OrdersTableProps) => {
+const OrdersTableComponent = ({
+  orders,
+  onUpdate,
+  storeId,
+  sortBy,
+  sortDirection,
+  onSort,
+}: OrdersTableProps) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -36,20 +70,24 @@ const OrdersTableComponent = ({ orders, onUpdate, storeId, sortBy, sortDirection
   const [loading, setLoading] = useState(false);
 
   // Helper component for sortable column headers
-  const SortableHeader = ({ column, children }: { column: SortColumn; children: React.ReactNode }) => {
+  const SortableHeader = ({
+    column,
+    children,
+  }: {
+    column: SortColumn;
+    children: React.ReactNode;
+  }) => {
     const isActive = sortBy === column;
-    const Icon = isActive 
-      ? (sortDirection === 'asc' ? ArrowUp : ArrowDown)
-      : ArrowUpDown;
-    
+    const Icon = isActive ? (sortDirection === 'asc' ? ArrowUp : ArrowDown) : ArrowUpDown;
+
     return (
-      <TableHead 
+      <TableHead
         className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
         onClick={() => onSort(column)}
         role="button"
         aria-label={`Trier par ${children}${isActive ? ` (${sortDirection === 'asc' ? 'croissant' : 'décroissant'})` : ''}`}
         tabIndex={0}
-        onKeyDown={(e) => {
+        onKeyDown={e => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             onSort(column);
@@ -58,86 +96,93 @@ const OrdersTableComponent = ({ orders, onUpdate, storeId, sortBy, sortDirection
       >
         <div className="flex items-center gap-2">
           {children}
-          <Icon className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} aria-hidden="true" />
+          <Icon
+            className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
+            aria-hidden="true"
+          />
         </div>
       </TableHead>
     );
   };
 
-  const handleStatusChange = useCallback(async (orderId: string, newStatus: string) => {
-    try {
-      const { error } = await supabase
-        .from('orders')
-        .update({ status: newStatus })
-        .eq('id', orderId);
+  const handleStatusChange = useCallback(
+    async (orderId: string, newStatus: string) => {
+      try {
+        const { error } = await supabase
+          .from('orders')
+          .update({ status: newStatus })
+          .eq('id', orderId);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Succès",
-        description: "Statut mis à jour",
-      });
+        toast({
+          title: 'Succès',
+          description: 'Statut mis à jour',
+        });
 
-      onUpdate();
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      toast({
-        title: "Erreur",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    }
-  }, [onUpdate]); // Note: toast est stable
+        onUpdate();
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        toast({
+          title: 'Erreur',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      }
+    },
+    [onUpdate]
+  ); // Note: toast est stable
 
-  const handlePaymentStatusChange = useCallback(async (orderId: string, newStatus: string) => {
-    try {
-      const { error } = await supabase
-        .from('orders')
-        .update({ payment_status: newStatus })
-        .eq('id', orderId);
+  const handlePaymentStatusChange = useCallback(
+    async (orderId: string, newStatus: string) => {
+      try {
+        const { error } = await supabase
+          .from('orders')
+          .update({ payment_status: newStatus })
+          .eq('id', orderId);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Succès",
-        description: "Statut de paiement mis à jour",
-      });
+        toast({
+          title: 'Succès',
+          description: 'Statut de paiement mis à jour',
+        });
 
-      onUpdate();
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      toast({
-        title: "Erreur",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    }
-  }, [onUpdate]); // Note: toast est stable
+        onUpdate();
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        toast({
+          title: 'Erreur',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      }
+    },
+    [onUpdate]
+  ); // Note: toast est stable
 
   const handleDelete = useCallback(async () => {
     if (!deleteId) return;
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('orders')
-        .delete()
-        .eq('id', deleteId);
+      const { error } = await supabase.from('orders').delete().eq('id', deleteId);
 
       if (error) throw error;
 
       toast({
-        title: "Succès",
-        description: "Commande supprimée avec succès",
+        title: 'Succès',
+        description: 'Commande supprimée avec succès',
       });
 
       onUpdate();
       setDeleteId(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
+        title: 'Erreur',
+        description: errorMessage,
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -145,45 +190,37 @@ const OrdersTableComponent = ({ orders, onUpdate, storeId, sortBy, sortDirection
   }, [deleteId, onUpdate]); // Note: toast est stable
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      pending: "secondary",
-      processing: "default",
-      completed: "outline",
-      cancelled: "destructive",
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+      pending: 'secondary',
+      processing: 'default',
+      completed: 'outline',
+      cancelled: 'destructive',
     };
 
     const labels: Record<string, string> = {
-      pending: "En attente",
-      processing: "En cours",
-      completed: "Terminée",
-      cancelled: "Annulée",
+      pending: 'En attente',
+      processing: 'En cours',
+      completed: 'Terminée',
+      cancelled: 'Annulée',
     };
 
-    return (
-      <Badge variant={variants[status] || "default"}>
-        {labels[status] || status}
-      </Badge>
-    );
+    return <Badge variant={variants[status] || 'default'}>{labels[status] || status}</Badge>;
   };
 
   const getPaymentBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      pending: "secondary",
-      paid: "outline",
-      failed: "destructive",
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+      pending: 'secondary',
+      paid: 'outline',
+      failed: 'destructive',
     };
 
     const labels: Record<string, string> = {
-      pending: "En attente",
-      paid: "Payée",
-      failed: "Échouée",
+      pending: 'En attente',
+      paid: 'Payée',
+      failed: 'Échouée',
     };
 
-    return (
-      <Badge variant={variants[status] || "default"}>
-        {labels[status] || status}
-      </Badge>
-    );
+    return <Badge variant={variants[status] || 'default'}>{labels[status] || status}</Badge>;
   };
 
   return (
@@ -193,35 +230,36 @@ const OrdersTableComponent = ({ orders, onUpdate, storeId, sortBy, sortDirection
           <MobileTableCard
             data={orders}
             columns={[
-              { 
-                key: 'order_number', 
-                label: 'N° Commande', 
+              {
+                key: 'order_number',
+                label: 'N° Commande',
                 priority: 'high',
-                className: 'font-medium'
+                className: 'font-medium',
               },
-              { 
-                key: 'customers', 
-                label: 'Client', 
+              {
+                key: 'customers',
+                label: 'Client',
                 priority: 'high',
-                render: (value) => value?.name || "Client non spécifié"
+                render: value => value?.name || 'Client non spécifié',
               },
-              { 
-                key: 'total_amount', 
-                label: 'Montant', 
+              {
+                key: 'total_amount',
+                label: 'Montant',
                 priority: 'high',
-                render: (value, row) => `${value.toLocaleString('fr-FR', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                })} ${row.currency}`
+                render: (value, row) =>
+                  `${value.toLocaleString('fr-FR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })} ${row.currency}`,
               },
-              { 
-                key: 'status', 
-                label: 'Statut', 
+              {
+                key: 'status',
+                label: 'Statut',
                 priority: 'high',
                 render: (value, row) => (
                   <Select
                     value={value}
-                    onValueChange={(newValue) => handleStatusChange(row.id, newValue)}
+                    onValueChange={newValue => handleStatusChange(row.id, newValue)}
                   >
                     <SelectTrigger className="w-full min-h-[44px]">
                       <SelectValue />
@@ -233,16 +271,16 @@ const OrdersTableComponent = ({ orders, onUpdate, storeId, sortBy, sortDirection
                       <SelectItem value="cancelled">Annulée</SelectItem>
                     </SelectContent>
                   </Select>
-                )
+                ),
               },
-              { 
-                key: 'payment_status', 
-                label: 'Paiement', 
+              {
+                key: 'payment_status',
+                label: 'Paiement',
                 priority: 'medium',
                 render: (value, row) => (
                   <Select
                     value={value}
-                    onValueChange={(newValue) => handlePaymentStatusChange(row.id, newValue)}
+                    onValueChange={newValue => handlePaymentStatusChange(row.id, newValue)}
                   >
                     <SelectTrigger className="w-full min-h-[44px]">
                       <SelectValue />
@@ -253,16 +291,16 @@ const OrdersTableComponent = ({ orders, onUpdate, storeId, sortBy, sortDirection
                       <SelectItem value="failed">Échouée</SelectItem>
                     </SelectContent>
                   </Select>
-                )
+                ),
               },
-              { 
-                key: 'created_at', 
-                label: 'Date', 
+              {
+                key: 'created_at',
+                label: 'Date',
                 priority: 'low',
-                render: (value) => format(new Date(value), "dd MMM yyyy", { locale: fr })
+                render: value => format(new Date(value), 'dd MMM yyyy', { locale: fr }),
               },
             ]}
-            actions={(order) => (
+            actions={order => (
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant="outline"
@@ -315,22 +353,21 @@ const OrdersTableComponent = ({ orders, onUpdate, storeId, sortBy, sortDirection
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
+                {orders.map(order => (
                   <TableRow key={order.id}>
                     <TableCell className="font-medium">{order.order_number}</TableCell>
-                    <TableCell>
-                      {order.customers?.name || "Client non spécifié"}
-                    </TableCell>
+                    <TableCell>{order.customers?.name || 'Client non spécifié'}</TableCell>
                     <TableCell>
                       {order.total_amount.toLocaleString('fr-FR', {
                         minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                      })} {order.currency}
+                        maximumFractionDigits: 2,
+                      })}{' '}
+                      {order.currency}
                     </TableCell>
                     <TableCell>
                       <Select
                         value={order.status}
-                        onValueChange={(value) => handleStatusChange(order.id, value)}
+                        onValueChange={value => handleStatusChange(order.id, value)}
                       >
                         <SelectTrigger className="w-[130px] h-8">
                           <SelectValue />
@@ -346,7 +383,7 @@ const OrdersTableComponent = ({ orders, onUpdate, storeId, sortBy, sortDirection
                     <TableCell>
                       <Select
                         value={order.payment_status}
-                        onValueChange={(value) => handlePaymentStatusChange(order.id, value)}
+                        onValueChange={value => handlePaymentStatusChange(order.id, value)}
                       >
                         <SelectTrigger className="w-[120px] h-8">
                           <SelectValue />
@@ -359,12 +396,16 @@ const OrdersTableComponent = ({ orders, onUpdate, storeId, sortBy, sortDirection
                       </Select>
                     </TableCell>
                     <TableCell>
-                      {format(new Date(order.created_at), "dd MMM yyyy", { locale: fr })}
+                      {format(new Date(order.created_at), 'dd MMM yyyy', { locale: fr })}
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" aria-label={`Actions pour la commande ${order.order_number || order.id}`}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={`Actions pour la commande ${order.order_number || order.id}`}
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -430,7 +471,7 @@ const OrdersTableComponent = ({ orders, onUpdate, storeId, sortBy, sortDirection
           <AlertDialogFooter>
             <AlertDialogCancel disabled={loading}>Annuler</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={loading}>
-              {loading ? "Suppression..." : "Supprimer"}
+              {loading ? 'Suppression...' : 'Supprimer'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -451,10 +492,11 @@ export const OrdersTable = React.memo(OrdersTableComponent, (prevProps, nextProp
     prevProps.onUpdate === nextProps.onUpdate &&
     prevProps.onSort === nextProps.onSort &&
     // Comparaison superficielle des orders (comparer les IDs)
-    prevProps.orders.every((order, index) => 
-      order.id === nextProps.orders[index]?.id &&
-      order.status === nextProps.orders[index]?.status &&
-      order.total === nextProps.orders[index]?.total
+    prevProps.orders.every(
+      (order, index) =>
+        order.id === nextProps.orders[index]?.id &&
+        order.status === nextProps.orders[index]?.status &&
+        order.total === nextProps.orders[index]?.total
     )
   );
 });

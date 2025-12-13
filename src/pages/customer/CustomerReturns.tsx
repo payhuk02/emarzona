@@ -1,7 +1,7 @@
 /**
  * Page de Gestion des Retours Client
  * Date: 31 Janvier 2025
- * 
+ *
  * Interface complète pour que les clients puissent :
  * - Demander des retours
  * - Suivre leurs retours
@@ -16,11 +16,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Package,
@@ -69,7 +81,8 @@ export default function CustomerReturns() {
 
       const { data, error } = await supabase
         .from('orders')
-        .select(`
+        .select(
+          `
           *,
           order_items (
             id,
@@ -85,7 +98,8 @@ export default function CustomerReturns() {
               image_url
             )
           )
-        `)
+        `
+        )
         .eq('customer_id', user.id)
         .eq('status', 'delivered')
         .order('created_at', { ascending: false })
@@ -109,7 +123,8 @@ export default function CustomerReturns() {
 
       const { data, error } = await supabase
         .from('product_returns')
-        .select(`
+        .select(
+          `
           *,
           order_items (
             id,
@@ -123,7 +138,8 @@ export default function CustomerReturns() {
             order_number,
             created_at
           )
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -199,7 +215,14 @@ export default function CustomerReturns() {
   // Get status badge
   const getStatusBadge = (status: string) => {
     type IconComponent = React.ComponentType<{ className?: string }>;
-    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: IconComponent }> = {
+    const statusConfig: Record<
+      string,
+      {
+        label: string;
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        icon: IconComponent;
+      }
+    > = {
       pending: { label: 'En attente', variant: 'secondary', icon: Clock },
       approved: { label: 'Approuvé', variant: 'default', icon: CheckCircle2 },
       rejected: { label: 'Rejeté', variant: 'destructive', icon: XCircle },
@@ -214,7 +237,11 @@ export default function CustomerReturns() {
       cancelled: { label: 'Annulé', variant: 'destructive', icon: XCircle },
     };
 
-    const config = statusConfig[status] || { label: status, variant: 'secondary' as const, icon: AlertCircle };
+    const config = statusConfig[status] || {
+      label: status,
+      variant: 'secondary' as const,
+      icon: AlertCircle,
+    };
     const Icon = config.icon;
 
     return (
@@ -234,7 +261,7 @@ export default function CustomerReturns() {
       damaged: 'Article endommagé',
       size_issue: 'Problème de taille',
       color_issue: 'Problème de couleur',
-      changed_mind: 'Changement d\'avis',
+      changed_mind: "Changement d'avis",
       duplicate: 'Commande en double',
       other: 'Autre',
     };
@@ -278,7 +305,7 @@ export default function CustomerReturns() {
             <div className="container mx-auto p-4 lg:p-6 space-y-6">
               <Skeleton className="h-12 w-full" />
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map((i) => (
+                {[1, 2, 3, 4].map(i => (
                   <Skeleton key={i} className="h-24" />
                 ))}
               </div>
@@ -341,7 +368,9 @@ export default function CustomerReturns() {
                   <Clock className="h-4 w-4 text-yellow-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold text-yellow-600">{stats.pending}</div>
+                  <div className="text-lg sm:text-2xl font-bold text-yellow-600">
+                    {stats.pending}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -351,7 +380,9 @@ export default function CustomerReturns() {
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold text-green-600">{stats.approved}</div>
+                  <div className="text-lg sm:text-2xl font-bold text-green-600">
+                    {stats.approved}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -361,13 +392,18 @@ export default function CustomerReturns() {
                   <CreditCard className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold text-blue-600">{stats.refunded}</div>
+                  <div className="text-lg sm:text-2xl font-bold text-blue-600">
+                    {stats.refunded}
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Tabs */}
-            <Tabs value={selectedTab} onValueChange={(v) => setSelectedTab(v as any)}>
+            <Tabs
+              value={selectedTab}
+              onValueChange={v => setSelectedTab(v as 'requests' | 'history')}
+            >
               <TabsList>
                 <TabsTrigger value="requests">
                   <PackageX className="h-4 w-4 mr-2" />
@@ -403,7 +439,9 @@ export default function CustomerReturns() {
                               </CardTitle>
                               <CardDescription>
                                 Commande {returnItem.orders?.order_number || 'N/A'} -{' '}
-                                {format(new Date(returnItem.created_at), 'dd MMM yyyy', { locale: fr })}
+                                {format(new Date(returnItem.created_at), 'dd MMM yyyy', {
+                                  locale: fr,
+                                })}
                               </CardDescription>
                             </div>
                             {getStatusBadge(returnItem.status)}
@@ -414,11 +452,15 @@ export default function CustomerReturns() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div>
                                 <Label className="text-muted-foreground">Produit</Label>
-                                <p className="font-medium">{returnItem.order_items?.product_name || 'N/A'}</p>
+                                <p className="font-medium">
+                                  {returnItem.order_items?.product_name || 'N/A'}
+                                </p>
                               </div>
                               <div>
                                 <Label className="text-muted-foreground">Raison</Label>
-                                <p className="font-medium">{getReturnReasonLabel(returnItem.return_reason)}</p>
+                                <p className="font-medium">
+                                  {getReturnReasonLabel(returnItem.return_reason)}
+                                </p>
                               </div>
                               <div>
                                 <Label className="text-muted-foreground">Quantité</Label>
@@ -475,11 +517,16 @@ export default function CustomerReturns() {
                   <CardContent>
                     <div className="space-y-4">
                       {returns.map((returnItem: ProductReturn) => (
-                        <div key={returnItem.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div
+                          key={returnItem.id}
+                          className="flex items-center justify-between p-4 border rounded-lg"
+                        >
                           <div>
                             <p className="font-medium">{returnItem.return_number}</p>
                             <p className="text-sm text-muted-foreground">
-                              {format(new Date(returnItem.created_at), 'dd MMM yyyy', { locale: fr })}
+                              {format(new Date(returnItem.created_at), 'dd MMM yyyy', {
+                                locale: fr,
+                              })}
                             </p>
                           </div>
                           {getStatusBadge(returnItem.status)}
@@ -509,7 +556,7 @@ export default function CustomerReturns() {
                         <SelectValue placeholder="Sélectionner une commande" />
                       </SelectTrigger>
                       <SelectContent>
-                        {returnableOrders.map((order) => {
+                        {returnableOrders.map(order => {
                           type OrderWithItems = {
                             id: string;
                             order_number: string;
@@ -519,9 +566,12 @@ export default function CustomerReturns() {
                           };
                           const orderTyped = order as OrderWithItems;
                           return (
-                          <SelectItem key={orderTyped.id} value={orderTyped.id}>
-                            {orderTyped.order_number} - {format(new Date(orderTyped.created_at), 'dd MMM yyyy', { locale: fr })}
-                          </SelectItem>
+                            <SelectItem key={orderTyped.id} value={orderTyped.id}>
+                              {orderTyped.order_number} -{' '}
+                              {format(new Date(orderTyped.created_at), 'dd MMM yyyy', {
+                                locale: fr,
+                              })}
+                            </SelectItem>
                           );
                         })}
                       </SelectContent>
@@ -539,7 +589,9 @@ export default function CustomerReturns() {
                           <SelectContent>
                             <SelectItem value="defective">Produit défectueux</SelectItem>
                             <SelectItem value="wrong_item">Mauvais article</SelectItem>
-                            <SelectItem value="not_as_described">Ne correspond pas à la description</SelectItem>
+                            <SelectItem value="not_as_described">
+                              Ne correspond pas à la description
+                            </SelectItem>
                             <SelectItem value="damaged">Article endommagé</SelectItem>
                             <SelectItem value="size_issue">Problème de taille</SelectItem>
                             <SelectItem value="color_issue">Problème de couleur</SelectItem>
@@ -552,7 +604,12 @@ export default function CustomerReturns() {
 
                       <div>
                         <Label htmlFor="type">Type de retour</Label>
-                        <Select value={returnType} onValueChange={(v) => setReturnType(v as any)}>
+                        <Select
+                          value={returnType}
+                          onValueChange={v =>
+                            setReturnType(v as 'refund' | 'exchange' | 'store_credit')
+                          }
+                        >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
@@ -569,7 +626,7 @@ export default function CustomerReturns() {
                         <Textarea
                           id="details"
                           value={returnDetails}
-                          onChange={(e) => setReturnDetails(e.target.value)}
+                          onChange={e => setReturnDetails(e.target.value)}
                           placeholder="Décrivez le problème en détail..."
                           rows={4}
                         />
@@ -592,7 +649,9 @@ export default function CustomerReturns() {
                               delivered_at?: string;
                               order_items?: Array<{ product_id: string; product_name?: string }>;
                             };
-                            const order = returnableOrders.find((o: OrderWithItems) => o.id === selectedOrder);
+                            const order = returnableOrders.find(
+                              (o: OrderWithItems) => o.id === selectedOrder
+                            );
                             if (!order || !order.order_items || order.order_items.length === 0) {
                               toast({
                                 title: 'Erreur',
@@ -638,4 +697,3 @@ export default function CustomerReturns() {
     </SidebarProvider>
   );
 }
-

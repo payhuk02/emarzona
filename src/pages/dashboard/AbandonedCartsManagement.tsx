@@ -1,7 +1,7 @@
 /**
  * Page de Gestion des Paniers Abandonnés
  * Date: 31 Janvier 2025
- * 
+ *
  * Interface complète pour gérer les paniers abandonnés avec :
  * - Liste des paniers abandonnés
  * - Statistiques de récupération
@@ -16,11 +16,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   ShoppingCart,
   Mail,
@@ -110,14 +129,14 @@ export default function AbandonedCartsManagement() {
       queryClient.invalidateQueries({ queryKey: ['abandoned-carts'] });
       toast({
         title: '✅ Email envoyé',
-        description: 'L\'email de récupération a été envoyé avec succès',
+        description: "L'email de récupération a été envoyé avec succès",
       });
     },
     onError: (error: unknown) => {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: errorMessage || 'Impossible d\'envoyer l\'email',
+        description: errorMessage || "Impossible d'envoyer l'email",
         variant: 'destructive',
       });
     },
@@ -133,18 +152,16 @@ export default function AbandonedCartsManagement() {
 
     // Filter by status
     if (statusFilter === 'recovered') {
-      filtered = filtered.filter((c) => c.recovered_at !== null);
+      filtered = filtered.filter(c => c.recovered_at !== null);
     } else if (statusFilter === 'pending') {
-      filtered = filtered.filter((c) => c.recovered_at === null);
+      filtered = filtered.filter(c => c.recovered_at === null);
     }
 
     // Filter by search
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        (c) =>
-          c.customer_email?.toLowerCase().includes(query) ||
-          c.id.toLowerCase().includes(query)
+        c => c.customer_email?.toLowerCase().includes(query) || c.id.toLowerCase().includes(query)
       );
     }
 
@@ -156,18 +173,21 @@ export default function AbandonedCartsManagement() {
     const now = new Date();
     return {
       total: abandonedCarts.length,
-      pending: abandonedCarts.filter((c) => c.recovered_at === null).length,
-      recovered: abandonedCarts.filter((c) => c.recovered_at !== null).length,
+      pending: abandonedCarts.filter(c => c.recovered_at === null).length,
+      recovered: abandonedCarts.filter(c => c.recovered_at !== null).length,
       totalValue: abandonedCarts.reduce((sum, c) => sum + (c.total_amount || 0), 0),
-      recoveryRate: abandonedCarts.length > 0
-        ? (abandonedCarts.filter((c) => c.recovered_at !== null).length / abandonedCarts.length) * 100
-        : 0,
-      averageHours: abandonedCarts.length > 0
-        ? abandonedCarts.reduce((sum, c) => {
-            const hours = differenceInHours(now, new Date(c.created_at));
-            return sum + hours;
-          }, 0) / abandonedCarts.length
-        : 0,
+      recoveryRate:
+        abandonedCarts.length > 0
+          ? (abandonedCarts.filter(c => c.recovered_at !== null).length / abandonedCarts.length) *
+            100
+          : 0,
+      averageHours:
+        abandonedCarts.length > 0
+          ? abandonedCarts.reduce((sum, c) => {
+              const hours = differenceInHours(now, new Date(c.created_at));
+              return sum + hours;
+            }, 0) / abandonedCarts.length
+          : 0,
     };
   }, [abandonedCarts]);
 
@@ -194,7 +214,7 @@ export default function AbandonedCartsManagement() {
             <div className="container mx-auto p-4 lg:p-6 space-y-6">
               <Skeleton className="h-12 w-full" />
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map((i) => (
+                {[1, 2, 3, 4].map(i => (
                   <Skeleton key={i} className="h-24" />
                 ))}
               </div>
@@ -253,7 +273,9 @@ export default function AbandonedCartsManagement() {
                   <Clock className="h-4 w-4 text-yellow-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold text-yellow-600">{stats.pending}</div>
+                  <div className="text-lg sm:text-2xl font-bold text-yellow-600">
+                    {stats.pending}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -263,7 +285,9 @@ export default function AbandonedCartsManagement() {
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold text-green-600">{stats.recovered}</div>
+                  <div className="text-lg sm:text-2xl font-bold text-green-600">
+                    {stats.recovered}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -281,11 +305,15 @@ export default function AbandonedCartsManagement() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Taux Récupération</CardTitle>
+                  <CardTitle className="text-xs sm:text-sm font-medium">
+                    Taux Récupération
+                  </CardTitle>
                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold">{stats.recoveryRate.toFixed(1)}%</div>
+                  <div className="text-lg sm:text-2xl font-bold">
+                    {stats.recoveryRate.toFixed(1)}%
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -299,11 +327,14 @@ export default function AbandonedCartsManagement() {
                     <Input
                       placeholder="Rechercher par email ou ID..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={e => setSearchQuery(e.target.value)}
                       className="pl-10"
                     />
                   </div>
-                  <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+                  <Select
+                    value={statusFilter}
+                    onValueChange={v => setStatusFilter(v as 'all' | 'sent' | 'not_sent')}
+                  >
                     <SelectTrigger className="w-full sm:w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
@@ -348,7 +379,7 @@ export default function AbandonedCartsManagement() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredCarts.map((cart) => {
+                        {filteredCarts.map(cart => {
                           const stage = getRecoveryStage(cart);
                           return (
                             <TableRow key={cart.id}>
@@ -366,7 +397,8 @@ export default function AbandonedCartsManagement() {
                               </TableCell>
                               <TableCell>
                                 <Badge variant="outline">
-                                  {(cart.cart_items || []).length} article{(cart.cart_items || []).length > 1 ? 's' : ''}
+                                  {(cart.cart_items || []).length} article
+                                  {(cart.cart_items || []).length > 1 ? 's' : ''}
                                 </Badge>
                               </TableCell>
                               <TableCell>
@@ -376,7 +408,9 @@ export default function AbandonedCartsManagement() {
                               </TableCell>
                               <TableCell>
                                 <div className="text-sm">
-                                  {format(new Date(cart.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}
+                                  {format(new Date(cart.created_at), 'dd MMM yyyy HH:mm', {
+                                    locale: fr,
+                                  })}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
                                   Il y a {getHoursSinceAbandon(cart.created_at)}h
@@ -388,10 +422,10 @@ export default function AbandonedCartsManagement() {
                                     stage.color === 'blue'
                                       ? 'default'
                                       : stage.color === 'yellow'
-                                      ? 'secondary'
-                                      : stage.color === 'orange'
-                                      ? 'outline'
-                                      : 'destructive'
+                                        ? 'secondary'
+                                        : stage.color === 'orange'
+                                          ? 'outline'
+                                          : 'destructive'
                                   }
                                 >
                                   {stage.label}
@@ -445,7 +479,7 @@ export default function AbandonedCartsManagement() {
             </Card>
 
             {/* View Cart Dialog */}
-            <Dialog open={!!viewingCartId} onOpenChange={(open) => !open && setViewingCartId(null)}>
+            <Dialog open={!!viewingCartId} onOpenChange={open => !open && setViewingCartId(null)}>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Détails du Panier Abandonné</DialogTitle>
@@ -456,7 +490,7 @@ export default function AbandonedCartsManagement() {
                 {viewingCartId && (
                   <div className="space-y-4">
                     {(() => {
-                      const cart = abandonedCarts.find((c) => c.id === viewingCartId);
+                      const cart = abandonedCarts.find(c => c.id === viewingCartId);
                       if (!cart) return null;
 
                       return (
@@ -464,7 +498,9 @@ export default function AbandonedCartsManagement() {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <Label>Email</Label>
-                              <div className="text-sm">{cart.customer_email || 'Non disponible'}</div>
+                              <div className="text-sm">
+                                {cart.customer_email || 'Non disponible'}
+                              </div>
                             </div>
                             <div>
                               <Label>Montant Total</Label>
@@ -475,7 +511,9 @@ export default function AbandonedCartsManagement() {
                             <div>
                               <Label>Abandonné le</Label>
                               <div className="text-sm">
-                                {format(new Date(cart.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
+                                {format(new Date(cart.created_at), 'dd MMM yyyy à HH:mm', {
+                                  locale: fr,
+                                })}
                               </div>
                             </div>
                             <div>
@@ -487,30 +525,43 @@ export default function AbandonedCartsManagement() {
                           <div>
                             <Label>Articles du Panier</Label>
                             <div className="mt-2 space-y-2">
-                              {(cart.cart_items || []).map((item: { product_name?: string; variant_name?: string; quantity: number; unit_price: number }, index: number) => (
-                                <Card key={index}>
-                                  <CardContent className="p-3">
-                                    <div className="flex items-center justify-between">
-                                      <div>
-                                        <div className="font-medium">{item.product_name || 'Produit'}</div>
-                                        {item.variant_name && (
-                                          <div className="text-xs text-muted-foreground">
-                                            {item.variant_name}
+                              {(cart.cart_items || []).map(
+                                (
+                                  item: {
+                                    product_name?: string;
+                                    variant_name?: string;
+                                    quantity: number;
+                                    unit_price: number;
+                                  },
+                                  index: number
+                                ) => (
+                                  <Card key={index}>
+                                    <CardContent className="p-3">
+                                      <div className="flex items-center justify-between">
+                                        <div>
+                                          <div className="font-medium">
+                                            {item.product_name || 'Produit'}
                                           </div>
-                                        )}
-                                        <div className="text-xs text-muted-foreground">
-                                          Quantité: {item.quantity}
+                                          {item.variant_name && (
+                                            <div className="text-xs text-muted-foreground">
+                                              {item.variant_name}
+                                            </div>
+                                          )}
+                                          <div className="text-xs text-muted-foreground">
+                                            Quantité: {item.quantity}
+                                          </div>
+                                        </div>
+                                        <div className="text-right">
+                                          <div className="font-semibold">
+                                            {(item.unit_price * item.quantity).toLocaleString()}{' '}
+                                            {cart.currency}
+                                          </div>
                                         </div>
                                       </div>
-                                      <div className="text-right">
-                                        <div className="font-semibold">
-                                          {(item.unit_price * item.quantity).toLocaleString()} {cart.currency}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              ))}
+                                    </CardContent>
+                                  </Card>
+                                )
+                              )}
                             </div>
                           </div>
 
@@ -531,7 +582,9 @@ export default function AbandonedCartsManagement() {
                             <div>
                               <Label>Récupéré le</Label>
                               <div className="text-sm">
-                                {format(new Date(cart.recovered_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
+                                {format(new Date(cart.recovered_at), 'dd MMM yyyy à HH:mm', {
+                                  locale: fr,
+                                })}
                               </div>
                             </div>
                           )}
@@ -548,4 +601,3 @@ export default function AbandonedCartsManagement() {
     </SidebarProvider>
   );
 }
-
