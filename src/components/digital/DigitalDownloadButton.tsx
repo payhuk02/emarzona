@@ -1,7 +1,7 @@
 /**
  * Digital Download Button - Professional
  * Date: 27 octobre 2025
- * 
+ *
  * Bouton de téléchargement sécurisé avec suivi
  */
 
@@ -15,15 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Download,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  Clock,
-  Lock,
-  RefreshCw,
-} from 'lucide-react';
+import { Download, CheckCircle2, AlertCircle, Loader2, Clock, Lock, RefreshCw } from 'lucide-react';
 import { useGenerateDownloadLink, useTrackDownload } from '@/hooks/digital/useDownloads';
 import { useRemainingDownloads } from '@/hooks/digital/useDigitalProducts';
 import { Badge } from '@/components/ui/badge';
@@ -93,7 +85,7 @@ export const DigitalDownloadButton = ({
 
       // Generate secure download link (hook already has retry logic)
       setDownloadProgress(10);
-      const result = await generateLink.mutateAsync({ 
+      const result = await generateLink.mutateAsync({
         fileId,
         expiresIn: 3600, // 1 hour
       });
@@ -122,7 +114,7 @@ export const DigitalDownloadButton = ({
         link.target = '_blank';
         document.body.appendChild(link);
         link.click();
-        
+
         // Cleanup after a short delay
         setTimeout(() => {
           document.body.removeChild(link);
@@ -145,7 +137,6 @@ export const DigitalDownloadButton = ({
         logger.error('Error starting download', { error: downloadError });
         throw new Error('Erreur lors du démarrage du téléchargement. Veuillez réessayer.');
       }
-
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       logger.error('Download error', {
@@ -155,7 +146,6 @@ export const DigitalDownloadButton = ({
         retryAttempt,
       });
 
-      const errorMessage = err.message || 'Erreur lors du téléchargement';
       setError(errorMessage);
       setIsDownloading(false);
 
@@ -167,17 +157,21 @@ export const DigitalDownloadButton = ({
       });
 
       // Auto-retry for network errors (max 2 retries)
-      if (retryAttempt < 2 && (
-        errorMessage.includes('réseau') ||
-        errorMessage.includes('network') ||
-        errorMessage.includes('timeout') ||
-        errorMessage.includes('fetch')
-      )) {
+      if (
+        retryAttempt < 2 &&
+        (errorMessage.includes('réseau') ||
+          errorMessage.includes('network') ||
+          errorMessage.includes('timeout') ||
+          errorMessage.includes('fetch'))
+      ) {
         setIsRetrying(true);
-        setTimeout(() => {
-          setIsRetrying(false);
-          handleDownload(retryAttempt + 1);
-        }, 2000 * (retryAttempt + 1)); // Exponential backoff: 2s, 4s
+        setTimeout(
+          () => {
+            setIsRetrying(false);
+            handleDownload(retryAttempt + 1);
+          },
+          2000 * (retryAttempt + 1)
+        ); // Exponential backoff: 2s, 4s
       }
     }
   };
@@ -185,9 +179,7 @@ export const DigitalDownloadButton = ({
   /**
    * Check if can download
    */
-  const canDownload = !remainingData || 
-                      remainingData.unlimited || 
-                      remainingData.remaining > 0;
+  const canDownload = !remainingData || remainingData.unlimited || remainingData.remaining > 0;
 
   return (
     <>
@@ -238,7 +230,11 @@ export const DigitalDownloadButton = ({
         <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {isDownloading ? 'Téléchargement en cours...' : error ? 'Erreur' : 'Téléchargement terminé'}
+              {isDownloading
+                ? 'Téléchargement en cours...'
+                : error
+                  ? 'Erreur'
+                  : 'Téléchargement terminé'}
             </DialogTitle>
             <DialogDescription>
               {fileName} ({formatSize(fileSize)})
@@ -250,9 +246,11 @@ export const DigitalDownloadButton = ({
               <>
                 <Progress value={downloadProgress} className="w-full" />
                 <p className="text-sm text-center text-muted-foreground">
-                  {downloadProgress < 50 ? 'Génération du lien sécurisé...' :
-                   downloadProgress < 100 ? 'Téléchargement du fichier...' :
-                   'Finalisation...'}
+                  {downloadProgress < 50
+                    ? 'Génération du lien sécurisé...'
+                    : downloadProgress < 100
+                      ? 'Téléchargement du fichier...'
+                      : 'Finalisation...'}
                 </p>
               </>
             )}
@@ -288,8 +286,8 @@ export const DigitalDownloadButton = ({
                 <CheckCircle2 className="h-12 w-12 text-green-600 mx-auto" />
                 <p className="text-sm font-medium">Téléchargement démarré !</p>
                 <p className="text-xs text-muted-foreground">
-                  Si le téléchargement ne démarre pas automatiquement, 
-                  vérifiez les téléchargements de votre navigateur.
+                  Si le téléchargement ne démarre pas automatiquement, vérifiez les téléchargements
+                  de votre navigateur.
                 </p>
               </div>
             )}
@@ -357,5 +355,3 @@ export const DigitalDownloadButtonCompact = ({
     </Button>
   );
 };
-
-
