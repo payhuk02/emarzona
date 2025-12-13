@@ -1,7 +1,7 @@
 /**
  * Page de Gestion des Garanties Client
  * Date: 31 Janvier 2025
- * 
+ *
  * Interface complète pour que les clients puissent :
  * - Enregistrer leurs garanties
  * - Suivre leurs garanties
@@ -16,11 +16,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Shield,
@@ -53,7 +65,9 @@ export default function CustomerWarranties() {
   const queryClient = useQueryClient();
 
   // State
-  const [selectedTab, setSelectedTab] = useState<'warranties' | 'claims' | 'register'>('warranties');
+  const [selectedTab, setSelectedTab] = useState<'warranties' | 'claims' | 'register'>(
+    'warranties'
+  );
   const [isRegisterDialogOpen, setIsRegisterDialogOpen] = useState(false);
   const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(false);
   const [selectedWarranty, setSelectedWarranty] = useState<string | null>(null);
@@ -80,7 +94,8 @@ export default function CustomerWarranties() {
 
       const { data, error } = await supabase
         .from('product_warranties')
-        .select(`
+        .select(
+          `
           *,
           products (
             id,
@@ -92,7 +107,8 @@ export default function CustomerWarranties() {
             order_number,
             created_at
           )
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -139,7 +155,8 @@ export default function CustomerWarranties() {
       // Récupérer les réclamations
       const { data, error } = await supabase
         .from('warranty_claims')
-        .select(`
+        .select(
+          `
           *,
           product_warranties!inner (
             id,
@@ -150,7 +167,8 @@ export default function CustomerWarranties() {
               image_url
             )
           )
-        `)
+        `
+        )
         .in('warranty_id', warrantyIds)
         .order('submitted_at', { ascending: false });
 
@@ -172,7 +190,8 @@ export default function CustomerWarranties() {
 
       const { data, error } = await supabase
         .from('orders')
-        .select(`
+        .select(
+          `
           *,
           order_items (
             id,
@@ -185,7 +204,8 @@ export default function CustomerWarranties() {
               image_url
             )
           )
-        `)
+        `
+        )
         .eq('customer_id', user.id)
         .eq('status', 'delivered')
         .order('created_at', { ascending: false })
@@ -288,7 +308,7 @@ export default function CustomerWarranties() {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'enregistrer la garantie',
+        description: error.message || "Impossible d'enregistrer la garantie",
         variant: 'destructive',
       });
     },
@@ -351,16 +371,26 @@ export default function CustomerWarranties() {
   const getWarrantyStatusBadge = (warranty: WarrantyRegistration) => {
     const endDate = new Date(warranty.end_date);
     const isExpired = isBefore(endDate, new Date());
-    const isExpiringSoon = isAfter(endDate, new Date()) && isBefore(endDate, new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
+    const isExpiringSoon =
+      isAfter(endDate, new Date()) &&
+      isBefore(endDate, new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
 
     if (warranty.status === 'expired' || isExpired) {
       return <Badge variant="destructive">Expirée</Badge>;
     }
     if (isExpiringSoon) {
-      return <Badge variant="secondary" className="bg-yellow-600">Expire bientôt</Badge>;
+      return (
+        <Badge variant="secondary" className="bg-yellow-600">
+          Expire bientôt
+        </Badge>
+      );
     }
     if (warranty.status === 'active') {
-      return <Badge variant="default" className="bg-green-600">Active</Badge>;
+      return (
+        <Badge variant="default" className="bg-green-600">
+          Active
+        </Badge>
+      );
     }
     return <Badge variant="secondary">{warranty.status}</Badge>;
   };
@@ -368,7 +398,14 @@ export default function CustomerWarranties() {
   // Get claim status badge
   const getClaimStatusBadge = (status: string) => {
     type IconComponent = React.ComponentType<{ className?: string }>;
-    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: IconComponent }> = {
+    const statusConfig: Record<
+      string,
+      {
+        label: string;
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        icon: IconComponent;
+      }
+    > = {
       submitted: { label: 'Soumise', variant: 'secondary', icon: Clock },
       under_review: { label: 'En révision', variant: 'secondary', icon: AlertCircle },
       approved: { label: 'Approuvée', variant: 'default', icon: CheckCircle2 },
@@ -378,7 +415,11 @@ export default function CustomerWarranties() {
       cancelled: { label: 'Annulée', variant: 'destructive', icon: XCircle },
     };
 
-    const config = statusConfig[status] || { label: status, variant: 'secondary' as const, icon: AlertCircle };
+    const config = statusConfig[status] || {
+      label: status,
+      variant: 'secondary' as const,
+      icon: AlertCircle,
+    };
     const Icon = config.icon;
 
     return (
@@ -409,7 +450,9 @@ export default function CustomerWarranties() {
       active: activeWarranties.length,
       expired: expiredWarranties.length,
       claims: claims.length,
-      pendingClaims: claims.filter((c: WarrantyClaim) => c.status === 'submitted' || c.status === 'under_review').length,
+      pendingClaims: claims.filter(
+        (c: WarrantyClaim) => c.status === 'submitted' || c.status === 'under_review'
+      ).length,
     };
   }, [warranties, claims]);
 
@@ -422,7 +465,7 @@ export default function CustomerWarranties() {
             <div className="container mx-auto p-4 lg:p-6 space-y-6">
               <Skeleton className="h-12 w-full" />
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map((i) => (
+                {[1, 2, 3, 4].map(i => (
                   <Skeleton key={i} className="h-24" />
                 ))}
               </div>
@@ -516,7 +559,10 @@ export default function CustomerWarranties() {
             </div>
 
             {/* Tabs */}
-            <Tabs value={selectedTab} onValueChange={(v) => setSelectedTab(v as any)}>
+            <Tabs
+              value={selectedTab}
+              onValueChange={v => setSelectedTab(v as 'warranties' | 'claims' | 'register')}
+            >
               <TabsList>
                 <TabsTrigger value="warranties">
                   <Shield className="h-4 w-4 mr-2" />
@@ -545,7 +591,9 @@ export default function CustomerWarranties() {
                     {warranties.map((warranty: WarrantyRegistration) => {
                       const endDate = new Date(warranty.end_date);
                       const isExpired = isBefore(endDate, new Date());
-                      const daysRemaining = Math.ceil((endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                      const daysRemaining = Math.ceil(
+                        (endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                      );
 
                       return (
                         <Card key={warranty.id}>
@@ -557,7 +605,9 @@ export default function CustomerWarranties() {
                                 </CardTitle>
                                 <CardDescription>
                                   Garantie {warranty.warranty_number} -{' '}
-                                  {format(new Date(warranty.created_at), 'dd MMM yyyy', { locale: fr })}
+                                  {format(new Date(warranty.created_at), 'dd MMM yyyy', {
+                                    locale: fr,
+                                  })}
                                 </CardDescription>
                               </div>
                               {getWarrantyStatusBadge(warranty)}
@@ -577,7 +627,9 @@ export default function CustomerWarranties() {
                                 <div>
                                   <Label className="text-muted-foreground">Date de début</Label>
                                   <p className="font-medium">
-                                    {format(new Date(warranty.start_date), 'dd MMM yyyy', { locale: fr })}
+                                    {format(new Date(warranty.start_date), 'dd MMM yyyy', {
+                                      locale: fr,
+                                    })}
                                   </p>
                                 </div>
                                 <div>
@@ -642,7 +694,9 @@ export default function CustomerWarranties() {
                               </CardTitle>
                               <CardDescription>
                                 {claim.product_warranties?.products?.name || 'Produit'} -{' '}
-                                {format(new Date(claim.submitted_at), 'dd MMM yyyy', { locale: fr })}
+                                {format(new Date(claim.submitted_at), 'dd MMM yyyy', {
+                                  locale: fr,
+                                })}
                               </CardDescription>
                             </div>
                             {getClaimStatusBadge(claim.status)}
@@ -700,7 +754,7 @@ export default function CustomerWarranties() {
                     <Label htmlFor="order">Commande</Label>
                     <Select
                       value={registerForm.order_id}
-                      onValueChange={(value) => {
+                      onValueChange={value => {
                         setRegisterForm({ ...registerForm, order_id: value });
                         type OrderWithItems = {
                           id: string;
@@ -714,7 +768,9 @@ export default function CustomerWarranties() {
                             ...registerForm,
                             order_id: value,
                             product_id: order.order_items[0].product_id,
-                            purchase_date: order.created_at ? format(new Date(order.created_at), 'yyyy-MM-dd') : '',
+                            purchase_date: order.created_at
+                              ? format(new Date(order.created_at), 'yyyy-MM-dd')
+                              : '',
                           });
                         }
                       }}
@@ -723,18 +779,21 @@ export default function CustomerWarranties() {
                         <SelectValue placeholder="Sélectionner une commande" />
                       </SelectTrigger>
                       <SelectContent>
-                        {orders.map((order) => {
+                        {orders.map(order => {
                           type OrderWithItems = {
                             id: string;
                             order_number: string;
                             created_at: string;
                           };
-                          const orderTyped = order as OrderWithItems;
+                          const formattedDate = format(new Date(order.created_at), 'dd MMM yyyy', {
+                            locale: fr,
+                          });
                           return (
-                          <SelectItem key={order.id} value={order.id}>
-                            {order.order_number} - {format(new Date(order.created_at), 'dd MMM yyyy', { locale: fr })}
-                          </SelectItem>
-                        ))}
+                            <SelectItem key={order.id} value={order.id}>
+                              {order.order_number} - {formattedDate}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </div>
@@ -743,7 +802,12 @@ export default function CustomerWarranties() {
                     <Label htmlFor="warranty_type">Type de garantie</Label>
                     <Select
                       value={registerForm.warranty_type}
-                      onValueChange={(v) => setRegisterForm({ ...registerForm, warranty_type: v as any })}
+                      onValueChange={v =>
+                        setRegisterForm({
+                          ...registerForm,
+                          warranty_type: v as 'manufacturer' | 'store' | 'extended' | 'insurance',
+                        })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -763,7 +827,9 @@ export default function CustomerWarranties() {
                       id="duration"
                       type="number"
                       value={registerForm.duration_months}
-                      onChange={(e) => setRegisterForm({ ...registerForm, duration_months: e.target.value })}
+                      onChange={e =>
+                        setRegisterForm({ ...registerForm, duration_months: e.target.value })
+                      }
                       min="1"
                       max="120"
                     />
@@ -774,7 +840,9 @@ export default function CustomerWarranties() {
                     <Input
                       id="serial_number"
                       value={registerForm.serial_number}
-                      onChange={(e) => setRegisterForm({ ...registerForm, serial_number: e.target.value })}
+                      onChange={e =>
+                        setRegisterForm({ ...registerForm, serial_number: e.target.value })
+                      }
                       placeholder="Ex: SN123456789"
                     />
                   </div>
@@ -785,7 +853,9 @@ export default function CustomerWarranties() {
                       id="purchase_date"
                       type="date"
                       value={registerForm.purchase_date}
-                      onChange={(e) => setRegisterForm({ ...registerForm, purchase_date: e.target.value })}
+                      onChange={e =>
+                        setRegisterForm({ ...registerForm, purchase_date: e.target.value })
+                      }
                     />
                   </div>
 
@@ -795,7 +865,9 @@ export default function CustomerWarranties() {
                       id="purchase_price"
                       type="number"
                       value={registerForm.purchase_price}
-                      onChange={(e) => setRegisterForm({ ...registerForm, purchase_price: e.target.value })}
+                      onChange={e =>
+                        setRegisterForm({ ...registerForm, purchase_price: e.target.value })
+                      }
                       placeholder="0"
                     />
                   </div>
@@ -810,7 +882,11 @@ export default function CustomerWarranties() {
                     </Button>
                     <Button
                       onClick={() => registerWarranty.mutate(registerForm)}
-                      disabled={!registerForm.order_id || !registerForm.product_id || registerWarranty.isPending}
+                      disabled={
+                        !registerForm.order_id ||
+                        !registerForm.product_id ||
+                        registerWarranty.isPending
+                      }
                       className="flex-1"
                     >
                       {registerWarranty.isPending ? (
@@ -845,7 +921,12 @@ export default function CustomerWarranties() {
                     <Label htmlFor="claim_type">Type de réclamation</Label>
                     <Select
                       value={claimForm.claim_type}
-                      onValueChange={(v) => setClaimForm({ ...claimForm, claim_type: v as any })}
+                      onValueChange={v =>
+                        setClaimForm({
+                          ...claimForm,
+                          claim_type: v as 'repair' | 'replacement' | 'refund',
+                        })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -863,7 +944,7 @@ export default function CustomerWarranties() {
                     <Textarea
                       id="description"
                       value={claimForm.description}
-                      onChange={(e) => setClaimForm({ ...claimForm, description: e.target.value })}
+                      onChange={e => setClaimForm({ ...claimForm, description: e.target.value })}
                       placeholder="Décrivez le problème..."
                       rows={4}
                     />
@@ -874,7 +955,7 @@ export default function CustomerWarranties() {
                     <Textarea
                       id="issue_details"
                       value={claimForm.issue_details}
-                      onChange={(e) => setClaimForm({ ...claimForm, issue_details: e.target.value })}
+                      onChange={e => setClaimForm({ ...claimForm, issue_details: e.target.value })}
                       placeholder="Informations complémentaires..."
                       rows={3}
                     />
@@ -921,4 +1002,3 @@ export default function CustomerWarranties() {
     </SidebarProvider>
   );
 }
-
