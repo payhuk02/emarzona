@@ -9,7 +9,14 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { LazyImage } from '@/components/ui/lazy-image';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -34,7 +41,13 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { useStore } from '@/hooks/useStore';
-import { useStoreReturns, useReturn, useUpdateReturnStatus, useProcessRefund, type ProductReturn } from '@/hooks/returns/useReturns';
+import {
+  useStoreReturns,
+  useReturn,
+  useUpdateReturnStatus,
+  useProcessRefund,
+  type ProductReturn,
+} from '@/hooks/returns/useReturns';
 
 // Type pour les retours avec relations depuis Supabase
 type ReturnWithRelations = ProductReturn & {
@@ -87,7 +100,7 @@ export default function AdminReturnManagement() {
   const [refundAmount, setRefundAmount] = useState('');
   const [refundMethod, setRefundMethod] = useState('original_payment');
 
-  const filteredReturns = (returns || []).filter((r) => {
+  const filteredReturns = (returns || []).filter(r => {
     const returnTyped = r as ReturnWithRelations;
     const matchesSearch =
       returnTyped.return_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -134,7 +147,11 @@ export default function AdminReturnManagement() {
       await processRefund.mutateAsync({
         returnId: selectedReturnId,
         refundAmount: parseFloat(refundAmount),
-        refundMethod: refundMethod as any,
+        refundMethod: refundMethod as
+          | 'original_payment'
+          | 'store_credit'
+          | 'bank_transfer'
+          | 'check',
       });
       setRefundDialogOpen(false);
       setSelectedReturnId(null);
@@ -147,7 +164,10 @@ export default function AdminReturnManagement() {
   const getStatusBadge = (status: string) => {
     type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
     type IconComponent = React.ComponentType<{ className?: string }>;
-    const statusConfig: Record<string, { label: string; variant: BadgeVariant; icon: IconComponent }> = {
+    const statusConfig: Record<
+      string,
+      { label: string; variant: BadgeVariant; icon: IconComponent }
+    > = {
       requested: { label: 'En attente', variant: 'secondary', icon: Clock },
       approved: { label: 'Approuvé', variant: 'default', icon: CheckCircle2 },
       rejected: { label: 'Rejeté', variant: 'destructive', icon: XCircle },
@@ -216,7 +236,8 @@ export default function AdminReturnManagement() {
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-2xl font-bold">
-                    {returns?.filter((r) => (r as ReturnWithRelations).status === 'requested').length || 0}
+                    {returns?.filter(r => (r as ReturnWithRelations).status === 'requested')
+                      .length || 0}
                   </div>
                   <div className="text-sm text-muted-foreground">En attente</div>
                 </CardContent>
@@ -224,7 +245,8 @@ export default function AdminReturnManagement() {
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-2xl font-bold">
-                    {returns?.filter((r) => (r as ReturnWithRelations).status === 'refunded').length || 0}
+                    {returns?.filter(r => (r as ReturnWithRelations).status === 'refunded')
+                      .length || 0}
                   </div>
                   <div className="text-sm text-muted-foreground">Remboursés</div>
                 </CardContent>
@@ -232,10 +254,13 @@ export default function AdminReturnManagement() {
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-2xl font-bold">
-                    {returns?.reduce((sum: number, r) => {
-                      const returnTyped = r as ReturnWithRelations;
-                      return sum + (returnTyped.refund_amount || 0);
-                    }, 0).toLocaleString('fr-FR') || 0} XOF
+                    {returns
+                      ?.reduce((sum: number, r) => {
+                        const returnTyped = r as ReturnWithRelations;
+                        return sum + (returnTyped.refund_amount || 0);
+                      }, 0)
+                      .toLocaleString('fr-FR') || 0}{' '}
+                    XOF
                   </div>
                   <div className="text-sm text-muted-foreground">Total remboursé</div>
                 </CardContent>
@@ -251,7 +276,7 @@ export default function AdminReturnManagement() {
                     <Input
                       placeholder="Rechercher par numéro ou produit..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={e => setSearchTerm(e.target.value)}
                       className="pl-10 min-h-[44px]"
                     />
                   </div>
@@ -284,7 +309,7 @@ export default function AdminReturnManagement() {
                 {filteredReturns && filteredReturns.length > 0 ? (
                   isMobile ? (
                     <MobileTableCard
-                      data={filteredReturns.map((r) => {
+                      data={filteredReturns.map(r => {
                         const returnTyped = r as ReturnWithRelations;
                         return { ...returnTyped, id: returnTyped.id };
                       })}
@@ -293,16 +318,20 @@ export default function AdminReturnManagement() {
                           key: 'return_number',
                           header: 'Numéro',
                           priority: 'high',
-                          render: (row) => {
+                          render: row => {
                             const returnTyped = row as ReturnWithRelations;
-                            return <span className="font-mono text-sm font-medium">{returnTyped.return_number}</span>;
+                            return (
+                              <span className="font-mono text-sm font-medium">
+                                {returnTyped.return_number}
+                              </span>
+                            );
                           },
                         },
                         {
                           key: 'product',
                           header: 'Produit',
                           priority: 'high',
-                          render: (row) => {
+                          render: row => {
                             const returnTyped = row as ReturnWithRelations;
                             return (
                               <div className="flex items-center gap-2">
@@ -313,7 +342,9 @@ export default function AdminReturnManagement() {
                                     className="w-10 h-10 object-cover rounded"
                                   />
                                 )}
-                                <span className="font-medium">{returnTyped.products?.name || 'Produit'}</span>
+                                <span className="font-medium">
+                                  {returnTyped.products?.name || 'Produit'}
+                                </span>
                               </div>
                             );
                           },
@@ -322,25 +353,33 @@ export default function AdminReturnManagement() {
                           key: 'customer',
                           header: 'Client',
                           priority: 'medium',
-                          render: (row) => {
+                          render: row => {
                             const returnTyped = row as ReturnWithRelations;
-                            return <span className="text-sm">{returnTyped.orders?.customer_id || 'N/A'}</span>;
+                            return (
+                              <span className="text-sm">
+                                {returnTyped.orders?.customer_id || 'N/A'}
+                              </span>
+                            );
                           },
                         },
                         {
                           key: 'reason',
                           header: 'Raison',
                           priority: 'low',
-                          render: (row) => {
+                          render: row => {
                             const returnTyped = row as ReturnWithRelations;
-                            return <span className="text-xs text-muted-foreground">{returnTyped.return_reason}</span>;
+                            return (
+                              <span className="text-xs text-muted-foreground">
+                                {returnTyped.return_reason}
+                              </span>
+                            );
                           },
                         },
                         {
                           key: 'amount',
                           header: 'Montant',
                           priority: 'high',
-                          render: (row) => {
+                          render: row => {
                             const returnTyped = row as ReturnWithRelations;
                             return (
                               <div className="flex items-center gap-1">
@@ -356,7 +395,7 @@ export default function AdminReturnManagement() {
                           key: 'status',
                           header: 'Statut',
                           priority: 'high',
-                          render: (row) => {
+                          render: row => {
                             const returnTyped = row as ReturnWithRelations;
                             return getStatusBadge(returnTyped.status);
                           },
@@ -365,7 +404,7 @@ export default function AdminReturnManagement() {
                           key: 'date',
                           header: 'Date',
                           priority: 'low',
-                          render: (row) => {
+                          render: row => {
                             const returnTyped = row as ReturnWithRelations;
                             return (
                               <span className="text-xs text-muted-foreground">
@@ -375,73 +414,76 @@ export default function AdminReturnManagement() {
                           },
                         },
                       ]}
-                      actions={(row) => {
-                        const returnTyped = row as ReturnWithRelations;
+                      actions={(row: ReturnWithRelations) => {
                         return (
-                        <div className="flex flex-col gap-2">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm" className="min-h-[44px] w-full">
-                                <Eye className="h-4 w-4 mr-2" />
-                                Voir détails
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                              <DialogHeader>
-                                <DialogTitle>Détails du Retour</DialogTitle>
-                                <DialogDescription>
-                                  {row.return_number}
-                                </DialogDescription>
-                              </DialogHeader>
-                              <ReturnDetailView returnId={row.id} onApprove={handleApprove} onReject={handleReject} onRefund={() => {
-                                setSelectedReturnId(row.id);
-                                setRefundAmount(row.total_amount.toString());
-                                setRefundDialogOpen(true);
-                              }} />
-                            </DialogContent>
-                          </Dialog>
-                          {row.status === 'requested' && (
-                            <>
+                          <div className="flex flex-col gap-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm" className="min-h-[44px] w-full">
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Voir détails
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                                <DialogHeader>
+                                  <DialogTitle>Détails du Retour</DialogTitle>
+                                  <DialogDescription>{row.return_number}</DialogDescription>
+                                </DialogHeader>
+                                <ReturnDetailView
+                                  returnId={row.id}
+                                  onApprove={handleApprove}
+                                  onReject={handleReject}
+                                  onRefund={() => {
+                                    setSelectedReturnId(row.id);
+                                    setRefundAmount(row.total_amount.toString());
+                                    setRefundDialogOpen(true);
+                                  }}
+                                />
+                              </DialogContent>
+                            </Dialog>
+                            {row.status === 'requested' && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleApprove(row.id)}
+                                  className="min-h-[44px] w-full"
+                                >
+                                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                                  Approuver
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    const reason = prompt('Raison du rejet:');
+                                    if (reason) {
+                                      handleReject(row.id, reason);
+                                    }
+                                  }}
+                                  className="min-h-[44px] w-full"
+                                >
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Rejeter
+                                </Button>
+                              </>
+                            )}
+                            {row.status === 'received' && (
                               <Button
                                 size="sm"
-                                onClick={() => handleApprove(row.id)}
-                                className="min-h-[44px] w-full"
-                              >
-                                <CheckCircle2 className="h-4 w-4 mr-2" />
-                                Approuver
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
                                 onClick={() => {
-                                  const reason = prompt('Raison du rejet:');
-                                  if (reason) {
-                                    handleReject(row.id, reason);
-                                  }
+                                  setSelectedReturnId(row.id);
+                                  setRefundAmount(row.total_amount.toString());
+                                  setRefundDialogOpen(true);
                                 }}
                                 className="min-h-[44px] w-full"
                               >
-                                <XCircle className="h-4 w-4 mr-2" />
-                                Rejeter
+                                <DollarSign className="h-4 w-4 mr-2" />
+                                Traiter remboursement
                               </Button>
-                            </>
-                          )}
-                          {row.status === 'received' && (
-                            <Button
-                              size="sm"
-                              onClick={() => {
-                                setSelectedReturnId(row.id);
-                                setRefundAmount(row.total_amount.toString());
-                                setRefundDialogOpen(true);
-                              }}
-                              className="min-h-[44px] w-full"
-                            >
-                              <DollarSign className="h-4 w-4 mr-2" />
-                              Traiter remboursement
-                            </Button>
-                          )}
-                        </div>
-                      )}
+                            )}
+                          </div>
+                        );
+                      }}
                     />
                   ) : (
                     <div className="overflow-x-auto">
@@ -459,115 +501,134 @@ export default function AdminReturnManagement() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {filteredReturns.map((returnItem) => {
+                          {filteredReturns.map(returnItem => {
                             const returnTyped = returnItem as ReturnWithRelations;
                             return (
-                            <TableRow key={returnTyped.id}>
-                              <TableCell className="font-mono text-sm">
-                                {returnTyped.return_number}
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  {returnTyped.products?.image_url && (
-                                    <LazyImage
-                                      src={returnTyped.products.image_url}
-                                      alt={returnTyped.products.name}
-                                      className="w-10 h-10 object-cover rounded"
-                                    />
-                                  )}
-                                  <span className="font-medium">{returnTyped.products?.name || 'Produit'}</span>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <span className="text-sm">{returnTyped.orders?.customer_id || 'N/A'}</span>
-                              </TableCell>
-                              <TableCell>
-                                <span className="text-sm text-muted-foreground">
-                                  {returnTyped.return_reason}
-                                </span>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-1">
-                                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                                  <span className="font-medium">
-                                    {returnTyped.total_amount.toLocaleString('fr-FR')} XOF
+                              <TableRow key={returnTyped.id}>
+                                <TableCell className="font-mono text-sm">
+                                  {returnTyped.return_number}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    {returnTyped.products?.image_url && (
+                                      <LazyImage
+                                        src={returnTyped.products.image_url}
+                                        alt={returnTyped.products.name}
+                                        className="w-10 h-10 object-cover rounded"
+                                      />
+                                    )}
+                                    <span className="font-medium">
+                                      {returnTyped.products?.name || 'Produit'}
+                                    </span>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <span className="text-sm">
+                                    {returnTyped.orders?.customer_id || 'N/A'}
                                   </span>
-                                </div>
-                              </TableCell>
-                              <TableCell>{getStatusBadge(returnTyped.status)}</TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                  <Calendar className="h-3 w-3" />
-                                  {format(new Date(returnTyped.requested_at), 'PPP', { locale: fr })}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]" aria-label={`Actions pour le retour ${returnRequest.id}`}>
-                                      <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem asChild>
-                                      <Dialog>
-                                        <DialogTrigger asChild>
-                                          <span className="cursor-pointer">Voir détails</span>
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                                          <DialogHeader>
-                                            <DialogTitle>Détails du Retour</DialogTitle>
-                                            <DialogDescription>
-                                              {returnTyped.return_number}
-                                            </DialogDescription>
-                                          </DialogHeader>
-                                          <ReturnDetailView returnId={returnTyped.id} onApprove={handleApprove} onReject={handleReject} onRefund={() => {
+                                </TableCell>
+                                <TableCell>
+                                  <span className="text-sm text-muted-foreground">
+                                    {returnTyped.return_reason}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-1">
+                                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                    <span className="font-medium">
+                                      {returnTyped.total_amount.toLocaleString('fr-FR')} XOF
+                                    </span>
+                                  </div>
+                                </TableCell>
+                                <TableCell>{getStatusBadge(returnTyped.status)}</TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                    <Calendar className="h-3 w-3" />
+                                    {format(new Date(returnTyped.requested_at), 'PPP', {
+                                      locale: fr,
+                                    })}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="min-h-[44px] min-w-[44px]"
+                                        aria-label={`Actions pour le retour ${returnRequest.id}`}
+                                      >
+                                        <MoreVertical className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem asChild>
+                                        <Dialog>
+                                          <DialogTrigger asChild>
+                                            <span className="cursor-pointer">Voir détails</span>
+                                          </DialogTrigger>
+                                          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                                            <DialogHeader>
+                                              <DialogTitle>Détails du Retour</DialogTitle>
+                                              <DialogDescription>
+                                                {returnTyped.return_number}
+                                              </DialogDescription>
+                                            </DialogHeader>
+                                            <ReturnDetailView
+                                              returnId={returnTyped.id}
+                                              onApprove={handleApprove}
+                                              onReject={handleReject}
+                                              onRefund={() => {
+                                                setSelectedReturnId(returnTyped.id);
+                                                setRefundAmount(
+                                                  returnTyped.total_amount.toString()
+                                                );
+                                                setRefundDialogOpen(true);
+                                              }}
+                                            />
+                                          </DialogContent>
+                                        </Dialog>
+                                      </DropdownMenuItem>
+                                      {returnTyped.status === 'requested' && (
+                                        <>
+                                          <DropdownMenuItem
+                                            onClick={() => handleApprove(returnTyped.id)}
+                                          >
+                                            <CheckCircle2 className="h-4 w-4 mr-2" />
+                                            Approuver
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem
+                                            onClick={() => {
+                                              const reason = prompt('Raison du rejet:');
+                                              if (reason) {
+                                                handleReject(returnTyped.id, reason);
+                                              }
+                                            }}
+                                            className="text-red-600"
+                                          >
+                                            <XCircle className="h-4 w-4 mr-2" />
+                                            Rejeter
+                                          </DropdownMenuItem>
+                                        </>
+                                      )}
+                                      {returnTyped.status === 'received' && (
+                                        <DropdownMenuItem
+                                          onClick={() => {
                                             setSelectedReturnId(returnTyped.id);
                                             setRefundAmount(returnTyped.total_amount.toString());
                                             setRefundDialogOpen(true);
-                                          }} />
-                                        </DialogContent>
-                                      </Dialog>
-                                    </DropdownMenuItem>
-                                    {returnTyped.status === 'requested' && (
-                                      <>
-                                        <DropdownMenuItem
-                                          onClick={() => handleApprove(returnTyped.id)}
-                                        >
-                                          <CheckCircle2 className="h-4 w-4 mr-2" />
-                                          Approuver
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() => {
-                                            const reason = prompt('Raison du rejet:');
-                                            if (reason) {
-                                              handleReject(returnTyped.id, reason);
-                                            }
                                           }}
-                                          className="text-red-600"
                                         >
-                                          <XCircle className="h-4 w-4 mr-2" />
-                                          Rejeter
+                                          <DollarSign className="h-4 w-4 mr-2" />
+                                          Traiter remboursement
                                         </DropdownMenuItem>
-                                      </>
-                                    )}
-                                    {returnTyped.status === 'received' && (
-                                      <DropdownMenuItem
-                                        onClick={() => {
-                                          setSelectedReturnId(returnTyped.id);
-                                          setRefundAmount(returnTyped.total_amount.toString());
-                                          setRefundDialogOpen(true);
-                                        }}
-                                      >
-                                        <DollarSign className="h-4 w-4 mr-2" />
-                                        Traiter remboursement
-                                      </DropdownMenuItem>
-                                    )}
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                                      )}
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
                         </TableBody>
                       </Table>
                     </div>
@@ -576,7 +637,9 @@ export default function AdminReturnManagement() {
                   <div className="text-center py-12">
                     <RefreshCw className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground">
-                      {searchTerm || statusFilter !== 'all' ? 'Aucun retour trouvé' : 'Aucun retour pour le moment'}
+                      {searchTerm || statusFilter !== 'all'
+                        ? 'Aucun retour trouvé'
+                        : 'Aucun retour pour le moment'}
                     </p>
                   </div>
                 )}
@@ -588,9 +651,7 @@ export default function AdminReturnManagement() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Traiter le Remboursement</DialogTitle>
-                  <DialogDescription>
-                    Configurez les détails du remboursement
-                  </DialogDescription>
+                  <DialogDescription>Configurez les détails du remboursement</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -598,7 +659,7 @@ export default function AdminReturnManagement() {
                     <Input
                       type="number"
                       value={refundAmount}
-                      onChange={(e) => setRefundAmount(e.target.value)}
+                      onChange={e => setRefundAmount(e.target.value)}
                       placeholder="0.00"
                     />
                   </div>
@@ -627,9 +688,7 @@ export default function AdminReturnManagement() {
                     >
                       Annuler
                     </Button>
-                    <Button onClick={handleRefund}>
-                      Traiter le remboursement
-                    </Button>
+                    <Button onClick={handleRefund}>Traiter le remboursement</Button>
                   </div>
                 </div>
               </DialogContent>
@@ -642,12 +701,12 @@ export default function AdminReturnManagement() {
 }
 
 // Composant pour afficher les détails d'un retour (version admin)
-function ReturnDetailView({ 
+function ReturnDetailView({
   returnId,
   onApprove,
   onReject,
   onRefund,
-}: { 
+}: {
   returnId: string;
   onApprove?: (id: string) => void;
   onReject?: (id: string, reason: string) => void;
@@ -704,7 +763,9 @@ function ReturnDetailView({
         {returnItem.refund_amount && (
           <div>
             <div className="text-sm text-muted-foreground">Montant remboursé</div>
-            <div className="font-semibold">{returnItem.refund_amount.toLocaleString('fr-FR')} XOF</div>
+            <div className="font-semibold">
+              {returnItem.refund_amount.toLocaleString('fr-FR')} XOF
+            </div>
           </div>
         )}
       </div>
@@ -775,4 +836,3 @@ function ReturnDetailView({
     </div>
   );
 }
-
