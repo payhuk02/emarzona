@@ -1,7 +1,7 @@
 /**
  * Digital Product Detail Page - Professional
  * Date: 28 octobre 2025
- * 
+ *
  * Page complète de détail pour produits digitaux
  * Inspiré de Gumroad, Stripe, Lemonsqueezy
  */
@@ -14,11 +14,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Download, 
-  FileText, 
-  Shield, 
-  Star, 
+import {
+  Download,
+  FileText,
+  Shield,
+  Star,
   Package,
   ArrowLeft,
   CheckCircle2,
@@ -31,7 +31,7 @@ import {
   Lock,
   Unlock,
   Loader2,
-  Search
+  Search,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DigitalDownloadButton } from '@/components/digital/DigitalDownloadButton';
@@ -44,7 +44,12 @@ import {
 import { useDigitalProduct } from '@/hooks/digital/useDigitalProducts';
 import { useHasDownloadAccess } from '@/hooks/digital/useDigitalProducts';
 import { sanitizeProductDescription } from '@/lib/html-sanitizer';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummary';
 import { ReviewsList } from '@/components/reviews/ReviewsList';
 import { ReviewForm } from '@/components/reviews/ReviewForm';
@@ -61,6 +66,14 @@ interface DigitalProductDetailParams {
   productId: string;
 }
 
+interface WindowWithTracking extends Window {
+  gtag?: (command: string, eventName: string, params?: Record<string, unknown>) => void;
+  fbq?: (command: string, eventName: string, params?: Record<string, unknown>) => void;
+  ttq?: {
+    track: (eventName: string, params?: Record<string, unknown>) => void;
+  };
+}
+
 /**
  * Page de détail d'un produit digital
  */
@@ -73,16 +86,16 @@ export default function DigitalProductDetail() {
 
   // Fetch digital product with all relations
   const { data: digitalProduct, isLoading, error } = useDigitalProduct(productId || '');
-  
+
   // Check if user has purchased this product
   const { data: hasAccess } = useHasDownloadAccess(productId || '');
-  
+
   // Track analytics event
   const { trackView } = useAnalyticsTracking();
 
   // Hook pour créer une commande
   const { mutateAsync: createDigitalOrder, isPending: isCreatingOrder } = useCreateDigitalOrder();
-  
+
   // Hook pour ajouter à la comparaison
   const addToComparison = useAddToComparison();
 
@@ -96,20 +109,23 @@ export default function DigitalProductDetail() {
 
       // Track with external pixels (Google Analytics, Facebook, TikTok)
       if (typeof window !== 'undefined') {
+        const windowWithTracking = window as WindowWithTracking;
         // Google Analytics
-        if ((window as any).gtag) {
-          (window as any).gtag('event', 'view_item', {
-            items: [{
-              item_id: productId,
-              item_name: digitalProduct?.product?.name || 'Digital Product',
-              item_category: 'digital',
-            }]
+        if (windowWithTracking.gtag) {
+          windowWithTracking.gtag('event', 'view_item', {
+            items: [
+              {
+                item_id: productId,
+                item_name: digitalProduct?.product?.name || 'Digital Product',
+                item_category: 'digital',
+              },
+            ],
           });
         }
 
         // Facebook Pixel
-        if ((window as any).fbq) {
-          (window as any).fbq('track', 'ViewContent', {
+        if (windowWithTracking.fbq) {
+          windowWithTracking.fbq('track', 'ViewContent', {
             content_type: 'product',
             content_ids: [productId],
             content_category: 'digital',
@@ -117,8 +133,8 @@ export default function DigitalProductDetail() {
         }
 
         // TikTok Pixel
-        if ((window as any).ttq) {
-          (window as any).ttq.track('ViewContent', {
+        if (windowWithTracking.ttq) {
+          windowWithTracking.ttq.track('ViewContent', {
             content_type: 'product',
             content_id: productId,
           });
@@ -160,7 +176,7 @@ export default function DigitalProductDetail() {
 
     try {
       setIsPurchasing(true);
-      
+
       logger.debug('Initiating digital product purchase', {
         digitalProductId: digitalProduct.id,
         productId: product.id,
@@ -175,9 +191,14 @@ export default function DigitalProductDetail() {
         customerEmail: user.email,
         customerName: user.user_metadata?.full_name || user.email.split('@')[0],
         generateLicense: digitalProduct.license_type !== 'none',
-        licenseType: digitalProduct.license_type === 'single' ? 'single' : 
-                    digitalProduct.license_type === 'multi' ? 'multi' : 'unlimited',
-        maxActivations: digitalProduct.license_type === 'multi' ? digitalProduct.max_licenses : undefined,
+        licenseType:
+          digitalProduct.license_type === 'single'
+            ? 'single'
+            : digitalProduct.license_type === 'multi'
+              ? 'multi'
+              : 'unlimited',
+        maxActivations:
+          digitalProduct.license_type === 'multi' ? digitalProduct.max_licenses : undefined,
       });
 
       if (result.checkoutUrl) {
@@ -186,7 +207,7 @@ export default function DigitalProductDetail() {
           checkoutUrl: result.checkoutUrl,
         });
         const { safeRedirect } = await import('@/lib/url-validator');
-        safeRedirect(result.checkoutUrl, (error) => {
+        safeRedirect(result.checkoutUrl, error => {
           toast({
             title: 'Erreur de redirection',
             description: error,
@@ -205,7 +226,7 @@ export default function DigitalProductDetail() {
       });
       toast({
         title: 'Erreur',
-        description: errorMessage || 'Impossible d\'initialiser le paiement. Veuillez réessayer.',
+        description: errorMessage || "Impossible d'initialiser le paiement. Veuillez réessayer.",
         variant: 'destructive',
       });
     } finally {
@@ -284,11 +305,7 @@ export default function DigitalProductDetail() {
       {/* Header */}
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-6 max-w-7xl">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="mb-4"
-          >
+          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
@@ -322,12 +339,8 @@ export default function DigitalProductDetail() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {files.map((file) => (
-                    <DigitalFilePreview
-                      key={file.id}
-                      file={file}
-                      isLocked={!hasAccess}
-                    />
+                  {files.map(file => (
+                    <DigitalFilePreview key={file.id} file={file} isLocked={!hasAccess} />
                   ))}
                 </CardContent>
               </Card>
@@ -356,7 +369,11 @@ export default function DigitalProductDetail() {
                         {product.price.toLocaleString()} {product.currency}
                       </span>
                       <Badge variant="destructive">
-                        -{Math.round(((product.price - product.promotional_price) / product.price) * 100)}%
+                        -
+                        {Math.round(
+                          ((product.price - product.promotional_price) / product.price) * 100
+                        )}
+                        %
                       </Badge>
                     </>
                   ) : (
@@ -371,11 +388,7 @@ export default function DigitalProductDetail() {
 
               {/* Reviews Summary (compact) */}
               <div className="py-2">
-                <ProductReviewsSummary 
-                  productId={productId || ''} 
-                  productType="digital"
-                  compact
-                />
+                <ProductReviewsSummary productId={productId || ''} productType="digital" compact />
               </div>
 
               <Separator />
@@ -401,7 +414,7 @@ export default function DigitalProductDetail() {
 
                       {/* Download Buttons */}
                       <div className="space-y-2">
-                        {files.map((file) => (
+                        {files.map(file => (
                           <DigitalDownloadButton
                             key={file.id}
                             fileId={file.id}
@@ -414,11 +427,17 @@ export default function DigitalProductDetail() {
                     </CardContent>
                   </Card>
                 ) : (
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className="w-full"
                     onClick={handlePurchase}
-                    disabled={isPurchasing || isCreatingOrder || !digitalProduct || !user || !product.is_active}
+                    disabled={
+                      isPurchasing ||
+                      isCreatingOrder ||
+                      !digitalProduct ||
+                      !user ||
+                      !product.is_active
+                    }
                   >
                     {isPurchasing || isCreatingOrder ? (
                       <>
@@ -444,10 +463,7 @@ export default function DigitalProductDetail() {
                     <Package className="h-4 w-4 mr-2" />
                     Comparer
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate('/digital/search')}
-                  >
+                  <Button variant="outline" onClick={() => navigate('/digital/search')}>
                     <Search className="h-4 w-4" />
                   </Button>
                 </div>
@@ -463,7 +479,9 @@ export default function DigitalProductDetail() {
                     <HardDrive className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-xs text-muted-foreground">Taille</p>
-                      <p className="font-medium">{digitalProduct.total_size_mb?.toFixed(2) || 0} MB</p>
+                      <p className="font-medium">
+                        {digitalProduct.total_size_mb?.toFixed(2) || 0} MB
+                      </p>
                     </div>
                   </div>
 
@@ -480,7 +498,9 @@ export default function DigitalProductDetail() {
                     <div>
                       <p className="text-xs text-muted-foreground">Téléchargements</p>
                       <p className="font-medium">
-                        {digitalProduct.download_limit === -1 ? 'Illimités' : digitalProduct.download_limit}
+                        {digitalProduct.download_limit === -1
+                          ? 'Illimités'
+                          : digitalProduct.download_limit}
                       </p>
                     </div>
                   </div>
@@ -490,8 +510,8 @@ export default function DigitalProductDetail() {
                     <div>
                       <p className="text-xs text-muted-foreground">Expiration</p>
                       <p className="font-medium">
-                        {digitalProduct.download_expiry_days === -1 
-                          ? 'Permanent' 
+                        {digitalProduct.download_expiry_days === -1
+                          ? 'Permanent'
                           : `${digitalProduct.download_expiry_days} jours`}
                       </p>
                     </div>
@@ -522,9 +542,7 @@ export default function DigitalProductDetail() {
               </Card>
 
               {/* License Card (if user owns) */}
-              {hasAccess && (
-                <DigitalLicenseCard productId={productId || ''} />
-              )}
+              {hasAccess && <DigitalLicenseCard productId={productId || ''} />}
             </div>
           </div>
         </div>
@@ -547,9 +565,11 @@ export default function DigitalProductDetail() {
                 <CardTitle>À propos de ce produit</CardTitle>
               </CardHeader>
               <CardContent>
-                <div 
+                <div
                   className="bg-white dark:bg-white text-black dark:text-black prose max-w-none prose-headings:text-black dark:prose-headings:text-black prose-p:text-black dark:prose-p:text-black prose-a:text-primary prose-strong:text-black dark:prose-strong:text-black p-4 sm:p-6 rounded-lg"
-                  dangerouslySetInnerHTML={{ __html: sanitizeProductDescription(product.description || '') }}
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeProductDescription(product.description || ''),
+                  }}
                 />
               </CardContent>
             </Card>
@@ -564,7 +584,7 @@ export default function DigitalProductDetail() {
                 <TabsTrigger value="versions">Versions</TabsTrigger>
                 <TabsTrigger value="metadata">Métadonnées</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="list" className="space-y-4">
                 <Card>
                   <CardHeader>
@@ -576,10 +596,7 @@ export default function DigitalProductDetail() {
                   <CardContent>
                     <div className="space-y-4">
                       {files.map((file, index) => (
-                        <div
-                          key={file.id}
-                          className="flex items-start gap-4 p-4 rounded-lg border"
-                        >
+                        <div key={file.id} className="flex items-start gap-4 p-4 rounded-lg border">
                           <div className="p-3 rounded-lg bg-primary/10">
                             <FileText className="h-6 w-6 text-primary" />
                           </div>
@@ -592,12 +609,8 @@ export default function DigitalProductDetail() {
                                 </p>
                               </div>
                               <div className="flex gap-2">
-                                {file.is_main && (
-                                  <Badge variant="default">Principal</Badge>
-                                )}
-                                {file.is_preview && (
-                                  <Badge variant="secondary">Aperçu</Badge>
-                                )}
+                                {file.is_main && <Badge variant="default">Principal</Badge>}
+                                {file.is_preview && <Badge variant="secondary">Aperçu</Badge>}
                               </div>
                             </div>
                             <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
@@ -630,10 +643,7 @@ export default function DigitalProductDetail() {
 
               <TabsContent value="metadata" className="space-y-4">
                 {files.length > 0 && files[0]?.id && (
-                  <FileMetadataEditor
-                    fileId={files[0].id}
-                    fileType={files[0].file_type}
-                  />
+                  <FileMetadataEditor fileId={files[0].id} fileType={files[0].file_type} />
                 )}
               </TabsContent>
             </Tabs>
@@ -649,9 +659,7 @@ export default function DigitalProductDetail() {
               <Card>
                 <CardHeader>
                   <CardTitle>Laisser un avis</CardTitle>
-                  <CardDescription>
-                    Partagez votre expérience avec ce produit
-                  </CardDescription>
+                  <CardDescription>Partagez votre expérience avec ce produit</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ReviewForm productId={productId || ''} productType="digital" />
@@ -675,18 +683,14 @@ export default function DigitalProductDetail() {
             <Card>
               <CardHeader>
                 <CardTitle>Questions fréquentes</CardTitle>
-                <CardDescription>
-                  Trouvez rapidement des réponses à vos questions
-                </CardDescription>
+                <CardDescription>Trouvez rapidement des réponses à vos questions</CardDescription>
               </CardHeader>
               <CardContent>
                 {faqs.length > 0 ? (
                   <Accordion type="single" collapsible className="w-full">
                     {faqs.map((faq: ProductFAQ, index: number) => (
                       <AccordionItem key={index} value={`faq-${index}`}>
-                        <AccordionTrigger className="text-left">
-                          {faq.question}
-                        </AccordionTrigger>
+                        <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground">
                           {faq.answer}
                         </AccordionContent>
@@ -713,14 +717,10 @@ export default function DigitalProductDetail() {
             variant="grid"
             title="Produits similaires"
           />
-          
-          <BoughtTogetherRecommendations
-            productId={productId || ''}
-            limit={4}
-          />
+
+          <BoughtTogetherRecommendations productId={productId || ''} limit={4} />
         </div>
       </div>
     </div>
   );
 }
-
