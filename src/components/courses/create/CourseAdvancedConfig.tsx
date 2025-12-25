@@ -1,13 +1,18 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Plus, X, DollarSign, Award, Target, Users } from "lucide-react";
-import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Plus, X, DollarSign, Award, Target, Users } from 'lucide-react';
+import { useState } from 'react';
 
 interface CourseAdvancedConfigProps {
   formData: {
@@ -20,7 +25,7 @@ interface CourseAdvancedConfigProps {
     prerequisites: string[];
     target_audience: string[];
   };
-  onChange: (field: string, value: any) => void;
+  onChange: (field: string, value: string | number | boolean | null | undefined) => void;
 }
 
 export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfigProps) => {
@@ -30,14 +35,17 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
 
   const addItem = (field: string, value: string, setter: (val: string) => void) => {
     if (value.trim()) {
-      onChange(field, [...formData[field as keyof typeof formData] as string[], value.trim()]);
+      onChange(field, [...(formData[field as keyof typeof formData] as string[]), value.trim()]);
       setter('');
     }
   };
 
   const removeItem = (field: string, index: number) => {
     const items = formData[field as keyof typeof formData] as string[];
-    onChange(field, items.filter((_, i) => i !== index));
+    onChange(
+      field,
+      items.filter((_, i) => i !== index)
+    );
   };
 
   return (
@@ -49,9 +57,7 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
             <DollarSign className="w-5 h-5 text-orange-600" />
             <div>
               <CardTitle>Tarification</CardTitle>
-              <CardDescription>
-                Définissez le prix de votre cours
-              </CardDescription>
+              <CardDescription>Définissez le prix de votre cours</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -67,18 +73,21 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
                 type="number"
                 min="0"
                 value={formData.price}
-                onChange={(e) => onChange('price', parseFloat(e.target.value))}
+                onChange={e => onChange('price', parseFloat(e.target.value))}
                 placeholder="0"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="currency">Devise</Label>
-              <Select value={formData.currency} onValueChange={(value) => onChange('currency', value)}>
+              <Select
+                value={formData.currency}
+                onValueChange={value => onChange('currency', value)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent mobileVariant="sheet">
                   <SelectItem value="XOF">XOF (Franc CFA)</SelectItem>
                   <SelectItem value="EUR">EUR (Euro)</SelectItem>
                   <SelectItem value="USD">USD (Dollar)</SelectItem>
@@ -89,22 +98,28 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
 
           {/* Prix promotionnel */}
           <div className="space-y-2">
-            <Label htmlFor="promotional_price">
-              Prix promotionnel (optionnel)
-            </Label>
+            <Label htmlFor="promotional_price">Prix promotionnel (optionnel)</Label>
             <Input
               id="promotional_price"
               type="number"
               min="0"
               value={formData.promotional_price || ''}
-              onChange={(e) => onChange('promotional_price', e.target.value ? parseFloat(e.target.value) : undefined)}
+              onChange={e =>
+                onChange(
+                  'promotional_price',
+                  e.target.value ? parseFloat(e.target.value) : undefined
+                )
+              }
               placeholder="Prix réduit pour une période limitée"
             />
             {formData.promotional_price && formData.promotional_price < formData.price && (
               <div className="flex items-center gap-2 text-sm">
                 <Badge variant="secondary" className="bg-green-100 text-green-700">
                   Réduction de{' '}
-                  {Math.round(((formData.price - formData.promotional_price) / formData.price) * 100)}%
+                  {Math.round(
+                    ((formData.price - formData.promotional_price) / formData.price) * 100
+                  )}
+                  %
                 </Badge>
               </div>
             )}
@@ -139,9 +154,7 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
             <Award className="w-5 h-5 text-orange-600" />
             <div>
               <CardTitle>Certificat de complétion</CardTitle>
-              <CardDescription>
-                Récompensez vos étudiants avec un certificat
-              </CardDescription>
+              <CardDescription>Récompensez vos étudiants avec un certificat</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -155,15 +168,13 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
             </div>
             <Switch
               checked={formData.certificate_enabled}
-              onCheckedChange={(checked) => onChange('certificate_enabled', checked)}
+              onCheckedChange={checked => onChange('certificate_enabled', checked)}
             />
           </div>
 
           {formData.certificate_enabled && (
             <div className="space-y-2 p-4 border rounded-lg">
-              <Label htmlFor="passing_score">
-                Score minimum pour le certificat
-              </Label>
+              <Label htmlFor="passing_score">Score minimum pour le certificat</Label>
               <div className="flex items-center gap-4">
                 <Input
                   id="passing_score"
@@ -171,7 +182,7 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
                   min="0"
                   max="100"
                   value={formData.certificate_passing_score}
-                  onChange={(e) => onChange('certificate_passing_score', parseInt(e.target.value))}
+                  onChange={e => onChange('certificate_passing_score', parseInt(e.target.value))}
                   className="w-24"
                 />
                 <span className="text-sm text-muted-foreground">%</span>
@@ -192,9 +203,7 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
             <Target className="w-5 h-5 text-orange-600" />
             <div>
               <CardTitle>Objectifs d'apprentissage</CardTitle>
-              <CardDescription>
-                Qu'est-ce que les étudiants apprendront ?
-              </CardDescription>
+              <CardDescription>Qu'est-ce que les étudiants apprendront ?</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -204,8 +213,8 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
               <Input
                 placeholder="Ex: Créer une application React moderne"
                 value={newObjective}
-                onChange={(e) => setNewObjective(e.target.value)}
-                onKeyPress={(e) => {
+                onChange={e => setNewObjective(e.target.value)}
+                onKeyPress={e => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
                     addItem('learning_objectives', newObjective, setNewObjective);
@@ -222,10 +231,7 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
 
             <div className="space-y-2">
               {formData.learning_objectives.map((objective, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 p-2 bg-muted rounded-lg"
-                >
+                <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
                   <span className="flex-1 text-sm">{objective}</span>
                   <Button
                     size="sm"
@@ -255,8 +261,8 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
               <Input
                 placeholder="Ex: Connaissances de base en JavaScript"
                 value={newPrerequisite}
-                onChange={(e) => setNewPrerequisite(e.target.value)}
-                onKeyPress={(e) => {
+                onChange={e => setNewPrerequisite(e.target.value)}
+                onKeyPress={e => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
                     addItem('prerequisites', newPrerequisite, setNewPrerequisite);
@@ -273,10 +279,7 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
 
             <div className="space-y-2">
               {formData.prerequisites.map((prerequisite, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 p-2 bg-muted rounded-lg"
-                >
+                <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
                   <span className="flex-1 text-sm">{prerequisite}</span>
                   <Button
                     size="sm"
@@ -299,9 +302,7 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
             <Users className="w-5 h-5 text-orange-600" />
             <div>
               <CardTitle>Public cible</CardTitle>
-              <CardDescription>
-                À qui s'adresse ce cours ?
-              </CardDescription>
+              <CardDescription>À qui s'adresse ce cours ?</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -311,8 +312,8 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
               <Input
                 placeholder="Ex: Développeurs débutants"
                 value={newAudience}
-                onChange={(e) => setNewAudience(e.target.value)}
-                onKeyPress={(e) => {
+                onChange={e => setNewAudience(e.target.value)}
+                onKeyPress={e => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
                     addItem('target_audience', newAudience, setNewAudience);
@@ -329,10 +330,7 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
 
             <div className="space-y-2">
               {formData.target_audience.map((audience, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 p-2 bg-muted rounded-lg"
-                >
+                <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
                   <span className="flex-1 text-sm">{audience}</span>
                   <Button
                     size="sm"
@@ -350,4 +348,3 @@ export const CourseAdvancedConfig = ({ formData, onChange }: CourseAdvancedConfi
     </div>
   );
 };
-

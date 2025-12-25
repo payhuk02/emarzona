@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 export interface Pixel {
   id: string;
@@ -22,7 +23,7 @@ export interface PixelEvent {
   event_type: 'pageview' | 'add_to_cart' | 'purchase' | 'lead';
   product_id: string | null;
   order_id: string | null;
-  event_data: any;
+  event_data: Record<string, unknown>;
   created_at: string;
 }
 
@@ -53,8 +54,9 @@ export const usePixels = () => {
 
       if (error) throw error;
       setPixels((data || []) as Pixel[]);
-    } catch (error: any) {
-      console.error('Error fetching pixels:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error fetching pixels', { error, userId: user.id });
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les Pixels',
@@ -91,11 +93,12 @@ export const usePixels = () => {
 
       await fetchPixels();
       return true;
-    } catch (error: any) {
-      console.error('Error creating pixel:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error creating pixel', { error, pixelData });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de créer le Pixel',
+        description: errorMessage || 'Impossible de créer le Pixel',
         variant: 'destructive',
       });
       return false;
@@ -121,11 +124,12 @@ export const usePixels = () => {
 
       await fetchPixels();
       return true;
-    } catch (error: any) {
-      console.error('Error updating pixel:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error updating pixel', { error, pixelId, updates });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de mettre à jour le Pixel',
+        description: errorMessage || 'Impossible de mettre à jour le Pixel',
         variant: 'destructive',
       });
       return false;
@@ -151,11 +155,12 @@ export const usePixels = () => {
 
       await fetchPixels();
       return true;
-    } catch (error: any) {
-      console.error('Error deleting pixel:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error deleting pixel', { error, pixelId });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de supprimer le Pixel',
+        description: errorMessage || 'Impossible de supprimer le Pixel',
         variant: 'destructive',
       });
       return false;
@@ -193,8 +198,9 @@ export const usePixels = () => {
 
       if (error) throw error;
       return true;
-    } catch (error: any) {
-      console.error('Error tracking event:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error tracking pixel event', { error, pixelId, eventType });
       return false;
     }
   };

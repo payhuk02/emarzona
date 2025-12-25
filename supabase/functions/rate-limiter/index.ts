@@ -26,6 +26,9 @@ const RATE_LIMITS: Record<string, RateLimitConfig> = {
   auth: { maxRequests: 5, windowSeconds: 60 },
   webhook: { maxRequests: 1000, windowSeconds: 60 },
   api: { maxRequests: 100, windowSeconds: 60 },
+  payment: { maxRequests: 20, windowSeconds: 60 },
+  upload: { maxRequests: 10, windowSeconds: 60 },
+  search: { maxRequests: 50, windowSeconds: 60 },
 };
 
 /**
@@ -39,23 +42,33 @@ function getClientIp(req: Request): string {
 
 /**
  * Vérifier si la limite est dépassée
+ * Supporte à la fois IP et userId pour un rate limiting plus précis
  */
 async function checkRateLimit(
   supabase: any,
   ip: string,
   endpoint: string,
-  config: RateLimitConfig
+  config: RateLimitConfig,
+  userId?: string
 ): Promise<{ allowed: boolean; remaining: number; resetAt: Date }> {
   const now = new Date();
   const windowStart = new Date(now.getTime() - config.windowSeconds * 1000);
 
-  // Compter les requêtes dans la fenêtre
-  const { count, error } = await supabase
+  // Construire la requête de comptage
+  let query = supabase
     .from('rate_limit_log')
     .select('*', { count: 'exact', head: true })
-    .eq('ip_address', ip)
     .eq('endpoint', endpoint)
     .gte('created_at', windowStart.toISOString());
+
+  // Si userId est fourni, utiliser userId, sinon utiliser IP
+  if (userId) {
+    query = query.eq('user_id', userId);
+  } else {
+    query = query.eq('ip_address', ip);
+  }
+
+  const { count, error } = await query;
 
   if (error) {
     console.error('Error checking rate limit:', error);
@@ -69,13 +82,19 @@ async function checkRateLimit(
 
   // Logger la requête si autorisée
   if (allowed) {
+    const logData: any = {
+      ip_address: ip,
+      endpoint: endpoint,
+      created_at: now.toISOString()
+    };
+    
+    if (userId) {
+      logData.user_id = userId;
+    }
+
     await supabase
       .from('rate_limit_log')
-      .insert({
-        ip_address: ip,
-        endpoint: endpoint,
-        created_at: now.toISOString()
-      });
+      .insert(logData);
   }
 
   return { allowed, remaining, resetAt };
@@ -93,11 +112,11 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { endpoint = 'default' } = await req.json();
+    const { endpoint = 'default', userId } = await req.json();
     const ip = getClientIp(req);
     const config = RATE_LIMITS[endpoint] || RATE_LIMITS.default;
 
-    const result = await checkRateLimit(supabase, ip, endpoint, config);
+    const result = await checkRateLimit(supabase, ip, endpoint, config, userId);
 
     const headers = {
       ...corsHeaders,

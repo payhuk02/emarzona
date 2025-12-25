@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { logger } from '@/lib/logger';
 
 /**
  * Composant de test pour vérifier le routing SPA
@@ -68,8 +69,7 @@ export const RouteTester: React.FC = () => {
   };
 
   const testRefresh = () => {
-    console.log('🔄 Test du rafraîchissement...');
-    console.log(`📍 Page actuelle: ${location.pathname}`);
+    logger.info('Test du rafraîchissement', { currentPath: location.pathname });
     
     // Simuler un rafraîchissement
     window.location.reload();

@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK COURSES LIVE SESSIONS SYSTEM
+-- EMARZONA COURSES LIVE SESSIONS SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système de sessions en direct (webinaires) pour cours en ligne
 --              Support intégration Zoom, Google Meet, ou streaming natif

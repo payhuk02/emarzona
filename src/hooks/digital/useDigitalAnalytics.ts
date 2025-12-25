@@ -417,3 +417,135 @@ export const useDigitalRevenueAnalytics = (storeId?: string, dateRange?: { from:
   });
 };
 
+/**
+ * Get geographic analytics for downloads
+ */
+export interface GeographicAnalytics {
+  country: string;
+  downloads: number;
+  unique_users: number;
+  percentage: number;
+}
+
+export const useGeographicAnalytics = (digitalProductId: string, dateRange?: { from: Date; to: Date }) => {
+  return useQuery({
+    queryKey: ['geographic-analytics', digitalProductId, dateRange],
+    queryFn: async () => {
+      let query = supabase
+        .from('digital_product_downloads')
+        .select('download_country, user_id, download_success')
+        .eq('digital_product_id', digitalProductId)
+        .eq('download_success', true);
+
+      if (dateRange) {
+        query = query
+          .gte('download_date', dateRange.from.toISOString())
+          .lte('download_date', dateRange.to.toISOString());
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      // Group by country
+      const countryMap = new Map<string, { downloads: number; users: Set<string> }>();
+
+      data.forEach((download) => {
+        const country = download.download_country || 'Unknown';
+        
+        if (!countryMap.has(country)) {
+          countryMap.set(country, { downloads: 0, users: new Set() });
+        }
+
+        const stats = countryMap.get(country)!;
+        stats.downloads += 1;
+        if (download.user_id) {
+          stats.users.add(download.user_id);
+        }
+      });
+
+      const totalDownloads = data.length;
+
+      const analytics: GeographicAnalytics[] = Array.from(countryMap.entries())
+        .map(([country, stats]) => ({
+          country,
+          downloads: stats.downloads,
+          unique_users: stats.users.size,
+          percentage: totalDownloads > 0 ? (stats.downloads / totalDownloads) * 100 : 0,
+        }))
+        .sort((a, b) => b.downloads - a.downloads);
+
+      return analytics;
+    },
+    enabled: !!digitalProductId,
+  });
+};
+
+/**
+ * Get analytics by file version
+ */
+export interface VersionAnalytics {
+  version: string;
+  downloads: number;
+  unique_users: number;
+  success_rate: number;
+  percentage: number;
+}
+
+export const useVersionAnalytics = (digitalProductId: string, dateRange?: { from: Date; to: Date }) => {
+  return useQuery({
+    queryKey: ['version-analytics', digitalProductId, dateRange],
+    queryFn: async () => {
+      let query = supabase
+        .from('digital_product_downloads')
+        .select('file_version, user_id, download_success')
+        .eq('digital_product_id', digitalProductId);
+
+      if (dateRange) {
+        query = query
+          .gte('download_date', dateRange.from.toISOString())
+          .lte('download_date', dateRange.to.toISOString());
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      // Group by version
+      const versionMap = new Map<string, { downloads: number; successful: number; users: Set<string> }>();
+
+      data.forEach((download) => {
+        const version = download.file_version || 'Unknown';
+        
+        if (!versionMap.has(version)) {
+          versionMap.set(version, { downloads: 0, successful: 0, users: new Set() });
+        }
+
+        const stats = versionMap.get(version)!;
+        stats.downloads += 1;
+        if (download.download_success) {
+          stats.successful += 1;
+        }
+        if (download.user_id) {
+          stats.users.add(download.user_id);
+        }
+      });
+
+      const totalDownloads = data.length;
+
+      const analytics: VersionAnalytics[] = Array.from(versionMap.entries())
+        .map(([version, stats]) => ({
+          version,
+          downloads: stats.downloads,
+          unique_users: stats.users.size,
+          success_rate: stats.downloads > 0 ? (stats.successful / stats.downloads) * 100 : 0,
+          percentage: totalDownloads > 0 ? (stats.downloads / totalDownloads) * 100 : 0,
+        }))
+        .sort((a, b) => b.downloads - a.downloads);
+
+      return analytics;
+    },
+    enabled: !!digitalProductId,
+  });
+};
+

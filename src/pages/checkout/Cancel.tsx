@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { XCircle, RotateCcw, Loader2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { logger } from "@/lib/logger";
 
 const CheckoutCancel = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [transaction, setTransaction] = useState<any>(null);
   const [product, setProduct] = useState<any>(null);
@@ -50,7 +51,7 @@ const CheckoutCancel = () => {
           }
         }
       } catch (err) {
-        console.error("Error updating transaction:", err);
+        logger.error("Error updating transaction", { error: err });
       } finally {
         setLoading(false);
       }
@@ -60,7 +61,7 @@ const CheckoutCancel = () => {
   }, [transactionId]);
 
   const handleRetry = () => {
-    window.location.href = "/marketplace";
+    navigate("/marketplace");
   };
 
   if (loading) {

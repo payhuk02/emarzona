@@ -1,7 +1,7 @@
 /**
  * Page Customer Loyalty - Programme de fidélité client
  * Date: 27 Janvier 2025
- * 
+ *
  * Fonctionnalités:
  * - Afficher les points de fidélité par store
  * - Voir le tier actuel et progrès vers le suivant
@@ -28,7 +28,6 @@ import {
 } from '@/components/ui/dialog';
 import {
   useMyLoyaltyPoints,
-  useLoyaltyPoints,
   useLoyaltyTiers,
   useLoyaltyRewards,
   useLoyaltyTransactions,
@@ -37,11 +36,8 @@ import {
 } from '@/hooks/loyalty/useLoyalty';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  Award,
   Coins,
-  Gift,
   TrendingUp,
-  History,
   Sparkles,
   Trophy,
   Star,
@@ -77,16 +73,10 @@ export default function CustomerLoyalty() {
   const { data: myPoints, isLoading: pointsLoading } = useMyLoyaltyPoints();
   const { data: redemptions } = useLoyaltyRewardRedemptions(undefined, user?.id);
   const redeemReward = useRedeemLoyaltyReward();
-  const { toast } = useToast();
 
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
   const [redeemingRewardId, setRedeemingRewardId] = useState<string | null>(null);
   const [isRedeemDialogOpen, setIsRedeemDialogOpen] = useState(false);
-
-  // Charger les données pour le store sélectionné
-  const { data: tiers } = useLoyaltyTiers(selectedStoreId || undefined);
-  const { data: rewards } = useLoyaltyRewards(selectedStoreId || undefined, defaultStore?.current_tier_type);
-  const { data: transactions } = useLoyaltyTransactions(selectedStoreId || undefined, user?.id);
 
   // Sélectionner le premier store par défaut
   const defaultStore = useMemo(() => {
@@ -94,14 +84,22 @@ export default function CustomerLoyalty() {
       setSelectedStoreId(myPoints[0].store_id);
       return myPoints[0];
     }
-    return myPoints?.find((p) => p.store_id === selectedStoreId);
+    return myPoints?.find(p => p.store_id === selectedStoreId);
   }, [myPoints, selectedStoreId]);
+
+  // Charger les données pour le store sélectionné
+  const { data: tiers } = useLoyaltyTiers(selectedStoreId || undefined);
+  const { data: rewards } = useLoyaltyRewards(
+    selectedStoreId || undefined,
+    defaultStore?.current_tier_type
+  );
+  const { data: transactions } = useLoyaltyTransactions(selectedStoreId || undefined, user?.id);
 
   // Trouver le tier suivant
   const nextTier = useMemo(() => {
     if (!tiers || !defaultStore) return null;
     return tiers.find(
-      (tier) => tier.min_points_required > defaultStore.available_points && tier.is_active
+      tier => tier.min_points_required > defaultStore.available_points && tier.is_active
     );
   }, [tiers, defaultStore]);
 
@@ -109,8 +107,8 @@ export default function CustomerLoyalty() {
   const progressToNextTier = useMemo(() => {
     if (!defaultStore || !nextTier) return 0;
     if (nextTier.min_points_required === 0) return 100;
-    
-    const currentTier = tiers?.find((t) => t.tier_type === defaultStore.current_tier_type);
+
+    const currentTier = tiers?.find(t => t.tier_type === defaultStore.current_tier_type);
     const minPoints = currentTier?.min_points_required || 0;
     const maxPoints = nextTier.min_points_required;
     const progress = ((defaultStore.available_points - minPoints) / (maxPoints - minPoints)) * 100;
@@ -121,7 +119,7 @@ export default function CustomerLoyalty() {
     if (!user?.id) return;
 
     try {
-      const code = await redeemReward.mutateAsync({
+      await redeemReward.mutateAsync({
         reward_id: rewardId,
         store_id: storeId,
         customer_id: user.id,
@@ -129,7 +127,7 @@ export default function CustomerLoyalty() {
       setIsRedeemDialogOpen(false);
       setRedeemingRewardId(null);
       // Le toast est géré par le hook
-    } catch (error) {
+    } catch (_error) {
       // Error handled by hook
     }
   };
@@ -158,14 +156,16 @@ export default function CustomerLoyalty() {
         <div className="flex-1 p-6">
           <Alert>
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>Veuillez vous connecter pour voir votre programme de fidélité.</AlertDescription>
+            <AlertDescription>
+              Veuillez vous connecter pour voir votre programme de fidélité.
+            </AlertDescription>
           </Alert>
         </div>
       </SidebarProvider>
     );
   }
 
-  const selectedReward = rewards?.find((r) => r.id === redeemingRewardId);
+  const selectedReward = rewards?.find(r => r.id === redeemingRewardId);
 
   return (
     <SidebarProvider>
@@ -173,11 +173,11 @@ export default function CustomerLoyalty() {
       <div className="flex-1 p-6 space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Award className="h-8 w-8" />
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
+            <Award className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" />
             Programme de Fidélité
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
             Consultez vos points, échangez des récompenses et suivez votre progression
           </p>
         </div>
@@ -187,13 +187,15 @@ export default function CustomerLoyalty() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex flex-wrap gap-2">
-                {myPoints.map((points) => (
+                {myPoints.map(points => (
                   <Button
                     key={points.store_id}
                     variant={selectedStoreId === points.store_id ? 'default' : 'outline'}
                     onClick={() => setSelectedStoreId(points.store_id)}
                   >
-                    {(points as any).store?.name || `Store ${points.store_id.slice(0, 8)}`}
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {((points as any).store?.name as string) ||
+                      `Store ${points.store_id.slice(0, 8)}`}
                   </Button>
                 ))}
               </div>
@@ -222,8 +224,12 @@ export default function CustomerLoyalty() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold">{defaultStore?.available_points || 0}</span>
-                    <span className="text-lg text-muted-foreground">points disponibles</span>
+                    <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold">
+                      {defaultStore?.available_points || 0}
+                    </span>
+                    <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
+                      points disponibles
+                    </span>
                   </div>
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div>
@@ -237,7 +243,8 @@ export default function CustomerLoyalty() {
                     <div>
                       <span className="text-muted-foreground">Total dépensé :</span>
                       <div className="font-semibold">
-                        {defaultStore?.total_spent?.toLocaleString() || 0} {defaultStore?.store_id ? 'FCFA' : ''}
+                        {defaultStore?.total_spent?.toLocaleString() || 0}{' '}
+                        {defaultStore?.store_id ? 'FCFA' : ''}
                       </div>
                     </div>
                   </div>
@@ -256,7 +263,7 @@ export default function CustomerLoyalty() {
                   <CardContent className="space-y-4">
                     <div className="flex items-center gap-4">
                       <div
-                        className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold text-white"
+                        className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white"
                         style={{
                           backgroundColor: TIER_COLORS[defaultStore.current_tier_type] || '#808080',
                         }}
@@ -264,11 +271,14 @@ export default function CustomerLoyalty() {
                         {defaultStore.current_tier_type[0].toUpperCase()}
                       </div>
                       <div>
-                        <div className="text-2xl font-bold">
-                          {defaultStore.current_tier?.name || defaultStore.current_tier_type.toUpperCase()}
+                        <div className="text-base sm:text-xl md:text-2xl font-bold">
+                          {defaultStore.current_tier?.name ||
+                            defaultStore.current_tier_type.toUpperCase()}
                         </div>
                         {defaultStore.current_tier?.description && (
-                          <p className="text-sm text-muted-foreground">{defaultStore.current_tier.description}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {defaultStore.current_tier.description}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -277,15 +287,17 @@ export default function CustomerLoyalty() {
                     {nextTier && (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Prochain tier : {nextTier.name}</span>
+                          <span className="text-muted-foreground">
+                            Prochain tier : {nextTier.name}
+                          </span>
                           <span className="font-medium">
                             {defaultStore.available_points} / {nextTier.min_points_required} points
                           </span>
                         </div>
                         <Progress value={progressToNextTier} className="h-2" />
                         <p className="text-xs text-muted-foreground">
-                          {nextTier.min_points_required - defaultStore.available_points} points pour atteindre{' '}
-                          {nextTier.name}
+                          {nextTier.min_points_required - defaultStore.available_points} points pour
+                          atteindre {nextTier.name}
                         </p>
                       </div>
                     )}
@@ -297,14 +309,18 @@ export default function CustomerLoyalty() {
                           <div className="flex items-center gap-2">
                             <Sparkles className="h-4 w-4 text-yellow-500" />
                             <span className="text-sm">
-                              Bonus {((defaultStore.current_tier.points_multiplier - 1) * 100).toFixed(0)}% de points
+                              Bonus{' '}
+                              {((defaultStore.current_tier.points_multiplier - 1) * 100).toFixed(0)}
+                              % de points
                             </span>
                           </div>
                         )}
                         {defaultStore.current_tier.discount_percentage > 0 && (
                           <div className="flex items-center gap-2">
                             <TrendingUp className="h-4 w-4 text-green-500" />
-                            <span className="text-sm">{defaultStore.current_tier.discount_percentage}% de réduction</span>
+                            <span className="text-sm">
+                              {defaultStore.current_tier.discount_percentage}% de réduction
+                            </span>
                           </div>
                         )}
                         {defaultStore.current_tier.free_shipping && (
@@ -331,7 +347,7 @@ export default function CustomerLoyalty() {
               <h2 className="text-xl font-semibold">Récompenses Disponibles</h2>
               {rewards && rewards.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {rewards.map((reward) => {
+                  {rewards.map(reward => {
                     const canRedeem =
                       defaultStore && defaultStore.available_points >= reward.points_cost;
                     const isAvailable =
@@ -344,10 +360,14 @@ export default function CustomerLoyalty() {
                           <CardTitle className="flex items-center justify-between">
                             <span>{reward.name}</span>
                             {reward.min_tier && (
-                              <Badge variant="outline" className="text-xs">{reward.min_tier}</Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {reward.min_tier}
+                              </Badge>
                             )}
                           </CardTitle>
-                          {reward.description && <CardDescription>{reward.description}</CardDescription>}
+                          {reward.description && (
+                            <CardDescription>{reward.description}</CardDescription>
+                          )}
                         </CardHeader>
                         <CardContent className="space-y-3">
                           <div className="flex items-center justify-between">
@@ -411,13 +431,15 @@ export default function CustomerLoyalty() {
                     <CardContent className="pt-6">
                       {transactions && transactions.length > 0 ? (
                         <div className="space-y-3">
-                          {transactions.map((transaction) => (
+                          {transactions.map(transaction => (
                             <div
                               key={transaction.id}
                               className="flex items-center justify-between p-3 border rounded-lg"
                             >
                               <div className="flex-1">
-                                <div className="font-medium">{transaction.description || 'Transaction'}</div>
+                                <div className="font-medium">
+                                  {transaction.description || 'Transaction'}
+                                </div>
                                 <div className="text-xs text-muted-foreground">
                                   {format(new Date(transaction.created_at), 'PPp', { locale: fr })}
                                 </div>
@@ -425,7 +447,9 @@ export default function CustomerLoyalty() {
                               <div className="text-right">
                                 <div
                                   className={`font-bold ${
-                                    transaction.points_amount > 0 ? 'text-green-600' : 'text-red-600'
+                                    transaction.points_amount > 0
+                                      ? 'text-green-600'
+                                      : 'text-red-600'
                                   }`}
                                 >
                                   {transaction.points_amount > 0 ? '+' : ''}
@@ -452,7 +476,7 @@ export default function CustomerLoyalty() {
                     <CardContent className="pt-6">
                       {redemptions && redemptions.length > 0 ? (
                         <div className="space-y-3">
-                          {redemptions.map((redemption) => (
+                          {redemptions.map(redemption => (
                             <div
                               key={redemption.id}
                               className="flex items-center justify-between p-3 border rounded-lg"
@@ -462,7 +486,10 @@ export default function CustomerLoyalty() {
                                   {redemption.reward?.name || 'Récompense'}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
-                                  Code : <code className="bg-muted px-2 py-0.5 rounded">{redemption.redemption_code}</code>
+                                  Code :{' '}
+                                  <code className="bg-muted px-2 py-0.5 rounded">
+                                    {redemption.redemption_code}
+                                  </code>
                                 </div>
                                 <div className="text-xs text-muted-foreground mt-1">
                                   {format(new Date(redemption.created_at), 'PPp', { locale: fr })}
@@ -474,12 +501,16 @@ export default function CustomerLoyalty() {
                                     redemption.status === 'used'
                                       ? 'default'
                                       : redemption.status === 'expired'
-                                      ? 'destructive'
-                                      : 'secondary'
+                                        ? 'destructive'
+                                        : 'secondary'
                                   }
                                 >
-                                  {redemption.status === 'used' && <CheckCircle className="h-3 w-3 mr-1" />}
-                                  {redemption.status === 'expired' && <Clock className="h-3 w-3 mr-1" />}
+                                  {redemption.status === 'used' && (
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                  )}
+                                  {redemption.status === 'expired' && (
+                                    <Clock className="h-3 w-3 mr-1" />
+                                  )}
                                   {redemption.status === 'active' && 'Actif'}
                                   {redemption.status === 'used' && 'Utilisé'}
                                   {redemption.status === 'expired' && 'Expiré'}
@@ -504,7 +535,8 @@ export default function CustomerLoyalty() {
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Vous n'avez pas encore de compte de fidélité. Effectuez votre premier achat pour commencer à gagner des points !
+              Vous n'avez pas encore de compte de fidélité. Effectuez votre premier achat pour
+              commencer à gagner des points !
             </AlertDescription>
           </Alert>
         )}
@@ -515,7 +547,8 @@ export default function CustomerLoyalty() {
             <DialogHeader>
               <DialogTitle>Échanger la Récompense</DialogTitle>
               <DialogDescription>
-                Confirmez l'échange de {selectedReward?.points_cost} points pour "{selectedReward?.name}"
+                Confirmez l'échange de {selectedReward?.points_cost} points pour "
+                {selectedReward?.name}"
               </DialogDescription>
             </DialogHeader>
             {selectedReward && defaultStore && (
@@ -531,7 +564,9 @@ export default function CustomerLoyalty() {
                   </div>
                   <div className="flex justify-between font-semibold pt-2 border-t">
                     <span>Points après échange :</span>
-                    <span>{(defaultStore?.available_points || 0) - selectedReward.points_cost}</span>
+                    <span>
+                      {(defaultStore?.available_points || 0) - selectedReward.points_cost}
+                    </span>
                   </div>
                 </div>
                 {selectedReward.description && (
@@ -551,7 +586,7 @@ export default function CustomerLoyalty() {
                 }}
                 disabled={redeemReward.isPending}
               >
-                {redeemReward.isPending ? 'Échange en cours...' : 'Confirmer l\'échange'}
+                {redeemReward.isPending ? 'Échange en cours...' : "Confirmer l'échange"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -560,4 +595,3 @@ export default function CustomerLoyalty() {
     </SidebarProvider>
   );
 }
-

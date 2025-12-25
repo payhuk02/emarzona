@@ -1,101 +1,21 @@
-# robots.txt - Payhuk SaaS E-Commerce Platform
-# Mise à jour : 26 Octobre 2025
-# Objectif : Optimiser le crawl des moteurs de recherche
-
-# =============================================================================
-# RÈGLES GÉNÉRALES - Tous les bots
-# =============================================================================
+# robots.txt pour Emarzona
+# Permet aux moteurs de recherche d'indexer les pages publiques
 
 User-agent: *
-
-# Pages publiques autorisées
 Allow: /
 Allow: /marketplace
-Allow: /stores/
-Allow: /auth
+Allow: /storefront
+Allow: /product/
+Allow: /cart
+Allow: /checkout
 
-# Assets statiques
-Allow: /assets/
-Allow: /*.css$
-Allow: /*.js$
-Allow: /*.webp$
-Allow: /*.jpg$
-Allow: /*.png$
-Allow: /*.svg$
+# Bloquer les pages privées et admin
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /account
+Disallow: /api
+Disallow: /_next
+Disallow: /static
 
-# Bloquer les zones privées
-Disallow: /dashboard/
-Disallow: /admin/
-Disallow: /api/
-
-# Bloquer les pages de paiement (éviter indexation URLs avec tokens)
-Disallow: /payment/
-Disallow: /checkout/
-
-# Bloquer les pages techniques
-Disallow: /*?transaction_id=
-Disallow: /*?payment_id=
-Disallow: /*?token=
-Disallow: /*?ref=
-Disallow: /*aff=
-
-# =============================================================================
-# RÈGLES SPÉCIFIQUES - Google
-# =============================================================================
-
-User-agent: Googlebot
-Allow: /
-
-User-agent: Googlebot-Image
-Allow: /assets/
-Allow: /*.webp$
-Allow: /*.jpg$
-Allow: /*.png$
-
-# =============================================================================
-# RÈGLES SPÉCIFIQUES - Bing
-# =============================================================================
-
-User-agent: Bingbot
-Allow: /
-
-# =============================================================================
-# BLOQUER LES MAUVAIS BOTS
-# =============================================================================
-
-# Bloquer bots scraping agressifs
-User-agent: AhrefsBot
-Disallow: /
-
-User-agent: SemrushBot
-Disallow: /
-
-User-agent: DotBot
-Disallow: /
-
-User-agent: MJ12bot
-Disallow: /
-
-# Bloquer bots malveillants
-User-agent: GPTBot
-Disallow: /
-
-User-agent: CCBot
-Disallow: /
-
-# =============================================================================
-# SITEMAP
-# =============================================================================
-
-Sitemap: https://payhuk.com/sitemap.xml
-Sitemap: https://www.payhuk.com/sitemap.xml
-
-# =============================================================================
-# INFORMATIONS
-# =============================================================================
-
-# Contact: support@payhuk.com
-# Site: https://payhuk.com
-# Politique de crawl : Respecter un délai de 1 seconde entre requêtes
-
-# Crawl-delay: 1
+# Sitemap
+Sitemap: https://emarzona.com/sitemap.xml

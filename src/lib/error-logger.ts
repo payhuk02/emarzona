@@ -3,13 +3,25 @@
  * Capture, formate et envoie les erreurs à différents services
  */
 
-import * as Sentry from '@sentry/react';
+import { captureException, captureMessage } from '@sentry/react';
+
+// Sauvegarder les méthodes originales de la console pour éviter les boucles infinies
+// avec console-guard.ts
+const originalConsole = {
+  log: console.log.bind(console),
+  info: console.info.bind(console),
+  warn: console.warn.bind(console),
+  error: console.error.bind(console),
+  debug: console.debug.bind(console),
+  group: console.group?.bind(console) || (() => {}),
+  groupEnd: console.groupEnd?.bind(console) || (() => {}),
+};
 
 export interface ErrorLogContext {
   userId?: string;
   componentStack?: string;
   level?: 'app' | 'page' | 'section' | 'component';
-  extra?: Record<string, any>;
+  extra?: Record<string, unknown>;
 }
 
 export interface ErrorLog {
@@ -28,13 +40,33 @@ export interface ErrorLog {
  * Log une erreur dans tous les services configurés
  */
 export function logError(error: Error, context: ErrorLogContext = {}): void {
+  // S'assurer que l'erreur a un message valide
+  let errorMessage = error?.message || 'Unknown error';
+  const errorStack = error?.stack;
+  const errorName = error?.name || 'Error';
+
+  // Si l'erreur n'est pas une instance d'Error, essayer de la convertir
+  if (!(error instanceof Error)) {
+    try {
+      if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        errorMessage = (error as { message?: string }).message || JSON.stringify(error);
+      } else {
+        errorMessage = String(error);
+      }
+    } catch (e) {
+      errorMessage = 'Error object could not be serialized';
+    }
+  }
+
   // Créer le log structuré
   const errorLog: ErrorLog = {
     timestamp: new Date().toISOString(),
     error: {
-      message: error.message,
-      stack: error.stack,
-      name: error.name,
+      message: errorMessage,
+      stack: errorStack,
+      name: errorName,
     },
     context,
     userAgent: navigator.userAgent,
@@ -43,19 +75,19 @@ export function logError(error: Error, context: ErrorLogContext = {}): void {
 
   // Console en développement
   if (process.env.NODE_ENV === 'development') {
-    console.group('🔴 Error Logged');
-    console.error('Error:', error);
-    console.log('Context:', context);
-    console.log('Full Log:', errorLog);
-    console.groupEnd();
+    originalConsole.group('🔴 Error Logged');
+    originalConsole.error('Error:', error);
+    originalConsole.log('Context:', context);
+    originalConsole.log('Full Log:', errorLog);
+    originalConsole.groupEnd();
   }
 
   // Sentry (production)
   if (process.env.NODE_ENV === 'production') {
-    Sentry.captureException(error, {
+    captureException(error, {
       level: context.level === 'app' ? 'fatal' : 'error',
       contexts: {
-        error_context: context,
+        error_context: context as Record<string, unknown>,
       },
       tags: {
         error_level: context.level || 'component',
@@ -98,14 +130,14 @@ export function logNetworkError(
  */
 export function logWarning(message: string, context: ErrorLogContext = {}): void {
   if (process.env.NODE_ENV === 'development') {
-    console.warn('⚠️ Warning:', message, context);
+    originalConsole.warn('⚠️ Warning:', message, context);
   }
 
   if (process.env.NODE_ENV === 'production') {
-    Sentry.captureMessage(message, {
+    captureMessage(message, {
       level: 'warning',
       contexts: {
-        warning_context: context,
+        warning_context: context as Record<string, unknown>,
       },
     });
   }
@@ -114,13 +146,13 @@ export function logWarning(message: string, context: ErrorLogContext = {}): void
 /**
  * Log une info (pour monitoring)
  */
-export function logInfo(message: string, data?: Record<string, any>): void {
+export function logInfo(message: string, data?: Record<string, unknown>): void {
   if (process.env.NODE_ENV === 'development') {
-    console.info('ℹ️ Info:', message, data);
+    originalConsole.info('ℹ️ Info:', message, data);
   }
 
   if (process.env.NODE_ENV === 'production' && data) {
-    Sentry.captureMessage(message, {
+    captureMessage(message, {
       level: 'info',
       extra: data,
     });
@@ -132,7 +164,7 @@ export function logInfo(message: string, data?: Record<string, any>): void {
  */
 function saveErrorToLocalStorage(errorLog: ErrorLog): void {
   try {
-    const storageKey = 'payhuk_error_logs';
+    const storageKey = 'emarzona_error_logs';
     const maxLogs = 50; // Garder les 50 dernières erreurs
 
     // Récupérer les logs existants
@@ -151,7 +183,8 @@ function saveErrorToLocalStorage(errorLog: ErrorLog): void {
     localStorage.setItem(storageKey, JSON.stringify(limitedLogs));
   } catch (e) {
     // Silencieux si LocalStorage est plein ou indisponible
-    console.error('Failed to save error to localStorage:', e);
+    // Utiliser originalConsole pour éviter la boucle infinie
+    originalConsole.error('Failed to save error to localStorage:', e);
   }
 }
 
@@ -160,11 +193,11 @@ function saveErrorToLocalStorage(errorLog: ErrorLog): void {
  */
 export function getErrorLogs(): ErrorLog[] {
   try {
-    const storageKey = 'payhuk_error_logs';
+    const storageKey = 'emarzona_error_logs';
     const logsStr = localStorage.getItem(storageKey);
     return logsStr ? JSON.parse(logsStr) : [];
   } catch (e) {
-    console.error('Failed to retrieve error logs:', e);
+    originalConsole.error('Failed to retrieve error logs:', e);
     return [];
   }
 }
@@ -174,9 +207,9 @@ export function getErrorLogs(): ErrorLog[] {
  */
 export function clearErrorLogs(): void {
   try {
-    localStorage.removeItem('payhuk_error_logs');
+    localStorage.removeItem('emarzona_error_logs');
   } catch (e) {
-    console.error('Failed to clear error logs:', e);
+    originalConsole.error('Failed to clear error logs:', e);
   }
 }
 
@@ -198,15 +231,34 @@ export function setupGlobalErrorHandlers(): void {
 
   // Promesses rejetées non gérées
   window.addEventListener('unhandledrejection', (event) => {
-    const error = event.reason instanceof Error
-      ? event.reason
-      : new Error(String(event.reason));
+    let error: Error;
+    
+    if (event.reason instanceof Error) {
+      error = event.reason;
+    } else if (typeof event.reason === 'string') {
+      error = new Error(event.reason);
+    } else if (event.reason && typeof event.reason === 'object') {
+      // Pour les objets complexes, essayer de les sérialiser en JSON
+      try {
+        const message = event.reason.message || event.reason.toString?.() || JSON.stringify(event.reason);
+        error = new Error(String(message));
+      } catch (e) {
+        // Si la sérialisation échoue, utiliser un message générique
+        error = new Error('Unhandled promise rejection (non-serializable object)');
+      }
+    } else {
+      // Pour les valeurs primitives (number, boolean, etc.)
+      error = new Error(String(event.reason ?? 'Unknown rejection reason'));
+    }
 
     logError(error, {
       level: 'app',
       extra: {
         type: 'unhandledrejection',
-        promise: event.promise,
+        reasonType: typeof event.reason,
+        reasonValue: event.reason && typeof event.reason === 'object' 
+          ? (event.reason.message || 'object') 
+          : event.reason,
       },
     });
   });
@@ -215,7 +267,8 @@ export function setupGlobalErrorHandlers(): void {
   window.addEventListener('error', (event) => {
     if (event.target && event.target !== window) {
       const target = event.target as HTMLElement;
-      const resourceUrl = (target as any).src || (target as any).href;
+      const resourceUrl = (target as HTMLImageElement | HTMLScriptElement | HTMLLinkElement).src || 
+                          (target as HTMLLinkElement | HTMLAnchorElement).href;
 
       if (resourceUrl) {
         logWarning(`Failed to load resource: ${resourceUrl}`, {

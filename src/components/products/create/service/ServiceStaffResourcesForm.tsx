@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, X, Users, Package } from 'lucide-react';
+import { Plus, X, Users, Package } from '@/components/icons';
 import type { ServiceProductFormData, ServiceStaffMember } from '@/types/service-product';
 
 interface ServiceStaffResourcesFormProps {

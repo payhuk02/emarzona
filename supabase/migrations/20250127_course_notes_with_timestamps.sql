@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK COURSES NOTES WITH TIMESTAMPS SYSTEM
+-- EMARZONA COURSES NOTES WITH TIMESTAMPS SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système de notes personnelles avec timestamps multiples
 --              Permet aux étudiants de prendre plusieurs notes avec timestamps

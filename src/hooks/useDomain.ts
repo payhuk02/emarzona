@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 export interface DomainConfig {
   custom_domain: string | null;
@@ -101,7 +102,7 @@ export const useDomain = (storeId: string | null) => {
   const { toast } = useToast();
 
   const generateVerificationToken = useCallback(() => {
-    return `payhula-verify-${Math.random().toString(36).substring(2, 15)}`;
+    return `emarzona-verify-${Math.random().toString(36).substring(2, 15)}`;
   }, []);
 
   const validateDomain = useCallback((domain: string): boolean => {
@@ -150,7 +151,7 @@ export const useDomain = (storeId: string | null) => {
 
       return true;
     } catch (error) {
-      console.error('Error starting monitoring:', error);
+      logger.error('Error starting monitoring', { error });
       toast({
         title: "Erreur",
         description: "Impossible de démarrer le monitoring.",
@@ -190,7 +191,7 @@ export const useDomain = (storeId: string | null) => {
       setMonitoring(healthData);
       return healthData;
     } catch (error) {
-      console.error('Error checking domain health:', error);
+      logger.error('Error checking domain health', { error });
       return null;
     }
   }, []);
@@ -205,7 +206,7 @@ Type: ${incident.type}
 Description: ${incident.description}
 Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
 
-      console.log(`Alert sent via ${alert.type}:`, alertMessage);
+      logger.info(`Alert sent via ${alert.type}`, { alertMessage });
 
       toast({
         title: "Alerte envoyée",
@@ -215,7 +216,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
 
       return true;
     } catch (error) {
-      console.error('Error sending alert:', error);
+      logger.error('Error sending alert', { error });
       return false;
     }
   }, [toast]);
@@ -241,7 +242,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
 
       return true;
     } catch (error) {
-      console.error('Error adding secondary domain:', error);
+      logger.error('Error adding secondary domain', { error });
       toast({
         title: "Erreur",
         description: "Impossible d'ajouter le domaine secondaire.",
@@ -275,7 +276,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
 
       return true;
     } catch (error) {
-      console.error('Error removing secondary domain:', error);
+      logger.error('Error removing secondary domain', { error });
       toast({
         title: "Erreur",
         description: "Impossible de supprimer le domaine secondaire.",
@@ -298,7 +299,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
 
       return true;
     } catch (error) {
-      console.error('Error enabling DNSSEC:', error);
+      logger.error('Error enabling DNSSEC', { error });
       toast({
         title: "Erreur",
         description: "Impossible d'activer DNSSEC.",
@@ -320,7 +321,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
 
       return true;
     } catch (error) {
-      console.error('Error enabling HSTS:', error);
+      logger.error('Error enabling HSTS', { error });
       toast({
         title: "Erreur",
         description: "Impossible d'activer HSTS.",
@@ -342,7 +343,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
 
       return true;
     } catch (error) {
-      console.error('Error enabling CSP:', error);
+      logger.error('Error enabling CSP', { error });
       toast({
         title: "Erreur",
         description: "Impossible d'activer CSP.",
@@ -395,8 +396,9 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: any) {
-      console.error('Error connecting domain:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error connecting domain', { error });
       toast({
         title: "Erreur",
         description: "Impossible de connecter le domaine.",
@@ -488,8 +490,9 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: any) {
-      console.error('Error verifying domain:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error verifying domain', { error });
       toast({
         title: "Erreur de vérification",
         description: "Impossible de vérifier le domaine.",
@@ -529,8 +532,9 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: any) {
-      console.error('Error disconnecting domain:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error disconnecting domain', { error });
       toast({
         title: "Erreur",
         description: "Impossible de déconnecter le domaine.",
@@ -559,8 +563,9 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: any) {
-      console.error('Error updating SSL:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error updating SSL', { error });
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour la configuration SSL.",
@@ -574,7 +579,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
     if (!storeId) return false;
 
     try {
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       if (redirects.www !== undefined) updateData.redirect_www = redirects.www;
       if (redirects.https !== undefined) updateData.redirect_https = redirects.https;
 
@@ -591,8 +596,9 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: any) {
-      console.error('Error updating redirects:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error updating redirects', { error });
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour les redirections.",
@@ -618,14 +624,14 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       },
       verificationRecord: {
         type: "TXT",
-        name: "_payhula-verification",
+        name: "_emarzona-verification",
         value: verificationToken,
         ttl: 3600
       },
       cnameRecord: {
         type: "CNAME",
         name: "shop",
-        value: "payhula.vercel.app",
+        value: "emarzona.vercel.app",
         ttl: 3600
       }
     };
@@ -669,7 +675,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
         errors
       };
     } catch (error) {
-      console.error('Error checking DNS propagation:', error);
+      logger.error('Error checking DNS propagation', { error });
       return {
         isPropagated: false,
         propagationTime: 0,
@@ -701,7 +707,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       setAnalytics(mockAnalytics);
       return mockAnalytics;
     } catch (error) {
-      console.error('Error fetching domain analytics:', error);
+      logger.error('Error fetching domain analytics', { error });
       return null;
     }
   }, []);
@@ -767,7 +773,7 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
         warnings
       };
     } catch (error) {
-      console.error('Error validating DNS:', error);
+      logger.error('Error validating DNS', { error });
       return {
         isValid: false,
         errors: ["Erreur lors de la validation DNS"],
@@ -799,7 +805,7 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
 
       return certificates;
     } catch (error) {
-      console.error('Error fetching SSL certificates:', error);
+      logger.error('Error fetching SSL certificates', { error });
       return [];
     }
   }, []);
@@ -837,7 +843,7 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
 
       return true;
     } catch (error) {
-      console.error('Error uploading custom certificate:', error);
+      logger.error('Error uploading custom certificate', { error });
       toast({
         title: "Erreur",
         description: "Impossible d'uploader le certificat personnalisé.",
@@ -859,7 +865,7 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
 
       return true;
     } catch (error) {
-      console.error('Error renewing SSL certificate:', error);
+      logger.error('Error renewing SSL certificate', { error });
       toast({
         title: "Erreur",
         description: "Impossible de renouveler le certificat SSL.",
@@ -881,7 +887,7 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
 
       return true;
     } catch (error) {
-      console.error('Error deleting SSL certificate:', error);
+      logger.error('Error deleting SSL certificate', { error });
       toast({
         title: "Erreur",
         description: "Impossible de supprimer le certificat SSL.",
@@ -913,7 +919,7 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
       setSSLConfiguration(sslConfig);
       return sslConfig;
     } catch (error) {
-      console.error('Error getting SSL grade:', error);
+      logger.error('Error getting SSL grade', { error });
       return {
         certificates: [],
         autoRenewal: false,
@@ -945,7 +951,7 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
 
       return true;
     } catch (error) {
-      console.error('Error updating SSL configuration:', error);
+      logger.error('Error updating SSL configuration', { error });
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour la configuration SSL.",

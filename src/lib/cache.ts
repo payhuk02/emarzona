@@ -4,6 +4,8 @@
  * et permettre une expérience offline partielle
  */
 
+import { logger } from './logger';
+
 interface CacheItem<T> {
   data: T;
   timestamp: number;
@@ -11,7 +13,7 @@ interface CacheItem<T> {
 }
 
 class CacheManager {
-  private readonly prefix = 'payhuk_cache_';
+  private readonly prefix = 'emarzona_cache_';
 
   /**
    * Stocke une donnée dans le cache avec une durée d'expiration
@@ -32,7 +34,7 @@ class CacheManager {
         JSON.stringify(item)
       );
     } catch (error) {
-      console.error(`[Cache] Error setting ${key}:`, error);
+      logger.error('Cache error setting', { key, error });
       // Si quota dépassé, nettoyer le cache
       if (error instanceof DOMException && error.name === 'QuotaExceededError') {
         this.clearExpired();
@@ -60,7 +62,7 @@ class CacheManager {
 
       return item.data;
     } catch (error) {
-      console.error(`[Cache] Error getting ${key}:`, error);
+      logger.error('Cache error getting', { key, error });
       return null;
     }
   }
@@ -72,7 +74,7 @@ class CacheManager {
     try {
       localStorage.removeItem(`${this.prefix}${key}`);
     } catch (error) {
-      console.error(`[Cache] Error removing ${key}:`, error);
+      logger.error('Cache error removing', { key, error });
     }
   }
 
@@ -110,9 +112,9 @@ class CacheManager {
 
       keysToRemove.forEach(key => localStorage.removeItem(key));
       
-      console.log(`[Cache] Cleared ${keysToRemove.length} expired entries`);
+      logger.debug('Cache cleared expired entries', { count: keysToRemove.length });
     } catch (error) {
-      console.error('[Cache] Error clearing expired:', error);
+      logger.error('Cache error clearing expired', { error });
     }
   }
 
@@ -132,9 +134,9 @@ class CacheManager {
 
       keysToRemove.forEach(key => localStorage.removeItem(key));
       
-      console.log(`[Cache] Cleared all ${keysToRemove.length} cache entries`);
+      logger.info('Cache cleared all entries', { count: keysToRemove.length });
     } catch (error) {
-      console.error('[Cache] Error clearing all:', error);
+      logger.error('Cache error clearing all', { error });
     }
   }
 

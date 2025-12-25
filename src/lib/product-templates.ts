@@ -52,7 +52,7 @@ interface ProductFormData {
   track_clicks: boolean;
   track_purchases: boolean;
   
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -389,7 +389,7 @@ export const createCustomTemplate = (
     description: metadata.description,
     category: productData.category || 'Personnalisé',
     icon: metadata.icon || '⭐',
-    type: productData.product_type as any || 'digital',
+    type: (productData.product_type as 'digital' | 'physical' | 'service') || 'digital',
     popularityScore: 50,
     config: productData,
   };
@@ -413,8 +413,9 @@ export const importTemplate = (json: string): ProductTemplate => {
       throw new Error('Template invalide: structure manquante');
     }
     return template;
-  } catch (error: any) {
-    throw new Error(`Erreur d'import: ${error.message}`);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    throw new Error(`Erreur d'import: ${errorMessage}`);
   }
 };
 

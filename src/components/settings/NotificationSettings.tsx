@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { logger } from "@/lib/logger";
 import { 
   Loader2, 
   Moon, 
@@ -118,7 +119,7 @@ export const NotificationSettings = () => {
         setSettings(prev => ({ ...prev, ...data.settings }));
       }
     } catch (error: any) {
-      console.error('Error loading notification settings:', error);
+      logger.error('Error loading notification settings', { error, userId: user?.id });
       toast({
         title: "Erreur",
         description: "Impossible de charger les paramètres de notifications",
@@ -149,7 +150,7 @@ export const NotificationSettings = () => {
         description: "Paramètres de notifications sauvegardés",
       });
     } catch (error: any) {
-      console.error('Error saving notification settings:', error);
+      logger.error('Error saving notification settings', { error, userId: user?.id });
       toast({
         title: "Erreur",
         description: "Impossible de sauvegarder les paramètres",

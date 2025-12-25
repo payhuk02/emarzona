@@ -113,11 +113,13 @@ export interface CustomerAccessManagerProps {
  * 
  * @example
  * ```tsx
+ * import { logger } from '@/lib/logger';
+ * 
  * <CustomerAccessManager 
  *   customerAccess={accessList}
- *   onRevokeAccess={(id, reason) => console.log('Revoke:', id, reason)}
- *   onRestoreAccess={(id) => console.log('Restore:', id)}
- *   onUpdateLimit={(id, limit) => console.log('Update limit:', id, limit)}
+ *   onRevokeAccess={(id, reason) => logger.info('Revoke access', { accessId: id, reason })}
+ *   onRestoreAccess={(id) => logger.info('Restore access', { accessId: id })}
+ *   onUpdateLimit={(id, limit) => logger.info('Update limit', { accessId: id, limit })}
  * />
  * ```
  */
@@ -326,7 +328,7 @@ export const CustomerAccessManager: React.FC<CustomerAccessManagerProps> = ({
             </div>
 
             {/* Filtre statut */}
-            <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+            <Select value={statusFilter} onValueChange={(value: string) => setStatusFilter(value)}>
               <SelectTrigger className="w-[160px]">
                 <SelectValue />
               </SelectTrigger>
@@ -450,6 +452,7 @@ export const CustomerAccessManager: React.FC<CustomerAccessManagerProps> = ({
                               variant="ghost"
                               className="h-8"
                               onClick={() => handleLimitUpdate(access.id)}
+                              aria-label="Confirmer la modification de la limite"
                             >
                               <CheckCircle2 className="h-4 w-4" />
                             </Button>
@@ -461,6 +464,7 @@ export const CustomerAccessManager: React.FC<CustomerAccessManagerProps> = ({
                                 setEditingLimit(null);
                                 setNewLimit(0);
                               }}
+                              aria-label="Annuler la modification de la limite"
                             >
                               <XCircle className="h-4 w-4" />
                             </Button>
@@ -480,6 +484,7 @@ export const CustomerAccessManager: React.FC<CustomerAccessManagerProps> = ({
                                 setEditingLimit(access.id);
                                 setNewLimit(access.downloadLimit || 0);
                               }}
+                              aria-label={`Modifier la limite de téléchargement pour ${access.customerName}`}
                             >
                               <Edit className="h-3 w-3" />
                             </Button>
@@ -523,6 +528,7 @@ export const CustomerAccessManager: React.FC<CustomerAccessManagerProps> = ({
                               variant="ghost"
                               className="h-8"
                               onClick={() => onViewDetails(access)}
+                              aria-label={`Voir les détails de l'accès pour ${access.customerName}`}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -531,7 +537,7 @@ export const CustomerAccessManager: React.FC<CustomerAccessManagerProps> = ({
                           {access.status === 'active' && onRevokeAccess && (
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="ghost" className="h-8 text-red-600">
+                                <Button size="sm" variant="ghost" className="h-8 text-red-600" aria-label={`Révoquer l'accès pour ${access.customerName}`}>
                                   <Ban className="h-4 w-4" />
                                 </Button>
                               </AlertDialogTrigger>
@@ -575,6 +581,7 @@ export const CustomerAccessManager: React.FC<CustomerAccessManagerProps> = ({
                                 variant="ghost"
                                 className="h-8 text-green-600"
                                 onClick={() => onRestoreAccess(access.id)}
+                                aria-label={`Restaurer l'accès pour ${access.customerName}`}
                               >
                                 <RefreshCw className="h-4 w-4" />
                               </Button>

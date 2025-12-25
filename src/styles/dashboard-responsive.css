@@ -60,7 +60,8 @@
 
 .dashboard-header {
   @apply sticky top-0 z-10 border-b;
-  @apply bg-card/95 backdrop-blur-sm shadow-soft;
+  @apply bg-card/95 backdrop-blur-sm;
+  box-shadow: var(--shadow-soft);
 }
 
 .dashboard-main {

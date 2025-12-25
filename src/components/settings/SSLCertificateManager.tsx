@@ -26,6 +26,7 @@ import {
   Loader2
 } from "lucide-react";
 import { SSLCertificate, SSLConfiguration } from "@/hooks/useDomain";
+import { logger } from "@/lib/logger";
 
 interface SSLCertificateManagerProps {
   domain: string | null;
@@ -74,7 +75,7 @@ export const SSLCertificateManager: React.FC<SSLCertificateManagerProps> = ({
       const certs = await onGetSSLCertificates(domain);
       setCertificates(certs);
     } catch (error) {
-      console.error('Error fetching certificates:', error);
+      logger.error('Error fetching certificates', { error, domain });
     } finally {
       setLoading(false);
     }
@@ -94,7 +95,7 @@ export const SSLCertificateManager: React.FC<SSLCertificateManagerProps> = ({
         await handleGetCertificates();
       }
     } catch (error) {
-      console.error('Error uploading certificate:', error);
+      logger.error('Error uploading certificate', { error, domain });
     } finally {
       setUploading(false);
     }
@@ -107,7 +108,7 @@ export const SSLCertificateManager: React.FC<SSLCertificateManagerProps> = ({
         await handleGetCertificates();
       }
     } catch (error) {
-      console.error('Error renewing certificate:', error);
+      logger.error('Error renewing certificate', { error, certificateId });
     }
   };
 
@@ -120,7 +121,7 @@ export const SSLCertificateManager: React.FC<SSLCertificateManagerProps> = ({
         await handleGetCertificates();
       }
     } catch (error) {
-      console.error('Error deleting certificate:', error);
+      logger.error('Error deleting certificate', { error, certificateId });
     }
   };
 
@@ -131,7 +132,7 @@ export const SSLCertificateManager: React.FC<SSLCertificateManagerProps> = ({
     try {
       await onGetSSLGrade(domain);
     } catch (error) {
-      console.error('Error analyzing SSL:', error);
+      logger.error('Error analyzing SSL', { error, domain });
     } finally {
       setLoading(false);
     }

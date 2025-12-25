@@ -138,7 +138,7 @@ export const CertificateGenerator = ({
             <div>
               <p className="text-muted-foreground">Date d'émission :</p>
               <p className="font-semibold">
-                {new Date(certificate.issued_at).toLocaleDateString('fr-FR')}
+                {new Date(certificate.completion_date || certificate.created_at).toLocaleDateString('fr-FR')}
               </p>
             </div>
           </div>
@@ -160,11 +160,11 @@ export const CertificateGenerator = ({
       {showPreview && (
         <div className="print:block">
           <CertificateTemplate
-            studentName={user?.user_metadata?.full_name || user?.email || 'Étudiant'}
-            courseName={courseName}
-            completionDate={certificate.issued_at}
+            studentName={certificate.student_name || user?.user_metadata?.full_name || user?.email || 'Étudiant'}
+            courseName={certificate.course_title || courseName}
+            completionDate={certificate.completion_date || certificate.created_at}
             certificateNumber={certificate.certificate_number}
-            instructorName={instructorName}
+            instructorName={certificate.instructor_name || instructorName}
           />
         </div>
       )}

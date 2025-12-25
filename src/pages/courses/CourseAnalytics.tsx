@@ -4,6 +4,7 @@
  * Date : 27 octobre 2025
  */
 
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,9 +12,12 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { useCourseDetail } from '@/hooks/courses/useCourseDetail';
 import { CourseAnalyticsDashboard } from '@/components/courses/analytics/CourseAnalyticsDashboard';
+import { ProgressionAnalyticsDashboard } from '@/components/courses/analytics/ProgressionAnalyticsDashboard';
 import { useAuth } from '@/contexts/AuthContext';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const CourseAnalytics = () => {
+  const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -24,13 +28,13 @@ const CourseAnalytics = () => {
       <div className="container mx-auto py-8">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Accès refusé</AlertTitle>
+          <AlertTitle>{t('courses.analytics.accessDenied')}</AlertTitle>
           <AlertDescription>
-            Vous devez être connecté pour accéder à cette page.
+            {t('courses.analytics.mustBeLoggedIn')}
           </AlertDescription>
         </Alert>
         <Button onClick={() => navigate('/auth/login')} className="mt-4">
-          Se connecter
+          {t('auth.login.button')}
         </Button>
       </div>
     );
@@ -55,13 +59,13 @@ const CourseAnalytics = () => {
       <div className="container mx-auto py-8">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Erreur</AlertTitle>
+          <AlertTitle>{t('common.error')}</AlertTitle>
           <AlertDescription>
-            {error?.message || 'Cours introuvable'}
+            {error?.message || t('courses.analytics.courseNotFound')}
           </AlertDescription>
         </Alert>
         <Button onClick={() => navigate('/dashboard/my-courses')} className="mt-4">
-          Retour à mes cours
+          {t('courses.analytics.backToMyCourses')}
         </Button>
       </div>
     );
@@ -75,13 +79,13 @@ const CourseAnalytics = () => {
       <div className="container mx-auto py-8">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Accès refusé</AlertTitle>
+          <AlertTitle>{t('courses.analytics.accessDenied')}</AlertTitle>
           <AlertDescription>
-            Vous n'avez pas l'autorisation de voir les analytics de ce cours.
+            {t('courses.analytics.noPermission')}
           </AlertDescription>
         </Alert>
         <Button onClick={() => navigate('/dashboard/my-courses')} className="mt-4">
-          Retour à mes cours
+          {t('courses.analytics.backToMyCourses')}
         </Button>
       </div>
     );
@@ -91,24 +95,40 @@ const CourseAnalytics = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="container mx-auto py-8 px-4">
+        <div className="container mx-auto py-4 sm:py-6 md:py-8 px-3 sm:px-4">
           <Button
             variant="ghost"
             onClick={() => navigate(`/courses/${slug}`)}
-            className="mb-4 text-white hover:bg-white/20"
+            className="mb-3 sm:mb-4 text-white hover:bg-white/20 h-8 sm:h-9 text-xs sm:text-sm"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour au cours
+            <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+            <span className="hidden sm:inline">{t('courses.analytics.backToCourse')}</span>
+            <span className="sm:hidden">Retour</span>
           </Button>
 
-          <h1 className="text-3xl font-bold mb-2">Analytics</h1>
-          <p className="text-xl text-blue-100">{product.name}</p>
+          <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold mb-1 sm:mb-2">{t('courses.analytics.title')}</h1>
+          <p className="text-xs sm:text-sm md:text-base lg:text-lg text-blue-100">{product.name}</p>
         </div>
       </div>
 
       {/* Content */}
       <div className="container mx-auto py-8 px-4">
-        <CourseAnalyticsDashboard productId={product.id} />
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+            <TabsTrigger value="progression">Progression</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview" className="space-y-6">
+            <CourseAnalyticsDashboard productId={product.id} />
+          </TabsContent>
+          
+          <TabsContent value="progression" className="space-y-6">
+            {course?.id && (
+              <ProgressionAnalyticsDashboard courseId={course.id} />
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

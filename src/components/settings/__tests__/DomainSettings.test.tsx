@@ -17,7 +17,7 @@ vi.mock('@/hooks/useStores', () => ({
         is_active: true,
         custom_domain: 'maboutique.com',
         domain_status: 'verified',
-        domain_verification_token: 'payhula-verify-abc123',
+        domain_verification_token: 'emarzona-verify-abc123',
         domain_verified_at: '2025-10-20T10:00:00Z',
         ssl_enabled: true,
         redirect_https: true,
@@ -31,8 +31,6 @@ vi.mock('@/hooks/useStores', () => ({
     updateStore: vi.fn().mockResolvedValue(true),
     createStore: vi.fn(),
     deleteStore: vi.fn(),
-    canCreateStore: () => true,
-    getRemainingStores: () => 2,
     refetch: vi.fn()
   })
 }));
@@ -214,6 +212,7 @@ describe('DomainSettings - Validation formulaire', () => {
 
 describe('DomainSettings - Helpers (domainUtils)', () => {
   it('validateDomain accepte les domaines valides', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { validateDomain } = require('@/lib/domainUtils');
     
     expect(validateDomain('example.com')).toBe(true);
@@ -222,6 +221,7 @@ describe('DomainSettings - Helpers (domainUtils)', () => {
   });
 
   it('validateDomain rejette les domaines invalides', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { validateDomain } = require('@/lib/domainUtils');
     
     expect(validateDomain('invalid')).toBe(false);
@@ -231,24 +231,26 @@ describe('DomainSettings - Helpers (domainUtils)', () => {
   });
 
   it('generateVerificationToken crée un token unique', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { generateVerificationToken } = require('@/lib/domainUtils');
     
     const token1 = generateVerificationToken();
     const token2 = generateVerificationToken();
     
-    expect(token1).toContain('payhula-verify-');
-    expect(token2).toContain('payhula-verify-');
+    expect(token1).toContain('emarzona-verify-');
+    expect(token2).toContain('emarzona-verify-');
     expect(token1).not.toBe(token2);
   });
 
   it('getDNSInstructions retourne les bonnes instructions', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { getDNSInstructions } = require('@/lib/domainUtils');
     
-    const instructions = getDNSInstructions('example.com', 'payhula-verify-test123');
+    const instructions = getDNSInstructions('example.com', 'emarzona-verify-test123');
     
     expect(instructions.aRecord.value).toBe('185.158.133.1');
     expect(instructions.wwwRecord.name).toBe('www.example.com');
-    expect(instructions.txtRecord.value).toBe('payhula-verify-test123');
+    expect(instructions.txtRecord.value).toBe('emarzona-verify-test123');
   });
 });
 
@@ -261,7 +263,7 @@ const mockStore = {
   is_active: true,
   custom_domain: 'maboutique.com',
   domain_status: 'verified' as const,
-  domain_verification_token: 'payhula-verify-abc123',
+  domain_verification_token: 'emarzona-verify-abc123',
   domain_verified_at: '2025-10-20T10:00:00Z',
   ssl_enabled: true,
   redirect_https: true,

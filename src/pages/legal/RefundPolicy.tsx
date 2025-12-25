@@ -48,7 +48,7 @@ export default function RefundPolicy() {
           
           {/* Introduction */}
           <p className="lead">
-            Chez Payhuk, votre satisfaction est notre priorité. Cette politique explique les conditions 
+            Chez Emarzona, votre satisfaction est notre priorité. Cette politique explique les conditions 
             de remboursement pour nos différents types de produits et services.
           </p>
 
@@ -188,7 +188,7 @@ export default function RefundPolicy() {
             Si vous n'êtes pas satisfait de notre réponse concernant votre demande de remboursement :
           </p>
           <ol>
-            <li><strong>Médiation :</strong> Contactez notre service client senior : support@payhuk.com</li>
+            <li><strong>Médiation :</strong> Contactez notre service client senior : support@emarzona.com</li>
             <li><strong>Plateforme européenne :</strong> Si vous êtes en UE, utilisez la plateforme ODR</li>
             <li><strong>Tribunal :</strong> En dernier recours, saisir le tribunal compétent</li>
           </ol>
@@ -223,7 +223,7 @@ export default function RefundPolicy() {
             Pour toute question sur notre politique de remboursement :
           </p>
           <ul>
-            <li><strong>Email :</strong> refunds@payhuk.com</li>
+            <li><strong>Email :</strong> refunds@emarzona.com</li>
             <li><strong>Support :</strong> Via le chat (en bas à droite)</li>
             <li><strong>Téléphone :</strong> [Votre numéro] (Lu-Ve 9h-18h)</li>
           </ul>

@@ -160,9 +160,11 @@ const TIER_CONFIG: Record<
  * 
  * @example
  * ```tsx
+ * import { logger } from '@/lib/logger';
+ * 
  * <ServicePackageManager 
  *   packages={packages}
- *   onSave={(packages) => console.log('Saved', packages)}
+ *   onSave={(packages) => logger.info('Packages saved', { count: packages.length })}
  *   enableAutoGenerate={true}
  *   availableOptions={[
  *     { id: '1', name: 'Support prioritaire', included: false },
@@ -553,7 +555,7 @@ export const ServicePackageManager: React.FC<ServicePackageManagerProps> = ({
 
       {/* Edit/Create Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingPackage?.name ? `Modifier ${editingPackage.name}` : 'Nouveau package'}

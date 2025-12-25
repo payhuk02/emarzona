@@ -1,506 +1,290 @@
 /**
- * Service Worker Avancé pour Payhuk
- * Features : Cache stratégies, Mode offline, Background sync, Notifications push
+ * Service Worker pour PWA
+ * Cache des assets statiques et support offline
  */
 
-const CACHE_VERSION = 'payhuk-v1.0.0';
-const CACHE_NAMES = {
-  static: `${CACHE_VERSION}-static`,
-  dynamic: `${CACHE_VERSION}-dynamic`,
-  images: `${CACHE_VERSION}-images`,
-  api: `${CACHE_VERSION}-api`,
-};
+const CACHE_VERSION = 'emarzona-v2';
+const STATIC_CACHE_NAME = `emarzona-static-${CACHE_VERSION}`;
+const DYNAMIC_CACHE_NAME = `emarzona-dynamic-${CACHE_VERSION}`;
+const IMAGE_CACHE_NAME = `emarzona-images-${CACHE_VERSION}`;
 
+// Assets à mettre en cache immédiatement
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/offline.html',
 ];
 
-// Installation du Service Worker
+// Install event - Cache les assets statiques
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing Service Worker...', CACHE_VERSION);
-  
   event.waitUntil(
-    caches.open(CACHE_NAMES.static).then((cache) => {
-      console.log('[SW] Precaching static assets');
-      // Cache les assets de manière individuelle pour gérer les erreurs gracieusement
-      return Promise.allSettled(
-        STATIC_ASSETS.map((asset) =>
-          cache.add(asset).catch((err) => {
-            console.warn(`[SW] Failed to cache ${asset}:`, err);
-            // Ne pas throw pour éviter de casser l'installation du SW
-            return null;
-          })
-        )
-      );
+    caches.open(STATIC_CACHE_NAME).then((cache) => {
+      return cache.addAll(STATIC_ASSETS);
     })
   );
-  
-  // Activer immédiatement le nouveau Service Worker
   self.skipWaiting();
 });
 
-// Activation du Service Worker
+// Activate event - Nettoie les anciens caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating Service Worker...', CACHE_VERSION);
-  
   event.waitUntil(
-    Promise.all([
-      // Nettoyer les anciens caches
-      caches.keys().then((cacheNames) => {
-        return Promise.all(
-          cacheNames
-            .filter((name) => {
-              // Supprimer les anciens caches
-              return name.startsWith('payhuk-') && !Object.values(CACHE_NAMES).includes(name);
-            })
-            .map((name) => {
-              console.log('[SW] Deleting old cache:', name);
-              return caches.delete(name);
-            })
-        );
-      }),
-      // Réclamer les clients immédiatement
-      self.clients.claim(),
-      // Nettoyer les références aux chunks obsolètes
-      caches.open(CACHE_NAMES.static).then((cache) => {
-        return cache.keys().then((requests) => {
-          // Vérifier que tous les fichiers existent encore
-          return Promise.allSettled(
-            requests.map((request) => {
-              return fetch(request, { method: 'HEAD' })
-                .then((response) => {
-                  // Si 404, supprimer du cache
-                  if (response.status === 404) {
-                    console.warn('[SW] Removing 404 resource from cache:', request.url);
-                    return cache.delete(request);
-                  }
-                })
-                .catch(() => {
-                  // Si erreur réseau, supprimer aussi
-                  console.warn('[SW] Removing unreachable resource from cache:', request.url);
-                  return cache.delete(request);
-                });
-            })
-          );
-        });
-      }).catch((err) => {
-        console.warn('[SW] Error cleaning static cache:', err);
-      })
-    ])
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter((name) => {
+            return !name.startsWith('emarzona-') || 
+                   (name !== STATIC_CACHE_NAME && 
+                    name !== DYNAMIC_CACHE_NAME && 
+                    name !== IMAGE_CACHE_NAME);
+          })
+          .map((name) => caches.delete(name))
+      );
+    })
   );
+  return self.clients.claim();
 });
 
-// Stratégies de cache
-const strategies = {
-  // Network First (pour les API calls)
-  networkFirst: async (request) => {
-    try {
-      const response = await fetch(request);
-      if (response.ok) {
-        const responseClone = response.clone();
-        const cache = await caches.open(CACHE_NAMES.api);
-        cache.put(request, responseClone).catch((err) => {
-          console.warn('[SW] Failed to cache API response:', err);
-        });
-      }
-      return response;
-    } catch (error) {
-      const cachedResponse = await caches.match(request);
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      // Retourner une réponse d'erreur au lieu de throw
-      console.warn('[SW] Network error and no cache:', request.url, error);
-      return new Response(JSON.stringify({ error: 'Network error' }), {
-        status: 503,
-        statusText: 'Service Unavailable',
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-  },
-  
-  // Cache First (pour les assets statiques)
-  cacheFirst: async (request) => {
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      // Vérifier que le cache n'est pas obsolète en testant la réponse
-      return cachedResponse;
-    }
-    
-    try {
-      const response = await fetch(request);
-      
-      // Si 404, supprimer du cache s'il existe et retourner erreur
-      if (response.status === 404) {
-        console.warn('[SW] Resource not found (404):', request.url);
-        const cache = await caches.open(CACHE_NAMES.static);
-        await cache.delete(request); // Nettoyer si présent
-        // Retourner une réponse qui redirige vers l'index pour SPA
-        if (request.url.includes('.js') || request.url.includes('.css')) {
-          // Pour les chunks, ne pas casser l'app, laisser le navigateur gérer
-          return response;
-        }
-        return response;
-      }
-      
-      if (response.ok) {
-        const responseClone = response.clone();
-        const cache = await caches.open(CACHE_NAMES.static);
-        cache.put(request, responseClone).catch((err) => {
-          console.warn('[SW] Failed to cache static asset:', err);
-        });
-      }
-      return response;
-    } catch (error) {
-      // Ne pas throw, retourner une réponse d'erreur pour éviter les erreurs non gérées
-      console.warn('[SW] Cache first fetch failed:', request.url, error);
-      // Si c'est un chunk JS/CSS manquant, retourner une réponse qui ne casse pas l'app
-      if (request.url.includes('.js') || request.url.includes('.css')) {
-        return new Response('', {
-          status: 404,
-          statusText: 'Not Found'
-        });
-      }
-      return new Response('Asset not available', {
-        status: 503,
-        statusText: 'Service Unavailable'
-      });
-    }
-  },
-  
-  // Stale While Revalidate (pour les images)
-  staleWhileRevalidate: async (request) => {
-    try {
-      const cache = await caches.open(CACHE_NAMES.images);
-      const cachedResponse = await caches.match(request);
-      
-      // Lancer le fetch en arrière-plan sans bloquer
-      const fetchPromise = fetch(request)
-        .then((response) => {
-          if (response.ok) {
-            const responseClone = response.clone();
-            cache.put(request, responseClone).catch((err) => {
-              console.warn('[SW] Failed to cache response:', err);
-            });
-          }
-          return response;
-        })
-        .catch((error) => {
-          // Ne pas throw, juste logger l'erreur
-          console.warn('[SW] Failed to fetch in staleWhileRevalidate:', request.url, error);
-          // Retourner une réponse d'erreur au lieu de null
-          return new Response('Fetch failed', {
-            status: 503,
-            statusText: 'Service Unavailable'
-          });
-        });
-      
-      // Retourner la version cache immédiatement si disponible, sinon attendre le fetch
-      if (cachedResponse) {
-        // Lancer le fetch en arrière-plan mais ne pas attendre
-        fetchPromise.catch(() => {}); // Ignorer les erreurs du fetch en arrière-plan
-        return cachedResponse;
-      }
-      
-      // Si pas de cache, attendre le fetch
-      const freshResponse = await fetchPromise;
-      if (freshResponse && freshResponse.status !== 503) {
-        return freshResponse;
-      }
-      
-      // Si le fetch échoue et pas de cache, retourner une réponse d'erreur
-      return new Response('Resource not available', { 
-        status: 503,
-        statusText: 'Service Unavailable'
-      });
-    } catch (error) {
-      console.warn('[SW] Error in staleWhileRevalidate:', error);
-      return new Response('Resource not available', {
-        status: 503,
-        statusText: 'Service Unavailable'
-      });
-    }
-  },
-};
-
-// Interception des requêtes (Fetch)
+// Fetch event - Stratégie Cache First pour assets, Network First pour API
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
-  
+
   // Ignorer les requêtes non-GET
   if (request.method !== 'GET') {
     return;
   }
-  
-  // Ignorer les requêtes Chrome extensions
-  if (url.protocol === 'chrome-extension:') {
+
+  // Ignorer les requêtes vers Supabase Realtime (WebSocket)
+  if (url.pathname.includes('/realtime/')) {
     return;
   }
+
+  // Ignorer les requêtes vers des domaines externes (Google Fonts, APIs externes, etc.)
+  // Ces requêtes doivent être gérées directement par le navigateur pour respecter la CSP
+  const externalDomains = [
+    'fonts.googleapis.com',
+    'fonts.gstatic.com',
+    'api.exchangerate-api.com',
+    'www.googletagmanager.com',
+    'www.google-analytics.com',
+  ];
   
-  // Ignorer les requêtes vers des domaines externes (Google Fonts, etc.)
-  // Ces ressources sont déjà gérées via <link> dans le HTML et peuvent être bloquées par CSP
-  const externalDomains = ['fonts.googleapis.com', 'fonts.gstatic.com'];
-  if (externalDomains.some(domain => url.hostname.includes(domain))) {
-    // Laisser le navigateur gérer ces requêtes normalement sans interception
+  if (externalDomains.some(domain => url.hostname === domain || url.hostname.endsWith('.' + domain))) {
+    return; // Laisser le navigateur gérer ces requêtes directement
+  }
+
+  // Ignorer les requêtes cross-origin (sauf celles déjà gérées ci-dessus)
+  // Le service worker ne devrait intercepter que les requêtes same-origin
+  if (url.origin !== self.location.origin && !url.hostname.includes('supabase.co')) {
     return;
   }
-  
-  // API calls : Network First
-  if (url.pathname.startsWith('/api/') || url.hostname.includes('supabase')) {
-    event.respondWith(
-      strategies.networkFirst(request).catch((error) => {
-        console.warn('[SW] Network first failed:', error);
-        return new Response(JSON.stringify({ error: 'Network error' }), {
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: { 'Content-Type': 'application/json' }
-        });
-      })
-    );
-    return;
-  }
-  
-  // Images : Stale While Revalidate
-  if (request.destination === 'image') {
-    event.respondWith(
-      strategies.staleWhileRevalidate(request).catch((error) => {
-        console.warn('[SW] Stale while revalidate failed:', error);
-        return new Response('Image not available', {
-          status: 503,
-          statusText: 'Service Unavailable'
-        });
-      })
-    );
-    return;
-  }
-  
-  // Assets statiques : Cache First (seulement pour les ressources locales)
+
+  // Stratégie Cache First pour les assets statiques (JS, CSS, fonts)
   if (
-    request.destination === 'style' ||
-    request.destination === 'script' ||
-    request.destination === 'font'
+    url.pathname.startsWith('/assets/') ||
+    url.pathname.startsWith('/js/') ||
+    url.pathname.startsWith('/css/') ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css') ||
+    url.pathname.endsWith('.woff') ||
+    url.pathname.endsWith('.woff2')
   ) {
-    // Vérifier que c'est une ressource locale
-    if (url.origin === self.location.origin || url.hostname.includes('supabase.co')) {
-      event.respondWith(
-        strategies.cacheFirst(request).catch((error) => {
-          console.warn('[SW] Cache first failed:', error);
-          // Retourner une réponse vide plutôt que throw pour éviter les erreurs
-          return new Response('', {
-            status: 503,
-            statusText: 'Service Unavailable'
-          });
-        })
-      );
-      return;
-    }
-    // Pour les ressources externes, ne pas intercepter
+    event.respondWith(
+      caches.match(request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return fetch(request).then((response) => {
+          if (response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(STATIC_CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return response;
+        });
+      })
+    );
     return;
   }
-  
-  // Navigation : Network First avec fallback offline
-  if (request.mode === 'navigate') {
+
+  // Stratégie Cache First avec expiration pour les images
+  if (
+    url.pathname.startsWith('/images/') ||
+    url.pathname.endsWith('.png') ||
+    url.pathname.endsWith('.jpg') ||
+    url.pathname.endsWith('.jpeg') ||
+    url.pathname.endsWith('.webp') ||
+    url.pathname.endsWith('.svg') ||
+    url.pathname.includes('/storage/v1/object/public/') // Supabase Storage
+  ) {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Cloner avant de mettre en cache
-          const responseClone = response.clone();
-          const cache = caches.open(CACHE_NAMES.dynamic);
-          cache.then((c) => c.put(request, responseClone)).catch((err) => {
-            console.warn('[SW] Failed to cache navigation:', err);
-          });
+      caches.match(request).then((cachedResponse) => {
+        if (cachedResponse) {
+          // Retourner depuis le cache immédiatement
+          return cachedResponse;
+        }
+        // Si pas en cache, fetch et mettre en cache
+        return fetch(request).then((response) => {
+          if (response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(IMAGE_CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
           return response;
-        })
-        .catch(async () => {
-          const cachedResponse = await caches.match(request);
+        }).catch(() => {
+          // En cas d'erreur, retourner une image placeholder si disponible
+          return caches.match('/placeholder.svg');
+        });
+      })
+    );
+    return;
+  }
+
+  // Stratégie Network First pour les pages et API
+  event.respondWith(
+    fetch(request)
+      .then((response) => {
+        // Mettre en cache les réponses valides (sauf les requêtes POST/PUT/DELETE)
+        if (response.status === 200 && request.method === 'GET') {
+          const responseToCache = response.clone();
+          caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
+            cache.put(request, responseToCache);
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        // En cas d'erreur réseau, retourner depuis le cache
+        return caches.match(request).then((cachedResponse) => {
           if (cachedResponse) {
             return cachedResponse;
           }
-          // Fallback à la page offline
-          const offlinePage = await caches.match('/offline.html');
-          return offlinePage || new Response('Offline', { status: 503 });
-        })
-    );
-    return;
-  }
-  
-  // Défaut : Network First
-  event.respondWith(
-    strategies.networkFirst(request).catch((error) => {
-      console.warn('[SW] Default strategy failed:', error);
-      return new Response(JSON.stringify({ error: 'Network error' }), {
-        status: 503,
-        statusText: 'Service Unavailable',
-        headers: { 'Content-Type': 'application/json' }
-      });
-    })
+          // Si pas de cache, retourner une page offline
+          if (request.mode === 'navigate') {
+            return caches.match('/index.html').then((html) => {
+              if (html) {
+                return html;
+              }
+              // Fallback vers offline.html si disponible
+              return caches.match('/offline.html');
+            });
+          }
+          return new Response('Offline', { 
+            status: 503,
+            headers: { 'Content-Type': 'text/plain' }
+          });
+        });
+      })
   );
 });
 
-// Background Sync
+// Background Sync pour les requêtes POST/PUT/DELETE en échec
 self.addEventListener('sync', (event) => {
-  console.log('[SW] Background sync:', event.tag);
-  
-  if (event.tag === 'sync-orders') {
-    event.waitUntil(syncOrders());
-  }
-  
-  if (event.tag === 'sync-cart') {
-    event.waitUntil(syncCart());
+  if (event.tag === 'sync-forms') {
+    event.waitUntil(syncForms());
   }
 });
 
-async function syncOrders() {
-  try {
-    // Récupérer les commandes en attente depuis IndexedDB
-    const pendingOrders = await getPendingOrders();
-    
-    for (const order of pendingOrders) {
-      await fetch('/api/orders', {
-        method: 'POST',
-        body: JSON.stringify(order),
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-    
-    // Nettoyer les commandes synchronisées
-    await clearPendingOrders();
-    
-    // Notifier l'utilisateur
-    self.registration.showNotification('Commandes synchronisées', {
-      body: 'Vos commandes ont été synchronisées avec succès !',
-      icon: '/icon-192.png',
-      badge: '/badge-72.png',
-    });
-  } catch (error) {
-    console.error('[SW] Error syncing orders:', error);
-  }
+/**
+ * Synchronise les formulaires en attente
+ */
+async function syncForms() {
+  // Récupérer les formulaires en attente depuis IndexedDB
+  // et les renvoyer au serveur
+  // (Implémentation à compléter selon les besoins)
+  console.log('[SW] Syncing forms...');
 }
 
-async function syncCart() {
-  try {
-    // Synchroniser le panier
-    console.log('[SW] Syncing cart...');
-    // Implémentation de la sync du panier
-  } catch (error) {
-    console.error('[SW] Error syncing cart:', error);
-  }
-}
-
-// Notifications Push
+// Push event - Gérer les notifications push avec son et affichage
 self.addEventListener('push', (event) => {
-  console.log('[SW] Push notification received');
-  
-  let data = {
-    title: 'Payhuk',
-    body: 'Nouvelle notification',
-    icon: '/icon-192.png',
-    badge: '/badge-72.png',
+  let notificationData = {
+    title: 'Nouvelle notification',
+    body: 'Vous avez reçu une nouvelle notification',
+    icon: '/icon-192x192.png',
+    badge: '/badge-72x72.png',
+    tag: 'default',
+    data: {},
+    requireInteraction: false,
   };
-  
+
+  // Parser les données du push
   if (event.data) {
     try {
-      data = event.data.json();
+      const data = event.data.json();
+      notificationData = {
+        title: data.title || notificationData.title,
+        body: data.body || data.message || notificationData.body,
+        icon: data.icon || notificationData.icon,
+        badge: data.badge || notificationData.badge,
+        tag: data.tag || data.type || notificationData.tag,
+        data: data.data || data.metadata || {},
+        requireInteraction: data.requireInteraction || false,
+        url: data.url || data.action_url || '/',
+      };
     } catch (e) {
-      data.body = event.data.text();
+      // Si les données ne sont pas en JSON, utiliser le texte brut
+      notificationData.body = event.data.text() || notificationData.body;
     }
   }
-  
+
+  // Afficher la notification avec son (silent: false par défaut)
+  const notificationOptions = {
+    body: notificationData.body,
+    icon: notificationData.icon,
+    badge: notificationData.badge,
+    tag: notificationData.tag,
+    data: {
+      ...notificationData.data,
+      url: notificationData.url,
+    },
+    requireInteraction: notificationData.requireInteraction,
+    silent: false, // ✅ SON ACTIVÉ - La notification fera du bruit
+    vibrate: [200, 100, 200], // ✅ Vibration pour mobile
+    timestamp: Date.now(),
+    actions: notificationData.data.actions || [],
+  };
+
   event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: data.icon,
-      badge: data.badge,
-      data: data.data,
-      actions: data.actions || [],
-      vibrate: [200, 100, 200],
-      tag: data.tag || 'default',
-      requireInteraction: data.requireInteraction || false,
-    })
+    self.registration.showNotification(notificationData.title, notificationOptions)
   );
 });
 
-// Clic sur une notification
+// Notification click event - Ouvrir l'application quand on clique sur la notification
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] Notification clicked:', event.notification.tag);
-  
   event.notification.close();
+
+  const urlToOpen = event.notification.data?.url || '/';
   
-  // Action personnalisée
-  if (event.action) {
-    console.log('[SW] Action clicked:', event.action);
-    // Gérer les actions spécifiques
-  }
-  
-  // Ouvrir l'application
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then((clientList) => {
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       // Si une fenêtre est déjà ouverte, la focus
       for (const client of clientList) {
-        if (client.url === '/' && 'focus' in client) {
+        if (client.url === urlToOpen && 'focus' in client) {
           return client.focus();
         }
       }
       // Sinon, ouvrir une nouvelle fenêtre
       if (clients.openWindow) {
-        return clients.openWindow('/');
+        return clients.openWindow(urlToOpen);
       }
     })
   );
 });
 
-// Messages du client
+// Message handler pour communication avec l'app
 self.addEventListener('message', (event) => {
-  console.log('[SW] Message received:', event.data);
-  
-  if (event.data === 'skipWaiting') {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
   
-  if (event.data.type === 'CACHE_URLS') {
+  if (event.data && event.data.type === 'CACHE_URLS') {
+    const urls = event.data.urls;
     event.waitUntil(
-      caches.open(CACHE_NAMES.dynamic).then((cache) => {
-        return cache.addAll(event.data.urls);
-      })
-    );
-  }
-  
-  if (event.data.type === 'CLEAR_CACHE') {
-    event.waitUntil(
-      caches.keys().then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((name) => caches.delete(name))
-        );
+      caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
+        return cache.addAll(urls);
       })
     );
   }
 });
-
-// Helpers IndexedDB (pour Background Sync)
-async function getPendingOrders() {
-  // TODO: Implémenter avec IndexedDB
-  return [];
-}
-
-async function clearPendingOrders() {
-  // TODO: Implémenter avec IndexedDB
-}
-
-// Gestion des erreurs globales
-self.addEventListener('error', (event) => {
-  console.error('[SW] Error:', event.error);
-  // Empêcher la propagation de l'erreur
-  event.preventDefault();
-});
-
-self.addEventListener('unhandledrejection', (event) => {
-  console.error('[SW] Unhandled rejection:', event.reason);
-  // Empêcher l'erreur de remonter et casser l'application
-  event.preventDefault();
-});
-
-console.log('[SW] Service Worker loaded');

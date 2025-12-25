@@ -210,7 +210,7 @@ export const useCreateDigitalOrder = () => {
           .single();
 
         if (licenseError || !license) {
-          console.error('License creation error:', licenseError);
+          logger.error('License creation error', { error: licenseError, digitalProductId });
           throw new Error('Erreur lors de la génération de la licence');
         }
 
@@ -298,7 +298,9 @@ export const useCreateDigitalOrder = () => {
           currency: order.currency,
           payment_status: order.payment_status,
           created_at: order.created_at,
-        }).catch(console.error);
+        }).catch((err) => {
+          logger.error('Error in analytics tracking', { error: err, orderId: order.id });
+        });
       });
 
       // 10. Créer l'order_item avec les références spécialisées
@@ -347,6 +349,7 @@ export const useCreateDigitalOrder = () => {
       });
 
       if (!paymentResult.success || !paymentResult.checkout_url) {
+        // Déclencher webhook pour échec de paiement si nécessaire
         throw new Error('Erreur lors de l\'initialisation du paiement');
       }
 
@@ -368,7 +371,7 @@ export const useCreateDigitalOrder = () => {
     },
 
     onError: (error: Error) => {
-      console.error('Digital order creation error:', error);
+      logger.error('Digital order creation error', { error });
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de créer la commande',
@@ -405,7 +408,7 @@ export const useHasPurchasedDigitalProduct = (
         .limit(1);
 
       if (error) {
-        console.error('Check purchase error:', error);
+        logger.error('Check purchase error', { error, userId, productId });
         return false;
       }
 

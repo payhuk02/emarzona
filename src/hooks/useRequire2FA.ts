@@ -14,6 +14,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface Require2FAResult {
   /** Le 2FA est-il activé ? */
@@ -99,7 +100,7 @@ export function useRequire2FA(options?: {
       const { data: { factors }, error } = await supabase.auth.mfa.listFactors();
       
       if (error) {
-        console.error('[useRequire2FA] Error checking MFA factors:', error);
+        logger.error('Error checking MFA factors', { error, userId: user?.id });
         setIsLoading(false);
         return;
       }
@@ -148,7 +149,7 @@ export function useRequire2FA(options?: {
 
       setIsLoading(false);
     } catch (error) {
-      console.error('[useRequire2FA] Unexpected error:', error);
+      logger.error('Unexpected error in useRequire2FA', { error, userId: user?.id });
       setIsLoading(false);
     }
   };
@@ -210,7 +211,7 @@ export function useIs2FAEnabled(): boolean {
       const hasVerified = factors?.some((f: any) => f.status === 'verified') || false;
       setIsEnabled(hasVerified);
     } catch (error) {
-      console.error('[useIs2FAEnabled] Error:', error);
+      logger.error('Error in useIs2FAEnabled', { error, userId: user?.id });
     }
   };
 

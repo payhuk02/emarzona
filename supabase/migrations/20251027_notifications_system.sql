@@ -23,7 +23,19 @@ CREATE TABLE IF NOT EXISTS public.notifications (
     'affiliate_commission',  -- Commission affilié
     'comment_reply',         -- Réponse à un commentaire
     'instructor_message',    -- Message instructeur
-    'system'                 -- Notification système
+    'system',                -- Notification système
+    -- Types de notifications de commissions
+    'commission_created',    -- Commission créée
+    'commission_approved',   -- Commission approuvée
+    'commission_rejected',   -- Commission rejetée
+    'commission_paid',       -- Commission payée
+    'commission_threshold_reached', -- Seuil de commission atteint
+    'payment_request_created',      -- Demande de paiement créée
+    'payment_request_approved',     -- Demande de paiement approuvée
+    'payment_request_rejected',     -- Demande de paiement rejetée
+    'payment_request_processed',    -- Demande de paiement traitée
+    'weekly_report',         -- Rapport hebdomadaire
+    'monthly_report'         -- Rapport mensuel
   )),
   
   -- Contenu

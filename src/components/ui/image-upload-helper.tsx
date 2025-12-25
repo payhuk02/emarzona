@@ -1,15 +1,15 @@
 /**
  * 📸 IMAGE UPLOAD HELPER COMPONENT
  * Helper component for uploading images with dimension validation
- * 
- * Standard: 1280x720 pixels (16:9)
+ *
+ * Standard: 1536x1024 pixels (3:2)
  */
 
 import React from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { IMAGE_FORMATS, IMAGE_FILE_LIMITS } from '@/config/image-formats';
-import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Info } from '@/components/icons';
 
 // ============================================================================
 // IMAGE REQUIREMENTS DISPLAY
@@ -20,9 +20,9 @@ interface ImageRequirementsProps {
   showAllFormats?: boolean;
 }
 
-export function ImageRequirements({ 
+export function ImageRequirements({
   format = 'product',
-  showAllFormats = false 
+  showAllFormats = false,
 }: ImageRequirementsProps) {
   const formatInfo = IMAGE_FORMATS[format];
 
@@ -37,9 +37,7 @@ export function ImageRequirements({
                 <span className="font-medium capitalize">{key}</span>
                 <Badge variant="outline">{info.aspectRatio}</Badge>
               </div>
-              <p className="text-xs text-muted-foreground mb-2">
-                {info.description}
-              </p>
+              <p className="text-xs text-muted-foreground mb-2">{info.description}</p>
               <code className="text-xs bg-muted px-2 py-1 rounded">
                 {info.width} x {info.height} px
               </code>
@@ -56,14 +54,16 @@ export function ImageRequirements({
       <AlertDescription className="space-y-2">
         <div className="flex items-center gap-2">
           <strong>Format requis:</strong>
-          <Badge>{formatInfo.width} x {formatInfo.height} px</Badge>
+          <Badge>
+            {formatInfo.width} x {formatInfo.height} px
+          </Badge>
           <Badge variant="outline">{formatInfo.aspectRatio}</Badge>
         </div>
         <div className="text-sm text-muted-foreground">
           <p>{formatInfo.description}</p>
           <p className="mt-1">
-            Formats acceptés: {IMAGE_FILE_LIMITS.allowedExtensions.join(', ')} 
-            • Taille max: {IMAGE_FILE_LIMITS.maxFileSizeMB}MB
+            Formats acceptés: {IMAGE_FILE_LIMITS.allowedExtensions.join(', ')}• Taille max:{' '}
+            {IMAGE_FILE_LIMITS.maxFileSizeMB}MB
           </p>
         </div>
       </AlertDescription>
@@ -118,7 +118,9 @@ export function ImageValidationDisplay({ result }: ImageValidationDisplayProps) 
             <strong>Erreurs:</strong>
             <ul className="list-disc list-inside mt-1">
               {result.errors.map((error, i) => (
-                <li key={i} className="text-sm">{error}</li>
+                <li key={i} className="text-sm">
+                  {error}
+                </li>
               ))}
             </ul>
           </AlertDescription>
@@ -132,7 +134,9 @@ export function ImageValidationDisplay({ result }: ImageValidationDisplayProps) 
             <strong>Avertissements:</strong>
             <ul className="list-disc list-inside mt-1">
               {result.warnings.map((warning, i) => (
-                <li key={i} className="text-sm text-muted-foreground">{warning}</li>
+                <li key={i} className="text-sm text-muted-foreground">
+                  {warning}
+                </li>
               ))}
             </ul>
           </AlertDescription>
@@ -152,14 +156,12 @@ export async function validateImage(
 ): Promise<ImageValidationResult> {
   const errors: string[] = [];
   const warnings: string[] = [];
-  
+
   const targetDimensions = IMAGE_FORMATS[targetFormat];
 
   // Check file type
   if (!IMAGE_FILE_LIMITS.allowedFormats.includes(file.type)) {
-    errors.push(
-      `Format non supporté. Utilisez: ${IMAGE_FILE_LIMITS.allowedExtensions.join(', ')}`
-    );
+    errors.push(`Format non supporté. Utilisez: ${IMAGE_FILE_LIMITS.allowedExtensions.join(', ')}`);
   }
 
   // Check file size
@@ -180,14 +182,14 @@ export async function validateImage(
     ) {
       errors.push(
         `Dimensions incorrectes (${dimensions.width}x${dimensions.height}). ` +
-        `Requis: ${targetDimensions.width}x${targetDimensions.height} pixels`
+          `Requis: ${targetDimensions.width}x${targetDimensions.height} pixels`
       );
     }
 
     // Check aspect ratio
     const imageRatio = dimensions.width / dimensions.height;
     const targetRatio = targetDimensions.width / targetDimensions.height;
-    
+
     if (Math.abs(imageRatio - targetRatio) > 0.01) {
       warnings.push(
         `Ratio d'aspect légèrement différent. Attendu: ${targetDimensions.aspectRatio}`
@@ -210,7 +212,7 @@ export async function validateImage(
       format: file.type,
     };
   } catch (error) {
-    errors.push('Impossible de lire les dimensions de l\'image');
+    errors.push("Impossible de lire les dimensions de l'image");
     return {
       isValid: false,
       errors,
@@ -252,9 +254,9 @@ function getImageDimensions(file: File): Promise<{ width: number; height: number
 export function ImageSpecsQuick() {
   return (
     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-      <Badge variant="outline">1280 x 720 px</Badge>
+      <Badge variant="outline">1536 x 1024 px</Badge>
       <span>•</span>
-      <Badge variant="outline">16:9</Badge>
+      <Badge variant="outline">3:2</Badge>
       <span>•</span>
       <span>Max 5MB</span>
       <span>•</span>
@@ -269,4 +271,3 @@ export default {
   ImageSpecsQuick,
   validateImage,
 };
-

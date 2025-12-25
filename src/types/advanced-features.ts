@@ -1,13 +1,28 @@
 // Types pour les fonctionnalités avancées de paiement et messagerie
 // Date: 2025-01-22
 
+import type { RecordString, JSONValue } from './common';
+
 export type PaymentType = 'full' | 'percentage' | 'delivery_secured';
-export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'held' | 'released' | 'disputed';
+export type PaymentStatus =
+  | 'pending'
+  | 'completed'
+  | 'failed'
+  | 'refunded'
+  | 'held'
+  | 'released'
+  | 'disputed';
 export type DeliveryStatus = 'pending' | 'shipped' | 'delivered' | 'confirmed' | 'disputed';
 export type ConversationStatus = 'active' | 'closed' | 'disputed';
 export type SenderType = 'customer' | 'store' | 'admin';
 export type MessageType = 'text' | 'image' | 'video' | 'file' | 'system';
-export type DisputeStatus = 'open' | 'investigating' | 'waiting_customer' | 'waiting_seller' | 'resolved' | 'closed';
+export type DisputeStatus =
+  | 'open'
+  | 'investigating'
+  | 'waiting_customer'
+  | 'waiting_seller'
+  | 'resolved'
+  | 'closed';
 export type InitiatorType = 'customer' | 'seller' | 'admin';
 
 // ==============================================
@@ -25,7 +40,7 @@ export interface AdvancedPayment {
   status: PaymentStatus;
   transaction_id?: string;
   notes?: string;
-  
+
   // Nouvelles colonnes pour les paiements avancés
   payment_type: PaymentType;
   percentage_amount?: number;
@@ -33,13 +48,13 @@ export interface AdvancedPayment {
   remaining_amount?: number;
   is_held?: boolean;
   held_until?: string;
-  release_conditions?: Record<string, any>;
+  release_conditions?: Record<string, unknown>;
   delivery_confirmed_at?: string;
   delivery_confirmed_by?: string;
   dispute_opened_at?: string;
   dispute_resolved_at?: string;
   dispute_resolution?: string;
-  
+
   // Relations
   customers?: {
     name: string;
@@ -48,7 +63,7 @@ export interface AdvancedPayment {
   orders?: {
     order_number: string;
   };
-  
+
   created_at: string;
   updated_at: string;
 }
@@ -75,7 +90,7 @@ export interface SecuredPayment {
   held_amount: number;
   status: PaymentStatus;
   hold_reason: string;
-  release_conditions: Record<string, any>;
+  release_conditions: Record<string, unknown>;
   held_until?: string;
   released_at?: string;
   released_by?: string;
@@ -96,7 +111,7 @@ export interface AdvancedOrder {
   payment_status: string;
   payment_method?: string;
   notes?: string;
-  
+
   // Nouvelles colonnes pour les commandes avancées
   payment_type: PaymentType;
   percentage_paid?: number;
@@ -106,7 +121,7 @@ export interface AdvancedOrder {
   delivery_notes?: string;
   delivery_confirmed_at?: string;
   delivery_confirmed_by?: string;
-  
+
   created_at: string;
   updated_at: string;
 }
@@ -128,7 +143,7 @@ export interface Conversation {
   admin_user_id?: string;
   created_at: string;
   updated_at: string;
-  
+
   // Relations
   order?: {
     order_number: string;
@@ -154,11 +169,11 @@ export interface Message {
   sender_type: SenderType;
   content?: string;
   message_type: MessageType;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   is_read: boolean;
   read_at?: string;
   created_at: string;
-  
+
   // Relations
   sender?: {
     name: string;
@@ -218,7 +233,7 @@ export interface PaymentFormData {
   remaining_amount?: string;
   is_held?: boolean;
   held_until?: string;
-  release_conditions?: Record<string, any>;
+  release_conditions?: Record<string, unknown>;
 }
 
 export interface MessageFormData {
@@ -249,7 +264,10 @@ export interface PaymentOptions {
   customerPhone?: string;
   paymentType?: PaymentType;
   percentageRate?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
+  paymentMethod?: string;
+  transactionId?: string;
+  notes?: string;
 }
 
 export interface PercentagePaymentOptions extends PaymentOptions {
@@ -259,7 +277,7 @@ export interface PercentagePaymentOptions extends PaymentOptions {
 
 export interface SecuredPaymentOptions extends PaymentOptions {
   holdReason: string;
-  releaseConditions: Record<string, any>;
+  releaseConditions: Record<string, unknown>;
   heldUntil?: string;
 }
 
@@ -380,8 +398,13 @@ export interface DisputeFilters {
 // ==============================================
 
 export interface RealtimeEvent {
-  type: 'payment_updated' | 'message_sent' | 'conversation_updated' | 'dispute_opened' | 'dispute_resolved';
-  data: any;
+  type:
+    | 'payment_updated'
+    | 'message_sent'
+    | 'conversation_updated'
+    | 'dispute_opened'
+    | 'dispute_resolved';
+  data: JSONValue;
   timestamp: string;
 }
 

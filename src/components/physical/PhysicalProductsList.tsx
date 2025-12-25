@@ -81,7 +81,7 @@ type SortBy = 'name' | 'created_at' | 'price' | 'stock' | 'revenue';
 // MAIN COMPONENT
 // ============================================================================
 
-export function PhysicalProductsList({
+function PhysicalProductsListComponent({
   storeId,
   onCreateProduct,
   onEditProduct,
@@ -413,7 +413,7 @@ export function PhysicalProductsList({
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" aria-label={`Actions pour le produit ${product.name || product.id}`}>
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -464,4 +464,16 @@ export function PhysicalProductsList({
   );
 }
 
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const PhysicalProductsList = React.memo(PhysicalProductsListComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.storeId === nextProps.storeId &&
+    prevProps.onCreateProduct === nextProps.onCreateProduct &&
+    prevProps.onEditProduct === nextProps.onEditProduct &&
+    prevProps.onViewProduct === nextProps.onViewProduct &&
+    prevProps.className === nextProps.className
+  );
+});
+
+PhysicalProductsList.displayName = 'PhysicalProductsList';
 

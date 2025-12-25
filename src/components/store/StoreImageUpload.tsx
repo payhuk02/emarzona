@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { uploadImage, validateImageFile, replaceImage, ImageType } from "@/lib/image-upload";
 import { supabase } from "@/integrations/supabase/client";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { logger } from "@/lib/logger";
 
 interface StoreImageUploadProps {
   label: string;
@@ -128,7 +129,7 @@ const StoreImageUpload = ({
         });
       }
     } catch (error: any) {
-      console.error("Upload error:", error);
+      logger.error("Upload error", { error });
       const errorMessage = error.message || "Impossible d'uploader l'image. Réessayez.";
       setError(errorMessage);
       toast({
@@ -190,7 +191,7 @@ const StoreImageUpload = ({
             <div className="max-w-[260px] text-xs">
               {aspectRatio === 'banner' ? 'Recommandé: 1280×720 (16:9) – WebP/JPEG' : aspectRatio === 'square' ? 'Recommandé: 500×500 (carré) – WebP/PNG' : 'Utilisez des images optimisées (WebP)'}
               <a
-                href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                href="https://github.com/payhuk02/emarzona/blob/main/docs/MEDIA_GUIDELINES.md"
                 target="_blank"
                 rel="noreferrer"
                 className="text-blue-600 underline ml-1"

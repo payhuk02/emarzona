@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { logger } from "@/lib/logger";
 import { 
   CheckCircle2, 
   XCircle, 
@@ -59,7 +60,7 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
             const module = await import("@/components/products/tabs/ProductInfoTab");
             return module.ProductInfoTab !== undefined;
           } catch (error) {
-            console.error("Erreur import ProductInfoTab:", error);
+            logger.error("Erreur import ProductInfoTab", { error });
             return false;
           }
         }
@@ -72,7 +73,7 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
             const module = await import("@/components/products/tabs/ProductSeoTab");
             return module.ProductSeoTab !== undefined;
           } catch (error) {
-            console.error("Erreur import ProductSeoTab:", error);
+            logger.error("Erreur import ProductSeoTab", { error });
             return false;
           }
         }
@@ -85,7 +86,7 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
             const module = await import("@/components/products/tabs/ProductAnalyticsTab");
             return module.ProductAnalyticsTab !== undefined;
           } catch (error) {
-            console.error("Erreur import ProductAnalyticsTab:", error);
+            logger.error("Erreur import ProductAnalyticsTab", { error });
             return false;
           }
         }
@@ -98,7 +99,7 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
             const module = await import("@/components/products/tabs/ProductPixelsTab");
             return module.ProductPixelsTab !== undefined;
           } catch (error) {
-            console.error("Erreur import ProductPixelsTab:", error);
+            logger.error("Erreur import ProductPixelsTab", { error });
             return false;
           }
         }
@@ -111,7 +112,7 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
             const module = await import("@/components/products/tabs/ProductVariantsTab");
             return module.ProductVariantsTab !== undefined;
           } catch (error) {
-            console.error("Erreur import ProductVariantsTab:", error);
+            logger.error("Erreur import ProductVariantsTab", { error });
             return false;
           }
         }
@@ -124,7 +125,7 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
             const module = await import("@/components/products/tabs/ProductPromotionsTab");
             return module.ProductPromotionsTab !== undefined;
           } catch (error) {
-            console.error("Erreur import ProductPromotionsTab:", error);
+            logger.error("Erreur import ProductPromotionsTab", { error });
             return false;
           }
         }

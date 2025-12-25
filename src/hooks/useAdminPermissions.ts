@@ -94,9 +94,9 @@ export const useAdminPermissions = () => {
         .select('role, permissions')
         .order('role');
       if (error) throw error;
-      setRoles((data || []) as any);
-    } catch (e: any) {
-      setError(e.message);
+      setRoles((data || []) as Array<{ role: string; permissions: RolePermissions }>);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Erreur inconnue');
       // Fallback: table absente en production → utiliser des rôles par défaut côté client
       setRoles(DEFAULT_ROLES);
       toast({ title: 'RBAC non initialisé', description: 'Utilisation des rôles par défaut côté client. Veuillez exécuter la migration platform_roles.', variant: 'destructive' });
@@ -119,8 +119,9 @@ export const useAdminPermissions = () => {
       toast({ title: 'Permissions enregistrées', description: role });
       await fetchRoles();
       return true;
-    } catch (e: any) {
-      toast({ title: 'Erreur', description: e.message, variant: 'destructive' });
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : 'Erreur inconnue';
+      toast({ title: 'Erreur', description: errorMessage, variant: 'destructive' });
       return false;
     }
   }, [fetchRoles, toast]);

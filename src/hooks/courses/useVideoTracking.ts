@@ -7,6 +7,7 @@
 
 import { useRef, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 interface VideoTrackingOptions {
   productId: string;
@@ -61,9 +62,9 @@ export const useVideoTracking = (options: VideoTrackingOptions) => {
           },
         });
 
-        console.log(`📹 Video event tracked: ${eventData.event_type}`, eventData);
+        logger.debug('Video event tracked', { eventType: eventData.event_type, productId, lessonId, sessionId });
       } catch (error) {
-        console.error('Error tracking video event:', error);
+        logger.error('Error tracking video event', { error, eventData, productId, lessonId });
       }
     },
     [productId, userId, sessionId, enabled]
@@ -128,7 +129,7 @@ export const useVideoTracking = (options: VideoTrackingOptions) => {
             lesson_id: lessonId,
           });
 
-          console.log(`✅ Milestone reached: ${milestone}%`);
+          logger.debug('Video milestone reached', { milestone, productId, lessonId, progressPercent });
         }
       }
     },
@@ -186,9 +187,9 @@ export const useVideoPosition = (enrollmentId?: string, lessonId?: string) => {
             }
           );
 
-        console.log(`💾 Position saved: ${Math.floor(currentTime)}s`);
+        logger.debug('Video position saved', { currentTime: Math.floor(currentTime), enrollmentId, lessonId });
       } catch (error) {
-        console.error('Error saving position:', error);
+        logger.error('Error saving video position', { error, enrollmentId, lessonId, currentTime });
       }
     },
     [enrollmentId, lessonId]
@@ -229,9 +230,9 @@ export const useWatchTime = (enrollmentId?: string, lessonId?: string) => {
         p_seconds: watchDuration,
       });
 
-      console.log(`⏱️ Watch time saved: ${watchDuration}s (Total: ${totalWatchTime.current}s)`);
+      logger.debug('Watch time saved', { watchDuration, totalWatchTime: totalWatchTime.current, enrollmentId, lessonId });
     } catch (error) {
-      console.error('Error saving watch time:', error);
+      logger.error('Error saving watch time', { error, enrollmentId, lessonId, watchDuration });
     }
   }, [enrollmentId, lessonId]);
 

@@ -3,6 +3,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Database, ExternalLink, Copy, CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { logger } from '@/lib/logger';
 import { useState } from 'react';
 
 export const DatabaseMigrationInstructions = () => {
@@ -222,7 +223,7 @@ ORDER BY policyname;`;
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy: ', err);
+      logger.error('Failed to copy', { error: err });
     }
   };
 

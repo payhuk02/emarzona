@@ -12,4 +12,16 @@ export { ReviewFilter } from './ReviewFilter';
 export { ReviewReplyForm } from './ReviewReplyForm';
 export { ProductReviewsSummary } from './ProductReviewsSummary';
 export { ExportReviewsButton } from './ExportReviewsButton';
+export { ReviewMediaGallery } from './ReviewMediaGallery';
+export { ReviewVoteButtons } from './ReviewVoteButtons';
+export { AnimatedReviewCard } from './AnimatedReviewCard';
+// Export des composants skeleton individuels
+export { 
+  ReviewCardSkeleton, 
+  ReviewStatsSkeleton, 
+  ReviewsListSkeleton, 
+  ReviewFormSkeleton, 
+  ProductReviewsSummarySkeleton 
+} from './ReviewSkeleton';
+export { ShareReviewButtons } from './ShareReviewButtons';
 

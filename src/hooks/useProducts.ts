@@ -24,6 +24,10 @@ export interface Product {
   low_stock_threshold?: number | null;
   created_at: string;
   updated_at: string;
+  product_affiliate_settings?: Array<{
+    commission_rate: number;
+    affiliate_enabled: boolean;
+  }> | null;
 }
 
 export const useProducts = (storeId?: string | null) => {
@@ -43,7 +47,13 @@ export const useProducts = (storeId?: string | null) => {
         setLoading(true);
         let query = supabase
           .from('products')
-          .select('*')
+          .select(`
+            *,
+            product_affiliate_settings!left (
+              commission_rate,
+              affiliate_enabled
+            )
+          `)
           .order('created_at', { ascending: false });
 
         if (storeId) {
@@ -55,10 +65,11 @@ export const useProducts = (storeId?: string | null) => {
         if (error) throw error;
         
         setProducts(data || []);
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la récupération des produits';
         toast({
           title: "Erreur",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive",
         });
       } finally {
@@ -77,7 +88,13 @@ export const useProducts = (storeId?: string | null) => {
       setLoading(true);
       let query = supabase
         .from('products')
-        .select('*')
+        .select(`
+          *,
+          product_affiliate_settings!left (
+            commission_rate,
+            affiliate_enabled
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (storeId) {
@@ -89,10 +106,11 @@ export const useProducts = (storeId?: string | null) => {
       if (error) throw error;
       
       setProducts(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la récupération des produits';
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

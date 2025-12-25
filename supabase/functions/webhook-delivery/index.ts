@@ -293,12 +293,12 @@ serve(async (req) => {
 
       deliveries = [delivery];
     } else {
-      // Traiter tous les deliveries en attente
+      // Traiter tous les deliveries en attente (pending ou retrying)
       const { data, error } = await supabase
         .from('webhook_deliveries')
         .select('*')
-        .eq('status', 'pending')
-        .lte('next_retry_at', new Date().toISOString())
+        .in('status', ['pending', 'retrying'])
+        .or('next_retry_at.is.null,next_retry_at.lte.' + new Date().toISOString())
         .limit(50) // Limiter pour éviter la surcharge
         .order('triggered_at', { ascending: true });
 

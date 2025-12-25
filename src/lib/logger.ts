@@ -15,6 +15,16 @@ interface LogContext {
   [key: string]: any;
 }
 
+// Sauvegarder les méthodes originales de la console AVANT qu'elles ne soient remplacées
+// par console-guard.ts pour éviter les boucles infinies
+const originalConsole = {
+  log: console.log.bind(console),
+  info: console.info.bind(console),
+  warn: console.warn.bind(console),
+  error: console.error.bind(console),
+  debug: console.debug.bind(console),
+};
+
 /**
  * Logger amélioré avec support Sentry et contexte
  */
@@ -24,7 +34,7 @@ export const logger = {
    */
   log: (message: string, ...args: any[]) => {
     if (isDevelopment) {
-      console.log(`[LOG] ${message}`, ...args);
+      originalConsole.log(`[LOG] ${message}`, ...args);
     }
     // En production, on n'envoie pas les logs normaux à Sentry pour éviter le spam
   },
@@ -34,7 +44,7 @@ export const logger = {
    */
   info: (message: string, context?: LogContext) => {
     if (isDevelopment) {
-      console.info(`[INFO] ${message}`, context);
+      originalConsole.info(`[INFO] ${message}`, context);
     }
     // En production, envoyer à Sentry si important
     if (isProduction && context) {
@@ -52,7 +62,7 @@ export const logger = {
    */
   warn: (message: string, context?: LogContext) => {
     if (isDevelopment) {
-      console.warn(`[WARN] ${message}`, context);
+      originalConsole.warn(`[WARN] ${message}`, context);
     }
     // En production, envoyer à Sentry
     if (isProduction) {
@@ -68,7 +78,7 @@ export const logger = {
    */
   error: (message: string | Error, context?: LogContext) => {
     if (isDevelopment) {
-      console.error(`[ERROR] ${message}`, context);
+      originalConsole.error(`[ERROR] ${message}`, context);
     }
     // En production, toujours envoyer à Sentry
     if (isProduction) {
@@ -90,7 +100,7 @@ export const logger = {
    */
   debug: (message: string, ...args: any[]) => {
     if (isDevelopment) {
-      console.debug(`[DEBUG] ${message}`, ...args);
+      originalConsole.debug(`[DEBUG] ${message}`, ...args);
     }
     // Jamais en production
   },

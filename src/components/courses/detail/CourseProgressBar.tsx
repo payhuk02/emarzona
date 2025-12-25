@@ -7,7 +7,7 @@
 
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, Clock, CheckCircle2 } from 'lucide-react';
+import { Trophy, Clock, CheckCircle2 } from '@/components/icons';
 import { useCourseProgressPercentage } from '@/hooks/courses/useCourseProgress';
 
 interface CourseProgressBarProps {

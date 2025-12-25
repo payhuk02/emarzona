@@ -1,0 +1,49 @@
+{
+  "name": "emarzona-mobile",
+  "version": "1.0.0",
+  "description": "Emarzona Mobile App - React Native",
+  "main": "index.js",
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "jest",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-native": "0.72.0",
+    "@react-navigation/native": "^6.1.0",
+    "@react-navigation/stack": "^6.3.0",
+    "@react-navigation/bottom-tabs": "^6.5.0",
+    "@tanstack/react-query": "^5.0.0",
+    "@supabase/supabase-js": "^2.38.0",
+    "react-native-paper": "^5.11.0",
+    "react-native-vector-icons": "^10.0.0",
+    "react-native-reanimated": "^3.5.0",
+    "react-native-gesture-handler": "^2.13.0",
+    "react-native-safe-area-context": "^4.7.0",
+    "react-native-screens": "^3.27.0",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@babel/preset-env": "^7.20.0",
+    "@babel/runtime": "^7.20.0",
+    "@react-native/eslint-config": "^0.72.0",
+    "@react-native/metro-config": "^0.72.0",
+    "@tsconfig/react-native": "^3.0.0",
+    "@types/react": "^18.0.24",
+    "@types/react-test-renderer": "^18.0.0",
+    "babel-jest": "^29.2.1",
+    "eslint": "^8.19.0",
+    "jest": "^29.2.1",
+    "prettier": "^2.4.1",
+    "react-test-renderer": "18.2.0",
+    "typescript": "4.8.4"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
+

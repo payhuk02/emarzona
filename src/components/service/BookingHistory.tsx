@@ -52,8 +52,8 @@ export interface BookingHistoryEvent {
   timestamp: Date | string;
   description: string;
   metadata?: {
-    oldValue?: any;
-    newValue?: any;
+    oldValue?: unknown;
+    newValue?: unknown;
     amount?: number;
     currency?: string;
     reason?: string;
@@ -173,10 +173,12 @@ const EVENT_CONFIG: Record<
  * 
  * @example
  * ```tsx
+ * import { logger } from '@/lib/logger';
+ * 
  * <BookingHistory 
  *   events={events}
  *   showFilters={true}
- *   onExport={(events) => console.log('Export', events)}
+ *   onExport={(events) => logger.info('Export bookings', { count: events.length })}
  *   maxHeight="600px"
  * />
  * ```
@@ -393,6 +395,7 @@ export const BookingHistory: React.FC<BookingHistoryProps> = ({
                 size="sm"
                 onClick={onRefresh}
                 disabled={isLoading}
+                aria-label="Actualiser l'historique des réservations"
               >
                 <RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
               </Button>

@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
 import type {
   EmailTemplate,
   EmailLog,
@@ -49,7 +50,7 @@ export const useEmailTemplates = (options?: {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching email templates:', error);
+        logger.error('Error fetching email templates', { error });
         throw error;
       }
 
@@ -79,7 +80,7 @@ export const useEmailTemplate = (slug: string, productType?: ProductType) => {
       const { data, error } = await query.maybeSingle();
 
       if (error) {
-        console.error(`Error fetching template ${slug}:`, error);
+        logger.error('Error fetching email template', { error, slug });
         throw error;
       }
 
@@ -111,7 +112,7 @@ export const useUserEmailLogs = (userId?: string, limit: number = 50) => {
         .limit(limit);
 
       if (error) {
-        console.error('Error fetching email logs:', error);
+        logger.error('Error fetching email logs', { error, limit });
         throw error;
       }
 
@@ -138,7 +139,7 @@ export const useOrderEmailLogs = (orderId?: string) => {
         .order('sent_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching order email logs:', error);
+        logger.error('Error fetching order email logs', { error, orderId });
         throw error;
       }
 
@@ -166,7 +167,7 @@ export const useProductEmailLogs = (productId?: string) => {
         .limit(100);
 
       if (error) {
-        console.error('Error fetching product email logs:', error);
+        logger.error('Error fetching product email logs', { error, productId });
         throw error;
       }
 
@@ -200,7 +201,7 @@ export const useEmailPreferences = () => {
 
       if (error && error.code !== 'PGRST116') {
         // Ignorer "row not found"
-        console.error('Error fetching email preferences:', error);
+        logger.error('Error fetching email preferences', { error, userId: user?.id });
         throw error;
       }
 
@@ -215,7 +216,7 @@ export const useEmailPreferences = () => {
           .single();
 
         if (insertError) {
-          console.error('Error creating email preferences:', insertError);
+          logger.error('Error creating email preferences', { error: insertError, userId: user?.id });
           throw insertError;
         }
 
@@ -249,7 +250,7 @@ export const useUpdateEmailPreferences = () => {
         .single();
 
       if (error) {
-        console.error('Error updating email preferences:', error);
+        logger.error('Error updating email preferences', { error, userId: user?.id });
         throw error;
       }
 
@@ -352,7 +353,7 @@ export const useEmailAnalytics = (options?: {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching email analytics:', error);
+        logger.error('Error fetching email analytics', { error, filters });
         throw error;
       }
 

@@ -1,3 +1,4 @@
+import React from "react";
 import { Payment } from "@/hooks/usePayments";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,7 @@ interface PaymentCardDashboardProps {
   onView: () => void;
 }
 
-const PaymentCardDashboard = ({
+const PaymentCardDashboardComponent = ({
   payment,
   onEdit,
   onDelete,
@@ -190,7 +191,7 @@ const PaymentCardDashboard = ({
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" aria-label="Actions pour la carte de paiement">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -217,5 +218,20 @@ const PaymentCardDashboard = ({
     </Card>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+const PaymentCardDashboard = React.memo(PaymentCardDashboardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.payment.id === nextProps.payment.id &&
+    prevProps.payment.status === nextProps.payment.status &&
+    prevProps.payment.amount === nextProps.payment.amount &&
+    prevProps.payment.created_at === nextProps.payment.created_at &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onView === nextProps.onView
+  );
+});
+
+PaymentCardDashboard.displayName = 'PaymentCardDashboard';
 
 export default PaymentCardDashboard;

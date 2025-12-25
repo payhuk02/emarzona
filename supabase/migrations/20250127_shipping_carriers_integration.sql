@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK SHIPPING CARRIERS INTEGRATION SYSTEM
+-- EMARZONA SHIPPING CARRIERS INTEGRATION SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Intégration transporteurs réels (DHL, FedEx, UPS, Chronopost)
 --              Calcul tarifs temps réel, génération étiquettes, tracking

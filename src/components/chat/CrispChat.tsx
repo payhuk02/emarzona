@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { initCrisp, setCrispUser, setCrispSessionData, configureCrispForRole, resetCrisp } from '@/lib/crisp';
 import { useLocation } from 'react-router-dom';
+import { logger } from '@/lib/logger';
 
 export const CrispChat: React.FC = () => {
   const { user } = useAuth();
@@ -17,7 +18,7 @@ export const CrispChat: React.FC = () => {
   // Initialiser Crisp au montage
   useEffect(() => {
     if (!CRISP_WEBSITE_ID) {
-      console.warn('⚠️  VITE_CRISP_WEBSITE_ID non configuré. Live Chat désactivé.');
+      logger.warn('VITE_CRISP_WEBSITE_ID non configuré. Live Chat désactivé.');
       return;
     }
 

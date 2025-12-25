@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK DIGITAL PRODUCT BUNDLES SYSTEM
+-- EMARZONA DIGITAL PRODUCT BUNDLES SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système complet pour produits digitaux groupés (bundles)
 -- =====================================================

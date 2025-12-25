@@ -3,6 +3,7 @@
  * Grille de parcours d'apprentissage
  */
 
+import React from 'react';
 import { useLearningPaths } from '@/hooks/courses/useLearningPaths';
 import { LearningPathCard } from './LearningPathCard';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,14 +15,14 @@ interface LearningPathsGridProps {
   onPathClick?: (pathId: string) => void;
 }
 
-export const LearningPathsGrid = ({ storeId, onPathClick }: LearningPathsGridProps) => {
+const LearningPathsGridComponent = ({ storeId, onPathClick }: LearningPathsGridProps) => {
   const { user } = useAuth();
   const { data: paths = [], isLoading } = useLearningPaths(storeId);
   const { data: enrollments = [] } = useStudentLearningPaths(user?.id);
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {[...Array(6)].map((_, i) => (
           <Skeleton key={i} className="h-64" />
         ))}
@@ -55,4 +56,14 @@ export const LearningPathsGrid = ({ storeId, onPathClick }: LearningPathsGridPro
     </div>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const LearningPathsGrid = React.memo(LearningPathsGridComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.storeId === nextProps.storeId &&
+    prevProps.onPathClick === nextProps.onPathClick
+  );
+});
+
+LearningPathsGrid.displayName = 'LearningPathsGrid';
 

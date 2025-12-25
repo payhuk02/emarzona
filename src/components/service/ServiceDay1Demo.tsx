@@ -8,6 +8,7 @@
 import React from 'react';
 import { ServiceStatusIndicator } from './ServiceStatusIndicator';
 import { BookingInfoDisplay } from './BookingInfoDisplay';
+import { logger } from '@/lib/logger';
 
 export const ServiceDay1Demo: React.FC = () => {
   return (
@@ -174,7 +175,7 @@ export const ServiceDay1Demo: React.FC = () => {
               assignedStaff="Yoga Instructor Sarah"
               customerNotes="Première séance, débutant complet"
               showActions={true}
-              onAction={(action) => console.log('Action:', action)}
+              onAction={(action) => logger.info('Action', { action })}
             />
             <BookingInfoDisplay 
               bookingId="BK-004"
@@ -199,7 +200,7 @@ export const ServiceDay1Demo: React.FC = () => {
               }}
               assignedStaff="Maître Lefebvre"
               showActions={true}
-              onAction={(action) => console.log('Action:', action)}
+              onAction={(action) => logger.info('Action', { action })}
             />
           </div>
         </div>
@@ -239,7 +240,7 @@ export const ServiceDay1Demo: React.FC = () => {
               amountPaid={200}
               paymentMethod="Carte bancaire"
               showActions={true}
-              onAction={(action) => console.log('Action:', action)}
+              onAction={(action) => logger.info('Action', { action })}
             />
             <BookingInfoDisplay 
               bookingId="BK-006"
@@ -270,7 +271,7 @@ export const ServiceDay1Demo: React.FC = () => {
               internalNotes="Nouveau patient - Envoyé par Dr. Moreau"
               createdAt={new Date(Date.now() - 259200000)}
               showActions={true}
-              onAction={(action) => console.log('Action:', action)}
+              onAction={(action) => logger.info('Action', { action })}
             />
           </div>
         </div>

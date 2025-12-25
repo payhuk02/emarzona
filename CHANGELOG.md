@@ -14,6 +14,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### ✨ Ajouts (Added)
 
 #### Tests & Qualité
+
 - **Tests E2E Playwright** : Suite complète de 50+ tests automatisés
   - Tests d'authentification (9 tests)
   - Tests produits digitaux (6 tests)
@@ -28,6 +29,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **Test helpers & fixtures** : Utilitaires de test réutilisables
 
 #### Shipping & Logistics
+
 - **Intégration FedEx API** : Calcul de frais de port en temps réel
 - **Génération d'étiquettes** : Création automatique d'étiquettes d'expédition
 - **Tracking de colis** : Suivi en temps réel des expéditions
@@ -40,6 +42,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Mise à jour de stock en masse
 
 #### Paiements Avancés
+
 - **Paiement par acompte** : Option de paiement en pourcentage
 - **Paiement sécurisé (Escrow)** : Système de séquestre pour transactions
 - **Gestion des versements** : Dashboard de gestion des paiements multiples
@@ -52,6 +55,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Résolution avec preuve
 
 #### Pages & UI
+
 - **PhysicalProductDetail** : Page détaillée pour produits physiques
 - **ServiceDetail** : Page détaillée pour services
 - **PayBalance** : Page de paiement du solde pour achats
@@ -61,6 +65,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **ServiceCalendar** : Calendrier moderne avec react-big-calendar
 
 #### Composants
+
 - **ProductImages** : Galerie d'images professionnelle avec zoom
 - **StaffCard** : Carte d'affichage du personnel
 - **PaymentOptionsForm** : Formulaire de configuration des options de paiement
@@ -69,6 +74,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### 🔄 Modifications (Changed)
 
 #### Wizards V2
+
 - **CreateDigitalProductWizard_v2** : Wizard amélioré avec 6 étapes
   - Ajout SEO & FAQs
   - Meilleure validation
@@ -83,6 +89,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Options de réservation
 
 #### Hooks
+
 - **useCreatePhysicalOrder** : Support des paiements avancés
 - **useCreateServiceOrder** : Gestion escrow et messaging
 - **useShipping** : Intégration FedEx complète
@@ -92,6 +99,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **useDisputes** : Gestion des litiges
 
 #### Base de Données
+
 - **Migration payment_options** : Colonne `payment_options` sur products
 - **Migration advanced_payments** : Tables `secured_payments`, `payment_installments`
 - **Migration messaging** : Tables `order_conversations`, `conversation_messages`
@@ -101,6 +109,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### 🐛 Corrections (Fixed)
 
 #### Erreurs de Build
+
 - Correction import malformé dans `useInventory.ts`
 - Correction import React Query dans hooks
 - Correction imports Supabase (8 fichiers)
@@ -108,6 +117,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Correction "React is not defined" dans wizards
 
 #### Erreurs Fonctionnelles
+
 - Correction sauvegarde produits digitaux (mapping files)
 - Correction création de licences (après achat uniquement)
 - Correction calcul de taille de fichiers
@@ -128,6 +138,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### ✨ Ajouts
 
 #### Parité avec Cours en Ligne
+
 - **Affiliation** pour Digital, Physical, Services
 - **Reviews & Ratings** système complet
 - **SEO avancé** : Meta tags, FAQs
@@ -147,6 +158,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### 🎉 Version Initiale
 
 #### Fonctionnalités Core
+
 - Authentification Supabase
 - Dashboard utilisateur
 - Gestion de profil
@@ -157,24 +169,28 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Cours en ligne
 
 #### Produits Digitaux
+
 - Création et gestion
 - Upload de fichiers
 - Système de licences
 - Téléchargements sécurisés
 
 #### Produits Physiques
+
 - Gestion d'inventaire
 - Variants (taille, couleur)
 - Stock tracking
 - Alertes stock faible
 
 #### Services
+
 - Système de réservation
 - Calendrier de disponibilité
 - Gestion du personnel
 - Notifications
 
 #### Cours en Ligne (LMS)
+
 - Éditeur de curriculum
 - Modules et leçons
 - Vidéos (YouTube, Vimeo, Google Drive)
@@ -184,12 +200,14 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Dashboard instructeur
 
 #### Paiements
+
 - Intégration PayDunya
 - Intégration Moneroo
 - Checkout sécurisé
 - Facturation PDF
 
 #### Fonctionnalités Avancées
+
 - Programme d'affiliation
 - Reviews & ratings
 - SEO optimization
@@ -219,6 +237,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## 📊 Statistiques
 
 ### Version 2.0.0
+
 - **Fichiers ajoutés** : 45+
 - **Fichiers modifiés** : 120+
 - **Lignes de code** : +15,000
@@ -255,7 +274,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ---
 
 **Pour plus d'informations** :
+
 - 📚 [Documentation](docs/)
 - 🐛 [Issues](https://github.com/payhuk02/payhula/issues)
 - 💬 [Discussions](https://github.com/payhuk02/payhula/discussions)
-

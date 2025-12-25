@@ -358,5 +358,5 @@ En cas de problème, vérifiez :
 **Date:** 29 Octobre 2025  
 **Version:** 1.0  
 **Auteur:** Payhula Team  
-**Projet:** Payhuk SaaS Platform
+**Projet:** Emarzona SaaS Platform
 

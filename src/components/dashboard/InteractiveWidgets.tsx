@@ -27,7 +27,7 @@ import {
   MessageSquare,
   Heart,
   Share2
-} from "lucide-react";
+} from '@/components/icons';
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -310,8 +310,9 @@ export const GoalProgress = ({ goals }: GoalProgressProps) => {
                 <Progress 
                   value={progress} 
                   className="h-2"
-                  // @ts-ignore
-                  style={{ '--progress-background': `hsl(var(--${goal.color}))` }}
+                  style={{ 
+                    '--progress-background': `hsl(var(--${goal.color}))` 
+                  } as React.CSSProperties & { '--progress-background'?: string }}
                 />
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Échéance: {new Date(goal.deadline).toLocaleDateString('fr-FR')}</span>

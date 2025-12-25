@@ -1,9 +1,11 @@
 /**
  * 🔒 URL VALIDATOR - PRÉVENTION OPEN REDIRECT
- * 
+ *
  * Valide les URLs de redirection pour éviter les attaques open redirect
- * Utilisé principalement pour les redirections de paiement (Moneroo, PayDunya)
+ * Utilisé principalement pour les redirections de paiement (Moneroo)
  */
+
+import { logger } from './logger';
 
 // ============================================================================
 // CONFIGURATION
@@ -14,9 +16,8 @@
  */
 const ALLOWED_PAYMENT_DOMAINS = [
   'moneroo.io',
-  'paydunya.com',
-  'payhula.com',
-  'payhula.vercel.app',
+  'emarzona.com',
+  'emarzona.vercel.app',
   'localhost', // Dev only
   '127.0.0.1', // Dev only
 ];
@@ -47,17 +48,17 @@ export interface ValidationResult {
 
 /**
  * Vérifie si une URL de redirection est sûre
- * 
+ *
  * @param url - URL à valider
  * @returns ValidationResult avec isValid et potentiellement une erreur
- * 
+ *
  * @example
  * ```typescript
  * const result = validateRedirectUrl('https://moneroo.io/checkout/123');
  * if (result.isValid) {
  *   window.location.href = url;
  * } else {
- *   console.error(result.error);
+ *   logger.error('Invalid redirect URL', { error: result.error });
  * }
  * ```
  */
@@ -84,7 +85,7 @@ export function validateRedirectUrl(url: string): ValidationResult {
   // 3. Vérifier le protocole
   const isProduction = import.meta.env.PROD;
   const allowedProtocols = isProduction ? PRODUCTION_PROTOCOLS : ALLOWED_PROTOCOLS;
-  
+
   if (!allowedProtocols.includes(parsedUrl.protocol)) {
     return {
       isValid: false,
@@ -114,7 +115,7 @@ export function validateRedirectUrl(url: string): ValidationResult {
 
 /**
  * Vérifie si une URL est un domaine de paiement autorisé
- * 
+ *
  * @param url - URL à vérifier
  * @returns true si le domaine est autorisé pour les paiements
  */
@@ -125,10 +126,10 @@ export function isPaymentDomain(url: string): boolean {
 
 /**
  * Redirige de manière sécurisée ou exécute un callback d'erreur
- * 
+ *
  * @param url - URL de redirection
  * @param onError - Callback exécuté en cas d'URL invalide
- * 
+ *
  * @example
  * ```typescript
  * safeRedirect(checkoutUrl, () => {
@@ -136,26 +137,25 @@ export function isPaymentDomain(url: string): boolean {
  * });
  * ```
  */
-export function safeRedirect(
-  url: string,
-  onError?: (error: string) => void
-): void {
+export function safeRedirect(url: string, onError?: (error: string) => void): void {
   const result = validateRedirectUrl(url);
-  
+
   if (result.isValid) {
     // URL valide, redirection sécurisée
-    console.log('✅ Redirection sécurisée vers:', url);
+    logger.info('✅ Redirection sécurisée vers:', { url });
     window.location.href = url;
   } else {
     // URL invalide, bloquer et notifier
-    console.error('🚨 SECURITY: Redirection bloquée vers URL non autorisée:', url);
-    console.error('Raison:', result.error);
-    
+    logger.error('🚨 SECURITY: Redirection bloquée vers URL non autorisée', {
+      url,
+      error: result.error,
+    });
+
     if (onError) {
       onError(result.error || 'URL non autorisée');
     } else {
       // Fallback : rediriger vers le dashboard
-      console.warn('Fallback: redirection vers /dashboard');
+      logger.warn('Fallback: redirection vers /dashboard');
       window.location.href = '/dashboard';
     }
   }
@@ -163,11 +163,11 @@ export function safeRedirect(
 
 /**
  * Extrait et valide une URL de redirection depuis une réponse API
- * 
+ *
  * @param response - Réponse contenant potentiellement une URL
  * @param field - Nom du champ contenant l'URL (par défaut 'checkout_url')
  * @returns URL validée ou null
- * 
+ *
  * @example
  * ```typescript
  * const checkoutUrl = extractAndValidateUrl(apiResponse);
@@ -177,15 +177,19 @@ export function safeRedirect(
  * ```
  */
 export function extractAndValidateUrl(
-  response: any,
+  response: unknown,
   field: string = 'checkout_url'
 ): string | null {
   if (!response || typeof response !== 'object') {
     return null;
   }
 
-  const url = response[field];
+  const url = (response as Record<string, unknown>)[field];
   if (!url) {
+    return null;
+  }
+
+  if (typeof url !== 'string') {
     return null;
   }
 
@@ -199,13 +203,13 @@ export function extractAndValidateUrl(
  */
 export function addAllowedDomain(domain: string): void {
   if (import.meta.env.PROD) {
-    console.error('❌ Impossible d\'ajouter des domaines en production');
+    logger.error("❌ Impossible d'ajouter des domaines en production");
     return;
   }
-  
+
   if (!ALLOWED_PAYMENT_DOMAINS.includes(domain)) {
     ALLOWED_PAYMENT_DOMAINS.push(domain);
-    console.log(`✅ Domaine ajouté pour tests: ${domain}`);
+    logger.info(`✅ Domaine ajouté pour tests: ${domain}`);
   }
 }
 
@@ -215,4 +219,3 @@ export function addAllowedDomain(domain: string): void {
 export function getAllowedDomains(): readonly string[] {
   return Object.freeze([...ALLOWED_PAYMENT_DOMAINS]);
 }
-

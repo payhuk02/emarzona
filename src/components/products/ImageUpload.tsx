@@ -1,9 +1,11 @@
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
+import { validateImage } from '@/components/ui/image-upload-helper';
 
 interface ImageUploadProps {
   value: string;
@@ -20,22 +22,19 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
       const file = event.target.files?.[0];
       if (!file) return;
 
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        toast({
-          title: "Erreur",
-          description: "Veuillez sélectionner une image",
-          variant: "destructive",
+      // Validation complète (type, poids, dimensions 1536x1024 via format produit)
+      const validation = await validateImage(file, 'product');
+      if (!validation.isValid) {
+        logger.warn('Invalid product image', {
+          errors: validation.errors,
+          fileName: file.name,
         });
-        return;
-      }
-
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
         toast({
-          title: "Erreur",
-          description: "L'image ne doit pas dépasser 5MB",
-          variant: "destructive",
+          title: "Format d'image non valide",
+          description:
+            validation.errors.join(' ') ||
+            "L'image doit être en 1536×1024 (ratio 3:2) et respecter la taille maximale.",
+          variant: 'destructive',
         });
         return;
       }
@@ -43,40 +42,41 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
       setUploading(true);
 
       // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       // Generate unique filename
-      const fileExt = file.name.split(".").pop();
+      const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
       // Upload to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from("product-images")
-        .upload(fileName, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
+      const { data, error } = await supabase.storage.from('product-images').upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
 
       if (error) throw error;
 
       // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from("product-images")
-        .getPublicUrl(data.path);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('product-images').getPublicUrl(data.path);
 
       onChange(publicUrl);
 
       toast({
-        title: "Succès",
-        description: "Image téléchargée avec succès",
+        title: 'Succès',
+        description: 'Image 1536×1024 téléchargée avec succès',
       });
-    } catch (error: any) {
-      console.error("Error uploading image:", error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error uploading image', { error: errorMessage });
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible de télécharger l'image",
-        variant: "destructive",
+        title: 'Erreur',
+        description: errorMessage || "Impossible de télécharger l'image",
+        variant: 'destructive',
       });
     } finally {
       setUploading(false);
@@ -84,7 +84,7 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
   };
 
   const handleRemove = () => {
-    onChange("");
+    onChange('');
   };
 
   return (
@@ -93,11 +93,7 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
 
       {value ? (
         <div className="relative aspect-square w-full max-w-sm rounded-lg overflow-hidden bg-muted">
-          <img
-            src={value}
-            alt="Aperçu produit"
-            className="h-full w-full object-cover"
-          />
+          <img src={value} alt="Aperçu produit" className="h-full w-full object-cover" />
           <Button
             type="button"
             variant="destructive"
@@ -105,6 +101,7 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
             className="absolute top-2 right-2"
             onClick={handleRemove}
             disabled={disabled}
+            aria-label="Supprimer l'image"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -113,12 +110,8 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
         <div className="border-2 border-dashed rounded-lg p-8 text-center">
           <div className="flex flex-col items-center gap-2">
             <ImageIcon className="h-12 w-12 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              Téléchargez une image de produit
-            </p>
-            <p className="text-xs text-muted-foreground">
-              PNG, JPG, WEBP (max 5MB)
-            </p>
+            <p className="text-sm text-muted-foreground">Téléchargez une image de produit</p>
+            <p className="text-xs text-muted-foreground">PNG, JPG, WEBP (max 5MB)</p>
           </div>
         </div>
       )}
@@ -135,7 +128,7 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
         <Button
           type="button"
           variant="outline"
-          onClick={() => document.getElementById("image-upload")?.click()}
+          onClick={() => document.getElementById('image-upload')?.click()}
           disabled={uploading || disabled}
           className="w-full"
         >
@@ -147,7 +140,7 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
           ) : (
             <>
               <Upload className="h-4 w-4 mr-2" />
-              {value ? "Changer l'image" : "Télécharger une image"}
+              {value ? "Changer l'image" : 'Télécharger une image'}
             </>
           )}
         </Button>

@@ -58,7 +58,7 @@ export default function TermsOfService() {
           {/* 1. Acceptation des conditions */}
           <h2>1. Acceptation des conditions</h2>
           <p>
-            En accédant et en utilisant Payhuk (ci-après "la Plateforme"), vous acceptez 
+            En accédant et en utilisant Emarzona (ci-après "la Plateforme"), vous acceptez 
             d'être lié par les présentes Conditions Générales d'Utilisation ("CGU"). 
             Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser la Plateforme.
           </p>
@@ -66,7 +66,7 @@ export default function TermsOfService() {
           {/* 2. Description du service */}
           <h2>2. Description du service</h2>
           <p>
-            Payhuk est une plateforme e-commerce et e-learning permettant aux utilisateurs de :
+            Emarzona est une plateforme e-commerce et e-learning permettant aux utilisateurs de :
           </p>
           <ul>
             <li>Acheter et vendre des produits digitaux, physiques et services</li>
@@ -107,7 +107,7 @@ export default function TermsOfService() {
           <h2>5. Propriété intellectuelle</h2>
           <p>
             Tout le contenu de la Plateforme (textes, images, logos, code) est protégé par 
-            le droit d'auteur et appartient à Payhuk ou à ses concédants de licence. 
+            le droit d'auteur et appartient à Emarzona ou à ses concédants de licence. 
             Vous conservez les droits sur le contenu que vous créez et publiez.
           </p>
 
@@ -156,7 +156,7 @@ export default function TermsOfService() {
             Pour toute question concernant ces CGU, vous pouvez nous contacter à :
           </p>
           <ul>
-            <li>Email: legal@payhuk.com</li>
+            <li>Email: legal@emarzona.com</li>
             <li>Adresse: [Votre adresse]</li>
           </ul>
 

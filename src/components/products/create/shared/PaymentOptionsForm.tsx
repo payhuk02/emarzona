@@ -1,27 +1,19 @@
 /**
  * Payment Options Form - Shared Component
  * Date: 28 octobre 2025
- * 
+ *
  * Formulaire de configuration des options de paiement
  * Support: Paiement complet, pourcentage, escrow (delivery_secured)
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import {
-  CreditCard,
-  Percent,
-  Shield,
-  Info,
-  CheckCircle,
-  TrendingUp,
-  Lock
-} from 'lucide-react';
+import { CreditCard, Percent, Shield, Info, CheckCircle, TrendingUp, Lock } from 'lucide-react';
 import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 
 export type PaymentType = 'full' | 'percentage' | 'delivery_secured';
@@ -33,8 +25,8 @@ interface PaymentOptionsData {
 }
 
 interface PaymentOptionsFormProps {
-  productPrice: number;
-  productType: 'physical' | 'service';
+  productPrice?: number | null;
+  productType: 'physical' | 'service' | 'generic';
   data: PaymentOptionsData;
   onUpdate: (data: PaymentOptionsData) => void;
 }
@@ -47,16 +39,19 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
 }) => {
   const { trackEvent } = useAnalyticsTracking();
 
+  // Sécuriser productPrice avec une valeur par défaut
+  const safePrice = typeof productPrice === 'number' && !isNaN(productPrice) ? productPrice : 0;
+
   const handlePaymentTypeChange = (value: PaymentType) => {
     onUpdate({
       ...data,
       payment_type: value,
     });
-    
+
     // Track payment option selection
     trackEvent('payment_option_selected', {
       payment_type: value,
-      product_price: productPrice,
+      product_price: safePrice,
       product_type: productType,
       percentage_rate: data.percentage_rate || 30,
     });
@@ -71,7 +66,7 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
   };
 
   const calculateAmount = (percentage: number) => {
-    return (productPrice * percentage) / 100;
+    return (safePrice * percentage) / 100;
   };
 
   return (
@@ -80,8 +75,9 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          Choisissez comment vos clients paieront pour ce {productType === 'physical' ? 'produit' : 'service'}.
-          Les options de paiement flexible augmentent les conversions de +30% en moyenne.
+          Choisissez comment vos clients paieront pour ce{' '}
+          {productType === 'service' ? 'service' : 'produit'}. Les options de paiement flexible
+          augmentent les conversions de +30% en moyenne.
         </AlertDescription>
       </Alert>
 
@@ -89,9 +85,7 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Type de Paiement</CardTitle>
-          <CardDescription>
-            Sélectionnez le mode de paiement pour ce produit
-          </CardDescription>
+          <CardDescription>Sélectionnez le mode de paiement pour ce produit</CardDescription>
         </CardHeader>
         <CardContent>
           <RadioGroup
@@ -100,8 +94,12 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
             className="space-y-4"
           >
             {/* Full Payment */}
-            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-colors cursor-pointer touch-manipulation">
-              <RadioGroupItem value="full" id="full" className="mt-1 min-w-[20px] min-h-[20px]" />
+            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-all duration-200 hover:shadow-md cursor-pointer touch-manipulation min-h-[120px]">
+              <RadioGroupItem
+                value="full"
+                id="full"
+                className="mt-1 min-w-[24px] min-h-[24px] touch-manipulation"
+              />
               <Label htmlFor="full" className="flex-1 cursor-pointer">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -111,13 +109,14 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
                       <Badge variant="secondary">Par défaut</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Le client paie la totalité immédiatement. Vous recevez le paiement directement.
+                      Le client paie la totalité immédiatement. Vous recevez le paiement
+                      directement.
                     </p>
                     <div className="mt-3 p-3 bg-green-50 dark:bg-green-950 rounded-md">
                       <div className="flex items-center gap-2 text-green-900 dark:text-green-100">
                         <CheckCircle className="h-4 w-4" />
                         <span className="text-sm font-medium">
-                          Montant reçu : {productPrice.toLocaleString()} XOF
+                          Montant reçu : {safePrice.toLocaleString()} XOF
                         </span>
                       </div>
                     </div>
@@ -127,8 +126,12 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
             </div>
 
             {/* Percentage Payment */}
-            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-colors cursor-pointer touch-manipulation">
-              <RadioGroupItem value="percentage" id="percentage" className="mt-1 min-w-[20px] min-h-[20px]" />
+            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-all duration-200 hover:shadow-md cursor-pointer touch-manipulation min-h-[120px]">
+              <RadioGroupItem
+                value="percentage"
+                id="percentage"
+                className="mt-1 min-w-[24px] min-h-[24px] touch-manipulation"
+              />
               <Label htmlFor="percentage" className="flex-1 cursor-pointer">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -141,7 +144,8 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground mb-3">
-                      Le client paie un acompte maintenant et le solde plus tard. Idéal pour les gros montants.
+                      Le client paie un acompte maintenant et le solde plus tard. Idéal pour les
+                      gros montants.
                     </p>
 
                     {data.payment_type === 'percentage' && (
@@ -158,7 +162,7 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
                               max="90"
                               step="5"
                               value={data.percentage_rate || 30}
-                              onChange={(e) => handlePercentageChange(e.target.value)}
+                              onChange={e => handlePercentageChange(e.target.value)}
                               className="w-24"
                             />
                             <span className="text-sm text-muted-foreground">%</span>
@@ -173,15 +177,22 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-md">
-                            <p className="text-xs text-blue-700 dark:text-blue-300 mb-1">Acompte (maintenant)</p>
+                            <p className="text-xs text-blue-700 dark:text-blue-300 mb-1">
+                              Acompte (maintenant)
+                            </p>
                             <p className="font-semibold text-blue-900 dark:text-blue-100">
                               {calculateAmount(data.percentage_rate || 30).toLocaleString()} XOF
                             </p>
                           </div>
                           <div className="p-3 bg-orange-50 dark:bg-orange-950 rounded-md">
-                            <p className="text-xs text-orange-700 dark:text-orange-300 mb-1">Solde (plus tard)</p>
+                            <p className="text-xs text-orange-700 dark:text-orange-300 mb-1">
+                              Solde (plus tard)
+                            </p>
                             <p className="font-semibold text-orange-900 dark:text-orange-100">
-                              {(productPrice - calculateAmount(data.percentage_rate || 30)).toLocaleString()} XOF
+                              {(
+                                safePrice - calculateAmount(data.percentage_rate || 30)
+                              ).toLocaleString()}{' '}
+                              XOF
                             </p>
                           </div>
                         </div>
@@ -193,15 +204,20 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
             </div>
 
             {/* Delivery Secured (Escrow) */}
-            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-colors cursor-pointer touch-manipulation">
-              <RadioGroupItem value="delivery_secured" id="delivery_secured" className="mt-1 min-w-[20px] min-h-[20px]" />
+            <div className="flex items-start space-x-3 p-4 sm:p-4 rounded-lg border-2 hover:border-primary transition-all duration-200 hover:shadow-md cursor-pointer touch-manipulation min-h-[120px]">
+              <RadioGroupItem
+                value="delivery_secured"
+                id="delivery_secured"
+                className="mt-1 min-w-[24px] min-h-[24px] touch-manipulation"
+              />
               <Label htmlFor="delivery_secured" className="flex-1 cursor-pointer">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <Shield className="h-5 w-5 text-yellow-600" />
                       <span className="font-semibold text-base">
-                        Paiement Sécurisé {productType === 'physical' ? '(à la livraison)' : '(à la prestation)'}
+                        Paiement Sécurisé{' '}
+                        {productType === 'physical' ? '(à la livraison)' : '(à la prestation)'}
                       </span>
                       <Badge variant="default" className="bg-yellow-600">
                         <Lock className="h-3 w-3 mr-1" />
@@ -209,10 +225,9 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {productType === 'physical' 
+                      {productType === 'physical'
                         ? "Le client paie la totalité mais l'argent est retenu par la plateforme jusqu'à confirmation de livraison."
-                        : "Le client paie la totalité mais l'argent est retenu par la plateforme jusqu'à confirmation de la prestation."
-                      }
+                        : "Le client paie la totalité mais l'argent est retenu par la plateforme jusqu'à confirmation de la prestation."}
                     </p>
                     <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-md border border-yellow-200">
                       <div className="space-y-2">
@@ -221,8 +236,16 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
                           <div className="text-sm text-yellow-900 dark:text-yellow-100">
                             <p className="font-medium mb-1">Protection acheteur et vendeur</p>
                             <ul className="text-xs space-y-1 text-yellow-800 dark:text-yellow-200">
-                              <li>• Client paie : {productPrice.toLocaleString()} XOF (retenu en escrow)</li>
-                              <li>• {productType === 'physical' ? 'Après livraison confirmée' : 'Après prestation confirmée'} : transfert au vendeur</li>
+                              <li>
+                                • Client paie : {safePrice.toLocaleString()} XOF (retenu en escrow)
+                              </li>
+                              <li>
+                                •{' '}
+                                {productType === 'physical'
+                                  ? 'Après livraison confirmée'
+                                  : 'Après prestation confirmée'}{' '}
+                                : transfert au vendeur
+                              </li>
                               <li>• En cas de problème : médiation plateforme</li>
                             </ul>
                           </div>
@@ -246,12 +269,19 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
-          <p><strong>Paiement complet</strong> : Idéal pour produits &lt; 50,000 XOF</p>
-          <p><strong>Paiement partiel</strong> : Recommandé pour produits &gt; 50,000 XOF (débloque gros achats)</p>
-          <p><strong>Paiement sécurisé</strong> : Parfait pour nouveaux vendeurs ou produits premium (rassure clients)</p>
+          <p>
+            <strong>Paiement complet</strong> : Idéal pour produits &lt; 50,000 XOF
+          </p>
+          <p>
+            <strong>Paiement partiel</strong> : Recommandé pour produits &gt; 50,000 XOF (débloque
+            gros achats)
+          </p>
+          <p>
+            <strong>Paiement sécurisé</strong> : Parfait pour nouveaux vendeurs ou produits premium
+            (rassure clients)
+          </p>
         </CardContent>
       </Card>
     </div>
   );
 };
-

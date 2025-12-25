@@ -2,6 +2,8 @@
  * Utilitaires pour la gestion des domaines personnalisés
  */
 
+import { logger } from './logger';
+
 /**
  * Valide un nom de domaine
  * @param domain - Le nom de domaine à valider
@@ -29,15 +31,15 @@ export const validateDomain = (domain: string): boolean => {
 
 /**
  * Génère un token de vérification unique pour un domaine
- * @returns Un token unique au format "payhula-verify-{random}"
+ * @returns Un token unique au format "emarzona-verify-{random}"
  * 
  * @example
- * generateVerificationToken() // "payhula-verify-abc123def456"
+ * generateVerificationToken() // "emarzona-verify-abc123def456"
  */
 export const generateVerificationToken = (): string => {
   const randomString = Math.random().toString(36).substring(2, 15) + 
                        Math.random().toString(36).substring(2, 15);
-  return `payhula-verify-${randomString}`;
+  return `emarzona-verify-${randomString}`;
 };
 
 /**
@@ -64,10 +66,10 @@ export const getDNSInstructions = (domain: string, token: string) => {
     },
     txtRecord: {
       type: 'TXT' as const,
-      name: `_payhula-verification.${domain}`,
+      name: `_emarzona-verification.${domain}`,
       value: token,
       ttl: 3600,
-      description: 'Enregistrement TXT de vérification Payhula'
+      description: 'Enregistrement TXT de vérification Emarzona'
     }
   };
 };
@@ -130,7 +132,7 @@ export const checkDNSPropagation = async (
 
     // Vérifier enregistrement TXT de vérification
     try {
-      const txtResponse = await fetch(`https://dns.google/resolve?name=_payhula-verification.${domain}&type=TXT`);
+      const txtResponse = await fetch(`https://dns.google/resolve?name=_emarzona-verification.${domain}&type=TXT`);
       const txtData = await txtResponse.json();
       
       if (txtData.Answer && txtData.Answer.length > 0) {
@@ -161,7 +163,7 @@ export const checkDNSPropagation = async (
       lastCheck: new Date()
     };
   } catch (error) {
-    console.error('Error checking DNS propagation:', error);
+    logger.error('Error checking DNS propagation', { error });
     return {
       isPropagated: false,
       details: {

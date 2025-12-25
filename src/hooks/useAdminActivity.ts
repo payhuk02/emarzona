@@ -4,9 +4,9 @@ import { useToast } from "@/hooks/use-toast";
 
 export interface AdminAction {
   id: string;
-  admin_id: string;
-  action_type: string;
-  target_type: string;
+  admin_id: string | null | undefined;
+  action_type: string | null | undefined;
+  target_type: string | null | undefined;
   target_id: string | null;
   details: any;
   created_at: string;
@@ -31,6 +31,14 @@ export const useAdminActivity = () => {
       // Récupérer les noms des admins
       const actionsWithNames = await Promise.all(
         (data || []).map(async (action) => {
+          // Vérifier que admin_id existe avant de faire la requête
+          if (!action.admin_id) {
+            return {
+              ...action,
+              admin_name: 'Admin inconnu',
+            };
+          }
+
           const { data: profileData } = await supabase
             .from('profiles')
             .select('display_name')

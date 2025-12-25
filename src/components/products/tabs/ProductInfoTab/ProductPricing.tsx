@@ -40,7 +40,7 @@ interface ProductPricingProps {
   /** Données du formulaire */
   formData: ProductPricingData;
   /** Fonction pour mettre à jour les données */
-  updateFormData: (field: string, value: any) => void;
+  updateFormData: (field: string, value: unknown) => void;
   /** Erreurs de validation */
   validationErrors?: Record<string, string>;
   /** Devise de la boutique (pour comparaison) */
@@ -140,7 +140,7 @@ export const ProductPricing = ({
                 min="0"
                 step="0.01"
                 aria-label="Prix du produit"
-                aria-required="true"
+                aria-required={true}
                 aria-invalid={!!validationErrors.price}
                 aria-describedby={validationErrors.price ? "price-error" : undefined}
                 className={cn(
@@ -180,17 +180,17 @@ export const ProductPricing = ({
               <SelectTrigger
                 id="product-currency"
                 aria-label="Devise du produit"
-                aria-required="true"
+                aria-required={true}
                 className="bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
               >
                 <SelectValue placeholder="Sélectionnez une devise" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-600">
+              <SelectContent className="bg-gray-800 border-gray-600 z-[1060]">
                 {CURRENCIES.map((currency) => (
                   <SelectItem
                     key={currency.code}
                     value={currency.code}
-                    className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                    className="text-white hover:bg-gray-700 focus:bg-gray-700 min-h-[44px]"
                   >
                     <div className="flex items-center gap-2">
                       <span>{currency.flag}</span>

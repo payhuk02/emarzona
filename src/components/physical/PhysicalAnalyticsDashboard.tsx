@@ -17,7 +17,7 @@ import {
   Truck,
   AlertTriangle,
   BarChart3,
-} from 'lucide-react';
+} from '@/components/icons';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMemo } from 'react';

@@ -35,7 +35,7 @@ export interface Affiliate {
   
   // Payment info
   payment_method?: PaymentMethod;
-  payment_details?: Record<string, any>;
+  payment_details?: Record<string, unknown>;
   
   // Status
   status: AffiliateStatus;
@@ -74,7 +74,7 @@ export interface ProductAffiliateSettings {
   
   // Content
   terms_and_conditions?: string;
-  promotional_materials?: Record<string, any>;
+  promotional_materials?: Record<string, unknown>;
   
   // Dates
   created_at: string;
@@ -115,7 +115,7 @@ export interface AffiliateLink {
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
-  custom_parameters?: Record<string, any>;
+  custom_parameters?: Record<string, unknown>;
   
   // Status
   status: LinkStatus;
@@ -141,6 +141,49 @@ export interface AffiliateLink {
     display_name?: string;
     affiliate_code: string;
   };
+  
+  // Lien court associé (optionnel)
+  short_link?: AffiliateShortLink;
+}
+
+// ==============================================
+// AFFILIATE SHORT LINK (Lien court)
+// ==============================================
+
+export interface AffiliateShortLink {
+  id: string;
+  affiliate_link_id: string;
+  affiliate_id: string;
+  
+  // Code court unique
+  short_code: string;  // Ex: "ABC123"
+  
+  // URL complète vers laquelle rediriger
+  target_url: string;
+  
+  // Statistiques
+  total_clicks: number;
+  unique_clicks: number;
+  
+  // Métadonnées
+  custom_alias?: string;  // Alias personnalisé optionnel
+  expires_at?: string;  // Date d'expiration optionnelle
+  is_active: boolean;
+  
+  // Dates
+  created_at: string;
+  updated_at: string;
+  last_used_at?: string;
+  
+  // Relations (optionnel)
+  affiliate_link?: AffiliateLink;
+}
+
+export interface CreateShortLinkForm {
+  affiliate_link_id: string;
+  custom_alias?: string;  // Alias personnalisé (optionnel)
+  expires_at?: string;  // Date d'expiration (optionnelle)
+  short_code_length?: number;  // Longueur du code (4-10, défaut: 6)
 }
 
 // ==============================================
@@ -213,7 +256,7 @@ export interface AffiliateCommission {
   
   // Meta
   notes?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   
@@ -246,7 +289,7 @@ export interface AffiliateWithdrawal {
   
   // Payment method
   payment_method: PaymentMethod;
-  payment_details: Record<string, any>;
+  payment_details: Record<string, unknown>;
   
   // Status
   status: WithdrawalStatus;
@@ -294,7 +337,7 @@ export interface AffiliateRegistrationForm {
   display_name?: string;
   password?: string;
   payment_method?: PaymentMethod;
-  payment_details?: Record<string, any>;
+  payment_details?: Record<string, unknown>;
 }
 
 export interface ProductAffiliateSettingsForm {
@@ -308,7 +351,7 @@ export interface ProductAffiliateSettingsForm {
   allow_self_referral: boolean;
   require_approval: boolean;
   terms_and_conditions?: string;
-  promotional_materials?: Record<string, any>;
+  promotional_materials?: Record<string, unknown>;
 }
 
 export interface CreateAffiliateLinkForm {
@@ -316,13 +359,13 @@ export interface CreateAffiliateLinkForm {
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
-  custom_parameters?: Record<string, any>;
+  custom_parameters?: Record<string, unknown>;
 }
 
 export interface WithdrawalRequestForm {
   amount: number;
   payment_method: PaymentMethod;
-  payment_details: Record<string, any>;
+  payment_details: Record<string, unknown>;
   notes?: string;
 }
 
@@ -551,7 +594,7 @@ export interface AffiliateNotification {
   type: 'new_sale' | 'commission_approved' | 'commission_paid' | 'withdrawal_approved' | 'withdrawal_completed' | 'new_product_available';
   title: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   read: boolean;
   created_at: string;
 }

@@ -19,7 +19,7 @@ export const CertificateTemplate = ({
   courseName,
   completionDate,
   certificateNumber,
-  instructorName = 'Payhuk Academy',
+  instructorName = 'Emarzona Academy',
 }: CertificateTemplateProps) => {
   const formattedDate = new Date(completionDate).toLocaleDateString('fr-FR', {
     day: 'numeric',
@@ -96,9 +96,9 @@ export const CertificateTemplate = ({
         </div>
       </div>
 
-      {/* Watermark Payhuk */}
+      {/* Watermark Emarzona */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-        <p className="text-xs text-gray-400">Payhuk Academy - Plateforme E-Learning</p>
+        <p className="text-xs text-gray-400">Emarzona Academy - Plateforme E-Learning</p>
       </div>
     </div>
   );

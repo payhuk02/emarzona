@@ -38,7 +38,7 @@ import {
   Users,
   Bell,
   RefreshCw,
-} from 'lucide-react';
+} from '@/components/icons';
 import { format, formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -603,7 +603,7 @@ export function BackorderManager({ productId, storeId, className }: BackorderMan
       {/* Customers Dialog */}
       {selectedBackorder && (
         <Dialog open={showCustomers} onOpenChange={setShowCustomers}>
-          <DialogContent className="max-w-4xl">
+          <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Clients en Backorder</DialogTitle>
               <DialogDescription>

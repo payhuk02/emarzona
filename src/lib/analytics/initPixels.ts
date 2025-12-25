@@ -4,6 +4,8 @@
  * Date : 27 octobre 2025
  */
 
+import { logger } from '../logger';
+
 // Déclarer les types pour window
 declare global {
   interface Window {
@@ -22,7 +24,7 @@ export const initGoogleAnalytics = (measurementId: string) => {
 
   // Vérifier si déjà initialisé
   if (document.getElementById(`ga-${measurementId}`)) {
-    console.log('Google Analytics already initialized');
+    logger.debug('Google Analytics already initialized', { measurementId });
     return;
   }
 
@@ -36,7 +38,7 @@ export const initGoogleAnalytics = (measurementId: string) => {
   // Configuration
   window.dataLayer = window.dataLayer || [];
   function gtag(...args: any[]) {
-    window.dataLayer!.push(arguments);
+    window.dataLayer!.push(args);
   }
   window.gtag = gtag;
 
@@ -45,7 +47,7 @@ export const initGoogleAnalytics = (measurementId: string) => {
     page_path: window.location.pathname,
   });
 
-  console.log(`✅ Google Analytics initialized: ${measurementId}`);
+  logger.info('Google Analytics initialized', { measurementId });
 };
 
 /**
@@ -56,17 +58,17 @@ export const initFacebookPixel = (pixelId: string) => {
 
   // Vérifier si déjà initialisé
   if (window.fbq) {
-    console.log('Facebook Pixel already initialized');
+    logger.debug('Facebook Pixel already initialized', { pixelId });
     return;
   }
 
   // Facebook Pixel Code
   (function (f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
     if (f.fbq) return;
-    n = f.fbq = function () {
+    n = f.fbq = function (...args: any[]) {
       n.callMethod
-        ? n.callMethod.apply(n, arguments)
-        : n.queue.push(arguments);
+        ? n.callMethod(...args)
+        : n.queue.push(args);
     };
     if (!f._fbq) f._fbq = n;
     n.push = n;
@@ -88,7 +90,7 @@ export const initFacebookPixel = (pixelId: string) => {
   window.fbq!('init', pixelId);
   window.fbq!('track', 'PageView');
 
-  console.log(`✅ Facebook Pixel initialized: ${pixelId}`);
+  logger.info('Facebook Pixel initialized', { pixelId });
 };
 
 /**
@@ -99,7 +101,7 @@ export const initGoogleTagManager = (containerId: string) => {
 
   // Vérifier si déjà initialisé
   if (document.getElementById(`gtm-${containerId}`)) {
-    console.log('Google Tag Manager already initialized');
+    logger.debug('Google Tag Manager already initialized', { containerId });
     return;
   }
 
@@ -107,16 +109,16 @@ export const initGoogleTagManager = (containerId: string) => {
   (function (w: any, d: any, s: any, l: any, i: any) {
     w[l] = w[l] || [];
     w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
-    var f = d.getElementsByTagName(s)[0],
-      j = d.createElement(s),
-      dl = l != 'dataLayer' ? '&l=' + l : '';
+    const f = d.getElementsByTagName(s)[0];
+    const j = d.createElement(s);
+    const dl = l != 'dataLayer' ? '&l=' + l : '';
     j.async = true;
     j.id = `gtm-${i}`;
     j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
     f.parentNode.insertBefore(j, f);
   })(window, document, 'script', 'dataLayer', containerId);
 
-  console.log(`✅ Google Tag Manager initialized: ${containerId}`);
+  logger.info('Google Tag Manager initialized', { containerId });
 };
 
 /**
@@ -127,15 +129,15 @@ export const initTikTokPixel = (pixelId: string) => {
 
   // Vérifier si déjà initialisé
   if (window.ttq) {
-    console.log('TikTok Pixel already initialized');
+    logger.debug('TikTok Pixel already initialized', { pixelId });
     return;
   }
 
   // TikTok Pixel Code
   (function (w: any, d: any, t: any) {
     w.TiktokAnalyticsObject = t;
-    var ttq = (w[t] = w[t] || []);
-    (ttq.methods = [
+    const ttq = (w[t] = w[t] || []);
+    ttq.methods = [
       'page',
       'track',
       'identify',
@@ -149,41 +151,42 @@ export const initTikTokPixel = (pixelId: string) => {
       'group',
       'enableCookie',
       'disableCookie',
-    ]),
-      (ttq.setAndDefer = function (t: any, e: any) {
-        t[e] = function () {
-          t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
-        };
-      });
-    for (var i = 0; i < ttq.methods.length; i++)
+    ];
+    ttq.setAndDefer = function (t: any, e: any) {
+      t[e] = function (...args: any[]) {
+        t.push([e, ...args]);
+      };
+    };
+    for (let i = 0; i < ttq.methods.length; i++)
       ttq.setAndDefer(ttq, ttq.methods[i]);
-    (ttq.instance = function (t: any) {
-      for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++)
+    ttq.instance = function (t: any) {
+      const e = ttq._i[t] || [];
+      for (let n = 0; n < ttq.methods.length; n++)
         ttq.setAndDefer(e, ttq.methods[n]);
       return e;
-    }),
-      (ttq.load = function (e: any, n: any) {
-        var i = 'https://analytics.tiktok.com/i18n/pixel/events.js';
-        (ttq._i = ttq._i || {}),
-          (ttq._i[e] = []),
-          (ttq._i[e]._u = i),
-          (ttq._t = ttq._t || {}),
-          (ttq._t[e] = +new Date()),
-          (ttq._o = ttq._o || {}),
-          (ttq._o[e] = n || {});
-        var o = document.createElement('script');
-        (o.type = 'text/javascript'),
-          (o.async = !0),
-          (o.src = i + '?sdkid=' + e + '&lib=' + t);
-        var a = document.getElementsByTagName('script')[0];
-        a.parentNode!.insertBefore(o, a);
-      });
+    };
+    ttq.load = function (e: any, n: any) {
+      const i = 'https://analytics.tiktok.com/i18n/pixel/events.js';
+      ttq._i = ttq._i || {};
+      ttq._i[e] = [];
+      ttq._i[e]._u = i;
+      ttq._t = ttq._t || {};
+      ttq._t[e] = +new Date();
+      ttq._o = ttq._o || {};
+      ttq._o[e] = n || {};
+      const o = document.createElement('script');
+      o.type = 'text/javascript';
+      o.async = !0;
+      o.src = i + '?sdkid=' + e + '&lib=' + t;
+      const a = document.getElementsByTagName('script')[0];
+      a.parentNode!.insertBefore(o, a);
+    };
 
     ttq.load(pixelId);
     ttq.page();
   })(window, document, 'ttq');
 
-  console.log(`✅ TikTok Pixel initialized: ${pixelId}`);
+  logger.info('TikTok Pixel initialized', { pixelId });
 };
 
 /**
@@ -198,19 +201,19 @@ export const trackEvent = (
   // Google Analytics
   if (window.gtag) {
     window.gtag('event', eventName, eventData);
-    console.log(`📊 GA Event: ${eventName}`, eventData);
+    logger.debug('Google Analytics event', { eventName, eventData });
   }
 
   // Facebook Pixel
   if (window.fbq) {
     window.fbq('track', eventName, eventData);
-    console.log(`📘 FB Event: ${eventName}`, eventData);
+    logger.debug('Facebook Pixel event', { eventName, eventData });
   }
 
   // TikTok Pixel
   if (window.ttq) {
     window.ttq.track(eventName, eventData);
-    console.log(`🎵 TikTok Event: ${eventName}`, eventData);
+    logger.debug('TikTok Pixel event', { eventName, eventData });
   }
 };
 

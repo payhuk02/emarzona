@@ -105,11 +105,11 @@ const AdminNotifications = () => {
 
         <Tabs defaultValue="send" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="send">
+            <TabsTrigger value="send" className="min-h-[44px]">
               <Send className="h-4 w-4 mr-2" />
               Envoyer
             </TabsTrigger>
-            <TabsTrigger value="history">
+            <TabsTrigger value="history" className="min-h-[44px]">
               <History className="h-4 w-4 mr-2" />
               Historique
             </TabsTrigger>
@@ -133,6 +133,7 @@ const AdminNotifications = () => {
                     onChange={(e) =>
                       setNotificationForm({ ...notificationForm, title: e.target.value })
                     }
+                    className="min-h-[44px]"
                   />
                 </div>
 
@@ -146,6 +147,7 @@ const AdminNotifications = () => {
                       setNotificationForm({ ...notificationForm, message: e.target.value })
                     }
                     rows={5}
+                    className="min-h-[44px]"
                   />
                 </div>
 
@@ -155,18 +157,21 @@ const AdminNotifications = () => {
                     <Button
                       variant={notificationForm.type === 'internal' ? 'default' : 'outline'}
                       onClick={() => setNotificationForm({ ...notificationForm, type: 'internal' })}
+                      className="min-h-[44px]"
                     >
                       Interne uniquement
                     </Button>
                     <Button
                       variant={notificationForm.type === 'email' ? 'default' : 'outline'}
                       onClick={() => setNotificationForm({ ...notificationForm, type: 'email' })}
+                      className="min-h-[44px]"
                     >
                       Email uniquement
                     </Button>
                     <Button
                       variant={notificationForm.type === 'both' ? 'default' : 'outline'}
                       onClick={() => setNotificationForm({ ...notificationForm, type: 'both' })}
+                      className="min-h-[44px]"
                     >
                       Interne + Email
                     </Button>
@@ -182,13 +187,14 @@ const AdminNotifications = () => {
                     onChange={(e) =>
                       setNotificationForm({ ...notificationForm, recipients: e.target.value })
                     }
+                    className="min-h-[44px]"
                   />
                   <p className="text-sm text-muted-foreground">
                     Utilisez 'all' pour tous les utilisateurs, ou spécifiez un groupe
                   </p>
                 </div>
 
-                <Button onClick={handleSendNotification} className="w-full gap-2">
+                <Button onClick={handleSendNotification} className="w-full gap-2 min-h-[44px]">
                   <Send className="h-4 w-4" />
                   Envoyer la notification
                 </Button>

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, Download, ShoppingBag, ArrowRight } from 'lucide-react';
 import { OneClickUpsell } from '@/components/upsell/OneClickUpsell';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -45,7 +46,7 @@ const PaymentSuccess = () => {
         setPurchasedProductType(orderItems.product_type || 'digital');
       }
     } catch (error) {
-      console.error('Error loading order info:', error);
+      logger.error('Error loading order info', { error });
     }
   };
 

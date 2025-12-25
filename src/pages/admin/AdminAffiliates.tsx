@@ -8,16 +8,38 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useAffiliates } from '@/hooks/useAffiliates';
 import { useAffiliateCommissions } from '@/hooks/useAffiliateCommissions';
 import { useAffiliateWithdrawals, usePendingWithdrawals } from '@/hooks/useAffiliateWithdrawals';
+import type {
+  AffiliateCommission,
+  AffiliateWithdrawal,
+  Affiliate,
+  AffiliateStatus,
+} from '@/types/affiliate';
+import { PaginationControls } from '@/components/affiliate/PaginationControls';
 import {
   Dialog,
   DialogContent,
@@ -28,10 +50,10 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { 
-  Users, 
-  TrendingUp, 
-  DollarSign, 
+import {
+  Users,
+  TrendingUp,
+  DollarSign,
   Wallet,
   MousePointerClick,
   ShoppingCart,
@@ -41,30 +63,60 @@ import {
   Download,
   Search,
   AlertCircle,
-  XCircle
+  XCircle,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const AdminAffiliates = () => {
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const isMobile = useIsMobile();
+  const [statusFilter, setStatusFilter] = useState<'all' | AffiliateStatus>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const { affiliates, loading: affiliatesLoading, suspendAffiliate, activateAffiliate } = useAffiliates({ 
-    status: statusFilter !== 'all' ? statusFilter as any : undefined,
-    search: searchTerm 
-  });
-  
-  const { commissions, stats, loading: commissionsLoading, approveCommission, rejectCommission, markAsPaid } = 
-    useAffiliateCommissions();
-  
-  const { withdrawals, approveWithdrawal, rejectWithdrawal, completeWithdrawal } = useAffiliateWithdrawals();
+
+  // États de pagination pour les affiliés
+  const [affiliatesPage, setAffiliatesPage] = useState(1);
+  const [affiliatesPageSize, setAffiliatesPageSizeLocal] = useState(20);
+
+  // États de pagination pour les commissions
+  const [commissionsPage, setCommissionsPage] = useState(1);
+  const [commissionsPageSize, setCommissionsPageSizeLocal] = useState(20);
+
+  const {
+    affiliates,
+    loading: affiliatesLoading,
+    suspendAffiliate,
+    activateAffiliate,
+    pagination: affiliatesPagination,
+    goToPage: goToAffiliatesPage,
+    setPageSize: setAffiliatesPageSize,
+  } = useAffiliates(
+    {
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+      search: searchTerm,
+    },
+    { page: affiliatesPage, pageSize: affiliatesPageSize }
+  );
+
+  const {
+    commissions,
+    stats,
+    loading: commissionsLoading,
+    approveCommission,
+    rejectCommission,
+    markAsPaid,
+    pagination: commissionsPagination,
+    goToPage: goToCommissionsPage,
+    setPageSize: setCommissionsPageSize,
+  } = useAffiliateCommissions(undefined, { page: commissionsPage, pageSize: commissionsPageSize });
+
+  const { withdrawals, approveWithdrawal, rejectWithdrawal, completeWithdrawal } =
+    useAffiliateWithdrawals();
   const { pending: pendingWithdrawals, totalAmount: pendingAmount } = usePendingWithdrawals();
 
-  const [selectedCommission, setSelectedCommission] = useState<any>(null);
-  const [selectedWithdrawal, setSelectedWithdrawal] = useState<any>(null);
-  const [selectedAffiliate, setSelectedAffiliate] = useState<any>(null);
+  const [selectedCommission, setSelectedCommission] = useState<AffiliateCommission | null>(null);
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState<AffiliateWithdrawal | null>(null);
+  const [selectedAffiliate, setSelectedAffiliate] = useState<Affiliate | null>(null);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
   const [showPayDialog, setShowPayDialog] = useState(false);
@@ -78,17 +130,20 @@ const AdminAffiliates = () => {
   const tablesRef = useScrollAnimation<HTMLDivElement>();
 
   // Stats globales optimisées avec useMemo
-  const globalStats = useMemo(() => ({
-    total_affiliates: affiliates.length,
-    active_affiliates: affiliates.filter(a => a.status === 'active').length,
-    suspended_affiliates: affiliates.filter(a => a.status === 'suspended').length,
-    total_clicks: affiliates.reduce((sum, a) => sum + a.total_clicks, 0),
-    total_sales: affiliates.reduce((sum, a) => sum + a.total_sales, 0),
-    total_revenue: affiliates.reduce((sum, a) => sum + a.total_revenue, 0),
-    total_commission_earned: affiliates.reduce((sum, a) => sum + a.total_commission_earned, 0),
-    total_commission_paid: affiliates.reduce((sum, a) => sum + a.total_commission_paid, 0),
-    pending_commission: affiliates.reduce((sum, a) => sum + a.pending_commission, 0),
-  }), [affiliates]);
+  const globalStats = useMemo(
+    () => ({
+      total_affiliates: affiliates.length,
+      active_affiliates: affiliates.filter(a => a.status === 'active').length,
+      suspended_affiliates: affiliates.filter(a => a.status === 'suspended').length,
+      total_clicks: affiliates.reduce((sum, a) => sum + a.total_clicks, 0),
+      total_sales: affiliates.reduce((sum, a) => sum + a.total_sales, 0),
+      total_revenue: affiliates.reduce((sum, a) => sum + a.total_revenue, 0),
+      total_commission_earned: affiliates.reduce((sum, a) => sum + a.total_commission_earned, 0),
+      total_commission_paid: affiliates.reduce((sum, a) => sum + a.total_commission_paid, 0),
+      pending_commission: affiliates.reduce((sum, a) => sum + a.pending_commission, 0),
+    }),
+    [affiliates]
+  );
 
   useEffect(() => {
     if (!affiliatesLoading && affiliates) {
@@ -96,91 +151,139 @@ const AdminAffiliates = () => {
     }
   }, [affiliatesLoading, affiliates]);
 
-  const handleApproveCommission = useCallback(async (commission: any) => {
-    logger.info(`Approbation commission ${commission.id}`);
-    await approveCommission({ commission_id: commission.id });
-    logger.info('Commission approuvée avec succès');
-  }, [approveCommission]);
+  // Synchroniser les états de pagination avec les hooks
+  useEffect(() => {
+    if (affiliatesPagination) {
+      setAffiliatesPage(affiliatesPagination.page);
+      setAffiliatesPageSizeLocal(affiliatesPagination.pageSize);
+    }
+  }, [affiliatesPagination?.page, affiliatesPagination?.pageSize]);
+
+  useEffect(() => {
+    if (commissionsPagination) {
+      setCommissionsPage(commissionsPagination.page);
+      setCommissionsPageSizeLocal(commissionsPagination.pageSize);
+    }
+  }, [commissionsPagination?.page, commissionsPagination?.pageSize]);
+
+  const handleApproveCommission = useCallback(
+    async (commission: AffiliateCommission) => {
+      logger.info(`Approbation commission ${commission.id}`);
+      const success = await approveCommission({ commission_id: commission.id });
+      if (success) {
+        logger.info('Commission approuvée avec succès');
+        // Refetch automatique géré par le hook
+      }
+    },
+    [approveCommission]
+  );
 
   const handleRejectCommission = useCallback(async () => {
     if (selectedCommission && rejectReason) {
-      await rejectCommission({ 
-        commission_id: selectedCommission.id, 
-        rejection_reason: rejectReason 
-      });
       logger.info(`Rejet commission ${selectedCommission.id}`);
-      setShowRejectDialog(false);
-      setRejectReason('');
-      setSelectedCommission(null);
-      logger.info('Commission rejetée avec succès');
+      const success = await rejectCommission({
+        commission_id: selectedCommission.id,
+        rejection_reason: rejectReason,
+      });
+      if (success) {
+        setShowRejectDialog(false);
+        setRejectReason('');
+        setSelectedCommission(null);
+        logger.info('Commission rejetée avec succès');
+        // Refetch automatique géré par le hook
+      }
     }
   }, [selectedCommission, rejectReason, rejectCommission]);
 
   const handlePayCommission = useCallback(async () => {
     if (selectedCommission && paymentReference) {
       logger.info(`Paiement commission ${selectedCommission.id}`);
-      await markAsPaid({
+      const success = await markAsPaid({
         commission_id: selectedCommission.id,
         payment_method: 'mobile_money',
         payment_reference: paymentReference,
       });
-      logger.info('Paiement commission marqué avec succès');
-      setShowPayDialog(false);
-      setPaymentReference('');
-      setSelectedCommission(null);
+      if (success) {
+        setShowPayDialog(false);
+        setPaymentReference('');
+        setSelectedCommission(null);
+        logger.info('Paiement commission marqué avec succès');
+        // Refetch automatique géré par le hook
+      }
     }
   }, [selectedCommission, paymentReference, markAsPaid]);
 
-  const handleApproveWithdrawal = useCallback(async (withdrawal: any) => {
-    logger.info(`Approbation retrait ${withdrawal.id}`);
-    await approveWithdrawal(withdrawal.id);
-    logger.info('Retrait approuvé avec succès');
-  }, [approveWithdrawal]);
+  const handleApproveWithdrawal = useCallback(
+    async (withdrawal: AffiliateWithdrawal) => {
+      logger.info(`Approbation retrait ${withdrawal.id}`);
+      const success = await approveWithdrawal(withdrawal.id);
+      if (success) {
+        logger.info('Retrait approuvé avec succès');
+        // Refetch automatique géré par le hook
+      }
+    },
+    [approveWithdrawal]
+  );
 
   const handleRejectWithdrawal = useCallback(async () => {
     if (selectedWithdrawal && rejectReason) {
       logger.info(`Rejet retrait ${selectedWithdrawal.id}`);
-      await rejectWithdrawal(selectedWithdrawal.id, rejectReason);
-      logger.info('Retrait rejeté avec succès');
-      setShowRejectDialog(false);
-      setRejectReason('');
-      setSelectedWithdrawal(null);
+      const success = await rejectWithdrawal(selectedWithdrawal.id, rejectReason);
+      if (success) {
+        setShowRejectDialog(false);
+        setRejectReason('');
+        setSelectedWithdrawal(null);
+        logger.info('Retrait rejeté avec succès');
+        // Refetch automatique géré par le hook
+      }
     }
   }, [selectedWithdrawal, rejectReason, rejectWithdrawal]);
 
   const handleCompleteWithdrawal = useCallback(async () => {
     if (selectedWithdrawal && paymentReference) {
       logger.info(`Complétion retrait ${selectedWithdrawal.id}`);
-      await completeWithdrawal(selectedWithdrawal.id, paymentReference);
-      logger.info('Retrait complété avec succès');
-      setShowPayDialog(false);
-      setPaymentReference('');
-      setSelectedWithdrawal(null);
+      const success = await completeWithdrawal(selectedWithdrawal.id, paymentReference);
+      if (success) {
+        setShowPayDialog(false);
+        setPaymentReference('');
+        setSelectedWithdrawal(null);
+        logger.info('Retrait complété avec succès');
+        // Refetch automatique géré par le hook
+      }
     }
   }, [selectedWithdrawal, paymentReference, completeWithdrawal]);
 
   const handleSuspendAffiliate = useCallback(async () => {
     if (selectedAffiliate && suspendReason) {
       logger.info(`Suspension affilié ${selectedAffiliate.id}`);
-      await suspendAffiliate(selectedAffiliate.id, suspendReason);
-      logger.info('Affilié suspendu avec succès');
-      setShowSuspendDialog(false);
-      setSuspendReason('');
-      setSelectedAffiliate(null);
+      const success = await suspendAffiliate(selectedAffiliate.id, suspendReason);
+      if (success) {
+        setShowSuspendDialog(false);
+        setSuspendReason('');
+        setSelectedAffiliate(null);
+        logger.info('Affilié suspendu avec succès');
+        // Refetch automatique géré par le hook
+      }
     }
   }, [selectedAffiliate, suspendReason, suspendAffiliate]);
 
-  const handleActivateAffiliate = useCallback(async (affiliate: any) => {
-    logger.info(`Activation affilié ${affiliate.id}`);
-    await activateAffiliate(affiliate.id);
-    logger.info('Affilié activé avec succès');
-  }, [activateAffiliate]);
+  const handleActivateAffiliate = useCallback(
+    async (affiliate: Affiliate) => {
+      logger.info(`Activation affilié ${affiliate.id}`);
+      const success = await activateAffiliate(affiliate.id);
+      if (success) {
+        logger.info('Affilié activé avec succès');
+        // Refetch automatique géré par le hook
+      }
+    },
+    [activateAffiliate]
+  );
 
   const exportToCSV = useCallback(() => {
     logger.info(`Export CSV de ${affiliates.length} affiliés`);
     const csvContent = [
       ['Affilié', 'Email', 'Code', 'Clics', 'Ventes', 'CA', 'Commissions', 'Statut'].join(','),
-      ...affiliates.map((aff) =>
+      ...affiliates.map(aff =>
         [
           aff.display_name || 'N/A',
           aff.email,
@@ -207,9 +310,9 @@ const AdminAffiliates = () => {
   if (affiliatesLoading) {
     return (
       <AdminLayout>
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <Skeleton className="h-12 w-64" />
-          <div className="grid gap-6 md:grid-cols-4">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {[...Array(4)].map((_, i) => (
               <Skeleton key={i} className="h-32" />
             ))}
@@ -221,104 +324,126 @@ const AdminAffiliates = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
         {/* Header */}
-        <div ref={headerRef} className="flex items-center justify-between" role="banner">
+        <div
+          ref={headerRef}
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+          role="banner"
+        >
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-affiliates-title">
+            <h1
+              className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent"
+              id="admin-affiliates-title"
+            >
               Gestion du système d'affiliation
             </h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-sm sm:text-base text-muted-foreground mt-2">
               Superviser l'ensemble des affiliés et leurs performances
             </p>
           </div>
-          <Button onClick={exportToCSV} variant="outline" className="gap-2">
+          <Button
+            onClick={exportToCSV}
+            variant="outline"
+            className="gap-2 min-h-[44px] w-full sm:w-auto"
+          >
             <Download className="h-4 w-4" />
-            Exporter CSV
+            <span className="hidden sm:inline">Exporter CSV</span>
+            <span className="sm:hidden">CSV</span>
           </Button>
         </div>
 
         {/* Alertes en attente */}
-        {(pendingWithdrawals.length > 0 || commissions.filter(c => c.status === 'pending').length > 0) && (
+        {(pendingWithdrawals.length > 0 ||
+          commissions.filter(c => c.status === 'pending').length > 0) && (
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Actions requises</AlertTitle>
             <AlertDescription>
               {pendingWithdrawals.length > 0 && (
-                <p>• {pendingWithdrawals.length} demande(s) de retrait en attente ({formatCurrency(pendingAmount)})</p>
+                <p>
+                  • {pendingWithdrawals.length} demande(s) de retrait en attente (
+                  {formatCurrency(pendingAmount)})
+                </p>
               )}
               {commissions.filter(c => c.status === 'pending').length > 0 && (
-                <p>• {commissions.filter(c => c.status === 'pending').length} commission(s) en attente d'approbation</p>
+                <p>
+                  • {commissions.filter(c => c.status === 'pending').length} commission(s) en
+                  attente d'approbation
+                </p>
               )}
             </AlertDescription>
           </Alert>
         )}
 
         {/* Stats globales */}
-        <div ref={statsRef} className="grid gap-6 md:grid-cols-4" role="region" aria-label="Statistiques des affiliés">
+        <div
+          ref={statsRef}
+          className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+          role="region"
+          aria-label="Statistiques des affiliés"
+        >
           <Card className="hover-scale">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-4 md:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Affiliés actifs
               </CardTitle>
-              <Users className="h-4 w-4 text-emerald-600" />
+              <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-emerald-600">
+            <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-emerald-600">
                 {globalStats.active_affiliates}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                 Sur {globalStats.total_affiliates} total
               </p>
             </CardContent>
           </Card>
 
           <Card className="hover-scale">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-4 md:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Ventes totales
               </CardTitle>
-              <ShoppingCart className="h-4 w-4 text-blue-600" />
+              <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
+            <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-blue-600">
                 {globalStats.total_sales}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                 {globalStats.total_clicks} clics au total
               </p>
             </CardContent>
           </Card>
 
           <Card className="hover-scale">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-4 md:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 CA généré
               </CardTitle>
-              <TrendingUp className="h-4 w-4 text-purple-600" />
+              <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
+            <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-purple-600">
                 {formatCurrency(globalStats.total_revenue)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Via affiliation
-              </p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Via affiliation</p>
             </CardContent>
           </Card>
 
           <Card className="hover-scale">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-4 md:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Commissions versées
               </CardTitle>
-              <DollarSign className="h-4 w-4 text-orange-600" />
+              <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
+            <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-orange-600">
                 {formatCurrency(globalStats.total_commission_paid)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                 {formatCurrency(globalStats.pending_commission)} en attente
               </p>
             </CardContent>
@@ -326,29 +451,38 @@ const AdminAffiliates = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="affiliates" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="affiliates">
-              Affiliés ({affiliates.length})
-            </TabsTrigger>
-            <TabsTrigger value="commissions">
-              Commissions
-              {commissions.filter(c => c.status === 'pending').length > 0 && (
-                <Badge variant="destructive" className="ml-2">
-                  {commissions.filter(c => c.status === 'pending').length}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="withdrawals">
-              Retraits
-              {pendingWithdrawals.length > 0 && (
-                <Badge variant="destructive" className="ml-2">
-                  {pendingWithdrawals.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="stats">Statistiques</TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="affiliates" className="space-y-4 sm:space-y-6">
+          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 scrollbar-hide">
+            <TabsList className="inline-flex w-full sm:w-auto min-w-full sm:min-w-0 grid grid-cols-4 sm:inline-flex gap-1 sm:gap-2">
+              <TabsTrigger value="affiliates" className="min-h-[44px] text-xs sm:text-sm">
+                <span className="hidden sm:inline">Affiliés</span>
+                <span className="sm:hidden">Aff.</span>
+                <span className="ml-1">({affiliates.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="commissions" className="min-h-[44px] text-xs sm:text-sm">
+                <span className="hidden sm:inline">Commissions</span>
+                <span className="sm:hidden">Com.</span>
+                {commissions.filter(c => c.status === 'pending').length > 0 && (
+                  <Badge variant="destructive" className="ml-1 sm:ml-2 text-[10px] sm:text-xs">
+                    {commissions.filter(c => c.status === 'pending').length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="withdrawals" className="min-h-[44px] text-xs sm:text-sm">
+                <span className="hidden sm:inline">Retraits</span>
+                <span className="sm:hidden">Ret.</span>
+                {pendingWithdrawals.length > 0 && (
+                  <Badge variant="destructive" className="ml-1 sm:ml-2 text-[10px] sm:text-xs">
+                    {pendingWithdrawals.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="stats" className="min-h-[44px] text-xs sm:text-sm">
+                <span className="hidden sm:inline">Statistiques</span>
+                <span className="sm:hidden">Stats</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Affiliés */}
           <TabsContent value="affiliates" className="space-y-4">
@@ -357,22 +491,20 @@ const AdminAffiliates = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Liste des affiliés</CardTitle>
-                    <CardDescription>
-                      Gérer tous les affiliés de la plateforme
-                    </CardDescription>
+                    <CardDescription>Gérer tous les affiliés de la plateforme</CardDescription>
                   </div>
-                  <div className="flex gap-2">
-                    <div className="relative">
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <div className="relative flex-1 sm:flex-initial">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         placeholder="Rechercher..."
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 w-64"
+                        onChange={e => setSearchTerm(e.target.value)}
+                        className="pl-10 w-full sm:w-64 min-h-[44px]"
                       />
                     </div>
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-40">
+                      <SelectTrigger className="w-full sm:w-40 min-h-[44px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -386,111 +518,269 @@ const AdminAffiliates = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Affilié</TableHead>
-                      <TableHead>Code</TableHead>
-                      <TableHead className="text-right">Clics</TableHead>
-                      <TableHead className="text-right">Ventes</TableHead>
-                      <TableHead className="text-right">CA</TableHead>
-                      <TableHead className="text-right">Commissions</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {affiliates.map((affiliate) => {
-                      const conversionRate = affiliate.total_clicks > 0 
-                        ? ((affiliate.total_sales / affiliate.total_clicks) * 100).toFixed(1) 
-                        : '0';
-                      
-                      return (
-                        <TableRow key={affiliate.id}>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{affiliate.display_name || 'N/A'}</p>
-                              <p className="text-xs text-muted-foreground">{affiliate.email}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{affiliate.affiliate_code}</Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <MousePointerClick className="h-3 w-3" />
-                              {affiliate.total_clicks}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right font-semibold">
-                            {affiliate.total_sales}
-                            <p className="text-xs text-muted-foreground">
-                              {conversionRate}%
+                {affiliates.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    Aucun affilié trouvé
+                  </div>
+                ) : isMobile ? (
+                  <MobileTableCard
+                    data={affiliates.map(aff => {
+                      const conversionRate =
+                        aff.total_clicks > 0
+                          ? ((aff.total_sales / aff.total_clicks) * 100).toFixed(1)
+                          : '0';
+                      return { id: aff.id, ...aff, conversionRate };
+                    })}
+                    columns={[
+                      {
+                        key: 'display_name',
+                        header: 'Affilié',
+                        priority: 'high',
+                        render: (value, row) => (
+                          <div>
+                            <p className="font-medium">{row.display_name || 'N/A'}</p>
+                            <p className="text-xs text-muted-foreground">{row.email}</p>
+                          </div>
+                        ),
+                        className: 'font-medium',
+                      },
+                      {
+                        key: 'affiliate_code',
+                        header: 'Code',
+                        priority: 'high',
+                        render: value => <Badge variant="outline">{String(value)}</Badge>,
+                      },
+                      {
+                        key: 'total_clicks',
+                        header: 'Clics',
+                        priority: 'medium',
+                        render: value => (
+                          <div className="flex items-center gap-1">
+                            <MousePointerClick className="h-3 w-3" />
+                            {Number(value)}
+                          </div>
+                        ),
+                      },
+                      {
+                        key: 'total_sales',
+                        header: 'Ventes',
+                        priority: 'high',
+                        render: (value, row) => (
+                          <div>
+                            <p className="font-semibold">{Number(value)}</p>
+                            <p className="text-xs text-muted-foreground">{row.conversionRate}%</p>
+                          </div>
+                        ),
+                        className: 'font-semibold',
+                      },
+                      {
+                        key: 'total_revenue',
+                        header: 'CA',
+                        priority: 'high',
+                        render: value => formatCurrency(Number(value)),
+                        className: 'font-semibold',
+                      },
+                      {
+                        key: 'total_commission_earned',
+                        header: 'Commissions',
+                        priority: 'high',
+                        render: (value, row) => (
+                          <div>
+                            <p className="font-semibold text-orange-600">
+                              {formatCurrency(Number(value))}
                             </p>
-                          </TableCell>
-                          <TableCell className="text-right font-semibold">
-                            {formatCurrency(affiliate.total_revenue)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div>
-                              <p className="font-semibold text-orange-600">
-                                {formatCurrency(affiliate.total_commission_earned)}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Payé : {formatCurrency(affiliate.total_commission_paid)}
-                              </p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {affiliate.status === 'active' && (
+                            <p className="text-xs text-muted-foreground">
+                              Payé : {formatCurrency(Number(row.total_commission_paid))}
+                            </p>
+                          </div>
+                        ),
+                      },
+                      {
+                        key: 'status',
+                        header: 'Statut',
+                        priority: 'high',
+                        render: value => {
+                          const status = String(value);
+                          if (status === 'active') {
+                            return (
                               <Badge className="gap-1">
                                 <CheckCircle2 className="h-3 w-3" />
                                 Actif
                               </Badge>
-                            )}
-                            {affiliate.status === 'suspended' && (
+                            );
+                          }
+                          if (status === 'suspended') {
+                            return (
                               <Badge variant="destructive" className="gap-1">
                                 <Ban className="h-3 w-3" />
                                 Suspendu
                               </Badge>
-                            )}
-                            {affiliate.status === 'pending' && (
+                            );
+                          }
+                          if (status === 'pending') {
+                            return (
                               <Badge variant="outline" className="gap-1">
                                 <Clock className="h-3 w-3" />
                                 En attente
                               </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {affiliate.status === 'active' ? (
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => {
-                                  setSelectedAffiliate(affiliate);
-                                  setShowSuspendDialog(true);
-                                }}
-                                className="gap-2"
-                              >
-                                <Ban className="h-3 w-3" />
-                                Suspendre
-                              </Button>
-                            ) : affiliate.status === 'suspended' ? (
-                              <Button
-                                size="sm"
-                                onClick={() => handleActivateAffiliate(affiliate)}
-                                className="gap-2"
-                              >
-                                <CheckCircle2 className="h-3 w-3" />
-                                Activer
-                              </Button>
-                            ) : null}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                            );
+                          }
+                          return null;
+                        },
+                      },
+                    ]}
+                    actions={row => (
+                      <div className="flex justify-end">
+                        {row.status === 'active' ? (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => {
+                              setSelectedAffiliate(row);
+                              setShowSuspendDialog(true);
+                            }}
+                            className="gap-2 min-h-[44px]"
+                          >
+                            <Ban className="h-3 w-3" />
+                            Suspendre
+                          </Button>
+                        ) : row.status === 'suspended' ? (
+                          <Button
+                            size="sm"
+                            onClick={() => handleActivateAffiliate(row)}
+                            className="gap-2 min-h-[44px]"
+                          >
+                            <CheckCircle2 className="h-3 w-3" />
+                            Activer
+                          </Button>
+                        ) : null}
+                      </div>
+                    )}
+                  />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Affilié</TableHead>
+                        <TableHead>Code</TableHead>
+                        <TableHead className="text-right">Clics</TableHead>
+                        <TableHead className="text-right">Ventes</TableHead>
+                        <TableHead className="text-right">CA</TableHead>
+                        <TableHead className="text-right">Commissions</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {affiliates.map(affiliate => {
+                        const conversionRate =
+                          affiliate.total_clicks > 0
+                            ? ((affiliate.total_sales / affiliate.total_clicks) * 100).toFixed(1)
+                            : '0';
+
+                        return (
+                          <TableRow key={affiliate.id}>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">{affiliate.display_name || 'N/A'}</p>
+                                <p className="text-xs text-muted-foreground">{affiliate.email}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{affiliate.affiliate_code}</Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <MousePointerClick className="h-3 w-3" />
+                                {affiliate.total_clicks}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right font-semibold">
+                              {affiliate.total_sales}
+                              <p className="text-xs text-muted-foreground">{conversionRate}%</p>
+                            </TableCell>
+                            <TableCell className="text-right font-semibold">
+                              {formatCurrency(affiliate.total_revenue)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div>
+                                <p className="font-semibold text-orange-600">
+                                  {formatCurrency(affiliate.total_commission_earned)}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  Payé : {formatCurrency(affiliate.total_commission_paid)}
+                                </p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {affiliate.status === 'active' && (
+                                <Badge className="gap-1">
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Actif
+                                </Badge>
+                              )}
+                              {affiliate.status === 'suspended' && (
+                                <Badge variant="destructive" className="gap-1">
+                                  <Ban className="h-3 w-3" />
+                                  Suspendu
+                                </Badge>
+                              )}
+                              {affiliate.status === 'pending' && (
+                                <Badge variant="outline" className="gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  En attente
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {affiliate.status === 'active' ? (
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    setSelectedAffiliate(affiliate);
+                                    setShowSuspendDialog(true);
+                                  }}
+                                  className="gap-2"
+                                >
+                                  <Ban className="h-3 w-3" />
+                                  Suspendre
+                                </Button>
+                              ) : affiliate.status === 'suspended' ? (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleActivateAffiliate(affiliate)}
+                                  className="gap-2"
+                                >
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Activer
+                                </Button>
+                              ) : null}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+
+                {/* Pagination pour les affiliés */}
+                {affiliatesPagination && affiliatesPagination.totalPages > 1 && (
+                  <div className="mt-6 pt-4 border-t px-6 pb-6">
+                    <PaginationControls
+                      {...affiliatesPagination}
+                      onPageChange={page => {
+                        setAffiliatesPage(page);
+                        goToAffiliatesPage(page);
+                      }}
+                      onPageSizeChange={size => {
+                        setAffiliatesPageSizeLocal(size);
+                        setAffiliatesPageSize(size);
+                        setAffiliatesPage(1);
+                      }}
+                    />
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -512,108 +802,132 @@ const AdminAffiliates = () => {
                     ))}
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Affilié</TableHead>
-                        <TableHead>Produit</TableHead>
-                        <TableHead className="text-right">Vente</TableHead>
-                        <TableHead className="text-right">Commission</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {commissions.slice(0, 20).map((commission) => (
-                        <TableRow key={commission.id}>
-                          <TableCell className="text-sm">
-                            {new Date(commission.created_at).toLocaleDateString('fr-FR')}
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{commission.affiliate?.display_name}</p>
-                              <p className="text-xs text-muted-foreground">{commission.affiliate?.email}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>{commission.product?.name}</TableCell>
-                          <TableCell className="text-right font-semibold">
-                            {formatCurrency(commission.order_total)}
-                          </TableCell>
-                          <TableCell className="text-right font-bold text-orange-600">
-                            {formatCurrency(commission.commission_amount)}
-                          </TableCell>
-                          <TableCell>
-                            {commission.status === 'pending' && (
-                              <Badge variant="outline" className="gap-1">
-                                <Clock className="h-3 w-3" />
-                                En attente
-                              </Badge>
-                            )}
-                            {commission.status === 'approved' && (
-                              <Badge variant="secondary" className="gap-1">
-                                <CheckCircle2 className="h-3 w-3" />
-                                Approuvé
-                              </Badge>
-                            )}
-                            {commission.status === 'paid' && (
-                              <Badge className="gap-1">
-                                <CheckCircle2 className="h-3 w-3" />
-                                Payé
-                              </Badge>
-                            )}
-                            {commission.status === 'rejected' && (
-                              <Badge variant="destructive" className="gap-1">
-                                <XCircle className="h-3 w-3" />
-                                Rejeté
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex gap-2 justify-end">
+                  <>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Affilié</TableHead>
+                          <TableHead>Produit</TableHead>
+                          <TableHead className="text-right">Vente</TableHead>
+                          <TableHead className="text-right">Commission</TableHead>
+                          <TableHead>Statut</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {commissions.slice(0, 20).map(commission => (
+                          <TableRow key={commission.id}>
+                            <TableCell className="text-sm">
+                              {new Date(commission.created_at).toLocaleDateString('fr-FR')}
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">{commission.affiliate?.display_name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {commission.affiliate?.email}
+                                </p>
+                              </div>
+                            </TableCell>
+                            <TableCell>{commission.product?.name}</TableCell>
+                            <TableCell className="text-right font-semibold">
+                              {formatCurrency(commission.order_total)}
+                            </TableCell>
+                            <TableCell className="text-right font-bold text-orange-600">
+                              {formatCurrency(commission.commission_amount)}
+                            </TableCell>
+                            <TableCell>
                               {commission.status === 'pending' && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleApproveCommission(commission)}
-                                    className="gap-1"
-                                  >
-                                    <CheckCircle2 className="h-3 w-3" />
-                                    Approuver
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() => {
-                                      setSelectedCommission(commission);
-                                      setShowRejectDialog(true);
-                                    }}
-                                    className="gap-1"
-                                  >
-                                    <XCircle className="h-3 w-3" />
-                                    Rejeter
-                                  </Button>
-                                </>
+                                <Badge variant="outline" className="gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  En attente
+                                </Badge>
                               )}
                               {commission.status === 'approved' && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedCommission(commission);
-                                    setShowPayDialog(true);
-                                  }}
-                                  className="gap-1"
-                                >
-                                  <Wallet className="h-3 w-3" />
-                                  Marquer payé
-                                </Button>
+                                <Badge variant="secondary" className="gap-1">
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Approuvé
+                                </Badge>
                               )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                              {commission.status === 'paid' && (
+                                <Badge className="gap-1">
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Payé
+                                </Badge>
+                              )}
+                              {commission.status === 'rejected' && (
+                                <Badge variant="destructive" className="gap-1">
+                                  <XCircle className="h-3 w-3" />
+                                  Rejeté
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex flex-col sm:flex-row gap-2 justify-end">
+                                {commission.status === 'pending' && (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleApproveCommission(commission)}
+                                      className="gap-1 min-h-[44px] w-full sm:w-auto"
+                                    >
+                                      <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                                      <span className="hidden sm:inline">Approuver</span>
+                                      <span className="sm:hidden">OK</span>
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => {
+                                        setSelectedCommission(commission);
+                                        setShowRejectDialog(true);
+                                      }}
+                                      className="gap-1 min-h-[44px] w-full sm:w-auto"
+                                    >
+                                      <XCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                                      Rejeter
+                                    </Button>
+                                  </>
+                                )}
+                                {commission.status === 'approved' && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedCommission(commission);
+                                      setShowPayDialog(true);
+                                    }}
+                                    className="gap-1 min-h-[44px] w-full sm:w-auto"
+                                  >
+                                    <Wallet className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    <span className="hidden sm:inline">Marquer payé</span>
+                                    <span className="sm:hidden">Payé</span>
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+
+                    {/* Pagination pour les commissions */}
+                    {commissionsPagination && commissionsPagination.totalPages > 1 && (
+                      <div className="mt-6 pt-4 border-t px-6 pb-6">
+                        <PaginationControls
+                          {...commissionsPagination}
+                          onPageChange={page => {
+                            setCommissionsPage(page);
+                            goToCommissionsPage(page);
+                          }}
+                          onPageSizeChange={size => {
+                            setCommissionsPageSizeLocal(size);
+                            setCommissionsPageSize(size);
+                            setCommissionsPage(1);
+                          }}
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -624,9 +938,7 @@ const AdminAffiliates = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Gestion des retraits</CardTitle>
-                <CardDescription>
-                  Traiter les demandes de retrait des affiliés
-                </CardDescription>
+                <CardDescription>Traiter les demandes de retrait des affiliés</CardDescription>
               </CardHeader>
               <CardContent>
                 {pendingWithdrawals.length > 0 && (
@@ -634,11 +946,12 @@ const AdminAffiliates = () => {
                     <Wallet className="h-4 w-4" />
                     <AlertTitle>Retraits en attente</AlertTitle>
                     <AlertDescription>
-                      {pendingWithdrawals.length} demande(s) pour un total de {formatCurrency(pendingAmount)}
+                      {pendingWithdrawals.length} demande(s) pour un total de{' '}
+                      {formatCurrency(pendingAmount)}
                     </AlertDescription>
                   </Alert>
                 )}
-                
+
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -651,7 +964,7 @@ const AdminAffiliates = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {withdrawals.slice(0, 20).map((withdrawal) => (
+                    {withdrawals.slice(0, 20).map(withdrawal => (
                       <TableRow key={withdrawal.id}>
                         <TableCell className="text-sm">
                           {new Date(withdrawal.created_at).toLocaleDateString('fr-FR')}
@@ -659,7 +972,9 @@ const AdminAffiliates = () => {
                         <TableCell>
                           <div>
                             <p className="font-medium">{withdrawal.affiliate?.display_name}</p>
-                            <p className="text-xs text-muted-foreground">{withdrawal.affiliate?.email}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {withdrawal.affiliate?.email}
+                            </p>
                           </div>
                         </TableCell>
                         <TableCell className="text-right font-bold">
@@ -686,16 +1001,17 @@ const AdminAffiliates = () => {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex gap-2 justify-end">
+                          <div className="flex flex-col sm:flex-row gap-2 justify-end">
                             {withdrawal.status === 'pending' && (
                               <>
                                 <Button
                                   size="sm"
                                   onClick={() => handleApproveWithdrawal(withdrawal)}
-                                  className="gap-1"
+                                  className="gap-1 min-h-[44px] w-full sm:w-auto"
                                 >
-                                  <CheckCircle2 className="h-3 w-3" />
-                                  Approuver
+                                  <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                                  <span className="hidden sm:inline">Approuver</span>
+                                  <span className="sm:hidden">OK</span>
                                 </Button>
                                 <Button
                                   size="sm"
@@ -704,9 +1020,9 @@ const AdminAffiliates = () => {
                                     setSelectedWithdrawal(withdrawal);
                                     setShowRejectDialog(true);
                                   }}
-                                  className="gap-1"
+                                  className="gap-1 min-h-[44px] w-full sm:w-auto"
                                 >
-                                  <XCircle className="h-3 w-3" />
+                                  <XCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                                   Rejeter
                                 </Button>
                               </>
@@ -718,10 +1034,11 @@ const AdminAffiliates = () => {
                                   setSelectedWithdrawal(withdrawal);
                                   setShowPayDialog(true);
                                 }}
-                                className="gap-1"
+                                className="gap-1 min-h-[44px] w-full sm:w-auto"
                               >
-                                <CheckCircle2 className="h-3 w-3" />
-                                Marquer complété
+                                <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                                <span className="hidden sm:inline">Marquer complété</span>
+                                <span className="sm:hidden">Complété</span>
                               </Button>
                             )}
                           </div>
@@ -736,7 +1053,7 @@ const AdminAffiliates = () => {
 
           {/* Stats */}
           <TabsContent value="stats" className="space-y-4">
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
               <Card>
                 <CardHeader>
                   <CardTitle>Top 10 Affiliés</CardTitle>
@@ -748,17 +1065,24 @@ const AdminAffiliates = () => {
                       .sort((a, b) => b.total_revenue - a.total_revenue)
                       .slice(0, 10)
                       .map((affiliate, index) => (
-                        <div key={affiliate.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div
+                          key={affiliate.id}
+                          className="flex items-center justify-between p-3 border rounded-lg"
+                        >
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
                               {index + 1}
                             </div>
                             <div>
                               <p className="font-medium">{affiliate.display_name}</p>
-                              <p className="text-xs text-muted-foreground">{affiliate.total_sales} ventes</p>
+                              <p className="text-xs text-muted-foreground">
+                                {affiliate.total_sales} ventes
+                              </p>
                             </div>
                           </div>
-                          <p className="font-bold text-primary">{formatCurrency(affiliate.total_revenue)}</p>
+                          <p className="font-bold text-primary">
+                            {formatCurrency(affiliate.total_revenue)}
+                          </p>
                         </div>
                       ))}
                   </div>
@@ -776,18 +1100,26 @@ const AdminAffiliates = () => {
                       <div className="flex justify-between mb-2">
                         <span className="text-sm">Taux de conversion global</span>
                         <span className="font-bold">
-                          {globalStats.total_clicks > 0 
-                            ? ((globalStats.total_sales / globalStats.total_clicks) * 100).toFixed(2) 
-                            : 0}%
+                          {globalStats.total_clicks > 0
+                            ? ((globalStats.total_sales / globalStats.total_clicks) * 100).toFixed(
+                                2
+                              )
+                            : 0}
+                          %
                         </span>
                       </div>
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-primary"
-                          style={{ 
-                            width: `${globalStats.total_clicks > 0 
-                              ? Math.min(((globalStats.total_sales / globalStats.total_clicks) * 100), 100) 
-                              : 0}%` 
+                          style={{
+                            width: `${
+                              globalStats.total_clicks > 0
+                                ? Math.min(
+                                    (globalStats.total_sales / globalStats.total_clicks) * 100,
+                                    100
+                                  )
+                                : 0
+                            }%`,
                           }}
                         />
                       </div>
@@ -805,7 +1137,7 @@ const AdminAffiliates = () => {
                       <div className="p-4 border rounded-lg">
                         <p className="text-sm text-muted-foreground">Panier moyen</p>
                         <p className="text-2xl font-bold">
-                          {globalStats.total_sales > 0 
+                          {globalStats.total_sales > 0
                             ? formatCurrency(globalStats.total_revenue / globalStats.total_sales)
                             : formatCurrency(0)}
                         </p>
@@ -813,8 +1145,10 @@ const AdminAffiliates = () => {
                       <div className="p-4 border rounded-lg">
                         <p className="text-sm text-muted-foreground">Commission moy.</p>
                         <p className="text-2xl font-bold">
-                          {globalStats.total_sales > 0 
-                            ? formatCurrency(globalStats.total_commission_earned / globalStats.total_sales)
+                          {globalStats.total_sales > 0
+                            ? formatCurrency(
+                                globalStats.total_commission_earned / globalStats.total_sales
+                              )
                             : formatCurrency(0)}
                         </p>
                       </div>
@@ -832,9 +1166,7 @@ const AdminAffiliates = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Rejeter la demande</DialogTitle>
-              <DialogDescription>
-                Indiquez la raison du rejet
-              </DialogDescription>
+              <DialogDescription>Indiquez la raison du rejet</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -842,20 +1174,25 @@ const AdminAffiliates = () => {
                 <Textarea
                   id="reject-reason"
                   value={rejectReason}
-                  onChange={(e) => setRejectReason(e.target.value)}
+                  onChange={e => setRejectReason(e.target.value)}
                   placeholder="Expliquez pourquoi cette demande est rejetée..."
                   rows={4}
                 />
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowRejectDialog(false)}>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowRejectDialog(false)}
+                className="w-full sm:w-auto"
+              >
                 Annuler
               </Button>
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 onClick={selectedCommission ? handleRejectCommission : handleRejectWithdrawal}
                 disabled={!rejectReason}
+                className="w-full sm:w-auto"
               >
                 Rejeter
               </Button>
@@ -868,9 +1205,7 @@ const AdminAffiliates = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Suspendre l'affilié</DialogTitle>
-              <DialogDescription>
-                Indiquez la raison de la suspension
-              </DialogDescription>
+              <DialogDescription>Indiquez la raison de la suspension</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -878,20 +1213,25 @@ const AdminAffiliates = () => {
                 <Textarea
                   id="suspend-reason"
                   value={suspendReason}
-                  onChange={(e) => setSuspendReason(e.target.value)}
+                  onChange={e => setSuspendReason(e.target.value)}
                   placeholder="Expliquez pourquoi cet affilié est suspendu..."
                   rows={4}
                 />
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowSuspendDialog(false)}>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowSuspendDialog(false)}
+                className="w-full sm:w-auto"
+              >
                 Annuler
               </Button>
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 onClick={handleSuspendAffiliate}
                 disabled={!suspendReason}
+                className="w-full sm:w-auto"
               >
                 Suspendre
               </Button>
@@ -904,9 +1244,7 @@ const AdminAffiliates = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Marquer comme payé</DialogTitle>
-              <DialogDescription>
-                Entrez la référence de la transaction
-              </DialogDescription>
+              <DialogDescription>Entrez la référence de la transaction</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -914,18 +1252,23 @@ const AdminAffiliates = () => {
                 <Input
                   id="payment-ref"
                   value={paymentReference}
-                  onChange={(e) => setPaymentReference(e.target.value)}
+                  onChange={e => setPaymentReference(e.target.value)}
                   placeholder="Ex: TXN-123456789"
                 />
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowPayDialog(false)}>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowPayDialog(false)}
+                className="w-full sm:w-auto"
+              >
                 Annuler
               </Button>
-              <Button 
+              <Button
                 onClick={selectedCommission ? handlePayCommission : handleCompleteWithdrawal}
                 disabled={!paymentReference}
+                className="w-full sm:w-auto"
               >
                 Confirmer le paiement
               </Button>
@@ -938,4 +1281,3 @@ const AdminAffiliates = () => {
 };
 
 export default AdminAffiliates;
-

@@ -6,6 +6,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 interface ProductPixels {
   tracking_enabled: boolean;
@@ -29,7 +30,7 @@ export const useProductPixels = (productId: string) => {
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching product pixels:', error);
+        logger.error('Error fetching product pixels', { error, productId });
         return null;
       }
 

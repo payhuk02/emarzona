@@ -331,7 +331,7 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          <strong>Note :</strong> Les pixels externes sont optionnels. Le tracking natif Payhuk fonctionne sans configuration supplémentaire.
+          <strong>Note :</strong> Les pixels externes sont optionnels. Le tracking natif Emarzona fonctionne sans configuration supplémentaire.
         </AlertDescription>
       </Alert>
     </div>

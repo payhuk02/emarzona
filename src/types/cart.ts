@@ -1,10 +1,12 @@
 /**
  * Types TypeScript pour le système de Panier
  * Date: 26 Janvier 2025
- * Support: Produits digitaux, physiques, services, cours
+ * Support: Produits digitaux, physiques, services, cours, œuvres d'artistes
  */
 
-export type ProductType = 'digital' | 'physical' | 'service' | 'course';
+import type { RecordString } from './common';
+
+export type ProductType = 'digital' | 'physical' | 'service' | 'course' | 'artist';
 
 export interface CartItem {
   id?: string;
@@ -20,7 +22,7 @@ export interface CartItem {
   discount_amount?: number;
   discount_percentage?: number;
   coupon_code?: string | null;
-  metadata?: Record<string, any>;
+  metadata?: RecordString;
   added_at?: string;
   updated_at?: string;
 }
@@ -47,7 +49,7 @@ export interface AddToCartOptions {
   quantity?: number;
   variant_id?: string;
   variant_name?: string;
-  metadata?: Record<string, any>;
+  metadata?: RecordString;
   coupon_code?: string;
 }
 

@@ -1,7 +1,7 @@
 /**
  * Product Images Gallery Component
  * Date: 28 octobre 2025
- * 
+ *
  * Galerie d'images professionnelle avec :
  * - Lightbox modal pour zoom
  * - Navigation prev/next
@@ -15,15 +15,9 @@ import { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  ChevronLeft,
-  ChevronRight,
-  ZoomIn,
-  X,
-  Image as ImageIcon,
-  Expand,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, ZoomIn, X, Image as ImageIcon, Expand } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 
 interface ProductImagesProps {
   images: string[];
@@ -32,6 +26,13 @@ interface ProductImagesProps {
   showThumbnails?: boolean;
   enableLightbox?: boolean;
   aspectRatio?: 'square' | 'video' | 'portrait';
+  /**
+   * Fit mode for the main image.
+   * - contain: no crop (recommended for detail pages)
+   * - cover: crop allowed (more "card-like")
+   * @default 'contain'
+   */
+  fit?: 'contain' | 'cover';
 }
 
 export const ProductImages = ({
@@ -41,6 +42,7 @@ export const ProductImages = ({
   showThumbnails = true,
   enableLightbox = true,
   aspectRatio = 'square',
+  fit = 'contain',
 }: ProductImagesProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -51,11 +53,11 @@ export const ProductImages = ({
   const currentImage = displayImages[selectedIndex];
 
   const handlePrevious = () => {
-    setSelectedIndex((prev) => (prev === 0 ? displayImages.length - 1 : prev - 1));
+    setSelectedIndex(prev => (prev === 0 ? displayImages.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
-    setSelectedIndex((prev) => (prev === displayImages.length - 1 ? 0 : prev + 1));
+    setSelectedIndex(prev => (prev === displayImages.length - 1 ? 0 : prev + 1));
   };
 
   const handleThumbnailClick = (index: number) => {
@@ -86,13 +88,19 @@ export const ProductImages = ({
         >
           {displayImages[0] === '/placeholder-product.png' ? (
             <div className="absolute inset-0 flex items-center justify-center">
-              <ImageIcon className="h-24 w-24 text-muted-foreground/20" />
+              <ImageIcon className="h-24 w-24 text-muted-foreground/20" aria-hidden="true" />
             </div>
           ) : (
-            <img
+            <OptimizedImage
               src={currentImage}
               alt={`${productName} - Image ${selectedIndex + 1}`}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className={cn(
+                'h-full w-full',
+                fit === 'contain' ? 'object-contain' : 'object-cover',
+                fit === 'cover' ? 'transition-transform duration-300 group-hover:scale-105' : ''
+              )}
+              width={800}
+              height={800}
             />
           )}
 
@@ -112,16 +120,18 @@ export const ProductImages = ({
               <Button
                 variant="secondary"
                 size="icon"
-                className="absolute left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 text-white hover:bg-black/80"
+                className="absolute left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 text-white hover:bg-black/80 min-h-[44px] min-w-[44px] touch-manipulation"
                 onClick={handlePrevious}
+                aria-label="Image précédente"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
               <Button
                 variant="secondary"
                 size="icon"
-                className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 text-white hover:bg-black/80"
+                className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 text-white hover:bg-black/80 min-h-[44px] min-w-[44px] touch-manipulation"
                 onClick={handleNext}
+                aria-label="Image suivante"
               >
                 <ChevronRight className="h-5 w-5" />
               </Button>
@@ -133,8 +143,9 @@ export const ProductImages = ({
             <Button
               variant="secondary"
               size="icon"
-              className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 text-white hover:bg-black/80"
+              className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 text-white hover:bg-black/80 min-h-[44px] min-w-[44px] touch-manipulation"
               onClick={handleOpenLightbox}
+              aria-label="Agrandir l'image"
             >
               <Expand className="h-5 w-5" />
             </Button>
@@ -143,28 +154,33 @@ export const ProductImages = ({
       </div>
 
       {/* Thumbnails */}
-      {showThumbnails && displayImages.length > 1 && displayImages[0] !== '/placeholder-product.png' && (
-        <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
-          {displayImages.map((image, index) => (
-            <button
-              key={index}
-              onClick={() => handleThumbnailClick(index)}
-              className={cn(
-                'relative aspect-square rounded-md overflow-hidden border-2 transition-all',
-                selectedIndex === index
-                  ? 'border-primary ring-2 ring-primary ring-offset-2'
-                  : 'border-transparent hover:border-muted-foreground/30'
-              )}
-            >
-              <img
-                src={image}
-                alt={`${productName} - Thumbnail ${index + 1}`}
-                className="h-full w-full object-cover"
-              />
-            </button>
-          ))}
-        </div>
-      )}
+      {showThumbnails &&
+        displayImages.length > 1 &&
+        displayImages[0] !== '/placeholder-product.png' && (
+          <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
+            {displayImages.map((image, index) => (
+              <button
+                key={index}
+                onClick={() => handleThumbnailClick(index)}
+                className={cn(
+                  'relative aspect-square rounded-md overflow-hidden border-2 transition-all',
+                  selectedIndex === index
+                    ? 'border-primary ring-2 ring-primary ring-offset-2'
+                    : 'border-transparent hover:border-muted-foreground/30'
+                )}
+                aria-label={`Sélectionner l'image ${index + 1} de ${productName}`}
+              >
+                <OptimizedImage
+                  src={image}
+                  alt={`${productName} - Thumbnail ${index + 1}`}
+                  className="h-full w-full object-cover"
+                  width={200}
+                  height={200}
+                />
+              </button>
+            ))}
+          </div>
+        )}
 
       {/* Lightbox Modal */}
       <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
@@ -174,8 +190,9 @@ export const ProductImages = ({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-4 right-4 z-50 text-white hover:bg-white/20"
+              className="absolute top-4 right-4 z-50 text-white hover:bg-white/20 min-h-[44px] min-w-[44px] touch-manipulation"
               onClick={() => setIsLightboxOpen(false)}
+              aria-label="Fermer la visionneuse"
             >
               <X className="h-6 w-6" />
             </Button>
@@ -189,7 +206,7 @@ export const ProductImages = ({
 
             {/* Main lightbox image */}
             <div className="relative h-full w-full flex items-center justify-center p-12">
-              <img
+              <OptimizedImage
                 src={currentImage}
                 alt={`${productName} - Full size ${selectedIndex + 1}`}
                 className={cn(
@@ -197,6 +214,8 @@ export const ProductImages = ({
                   isZoomed ? 'scale-150 cursor-zoom-out' : 'cursor-zoom-in'
                 )}
                 onClick={() => setIsZoomed(!isZoomed)}
+                width={1920}
+                height={1080}
               />
             </div>
 
@@ -206,16 +225,18 @@ export const ProductImages = ({
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black min-h-[44px] min-w-[44px] touch-manipulation"
                   onClick={handlePrevious}
+                  aria-label="Image précédente"
                 >
                   <ChevronLeft className="h-6 w-6" />
                 </Button>
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black min-h-[44px] min-w-[44px] touch-manipulation"
                   onClick={handleNext}
+                  aria-label="Image suivante"
                 >
                   <ChevronRight className="h-6 w-6" />
                 </Button>
@@ -267,13 +288,15 @@ export const ProductImagesGrid = ({
           >
             {image === '/placeholder-product.png' ? (
               <div className="absolute inset-0 flex items-center justify-center">
-                <ImageIcon className="h-12 w-12 text-muted-foreground/20" />
+                <ImageIcon className="h-12 w-12 text-muted-foreground/20" aria-hidden="true" />
               </div>
             ) : (
-              <img
+              <OptimizedImage
                 src={image}
                 alt={`${productName} - ${index + 1}`}
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                width={400}
+                height={400}
               />
             )}
 
@@ -289,25 +312,16 @@ export const ProductImagesGrid = ({
 
       {/* Bouton "Voir plus" */}
       {!showAll && remainingCount > 0 && (
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={() => setShowAll(true)}
-        >
+        <Button variant="outline" className="w-full" onClick={() => setShowAll(true)}>
           Voir {remainingCount} image{remainingCount > 1 ? 's' : ''} de plus
         </Button>
       )}
 
       {showAll && displayImages.length > maxVisible && (
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={() => setShowAll(false)}
-        >
+        <Button variant="outline" className="w-full" onClick={() => setShowAll(false)}>
           Voir moins
         </Button>
       )}
     </div>
   );
 };
-

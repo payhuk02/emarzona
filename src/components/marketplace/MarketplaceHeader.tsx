@@ -6,33 +6,57 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X, ShoppingBag, Store, UserCircle } from "lucide-react";
 import { ThemeToggle } from "@/components/navigation/ThemeToggle";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
-import payhukLogo from "@/assets/payhuk-logo.png";
+import { usePlatformLogo } from "@/hooks/usePlatformLogo";
 
 const MarketplaceHeader = () => {
   const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const platformLogo = usePlatformLogo();
 
   return (
     <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur-md shadow-soft transition-all duration-300">
       <div className="container mx-auto px-3 sm:px-4 lg:px-6">
         <div className="flex h-14 sm:h-16 items-center justify-between gap-3">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity">
-            <img src={payhukLogo} alt="Payhuk" className="h-7 w-7 sm:h-8 sm:w-8" />
-            <span className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">Payhuk</span>
+          <Link 
+            to="/" 
+            className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity"
+            aria-label="Retour à l'accueil Emarzona"
+          >
+            {platformLogo ? (
+              <img 
+                src={platformLogo} 
+                alt="Logo Emarzona" 
+                width={32}
+                height={32}
+                className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 object-contain"
+                loading="eager"
+              />
+            ) : (
+              <div 
+                className="h-7 w-7 sm:h-8 sm:w-8 bg-primary rounded flex items-center justify-center flex-shrink-0"
+                aria-hidden="true"
+              >
+                <span className="text-xs sm:text-sm font-bold text-primary-foreground">E</span>
+              </div>
+            )}
+            <span className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">Emarzona</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-4 flex-1 justify-center">
-            <Link to="/marketplace">
+          <nav 
+            className="hidden md:flex items-center gap-4 flex-1 justify-center"
+            aria-label="Navigation principale"
+          >
+            <Link to="/marketplace" aria-label="Accéder à la marketplace">
               <Button variant="ghost" size="sm" className="text-foreground hover:text-primary transition-all">
-                <ShoppingBag className="h-4 w-4 mr-2" />
+                <ShoppingBag className="h-4 w-4 mr-2" aria-hidden="true" />
                 {t('nav.marketplace')}
               </Button>
             </Link>
-            <Link to="/dashboard">
+            <Link to="/dashboard" aria-label="Accéder au tableau de bord">
               <Button variant="ghost" size="sm" className="text-foreground hover:text-primary transition-all">
-                <Store className="h-4 w-4 mr-2" />
+                <Store className="h-4 w-4 mr-2" aria-hidden="true" />
                 {t('nav.dashboard')}
               </Button>
             </Link>
@@ -75,8 +99,21 @@ const MarketplaceHeader = () => {
                   {/* Header */}
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-2">
-                      <img src={payhukLogo} alt="Payhuk" className="h-7 w-7" />
-                      <span className="text-xl font-bold">Payhuk</span>
+                      {platformLogo ? (
+                        <img 
+                          src={platformLogo} 
+                          alt="Emarzona" 
+                          width={28}
+                          height={28}
+                          className="h-7 w-7 flex-shrink-0 object-contain"
+                          loading="eager"
+                        />
+                      ) : (
+                        <div className="h-7 w-7 bg-primary rounded flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-bold text-primary-foreground">E</span>
+                        </div>
+                      )}
+                      <span className="text-xl font-bold">Emarzona</span>
                     </div>
                     <Button
                       variant="ghost"
@@ -90,23 +127,47 @@ const MarketplaceHeader = () => {
                   </div>
 
                   {/* Navigation */}
-                  <nav className="flex flex-col gap-2 flex-1">
-                    <Link to="/marketplace" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start h-12 text-base touch-manipulation min-h-[44px] hover:translate-x-1 transition-transform focus-visible:ring-2 focus-visible:ring-primary">
-                        <ShoppingBag className="h-5 w-5 mr-3" />
+                  <nav 
+                    className="flex flex-col gap-2 flex-1"
+                    aria-label="Menu de navigation mobile"
+                  >
+                    <Link 
+                      to="/marketplace" 
+                      onClick={() => setMobileMenuOpen(false)}
+                      aria-label="Accéder à la marketplace"
+                    >
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start h-12 text-base touch-manipulation min-h-[44px] hover:translate-x-1 transition-transform focus-visible:ring-2 focus-visible:ring-primary"
+                      >
+                        <ShoppingBag className="h-5 w-5 mr-3" aria-hidden="true" />
                         {t('nav.marketplace')}
                       </Button>
                     </Link>
-                    <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start h-12 text-base touch-manipulation hover:translate-x-1 transition-transform">
-                        <Store className="h-5 w-5 mr-3" />
+                    <Link 
+                      to="/dashboard" 
+                      onClick={() => setMobileMenuOpen(false)}
+                      aria-label="Accéder au tableau de bord"
+                    >
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start h-12 text-base touch-manipulation min-h-[44px] hover:translate-x-1 transition-transform focus-visible:ring-2 focus-visible:ring-primary"
+                      >
+                        <Store className="h-5 w-5 mr-3" aria-hidden="true" />
                         {t('nav.dashboard')}
                       </Button>
                     </Link>
-                    <div className="h-px bg-border my-4" />
-                    <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start h-12 text-base touch-manipulation hover:translate-x-1 transition-transform">
-                        <UserCircle className="h-5 w-5 mr-3" />
+                    <div className="h-px bg-border my-4" aria-hidden="true" />
+                    <Link 
+                      to="/auth" 
+                      onClick={() => setMobileMenuOpen(false)}
+                      aria-label="Se connecter ou créer un compte"
+                    >
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start h-12 text-base touch-manipulation min-h-[44px] hover:translate-x-1 transition-transform focus-visible:ring-2 focus-visible:ring-primary"
+                      >
+                        <UserCircle className="h-5 w-5 mr-3" aria-hidden="true" />
                         {t('nav.login')}
                       </Button>
                     </Link>

@@ -1,4 +1,4 @@
-# 🛍️ Payhula SaaS Platform
+﻿# 🛍️ Emarzona - Plateforme de ecommerce et marketing
 
 > **Plateforme E-commerce SaaS Haut de Gamme Multi-Produits**  
 > Solution professionnelle pour la vente de produits digitaux, physiques, services et cours en ligne
@@ -10,7 +10,7 @@
 [![Tests](https://img.shields.io/badge/tests-50%2B-green)](./tests)
 [![Security](https://img.shields.io/badge/security-95%2F100-success)](SECURITY.md)
 [![Code Quality](https://img.shields.io/badge/quality-98%2F100-brightgreen)](TYPESCRIPT_STRICT_COMPLETE.md)
-[![Audit](https://img.shields.io/badge/audit-2025--10--30-informational)](AUDIT_COMPLET_PAYHULA_2025_PROFESSIONNEL.md)
+[![Audit](https://img.shields.io/badge/audit-2025--10--30-informational)](docs/audits/AUDIT_COMPLET_PAYHULA_2025_PROFESSIONNEL.md)
 
 ---
 
@@ -31,7 +31,7 @@
 
 ## 🎯 Présentation
 
-**Payhula** est une plateforme SaaS e-commerce moderne et complète permettant aux entrepreneurs et entreprises de vendre **4 types de produits différents** :
+**Emarzona** est une plateforme SaaS e-commerce moderne et complète permettant aux entrepreneurs et entreprises de vendre **4 types de produits différents** :
 
 1. 📦 **Produits Digitaux** - eBooks, logiciels, templates, etc.
 2. 🚚 **Produits Physiques** - Avec gestion d'inventaire et shipping
@@ -192,6 +192,7 @@
 # 1. Cloner le repo
 git clone https://github.com/payhuk02/payhula.git
 cd payhula
+# Note: Le nom du dépôt peut être renommé ultérieurement
 
 # 2. Installer les dépendances
 npm install
@@ -215,9 +216,12 @@ Créer un fichier `.env` à la racine :
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-# Paiements
-VITE_PAYDUNYA_MASTER_KEY=your_paydunya_key
-VITE_MONEROO_API_KEY=your_moneroo_key
+# Paiements (⚠️ IMPORTANT: Configuré dans Supabase Edge Functions)
+# ❌ NE PAS mettre les clés API PayDunya/Moneroo ici - elles sont dans Supabase
+# Les clés API doivent être configurées dans Supabase Dashboard:
+# Settings → Edge Functions → Secrets (pas dans ce fichier .env)
+# Voir: MIGRATION_CLES_API_VERS_SUPABASE.md pour la migration
+# Voir: GUIDE_CONFIGURATION_SUPABASE_EDGE_FUNCTIONS.md pour la configuration complète
 
 # Shipping
 VITE_FEDEX_API_KEY=your_fedex_key
@@ -311,7 +315,7 @@ Les fichiers de production seront dans le dossier `dist/`.
 ### Structure du Projet
 
 ```
-payhula/
+emarzona/
 ├── src/
 │   ├── components/          # Composants React
 │   │   ├── digital/         # Composants produits digitaux
@@ -344,6 +348,7 @@ payhula/
 ### Base de Données
 
 **11 tables principales** pour les cours :
+
 - `online_courses`
 - `course_modules`
 - `course_lessons`
@@ -357,6 +362,7 @@ payhula/
 - `course_instructors`
 
 **6 tables pour les produits digitaux** :
+
 - `digital_products`
 - `digital_product_files`
 - `digital_licenses`
@@ -398,7 +404,7 @@ Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus
 
 ## 👥 Équipe
 
-- **Intelli / payhuk02** - Développement principal
+- **Emarzona Team** - Développement principal
 - **Contributeurs** - Voir [CONTRIBUTORS.md](CONTRIBUTORS.md)
 
 ---
@@ -416,17 +422,17 @@ Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus
 
 ## 📞 Support
 
-- 📧 Email: support@payhula.com
-- 💬 Discord: [Rejoindre notre communauté](https://discord.gg/payhula)
+- 📧 Email: support@emarzona.com
+- 💬 Discord: [Rejoindre notre communauté](https://discord.gg/emarzona)
 - 📝 Issues: [GitHub Issues](https://github.com/payhuk02/payhula/issues)
-- 📚 Docs: [documentation.payhula.com](https://documentation.payhula.com)
+- 📚 Docs: [documentation.emarzona.com](https://documentation.emarzona.com)
 
 ---
 
 <div align="center">
 
-**Fait avec ❤️ par l'équipe Payhula**
+**Fait avec ❤️ par l'équipe Emarzona**
 
-[Site Web](https://payhula.com) • [Documentation](https://docs.payhula.com) • [Demo](https://demo.payhula.com)
+[Site Web](https://emarzona.com) • [Documentation](https://docs.emarzona.com) • [Demo](https://demo.emarzona.com)
 
 </div>

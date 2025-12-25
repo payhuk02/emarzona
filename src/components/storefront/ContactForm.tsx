@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { MobileFormField } from "@/components/ui/mobile-form-field";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Phone, MessageSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useSpaceInputFix } from "@/hooks/useSpaceInputFix";
 
 interface ContactFormProps {
   storeName: string;
@@ -15,6 +17,7 @@ interface ContactFormProps {
 
 const ContactForm = ({ storeName, contactEmail, contactPhone }: ContactFormProps) => {
   const { t } = useTranslation();
+  const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -99,55 +102,58 @@ const ContactForm = ({ storeName, contactEmail, contactPhone }: ContactFormProps
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-sm">Nom complet *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
-              placeholder="Votre nom"
-              className="h-11 touch-manipulation"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm">Email *</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-              placeholder="votre@email.com"
-              className="h-11 touch-manipulation"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="subject" className="text-sm">Sujet *</Label>
-          <Input
-            id="subject"
-            value={formData.subject}
-            onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+          <MobileFormField
+            label="Nom complet"
+            name="name"
+            type="text"
+            value={formData.name}
+            onChange={(value) => setFormData({ ...formData, name: value })}
             required
-            placeholder="Objet de votre message"
-            className="h-11 touch-manipulation"
+            fieldProps={{
+              onKeyDown: handleSpaceKeyDown,
+              placeholder: "Votre nom",
+            }}
+          />
+          <MobileFormField
+            label="Email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={(value) => setFormData({ ...formData, email: value })}
+            required
+            fieldProps={{
+              placeholder: "votre@email.com",
+            }}
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="message" className="text-sm">Message *</Label>
-          <Textarea
-            id="message"
-            value={formData.message}
-            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-            required
-            rows={5}
-            placeholder="Écrivez votre message ici..."
-            className="min-h-[120px] sm:min-h-[150px] touch-manipulation resize-none"
-          />
-        </div>
+        <MobileFormField
+          label="Sujet"
+          name="subject"
+          type="text"
+          value={formData.subject}
+          onChange={(value) => setFormData({ ...formData, subject: value })}
+          required
+          fieldProps={{
+            onKeyDown: handleSpaceKeyDown,
+            placeholder: "Objet de votre message",
+          }}
+        />
+
+        <MobileFormField
+          label="Message"
+          name="message"
+          type="textarea"
+          value={formData.message}
+          onChange={(value) => setFormData({ ...formData, message: value })}
+          required
+          fieldProps={{
+            onKeyDown: handleSpaceKeyDown,
+            rows: 5,
+            placeholder: "Écrivez votre message ici...",
+            className: "min-h-[120px] sm:min-h-[150px] resize-none",
+          }}
+        />
 
         <Button
           type="submit"

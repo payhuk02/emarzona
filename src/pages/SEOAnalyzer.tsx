@@ -1,3 +1,5 @@
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 import { Button } from "@/components/ui/button";
 import { useSEOAnalysis } from "@/hooks/useSEOAnalysis";
 import { SEOOverview } from "@/components/seo/SEOOverview";
@@ -6,9 +8,11 @@ import { Search, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 const SEOAnalyzer = () => {
   const { toast } = useToast();
+  const headerRef = useScrollAnimation<HTMLDivElement>();
   const { data: session } = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
@@ -32,49 +36,53 @@ const SEOAnalyzer = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Container global responsive */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8 animate-fade-in">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            {/* Title & description */}
-            <div className="flex flex-col">
-              <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 flex-wrap">
-                <Search className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full overflow-x-hidden">
+        <AppSidebar />
+        <main className="flex-1 overflow-auto">
+          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+            {/* Header - Responsive & Animated */}
+            <div
+              ref={headerRef}
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+            >
+              <div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                    <Search className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                  </div>
+                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Mon Analyseur SEO
+                  </span>
               </h1>
-              <p className="text-muted-foreground mt-2 text-sm sm:text-base">
+                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
                 Optimisez le référencement de vos pages et produits
               </p>
             </div>
-
-            {/* Bouton d’analyse */}
+              <div className="flex items-center gap-2">
             <Button
               onClick={handleRefresh}
               disabled={isRefetching}
-              variant="outline"
-              className="gap-2 self-start sm:self-auto w-full sm:w-auto"
+                  className="gap-2 h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
               <RefreshCw
-                className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
+                    className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isRefetching ? "animate-spin" : ""}`}
               />
-              <span className="text-sm sm:text-base">Analyser maintenant</span>
+                  <span className="hidden sm:inline text-xs sm:text-sm">Analyser maintenant</span>
+                  <span className="sm:hidden text-xs">Analyser</span>
             </Button>
           </div>
         </div>
 
         {/* Overview Cards */}
-        <div className="mb-8">
           <SEOOverview data={data} isLoading={isLoading} />
-        </div>
 
         {/* Pages List */}
-        <div className="overflow-x-auto">
           <SEOPagesList data={data} isLoading={isLoading} />
         </div>
+        </main>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

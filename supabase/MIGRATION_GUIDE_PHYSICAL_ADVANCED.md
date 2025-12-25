@@ -303,5 +303,5 @@ En cas de problème:
 
 **Date de création:** 29 Octobre 2025  
 **Version:** 1.0  
-**Auteur:** Payhuk Dev Team
+**Auteur:** Emarzona Dev Team
 

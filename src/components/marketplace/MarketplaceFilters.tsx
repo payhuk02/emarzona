@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
@@ -25,20 +25,23 @@ const MarketplaceFilters = ({
   categories,
 }: MarketplaceFiltersProps) => {
   const [open, setOpen] = useState(false);
-  const hasActiveFilters = categoryFilter !== "all" || priceRange !== "all" || sortBy !== "recent";
+  
+  const hasActiveFilters = useMemo(() => {
+    return categoryFilter !== "all" || priceRange !== "all" || sortBy !== "recent";
+  }, [categoryFilter, priceRange, sortBy]);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     onCategoryChange("all");
     onPriceChange("all");
     onSortChange("recent");
-  };
+  }, [onCategoryChange, onPriceChange, onSortChange]);
 
   return (
     <>
       {/* Desktop Filters */}
       <div className="hidden sm:flex flex-wrap gap-3">
         <Select value={categoryFilter} onValueChange={onCategoryChange}>
-          <SelectTrigger className="w-[180px] md:w-[200px] bg-card border-border">
+          <SelectTrigger className="w-full sm:w-[180px] md:w-[200px] bg-card border-border">
             <SelectValue placeholder="Catégorie" />
           </SelectTrigger>
           <SelectContent className="z-50 bg-background">
@@ -52,7 +55,7 @@ const MarketplaceFilters = ({
         </Select>
 
         <Select value={priceRange} onValueChange={onPriceChange}>
-          <SelectTrigger className="w-[180px] md:w-[200px] bg-card border-border">
+          <SelectTrigger className="w-full sm:w-[180px] md:w-[200px] bg-card border-border">
             <SelectValue placeholder="Prix" />
           </SelectTrigger>
           <SelectContent className="z-50 bg-background">
@@ -64,7 +67,7 @@ const MarketplaceFilters = ({
         </Select>
 
         <Select value={sortBy} onValueChange={onSortChange}>
-          <SelectTrigger className="w-[180px] md:w-[200px] bg-card border-border">
+          <SelectTrigger className="w-full sm:w-[180px] md:w-[200px] bg-card border-border">
             <SlidersHorizontal className="h-4 w-4 mr-2" />
             <SelectValue placeholder="Trier par" />
           </SelectTrigger>
@@ -178,4 +181,22 @@ const MarketplaceFilters = ({
   );
 };
 
-export default MarketplaceFilters;
+MarketplaceFilters.displayName = 'MarketplaceFilters';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+const MarketplaceFiltersMemo = React.memo(MarketplaceFilters, (prevProps, nextProps) => {
+  return (
+    prevProps.categoryFilter === nextProps.categoryFilter &&
+    prevProps.priceRange === nextProps.priceRange &&
+    prevProps.sortBy === nextProps.sortBy &&
+    prevProps.categories.length === nextProps.categories.length &&
+    prevProps.categories.every((cat, i) => cat === nextProps.categories[i]) &&
+    prevProps.onCategoryChange === nextProps.onCategoryChange &&
+    prevProps.onPriceChange === nextProps.onPriceChange &&
+    prevProps.onSortChange === nextProps.onSortChange
+  );
+});
+
+MarketplaceFiltersMemo.displayName = 'MarketplaceFilters';
+
+export default MarketplaceFiltersMemo;

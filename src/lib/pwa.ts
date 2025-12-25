@@ -3,6 +3,8 @@
  * Gestion du Service Worker, notifications push, mode offline
  */
 
+import { logger } from './logger';
+
 /**
  * Enregistrer le Service Worker
  */
@@ -13,7 +15,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
         scope: '/',
       });
       
-      console.log('[PWA] Service Worker registered:', registration.scope);
+      logger.info('Service Worker registered', { scope: registration.scope });
       
       // Vérifier les mises à jour
       registration.addEventListener('updatefound', () => {
@@ -22,7 +24,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               // Nouvelle version disponible
-              console.log('[PWA] New version available');
+              logger.info('Service Worker new version available');
               notifyNewVersion();
             }
           });
@@ -31,7 +33,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
       
       return registration;
     } catch (error) {
-      console.error('[PWA] Service Worker registration failed:', error);
+      logger.error('Service Worker registration failed', { error });
       return null;
     }
   }
@@ -56,7 +58,7 @@ export async function updateServiceWorker(): Promise<void> {
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       await registration.update();
-      console.log('[PWA] Service Worker updated');
+      logger.info('Service Worker updated');
     }
   }
 }
@@ -69,7 +71,7 @@ export async function unregisterServiceWorker(): Promise<boolean> {
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       const success = await registration.unregister();
-      console.log('[PWA] Service Worker unregistered:', success);
+      logger.info('Service Worker unregistered', { success });
       return success;
     }
   }
@@ -85,7 +87,7 @@ export async function clearCache(): Promise<void> {
     await Promise.all(
       cacheNames.map((cacheName) => caches.delete(cacheName))
     );
-    console.log('[PWA] Cache cleared');
+    logger.info('PWA cache cleared');
   }
 }
 
@@ -94,7 +96,7 @@ export async function clearCache(): Promise<void> {
  */
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
   if (!('Notification' in window)) {
-    console.warn('[PWA] Notifications not supported');
+    logger.warn('PWA notifications not supported');
     return 'denied';
   }
   
@@ -104,7 +106,7 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   
   if (Notification.permission !== 'denied') {
     const permission = await Notification.requestPermission();
-    console.log('[PWA] Notification permission:', permission);
+    logger.debug('PWA notification permission', { permission });
     return permission;
   }
   
@@ -125,14 +127,14 @@ export async function subscribeToPushNotifications(): Promise<PushSubscription |
       ),
     });
     
-    console.log('[PWA] Push subscription:', subscription);
+    logger.info('PWA push subscription', { subscription });
     
     // Envoyer la subscription au serveur
     await sendSubscriptionToServer(subscription);
     
     return subscription;
   } catch (error) {
-    console.error('[PWA] Error subscribing to push:', error);
+    logger.error('PWA error subscribing to push', { error });
     return null;
   }
 }
@@ -147,13 +149,13 @@ export async function unsubscribeFromPushNotifications(): Promise<boolean> {
     
     if (subscription) {
       await subscription.unsubscribe();
-      console.log('[PWA] Unsubscribed from push');
+      logger.info('PWA unsubscribed from push');
       return true;
     }
     
     return false;
   } catch (error) {
-    console.error('[PWA] Error unsubscribing from push:', error);
+    logger.error('PWA error unsubscribing from push', { error });
     return false;
   }
 }
@@ -164,7 +166,7 @@ export async function unsubscribeFromPushNotifications(): Promise<boolean> {
 async function sendSubscriptionToServer(subscription: PushSubscription): Promise<void> {
   try {
     // TODO: Implémenter l'envoi au backend
-    console.log('[PWA] Sending subscription to server:', subscription);
+    logger.debug('PWA sending subscription to server', { subscription });
     
     // Exemple:
     // await fetch('/api/push/subscribe', {
@@ -173,7 +175,7 @@ async function sendSubscriptionToServer(subscription: PushSubscription): Promise
     //   body: JSON.stringify(subscription),
     // });
   } catch (error) {
-    console.error('[PWA] Error sending subscription:', error);
+    logger.error('PWA error sending subscription', { error });
   }
 }
 
@@ -185,7 +187,7 @@ export async function showNotification(
   options?: NotificationOptions
 ): Promise<void> {
   if (!('Notification' in window)) {
-    console.warn('[PWA] Notifications not supported');
+    logger.warn('PWA notifications not supported');
     return;
   }
   
@@ -231,17 +233,17 @@ export async function registerBackgroundSync(tag: string): Promise<void> {
     const registration = await navigator.serviceWorker.ready;
     if ('sync' in registration) {
       await registration.sync.register(tag);
-      console.log('[PWA] Background sync registered:', tag);
+      logger.info('PWA background sync registered', { tag });
     }
   } catch (error) {
-    console.error('[PWA] Error registering background sync:', error);
+    logger.error('PWA error registering background sync', { error });
   }
 }
 
 /**
  * Envoyer un message au Service Worker
  */
-export function sendMessageToSW(message: any): void {
+export function sendMessageToSW(message: unknown): void {
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage(message);
   }
@@ -270,8 +272,9 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
  * Vérifier si l'app est installée (PWA)
  */
 export function isAppInstalled(): boolean {
+  const navigatorWithStandalone = navigator as typeof navigator & { standalone?: boolean };
   return window.matchMedia('(display-mode: standalone)').matches ||
-         (window.navigator as any).standalone === true;
+         navigatorWithStandalone.standalone === true;
 }
 
 /**

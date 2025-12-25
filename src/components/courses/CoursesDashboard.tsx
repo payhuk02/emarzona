@@ -202,7 +202,7 @@ export const CoursesDashboard: React.FC<CoursesDashboardProps> = ({
               Exporter
             </Button>
           )}
-          <Button variant="outline" size="icon" onClick={onRefresh} disabled={isLoading}>
+          <Button variant="outline" size="icon" onClick={onRefresh} disabled={isLoading} aria-label="Actualiser le tableau de bord">
             <RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
           </Button>
         </div>

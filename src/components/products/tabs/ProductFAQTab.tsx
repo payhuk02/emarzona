@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useSpaceInputFix } from "@/hooks/useSpaceInputFix";
 
 interface ProductFAQTabProps {
   formData: any;
@@ -932,6 +933,7 @@ interface FAQFormProps {
 }
 
 const FAQForm = ({ faq, onSave, onCancel }: FAQFormProps) => {
+  const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const [formData, setFormData] = useState({
     question: faq?.question || "",
     answer: faq?.answer || "",
@@ -978,6 +980,7 @@ const FAQForm = ({ faq, onSave, onCancel }: FAQFormProps) => {
           id="question"
           value={formData.question}
           onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value }))}
+          onKeyDown={handleSpaceKeyDown}
           placeholder="Quelle est votre question ?"
           className={cn(
             "bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400",
@@ -1000,6 +1003,7 @@ const FAQForm = ({ faq, onSave, onCancel }: FAQFormProps) => {
           id="answer"
           value={formData.answer}
           onChange={(e) => setFormData(prev => ({ ...prev, answer: e.target.value }))}
+          onKeyDown={handleSpaceKeyDown}
           placeholder="Réponse détaillée..."
           rows={6}
           className={cn(

@@ -2,6 +2,8 @@
  * Types pour le système de Gift Cards
  */
 
+import type { RecordString } from './common';
+
 export enum GiftCardStatus {
   ACTIVE = 'active',
   REDEEMED = 'redeemed',
@@ -39,7 +41,7 @@ export interface GiftCard {
   applicable_to_stores?: string[] | null;
   can_be_partially_used: boolean;
   auto_activate: boolean;
-  metadata?: Record<string, any>;
+  metadata?: RecordString;
   notes?: string | null;
   times_used: number;
   last_used_at?: string | null;
@@ -71,7 +73,7 @@ export interface GiftCardTransaction {
   description?: string | null;
   reference_number?: string | null;
   user_id?: string | null;
-  metadata?: Record<string, any>;
+  metadata?: RecordString;
   created_at: string;
   
   // Relations (optionnelles)
@@ -111,7 +113,7 @@ export interface CreateGiftCardInput {
   applicable_to_stores?: string[];
   can_be_partially_used?: boolean;
   auto_activate?: boolean;
-  metadata?: Record<string, any>;
+  metadata?: RecordString;
   notes?: string;
 }
 

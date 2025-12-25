@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { XCircle, RefreshCw } from 'lucide-react';
 import * as Sentry from '@sentry/react';
+import { logger } from '@/lib/logger';
 
 interface Props {
   children: React.ReactNode;
@@ -67,7 +68,7 @@ export class FormErrorBoundary extends Component<Props, State> {
       this.props.onError(error, errorInfo);
     }
 
-    console.error(`Form Error (${this.props.formName}):`, error, errorInfo);
+    logger.error(`Form Error (${this.props.formName})`, { error, errorInfo });
   }
 
   handleReset = () => {

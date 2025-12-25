@@ -1,0 +1,426 @@
+/**
+ * Optimisations Mobile - Phase 2 UX
+ * Améliorations spécifiques pour l'expérience mobile
+ */
+
+/* === TOUCH TARGETS === */
+/* Taille minimale 44x44px pour les éléments interactifs (Apple HIG, Material Design) */
+button,
+a,
+input[type='button'],
+input[type='submit'],
+input[type='checkbox'],
+input[type='radio'],
+select {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* === SCROLL SMOOTH === */
+/* Amélioration du scroll sur mobile */
+@media (max-width: 768px) {
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body {
+    overscroll-behavior-y: contain;
+  }
+}
+
+/* === TEXT SIZE === */
+/* Taille de texte optimale pour mobile */
+@media (max-width: 768px) {
+  body {
+    font-size: 16px; /* Évite le zoom automatique sur iOS */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: 16px; /* Évite le zoom automatique sur iOS */
+  }
+}
+
+/* === VIEWPORT FIXES === */
+/* Corrections pour les navigateurs mobiles */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari */
+  .mobile-fix {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* === SAFE AREA === */
+/* Support pour les zones sûres (notch, etc.) */
+@supports (padding: max(0px)) {
+  .safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .safe-area-left {
+    padding-left: max(1rem, env(safe-area-inset-left));
+  }
+
+  .safe-area-right {
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+}
+
+/* === MODAL MOBILE === */
+/* Modales optimisées pour mobile */
+@media (max-width: 768px) {
+  [role='dialog'],
+  [role='alertdialog'] {
+    max-height: 90vh;
+    max-width: 100vw;
+    margin: 0;
+    border-radius: 1rem 1rem 0 0;
+  }
+
+  /* Animation slide-up pour mobile */
+  .modal-mobile-enter {
+    transform: translateY(100%);
+  }
+
+  .modal-mobile-enter-active {
+    transform: translateY(0);
+    transition: transform 0.3s ease-out;
+  }
+}
+
+/* === NAVIGATION MOBILE === */
+/* Navigation optimisée pour mobile */
+@media (max-width: 768px) {
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--background);
+    backdrop-filter: blur(10px);
+  }
+
+  /* Exception pour la barre de navigation contextuelle en bas */
+  nav.context-bottom-nav {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    z-index: 110 !important;
+  }
+
+  /* Bottom navigation pour mobile */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--background);
+    border-top: 1px solid var(--border);
+    padding: 0.5rem 0;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    z-index: 100;
+  }
+}
+
+/* === CARDS MOBILE === */
+/* Cartes optimisées pour mobile */
+@media (max-width: 768px) {
+  .card-mobile {
+    margin: 0.5rem;
+    border-radius: 0.75rem;
+  }
+
+  .card-mobile:active {
+    transform: scale(0.98);
+    transition: transform 0.1s;
+  }
+}
+
+/* === FORMS MOBILE === */
+/* Formulaires optimisés pour mobile */
+@media (max-width: 768px) {
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='number'],
+  input[type='tel'],
+  input[type='url'],
+  textarea,
+  select {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 16px; /* Évite le zoom automatique */
+    border-radius: 0.5rem;
+  }
+
+  /* Labels au-dessus des inputs sur mobile */
+  .form-group-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* === BUTTONS MOBILE === */
+/* Boutons optimisés pour mobile */
+@media (max-width: 768px) {
+  .btn-mobile {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    min-height: 48px; /* Touch target optimal */
+  }
+
+  .btn-mobile:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+/* === IMAGES MOBILE === */
+/* Images optimisées pour mobile */
+@media (max-width: 768px) {
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Lazy loading pour mobile */
+  img[loading='lazy'] {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  img[loading='lazy'].loaded {
+    opacity: 1;
+  }
+}
+
+/* === TABLES MOBILE === */
+/* Tables optimisées pour mobile */
+@media (max-width: 768px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Stack table sur mobile */
+  .table-mobile-stack {
+    display: block;
+  }
+
+  .table-mobile-stack thead {
+    display: none;
+  }
+
+  .table-mobile-stack tbody,
+  .table-mobile-stack tr,
+  .table-mobile-stack td {
+    display: block;
+    width: 100%;
+  }
+
+  .table-mobile-stack td {
+    text-align: right;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .table-mobile-stack td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: 600;
+  }
+}
+
+/* === LOADING STATES MOBILE === */
+/* États de chargement optimisés pour mobile */
+@media (max-width: 768px) {
+  .skeleton-mobile {
+    border-radius: 0.5rem;
+    margin: 0.5rem 0;
+  }
+
+  .loading-spinner-mobile {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+/* === SCROLLBAR HIDE === */
+/* Masquer la scrollbar tout en gardant le scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE et Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari et Opera */
+}
+
+/* === SCROLLBAR PROFESSIONNELLE POUR ONGLET COMMANDES === */
+/* Barre de défilement horizontale visible et stylisée pour l'onglet Commandes - Version Professionnelle */
+.scrollbar-orders {
+  scrollbar-width: thin; /* Firefox - barre fine */
+  scrollbar-color: rgb(168 85 247 / 0.7) rgb(0 0 0 / 0.08); /* Firefox - thumb et track améliorés */
+  /* Momentum scrolling pour iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+.scrollbar-orders::-webkit-scrollbar {
+  height: 10px; /* Hauteur de la barre de défilement horizontale - Augmentée pour meilleure visibilité */
+}
+
+.scrollbar-orders::-webkit-scrollbar-track {
+  background: linear-gradient(
+    to right,
+    rgb(0 0 0 / 0.03),
+    rgb(0 0 0 / 0.05),
+    rgb(0 0 0 / 0.03)
+  ); /* Gradient subtil pour la piste */
+  border-radius: 5px;
+  margin: 2px 0;
+}
+
+.scrollbar-orders::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    to right,
+    rgb(168 85 247 / 0.4),
+    rgb(168 85 247 / 0.7),
+    rgb(168 85 247 / 0.4)
+  ); /* Gradient pour le curseur */
+  border-radius: 5px;
+  border: 1px solid rgb(168 85 247 / 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgb(168 85 247 / 0.2);
+}
+
+.scrollbar-orders::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    to right,
+    rgb(168 85 247 / 0.6),
+    rgb(168 85 247 / 0.9),
+    rgb(168 85 247 / 0.6)
+  ); /* Gradient plus intense au survol */
+  box-shadow: 0 2px 6px rgb(168 85 247 / 0.4);
+  transform: scaleY(1.1);
+}
+
+.scrollbar-orders::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(
+    to right,
+    rgb(147 51 234 / 0.7),
+    rgb(168 85 247 / 1),
+    rgb(147 51 234 / 0.7)
+  ); /* Gradient encore plus intense au clic */
+  box-shadow: 0 1px 3px rgb(168 85 247 / 0.5);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .scrollbar-orders {
+    scrollbar-color: rgb(168 85 247 / 0.8) rgb(255 255 255 / 0.05);
+  }
+
+  .scrollbar-orders::-webkit-scrollbar-track {
+    background: linear-gradient(
+      to right,
+      rgb(255 255 255 / 0.02),
+      rgb(255 255 255 / 0.05),
+      rgb(255 255 255 / 0.02)
+    );
+  }
+}
+
+/* === PERFORMANCE MOBILE === */
+/* Optimisations de performance pour mobile */
+@media (max-width: 768px) {
+  /*
+   * ⚠️ PERF: éviter les overrides globaux sur `*` avec `!important`
+   * Ça force des recalculs de style massifs et peut dégrader le scroll / input latency.
+   * On garde des optimisations ciblées ci-dessous et le mode "reduce-motion-mobile" si besoin.
+   */
+
+  /* Désactiver les animations complexes sur mobile */
+  .reduce-motion-mobile *,
+  .reduce-motion-mobile *::before,
+  .reduce-motion-mobile *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  /* Désactiver les animations de hover sur mobile (pas de hover sur tactile) */
+  @media (hover: none) {
+    *:hover {
+      transform: none !important;
+      transition: none !important;
+    }
+
+    .hover-lift:hover,
+    .hover-scale:hover,
+    .hover-glow:hover {
+      transform: none !important;
+      box-shadow: none !important;
+    }
+  }
+
+  /* Optimiser les animations de scroll sur mobile */
+  .animate-on-scroll {
+    animation-duration: 0.3s !important;
+  }
+
+  /* Réduire les animations de skeleton */
+  .skeleton,
+  .skeleton-dark {
+    animation-duration: 1s !important;
+  }
+
+  /* Réduire les animations de pulse */
+  .animate-pulse {
+    animation-duration: 2s !important;
+  }
+
+  /* Optimiser les transitions de modales sur mobile */
+  .modal-content-enter-active,
+  .modal-content-exit-active {
+    transition-duration: 0.2s !important;
+  }
+
+  /* Optimiser les transitions de toasts sur mobile */
+  .toast-enter-active,
+  .toast-exit-active {
+    transition-duration: 0.2s !important;
+  }
+}
+
+/* === ACCESSIBILITY MOBILE === */
+/* Améliorations d'accessibilité mobile */
+@media (max-width: 768px) {
+  /* Focus visible amélioré sur mobile */
+  *:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  /* Skip link visible sur mobile */
+  .skip-link:focus {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1000;
+    padding: 0.75rem 1.5rem;
+    background: var(--primary);
+    color: white;
+    border-radius: 0.5rem;
+  }
+}

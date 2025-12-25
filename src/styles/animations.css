@@ -106,6 +106,18 @@
   }
 }
 
+@keyframes wave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-10px);
+  }
+  75% {
+    transform: translateY(10px);
+  }
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -163,6 +175,10 @@
   animation: shimmer 2s infinite linear;
 }
 
+.animate-wave {
+  animation: wave 1.5s ease-in-out infinite;
+}
+
 /* Animation au scroll */
 .animate-on-scroll {
   opacity: 0;
@@ -196,30 +212,47 @@
   animation-delay: 500ms;
 }
 
-/* Hover effects */
+/* Hover effects - Optimisés avec GPU acceleration */
 .hover-lift {
   transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  will-change: transform;
+  transform: translateZ(0); /* Force GPU acceleration */
 }
 
 .hover-lift:hover {
-  transform: translateY(-4px);
+  transform: translateY(-4px) translateZ(0);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.hover-lift:not(:hover) {
+  will-change: auto; /* Réinitialiser après animation */
 }
 
 .hover-scale {
   transition: transform 0.2s ease-out;
+  will-change: transform;
+  transform: translateZ(0); /* Force GPU acceleration */
 }
 
 .hover-scale:hover {
-  transform: scale(1.05);
+  transform: scale(1.05) translateZ(0);
+}
+
+.hover-scale:not(:hover) {
+  will-change: auto; /* Réinitialiser après animation */
 }
 
 .hover-glow {
   transition: box-shadow 0.3s ease-out;
+  will-change: box-shadow;
 }
 
 .hover-glow:hover {
   box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+}
+
+.hover-glow:not(:hover) {
+  will-change: auto; /* Réinitialiser après animation */
 }
 
 /* Skeleton loading */
@@ -360,14 +393,20 @@
   animation: spin-slow 1s linear infinite;
 }
 
-/* Card hover effect */
+/* Card hover effect - Optimisé avec GPU acceleration */
 .card-hover {
   transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  will-change: transform;
+  transform: translateZ(0); /* Force GPU acceleration */
 }
 
 .card-hover:hover {
-  transform: translateY(-4px) scale(1.02);
+  transform: translateY(-4px) scale(1.02) translateZ(0);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+.card-hover:not(:hover) {
+  will-change: auto; /* Réinitialiser après animation */
 }
 
 /* Image zoom effect */

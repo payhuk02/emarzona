@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 interface VideoUploaderProps {
   onVideoUploaded: (videoData: {
@@ -75,7 +76,7 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
   // Extraire l'ID Google Drive et convertir en URL embed
   const convertGoogleDriveUrl = (url: string): string => {
     // Format 1: https://drive.google.com/file/d/{FILE_ID}/view
-    let match = url.match(/\/file\/d\/([^\/]+)/);
+    let match = url.match(/\/file\/d\/([^/]+)/);
     if (match) {
       return `https://drive.google.com/file/d/${match[1]}/preview`;
     }
@@ -170,7 +171,7 @@ export const VideoUploader = ({ onVideoUploaded, onCancel, currentVideo }: Video
       });
 
     } catch (error: any) {
-      console.error('Erreur upload:', error);
+      logger.error('Erreur upload', { error, fileName: selectedFile?.name });
       setError(error.message || 'Erreur lors de l\'upload de la vidéo');
       toast({
         title: '❌ Erreur d\'upload',

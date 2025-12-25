@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useSpaceInputFix } from "@/hooks/useSpaceInputFix";
 import { 
   Plus, 
   Trash2, 
@@ -386,6 +387,7 @@ interface CustomFieldFormProps {
 }
 
 const CustomFieldForm = ({ field, onSave, onCancel }: CustomFieldFormProps) => {
+  const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const [formData, setFormData] = useState({
     name: field?.name || "",
     label: field?.label || "",
@@ -457,6 +459,7 @@ const CustomFieldForm = ({ field, onSave, onCancel }: CustomFieldFormProps) => {
             id="name"
             value={formData.name}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            onKeyDown={handleSpaceKeyDown}
             placeholder="field_name"
           />
           <p className="text-xs text-gray-500 mt-1">Nom technique (sans espaces)</p>
@@ -468,6 +471,7 @@ const CustomFieldForm = ({ field, onSave, onCancel }: CustomFieldFormProps) => {
             id="label"
             value={formData.label}
             onChange={(e) => setFormData(prev => ({ ...prev, label: e.target.value }))}
+            onKeyDown={handleSpaceKeyDown}
             placeholder="Nom du champ"
           />
           <p className="text-xs text-gray-500 mt-1">Texte affiché à l'utilisateur</p>
@@ -496,6 +500,7 @@ const CustomFieldForm = ({ field, onSave, onCancel }: CustomFieldFormProps) => {
           id="description"
           value={formData.description}
           onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          onKeyDown={handleSpaceKeyDown}
           placeholder="Description du champ..."
           rows={2}
         />
@@ -507,6 +512,7 @@ const CustomFieldForm = ({ field, onSave, onCancel }: CustomFieldFormProps) => {
           id="placeholder"
           value={formData.placeholder}
           onChange={(e) => setFormData(prev => ({ ...prev, placeholder: e.target.value }))}
+          onKeyDown={handleSpaceKeyDown}
           placeholder="Texte d'aide..."
         />
       </div>
@@ -520,6 +526,7 @@ const CustomFieldForm = ({ field, onSave, onCancel }: CustomFieldFormProps) => {
                 <Input
                   value={option}
                   onChange={(e) => updateOption(index, e.target.value)}
+                  onKeyDown={handleSpaceKeyDown}
                   placeholder={`Option ${index + 1}`}
                 />
                 <Button

@@ -1,7 +1,7 @@
 /**
  * Create Physical Product Wizard - Professional & Optimized V2
  * Date: 2025-01-01
- * 
+ *
  * Wizard professionnel en 8 étapes pour produits physiques
  * Version optimisée avec design professionnel, responsive et fonctionnalités avancées
  */
@@ -47,18 +47,28 @@ import { PhysicalAffiliateSettings } from './PhysicalAffiliateSettings';
 import { PhysicalSEOAndFAQs } from './PhysicalSEOAndFAQs';
 import { PhysicalPreview } from './PhysicalPreview';
 import { PaymentOptionsForm } from '../shared/PaymentOptionsForm';
+import { ProductStatisticsDisplaySettings } from '../shared/ProductStatisticsDisplaySettings';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
+import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { cn } from '@/lib/utils';
-import type { PhysicalProductFormData } from '@/types/physical-product';
-
-// Template system
-import { TemplateSelector } from '@/components/templates/TemplateSelector';
-import { useTemplateApplier } from '@/hooks/useTemplateApplier';
-import type { ProductTemplate } from '@/types/templates';
+import type {
+  PhysicalProductFormData,
+  PhysicalProductFormDataUpdate,
+  PhysicalProductVariant,
+  PhysicalProductAffiliateSettings,
+  PhysicalProductPaymentOptions,
+} from '@/types/physical-product';
+import {
+  validateWithZod,
+  formatValidators,
+  getFieldError,
+  physicalProductSchema,
+  physicalProductStep1Schema,
+} from '@/lib/wizard-validation';
 
 const STEPS = [
   {
@@ -145,10 +155,6 @@ export const CreatePhysicalProductWizard = ({
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
   const [currentStep, setCurrentStep] = useState(1);
-  
-  // Template system
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
-  const { applyTemplate } = useTemplateApplier();
 
   // Auto-save
   const [isAutoSaving, setIsAutoSaving] = useState(false);
@@ -158,23 +164,41 @@ export const CreatePhysicalProductWizard = ({
   const headerRef = useScrollAnimation<HTMLDivElement>();
   const stepsRef = useScrollAnimation<HTMLDivElement>();
   const contentRef = useScrollAnimation<HTMLDivElement>();
-  
-  const [formData, setFormData] = useState<Partial<any>>({
+
+  // Use props or fallback to hook store
+  const storeId = propsStoreId || store?.id;
+
+  // Server validation hook
+  const {
+    validateSlug,
+    validateSku,
+    validatePhysicalProduct: validatePhysicalProductServer,
+    isValidating: isValidatingServer,
+    serverErrors,
+    clearServerErrors,
+  } = useWizardServerValidation({
+    storeId: storeId || undefined,
+    showToasts: true,
+  });
+
+  const [formData, setFormData] = useState<Partial<PhysicalProductFormData>>({
     // Basic Info (Step 1)
     name: '',
+    slug: '',
     description: '',
+    short_description: '',
     price: 0,
     compare_at_price: null,
     cost_per_item: null,
     images: [],
     category_id: null,
     tags: [],
-    
+
     // Variants (Step 2)
     has_variants: false,
     variants: [],
     options: [],
-    
+
     // Inventory (Step 3)
     track_inventory: true,
     continue_selling_when_out_of_stock: false,
@@ -182,7 +206,7 @@ export const CreatePhysicalProductWizard = ({
     quantity: 0,
     sku: '',
     barcode: '',
-    
+
     // Shipping (Step 4)
     requires_shipping: true,
     weight: null,
@@ -195,7 +219,7 @@ export const CreatePhysicalProductWizard = ({
     },
     shipping_class: null,
     free_shipping: false,
-    
+
     // Affiliation (Step 5)
     affiliate: {
       enabled: false,
@@ -208,7 +232,7 @@ export const CreatePhysicalProductWizard = ({
       require_approval: false,
       terms_and_conditions: '',
     },
-    
+
     // SEO & FAQs (Step 6)
     seo: {
       meta_title: '',
@@ -219,16 +243,24 @@ export const CreatePhysicalProductWizard = ({
       og_image: '',
     },
     faqs: [],
-    
+
     // Payment Options (Step 8)
     payment: {
       payment_type: 'full', // 'full' | 'percentage' | 'delivery_secured'
       percentage_rate: 30, // Pour paiement partiel (10-90%)
     },
-    
+
     // Size Chart (Step 5)
     size_chart_id: null as string | null,
-    
+
+    // Statistics Display Settings
+    hide_purchase_count: false,
+    hide_likes_count: false,
+    hide_recommendations_count: false,
+    hide_downloads_count: false,
+    hide_reviews_count: false,
+    hide_rating: false,
+
     // Meta
     is_active: true,
   });
@@ -239,19 +271,54 @@ export const CreatePhysicalProductWizard = ({
   /**
    * Update form data with auto-save
    */
-  const handleUpdateFormData = useCallback((data: any) => {
+  const handleUpdateFormData = useCallback((data: PhysicalProductFormDataUpdate) => {
     setFormData(prev => {
-      const newData = { ...prev, ...data };
-      
+      // Merge nested objects properly (affiliate, payment, etc.)
+      const newData = { ...prev };
+
+      // Handle affiliate updates
+      if (data.affiliate !== undefined) {
+        // Si prev.affiliate existe, l'utiliser comme base, sinon utiliser les valeurs par défaut
+        const defaultAffiliate: PhysicalProductAffiliateSettings = {
+          enabled: false,
+          commission_rate: 10,
+          commission_type: 'percentage',
+          fixed_commission_amount: 0,
+          cookie_duration_days: 30,
+          min_order_amount: 0,
+          allow_self_referral: false,
+          require_approval: false,
+          terms_and_conditions: '',
+        };
+        // Fusionner : prev.affiliate (ou defaults) -> data.affiliate (le dernier gagne)
+        const baseAffiliate = prev.affiliate || defaultAffiliate;
+        newData.affiliate = {
+          ...baseAffiliate,
+          ...data.affiliate,
+        } as PhysicalProductAffiliateSettings;
+      }
+
+      // Handle payment updates
+      if (data.payment !== undefined) {
+        newData.payment = { ...prev.payment, ...data.payment } as PhysicalProductPaymentOptions;
+      }
+
+      // Handle other updates
+      Object.keys(data).forEach(key => {
+        if (key !== 'affiliate' && key !== 'payment') {
+          (newData as Record<string, unknown>)[key] = (data as Record<string, unknown>)[key];
+        }
+      });
+
       // Auto-save after 2 seconds of inactivity
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
       }
-      
+
       autoSaveTimeoutRef.current = setTimeout(() => {
         handleAutoSave(newData);
       }, 2000);
-      
+
       return newData;
     });
   }, []);
@@ -259,139 +326,236 @@ export const CreatePhysicalProductWizard = ({
   /**
    * Auto-save draft
    */
-  const handleAutoSave = useCallback(async (data?: any) => {
-    const dataToSave = data || formData;
-    
-    // Ne pas auto-save si pas de nom
-    if (!dataToSave.name || dataToSave.name.trim() === '') {
-      return;
-    }
+  const handleAutoSave = useCallback(
+    async (data?: PhysicalProductFormData) => {
+      const dataToSave = data || formData;
 
-    setIsAutoSaving(true);
-    try {
-      // Sauvegarder dans localStorage pour l'instant
-      localStorage.setItem('physical-product-draft', JSON.stringify(dataToSave));
-      logger.info('Brouillon produit physique auto-sauvegardé', { step: currentStep });
-    } catch (error) {
-      console.error('Auto-save error:', error);
-    } finally {
-      setIsAutoSaving(false);
-    }
-  }, [formData, currentStep]);
+      // Ne pas auto-save si pas de nom
+      if (!dataToSave.name || dataToSave.name.trim() === '') {
+        return;
+      }
+
+      setIsAutoSaving(true);
+      try {
+        // Sauvegarder dans localStorage pour l'instant
+        try {
+          localStorage.setItem('physical-product-draft', JSON.stringify(dataToSave));
+        } catch {
+          // ignore (quota, mode privé, etc.)
+        }
+        logger.info('Brouillon produit physique auto-sauvegardé', { step: currentStep });
+      } catch (error) {
+        logger.error('Auto-save error', { error, step: currentStep });
+      } finally {
+        setIsAutoSaving(false);
+      }
+    },
+    [formData, currentStep]
+  );
 
   /**
    * Load draft from localStorage
    */
   useEffect(() => {
-    const savedDraft = localStorage.getItem('physical-product-draft');
+    let savedDraft: string | null = null;
+    try {
+      savedDraft = localStorage.getItem('physical-product-draft');
+    } catch {
+      savedDraft = null;
+    }
     if (savedDraft) {
       try {
-        const draft = JSON.parse(savedDraft);
-        setFormData(draft);
+        const draft = JSON.parse(savedDraft) as unknown;
+        if (draft && typeof draft === 'object') {
+          setFormData(draft as PhysicalProductFormData);
+        }
         logger.info('Brouillon produit physique chargé depuis localStorage');
       } catch (error) {
-        console.error('Error loading draft:', error);
+        logger.error('Error loading draft', { error });
+        try {
+          localStorage.removeItem('physical-product-draft');
+        } catch {
+          // ignore
+        }
       }
     }
   }, []);
 
   /**
-   * Handle template selection
+   * Validate current step avec validation améliorée (client + serveur)
    */
-  const handleTemplateSelect = useCallback((template: ProductTemplate) => {
-    try {
-      const updatedData = applyTemplate(template, formData, {
-        mergeMode: 'smart', // Ne remplace que les champs vides
-      });
-      
-      setFormData(updatedData);
-      setShowTemplateSelector(false);
-      
-      logger.info('Template appliqué au produit physique', { templateName: template.name });
-      
-      toast({
-        title: '✨ Template appliqué !',
-        description: `Le template "${template.name}" a été appliqué avec succès. Personnalisez maintenant votre produit.`,
-      });
-      
-      // Optionnel : passer à l'étape 1 si on n'y est pas déjà
-      if (currentStep !== 1) {
-        setCurrentStep(1);
+  const validateStep = useCallback(
+    async (step: number): Promise<boolean> => {
+      const errors: string[] = [];
+
+      // Réinitialiser les erreurs serveur
+      clearServerErrors();
+
+      switch (step) {
+        case 1: {
+          // 1. Validation client avec Zod - SEULEMENT les champs de l'étape 1
+          // Transformer les chaînes vides en undefined pour les champs optionnels
+          const step1Data = {
+            name: formData.name,
+            slug: formData.slug?.trim() || undefined,
+            short_description: formData.short_description?.trim() || undefined,
+            description: formData.description?.trim() || undefined,
+            price: formData.price,
+            // Ne pas inclure sku, weight, quantity car ce sont des champs des étapes suivantes
+          };
+
+          const result = validateWithZod(physicalProductStep1Schema, step1Data);
+
+          if (!result.valid) {
+            const nameError = getFieldError(result.errors, 'name');
+            const priceError = getFieldError(result.errors, 'price');
+            const slugError = getFieldError(result.errors, 'slug');
+            const shortDescriptionError = getFieldError(result.errors, 'short_description');
+            const descriptionError = getFieldError(result.errors, 'description');
+
+            if (nameError) errors.push(nameError);
+            if (priceError) errors.push(priceError);
+            if (slugError) errors.push(slugError);
+            if (shortDescriptionError) errors.push(shortDescriptionError);
+            if (descriptionError) errors.push(descriptionError);
+          }
+
+          // 3. Validation images
+          if (!formData.images || formData.images.length === 0) {
+            errors.push(t('products.errors.imageRequired', 'Au moins une image est requise'));
+          }
+
+          // Si erreurs client, arrêter ici
+          if (errors.length > 0) {
+            setValidationErrors(prev => ({ ...prev, [step]: errors }));
+            return false;
+          }
+
+          // 4. Validation serveur (unicité slug uniquement pour l'étape 1)
+          if (storeId) {
+            const serverResult = await validatePhysicalProductServer({
+              name: formData.name,
+              slug: formData.slug,
+              price: formData.price,
+              // Ne pas valider SKU, weight, quantity à l'étape 1
+              sku: undefined,
+              weight: undefined,
+              quantity: undefined,
+            });
+
+            if (!serverResult.valid) {
+              // Les erreurs sont déjà affichées dans le hook via toast
+              // Mais on les ajoute aussi aux erreurs de validation
+              if (serverResult.errors) {
+                serverResult.errors.forEach(err => {
+                  errors.push(err.message);
+                });
+              }
+              logger.warn('Validation serveur échouée - Étape 1', { errors: serverResult.errors });
+              setValidationErrors(prev => ({ ...prev, [step]: errors }));
+              return false;
+            }
+
+            // Validation slug spécifique si fourni
+            if (formData.slug) {
+              const slugValid = await validateSlug(formData.slug);
+              if (!slugValid) {
+                errors.push(serverErrors.slug || 'Slug invalide');
+                setValidationErrors(prev => ({ ...prev, [step]: errors }));
+                return false;
+              }
+            }
+
+            // Validation SKU spécifique si fourni
+            if (formData.sku) {
+              const skuValid = await validateSku(formData.sku);
+              if (!skuValid) {
+                errors.push(serverErrors.sku || 'SKU invalide');
+                setValidationErrors(prev => ({ ...prev, [step]: errors }));
+                return false;
+              }
+            }
+          }
+
+          break;
+        }
+        case 2:
+          if (formData.has_variants) {
+            if (!formData.options || formData.options.length === 0) {
+              errors.push(
+                t(
+                  'products.errors.variantsOptionsRequired',
+                  'Au moins une option est requise pour les variantes'
+                )
+              );
+            }
+            if (!formData.variants || formData.variants.length === 0) {
+              errors.push(
+                t('products.errors.variantsRequired', 'Au moins une variante est requise')
+              );
+            }
+          }
+          break;
+
+        case 3:
+          if (formData.track_inventory) {
+            if (!formData.sku?.trim())
+              errors.push(t('products.errors.skuRequired', 'Le SKU est requis'));
+            if (formData.quantity === undefined || formData.quantity < 0) {
+              errors.push(
+                t('products.errors.quantityRequired', 'La quantité en stock est requise')
+              );
+            }
+          }
+          break;
+
+        case 4:
+          if (formData.requires_shipping) {
+            if (!formData.weight || formData.weight <= 0) {
+              errors.push(
+                t(
+                  'products.errors.weightRequired',
+                  'Le poids est requis pour les produits avec expédition'
+                )
+              );
+            }
+          }
+          break;
+
+        case 5:
+        case 6:
+        case 7:
+          // Optional steps
+          break;
       }
-    } catch (error: any) {
-      logger.error('Erreur lors de l\'application du template', error);
-      toast({
-        title: '❌ Erreur',
-        description: error.message || 'Impossible d\'appliquer le template',
-        variant: 'destructive',
-      });
-    }
-  }, [formData, currentStep, applyTemplate, toast]);
 
-  /**
-   * Validate current step
-   */
-  const validateStep = useCallback((step: number): boolean => {
-    const errors: string[] = [];
+      setValidationErrors(prev => ({ ...prev, [step]: errors }));
+      const isValid = errors.length === 0;
 
-    switch (step) {
-      case 1:
-        if (!formData.name?.trim()) errors.push(t('products.errors.nameRequired', 'Le nom est requis'));
-        if (!formData.description?.trim()) errors.push(t('products.errors.descriptionRequired', 'La description est requise'));
-        if (!formData.price || formData.price <= 0) errors.push(t('products.errors.priceRequired', 'Le prix doit être supérieur à 0'));
-        if (!formData.images || formData.images.length === 0) errors.push(t('products.errors.imageRequired', 'Au moins une image est requise'));
-        break;
+      if (!isValid) {
+        logger.warn('Validation échouée', { step, errors });
+      }
 
-      case 2:
-        if (formData.has_variants) {
-          if (!formData.options || formData.options.length === 0) {
-            errors.push(t('products.errors.variantsOptionsRequired', 'Au moins une option est requise pour les variantes'));
-          }
-          if (!formData.variants || formData.variants.length === 0) {
-            errors.push(t('products.errors.variantsRequired', 'Au moins une variante est requise'));
-          }
-        }
-        break;
-
-      case 3:
-        if (formData.track_inventory) {
-          if (!formData.sku?.trim()) errors.push(t('products.errors.skuRequired', 'Le SKU est requis'));
-          if (formData.quantity === undefined || formData.quantity < 0) {
-            errors.push(t('products.errors.quantityRequired', 'La quantité en stock est requise'));
-          }
-        }
-        break;
-
-      case 4:
-        if (formData.requires_shipping) {
-          if (!formData.weight || formData.weight <= 0) {
-            errors.push(t('products.errors.weightRequired', 'Le poids est requis pour les produits avec expédition'));
-          }
-        }
-        break;
-
-      case 5:
-      case 6:
-      case 7:
-        // Optional steps
-        break;
-    }
-
-    setValidationErrors(prev => ({ ...prev, [step]: errors }));
-    const isValid = errors.length === 0;
-    
-    if (!isValid) {
-      logger.warn('Validation échouée', { step, errors });
-    }
-    
-    return isValid;
-  }, [formData, t]);
+      return isValid;
+    },
+    [
+      formData,
+      t,
+      storeId,
+      validatePhysicalProductServer,
+      validateSlug,
+      validateSku,
+      serverErrors,
+      clearServerErrors,
+    ]
+  );
 
   /**
    * Navigation handlers
    */
-  const handleNext = useCallback(() => {
-    if (validateStep(currentStep)) {
+  const handleNext = useCallback(async () => {
+    const isValid = await validateStep(currentStep);
+    if (isValid) {
       const nextStepNum = currentStep + 1;
       setCurrentStep(nextStepNum);
       logger.info('Navigation vers étape suivante', { from: currentStep, to: nextStepNum });
@@ -399,7 +563,10 @@ export const CreatePhysicalProductWizard = ({
     } else {
       toast({
         title: t('products.errors.validationTitle', 'Erreurs de validation'),
-        description: t('products.errors.validationDesc', 'Veuillez corriger les erreurs avant de continuer'),
+        description: t(
+          'products.errors.validationDesc',
+          'Veuillez corriger les erreurs avant de continuer'
+        ),
         variant: 'destructive',
       });
     }
@@ -414,14 +581,17 @@ export const CreatePhysicalProductWizard = ({
     }
   }, [currentStep]);
 
-  const handleStepClick = useCallback((stepId: number) => {
-    // Permettre de revenir en arrière, mais valider avant d'avancer
-    if (stepId < currentStep || validateStep(currentStep)) {
-      setCurrentStep(stepId);
-      logger.info('Navigation directe vers étape', { to: stepId });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [currentStep, validateStep]);
+  const handleStepClick = useCallback(
+    (stepId: number) => {
+      // Permettre de revenir en arrière, mais valider avant d'avancer
+      if (stepId < currentStep || validateStep(currentStep)) {
+        setCurrentStep(stepId);
+        logger.info('Navigation directe vers étape', { to: stepId });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+    [currentStep, validateStep]
+  );
 
   /**
    * Keyboard shortcuts
@@ -457,57 +627,106 @@ export const CreatePhysicalProductWizard = ({
   /**
    * Helper function to save physical product
    */
-  const savePhysicalProduct = useCallback(async (isDraft: boolean) => {
-    if (!store) {
-      throw new Error(t('products.errors.noStore', 'Aucune boutique trouvée'));
-    }
+  const savePhysicalProduct = useCallback(
+    async (isDraft: boolean) => {
+      if (!store) {
+        throw new Error(t('products.errors.noStore', 'Aucune boutique trouvée'));
+      }
 
-    // 1. Generate slug from name
-    const slug = formData.name
-      ?.toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '') || 'product';
+      // 1. Generate slug from name and ensure uniqueness
+      // Utiliser le slug du formulaire s'il est fourni, sinon générer depuis le nom
+      let slug =
+        formData.slug?.trim() ||
+        formData.name
+          ?.toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '') ||
+        'product';
 
-    // 2. Create base product avec SEO
-    const { data: product, error: productError } = await supabase
-      .from('products')
-      .insert({
-        store_id: store.id,
-        name: formData.name,
-        slug,
-        description: formData.description,
-        price: formData.price || 0,
-        currency: 'XOF',
-        product_type: 'physical',
-        category_id: formData.category_id,
-        image_url: formData.images?.[0] || null,
-        images: formData.images || [],
-        // SEO fields
-        meta_title: formData.seo?.meta_title,
-        meta_description: formData.seo?.meta_description,
-        meta_keywords: formData.seo?.meta_keywords,
-        og_title: formData.seo?.og_title,
-        og_description: formData.seo?.og_description,
-        og_image: formData.seo?.og_image,
-        // FAQs
-        faqs: formData.faqs || [],
-        // Payment Options
-        payment_options: formData.payment || {
-          payment_type: 'full',
-          percentage_rate: 30,
-        },
-        is_draft: isDraft,
-        is_active: !isDraft,
-      })
-      .select()
-      .single();
+      // Vérifier l'unicité du slug et générer un nouveau si nécessaire
+      let attempts = 0;
+      const maxAttempts = 10;
+      while (attempts < maxAttempts) {
+        const { data: existing } = await supabase
+          .from('products')
+          .select('id')
+          .eq('store_id', store.id)
+          .eq('slug', slug)
+          .limit(1);
 
-    if (productError) throw productError;
+        if (!existing || existing.length === 0) {
+          // Slug disponible
+          break;
+        }
 
-    // 3. Create physical_product
-    const { error: physicalError } = await supabase
-      .from('physical_products')
-      .insert({
+        // Slug existe déjà, générer un nouveau avec suffixe
+        attempts++;
+        const baseSlug =
+          formData.slug ||
+          formData.name
+            ?.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '') ||
+          'product';
+        slug = `${baseSlug}-${attempts}`;
+      }
+
+      if (attempts >= maxAttempts) {
+        throw new Error(
+          'Impossible de générer un slug unique. Veuillez modifier le nom du produit.'
+        );
+      }
+
+      // 2. Create base product avec SEO
+      const { data: product, error: productError } = await supabase
+        .from('products')
+        .insert({
+          store_id: store.id,
+          name: formData.name,
+          slug,
+          description: formData.description,
+          short_description: formData.short_description || null,
+          price: formData.price || 0,
+          currency: 'XOF',
+          product_type: 'physical',
+          category_id: formData.category_id,
+          image_url: formData.images?.[0] || null,
+          images: formData.images || [],
+          // SEO fields (only fields that exist in products table)
+          meta_title: formData.seo?.meta_title,
+          meta_description: formData.seo?.meta_description,
+          og_image: formData.seo?.og_image,
+          // Note: meta_keywords, og_title, og_description are not saved to DB (columns don't exist)
+          // FAQs
+          faqs: formData.faqs || [],
+          // Payment Options
+          payment_options: formData.payment || {
+            payment_type: 'full',
+            percentage_rate: 30,
+          },
+          is_draft: isDraft,
+          is_active: !isDraft,
+        })
+        .select()
+        .single();
+
+      if (productError) {
+        // Gestion améliorée des erreurs de contrainte unique
+        if (productError.code === '23505' || productError.message?.includes('duplicate key')) {
+          const constraintMatch = productError.message?.match(/constraint ['"]([^'"]+)['"]/);
+          const constraintName = constraintMatch ? constraintMatch[1] : 'unknown';
+
+          if (constraintName.includes('slug')) {
+            throw new Error(
+              "Ce slug est déjà utilisé par un autre produit de votre boutique. Veuillez modifier le nom ou l'URL du produit."
+            );
+          }
+        }
+        throw productError;
+      }
+
+      // 3. Create physical_product
+      const { error: physicalError } = await supabase.from('physical_products').insert({
         product_id: product.id,
         sku: formData.sku,
         barcode: formData.barcode,
@@ -524,46 +743,42 @@ export const CreatePhysicalProductWizard = ({
         country_of_origin: formData.country_of_origin || 'CI',
       });
 
-    if (physicalError) throw physicalError;
+      if (physicalError) throw physicalError;
 
-    // 4. Create variants if any
-    if (formData.variants && formData.variants.length > 0) {
-      const variantsData = formData.variants.map((variant: any) => ({
-        physical_product_id: product.id,
-        variant_name: variant.variant_name,
-        sku: variant.sku,
-        price_adjustment: variant.price_adjustment || 0,
-        weight_adjustment: variant.weight_adjustment || 0,
-        image_url: variant.image_url,
-        is_available: variant.is_available !== false,
-      }));
+      // 4. Create variants if any
+      if (formData.variants && formData.variants.length > 0) {
+        const variantsData = formData.variants.map((variant: PhysicalProductVariant) => ({
+          physical_product_id: product.id,
+          variant_name: variant.variant_name,
+          sku: variant.sku,
+          price_adjustment: variant.price_adjustment || 0,
+          weight_adjustment: variant.weight_adjustment || 0,
+          image_url: variant.image_url,
+          is_available: variant.is_available !== false,
+        }));
 
-      const { error: variantsError } = await supabase
-        .from('physical_product_variants')
-        .insert(variantsData);
+        const { error: variantsError } = await supabase
+          .from('physical_product_variants')
+          .insert(variantsData);
 
-      if (variantsError) throw variantsError;
-    }
+        if (variantsError) throw variantsError;
+      }
 
-    // 5. Link size chart if selected
-    if (formData.size_chart_id) {
-      const { error: sizeChartError } = await supabase
-        .from('product_size_charts')
-        .insert({
+      // 5. Link size chart if selected
+      if (formData.size_chart_id) {
+        const { error: sizeChartError } = await supabase.from('product_size_charts').insert({
           product_id: product.id,
           size_chart_id: formData.size_chart_id,
         });
 
-      if (sizeChartError) {
-        logger.error('Error linking size chart:', sizeChartError);
-        // Ne pas faire échouer la création si le size chart échoue
+        if (sizeChartError) {
+          logger.error('Error linking size chart:', sizeChartError);
+          // Ne pas faire échouer la création si le size chart échoue
+        }
       }
-    }
 
-    // 6. Create inventory
-    const { error: inventoryError } = await supabase
-      .from('physical_product_inventory')
-      .insert({
+      // 6. Create inventory
+      const { error: inventoryError } = await supabase.from('physical_product_inventory').insert({
         physical_product_id: product.id,
         location_name: formData.inventory_location || 'Default',
         quantity_available: formData.quantity || 0,
@@ -572,13 +787,11 @@ export const CreatePhysicalProductWizard = ({
         track_inventory: formData.track_inventory !== false,
       });
 
-    if (inventoryError) throw inventoryError;
+      if (inventoryError) throw inventoryError;
 
-    // 6. Create affiliate settings if enabled
-    if (formData.affiliate && formData.affiliate.enabled) {
-      const { error: affiliateError } = await supabase
-        .from('product_affiliate_settings')
-        .insert({
+      // 6. Create affiliate settings if enabled
+      if (formData.affiliate && formData.affiliate.enabled) {
+        const { error: affiliateError } = await supabase.from('product_affiliate_settings').insert({
           product_id: product.id,
           store_id: store.id,
           affiliate_enabled: formData.affiliate.enabled,
@@ -586,23 +799,44 @@ export const CreatePhysicalProductWizard = ({
           commission_type: formData.affiliate.commission_type,
           fixed_commission_amount: formData.affiliate.fixed_commission_amount,
           cookie_duration_days: formData.affiliate.cookie_duration_days,
-          max_commission_per_sale: formData.affiliate.max_commission_per_sale,
           min_order_amount: formData.affiliate.min_order_amount,
           allow_self_referral: formData.affiliate.allow_self_referral,
           require_approval: formData.affiliate.require_approval,
           terms_and_conditions: formData.affiliate.terms_and_conditions,
         });
 
-      if (affiliateError) {
-        console.error('Affiliate settings error:', affiliateError);
+        if (affiliateError) {
+          logger.error('Affiliate settings error', { error: affiliateError, productId });
+        }
       }
-    }
 
-    // Clear draft from localStorage on success
-    localStorage.removeItem('physical-product-draft');
+      // Clear draft from localStorage on success
+      try {
+        localStorage.removeItem('physical-product-draft');
+      } catch {
+        // ignore
+      }
 
-    return product;
-  }, [formData, store, t]);
+      // Déclencher webhook product.created (asynchrone)
+      if (product && !isDraft) {
+        import('@/lib/webhooks/webhook-system').then(({ triggerWebhook }) => {
+          triggerWebhook(store.id, 'product.created', {
+            product_id: product.id,
+            name: product.name,
+            product_type: product.product_type,
+            price: product.price,
+            currency: product.currency,
+            created_at: product.created_at,
+          }).catch(err => {
+            logger.error('Error triggering webhook', { error: err, productId: product.id });
+          });
+        });
+      }
+
+      return product;
+    },
+    [formData, store, t]
+  );
 
   /**
    * Save as draft
@@ -611,14 +845,18 @@ export const CreatePhysicalProductWizard = ({
     setIsSaving(true);
     try {
       const product = await savePhysicalProduct(true);
-      
+
       logger.info('Brouillon produit physique sauvegardé', { productId: product.id });
-      
+
       toast({
         title: t('products.draftSaved', '✅ Brouillon sauvegardé'),
-        description: t('products.draftSavedDesc', 'Produit "{{name}}" enregistré. Vous pouvez continuer plus tard.', { name: product.name }),
+        description: t(
+          'products.draftSavedDesc',
+          'Produit "{{name}}" enregistré. Vous pouvez continuer plus tard.',
+          { name: product.name }
+        ),
       });
-      
+
       if (onSuccess) {
         onSuccess();
       } else {
@@ -628,7 +866,10 @@ export const CreatePhysicalProductWizard = ({
       logger.error('Erreur lors de la sauvegarde du brouillon', error);
       toast({
         title: t('products.errors.saveError', '❌ Erreur de sauvegarde'),
-        description: error instanceof Error ? error.message : t('products.errors.saveErrorDesc', 'Impossible de sauvegarder le brouillon'),
+        description:
+          error instanceof Error
+            ? error.message
+            : t('products.errors.saveErrorDesc', 'Impossible de sauvegarder le brouillon'),
         variant: 'destructive',
       });
     } finally {
@@ -651,7 +892,10 @@ export const CreatePhysicalProductWizard = ({
     if (!allValid) {
       toast({
         title: t('products.errors.validationAllTitle', '⚠️ Erreurs de validation'),
-        description: t('products.errors.validationAllDesc', 'Veuillez corriger toutes les erreurs avant de publier'),
+        description: t(
+          'products.errors.validationAllDesc',
+          'Veuillez corriger toutes les erreurs avant de publier'
+        ),
         variant: 'destructive',
       });
       return;
@@ -660,17 +904,21 @@ export const CreatePhysicalProductWizard = ({
     setIsSaving(true);
     try {
       const product = await savePhysicalProduct(false);
-      
+
       logger.info('Produit physique publié', { productId: product.id, productName: product.name });
-      
+
       toast({
         title: t('products.published', '🎉 Produit publié !'),
-        description: t('products.publishedDesc', '"{{name}}" est maintenant en ligne{{affiliate}}', { 
-          name: product.name,
-          affiliate: formData.affiliate?.enabled ? ' avec programme d\'affiliation activé' : ''
-        }),
+        description: t(
+          'products.publishedDesc',
+          '"{{name}}" est maintenant en ligne{{affiliate}}',
+          {
+            name: product.name,
+            affiliate: formData.affiliate?.enabled ? " avec programme d'affiliation activé" : '',
+          }
+        ),
       });
-      
+
       if (onSuccess) {
         onSuccess();
       } else {
@@ -680,13 +928,24 @@ export const CreatePhysicalProductWizard = ({
       logger.error('Erreur lors de la publication', error);
       toast({
         title: t('products.errors.publishError', '❌ Erreur de publication'),
-        description: error instanceof Error ? error.message : t('products.errors.publishErrorDesc', 'Impossible de publier le produit'),
+        description:
+          error instanceof Error
+            ? error.message
+            : t('products.errors.publishErrorDesc', 'Impossible de publier le produit'),
         variant: 'destructive',
       });
     } finally {
       setIsSaving(false);
     }
-  }, [validateStep, savePhysicalProduct, formData.affiliate?.enabled, toast, onSuccess, navigate, t]);
+  }, [
+    validateStep,
+    savePhysicalProduct,
+    formData.affiliate?.enabled,
+    toast,
+    onSuccess,
+    navigate,
+    t,
+  ]);
 
   /**
    * Get props for current step component
@@ -698,15 +957,16 @@ export const CreatePhysicalProductWizard = ({
     };
 
     switch (currentStep) {
-      case 5: // Affiliation
+      case 6: // Affiliation
         return {
           productPrice: formData.price || 0,
           productName: formData.name || t('products.product', 'Produit'),
           data: formData.affiliate || {},
-          onUpdate: (affiliateData: any) => handleUpdateFormData({ affiliate: affiliateData }),
+          onUpdate: (affiliateData: PhysicalProductFormDataUpdate['affiliate']) =>
+            handleUpdateFormData({ affiliate: affiliateData }),
         };
-      
-      case 6: // SEO & FAQs
+
+      case 7: // SEO & FAQs
         return {
           data: {
             seo: formData.seo || {},
@@ -717,19 +977,27 @@ export const CreatePhysicalProductWizard = ({
           productPrice: formData.price || 0,
           onUpdate: handleUpdateFormData,
         };
-      
-      case 7: // Payment Options
+
+      case 8: // Payment Options
         return {
-          productPrice: formData.price || 0,
+          productPrice:
+            typeof formData.price === 'number' && !isNaN(formData.price) ? formData.price : 0,
           productType: 'physical' as const,
           data: formData.payment || {},
-          onUpdate: (paymentData: any) => handleUpdateFormData({ payment: paymentData }),
+          onUpdate: (paymentData: PhysicalProductFormDataUpdate['payment']) =>
+            handleUpdateFormData({ payment: paymentData }),
         };
-      
+
+      case 1: // Basic Info
+        return {
+          ...baseProps,
+          storeSlug: storeSlug || (store && 'slug' in store ? store.slug : undefined),
+        };
+
       default:
         return baseProps;
     }
-  }, [currentStep, formData, handleUpdateFormData, t]);
+  }, [currentStep, formData, handleUpdateFormData, t, storeSlug, store]);
 
   const CurrentStep = STEPS[currentStep - 1];
   const CurrentStepComponent = CurrentStep.component;
@@ -766,10 +1034,10 @@ export const CreatePhysicalProductWizard = ({
   }
 
   return (
-    <div className="min-h-screen bg-background py-4 sm:py-6 lg:py-8 overflow-x-hidden">
-      <div className="container max-w-5xl mx-auto px-2 sm:px-4 lg:px-6">
+    <div className="min-h-screen bg-background sm:py-6 lg:py-8 overflow-x-hidden w-full">
+      <div className="w-full max-w-5xl mx-auto sm:px-4 lg:px-6">
         {/* Header */}
-        <div 
+        <div
           ref={headerRef}
           className="mb-6 sm:mb-8 animate-in fade-in slide-in-from-top-4 duration-700"
         >
@@ -782,43 +1050,33 @@ export const CreatePhysicalProductWizard = ({
               aria-label={t('common.back', 'Retour')}
             >
               <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-              <span className="hidden sm:inline">{t('products.backToType', 'Retour au choix du type')}</span>
+              <span className="hidden sm:inline">
+                {t('products.backToType', 'Retour au choix du type')}
+              </span>
               <span className="sm:hidden">{t('common.back', 'Retour')}</span>
             </Button>
           )}
-          
+
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5 backdrop-blur-sm border border-green-500/20 animate-in zoom-in duration-500">
-                <Package className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 dark:text-green-400" aria-hidden="true" />
+                <Package
+                  className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 dark:text-green-400"
+                  aria-hidden="true"
+                />
               </div>
               <div>
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2">
                   {t('products.createPhysical.title', 'Nouveau Produit Physique')}
                 </h1>
                 <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
-                  {t('products.createPhysical.subtitle', 'Créez un produit physique professionnel en 8 étapes')}
+                  {t(
+                    'products.createPhysical.subtitle',
+                    'Créez un produit physique professionnel en 8 étapes'
+                  )}
                 </p>
               </div>
             </div>
-            
-            {/* Template Button - Badge "Nouveau" supprimé */}
-            {currentStep === 1 && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowTemplateSelector(true);
-                  logger.info('Ouverture sélecteur de template pour produit physique');
-                }}
-                className="gap-2 border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md"
-                size="sm"
-                aria-label={t('products.useTemplate', 'Utiliser un template')}
-              >
-                <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-                <span className="hidden sm:inline">{t('products.useTemplate', 'Utiliser un template')}</span>
-                <span className="sm:hidden">{t('products.template', 'Template')}</span>
-              </Button>
-            )}
           </div>
 
           {/* Progress Bar */}
@@ -831,21 +1089,22 @@ export const CreatePhysicalProductWizard = ({
                 {isAutoSaving && (
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Loader2 className="h-3 w-3 animate-spin" />
-                    <span className="hidden sm:inline">{t('products.autoSaving', 'Auto-sauvegarde...')}</span>
+                    <span className="hidden sm:inline">
+                      {t('products.autoSaving', 'Auto-sauvegarde...')}
+                    </span>
                   </div>
                 )}
-                <span className="text-muted-foreground">{Math.round(progress)}% {t('products.completed', 'complété')}</span>
+                <span className="text-muted-foreground">
+                  {Math.round(progress)}% {t('products.completed', 'complété')}
+                </span>
               </div>
             </div>
-            <Progress 
-              value={progress} 
-              className="h-1.5 sm:h-2 bg-muted"
-            />
+            <Progress value={progress} className="h-1.5 sm:h-2 bg-muted" />
           </div>
         </div>
 
         {/* Steps Indicator - Responsive */}
-        <Card 
+        <Card
           ref={stepsRef}
           className="mb-6 sm:mb-8 border-border/50 bg-card/50 backdrop-blur-sm shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
@@ -865,33 +1124,54 @@ export const CreatePhysicalProductWizard = ({
                     aria-selected={isActive}
                     aria-label={`${t('products.step', 'Étape')} ${step.id}: ${step.title}`}
                     className={cn(
-                      "relative p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-300 text-left",
-                      "hover:shadow-md hover:scale-[1.02] touch-manipulation",
-                      isActive && 'border-green-500 bg-green-50 dark:bg-green-950/30 shadow-lg scale-[1.02] ring-2 ring-green-500/20',
+                      'relative p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-300 text-left',
+                      'hover:shadow-md hover:scale-[1.02] touch-manipulation',
+                      isActive &&
+                        'border-green-500 bg-green-50 dark:bg-green-950/30 shadow-lg scale-[1.02] ring-2 ring-green-500/20',
                       isCompleted && 'border-green-500 bg-green-50 dark:bg-green-950/30',
-                      !isActive && !isCompleted && !hasErrors && 'border-border hover:border-green-500/50 bg-card/50',
+                      !isActive &&
+                        !isCompleted &&
+                        !hasErrors &&
+                        'border-border hover:border-green-500/50 bg-card/50',
                       hasErrors && 'border-red-500 bg-red-50 dark:bg-red-950/30',
-                      "animate-in fade-in slide-in-from-bottom-4"
+                      'animate-in fade-in slide-in-from-bottom-4'
                     )}
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
-                      <Icon className={cn(
-                        "h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 transition-colors",
-                        isActive ? 'text-green-600 dark:text-green-400' : 
-                        isCompleted ? 'text-green-600 dark:text-green-400' : 
-                        hasErrors ? 'text-red-600 dark:text-red-400' :
-                        'text-muted-foreground'
-                      )} />
-                      {isCompleted && <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400 flex-shrink-0 ml-auto" aria-hidden="true" />}
-                      {hasErrors && !isCompleted && <AlertCircle className="h-3 w-3 text-red-600 dark:text-red-400 flex-shrink-0 ml-auto" aria-hidden="true" />}
+                      <Icon
+                        className={cn(
+                          'h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 transition-colors',
+                          isActive
+                            ? 'text-green-600 dark:text-green-400'
+                            : isCompleted
+                              ? 'text-green-600 dark:text-green-400'
+                              : hasErrors
+                                ? 'text-red-600 dark:text-red-400'
+                                : 'text-muted-foreground'
+                        )}
+                      />
+                      {isCompleted && (
+                        <CheckCircle2
+                          className="h-3 w-3 text-green-600 dark:text-green-400 flex-shrink-0 ml-auto"
+                          aria-hidden="true"
+                        />
+                      )}
+                      {hasErrors && !isCompleted && (
+                        <AlertCircle
+                          className="h-3 w-3 text-red-600 dark:text-red-400 flex-shrink-0 ml-auto"
+                          aria-hidden="true"
+                        />
+                      )}
                     </div>
-                    <div className={cn(
-                      "text-[10px] sm:text-xs font-medium truncate",
-                      isActive && "text-green-600 dark:text-green-400 font-semibold",
-                      hasErrors && !isActive && "text-red-600 dark:text-red-400",
-                      !isActive && !hasErrors && "text-muted-foreground"
-                    )}>
+                    <div
+                      className={cn(
+                        'text-[10px] sm:text-xs font-medium truncate',
+                        isActive && 'text-green-600 dark:text-green-400 font-semibold',
+                        hasErrors && !isActive && 'text-red-600 dark:text-red-400',
+                        !isActive && !hasErrors && 'text-muted-foreground'
+                      )}
+                    >
                       {step.title}
                     </div>
                     <div className="text-[9px] sm:text-[10px] text-muted-foreground truncate hidden sm:block mt-0.5">
@@ -906,7 +1186,10 @@ export const CreatePhysicalProductWizard = ({
 
         {/* Validation Errors */}
         {validationErrors[currentStep]?.length > 0 && (
-          <Alert variant="destructive" className="mb-4 sm:mb-6 animate-in fade-in slide-in-from-top-4">
+          <Alert
+            variant="destructive"
+            className="mb-4 sm:mb-6 animate-in fade-in slide-in-from-top-4"
+          >
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               <ul className="list-disc list-inside text-xs sm:text-sm space-y-1">
@@ -919,7 +1202,7 @@ export const CreatePhysicalProductWizard = ({
         )}
 
         {/* Current Step */}
-        <Card 
+        <Card
           ref={contentRef}
           className="mb-6 sm:mb-8 border-border/50 bg-card/50 backdrop-blur-sm shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
@@ -941,10 +1224,27 @@ export const CreatePhysicalProductWizard = ({
             {currentStep === 5 ? (
               <PhysicalSizeChartSelector
                 selectedSizeChartId={formData.size_chart_id || undefined}
-                onSelectSizeChart={(sizeChartId) => {
+                onSelectSizeChart={sizeChartId => {
                   handleUpdateFormData({ size_chart_id: sizeChartId });
                 }}
               />
+            ) : currentStep === 7 ? (
+              <div className="space-y-6">
+                <CurrentStepComponent {...getStepProps()} />
+                <ProductStatisticsDisplaySettings
+                  formData={{
+                    hide_purchase_count: formData.hide_purchase_count,
+                    hide_likes_count: formData.hide_likes_count,
+                    hide_recommendations_count: formData.hide_recommendations_count,
+                    hide_downloads_count: formData.hide_downloads_count,
+                    hide_reviews_count: formData.hide_reviews_count,
+                    hide_rating: formData.hide_rating,
+                  }}
+                  updateFormData={(field, value) => handleUpdateFormData({ [field]: value })}
+                  productType="physical"
+                  variant="compact"
+                />
+              </div>
             ) : CurrentStepComponent ? (
               <CurrentStepComponent {...getStepProps()} />
             ) : null}
@@ -982,7 +1282,9 @@ export const CreatePhysicalProductWizard = ({
                   aria-label={t('products.saveDraft', 'Sauvegarder comme brouillon')}
                 >
                   <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                  <span className="hidden sm:inline">{t('products.saveDraft', 'Sauvegarder brouillon')}</span>
+                  <span className="hidden sm:inline">
+                    {t('products.saveDraft', 'Sauvegarder brouillon')}
+                  </span>
                   <span className="sm:hidden">{t('products.draft', 'Brouillon')}</span>
                   <Badge variant="secondary" className="ml-1.5 hidden sm:flex text-[10px]">
                     ⌘S
@@ -990,8 +1292,8 @@ export const CreatePhysicalProductWizard = ({
                 </Button>
 
                 {currentStep < STEPS.length ? (
-                  <Button 
-                    onClick={handleNext} 
+                  <Button
+                    onClick={handleNext}
                     disabled={isSaving}
                     className="flex-1 sm:flex-none bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                     size="sm"
@@ -1005,8 +1307,8 @@ export const CreatePhysicalProductWizard = ({
                     </Badge>
                   </Button>
                 ) : (
-                  <Button 
-                    onClick={handlePublish} 
+                  <Button
+                    onClick={handlePublish}
                     disabled={isSaving}
                     className="flex-1 sm:flex-none bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                     size="sm"
@@ -1015,13 +1317,17 @@ export const CreatePhysicalProductWizard = ({
                     {isSaving ? (
                       <>
                         <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
-                        <span className="hidden sm:inline">{t('products.publishing', 'Publication...')}</span>
+                        <span className="hidden sm:inline">
+                          {t('products.publishing', 'Publication...')}
+                        </span>
                         <span className="sm:hidden">{t('products.publishingShort', 'Pub...')}</span>
                       </>
                     ) : (
                       <>
                         <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                        <span className="hidden sm:inline">{t('products.publish', 'Publier le produit')}</span>
+                        <span className="hidden sm:inline">
+                          {t('products.publish', 'Publier le produit')}
+                        </span>
                         <span className="sm:hidden">{t('products.publishShort', 'Publier')}</span>
                       </>
                     )}
@@ -1037,26 +1343,25 @@ export const CreatePhysicalProductWizard = ({
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Keyboard className="h-3 w-3" aria-hidden="true" />
             <span>{t('common.shortcuts', 'Raccourcis')}:</span>
-            <Badge variant="outline" className="text-[10px] font-mono">⌘S</Badge>
-            <span className="text-muted-foreground">{t('products.shortcuts.save', 'Brouillon')}</span>
-            <Badge variant="outline" className="text-[10px] font-mono ml-2">⌘→</Badge>
+            <Badge variant="outline" className="text-[10px] font-mono">
+              ⌘S
+            </Badge>
+            <span className="text-muted-foreground">
+              {t('products.shortcuts.save', 'Brouillon')}
+            </span>
+            <Badge variant="outline" className="text-[10px] font-mono ml-2">
+              ⌘→
+            </Badge>
             <span className="text-muted-foreground">{t('products.shortcuts.next', 'Suivant')}</span>
-            <Badge variant="outline" className="text-[10px] font-mono ml-2">⌘←</Badge>
-            <span className="text-muted-foreground">{t('products.shortcuts.prev', 'Précédent')}</span>
+            <Badge variant="outline" className="text-[10px] font-mono ml-2">
+              ⌘←
+            </Badge>
+            <span className="text-muted-foreground">
+              {t('products.shortcuts.prev', 'Précédent')}
+            </span>
           </div>
         </div>
       </div>
-      
-      {/* Template Selector Dialog */}
-      <TemplateSelector
-        productType="physical"
-        open={showTemplateSelector}
-        onClose={() => {
-          setShowTemplateSelector(false);
-          logger.info('Fermeture sélecteur de template pour produit physique');
-        }}
-        onSelectTemplate={handleTemplateSelect}
-      />
     </div>
   );
 };

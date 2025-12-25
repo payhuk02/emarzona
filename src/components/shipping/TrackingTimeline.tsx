@@ -22,7 +22,9 @@ interface TrackingTimelineProps {
   trackingNumber: string;
 }
 
-const eventIcons: Record<string, any> = {
+type EventIcon = typeof Package | typeof Truck | typeof Home | typeof Circle;
+
+const eventIcons: Record<string, EventIcon> = {
   LABEL_CREATED: Package,
   PICKED_UP: Package,
   IN_TRANSIT: Truck,

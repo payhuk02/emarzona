@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK DIGITAL PRODUCT COUPONS SYSTEM
+-- EMARZONA DIGITAL PRODUCT COUPONS SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système complet de codes promo pour produits digitaux
 -- =====================================================

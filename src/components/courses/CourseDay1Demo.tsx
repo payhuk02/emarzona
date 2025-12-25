@@ -8,6 +8,8 @@
  * Date : 29 Octobre 2025
  */
 
+import { logger } from '@/lib/logger';
+
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -47,7 +49,7 @@ export const CourseDay1Demo: React.FC = () => {
   };
 
   const handleAction = (action: string) => {
-    console.log('Action:', action);
+    logger.info('Action', { action });
     alert(`Action: ${action}`);
   };
 

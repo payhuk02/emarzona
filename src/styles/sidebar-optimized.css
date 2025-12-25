@@ -1,0 +1,226 @@
+/**
+ * CSS optimisé pour le sidebar
+ * OPTIMISATION PERFORMANCE: Fichier séparé pour permettre le chargement asynchrone
+ * Réduit le CSS critique du bundle principal
+ * 
+ * NOTE: Ce fichier est chargé de manière asynchrone, donc pas besoin de @layer base
+ * Les variables CSS sont définies directement sans utiliser les directives Tailwind
+ */
+
+/* ============================================================
+   VARIABLES CSS POUR LE SIDEBAR
+   ============================================================ */
+
+[data-sidebar='sidebar'] {
+  /* Variables pour le mode clair (par défaut) */
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 0 0% 0%;
+  --sidebar-accent-foreground: 0 0% 0%;
+  --sidebar-primary: 217 91% 60%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 0 0% 96%;
+  --sidebar-accent-foreground: 0 0% 12%;
+  --sidebar-border: 0 0% 90%;
+  --sidebar-ring: 217 91% 60%;
+
+  /* Variables pour le mode sombre (dégradé) */
+  --sidebar-text-color: rgb(203 213 225); /* text-slate-300 */
+  --sidebar-text-color-dark: rgb(148 163 184); /* text-slate-400 */
+  --sidebar-text-color-active: rgb(191 219 254); /* text-blue-200 */
+  --sidebar-bg-gradient: linear-gradient(to bottom right, rgb(15 23 42), rgb(23 37 84), rgb(0 0 0));
+}
+
+/* ============================================================
+   SIDEBAR - MODE CLAIR (Par défaut)
+   ============================================================ */
+
+[data-sidebar='sidebar'] {
+  --sidebar-background: 0 0% 100% !important;
+  --sidebar-foreground: 0 0% 0% !important;
+  --sidebar-accent-foreground: 0 0% 0% !important;
+  background-color: hsl(var(--sidebar-background)) !important;
+  color: black !important;
+}
+
+/* Force le fond clair même en mode sombre */
+.dark [data-sidebar='sidebar'] {
+  --sidebar-background: 0 0% 100% !important;
+  --sidebar-foreground: 0 0% 0% !important;
+  --sidebar-accent-foreground: 0 0% 0% !important;
+  background-color: hsl(var(--sidebar-background)) !important;
+  color: black !important;
+}
+
+/* Force NOIR sur TOUS les éléments texte */
+[data-sidebar='sidebar'] *,
+[data-sidebar='sidebar'] span,
+[data-sidebar='sidebar'] a,
+[data-sidebar='sidebar'] button,
+[data-sidebar='sidebar'] div,
+[data-sidebar='sidebar'] p,
+[data-sidebar='sidebar'] li,
+[data-sidebar='sidebar'] [data-sidebar='group-label'],
+[data-sidebar='sidebar'] [data-sidebar='menu-button'],
+[data-sidebar='sidebar'] [data-sidebar='menu-item'],
+[data-sidebar='sidebar'] [data-sidebar='menu-button'] *,
+[data-sidebar='sidebar'] [data-sidebar='menu-button'] span,
+[data-sidebar='sidebar'] [data-sidebar='menu-button'] a {
+  color: black !important;
+}
+
+.dark [data-sidebar='sidebar'] *,
+.dark [data-sidebar='sidebar'] span,
+.dark [data-sidebar='sidebar'] a,
+.dark [data-sidebar='sidebar'] button,
+.dark [data-sidebar='sidebar'] div,
+.dark [data-sidebar='sidebar'] p,
+.dark [data-sidebar='sidebar'] li,
+.dark [data-sidebar='sidebar'] [data-sidebar='group-label'],
+.dark [data-sidebar='sidebar'] [data-sidebar='menu-button'],
+.dark [data-sidebar='sidebar'] [data-sidebar='menu-item'],
+.dark [data-sidebar='sidebar'] [data-sidebar='menu-button'] *,
+.dark [data-sidebar='sidebar'] [data-sidebar='menu-button'] span,
+.dark [data-sidebar='sidebar'] [data-sidebar='menu-button'] a {
+  color: black !important;
+}
+
+/* Force NOIR sur TOUTES les icônes SVG */
+[data-sidebar='sidebar'] svg,
+[data-sidebar='sidebar'] svg * {
+  color: black !important;
+  stroke: black !important;
+  fill: black !important;
+}
+
+.dark [data-sidebar='sidebar'] svg,
+.dark [data-sidebar='sidebar'] svg * {
+  color: black !important;
+  stroke: black !important;
+  fill: black !important;
+}
+
+/* Force NOIR sur tous les liens NavLink */
+[data-sidebar='sidebar'] a,
+[data-sidebar='sidebar'] a *,
+[data-sidebar='sidebar'] a span,
+[data-sidebar='sidebar'] a div,
+[data-sidebar='sidebar'] [class*='NavLink'],
+[data-sidebar='sidebar'] [class*='nav-link'],
+[data-sidebar='sidebar'] [class*='router-link'],
+[data-sidebar='sidebar'] [data-sidebar='menu-button'] a,
+[data-sidebar='sidebar'] [data-sidebar='menu-button'] a *,
+[data-sidebar='sidebar'] [data-sidebar='menu-button'] a span {
+  color: black !important;
+}
+
+/* Force NOIR même sur les éléments avec classes Tailwind */
+[data-sidebar='sidebar'] [class*='text-']:not([class*='text-primary']):not([data-active='true']),
+[data-sidebar='sidebar'] [class*='text-']:not([class*='text-primary']):not([data-active='true']) *,
+[data-sidebar='sidebar']
+  [class*='text-']:not([class*='text-primary']):not([data-active='true'])
+  span {
+  color: black !important;
+}
+
+/* Exception pour les éléments actifs qui gardent leur couleur primaire */
+[data-sidebar='sidebar'] [data-active='true'],
+[data-sidebar='sidebar'] [data-active='true'] *,
+[data-sidebar='sidebar'] .bg-primary\/20,
+[data-sidebar='sidebar'] .bg-primary\/20 *,
+[data-sidebar='sidebar'] .text-primary,
+[data-sidebar='sidebar'] [class*='text-primary'],
+[data-sidebar='sidebar'] [class*='text-primary'] * {
+  color: hsl(var(--primary)) !important;
+}
+
+[data-sidebar='sidebar'] .text-primary svg,
+[data-sidebar='sidebar'] [class*='text-primary'] svg {
+  color: hsl(var(--primary)) !important;
+  stroke: hsl(var(--primary)) !important;
+  fill: hsl(var(--primary)) !important;
+}
+
+/* Exception pour les images (logo) */
+[data-sidebar='sidebar'] img {
+  color: unset !important;
+  stroke: unset !important;
+  fill: unset !important;
+}
+
+/* ============================================================
+   SIDEBAR - MODE SOMBRE (Dégradé - Optionnel)
+   ============================================================ */
+
+/* Note: Ces styles peuvent être activés si nécessaire */
+[data-sidebar-theme='dark-gradient'] [data-sidebar='sidebar'] {
+  background: var(--sidebar-bg-gradient) !important;
+  color: var(--sidebar-text-color) !important;
+}
+
+[data-sidebar-theme='dark-gradient']
+  [data-sidebar='sidebar']
+  *:not([data-active='true']):not(.text-primary):not([class*='text-primary']) {
+  color: var(--sidebar-text-color) !important;
+}
+
+[data-sidebar-theme='dark-gradient'] [data-sidebar='sidebar'] [data-sidebar='group-label'],
+[data-sidebar-theme='dark-gradient'] [data-sidebar='sidebar'] [data-sidebar='group-label'] span {
+  color: var(--sidebar-text-color-active) !important;
+  font-weight: 600 !important;
+}
+
+[data-sidebar-theme='dark-gradient'] [data-sidebar='sidebar'] [data-active='true'],
+[data-sidebar-theme='dark-gradient'] [data-sidebar='sidebar'] [aria-current='page'],
+[data-sidebar-theme='dark-gradient'] [data-sidebar='sidebar'] [class*='bg-blue-600'] {
+  color: var(--sidebar-text-color-active) !important;
+}
+
+[data-sidebar-theme='dark-gradient'] [data-sidebar='sidebar'] svg:not([class*='text-primary']) {
+  color: var(--sidebar-text-color) !important;
+  stroke: var(--sidebar-text-color) !important;
+  fill: var(--sidebar-text-color) !important;
+}
+
+/* ============================================================
+   SCROLLBARS PERSONNALISÉES POUR SIDEBARS
+   ============================================================ */
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.3);
+}
+
+/* ============================================================
+   HOVER & FOCUS STATES
+   ============================================================ */
+
+/* Hover states */
+[data-sidebar='sidebar'] a:hover:not([data-active='true']):not([class*='text-primary']),
+[data-sidebar='sidebar'] button:hover:not([data-active='true']):not([class*='text-primary']) {
+  color: rgb(255 255 255) !important;
+}
+
+/* Focus states */
+[data-sidebar='sidebar'] *:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}

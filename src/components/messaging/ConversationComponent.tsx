@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo, memo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import {
   Dialog,
   DialogContent,
@@ -14,20 +14,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Send,
   Paperclip,
-  Image,
-  Video,
-  File,
   MoreVertical,
   Shield,
   Lock,
@@ -41,17 +38,23 @@ import {
   Store,
   Crown,
   Loader2,
-  X
-} from "lucide-react";
-import { useMessaging } from "@/hooks/useMessaging";
-import { Message, MessageType, SenderType, Conversation } from "@/types/advanced-features";
-import { useToast } from "@/hooks/use-toast";
-import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
-import { supabase } from "@/integrations/supabase/client";
+  X,
+  Image,
+  Video,
+  File,
+  Camera,
+} from 'lucide-react';
+import { useMessaging } from '@/hooks/useMessaging';
+import { Message, MessageType, SenderType, Conversation } from '@/types/advanced-features';
+import { useToast } from '@/hooks/use-toast';
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
+import { MediaAttachment } from '@/components/media';
+import { CameraCapture } from '@/components/camera/CameraCapture';
 
 interface ConversationComponentProps {
-  orderId: string;
+  orderId?: string;
   storeId: string;
   customerId?: string;
   className?: string;
@@ -59,9 +62,9 @@ interface ConversationComponentProps {
 
 // Cache pour les fonctions de formatage
 const formatMessageTime = (timestamp: string) => {
-  return formatDistanceToNow(new Date(timestamp), { 
-    addSuffix: true, 
-    locale: fr 
+  return formatDistanceToNow(new Date(timestamp), {
+    addSuffix: true,
+    locale: fr,
   });
 };
 
@@ -87,13 +90,13 @@ const MessageItem = memo<MessageItemProps>(({ message }) => {
   const getSenderColor = useCallback((senderType: SenderType) => {
     switch (senderType) {
       case 'customer':
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100";
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100';
       case 'store':
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100";
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100';
       case 'admin':
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100";
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100';
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100";
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
     }
   }, []);
 
@@ -126,31 +129,20 @@ const MessageItem = memo<MessageItemProps>(({ message }) => {
   const isStoreMessage = message.sender_type === 'store';
 
   return (
-    <div
-      className={`flex gap-3 ${
-        isStoreMessage ? 'justify-end' : 'justify-start'
-      }`}
-    >
+    <div className={`flex gap-3 ${isStoreMessage ? 'justify-end' : 'justify-start'}`}>
       {!isStoreMessage && (
         <Avatar className="h-8 w-8 flex-shrink-0">
           <AvatarImage src={message.sender?.avatar_url} loading="lazy" />
-          <AvatarFallback className="text-xs">
-            {getSenderIcon(message.sender_type)}
-          </AvatarFallback>
+          <AvatarFallback className="text-xs">{getSenderIcon(message.sender_type)}</AvatarFallback>
         </Avatar>
       )}
       <div
         className={`max-w-[70%] sm:max-w-[80%] rounded-lg p-3 ${
-          isStoreMessage
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-muted'
+          isStoreMessage ? 'bg-primary text-primary-foreground' : 'bg-muted'
         }`}
       >
         <div className="flex items-center gap-2 mb-1 flex-wrap">
-          <Badge
-            variant="secondary"
-            className={`text-xs ${getSenderColor(message.sender_type)}`}
-          >
+          <Badge variant="secondary" className={`text-xs ${getSenderColor(message.sender_type)}`}>
             {senderLabel}
           </Badge>
           {getMessageIcon(message.message_type)}
@@ -160,25 +152,19 @@ const MessageItem = memo<MessageItemProps>(({ message }) => {
         )}
         {message.attachments && message.attachments.length > 0 && (
           <div className="mt-2 space-y-2">
-            {message.attachments.map((attachment) => (
-              <div 
-                key={attachment.id} 
-                className="flex items-center gap-2 p-2 bg-background/50 rounded"
-              >
-                {attachment.file_type.startsWith('image/') ? (
-                  <img
-                    src={attachment.file_url}
-                    alt={attachment.file_name}
-                    className="max-w-32 max-h-32 rounded object-contain"
-                    loading="lazy"
-                  />
-                ) : (
-                  <>
-                    <File className="h-4 w-4 flex-shrink-0" />
-                    <span className="text-xs truncate">{attachment.file_name}</span>
-                  </>
-                )}
-              </div>
+            {message.attachments.map(attachment => (
+              <MediaAttachment
+                key={attachment.id}
+                attachment={{
+                  id: attachment.id,
+                  file_name: attachment.file_name,
+                  file_type: attachment.file_type,
+                  file_url: attachment.file_url,
+                  storage_path: attachment.storage_path,
+                  file_size: attachment.file_size,
+                }}
+                size="thumbnail"
+              />
             ))}
           </div>
         )}
@@ -195,9 +181,7 @@ const MessageItem = memo<MessageItemProps>(({ message }) => {
       {isStoreMessage && (
         <Avatar className="h-8 w-8 flex-shrink-0">
           <AvatarImage src={message.sender?.avatar_url} loading="lazy" />
-          <AvatarFallback className="text-xs">
-            {getSenderIcon(message.sender_type)}
-          </AvatarFallback>
+          <AvatarFallback className="text-xs">{getSenderIcon(message.sender_type)}</AvatarFallback>
         </Avatar>
       )}
     </div>
@@ -213,11 +197,7 @@ interface ConversationItemProps {
   onSelect: (id: string) => void;
 }
 
-const ConversationItem = memo<ConversationItemProps>(({ 
-  conversation, 
-  isActive, 
-  onSelect 
-}) => {
+const ConversationItem = memo<ConversationItemProps>(({ conversation, isActive, onSelect }) => {
   const handleClick = useCallback(() => {
     onSelect(conversation.id);
   }, [conversation.id, onSelect]);
@@ -225,9 +205,7 @@ const ConversationItem = memo<ConversationItemProps>(({
   return (
     <Card
       className={`cursor-pointer transition-colors ${
-        isActive
-          ? 'bg-primary/10 border-primary'
-          : 'hover:bg-muted/50'
+        isActive ? 'bg-primary/10 border-primary' : 'hover:bg-muted/50'
       }`}
       onClick={handleClick}
     >
@@ -242,9 +220,7 @@ const ConversationItem = memo<ConversationItemProps>(({
                 <Shield className="h-3 w-3 text-purple-500 flex-shrink-0" />
               )}
             </div>
-            <p className="text-sm font-medium truncate">
-              {conversation.store?.name || 'Boutique'}
-            </p>
+            <p className="text-sm font-medium truncate">{conversation.store?.name || 'Boutique'}</p>
             {conversation.last_message && (
               <p className="text-xs text-muted-foreground truncate mt-1">
                 {conversation.last_message.content || 'Fichier envoyé'}
@@ -258,8 +234,8 @@ const ConversationItem = memo<ConversationItemProps>(({
               </span>
             )}
             {conversation.unread_count && conversation.unread_count > 0 && (
-              <Badge 
-                variant="destructive" 
+              <Badge
+                variant="destructive"
                 className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs min-w-[1.25rem]"
               >
                 {conversation.unread_count > 99 ? '99+' : conversation.unread_count}
@@ -279,7 +255,7 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
   orderId,
   storeId,
   customerId,
-  className = ""
+  className = '',
 }) => {
   const {
     conversations,
@@ -294,11 +270,12 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
     closeConversation,
     openConversation,
     enableAdminIntervention,
-  } = useMessaging(orderId);
+  } = useMessaging(orderId, storeId);
 
-  const [messageContent, setMessageContent] = useState("");
+  const [messageContent, setMessageContent] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showFileDialog, setShowFileDialog] = useState(false);
+  const [showCameraDialog, setShowCameraDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -307,7 +284,7 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
   // Throttle pour le scroll automatique (optimisation)
   const scrollToBottom = useCallback(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, []);
 
@@ -340,7 +317,9 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
   useEffect(() => {
     if (currentConversation?.id) {
       const markAsRead = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (user) {
           markMessagesAsRead(currentConversation.id, user.id);
         }
@@ -354,7 +333,7 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
     if (!currentConversation) return;
 
     const messageType: MessageType = selectedFiles.length > 0 ? 'file' : 'text';
-    
+
     const formData = {
       content: messageContent,
       message_type: messageType,
@@ -362,48 +341,62 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
     };
 
     await sendMessage(currentConversation.id, formData);
-    
-    setMessageContent("");
+
+    setMessageContent('');
     setSelectedFiles([]);
     setShowFileDialog(false);
-    
+
     // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   }, [messageContent, selectedFiles, currentConversation, sendMessage]);
 
-  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    const validFiles = files.filter(file => {
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      if (file.size > maxSize) {
-        toast({
-          title: "Fichier trop volumineux",
-          description: `${file.name} dépasse la taille maximale de 10MB`,
-          variant: "destructive",
-        });
-        return false;
-      }
-      return true;
-    });
-    setSelectedFiles(prev => [...prev, ...validFiles]);
-  }, [toast]);
+  const handleFileSelect = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(event.target.files || []);
+      const validFiles = files.filter(file => {
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.size > maxSize) {
+          toast({
+            title: 'Fichier trop volumineux',
+            description: `${file.name} dépasse la taille maximale de 10MB`,
+            variant: 'destructive',
+          });
+          return false;
+        }
+        return true;
+      });
+      setSelectedFiles(prev => [...prev, ...validFiles]);
+    },
+    [toast]
+  );
 
   const removeFile = useCallback((index: number) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   }, []);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  }, [handleSendMessage]);
+  const handleCameraCapture = useCallback((file: File) => {
+    setSelectedFiles(prev => [...prev, file]);
+    setShowCameraDialog(false);
+  }, []);
 
-  const handleOpenConversation = useCallback((id: string) => {
-    openConversation(id);
-  }, [openConversation]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage();
+      }
+    },
+    [handleSendMessage]
+  );
+
+  const handleOpenConversation = useCallback(
+    (id: string) => {
+      openConversation(id);
+    },
+    [openConversation]
+  );
 
   const handleEnableAdminIntervention = useCallback(() => {
     if (currentConversation) {
@@ -419,7 +412,7 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
 
   // Mémoriser les conversations rendues pour éviter les re-renders
   const conversationItems = useMemo(() => {
-    return conversations.map((conversation) => (
+    return conversations.map(conversation => (
       <ConversationItem
         key={conversation.id}
         conversation={conversation}
@@ -431,9 +424,7 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
 
   // Mémoriser les messages rendus
   const messageItems = useMemo(() => {
-    return messages.map((message) => (
-      <MessageItem key={message.id} message={message} />
-    ));
+    return messages.map(message => <MessageItem key={message.id} message={message} />);
   }, [messages]);
 
   // États de chargement
@@ -474,9 +465,7 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
           <h3 className="font-semibold">Conversations</h3>
         </div>
         <ScrollArea className="h-[calc(100%-4rem)]">
-          <div className="p-2 space-y-2">
-            {conversationItems}
-          </div>
+          <div className="p-2 space-y-2">{conversationItems}</div>
         </ScrollArea>
       </div>
 
@@ -507,7 +496,12 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="shrink-0"
+                    aria-label="Actions de la conversation"
+                  >
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -519,10 +513,7 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={handleCloseConversation}
-                    className="text-destructive"
-                  >
+                  <DropdownMenuItem onClick={handleCloseConversation} className="text-destructive">
                     <Lock className="h-4 w-4 mr-2" />
                     Fermer la conversation
                   </DropdownMenuItem>
@@ -562,15 +553,16 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
                       size="sm"
                       onClick={() => setSelectedFiles([])}
                       className="h-auto py-1"
+                      aria-label="Effacer tous les fichiers sélectionnés"
                     >
                       Effacer tout
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {selectedFiles.map((file, index) => (
-                      <Badge 
-                        key={`${file.name}-${index}`} 
-                        variant="secondary" 
+                      <Badge
+                        key={`${file.name}-${index}`}
+                        variant="secondary"
                         className="flex items-center gap-1 max-w-full"
                       >
                         <File className="h-3 w-3 flex-shrink-0" />
@@ -593,7 +585,7 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
                 <div className="flex-1 min-w-0">
                   <Textarea
                     value={messageContent}
-                    onChange={(e) => setMessageContent(e.target.value)}
+                    onChange={e => setMessageContent(e.target.value)}
                     placeholder="Tapez votre message..."
                     className="min-h-[60px] resize-none"
                     onKeyDown={handleKeyDown}
@@ -601,43 +593,60 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Dialog open={showFileDialog} onOpenChange={setShowFileDialog}>
-                    <DialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        disabled={sendingMessage}
-                        className="shrink-0"
-                      >
-                        <Paperclip className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Ajouter des fichiers</DialogTitle>
-                        <DialogDescription>
-                          Sélectionnez des images, vidéos ou documents à envoyer
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <Input
-                          ref={fileInputRef}
-                          type="file"
-                          multiple
-                          accept="image/*,video/*,.pdf,.txt,.doc,.docx"
-                          onChange={handleFileSelect}
-                          className="cursor-pointer"
-                        />
-                        <div className="text-sm text-muted-foreground">
-                          <p>Types autorisés: Images, vidéos, PDF, documents texte</p>
-                          <p>Taille maximale: 10MB par fichier</p>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={sendingMessage}
+                      className="shrink-0"
+                      onClick={() => setShowCameraDialog(true)}
+                      aria-label="Prendre une photo"
+                      title="Prendre une photo"
+                    >
+                      <Camera className="h-4 w-4" />
+                    </Button>
+                    <Dialog open={showFileDialog} onOpenChange={setShowFileDialog}>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={sendingMessage}
+                          className="shrink-0"
+                          aria-label="Joindre un fichier"
+                          title="Joindre un fichier"
+                        >
+                          <Paperclip className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Ajouter des fichiers</DialogTitle>
+                          <DialogDescription>
+                            Sélectionnez des images, vidéos ou documents à envoyer
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <Input
+                            ref={fileInputRef}
+                            type="file"
+                            multiple
+                            accept="image/*,video/*,.pdf,.txt,.doc,.docx"
+                            onChange={handleFileSelect}
+                            className="cursor-pointer"
+                          />
+                          <div className="text-sm text-muted-foreground">
+                            <p>Types autorisés: Images, vidéos, PDF, documents texte</p>
+                            <p>Taille maximale: 10MB par fichier</p>
+                          </div>
                         </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                   <Button
                     onClick={handleSendMessage}
-                    disabled={sendingMessage || (!messageContent.trim() && selectedFiles.length === 0)}
+                    disabled={
+                      sendingMessage || (!messageContent.trim() && selectedFiles.length === 0)
+                    }
                     size="sm"
                     className="shrink-0"
                   >
@@ -663,6 +672,14 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
           </div>
         )}
       </div>
+
+      {/* Camera Capture Dialog */}
+      <CameraCapture
+        open={showCameraDialog}
+        onClose={() => setShowCameraDialog(false)}
+        onCapture={handleCameraCapture}
+        captureLabel="Prendre la photo"
+      />
     </div>
   );
 };

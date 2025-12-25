@@ -8,6 +8,8 @@
  * Date : 29 Octobre 2025
  */
 
+import { logger } from '@/lib/logger';
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CoursesList, type CourseListItem } from './CoursesList';
@@ -308,30 +310,30 @@ export const CourseDay2Demo: React.FC = () => {
 
   // Handlers pour CoursesList
   const handleCourseSelect = (courseId: string) => {
-    console.log('Course selected:', courseId);
+    logger.info('Course selected', { courseId });
     alert(`Cours sélectionné: ${courseId}`);
   };
 
   const handleEdit = (courseId: string) => {
-    console.log('Edit course:', courseId);
+    logger.info('Edit course', { courseId });
     alert(`Éditer le cours: ${courseId}`);
   };
 
   const handleDelete = (courseId: string) => {
-    console.log('Delete course:', courseId);
+    logger.info('Delete course', { courseId });
     if (confirm(`Supprimer le cours ${courseId} ?`)) {
       alert('Cours supprimé (demo)');
     }
   };
 
   const handleBulkAction = (action: string, courseIds: string[]) => {
-    console.log('Bulk action:', action, courseIds);
+    logger.info('Bulk action', { action, count: courseIds.length, courseIds });
     alert(`Action groupée: ${action} sur ${courseIds.length} cours`);
   };
 
   // Handlers pour CoursePackageManager
   const handleCreatePackage = (packageData: Partial<CoursePackage>) => {
-    console.log('Create package:', packageData);
+    logger.info('Create package', { packageName: packageData.name });
     const newPackage: CoursePackage = {
       id: `PKG-${Date.now()}`,
       name: packageData.name || '',
@@ -352,13 +354,13 @@ export const CourseDay2Demo: React.FC = () => {
   };
 
   const handleUpdatePackage = (packageId: string, packageData: Partial<CoursePackage>) => {
-    console.log('Update package:', packageId, packageData);
+    logger.info('Update package', { packageId, packageName: packageData.name });
     setPackages(packages.map(pkg => pkg.id === packageId ? { ...pkg, ...packageData } : pkg));
     alert(`Package ${packageId} mis à jour !`);
   };
 
   const handleDeletePackage = (packageId: string) => {
-    console.log('Delete package:', packageId);
+    logger.info('Delete package', { packageId });
     if (confirm(`Supprimer le package ${packageId} ?`)) {
       setPackages(packages.filter(pkg => pkg.id !== packageId));
       alert('Package supprimé !');
@@ -366,7 +368,7 @@ export const CourseDay2Demo: React.FC = () => {
   };
 
   const handleDuplicatePackage = (packageId: string) => {
-    console.log('Duplicate package:', packageId);
+    logger.info('Duplicate package', { packageId });
     const pkg = packages.find(p => p.id === packageId);
     if (pkg) {
       const newPackage: CoursePackage = {
@@ -383,7 +385,7 @@ export const CourseDay2Demo: React.FC = () => {
   };
 
   const handleTogglePackageActive = (packageId: string, isActive: boolean) => {
-    console.log('Toggle package active:', packageId, isActive);
+    logger.info('Toggle package active', { packageId, isActive });
     setPackages(packages.map(pkg => pkg.id === packageId ? { ...pkg, isActive } : pkg));
   };
 

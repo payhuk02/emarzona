@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Package, ShoppingCart, Users, Tag, GraduationCap } from "lucide-react";
+import { Plus, Package, ShoppingCart, Users, Tag, GraduationCap } from '@/components/icons';
 import { useNavigate } from "react-router-dom";
 
 export const QuickActions = () => {

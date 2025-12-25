@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useValidateGiftCard } from '@/hooks/giftCards/useGiftCards';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Gift, X, Loader2 } from 'lucide-react';
+import { Gift, X, Loader2 } from '@/components/icons';
 import { formatCurrency } from '@/lib/utils';
 
 interface GiftCardInputProps {
@@ -82,10 +82,11 @@ export default function GiftCardInput({
         title: 'Carte cadeau appliquée',
         description: `Solde disponible : ${formatCurrency(validation.current_balance)}`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de valider la carte cadeau';
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de valider la carte cadeau',
+        description: errorMessage,
         variant: 'destructive'
       });
     }
@@ -119,6 +120,7 @@ export default function GiftCardInput({
             variant="ghost"
             size="sm"
             onClick={handleRemove}
+            aria-label="Retirer la carte cadeau"
           >
             <X className="h-4 w-4" />
           </Button>

@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Truck, Package, Info } from 'lucide-react';
+import { Truck, Package, Info } from '@/components/icons';
 import type { PhysicalProductFormData } from '@/types/physical-product';
 
 interface PhysicalShippingConfigProps {
@@ -35,13 +35,11 @@ export const PhysicalShippingConfig = ({ data, onUpdate }: PhysicalShippingConfi
                 <Truck className="h-5 w-5" />
                 Expédition requise
               </CardTitle>
-              <CardDescription>
-                Ce produit nécessite-t-il une expédition physique ?
-              </CardDescription>
+              <CardDescription>Ce produit nécessite-t-il une expédition physique ?</CardDescription>
             </div>
             <Switch
               checked={data.requires_shipping ?? true}
-              onCheckedChange={(checked) => onUpdate({ requires_shipping: checked })}
+              onCheckedChange={checked => onUpdate({ requires_shipping: checked })}
             />
           </div>
         </CardHeader>
@@ -68,7 +66,7 @@ export const PhysicalShippingConfig = ({ data, onUpdate }: PhysicalShippingConfi
                     step="0.01"
                     placeholder="1.5"
                     value={data.weight || ''}
-                    onChange={(e) => onUpdate({ weight: parseFloat(e.target.value) || null })}
+                    onChange={e => onUpdate({ weight: parseFloat(e.target.value) || null })}
                   />
                 </div>
 
@@ -76,12 +74,14 @@ export const PhysicalShippingConfig = ({ data, onUpdate }: PhysicalShippingConfi
                   <Label htmlFor="weight_unit">Unité</Label>
                   <Select
                     value={data.weight_unit || 'kg'}
-                    onValueChange={(value) => onUpdate({ weight_unit: value as any })}
+                    onValueChange={value =>
+                      onUpdate({ weight_unit: value as 'kg' | 'g' | 'lb' | 'oz' })
+                    }
                   >
                     <SelectTrigger id="weight_unit">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent mobileVariant="sheet">
                       <SelectItem value="kg">Kilogrammes (kg)</SelectItem>
                       <SelectItem value="g">Grammes (g)</SelectItem>
                       <SelectItem value="lb">Livres (lb)</SelectItem>
@@ -109,7 +109,7 @@ export const PhysicalShippingConfig = ({ data, onUpdate }: PhysicalShippingConfi
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="length">Longueur</Label>
                   <Input
@@ -119,7 +119,7 @@ export const PhysicalShippingConfig = ({ data, onUpdate }: PhysicalShippingConfi
                     step="0.1"
                     placeholder="30"
                     value={data.dimensions?.length || ''}
-                    onChange={(e) =>
+                    onChange={e =>
                       onUpdate({
                         dimensions: {
                           ...data.dimensions!,
@@ -139,7 +139,7 @@ export const PhysicalShippingConfig = ({ data, onUpdate }: PhysicalShippingConfi
                     step="0.1"
                     placeholder="20"
                     value={data.dimensions?.width || ''}
-                    onChange={(e) =>
+                    onChange={e =>
                       onUpdate({
                         dimensions: {
                           ...data.dimensions!,
@@ -159,7 +159,7 @@ export const PhysicalShippingConfig = ({ data, onUpdate }: PhysicalShippingConfi
                     step="0.1"
                     placeholder="10"
                     value={data.dimensions?.height || ''}
-                    onChange={(e) =>
+                    onChange={e =>
                       onUpdate({
                         dimensions: {
                           ...data.dimensions!,
@@ -174,7 +174,7 @@ export const PhysicalShippingConfig = ({ data, onUpdate }: PhysicalShippingConfi
                   <Label htmlFor="dim_unit">Unité</Label>
                   <Select
                     value={data.dimensions?.unit || 'cm'}
-                    onValueChange={(value) =>
+                    onValueChange={value =>
                       onUpdate({
                         dimensions: {
                           ...data.dimensions!,
@@ -186,7 +186,7 @@ export const PhysicalShippingConfig = ({ data, onUpdate }: PhysicalShippingConfi
                     <SelectTrigger id="dim_unit">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent mobileVariant="sheet">
                       <SelectItem value="cm">Centimètres</SelectItem>
                       <SelectItem value="in">Pouces</SelectItem>
                     </SelectContent>
@@ -202,13 +202,11 @@ export const PhysicalShippingConfig = ({ data, onUpdate }: PhysicalShippingConfi
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Livraison gratuite</CardTitle>
-                  <CardDescription>
-                    Offrir la livraison gratuite pour ce produit
-                  </CardDescription>
+                  <CardDescription>Offrir la livraison gratuite pour ce produit</CardDescription>
                 </div>
                 <Switch
                   checked={data.free_shipping ?? false}
-                  onCheckedChange={(checked) => onUpdate({ free_shipping: checked })}
+                  onCheckedChange={checked => onUpdate({ free_shipping: checked })}
                 />
               </div>
             </CardHeader>

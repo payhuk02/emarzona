@@ -16,6 +16,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
+import { logger } from "@/lib/logger";
 import { 
   User, 
   Mail, 
@@ -140,7 +141,7 @@ export const AdvancedProfileSettings = () => {
       setReferralInfo(referral);
       setReferredProfiles(referred);
     } catch (error) {
-      console.error('Error loading advanced data:', error);
+      logger.error('Error loading advanced data', { error });
     }
   };
 
@@ -167,7 +168,7 @@ export const AdvancedProfileSettings = () => {
         await loadAdvancedData();
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
+      logger.error('Error updating profile', { error });
     } finally {
       setLoading(false);
     }
@@ -248,14 +249,14 @@ export const AdvancedProfileSettings = () => {
     <TooltipProvider>
       <div className="space-y-6">
         {/* En-tête du profil */}
-        <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+        <Card className="border border-border bg-white shadow-sm">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  <Avatar className="h-20 w-20 border-4 border-gray-600">
+                  <Avatar className="h-20 w-20 border-4 border-primary/20">
                     <AvatarImage src={profile.avatar_url || ""} alt="Avatar" />
-                    <AvatarFallback className="text-lg font-semibold bg-gray-700 text-white">
+                    <AvatarFallback className="text-lg font-semibold bg-primary text-primary-foreground">
                       {getInitials()}
                     </AvatarFallback>
                   </Avatar>
@@ -265,6 +266,7 @@ export const AdvancedProfileSettings = () => {
                     className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-blue-600 hover:bg-blue-700"
                     onClick={handleAvatarClick}
                     disabled={uploading}
+                    aria-label="Modifier l'avatar"
                   >
                     {uploading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -281,10 +283,10 @@ export const AdvancedProfileSettings = () => {
                   />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-white">
+                  <h1 className="text-2xl font-bold text-foreground">
                     {formData.displayName || user?.email}
                   </h1>
-                  <p className="text-gray-400">
+                  <p className="text-muted-foreground">
                     {formData.firstName && formData.lastName 
                       ? `${formData.firstName} ${formData.lastName}` 
                       : t('settings.profileSettings.memberSince') + " " + format(new Date(profile.created_at), "MMMM yyyy", { locale: fr })
@@ -307,7 +309,7 @@ export const AdvancedProfileSettings = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowPrivateInfo(!showPrivateInfo)}
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  className="border-border text-foreground hover:bg-accent"
                 >
                   {showPrivateInfo ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
@@ -315,7 +317,7 @@ export const AdvancedProfileSettings = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => refetch()}
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  className="border-border text-foreground hover:bg-accent"
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
@@ -325,14 +327,14 @@ export const AdvancedProfileSettings = () => {
         </Card>
 
         {/* Barre de progression du profil */}
-        <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+        <Card className="border border-border bg-white shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-white">Complétion du profil</span>
-              <span className="text-sm text-gray-400">{profileCompletion}%</span>
+              <span className="text-sm font-medium text-foreground">Complétion du profil</span>
+              <span className="text-sm text-muted-foreground font-semibold">{profileCompletion}%</span>
             </div>
             <Progress value={profileCompletion} className="h-2" />
-            <p className="text-xs text-gray-400 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               Complétez votre profil pour améliorer votre visibilité et votre crédibilité
             </p>
           </CardContent>
@@ -340,95 +342,95 @@ export const AdvancedProfileSettings = () => {
 
         {/* Onglets */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-gray-800 border border-gray-700">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-gray-700">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="personal" className="data-[state=active]:bg-gray-700">Informations</TabsTrigger>
-            <TabsTrigger value="referral" className="data-[state=active]:bg-gray-700">Parrainage</TabsTrigger>
-            <TabsTrigger value="stats" className="data-[state=active]:bg-gray-700">Statistiques</TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-gray-700">Paramètres</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 bg-muted border border-border">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Vue d'ensemble</TabsTrigger>
+            <TabsTrigger value="personal" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Informations</TabsTrigger>
+            <TabsTrigger value="referral" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Parrainage</TabsTrigger>
+            <TabsTrigger value="stats" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Statistiques</TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-background data-[state=active]:text-foreground">Paramètres</TabsTrigger>
           </TabsList>
 
           {/* Vue d'ensemble */}
           <TabsContent value="overview" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+              <Card className="border border-border bg-white shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-400">Complétion</p>
-                      <p className="text-2xl font-bold text-white">{profileCompletion}%</p>
+                      <p className="text-sm text-muted-foreground">Complétion</p>
+                      <p className="text-2xl font-bold text-foreground">{profileCompletion}%</p>
                     </div>
-                    <Target className="h-8 w-8 text-blue-400" />
+                    <Target className="h-8 w-8 text-primary" />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+              <Card className="border border-border bg-white shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-400">Parrainages</p>
-                      <p className="text-2xl font-bold text-white">{referredProfiles.length}</p>
+                      <p className="text-sm text-muted-foreground">Parrainages</p>
+                      <p className="text-2xl font-bold text-foreground">{referredProfiles.length}</p>
                     </div>
-                    <Users className="h-8 w-8 text-green-400" />
+                    <Users className="h-8 w-8 text-green-600" />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+              <Card className="border border-border bg-white shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-400">Gains</p>
-                      <p className="text-2xl font-bold text-white">
+                      <p className="text-sm text-muted-foreground">Gains</p>
+                      <p className="text-2xl font-bold text-foreground">
                         {referralInfo?.total_referral_earnings || 0} XOF
                       </p>
                     </div>
-                    <DollarSign className="h-8 w-8 text-yellow-400" />
+                    <DollarSign className="h-8 w-8 text-yellow-600" />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+              <Card className="border border-border bg-white shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-400">Membre depuis</p>
-                      <p className="text-sm font-semibold text-white">
+                      <p className="text-sm text-muted-foreground">Membre depuis</p>
+                      <p className="text-sm font-semibold text-foreground">
                         {format(new Date(profile.created_at), "MMM yyyy", { locale: fr })}
                       </p>
                     </div>
-                    <Calendar className="h-8 w-8 text-purple-400" />
+                    <Calendar className="h-8 w-8 text-purple-600" />
                   </div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Informations récentes */}
-            <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+            <Card className="border border-border bg-white shadow-sm">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="text-foreground flex items-center gap-2">
                   <Activity className="h-5 w-5" />
                   Activité récente
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg">
-                    <CheckCircle2 className="h-5 w-5 text-green-400" />
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border border-border">
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
                     <div>
-                      <p className="text-sm font-medium text-white">Profil mis à jour</p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-sm font-medium text-foreground">Profil mis à jour</p>
+                      <p className="text-xs text-muted-foreground">
                         {format(new Date(profile.updated_at), "dd MMM yyyy à HH:mm", { locale: fr })}
                       </p>
                     </div>
                   </div>
                   {referralInfo?.referral_code && (
-                    <div className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg">
-                      <Share2 className="h-5 w-5 text-blue-400" />
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border border-border">
+                      <Share2 className="h-5 w-5 text-primary" />
                       <div>
-                        <p className="text-sm font-medium text-white">Code de parrainage généré</p>
-                        <p className="text-xs text-gray-400">Code: {referralInfo.referral_code}</p>
+                        <p className="text-sm font-medium text-foreground">Code de parrainage généré</p>
+                        <p className="text-xs text-muted-foreground">Code: {referralInfo.referral_code}</p>
                       </div>
                     </div>
                   )}
@@ -439,12 +441,12 @@ export const AdvancedProfileSettings = () => {
 
           {/* Informations personnelles */}
           <TabsContent value="personal" className="space-y-6 mt-6">
-            <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+            <Card className="border border-border bg-white shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-lg font-semibold text-white">Informations personnelles</CardTitle>
-                    <CardDescription className="text-gray-400">
+                    <CardTitle className="text-lg font-semibold text-foreground">Informations personnelles</CardTitle>
+                    <CardDescription className="text-muted-foreground">
                       Gérez vos informations personnelles et votre profil public
                     </CardDescription>
                   </div>
@@ -452,7 +454,7 @@ export const AdvancedProfileSettings = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setIsEditing(!isEditing)}
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                    className="border-border text-foreground hover:bg-accent"
                   >
                     {isEditing ? (
                       <>
@@ -472,93 +474,93 @@ export const AdvancedProfileSettings = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-white">Nom d'affichage *</Label>
+                      <Label className="text-sm font-medium text-foreground">Nom d'affichage *</Label>
                       <Input
                         value={formData.displayName}
                         onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
                         placeholder="Votre nom d'affichage"
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
+                        className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                         disabled={!isEditing}
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-white">Email</Label>
+                      <Label className="text-sm font-medium text-foreground">Email</Label>
                       <Input
                         value={user?.email || ""}
                         disabled
-                        className="bg-gray-800 border-gray-600 text-gray-400"
+                        className="bg-muted border-input text-muted-foreground"
                       />
-                      <p className="text-xs text-gray-400">L'email ne peut pas être modifié</p>
+                      <p className="text-xs text-muted-foreground">L'email ne peut pas être modifié</p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-white">Prénom</Label>
+                      <Label className="text-sm font-medium text-foreground">Prénom</Label>
                       <Input
                         value={formData.firstName}
                         onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
                         placeholder="Votre prénom"
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
+                        className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                         disabled={!isEditing}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-white">Nom de famille</Label>
+                      <Label className="text-sm font-medium text-foreground">Nom de famille</Label>
                       <Input
                         value={formData.lastName}
                         onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
                         placeholder="Votre nom de famille"
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
+                        className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                         disabled={!isEditing}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-white">Téléphone</Label>
+                      <Label className="text-sm font-medium text-foreground">Téléphone</Label>
                       <Input
                         value={formData.phone}
                         onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                         placeholder="+226 XX XX XX XX"
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
+                        className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                         disabled={!isEditing}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-white">Localisation</Label>
+                      <Label className="text-sm font-medium text-foreground">Localisation</Label>
                       <Input
                         value={formData.location}
                         onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
                         placeholder="Ville, Pays"
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
+                        className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                         disabled={!isEditing}
                       />
                     </div>
 
                     <div className="space-y-2 md:col-span-2">
-                      <Label className="text-sm font-medium text-white">Site web</Label>
+                      <Label className="text-sm font-medium text-foreground">Site web</Label>
                       <Input
                         value={formData.website}
                         onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
                         placeholder="https://votre-site.com"
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
+                        className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                         disabled={!isEditing}
                       />
                     </div>
 
                     <div className="space-y-2 md:col-span-2">
-                      <Label className="text-sm font-medium text-white">Biographie</Label>
+                      <Label className="text-sm font-medium text-foreground">Biographie</Label>
                       <Textarea
                         value={formData.bio}
                         onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
                         placeholder="Parlez-nous de vous..."
                         rows={4}
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
+                        className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                         disabled={!isEditing}
                       />
-                      <p className="text-xs text-gray-400">Maximum 500 caractères</p>
+                      <p className="text-xs text-muted-foreground">Maximum 500 caractères</p>
                     </div>
                   </div>
 
@@ -568,14 +570,14 @@ export const AdvancedProfileSettings = () => {
                         type="button"
                         variant="outline"
                         onClick={handleCancel}
-                        className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                        className="border-border text-foreground hover:bg-accent"
                       >
                         {t('settings.profileSettings.cancel')}
                       </Button>
                       <Button
                         type="submit"
                         disabled={loading}
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
                       >
                         {loading ? (
                           <>
@@ -598,24 +600,24 @@ export const AdvancedProfileSettings = () => {
 
           {/* Parrainage */}
           <TabsContent value="referral" className="space-y-6 mt-6">
-            <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+            <Card className="border border-border bg-white shadow-sm">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="text-foreground flex items-center gap-2">
                   <Share2 className="h-5 w-5" />
                   Programme de parrainage
                 </CardTitle>
-                <CardDescription className="text-gray-400">
+                <CardDescription className="text-muted-foreground">
                   Invitez vos amis et gagnez des commissions
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {referralInfo?.referral_code ? (
                   <div className="space-y-4">
-                    <div className="p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                    <div className="p-4 bg-muted/50 rounded-lg border border-border">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-white">Votre code de parrainage</p>
-                          <p className="text-2xl font-bold text-blue-400 font-mono">
+                          <p className="text-sm font-medium text-foreground">Votre code de parrainage</p>
+                          <p className="text-2xl font-bold text-primary font-mono">
                             {referralInfo.referral_code}
                           </p>
                         </div>
@@ -624,7 +626,7 @@ export const AdvancedProfileSettings = () => {
                             variant="outline"
                             size="sm"
                             onClick={copyReferralCode}
-                            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                            className="border-border text-foreground hover:bg-accent"
                           >
                             <Copy className="h-4 w-4 mr-2" />
                             Copier
@@ -633,7 +635,7 @@ export const AdvancedProfileSettings = () => {
                             variant="outline"
                             size="sm"
                             onClick={shareReferralCode}
-                            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                            className="border-border text-foreground hover:bg-accent"
                           >
                             <Share2 className="h-4 w-4 mr-2" />
                             Partager
@@ -643,28 +645,28 @@ export const AdvancedProfileSettings = () => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card className="bg-gray-700/30 border-gray-600">
+                      <Card className="bg-muted/50 border-border">
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm text-gray-400">Parrainages</p>
-                              <p className="text-2xl font-bold text-white">{referredProfiles.length}</p>
+                              <p className="text-sm text-muted-foreground">Parrainages</p>
+                              <p className="text-2xl font-bold text-foreground">{referredProfiles.length}</p>
                             </div>
-                            <Users className="h-8 w-8 text-green-400" />
+                            <Users className="h-8 w-8 text-green-600" />
                           </div>
                         </CardContent>
                       </Card>
 
-                      <Card className="bg-gray-700/30 border-gray-600">
+                      <Card className="bg-muted/50 border-border">
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm text-gray-400">Gains totaux</p>
-                              <p className="text-2xl font-bold text-white">
+                              <p className="text-sm text-muted-foreground">Gains totaux</p>
+                              <p className="text-2xl font-bold text-foreground">
                                 {referralInfo.total_referral_earnings || 0} XOF
                               </p>
                             </div>
-                            <DollarSign className="h-8 w-8 text-yellow-400" />
+                            <DollarSign className="h-8 w-8 text-yellow-600" />
                           </div>
                         </CardContent>
                       </Card>
@@ -672,21 +674,21 @@ export const AdvancedProfileSettings = () => {
 
                     {referredProfiles.length > 0 && (
                       <div>
-                        <h3 className="text-lg font-semibold text-white mb-4">Parrainages récents</h3>
+                        <h3 className="text-lg font-semibold text-foreground mb-4">Parrainages récents</h3>
                         <div className="space-y-2">
                           {referredProfiles.slice(0, 5).map((ref) => (
-                            <div key={ref.id} className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg">
+                            <div key={ref.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border">
                               <div className="flex items-center gap-3">
                                 <Avatar className="h-8 w-8">
-                                  <AvatarFallback className="text-xs bg-gray-600">
+                                  <AvatarFallback className="text-xs bg-primary text-primary-foreground">
                                     {ref.display_name?.[0] || "U"}
                                   </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                  <p className="text-sm font-medium text-white">
+                                  <p className="text-sm font-medium text-foreground">
                                     {ref.display_name || `${ref.first_name || ""} ${ref.last_name || ""}`.trim() || "Utilisateur"}
                                   </p>
-                                  <p className="text-xs text-gray-400">
+                                  <p className="text-xs text-muted-foreground">
                                     Rejoint le {format(new Date(ref.created_at), "dd MMM yyyy", { locale: fr })}
                                   </p>
                                 </div>
@@ -702,8 +704,8 @@ export const AdvancedProfileSettings = () => {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-400">Code de parrainage non disponible</p>
+                    <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">Code de parrainage non disponible</p>
                   </div>
                 )}
               </CardContent>
@@ -713,9 +715,9 @@ export const AdvancedProfileSettings = () => {
           {/* Statistiques */}
           <TabsContent value="stats" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+              <Card className="border border-border bg-white shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-foreground flex items-center gap-2">
                     <BarChart3 className="h-5 w-5" />
                     Statistiques du profil
                   </CardTitle>
@@ -723,21 +725,21 @@ export const AdvancedProfileSettings = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">Complétion du profil</span>
-                      <span className="text-sm font-semibold text-white">{profileCompletion}%</span>
+                      <span className="text-sm text-muted-foreground">Complétion du profil</span>
+                      <span className="text-sm font-semibold text-foreground">{profileCompletion}%</span>
                     </div>
                     <Progress value={profileCompletion} className="h-2" />
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">Membre depuis</span>
-                      <span className="text-sm font-semibold text-white">
+                      <span className="text-sm text-muted-foreground">Membre depuis</span>
+                      <span className="text-sm font-semibold text-foreground">
                         {format(new Date(profile.created_at), "dd MMM yyyy", { locale: fr })}
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">Dernière mise à jour</span>
-                      <span className="text-sm font-semibold text-white">
+                      <span className="text-sm text-muted-foreground">Dernière mise à jour</span>
+                      <span className="text-sm font-semibold text-foreground">
                         {format(new Date(profile.updated_at), "dd MMM yyyy", { locale: fr })}
                       </span>
                     </div>
@@ -745,9 +747,9 @@ export const AdvancedProfileSettings = () => {
                 </CardContent>
               </Card>
 
-              <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+              <Card className="border border-border bg-white shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-foreground flex items-center gap-2">
                     <PieChart className="h-5 w-5" />
                     Répartition des informations
                   </CardTitle>
@@ -762,8 +764,8 @@ export const AdvancedProfileSettings = () => {
                     ].map((item, index) => (
                       <div key={index} className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-400">{item.label}</span>
-                          <span className="text-sm font-semibold text-white">
+                          <span className="text-sm text-muted-foreground">{item.label}</span>
+                          <span className="text-sm font-semibold text-foreground">
                             {item.value}/{item.max}
                           </span>
                         </div>
@@ -778,22 +780,22 @@ export const AdvancedProfileSettings = () => {
 
           {/* Paramètres */}
           <TabsContent value="settings" className="space-y-6 mt-6">
-            <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+            <Card className="border border-border bg-white shadow-sm">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="text-foreground flex items-center gap-2">
                   <Settings className="h-5 w-5" />
                   Paramètres de confidentialité
                 </CardTitle>
-                <CardDescription className="text-gray-400">
+                <CardDescription className="text-muted-foreground">
                   Contrôlez la visibilité de vos informations
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
                     <div className="space-y-1">
-                      <Label className="text-sm font-medium text-white">Profil public</Label>
-                      <p className="text-xs text-gray-400">Rendre votre profil visible par d'autres utilisateurs</p>
+                      <Label className="text-sm font-medium text-foreground">Profil public</Label>
+                      <p className="text-xs text-muted-foreground">Rendre votre profil visible par d'autres utilisateurs</p>
                     </div>
                     <Switch
                       checked={showPrivateInfo}
@@ -801,18 +803,18 @@ export const AdvancedProfileSettings = () => {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
                     <div className="space-y-1">
-                      <Label className="text-sm font-medium text-white">Statut en ligne</Label>
-                      <p className="text-xs text-gray-400">Afficher quand vous êtes connecté</p>
+                      <Label className="text-sm font-medium text-foreground">Statut en ligne</Label>
+                      <p className="text-xs text-muted-foreground">Afficher quand vous êtes connecté</p>
                     </div>
                     <Switch defaultChecked />
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
                     <div className="space-y-1">
-                      <Label className="text-sm font-medium text-white">Notifications par email</Label>
-                      <p className="text-xs text-gray-400">Recevoir des notifications importantes par email</p>
+                      <Label className="text-sm font-medium text-foreground">Notifications par email</Label>
+                      <p className="text-xs text-muted-foreground">Recevoir des notifications importantes par email</p>
                     </div>
                     <Switch
                       checked={notifications.emailUpdates}
@@ -820,10 +822,10 @@ export const AdvancedProfileSettings = () => {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
                     <div className="space-y-1">
-                      <Label className="text-sm font-medium text-white">Emails marketing</Label>
-                      <p className="text-xs text-gray-400">Recevoir des offres et promotions</p>
+                      <Label className="text-sm font-medium text-foreground">Emails marketing</Label>
+                      <p className="text-xs text-muted-foreground">Recevoir des offres et promotions</p>
                     </div>
                     <Switch
                       checked={notifications.marketingEmails}
@@ -834,9 +836,9 @@ export const AdvancedProfileSettings = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+            <Card className="border border-border bg-white shadow-sm">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="text-foreground flex items-center gap-2">
                   <Shield className="h-5 w-5" />
                   Actions du compte
                 </CardTitle>
@@ -845,7 +847,7 @@ export const AdvancedProfileSettings = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Button
                     variant="outline"
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                    className="border-border text-foreground hover:bg-accent"
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Exporter les données
@@ -853,7 +855,7 @@ export const AdvancedProfileSettings = () => {
                   
                   <Button
                     variant="outline"
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                    className="border-border text-foreground hover:bg-accent"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Supprimer l'avatar

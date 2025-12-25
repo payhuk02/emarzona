@@ -322,6 +322,7 @@ export const CourseBundleBuilder: React.FC<CourseBundleBuilderProps> = ({
                               variant="ghost"
                               size="icon"
                               onClick={() => removeCourse(course.id)}
+                              aria-label={`Retirer ${course.title} du bundle`}
                             >
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>

@@ -5,6 +5,7 @@
  * Composant pour afficher une carte d'abonnement de produit digital
  */
 
+import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -87,7 +88,7 @@ const INTERVAL_LABELS = {
   yearly: 'Annuel',
 };
 
-export const DigitalSubscriptionCard = ({
+const DigitalSubscriptionCardComponent = ({
   subscription,
   showActions = true,
   onCancel,
@@ -124,6 +125,7 @@ export const DigitalSubscriptionCard = ({
         subscription.status === 'past_due' && "border-yellow-500",
         className
       )}
+      style={{ willChange: 'transform' }}
     >
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
@@ -286,6 +288,23 @@ export const DigitalSubscriptionCard = ({
     </Card>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const DigitalSubscriptionCard = React.memo(DigitalSubscriptionCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.subscription.id === nextProps.subscription.id &&
+    prevProps.subscription.status === nextProps.subscription.status &&
+    prevProps.subscription.current_period_end === nextProps.subscription.current_period_end &&
+    prevProps.subscription.amount === nextProps.subscription.amount &&
+    prevProps.showActions === nextProps.showActions &&
+    prevProps.onCancel === nextProps.onCancel &&
+    prevProps.onReactivate === nextProps.onReactivate &&
+    prevProps.onViewPayments === nextProps.onViewPayments &&
+    prevProps.className === nextProps.className
+  );
+});
+
+DigitalSubscriptionCard.displayName = 'DigitalSubscriptionCard';
 
 /**
  * Subscriptions Grid - Grille d'abonnements

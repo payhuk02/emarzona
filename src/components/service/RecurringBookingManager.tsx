@@ -21,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { logger } from '@/lib/logger';
 import {
   Calendar,
   Clock,
@@ -178,7 +179,7 @@ export const RecurringBookingManager: React.FC<RecurringBookingManagerProps> = (
       setIsDialogOpen(false);
       setEditingBooking(null);
     } catch (error) {
-      console.error('Error saving recurring booking:', error);
+      logger.error('Error saving recurring booking', { error, bookingId: editingBooking?.id });
     } finally {
       setIsSaving(false);
     }
@@ -339,7 +340,7 @@ export const RecurringBookingManager: React.FC<RecurringBookingManagerProps> = (
 
       {/* Dialog d'édition */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingBooking?.id ? 'Modifier' : 'Nouvelle'} réservation récurrente

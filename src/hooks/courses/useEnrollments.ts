@@ -8,13 +8,14 @@
  * - Suivi de la progression
  * - Gestion de l'accès
  * 
- * @author Payhuk Team
+ * @author Emarzona Team
  * @date 29 Octobre 2025
  */
 
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 import { EnrollmentStatus } from '@/components/courses/EnrollmentInfoDisplay';
 
 /**
@@ -212,11 +213,24 @@ export const useEnrollments = () => {
   };
 
   /**
-   * Récupérer les statistiques
+   * Récupérer les statistiques (optimisé avec fonction SQL)
    */
   const { data: stats } = useQuery({
     queryKey: ['enrollment-stats'],
     queryFn: async () => {
+      // Essayer d'abord la fonction SQL optimisée
+      const { data: statsData, error: rpcError } = await supabase.rpc('get_enrollment_stats');
+
+      if (!rpcError && statsData) {
+        // La fonction SQL retourne les stats directement
+        return statsData as EnrollmentStats;
+      }
+
+      // Fallback : calcul côté client si la fonction n'existe pas encore
+      logger.warn('get_enrollment_stats function not available, using client-side calculation', {
+        error: rpcError?.message,
+      });
+
       const { data: allEnrollments, error } = await supabase
         .from('enrollments')
         .select('*');

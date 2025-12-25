@@ -3,6 +3,7 @@
  * Carte pour afficher un parcours d'apprentissage
  */
 
+import React from 'react';
 import { BookOpen, Clock, Users, TrendingUp, Award, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,7 +31,7 @@ export const LearningPathCard = ({
   const isCompleted = enrollment?.status === 'completed';
 
   return (
-    <Card className={cn('hover:shadow-lg transition-all', className)}>
+    <Card className={cn('hover:shadow-lg transition-all', className)} style={{ willChange: 'transform' }}>
       {path.image_url && (
         <div className="relative h-48 w-full overflow-hidden rounded-t-lg">
           <img

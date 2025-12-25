@@ -1,6 +1,6 @@
 /**
  * Utilitaire pour optimiser et transformer les images avec Supabase Transform API
- * 
+ *
  * Features:
  * - Génération d'URLs optimisées (width, quality, format)
  * - Support srcSet responsive
@@ -14,13 +14,18 @@ export interface ImageTransformOptions {
   quality?: number;
   format?: 'webp' | 'jpg' | 'png' | 'avif' | 'origin';
   resize?: 'cover' | 'contain' | 'fill';
+  /**
+   * Détecter automatiquement le meilleur format (AVIF > WebP > original)
+   * @default true
+   */
+  autoFormat?: boolean;
 }
 
 export interface ResponsiveImageSizes {
-  mobile: number;    // 300-400px
-  tablet: number;    // 600-768px
-  desktop: number;   // 900-1200px
-  large?: number;    // 1600px+ (optionnel)
+  mobile: number; // 300-400px
+  tablet: number; // 600-768px
+  desktop: number; // 900-1200px
+  large?: number; // 1600px+ (optionnel)
 }
 
 /**
@@ -33,13 +38,13 @@ export const isSupabaseStorageUrl = (url: string | undefined | null): boolean =>
 
 /**
  * Génère une URL Supabase Storage optimisée avec paramètres de transformation
- * 
+ *
  * Supabase Transform API: https://supabase.com/docs/guides/storage/image-transformations
- * 
+ *
  * @param imageUrl - URL originale de l'image Supabase
  * @param options - Options de transformation
  * @returns URL transformée avec paramètres
- * 
+ *
  * @example
  * const optimizedUrl = getOptimizedImageUrl(
  *   'https://project.supabase.co/storage/v1/object/public/bucket/image.jpg',
@@ -47,16 +52,63 @@ export const isSupabaseStorageUrl = (url: string | undefined | null): boolean =>
  * );
  * // => 'https://project.supabase.co/storage/v1/object/public/bucket/image.jpg?width=600&quality=80&format=webp'
  */
+/**
+ * Détecte le meilleur format d'image supporté par le navigateur
+ * Priorité: AVIF > WebP > Original
+ *
+ * AVIF offre ~50% de compression en plus que WebP
+ * WebP offre ~30% de compression en plus que JPEG/PNG
+ */
+const getBestSupportedFormat = (): 'avif' | 'webp' | 'origin' => {
+  if (typeof document === 'undefined') return 'webp'; // SSR fallback
+
+  // Vérifier le support AVIF (format le plus moderne et efficace)
+  // AVIF est supporté par Chrome 85+, Firefox 93+, Safari 16+
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    const avifSupported = canvas.toDataURL('image/avif').indexOf('data:image/avif') === 0;
+
+    if (avifSupported) {
+      return 'avif';
+    }
+  } catch (e) {
+    // AVIF non supporté, continuer avec WebP
+  }
+
+  // Vérifier le support WebP (fallback universel)
+  // WebP est supporté par tous les navigateurs modernes
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    const webpSupported = canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+
+    if (webpSupported) {
+      return 'webp';
+    }
+  } catch (e) {
+    // WebP non supporté, utiliser format original
+  }
+
+  return 'origin';
+};
+
 export const getOptimizedImageUrl = (
   imageUrl: string | undefined | null,
   options: ImageTransformOptions = {}
 ): string | undefined => {
   if (!imageUrl) return undefined;
-  
+
   // Si ce n'est pas une URL Supabase Storage, retourner tel quel
   if (!isSupabaseStorageUrl(imageUrl)) {
     return imageUrl;
   }
+
+  // Détecter le meilleur format si autoFormat est activé
+  const format =
+    options.autoFormat !== false && !options.format ? getBestSupportedFormat() : options.format;
 
   // Construire les paramètres de transformation
   const params = new URLSearchParams();
@@ -73,8 +125,8 @@ export const getOptimizedImageUrl = (
     params.append('quality', Math.min(100, Math.max(1, options.quality)).toString());
   }
 
-  if (options.format) {
-    params.append('format', options.format);
+  if (format && format !== 'origin') {
+    params.append('format', format);
   }
 
   if (options.resize) {
@@ -82,19 +134,19 @@ export const getOptimizedImageUrl = (
   }
 
   const queryString = params.toString();
-  
+
   // Ajouter les paramètres à l'URL
   return queryString ? `${imageUrl}?${queryString}` : imageUrl;
 };
 
 /**
  * Génère un srcSet responsive pour une image
- * 
+ *
  * @param imageUrl - URL originale de l'image
  * @param sizes - Largeurs pour les différents breakpoints
  * @param options - Options communes de transformation
  * @returns String srcSet pour l'attribut HTML
- * 
+ *
  * @example
  * const srcSet = getResponsiveSrcSet(imageUrl, {
  *   mobile: 400,
@@ -150,7 +202,7 @@ export const IMAGE_PRESETS = {
    */
   storeLogo: {
     sizes: { mobile: 120, tablet: 200, desktop: 300 },
-    options: { quality: 90, format: 'webp' as const, resize: 'cover' as const }
+    options: { quality: 90, format: 'webp' as const, resize: 'cover' as const },
   },
 
   /**
@@ -158,15 +210,16 @@ export const IMAGE_PRESETS = {
    */
   storeBanner: {
     sizes: { mobile: 600, tablet: 1024, desktop: 1920 },
-    options: { quality: 85, format: 'webp' as const, resize: 'cover' as const }
+    options: { quality: 85, format: 'webp' as const, resize: 'cover' as const },
   },
 
   /**
-   * Image produit (carré/vertical, qualité élevée)
+   * Image produit (ratio 3:2, qualité élevée pour netteté professionnelle)
+   * Optimisé pour mobile : 400px pour petits écrans, 600px pour mobiles standards
    */
   productImage: {
-    sizes: { mobile: 400, tablet: 600, desktop: 800, large: 1200 },
-    options: { quality: 85, format: 'webp' as const, resize: 'cover' as const }
+    sizes: { mobile: 400, tablet: 800, desktop: 1000, large: 1400 },
+    options: { quality: 90, format: 'webp' as const, resize: 'cover' as const },
   },
 
   /**
@@ -174,7 +227,7 @@ export const IMAGE_PRESETS = {
    */
   productThumbnail: {
     sizes: { mobile: 200, tablet: 300, desktop: 400 },
-    options: { quality: 75, format: 'webp' as const, resize: 'cover' as const }
+    options: { quality: 75, format: 'webp' as const, resize: 'cover' as const },
   },
 
   /**
@@ -182,7 +235,7 @@ export const IMAGE_PRESETS = {
    */
   avatar: {
     sizes: { mobile: 80, tablet: 120, desktop: 150 },
-    options: { quality: 85, format: 'webp' as const, resize: 'cover' as const }
+    options: { quality: 85, format: 'webp' as const, resize: 'cover' as const },
   },
 
   /**
@@ -190,17 +243,17 @@ export const IMAGE_PRESETS = {
    */
   productGallery: {
     sizes: { mobile: 600, tablet: 900, desktop: 1200, large: 1600 },
-    options: { quality: 90, format: 'webp' as const, resize: 'contain' as const }
-  }
+    options: { quality: 90, format: 'webp' as const, resize: 'contain' as const },
+  },
 };
 
 /**
  * Génère les attributs d'image optimisés pour un preset
- * 
+ *
  * @param imageUrl - URL originale de l'image
  * @param preset - Nom du preset à utiliser
  * @returns Objet avec src, srcSet, et sizes
- * 
+ *
  * @example
  * const imageAttrs = getImageAttributesForPreset(product.image_url, 'productImage');
  * <img {...imageAttrs} alt="Product" loading="lazy" />
@@ -213,24 +266,28 @@ export const getImageAttributesForPreset = (
     return {
       src: undefined,
       srcSet: undefined,
-      sizes: undefined
+      sizes: undefined,
     };
   }
 
   const preset = IMAGE_PRESETS[presetName];
-  
+
   // Génerer src par défaut (taille desktop)
   const src = getOptimizedImageUrl(imageUrl, {
     ...preset.options,
-    width: preset.sizes.desktop
+    width: preset.sizes.desktop,
   });
 
   // Générer srcSet responsive
   const srcSet = getResponsiveSrcSet(imageUrl, preset.sizes, preset.options);
 
   // Générer l'attribut sizes basé sur les breakpoints
+  // Optimisé pour mobile : utiliser 100vw sur mobile pour meilleure qualité
   const sizesArray: string[] = [];
-  if (preset.sizes.mobile) sizesArray.push(`(max-width: 640px) ${preset.sizes.mobile}px`);
+  if (preset.sizes.mobile) {
+    // Sur mobile, utiliser 100vw pour charger l'image pleine largeur
+    sizesArray.push(`(max-width: 640px) 100vw`);
+  }
   if (preset.sizes.tablet) sizesArray.push(`(max-width: 1024px) ${preset.sizes.tablet}px`);
   if (preset.sizes.large) sizesArray.push(`(min-width: 1536px) ${preset.sizes.large}px`);
   sizesArray.push(`${preset.sizes.desktop}px`); // Fallback
@@ -238,13 +295,13 @@ export const getImageAttributesForPreset = (
   return {
     src,
     srcSet,
-    sizes: sizesArray.join(', ')
+    sizes: sizesArray.join(', '),
   };
 };
 
 /**
  * Calcule le gain de performance estimé de l'optimisation
- * 
+ *
  * Basé sur les statistiques moyennes :
  * - Image originale JPG: ~500KB
  * - Image WebP optimisée (quality 80): ~150KB
@@ -260,7 +317,7 @@ export const calculateOptimizationGain = (
 } => {
   const gainKB = originalSizeKB - optimizedSizeKB;
   const gainPercent = (gainKB / originalSizeKB) * 100;
-  
+
   // Connexion 3G moyenne: ~750 KB/s
   const SPEED_3G_KBPS = 750;
   const loadTimeImprovement = (gainKB / SPEED_3G_KBPS) * 1000;
@@ -268,7 +325,7 @@ export const calculateOptimizationGain = (
   return {
     gainKB: Math.round(gainKB),
     gainPercent: Math.round(gainPercent),
-    loadTimeImprovement: Math.round(loadTimeImprovement)
+    loadTimeImprovement: Math.round(loadTimeImprovement),
   };
 };
 
@@ -287,9 +344,9 @@ export const preloadImage = (imageUrl: string, as: 'image' | 'fetch' = 'image'):
 };
 
 /**
- * Détecte le support WebP du navigateur
+ * Détecte le support WebP du navigateur (synchrone)
  */
-export const supportsWebP = async (): Promise<boolean> => {
+export const supportsWebP = (): boolean => {
   if (typeof window === 'undefined') return false;
 
   // Check via canvas
@@ -300,8 +357,23 @@ export const supportsWebP = async (): Promise<boolean> => {
   const ctx = canvas.getContext('2d');
   if (!ctx) return false;
 
-  const dataURI = canvas.toDataURL('image/webp');
-  return dataURI.startsWith('data:image/webp');
+  try {
+    const dataURI = canvas.toDataURL('image/webp');
+    return dataURI.startsWith('data:image/webp');
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Détecte le support WebP du navigateur (asynchrone avec cache)
+ */
+let webpSupportCache: boolean | null = null;
+export const supportsWebPAsync = async (): Promise<boolean> => {
+  if (webpSupportCache !== null) return webpSupportCache;
+
+  webpSupportCache = supportsWebP();
+  return webpSupportCache;
 };
 
 /**
@@ -313,4 +385,3 @@ export const formatFileSize = (sizeInKB: number): string => {
   }
   return `${(sizeInKB / 1024).toFixed(2)} MB`;
 };
-

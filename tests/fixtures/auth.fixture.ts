@@ -7,7 +7,7 @@ import { test as base } from '@playwright/test';
 
 export const test = base.extend({
   // Authenticated user fixture
-  authenticatedPage: async ({ page }, use) => {
+  authenticatedPage: async ({ page }, useFn) => {
     // Navigate to login page
     await page.goto('/auth');
     
@@ -21,8 +21,9 @@ export const test = base.extend({
     // Wait for redirect to dashboard
     await page.waitForURL('/dashboard');
     
-    // Use the authenticated page
-    await use(page);
+    // Use the authenticated page (Playwright fixture pattern, not React Hook)
+    // The parameter name 'useFn' avoids React Hook naming conflict
+    await useFn(page);
   },
 });
 

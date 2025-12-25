@@ -24,10 +24,12 @@ import {
   Download
 } from "lucide-react";
 import "@/styles/modern-product-creation-dark.css";
+import { ProductFormData } from '@/types/product-form';
+import { LucideIcon } from 'lucide-react';
 
 interface ProductAnalyticsTabDarkProps {
-  formData: any;
-  updateFormData: (field: string, value: any) => void;
+  formData: ProductFormData;
+  updateFormData: (field: string, value: string | number | boolean | null | undefined) => void;
 }
 
 export const ProductAnalyticsTabDark = ({ formData, updateFormData }: ProductAnalyticsTabDarkProps) => {
@@ -64,7 +66,7 @@ export const ProductAnalyticsTabDark = ({ formData, updateFormData }: ProductAna
     title: string;
     value: string | number;
     change: string;
-    icon: any;
+    icon: LucideIcon;
     className?: string;
     trend?: "positive" | "negative";
   }) => (

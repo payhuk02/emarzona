@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Globe, Check, X } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { logger } from '@/lib/logger';
 
 /**
  * Page de test pour vérifier le système i18n
@@ -156,7 +157,7 @@ export default function I18nTest() {
               <Button variant="outline" onClick={() => window.location.reload()}>
                 Recharger la page
               </Button>
-              <Button variant="outline" onClick={() => console.log('i18n state:', i18n)}>
+              <Button variant="outline" onClick={() => logger.debug('i18n state', { i18n })}>
                 Log i18n state
               </Button>
             </div>

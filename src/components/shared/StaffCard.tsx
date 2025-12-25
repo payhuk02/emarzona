@@ -11,6 +11,7 @@
  * - Responsive variants
  */
 
+import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -54,7 +55,7 @@ interface StaffCardProps {
   onContact?: () => void;
 }
 
-export const StaffCard = ({
+const StaffCardComponent = ({
   name,
   role,
   bio,
@@ -105,7 +106,7 @@ export const StaffCard = ({
   // Variant Compact (pour listes)
   if (variant === 'compact') {
     return (
-      <Card className={cn('hover:shadow-md transition-shadow', className)}>
+      <Card className={cn('hover:shadow-md transition-shadow', className)} style={{ willChange: 'transform' }}>
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
             {/* Avatar avec status indicator */}
@@ -156,7 +157,7 @@ export const StaffCard = ({
   // Variant Horizontal (pour détails)
   if (variant === 'horizontal') {
     return (
-      <Card className={cn('hover:shadow-lg transition-shadow', className)}>
+      <Card className={cn('hover:shadow-lg transition-shadow', className)} style={{ willChange: 'transform' }}>
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Avatar */}
@@ -248,7 +249,8 @@ export const StaffCard = ({
                         size="icon"
                         variant="outline"
                         asChild
-                        className="h-8 w-8"
+                        className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation"
+                        aria-label={`Profil LinkedIn de ${name}`}
                       >
                         <a
                           href={socialLinks.linkedin}
@@ -264,7 +266,8 @@ export const StaffCard = ({
                         size="icon"
                         variant="outline"
                         asChild
-                        className="h-8 w-8"
+                        className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation"
+                        aria-label={`Profil Twitter de ${name}`}
                       >
                         <a
                           href={socialLinks.twitter}
@@ -280,7 +283,8 @@ export const StaffCard = ({
                         size="icon"
                         variant="outline"
                         asChild
-                        className="h-8 w-8"
+                        className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation"
+                        aria-label={`Profil Facebook de ${name}`}
                       >
                         <a
                           href={socialLinks.facebook}
@@ -296,7 +300,8 @@ export const StaffCard = ({
                         size="icon"
                         variant="outline"
                         asChild
-                        className="h-8 w-8"
+                        className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation"
+                        aria-label={`Profil Instagram de ${name}`}
                       >
                         <a
                           href={socialLinks.instagram}
@@ -319,7 +324,7 @@ export const StaffCard = ({
 
   // Variant Default (carte verticale)
   return (
-    <Card className={cn('hover:shadow-lg transition-shadow h-full', className)}>
+    <Card className={cn('hover:shadow-lg transition-shadow h-full', className)} style={{ willChange: 'transform' }}>
       <CardHeader className="text-center pb-4">
         {/* Avatar */}
         <div className="relative mx-auto mb-4">
@@ -424,7 +429,7 @@ export const StaffCard = ({
           {socialLinks && (
             <div className="flex justify-center gap-2">
               {socialLinks.linkedin && (
-                <Button size="icon" variant="outline" asChild className="h-8 w-8">
+                <Button size="icon" variant="outline" asChild className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation" aria-label={`Profil LinkedIn de ${name}`}>
                   <a
                     href={socialLinks.linkedin}
                     target="_blank"
@@ -435,7 +440,7 @@ export const StaffCard = ({
                 </Button>
               )}
               {socialLinks.twitter && (
-                <Button size="icon" variant="outline" asChild className="h-8 w-8">
+                <Button size="icon" variant="outline" asChild className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation" aria-label={`Profil Twitter de ${name}`}>
                   <a
                     href={socialLinks.twitter}
                     target="_blank"
@@ -446,7 +451,7 @@ export const StaffCard = ({
                 </Button>
               )}
               {socialLinks.facebook && (
-                <Button size="icon" variant="outline" asChild className="h-8 w-8">
+                <Button size="icon" variant="outline" asChild className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation" aria-label={`Profil Facebook de ${name}`}>
                   <a
                     href={socialLinks.facebook}
                     target="_blank"
@@ -457,7 +462,7 @@ export const StaffCard = ({
                 </Button>
               )}
               {socialLinks.instagram && (
-                <Button size="icon" variant="outline" asChild className="h-8 w-8">
+                <Button size="icon" variant="outline" asChild className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation" aria-label={`Profil Instagram de ${name}`}>
                   <a
                     href={socialLinks.instagram}
                     target="_blank"
@@ -474,6 +479,30 @@ export const StaffCard = ({
     </Card>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const StaffCard = React.memo(StaffCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.name === nextProps.name &&
+    prevProps.role === nextProps.role &&
+    prevProps.bio === nextProps.bio &&
+    prevProps.avatar_url === nextProps.avatar_url &&
+    prevProps.email === nextProps.email &&
+    prevProps.phone === nextProps.phone &&
+    prevProps.rating === nextProps.rating &&
+    prevProps.reviewCount === nextProps.reviewCount &&
+    prevProps.yearsExperience === nextProps.yearsExperience &&
+    prevProps.location === nextProps.location &&
+    prevProps.availability === nextProps.availability &&
+    prevProps.variant === nextProps.variant &&
+    prevProps.className === nextProps.className &&
+    JSON.stringify(prevProps.skills) === JSON.stringify(nextProps.skills) &&
+    JSON.stringify(prevProps.socialLinks) === JSON.stringify(nextProps.socialLinks) &&
+    prevProps.onContact === nextProps.onContact
+  );
+});
+
+StaffCard.displayName = 'StaffCard';
 
 /**
  * Staff List Component (for displaying multiple staff members)
@@ -493,7 +522,7 @@ interface StaffListProps {
   className?: string;
 }
 
-export const StaffList = ({
+const StaffListComponent = ({
   staff,
   variant = 'default',
   columns = 3,
@@ -514,4 +543,24 @@ export const StaffList = ({
     </div>
   );
 };
+
+StaffListComponent.displayName = 'StaffListComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const StaffList = React.memo(StaffListComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.staff.length === nextProps.staff.length &&
+    prevProps.variant === nextProps.variant &&
+    prevProps.columns === nextProps.columns &&
+    prevProps.className === nextProps.className &&
+    // Comparaison superficielle des staff (comparer les IDs)
+    prevProps.staff.every((member, index) => 
+      member.id === nextProps.staff[index]?.id &&
+      member.name === nextProps.staff[index]?.name &&
+      member.availability === nextProps.staff[index]?.availability
+    )
+  );
+});
+
+StaffList.displayName = 'StaffList';
 

@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK SERVICE BOOKINGS SYSTEM
+-- EMARZONA SERVICE BOOKINGS SYSTEM
 -- Date: 27 Octobre 2025
 -- Description: Système de réservation pour produits de type service
 -- Version: 1.0

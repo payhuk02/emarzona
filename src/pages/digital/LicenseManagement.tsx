@@ -58,8 +58,8 @@ export const LicenseManagement = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold">Gestion des Licenses</h1>
-                <p className="text-muted-foreground mt-1">
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold">Gestion des Licenses</h1>
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-1">
                   Gérez et générez des licenses pour vos produits digitaux
                 </p>
               </div>
@@ -78,7 +78,7 @@ export const LicenseManagement = () => {
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">0</div>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold text-green-600">0</div>
                   <p className="text-xs text-muted-foreground">
                     Licenses actives
                   </p>

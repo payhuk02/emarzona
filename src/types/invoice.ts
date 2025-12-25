@@ -81,7 +81,7 @@ export interface InvoiceItem {
   discount_amount: number;
   tax_amount: number;
   total_price: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
 }
 

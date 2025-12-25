@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK PHYSICAL PRODUCTS NOTIFICATIONS SYSTEM
+-- EMARZONA PHYSICAL PRODUCTS NOTIFICATIONS SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système d'alertes et notifications pour produits physiques
 --              Alertes stock, notifications commandes, etc.

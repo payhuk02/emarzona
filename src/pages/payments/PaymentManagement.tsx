@@ -1,7 +1,7 @@
 /**
  * Payment Management Page - Advanced Payments
  * Date: 28 octobre 2025
- * 
+ *
  * Gestion paiements avancés: pourcentage, escrow/delivery_secured
  * Features: Release payments, confirm delivery, partial payments tracking
  */
@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import type { LucideIcon } from 'lucide-react';
 import {
   CreditCard,
   Percent,
@@ -40,7 +41,7 @@ import {
   TrendingUp,
   Package,
   User,
-  Store
+  Store,
 } from 'lucide-react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -48,9 +49,11 @@ import { useAdvancedPayments } from '@/hooks/useAdvancedPayments';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
+import { logger } from '@/lib/logger';
 import { fr } from 'date-fns/locale';
 import { CountdownTimer } from '@/components/ui/countdown-timer';
 import { useQueryClient } from '@tanstack/react-query';
+import type { AdvancedPayment } from '@/types/advanced-features';
 
 export default function PaymentManagement() {
   const { orderId } = useParams<{ orderId: string }>();
@@ -59,23 +62,15 @@ export default function PaymentManagement() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const {
-    payments,
-    loading,
-    stats,
-    releasePayment,
-    openDispute,
-  } = useAdvancedPayments();
+  const { payments, loading, stats, releasePayment, openDispute } = useAdvancedPayments();
 
-  const [selectedPayment, setSelectedPayment] = useState<any>(null);
+  const [selectedPayment, setSelectedPayment] = useState<AdvancedPayment | null>(null);
   const [showReleaseDialog, setShowReleaseDialog] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Filter payments for this order if orderId is provided
-  const orderPayments = orderId 
-    ? payments.filter(p => p.order_id === orderId)
-    : payments;
+  const orderPayments = orderId ? payments.filter(p => p.order_id === orderId) : payments;
 
   // Separate payments by type
   const partialPayments = orderPayments.filter(p => p.payment_type === 'percentage');
@@ -90,7 +85,7 @@ export default function PaymentManagement() {
     try {
       setIsProcessing(true);
       await releasePayment(selectedPayment.id, 'delivery_confirmed');
-      
+
       toast({
         title: '✅ Paiement relâché',
         description: 'Le paiement a été transféré au vendeur',
@@ -98,11 +93,12 @@ export default function PaymentManagement() {
 
       setShowReleaseDialog(false);
       setSelectedPayment(null);
-    } catch (error: any) {
-      console.error('Release payment error:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Release payment error', { error, paymentId: selectedPayment.id });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de relâcher le paiement',
+        description: errorMessage || 'Impossible de relâcher le paiement',
         variant: 'destructive',
       });
     } finally {
@@ -118,7 +114,7 @@ export default function PaymentManagement() {
 
     try {
       setIsProcessing(true);
-      
+
       // Call release payment with customer confirmation
       await releasePayment(selectedPayment.id, 'customer_confirmed');
 
@@ -129,11 +125,12 @@ export default function PaymentManagement() {
 
       setShowConfirmDialog(false);
       setSelectedPayment(null);
-    } catch (error: any) {
-      console.error('Confirm delivery error:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Confirm delivery error', { error, paymentId: selectedPayment.id });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de confirmer la livraison',
+        description: errorMessage || 'Impossible de confirmer la livraison',
         variant: 'destructive',
       });
     } finally {
@@ -152,7 +149,14 @@ export default function PaymentManagement() {
    * Get payment status badge
    */
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, any> = {
+    const variants: Record<
+      string,
+      {
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        icon: LucideIcon;
+        label: string;
+      }
+    > = {
       pending: { variant: 'secondary', icon: Clock, label: 'En attente' },
       completed: { variant: 'default', icon: CheckCircle, label: 'Complété' },
       held: { variant: 'destructive', icon: Lock, label: 'Retenu' },
@@ -196,16 +200,12 @@ export default function PaymentManagement() {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
-        
+
         <main className="flex-1 overflow-x-hidden">
           <div className="container mx-auto p-6 max-w-7xl">
             {/* Header */}
             <div className="mb-6">
-              <Button
-                variant="ghost"
-                onClick={() => navigate(-1)}
-                className="mb-4"
-              >
+              <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Retour
               </Button>
@@ -232,9 +232,7 @@ export default function PaymentManagement() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{orderPayments.length}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Tous types confondus
-                  </p>
+                  <p className="text-xs text-muted-foreground">Tous types confondus</p>
                 </CardContent>
               </Card>
 
@@ -244,12 +242,8 @@ export default function PaymentManagement() {
                   <Lock className="h-4 w-4 text-destructive" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-destructive">
-                    {stats?.totalHeld || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    XOF en escrow
-                  </p>
+                  <div className="text-2xl font-bold text-destructive">{stats?.totalHeld || 0}</div>
+                  <p className="text-xs text-muted-foreground">XOF en escrow</p>
                 </CardContent>
               </Card>
 
@@ -260,9 +254,7 @@ export default function PaymentManagement() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{partialPayments.length}</div>
-                  <p className="text-xs text-muted-foreground">
-                    En pourcentage
-                  </p>
+                  <p className="text-xs text-muted-foreground">En pourcentage</p>
                 </CardContent>
               </Card>
 
@@ -273,21 +265,25 @@ export default function PaymentManagement() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{securedPayments.length}</div>
-                  <p className="text-xs text-muted-foreground">
-                    À la livraison
-                  </p>
+                  <p className="text-xs text-muted-foreground">À la livraison</p>
                 </CardContent>
               </Card>
             </div>
 
             {/* Tabs for Payment Types */}
             <Tabs defaultValue="secured" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="secured" className="flex items-center gap-2">
+              <TabsList className="w-full overflow-x-auto flex-nowrap justify-start">
+                <TabsTrigger
+                  value="secured"
+                  className="flex items-center gap-2 min-h-[44px] shrink-0"
+                >
                   <Shield className="h-4 w-4" />
                   Paiements Sécurisés ({securedPayments.length})
                 </TabsTrigger>
-                <TabsTrigger value="partial" className="flex items-center gap-2">
+                <TabsTrigger
+                  value="partial"
+                  className="flex items-center gap-2 min-h-[44px] shrink-0"
+                >
                   <Percent className="h-4 w-4" />
                   Paiements Partiels ({partialPayments.length})
                 </TabsTrigger>
@@ -305,7 +301,7 @@ export default function PaymentManagement() {
                     </CardContent>
                   </Card>
                 ) : (
-                  securedPayments.map((payment) => (
+                  securedPayments.map(payment => (
                     <Card key={payment.id} className="overflow-hidden">
                       <CardHeader className="bg-muted/50">
                         <div className="flex items-start justify-between">
@@ -337,29 +333,37 @@ export default function PaymentManagement() {
                             <div className="space-y-2">
                               <div className="flex justify-between">
                                 <span className="text-sm text-muted-foreground">Méthode</span>
-                                <span className="font-medium">{payment.payment_method || 'Moneroo'}</span>
+                                <span className="font-medium">
+                                  {payment.payment_method || 'Moneroo'}
+                                </span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-sm text-muted-foreground">Date paiement</span>
                                 <span className="font-medium">
-                                  {format(new Date(payment.created_at), 'dd MMM yyyy', { locale: fr })}
+                                  {format(new Date(payment.created_at), 'dd MMM yyyy', {
+                                    locale: fr,
+                                  })}
                                 </span>
                               </div>
                               {payment.held_until && (
                                 <>
                                   <div className="flex justify-between">
-                                    <span className="text-sm text-muted-foreground">Retenu jusqu'à</span>
+                                    <span className="text-sm text-muted-foreground">
+                                      Retenu jusqu'à
+                                    </span>
                                     <span className="font-medium text-destructive">
-                                      {format(new Date(payment.held_until), 'dd MMM yyyy', { locale: fr })}
+                                      {format(new Date(payment.held_until), 'dd MMM yyyy', {
+                                        locale: fr,
+                                      })}
                                     </span>
                                   </div>
-                                  
+
                                   {/* Countdown Timer */}
                                   <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
                                     <p className="text-xs font-medium text-yellow-800 dark:text-yellow-200 mb-2">
                                       Libération automatique dans :
                                     </p>
-                                    <CountdownTimer 
+                                    <CountdownTimer
                                       targetDate={payment.held_until}
                                       onComplete={() => {
                                         toast({
@@ -367,7 +371,9 @@ export default function PaymentManagement() {
                                           description: 'Les fonds ont été transférés au vendeur',
                                         });
                                         // Refresh payments data
-                                        queryClient.invalidateQueries({ queryKey: ['advanced-payments'] });
+                                        queryClient.invalidateQueries({
+                                          queryKey: ['advanced-payments'],
+                                        });
                                       }}
                                       showIcon={true}
                                     />
@@ -415,7 +421,9 @@ export default function PaymentManagement() {
                                   <Button
                                     variant="destructive"
                                     className="w-full"
-                                    onClick={() => navigate(`/disputes/create?orderId=${payment.order_id}`)}
+                                    onClick={() =>
+                                      navigate(`/disputes/create?orderId=${payment.order_id}`)
+                                    }
                                   >
                                     <AlertCircle className="h-4 w-4 mr-2" />
                                     Ouvrir un litige
@@ -431,7 +439,12 @@ export default function PaymentManagement() {
                                   Paiement relâché et transféré au vendeur
                                   {payment.released_at && (
                                     <span className="block text-sm mt-1">
-                                      Le {format(new Date(payment.released_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
+                                      Le{' '}
+                                      {format(
+                                        new Date(payment.released_at),
+                                        'dd MMM yyyy à HH:mm',
+                                        { locale: fr }
+                                      )}
                                     </span>
                                   )}
                                 </AlertDescription>
@@ -457,7 +470,7 @@ export default function PaymentManagement() {
                     </CardContent>
                   </Card>
                 ) : (
-                  partialPayments.map((payment) => {
+                  partialPayments.map(payment => {
                     const percentagePaid = payment.percentage_paid || 0;
                     const remainingAmount = payment.remaining_amount || 0;
                     const totalAmount = payment.total_amount || 0;
@@ -495,21 +508,27 @@ export default function PaymentManagement() {
                             {/* Amounts */}
                             <div className="grid md:grid-cols-3 gap-4">
                               <div className="p-4 rounded-lg bg-green-50 dark:bg-green-950 border border-green-200">
-                                <p className="text-sm text-green-700 dark:text-green-300 mb-1">Payé</p>
+                                <p className="text-sm text-green-700 dark:text-green-300 mb-1">
+                                  Payé
+                                </p>
                                 <p className="text-2xl font-bold text-green-900 dark:text-green-100">
                                   {formatCurrency(percentagePaid)}
                                 </p>
                               </div>
 
                               <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-950 border border-orange-200">
-                                <p className="text-sm text-orange-700 dark:text-orange-300 mb-1">Restant</p>
+                                <p className="text-sm text-orange-700 dark:text-orange-300 mb-1">
+                                  Restant
+                                </p>
                                 <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
                                   {formatCurrency(remainingAmount)}
                                 </p>
                               </div>
 
                               <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200">
-                                <p className="text-sm text-blue-700 dark:text-blue-300 mb-1">Total</p>
+                                <p className="text-sm text-blue-700 dark:text-blue-300 mb-1">
+                                  Total
+                                </p>
                                 <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
                                   {formatCurrency(totalAmount)}
                                 </p>
@@ -525,12 +544,16 @@ export default function PaymentManagement() {
                                 <div className="space-y-2">
                                   <div className="flex justify-between">
                                     <span className="text-sm">Méthode</span>
-                                    <span className="font-medium">{payment.payment_method || 'Moneroo'}</span>
+                                    <span className="font-medium">
+                                      {payment.payment_method || 'Moneroo'}
+                                    </span>
                                   </div>
                                   <div className="flex justify-between">
                                     <span className="text-sm">Date</span>
                                     <span className="font-medium">
-                                      {format(new Date(payment.created_at), 'dd MMM yyyy', { locale: fr })}
+                                      {format(new Date(payment.created_at), 'dd MMM yyyy', {
+                                        locale: fr,
+                                      })}
                                     </span>
                                   </div>
                                 </div>
@@ -578,8 +601,11 @@ export default function PaymentManagement() {
                     <Alert>
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
-                        Vous êtes sur le point de relâcher <strong>{formatCurrency(selectedPayment.held_amount || selectedPayment.amount)}</strong>.
-                        Cette action est irréversible.
+                        Vous êtes sur le point de relâcher{' '}
+                        <strong>
+                          {formatCurrency(selectedPayment.held_amount || selectedPayment.amount)}
+                        </strong>
+                        . Cette action est irréversible.
                       </AlertDescription>
                     </Alert>
 
@@ -588,7 +614,9 @@ export default function PaymentManagement() {
                       <div className="space-y-1 text-sm">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Montant</span>
-                          <span className="font-medium">{formatCurrency(selectedPayment.held_amount || selectedPayment.amount)}</span>
+                          <span className="font-medium">
+                            {formatCurrency(selectedPayment.held_amount || selectedPayment.amount)}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Status actuel</span>
@@ -600,7 +628,11 @@ export default function PaymentManagement() {
                 )}
 
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowReleaseDialog(false)} disabled={isProcessing}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowReleaseDialog(false)}
+                    disabled={isProcessing}
+                  >
                     Annuler
                   </Button>
                   <Button onClick={handleReleasePayment} disabled={isProcessing}>
@@ -638,20 +670,29 @@ export default function PaymentManagement() {
                     <Alert className="bg-green-50 dark:bg-green-950 border-green-200">
                       <CheckCircle className="h-4 w-4 text-green-600" />
                       <AlertDescription className="text-green-900 dark:text-green-100">
-                        En confirmant la livraison, le paiement de <strong>{formatCurrency(selectedPayment.held_amount || selectedPayment.amount)}</strong> sera transféré au vendeur.
+                        En confirmant la livraison, le paiement de{' '}
+                        <strong>
+                          {formatCurrency(selectedPayment.held_amount || selectedPayment.amount)}
+                        </strong>{' '}
+                        sera transféré au vendeur.
                       </AlertDescription>
                     </Alert>
 
                     <div className="p-4 rounded-lg bg-muted">
                       <p className="text-sm text-muted-foreground mb-2">
-                        ⚠️ Vérifiez que vous avez bien reçu votre commande et qu'elle correspond à ce qui était attendu avant de confirmer.
+                        ⚠️ Vérifiez que vous avez bien reçu votre commande et qu'elle correspond à
+                        ce qui était attendu avant de confirmer.
                       </p>
                     </div>
                   </div>
                 )}
 
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowConfirmDialog(false)} disabled={isProcessing}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowConfirmDialog(false)}
+                    disabled={isProcessing}
+                  >
                     Annuler
                   </Button>
                   <Button onClick={handleConfirmDelivery} disabled={isProcessing}>
@@ -676,4 +717,3 @@ export default function PaymentManagement() {
     </SidebarProvider>
   );
 }
-

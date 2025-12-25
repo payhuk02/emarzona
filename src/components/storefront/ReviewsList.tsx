@@ -1,7 +1,7 @@
 import { Review } from "@/hooks/useReviews";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Star, User } from "lucide-react";
+import { Star, User } from '@/components/icons';
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";

@@ -21,8 +21,47 @@
     "refresh": "Actualiser",
     "yes": "Oui",
     "no": "Non",
+    "show": "Afficher",
+    "hide": "Masquer",
     "manageAll": "Gérez toutes vos",
-    "or": "Ou"
+    "or": "Ou",
+    "coverage": "Couverture",
+    "language": "Langue"
+  },
+  "wizard": {
+    "title": "Nouveau Produit Digital",
+    "subtitle": "Créez un produit digital professionnel en 6 étapes",
+    "back": "Retour au choix du type",
+    "backShort": "Retour",
+    "step": "Étape",
+    "of": "sur",
+    "steps": "Étapes du formulaire",
+    "autoSaving": "Auto-sauvegarde...",
+    "previous": "Étape précédente",
+    "prev": "Préc.",
+    "next": "Suivant",
+    "nextShort": "Suiv.",
+    "saveDraft": "Sauvegarder comme brouillon",
+    "draft": "Brouillon",
+    "publish": "Publier le produit",
+    "publishShort": "Publier",
+    "publishing": "Publication...",
+    "publishingShort": "Pub...",
+    "shortcuts": {
+      "save": "Brouillon",
+      "next": "Suivant",
+      "prev": "Précédent"
+    },
+    "seo": {
+      "faq": {
+        "description": "Optimisez votre référencement et ajoutez des réponses aux questions fréquentes"
+      }
+    },
+    "errors": {
+      "title": "Erreur",
+      "requiredFields": "Veuillez remplir tous les champs obligatoires",
+      "noFiles": "Veuillez ajouter un lien principal pour votre produit"
+    }
   },
   "nav": {
     "home": "Accueil",
@@ -37,6 +76,17 @@
     "logout": "Déconnexion",
     "login": "Connexion",
     "signup": "Inscription"
+  },
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "products": "Produits",
+    "orders": "Commandes",
+    "customers": "Clients",
+    "marketing": "Marketing",
+    "emails": "Emails",
+    "analytics": "Analytics",
+    "settings": "Paramètres",
+    "myProfile": "Mon Profil"
   },
   "auth": {
     "welcome": "Bienvenue",
@@ -92,7 +142,11 @@
       "button": "Envoyer le lien",
       "success": "Email de réinitialisation envoyé !",
       "error": "Erreur lors de l'envoi"
-    }
+    },
+    "signOut": "Déconnexion",
+    "signOutSuccess": "Déconnexion réussie",
+    "signOutSuccessDescription": "Vous avez été déconnecté avec succès.",
+    "signOutError": "Une erreur est survenue lors de la déconnexion."
   },
   "marketplace": {
     "title": "Marketplace",
@@ -156,7 +210,7 @@
       "community": "Communauté active"
     },
     "hero": {
-      "title": "Marketplace Payhuk",
+      "title": "Marketplace Emarzona",
       "subtitle": "Découvrez des milliers de produits digitaux : formations, ebooks, templates, logiciels et plus encore.",
       "tagline": "Rejoignez la révolution du commerce digital en Afrique",
       "skipToMain": "Aller au contenu principal"
@@ -178,6 +232,52 @@
       "authRequired": "Authentification requise",
       "loginRequired": "Veuillez vous connecter pour effectuer un achat",
       "paymentError": "Erreur de paiement",
+      "categories": {
+        "all": "Pour vous",
+        "featured": "Meilleurs services",
+        "formation": "Formations",
+        "cours": "Cours",
+        "design": "Design & Graphisme",
+        "marketing": "SEO & Marketing",
+        "developpement": "Développement Web",
+        "informatique": "Informatique",
+        "redaction": "Rédaction",
+        "video": "Vidéo & Montage",
+        "audio": "Audio & Musique",
+        "photographie": "Photographie",
+        "ebook": "Ebooks & Guides",
+        "template": "Templates",
+        "logiciel": "Logiciels",
+        "app": "Applications",
+        "vetements": "T-shirts & Vêtements",
+        "accessoires": "Accessoires",
+        "electronique": "Électronique",
+        "traduction": "Traduction",
+        "coaching": "Coaching",
+        "consultation": "Consultation",
+        "conseil": "Conseil Business",
+        "social": "Réseaux sociaux",
+        "maintenance": "Maintenance",
+        "graphisme": "Graphisme",
+        "animation": "Animation",
+        "illustration": "Illustration",
+        "uiUx": "UI/UX Design",
+        "data": "Data & Analytics",
+        "cloud": "Cloud & DevOps",
+        "securite": "Sécurité",
+        "podcast": "Podcast",
+        "voixOff": "Voix-off",
+        "maison": "Maison & Jardin",
+        "sport": "Sport",
+        "beaute": "Beauté",
+        "livres": "Livres",
+        "jouets": "Jouets",
+        "alimentation": "Alimentation",
+        "artisanat": "Artisanat",
+        "scrollLeft": "Faire défiler vers la gauche",
+        "scrollRight": "Faire défiler vers la droite",
+        "ariaLabel": "Catégories de services"
+      },
       "paymentFailed": "Impossible d'initialiser le paiement",
       "purchaseOf": "Achat de",
       "shareSuccess": "Partagé avec succès",
@@ -187,6 +287,52 @@
       "linkCopied": "Lien copié",
       "linkCopiedDesc": "Le lien du produit a été copié dans le presse-papiers",
       "copyError": "Impossible de copier le lien. Vérifiez les permissions."
+    },
+    "categories": {
+      "all": "Pour vous",
+      "featured": "Meilleurs services",
+      "formation": "Formations",
+      "cours": "Cours",
+      "design": "Design & Graphisme",
+      "marketing": "SEO & Marketing",
+      "developpement": "Développement Web",
+      "informatique": "Informatique",
+      "redaction": "Rédaction",
+      "video": "Vidéo & Montage",
+      "audio": "Audio & Musique",
+      "photographie": "Photographie",
+      "ebook": "Ebooks & Guides",
+      "template": "Templates",
+      "logiciel": "Logiciels",
+      "app": "Applications",
+      "vetements": "T-shirts & Vêtements",
+      "accessoires": "Accessoires",
+      "electronique": "Électronique",
+      "traduction": "Traduction",
+      "coaching": "Coaching",
+      "consultation": "Consultation",
+      "conseil": "Conseil Business",
+      "social": "Réseaux sociaux",
+      "maintenance": "Maintenance",
+      "graphisme": "Graphisme",
+      "animation": "Animation",
+      "illustration": "Illustration",
+      "uiUx": "UI/UX Design",
+      "data": "Data & Analytics",
+      "cloud": "Cloud & DevOps",
+      "securite": "Sécurité",
+      "podcast": "Podcast",
+      "voixOff": "Voix-off",
+      "maison": "Maison & Jardin",
+      "sport": "Sport",
+      "beaute": "Beauté",
+      "livres": "Livres",
+      "jouets": "Jouets",
+      "alimentation": "Alimentation",
+      "artisanat": "Artisanat",
+      "scrollLeft": "Faire défiler vers la gauche",
+      "scrollRight": "Faire défiler vers la droite",
+      "ariaLabel": "Catégories de services"
     },
     "filterLabels": {
       "category": "Catégorie:",
@@ -214,7 +360,7 @@
     },
     "cta": {
       "title": "Prêt à lancer votre boutique ?",
-      "subtitle": "Rejoignez des centaines d'entrepreneurs qui développent leur business avec Payhuk.",
+      "subtitle": "Rejoignez des centaines d'entrepreneurs qui développent leur business avec Emarzona.",
       "startFree": "Commencer gratuitement",
       "joinCommunity": "Rejoindre la communauté"
     }
@@ -238,7 +384,7 @@
       "multiCurrency": "Multidevise"
     },
     "contact": {
-      "title": "Contactez {storeName}",
+      "title": "Contactez {{storeName}}",
       "description": "Vous avez une question ? N'hésitez pas à nous contacter. Nous vous répondrons dans les meilleurs délais.",
       "messageSent": "Message envoyé !",
       "messageDesc": "Nous vous répondrons dans les plus brefs délais."
@@ -251,7 +397,8 @@
       "noAbout": "Aucune information à propos de cette boutique",
       "noReviews": "Aucun avis pour le moment",
       "noContact": "Aucune information de contact disponible"
-    }
+    },
+    "noProducts": "Aucun produit disponible"
   },
   "products": {
     "title": "Mes Produits",
@@ -308,6 +455,7 @@
   "orders": {
     "title": "Mes Commandes",
     "orderNumber": "Commande #{{number}}",
+    "orderNumberLabel": "Commande",
     "date": "Date",
     "status": "Statut",
     "total": "Total",
@@ -383,8 +531,8 @@
   },
   "seo": {
     "home": {
-      "title": "Payhuk - Plateforme E-commerce Moderne",
-      "description": "Créez et gérez votre boutique en ligne facilement avec Payhuk"
+      "title": "Emarzona - Plateforme de ecommerce et marketing",
+      "description": "Créez et gérez votre boutique en ligne facilement avec Emarzona"
     },
     "marketplace": {
       "title": "Marketplace - Découvrez nos produits",
@@ -582,7 +730,8 @@
       "total": "Total Produits",
       "active": "Actifs",
       "inactive": "Inactifs",
-      "outOfStock": "En rupture"
+      "outOfStock": "En rupture",
+      "ariaLabel": "Statistiques des produits"
     },
     "filters": {
       "search": "Rechercher un produit...",
@@ -602,13 +751,22 @@
       "priceAsc": "Prix croissant",
       "priceDesc": "Prix décroissant",
       "stockAsc": "Stock croissant",
-      "stockDesc": "Stock décroissant"
+      "stockDesc": "Stock décroissant",
+      "ariaLabel": "Filtres de recherche"
     },
     "status": {
       "active": "Actif",
       "inactive": "Inactif",
-      "draft": "Brouillon"
+      "draft": "Brouillon",
+      "published": "Publié"
     },
+    "metadata": {
+      "createdAt": "Créé le",
+      "updatedAt": "Dernière mise à jour",
+      "version": "Version"
+    },
+    "urlCopied": "URL copiée",
+    "urlCopiedDescription": "L'URL du produit a été copiée dans le presse-papiers",
     "stockStatus": {
       "inStock": "En stock",
       "lowStock": "Stock faible",
@@ -677,11 +835,13 @@
       "status": "Statut",
       "createdAt": "Créé le",
       "updatedAt": "Modifié le"
+    },
+    "list": {
+      "ariaLabel": "Liste des produits"
     }
   },
   "dashboard": {
     "title": "Tableau de bord",
-    "titleWithStore": "Tableau de bord - {{storeName}}",
     "loading": "Chargement du tableau de bord...",
     "welcome": "Bienvenue ! 🎉",
     "createStorePrompt": "Commencez par créer votre boutique pour accéder au tableau de bord avancé",
@@ -696,7 +856,8 @@
     "stats": {
       "products": {
         "title": "Produits",
-        "active": "{{count}} actifs"
+        "active": "{{count}} actif",
+        "active_plural": "{{count}} actifs"
       },
       "orders": {
         "title": "Commandes",
@@ -710,6 +871,16 @@
         "title": "Revenus",
         "total": "Total des ventes"
       }
+    },
+    "goals": {
+      "monthlyRevenue": "Revenus mensuels",
+      "newCustomers": "Nouveaux clients",
+      "productsSold": "Produits vendus",
+      "customersUnit": "clients",
+      "ordersUnit": "commandes"
+    },
+    "trends": {
+      "vsLastMonth": "vs mois dernier"
     },
     "notifications": {
       "title": "Notifications récentes",
@@ -774,13 +945,13 @@
       "stores": "Boutiques"
     },
     "testimonials": {
-      "title": "Ils réussissent avec Payhuk",
+      "title": "Ils réussissent avec Emarzona",
       "subtitle": "Rejoignez des centaines d'entrepreneurs qui développent leur business",
       "items": [
         {
           "name": "Amadou K.",
           "role": "Créateur de contenu",
-          "content": "J'ai doublé mes revenus en 3 mois grâce à Payhuk. La plateforme est simple et les paiements en FCFA sont un vrai plus !"
+          "content": "J'ai doublé mes revenus en 3 mois grâce à Emarzona. La plateforme est simple et les paiements sont un vrai plus !"
         },
         {
           "name": "Fatou D.",
@@ -790,7 +961,7 @@
         {
           "name": "Ibrahim S.",
           "role": "Développeur",
-          "content": "Interface moderne, fonctionnalités complètes et support réactif. Payhuk est la meilleure plateforme pour vendre en Afrique."
+          "content": "Interface moderne, fonctionnalités complètes et support réactif. Emarzona est la meilleure plateforme pour vendre en ligne."
         }
       ]
     },
@@ -867,7 +1038,7 @@
     },
     "cta": {
       "title": "Prêt à développer votre business ?",
-      "subtitle": "Rejoignez des milliers d'entrepreneurs africains qui réussissent avec Payhuk",
+      "subtitle": "Rejoignez des milliers d'entrepreneurs qui réussissent avec Emarzona",
       "button": "Créer mon compte gratuitement"
     },
     "footer": {
@@ -890,7 +1061,7 @@
         "terms": "Conditions d'utilisation",
         "privacy": "Politique de confidentialité"
       },
-      "copyright": "© 2025 Payhuk. Tous droits réservés."
+      "copyright": "© 2025 Emarzona. Tous droits réservés."
     },
     "featureSections": {
       "feature1": {
@@ -1033,11 +1204,27 @@
         "zones": {
           "westAfrica": {
             "title": "Afrique de l'Ouest (Zone UEMOA - FCFA XOF)",
-            "countries": ["Sénégal", "Côte d'Ivoire", "Mali", "Bénin", "Burkina Faso", "Niger", "Togo", "Guinée-Bissau"]
+            "countries": [
+              "Sénégal",
+              "Côte d'Ivoire",
+              "Mali",
+              "Bénin",
+              "Burkina Faso",
+              "Niger",
+              "Togo",
+              "Guinée-Bissau"
+            ]
           },
           "centralAfrica": {
             "title": "Afrique Centrale (Zone CEMAC - FCFA XAF)",
-            "countries": ["Cameroun", "Gabon", "Congo-Brazzaville", "Tchad", "RCA", "Guinée Équatoriale"]
+            "countries": [
+              "Cameroun",
+              "Gabon",
+              "Congo-Brazzaville",
+              "Tchad",
+              "RCA",
+              "Guinée Équatoriale"
+            ]
           },
           "northAfrica": {
             "title": "Afrique du Nord",
@@ -1045,7 +1232,13 @@
           },
           "eastAfrica": {
             "title": "Afrique de l'Est",
-            "countries": ["Kenya (KES)", "Tanzanie (TZS)", "Ouganda (UGX)", "Rwanda (RWF)", "Éthiopie (ETB)"]
+            "countries": [
+              "Kenya (KES)",
+              "Tanzanie (TZS)",
+              "Ouganda (UGX)",
+              "Rwanda (RWF)",
+              "Éthiopie (ETB)"
+            ]
           },
           "southernAfrica": {
             "title": "Afrique Australe",
@@ -1053,7 +1246,13 @@
           },
           "international": {
             "title": "International (Devises majeures)",
-            "countries": ["Zone Euro (EUR)", "États-Unis (USD)", "Royaume-Uni (GBP)", "Canada (CAD)", "Suisse (CHF)"]
+            "countries": [
+              "Zone Euro (EUR)",
+              "États-Unis (USD)",
+              "Royaume-Uni (GBP)",
+              "Canada (CAD)",
+              "Suisse (CHF)"
+            ]
           }
         },
         "note": "+ 180 autres pays et territoires dans le monde entier"
@@ -1061,7 +1260,7 @@
     },
     "finalCta": {
       "title": "Commencez à vendre des produits digitaux dès aujourd'hui !",
-      "subtitle": "Rejoignez des centaines d'entrepreneurs africains qui ont déjà fait confiance à Payhuk",
+      "subtitle": "Rejoignez des centaines d'entrepreneurs qui ont déjà fait confiance à Emarzona",
       "button": "Créer mon compte gratuitement"
     }
   },
@@ -1218,7 +1417,505 @@
       "videoUploadFailed": "Erreur lors du téléchargement de la vidéo",
       "quizSubmissionFailed": "Erreur lors de la soumission du quiz",
       "certificateGenerationFailed": "Erreur lors de la génération du certificat"
+    },
+    "create": {
+      "title": "Créer un nouveau cours",
+      "description": "Suivez les étapes pour créer un cours professionnel en quelques minutes",
+      "backToProducts": "Retour aux produits",
+      "useTemplate": "Utiliser un template",
+      "useTemplateShort": "Template"
     }
+  },
+  "admin": {
+    "batchShipping": {
+      "title": "Expéditions Batch",
+      "description": "Traitez plusieurs commandes simultanément et générez des étiquettes en masse",
+      "noStore": "Aucune boutique trouvée",
+      "noStoreDescription": "Veuillez créer une boutique pour gérer vos expéditions batch",
+      "stats": {
+        "total": "Lots totaux",
+        "processing": "En traitement",
+        "labelGenerated": "Étiquettes générées",
+        "completed": "Complétés"
+      }
+    },
+    "costOptimization": {
+      "title": "Optimisation des Coûts et Marges",
+      "description": "Analysez vos coûts, marges et optimisez vos prix pour maximiser la rentabilité",
+      "noStore": "Vous devez créer une boutique avant d'utiliser l'optimisation des coûts"
+    },
+    "demandForecasting": {
+      "title": "Prévisions de Demande",
+      "description": "Analysez les tendances et prévoyez la demande future de vos produits",
+      "noStore": "Vous devez créer une boutique avant d'utiliser les prévisions de demande"
+    },
+    "physicalPromotions": {
+      "title": "Promotions et réductions",
+      "description": "Gérez vos promotions, codes de réduction et offres spéciales"
+    },
+    "physicalBundles": {
+      "title": "Gestion des Bundles",
+      "description": "Créez et gérez des bundles de produits avec promotions automatiques et prix dynamiques"
+    },
+    "physicalBackorders": {
+      "title": "Gestion des Backorders",
+      "description": "Gérez les commandes en rupture de stock avec priorisation et alertes automatiques"
+    },
+    "physicalPreOrders": {
+      "title": "Gestion des Précommandes",
+      "description": "Gérez les précommandes de vos produits physiques avec notifications automatiques"
+    },
+    "physicalMultiCurrency": {
+      "title": "Gestion Multi-devises",
+      "description": "Gérez les devises, taux de change et prix régionaux",
+      "tabs": {
+        "currencies": "Devises & Taux",
+        "currenciesShort": "Devises",
+        "converter": "Convertisseur"
+      }
+    }
+  },
+  "promotions": {
+    "title": "Promotions",
+    "description": "Gérez vos codes promo et réductions",
+    "createButton": "Nouvelle promotion",
+    "createButtonShort": "Nouvelle",
+    "noStore": {
+      "title": "Boutique non configurée",
+      "description": "Veuillez d'abord créer votre boutique pour gérer vos promotions."
+    },
+    "stats": {
+      "total": "Total Promotions",
+      "active": "Actives",
+      "totalUses": "Total Utilisations",
+      "averageDiscount": "Moyenne Réduction"
+    },
+    "empty": {
+      "title": "Aucune promotion",
+      "description": "Commencez par créer votre première promotion",
+      "noResults": "Aucune promotion ne correspond à vos filtres"
+    },
+    "statistics": {
+      "title": "Statistiques",
+      "total": "Total",
+      "totalDescription": "Nombre total de promotions",
+      "active": "Actives",
+      "inactive": "{{count}} inactive",
+      "inactive_plural": "{{count}} inactives",
+      "uses": "Utilisations",
+      "usesDescription": "Total des utilisations",
+      "averageDiscount": "Réduction moyenne",
+      "averageDiscountDescription": "Moyenne des réductions"
+    }
+  },
+  "withdrawals": {
+    "title": "Retraits",
+    "description": "Gérez vos retraits et consultez votre solde disponible",
+    "requestButton": "Demander un retrait",
+    "noStore": "Vous devez créer une boutique avant de pouvoir effectuer des retraits.",
+    "migration": {
+      "title": "Migration SQL requise :",
+      "description": "Pour activer le système de retraits, veuillez exécuter la migration SQL {{fileName}} dans votre base de données Supabase."
+    }
+  },
+  "store": {
+    "title": "Boutique",
+    "loading": "Chargement de vos boutiques...",
+    "viewStore": "Voir ma boutique",
+    "viewStoreShort": "Voir",
+    "viewStoreAriaLabel": "Ouvrir la boutique {{name}} dans un nouvel onglet",
+    "tabs": {
+      "ariaLabel": "Navigation des boutiques",
+      "manage": "Gérer mes boutiques",
+      "manageShort": "Gérer",
+      "create": "Créer ma boutique",
+      "createShort": "Créer"
+    },
+    "create": {
+      "title": "Créer une nouvelle boutique",
+      "description": "Configurez votre nouvelle boutique dans les paramètres.",
+      "descriptionExisting": "Vous pouvez créer jusqu'à 3 boutiques. Si vous avez atteint la limite, supprimez une boutique existante avant d'en créer une nouvelle."
+    },
+    "existing": {
+      "title": "Boutiques existantes",
+      "description": "Vous pouvez créer jusqu'à 3 boutiques par utilisateur. Pour créer une nouvelle boutique, vous devez d'abord supprimer une boutique existante si vous avez atteint la limite.",
+      "currentStore": "Vos boutiques actuelles :"
+    },
+    "empty": {
+      "title": "Créez votre première boutique",
+      "description": "Configurez votre boutique pour commencer à vendre vos produits digitaux et services en Afrique"
+    },
+    "whatIs": {
+      "title": "Qu'est-ce qu'une boutique Emarzona ?",
+      "feature1": "Un lien unique et personnalisable pour votre activité",
+      "feature2": "Vendez plusieurs produits et services",
+      "feature3": "Acceptez les paiements en FCFA et autres devises",
+      "feature4": "Gérez tout depuis votre tableau de bord"
+    },
+    "goToSettings": "Aller aux paramètres"
+  },
+  "affiliate": {
+    "dashboard": {
+      "title": "Dashboard Affilié",
+      "description": "Vue d'ensemble de vos promotions de cours",
+      "loginRequired": "Connexion requise",
+      "mustBeLoggedIn": "Vous devez être connecté pour accéder au dashboard affilié.",
+      "findCourses": "Trouver des cours",
+      "discoverCourses": "Découvrir les cours disponibles",
+      "welcome": {
+        "title": "Bienvenue dans le Programme d'Affiliation !",
+        "description": "Commencez à gagner des commissions en promouvant des cours en ligne de qualité."
+      },
+      "steps": {
+        "step1": {
+          "title": "Trouvez un cours",
+          "description": "Parcourez notre marketplace et trouvez des cours avec l'affiliation activée"
+        },
+        "step2": {
+          "title": "Créez vos liens",
+          "description": "Générez des liens personnalisés pour chaque canal (blog, YouTube, etc.)"
+        },
+        "step3": {
+          "title": "Gagnez !",
+          "description": "Recevez des commissions à chaque inscription via vos liens"
+        }
+      },
+      "tips": {
+        "title": "Conseils de Promotion",
+        "tip1": {
+          "title": "Créez du contenu de valeur",
+          "description": "Rédigez des articles ou créez des vidéos qui apportent de la valeur à votre audience"
+        },
+        "tip2": {
+          "title": "Testez différents canaux",
+          "description": "Créez des liens spécifiques pour blog, YouTube, Instagram pour analyser les performances"
+        },
+        "tip3": {
+          "title": "Soyez transparent",
+          "description": "Indiquez toujours que vous utilisez un lien d'affiliation"
+        },
+        "tip4": {
+          "title": "Analysez vos statistiques",
+          "description": "Suivez régulièrement vos performances et optimisez vos stratégies"
+        }
+      },
+      "faq": {
+        "title": "Questions Fréquentes",
+        "q1": {
+          "question": "Quand suis-je payé ?",
+          "answer": "Les commissions sont payées mensuellement une fois que vous atteignez le seuil minimum de 50,000 XOF."
+        },
+        "q2": {
+          "question": "Combien de temps dure le cookie ?",
+          "answer": "Cela dépend du cours. La durée est affichée sur chaque page de génération de liens (généralement 30 jours)."
+        },
+        "q3": {
+          "question": "Puis-je promouvoir plusieurs cours ?",
+          "answer": "Oui ! Vous pouvez promouvoir autant de cours que vous le souhaitez et créer des liens illimités."
+        },
+        "q4": {
+          "question": "Comment optimiser mes conversions ?",
+          "answer": "Créez du contenu pertinent, utilisez des appels à l'action clairs, et ciblez la bonne audience pour chaque cours."
+        }
+      }
+    }
+  },
+  "emails": {
+    "campaigns": {
+      "title": "Campagnes Email",
+      "subtitle": "Créez et gérez vos campagnes email marketing",
+      "noStore": "Veuillez sélectionner une boutique",
+      "editCampaign": "Modifier la campagne",
+      "newCampaign": "Nouvelle campagne",
+      "editCampaignDescription": "Modifiez les informations de votre campagne email",
+      "newCampaignDescription": "Créez une nouvelle campagne email marketing pour votre boutique",
+      "campaignName": "Nom de la campagne",
+      "campaignNamePlaceholder": "Newsletter de janvier 2025",
+      "campaignType": "Type de campagne",
+      "campaignDescriptionPlaceholder": "Description de la campagne...",
+      "audienceType": "Type d'audience",
+      "scheduledAt": "Date et heure d'envoi",
+      "scheduledAtPlaceholder": "Programmer l'envoi",
+      "scheduledAtDescription": "Laissez vide pour envoyer immédiatement ou créer un brouillon",
+      "timezone": "Fuseau horaire",
+      "createCampaign": "Créer la campagne",
+      "types": {
+        "newsletter": "Newsletter",
+        "promotional": "Promotionnelle",
+        "transactional": "Transactionnelle",
+        "abandonCart": "Panier abandonné",
+        "nurture": "Nurture"
+      },
+      "audienceTypes": {
+        "segment": "Segment",
+        "list": "Liste",
+        "filter": "Filtres"
+      },
+      "alert": {
+        "title": "Système d'Emailing Avancé",
+        "description": "Créez des campagnes email ciblées pour vos clients. Programmez des envois, segmentez votre audience et suivez les performances en temps réel."
+      }
+    },
+    "sequences": {
+      "title": "Séquences Email",
+      "subtitle": "Créez des séquences d'emails automatisées pour vos clients",
+      "noStore": "Veuillez sélectionner une boutique",
+      "editStep": "Modifier l'étape",
+      "newStep": "Nouvelle étape",
+      "editStepDescription": "Modifiez les paramètres de cette étape de la séquence",
+      "newStepDescription": "Ajoutez une nouvelle étape à votre séquence d'emails",
+      "stepOrder": "Ordre de l'étape",
+      "stepOrderDescription": "L'ordre détermine quand cette étape sera exécutée dans la séquence",
+      "templateDescription": "Le template à utiliser pour cet email",
+      "delayType": "Type de délai",
+      "delayValue": "Valeur",
+      "immediate": "Immédiat",
+      "minutes": "Minutes",
+      "hours": "Heures",
+      "days": "Jours",
+      "day": "jour",
+      "hour": "heure",
+      "minute": "minute",
+      "delayDescription": "Cette étape sera envoyée {{value}} {{unit}}{{plural}} après l'étape précédente",
+      "addStep": "Ajouter l'étape",
+      "tabs": {
+        "list": "Liste",
+        "steps": "Étapes"
+      },
+      "alert": {
+        "title": "Séquences Automatisées",
+        "description": "Créez des séquences d'emails qui s'envoient automatiquement selon un calendrier défini. Parfait pour les parcours d'onboarding, les relances et les campagnes de nurturing."
+      }
+    },
+    "workflows": {
+      "title": "Workflows Email",
+      "subtitle": "Automatisez vos emails avec des workflows intelligents",
+      "noStore": "Veuillez sélectionner une boutique",
+      "alert": {
+        "title": "Workflows Automatisés",
+        "description": "Créez des workflows automatisés qui déclenchent des actions basées sur des événements, des conditions ou des planifications. Automatisez vos campagnes email pour économiser du temps et améliorer l'engagement."
+      }
+    },
+    "analytics": {
+      "title": "Analytics Email",
+      "subtitle": "Analysez les performances de vos campagnes et séquences email",
+      "noStore": "Veuillez sélectionner une boutique",
+      "alert": {
+        "title": "Analytics Email Avancées",
+        "description": "Visualisez les performances de vos emails avec des graphiques détaillés. Analysez les taux d'ouverture, de clic, et les revenus générés par vos campagnes."
+      }
+    },
+    "segments": {
+      "title": "Segments d'Audience",
+      "subtitle": "Créez et gérez vos segments d'audience pour cibler vos campagnes email",
+      "noStore": "Veuillez sélectionner une boutique",
+      "tabs": {
+        "list": "Liste des segments",
+        "preview": "Prévisualisation"
+      },
+      "alert": {
+        "title": "Segmentation d'Audience",
+        "description": "Créez des segments statiques (liste manuelle) ou dynamiques (calculés automatiquement) pour cibler précisément vos campagnes email. Les segments dynamiques se mettent à jour automatiquement selon vos critères."
+      },
+      "backToList": "Retour à la liste",
+      "back": "Retour",
+      "previewLabel": "Prévisualisation: "
+    },
+    "templateEditor": {
+      "title": "Éditeur de Templates Email",
+      "subtitle": "Créez et personnalisez vos templates email avec un éditeur visuel",
+      "alert": {
+        "title": "Éditeur de Templates Email",
+        "description": "Utilisez l'éditeur pour créer vos templates email. Vous pouvez insérer des blocs prédéfinis, utiliser des variables dynamiques, et prévisualiser le résultat sur mobile et desktop."
+      },
+      "tabs": {
+        "editor": "Éditeur",
+        "editorShort": "Édit",
+        "blocks": "Blocs",
+        "blocksShort": "Bloc",
+        "preview": "Prévisualisation",
+        "previewShort": "Aperçu"
+      },
+      "toast": {
+        "saved": "Template sauvegardé",
+        "savedDescription": "Le template a été sauvegardé avec succès.",
+        "error": "Erreur",
+        "errorDescription": "Erreur lors de la sauvegarde du template.",
+        "blockInserted": "Bloc inséré",
+        "blockInsertedDescription": "Le bloc a été inséré dans votre template."
+      }
+    }
+  },
+  "digitalUpdates": {
+    "title": "Gestion des Mises à Jour",
+    "subtitle": "Publiez et gérez les mises à jour de vos produits digitaux",
+    "newUpdate": "Nouvelle mise à jour",
+    "newUpdateShort": "Nouvelle",
+    "selectProduct": "Sélectionner un produit",
+    "selectProductDesc": "Choisissez un produit digital pour gérer ses mises à jour",
+    "noProducts": "Aucun produit digital",
+    "noProductsDesc": "Créez d'abord un produit digital pour pouvoir gérer ses mises à jour",
+    "createProduct": "Créer un produit digital",
+    "currentVersion": "Version actuelle: {{version}}",
+    "productWithoutName": "Produit sans nom",
+    "tabs": {
+      "updates": "Mises à jour",
+      "updatesShort": "Mises à j.",
+      "stats": "Statistiques",
+      "statsShort": "Stats",
+      "settings": "Paramètres",
+      "settingsShort": "Param."
+    }
+  },
+  "digitalVersions": {
+    "title": "Gestion des Versions",
+    "subtitle": "Gérez toutes les versions de votre produit digital",
+    "newVersion": "Nouvelle Version",
+    "currentVersion": "Version Actuelle",
+    "versionHistory": "Historique des Versions",
+    "versionNumber": "Numéro de version",
+    "versionNumberPlaceholder": "1.2.3",
+    "versionNumberFormat": "Format: major.minor.patch (ex: 1.2.3)",
+    "versionName": "Nom de la version",
+    "versionNamePlaceholder": "Version 2.0 - Nouveau Design",
+    "releaseNotes": "Notes de version",
+    "releaseNotesPlaceholder": "Nouvelles fonctionnalités, corrections de bugs...",
+    "isCurrent": "Version courante",
+    "isCurrentDesc": "Marquer cette version comme la version actuelle",
+    "isBeta": "Version beta",
+    "isBetaDesc": "Marquer cette version comme beta",
+    "files": "Fichiers de la version",
+    "filesDesc": "Sélectionnez les fichiers à inclure dans cette version (max 500MB par fichier)",
+    "uploading": "Upload en cours...",
+    "uploaded": "Uploadé",
+    "error": "Erreur",
+    "createVersion": "Créer la version",
+    "creating": "Création...",
+    "versionCreated": "Version créée",
+    "versionCreatedDesc": "Version {{version}} créée avec succès",
+    "publishedOn": "Publiée le",
+    "downloads": "Téléchargements",
+    "size": "Taille",
+    "filesCount": "Fichiers",
+    "noVersions": "Aucune version",
+    "noVersionsDesc": "Créez votre première version pour commencer",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette version ?",
+    "versionDeleted": "Version supprimée",
+    "versionDeletedDesc": "La version a été supprimée avec succès"
+  },
+  "calendarIntegrations": {
+    "title": "Intégrations Calendriers Externes",
+    "subtitle": "Connectez vos calendriers Google, Outlook ou iCal pour synchroniser vos réservations",
+    "newIntegration": "Nouvelle Intégration",
+    "googleCalendar": "Google Calendar",
+    "outlook": "Outlook",
+    "ical": "iCal",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "error": "Erreur",
+    "pending": "En attente",
+    "sync": "Synchroniser",
+    "syncing": "Synchronisation en cours...",
+    "lastSync": "Dernière synchronisation",
+    "syncDirection": {
+      "oneWayImport": "Import uniquement",
+      "oneWayExport": "Export uniquement",
+      "bidirectional": "Bidirectionnelle"
+    },
+    "autoSync": "Synchronisation automatique",
+    "syncInterval": "Intervalle de synchronisation",
+    "minutes": "minutes",
+    "createEventsForBookings": "Créer des événements pour les réservations",
+    "createEventsForAvailability": "Créer des événements pour la disponibilité",
+    "noIntegrations": "Aucune intégration",
+    "noIntegrationsDesc": "Créez votre première intégration pour commencer",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette intégration ?",
+    "integrationDeleted": "Intégration supprimée",
+    "syncLogs": "Historique de synchronisation",
+    "eventsCreated": "Événements créés",
+    "eventsUpdated": "Événements mis à jour",
+    "eventsDeleted": "Événements supprimés",
+    "syncSuccess": "Synchronisation réussie",
+    "syncError": "Erreur de synchronisation"
+  },
+  "recurringBookings": {
+    "title": "Réservations Récurrentes",
+    "subtitle": "Gérez vos séries de réservations récurrentes",
+    "noStore": "Aucune boutique trouvée",
+    "noStoreDesc": "Veuillez créer une boutique pour gérer vos réservations récurrentes",
+    "stats": {
+      "total": "Total",
+      "active": "Actives",
+      "bookings": "Réservations",
+      "completed": "Complétées",
+      "cancelled": "Annulées"
+    }
+  },
+  "common": {
+    "welcome": "Bienvenue",
+    "startBuilding": "Commencez à construire votre projet ici !",
+    "notAvailable": "N/A",
+    "optional": "optionnel",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "description": "Description",
+    "hide": "Masquer",
+    "view": "Voir"
+  },
+  "shipping": {
+    "title": "Livraison",
+    "country": "Pays",
+    "countryRequired": "Pays requis",
+    "selectCountry": "Sélectionner un pays",
+    "city": "Ville",
+    "cityPlaceholder": "Ex: Dakar",
+    "postalCode": "Code postal",
+    "postalCodePlaceholder": "Ex: 75001",
+    "calculate": "Calculer le shipping",
+    "calculating": "Calcul en cours...",
+    "calculationError": "Erreur lors du calcul du shipping",
+    "baseShipping": "Shipping de base",
+    "insurance": "Assurance",
+    "specializedPackaging": "Emballage spécialisé",
+    "specialHandling": "Manutention spéciale",
+    "totalShipping": "Total shipping",
+    "estimatedDelivery": "Livraison estimée : {{days}} jours",
+    "recommendedCarriers": "Transporteurs recommandés :",
+    "status": {
+      "pending": "En attente",
+      "labelCreated": "Étiquette créée",
+      "pickedUp": "Ramassé",
+      "inTransit": "En transit",
+      "outForDelivery": "En livraison",
+      "delivered": "Livré",
+      "failed": "Échec",
+      "returned": "Retourné",
+      "cancelled": "Annulé"
+    },
+    "origin": "Origine",
+    "destination": "Destination",
+    "estimatedDeliveryLabel": "Livraison estimée",
+    "deliveredOn": "Livré le",
+    "weight": "Poids",
+    "cost": "Coût",
+    "createdOn": "Créé le",
+    "track": "Suivre",
+    "label": "Étiquette",
+    "cancelShipment": "Annuler l'expédition",
+    "cancelShipmentConfirm": "Êtes-vous sûr de vouloir annuler cette expédition ?",
+    "detailedTracking": "le suivi détaillé",
+    "artistCalculator": {
+      "title": "Calcul du Shipping Spécialisé",
+      "description": "Calculez les frais de livraison spécialisés pour cette œuvre d'artiste"
+    }
+  },
+  "countries": {
+    "SN": "Sénégal",
+    "CI": "Côte d'Ivoire",
+    "ML": "Mali",
+    "BF": "Burkina Faso",
+    "FR": "France",
+    "BE": "Belgique",
+    "CH": "Suisse"
   }
 }
-

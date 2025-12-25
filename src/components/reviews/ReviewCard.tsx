@@ -10,7 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ReviewStars } from './ReviewStars';
-import { ThumbsUp, ThumbsDown, MessageCircle, ShieldCheck } from 'lucide-react';
+import { ReviewMediaGallery } from './ReviewMediaGallery';
+import { ReviewVoteButtons } from './ReviewVoteButtons';
+import { MessageCircle, ShieldCheck } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import type { Review } from '@/types/review';
@@ -24,22 +26,18 @@ interface ReviewCardProps {
   currentUserVote?: { is_helpful: boolean } | null;
 }
 
-export const ReviewCard: React.FC<ReviewCardProps> = ({
+const ReviewCardComponent: React.FC<ReviewCardProps> = ({
   review,
   onVote,
   onReply,
   showReplies = true,
   currentUserVote,
+  isLoading = false,
 }) => {
-  const [showAllImages, setShowAllImages] = useState(false);
   const detailedFields = getDetailedRatingFields(review.product_type);
 
-  const imagesToShow = showAllImages 
-    ? review.media?.filter(m => m.media_type === 'image') 
-    : review.media?.filter(m => m.media_type === 'image').slice(0, 3);
-
   return (
-    <Card>
+    <Card style={{ willChange: 'transform' }}>
       <CardContent className="pt-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
@@ -71,11 +69,15 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
         </div>
 
         {/* Ratings détaillés */}
-        {detailedFields.length > 0 && detailedFields.some(f => (review as any)[f]) && (
+        {detailedFields.length > 0 && detailedFields.some(f => {
+          const reviewWithFields = review as Review & { [key: string]: unknown };
+          return reviewWithFields[f];
+        }) && (
           <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
             {detailedFields.map(field => {
-              const value = (review as any)[field];
-              if (!value) return null;
+              const reviewWithFields = review as Review & { [key: string]: unknown };
+              const value = reviewWithFields[field];
+              if (!value || typeof value !== 'number') return null;
               return (
                 <div key={field} className="flex items-center justify-between">
                   <span className="text-muted-foreground">{getDetailedRatingLabel(field)} :</span>
@@ -94,30 +96,10 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
         {/* Contenu */}
         <p className="text-sm whitespace-pre-wrap mb-4">{review.content}</p>
 
-        {/* Media */}
+        {/* Media Gallery */}
         {review.media && review.media.length > 0 && (
           <div className="mb-4">
-            <div className="grid grid-cols-3 gap-2">
-              {imagesToShow?.map((media) => (
-                <img
-                  key={media.id}
-                  src={media.media_url}
-                  alt="Review media"
-                  className="w-full aspect-square object-cover rounded-md cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={() => window.open(media.media_url, '_blank')}
-                />
-              ))}
-            </div>
-            {review.media.length > 3 && !showAllImages && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mt-2"
-                onClick={() => setShowAllImages(true)}
-              >
-                Voir {review.media.length - 3} photo{review.media.length - 3 > 1 ? 's' : ''} de plus
-              </Button>
-            )}
+            <ReviewMediaGallery media={review.media} maxVisible={3} />
           </div>
         )}
 
@@ -142,27 +124,16 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
       </CardContent>
 
       <CardFooter className="flex items-center justify-between border-t pt-4">
-        {/* Votes */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onVote?.(true)}
-            className={currentUserVote?.is_helpful ? 'text-primary' : ''}
-          >
-            <ThumbsUp className="w-4 h-4 mr-1" />
-            Utile ({review.helpful_count})
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onVote?.(false)}
-            className={currentUserVote && !currentUserVote.is_helpful ? 'text-destructive' : ''}
-          >
-            <ThumbsDown className="w-4 h-4 mr-1" />
-            Pas utile ({review.not_helpful_count})
-          </Button>
-        </div>
+        {/* Votes améliorés */}
+        {onVote && (
+          <ReviewVoteButtons
+            helpfulCount={review.helpful_count}
+            notHelpfulCount={review.not_helpful_count}
+            currentUserVote={currentUserVote}
+            onVote={onVote}
+            isLoading={isLoading}
+          />
+        )}
 
         {/* Répondre */}
         {onReply && (
@@ -175,4 +146,22 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
     </Card>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const ReviewCard = React.memo(ReviewCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.review.id === nextProps.review.id &&
+    prevProps.review.rating === nextProps.review.rating &&
+    prevProps.review.helpful_count === nextProps.review.helpful_count &&
+    prevProps.review.reply_count === nextProps.review.reply_count &&
+    prevProps.review.created_at === nextProps.review.created_at &&
+    prevProps.showReplies === nextProps.showReplies &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.currentUserVote?.is_helpful === nextProps.currentUserVote?.is_helpful &&
+    prevProps.onVote === nextProps.onVote &&
+    prevProps.onReply === nextProps.onReply
+  );
+});
+
+ReviewCard.displayName = 'ReviewCard';
 

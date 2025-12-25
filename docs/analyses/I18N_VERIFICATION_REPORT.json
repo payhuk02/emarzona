@@ -1,0 +1,1442 @@
+{
+  "total": 179,
+  "withI18n": 178,
+  "withoutI18n": 1,
+  "withHardcodedText": 116,
+  "pagesWithoutI18n": [
+    {
+      "file": "src\\pages\\UnsubscribePage.tsx",
+      "issues": [
+        "Pas d'import i18n détecté"
+      ]
+    }
+  ],
+  "pagesWithHardcodedText": [
+    "src\\pages\\admin\\AdminAffiliates.tsx",
+    "src\\pages\\admin\\AdminAnalytics.tsx",
+    "src\\pages\\admin\\AdminAudit.tsx",
+    "src\\pages\\admin\\AdminBatchShipping.tsx",
+    "src\\pages\\admin\\AdminCommissionPayments.tsx",
+    "src\\pages\\admin\\AdminCommissionSettings.tsx",
+    "src\\pages\\admin\\AdminCommunity.tsx",
+    "src\\pages\\admin\\AdminCourses.tsx",
+    "src\\pages\\admin\\AdminDashboard.tsx",
+    "src\\pages\\admin\\AdminDisputes.tsx",
+    "src\\pages\\admin\\AdminErrorMonitoring.tsx",
+    "src\\pages\\admin\\AdminGiftCardManagement.tsx",
+    "src\\pages\\admin\\AdminInventory.tsx",
+    "src\\pages\\admin\\AdminLoyaltyManagement.tsx",
+    "src\\pages\\admin\\AdminNotifications.tsx",
+    "src\\pages\\admin\\AdminOrders.tsx",
+    "src\\pages\\admin\\AdminPayments.tsx",
+    "src\\pages\\admin\\AdminProducts.tsx",
+    "src\\pages\\admin\\AdminReferrals.tsx",
+    "src\\pages\\admin\\AdminReturnManagement.tsx",
+    "src\\pages\\admin\\AdminReviews.tsx",
+    "src\\pages\\admin\\AdminSales.tsx",
+    "src\\pages\\admin\\AdminSettings.tsx",
+    "src\\pages\\admin\\AdminShipping.tsx",
+    "src\\pages\\admin\\AdminShippingConversations.tsx",
+    "src\\pages\\admin\\AdminStoreWithdrawals.tsx",
+    "src\\pages\\admin\\AdminSuppliersManagement.tsx",
+    "src\\pages\\admin\\AdminSupport.tsx",
+    "src\\pages\\admin\\AdminTaxManagement.tsx",
+    "src\\pages\\admin\\AdminTransactionReconciliation.tsx",
+    "src\\pages\\admin\\AdminUsers.tsx",
+    "src\\pages\\admin\\AdminVendorConversations.tsx",
+    "src\\pages\\admin\\AdminWebhookManagement.tsx",
+    "src\\pages\\admin\\IntegrationsPage.tsx",
+    "src\\pages\\admin\\MonerooReconciliation.tsx",
+    "src\\pages\\admin\\PlatformCustomization.tsx",
+    "src\\pages\\admin\\TransactionMonitoring.tsx",
+    "src\\pages\\AdminKYC.tsx",
+    "src\\pages\\AdvancedOrderManagement.tsx",
+    "src\\pages\\affiliate\\CourseAffiliate.tsx",
+    "src\\pages\\AffiliateDashboard.tsx",
+    "src\\pages\\Analytics.tsx",
+    "src\\pages\\artist\\ArtistProductDetail.tsx",
+    "src\\pages\\Auth.tsx",
+    "src\\pages\\checkout\\Cancel.tsx",
+    "src\\pages\\checkout\\Success.tsx",
+    "src\\pages\\Checkout.tsx",
+    "src\\pages\\community\\CommunityPage.tsx",
+    "src\\pages\\courses\\CourseDetail.tsx",
+    "src\\pages\\courses\\MyCourses.tsx",
+    "src\\pages\\CreateProduct.tsx",
+    "src\\pages\\customer\\CustomerLoyalty.tsx",
+    "src\\pages\\customer\\CustomerMyGiftCards.tsx",
+    "src\\pages\\customer\\CustomerMyInvoices.tsx",
+    "src\\pages\\customer\\CustomerMyReturns.tsx",
+    "src\\pages\\customer\\CustomerMyWishlist.tsx",
+    "src\\pages\\customer\\CustomerPhysicalPortal.tsx",
+    "src\\pages\\customer\\CustomerPortal.tsx",
+    "src\\pages\\customer\\MyCourses.tsx",
+    "src\\pages\\customer\\MyDownloads.tsx",
+    "src\\pages\\customer\\MyFavorites.tsx",
+    "src\\pages\\customer\\MyOrders.tsx",
+    "src\\pages\\customer\\MyProfile.tsx",
+    "src\\pages\\customer\\PriceStockAlerts.tsx",
+    "src\\pages\\customer\\SharedWishlist.tsx",
+    "src\\pages\\dashboard\\StoreAffiliateManagement.tsx",
+    "src\\pages\\digital\\BundleDetail.tsx",
+    "src\\pages\\digital\\CreateBundle.tsx",
+    "src\\pages\\digital\\DigitalProductDetail.tsx",
+    "src\\pages\\digital\\DigitalProductsCompare.tsx",
+    "src\\pages\\digital\\DigitalProductsList.tsx",
+    "src\\pages\\digital\\DigitalProductsSearch.tsx",
+    "src\\pages\\digital\\DigitalProductUpdatesDashboard.tsx",
+    "src\\pages\\digital\\LicenseManagement.tsx",
+    "src\\pages\\digital\\MyLicenses.tsx",
+    "src\\pages\\disputes\\DisputeDetail.tsx",
+    "src\\pages\\gamification\\GamificationPage.tsx",
+    "src\\pages\\inventory\\InventoryDashboard.tsx",
+    "src\\pages\\KYC.tsx",
+    "src\\pages\\Landing.tsx",
+    "src\\pages\\legal\\RefundPolicy.tsx",
+    "src\\pages\\legal\\TermsOfService.tsx",
+    "src\\pages\\Marketing.tsx",
+    "src\\pages\\Marketplace.tsx",
+    "src\\pages\\notifications\\NotificationsCenter.tsx",
+    "src\\pages\\orders\\OrderMessaging.tsx",
+    "src\\pages\\Orders.tsx",
+    "src\\pages\\PaymentMethods.tsx",
+    "src\\pages\\payments\\PayBalanceList.tsx",
+    "src\\pages\\payments\\PaymentManagement.tsx",
+    "src\\pages\\payments\\PaymentManagementList.tsx",
+    "src\\pages\\payments\\PaymentSuccess.tsx",
+    "src\\pages\\Payments.tsx",
+    "src\\pages\\PaymentsCustomers.tsx",
+    "src\\pages\\physical\\PhysicalProductDetail.tsx",
+    "src\\pages\\physical\\PhysicalProductsList.tsx",
+    "src\\pages\\PlatformRevenue.tsx",
+    "src\\pages\\ProductDetail.tsx",
+    "src\\pages\\Products.tsx",
+    "src\\pages\\Promotions.tsx",
+    "src\\pages\\Referrals.tsx",
+    "src\\pages\\service\\AdvancedCalendarPage.tsx",
+    "src\\pages\\service\\BookingsManagement.tsx",
+    "src\\pages\\service\\RecurringBookingsManagement.tsx",
+    "src\\pages\\service\\ServiceDetail.tsx",
+    "src\\pages\\service\\ServiceManagementPage.tsx",
+    "src\\pages\\settings\\NotificationSettings.tsx",
+    "src\\pages\\Settings.tsx",
+    "src\\pages\\shipping\\ContactShippingService.tsx",
+    "src\\pages\\shipping\\ShippingDashboard.tsx",
+    "src\\pages\\shipping\\ShippingServiceMessages.tsx",
+    "src\\pages\\store\\StoreTeamManagement.tsx",
+    "src\\pages\\StoreAffiliates.tsx",
+    "src\\pages\\Storefront.tsx",
+    "src\\pages\\vendor\\VendorMessaging.tsx",
+    "src\\pages\\Withdrawals.tsx"
+  ],
+  "allPages": [
+    {
+      "file": "src\\pages\\admin\\AdminAccessibilityReport.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\AdminActivity.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\AdminAffiliates.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminAnalytics.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminAudit.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminBatchShipping.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminCommissionPayments.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminCommissionSettings.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminCommunity.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminCostOptimization.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\AdminCourses.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminDashboard.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminDemandForecasting.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\AdminDisputes.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminErrorMonitoring.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminGiftCardManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminInventory.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminLoyaltyManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminMonitoring.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\AdminNotifications.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminOrders.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminPayments.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminProductKitsManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\AdminProducts.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminReferrals.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminReturnManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminReviews.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminSales.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminSecurity.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\AdminSettings.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminShipping.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminShippingConversations.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminStores.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\AdminStoreWithdrawals.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminSuppliersManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminSupport.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminTaxManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminTransactionReconciliation.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminUsers.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminVendorConversations.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\AdminWarehousesManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\AdminWebhookManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\DigitalProductWebhooks.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\IntegrationsPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\MonerooAnalytics.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\MonerooReconciliation.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\PhysicalBackorders.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\PhysicalBarcodeScanner.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\PhysicalBundles.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\PhysicalInventoryManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\PhysicalMultiCurrency.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\PhysicalPreOrders.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\PhysicalProductsAnalytics.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\PhysicalProductsLots.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\PhysicalProductsSerialTracking.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\PhysicalProductWebhooks.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\PhysicalPromotions.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\admin\\PlatformCustomization.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\admin\\TransactionMonitoring.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\AdminKYC.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\AdvancedDashboard.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\AdvancedOrderManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\AdvancedOrderManagementSimple.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\affiliate\\AffiliateCoursesDashboard.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\affiliate\\CourseAffiliate.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\affiliate\\ShortLinkRedirect.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\AffiliateDashboard.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Analytics.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\artist\\ArtistProductDetail.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Auth.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Cart.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\checkout\\Cancel.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\checkout\\Checkout.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\checkout\\Success.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Checkout.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\community\\CommunityPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\courses\\CourseAnalytics.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\courses\\CourseDetail.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\courses\\CreateCourse.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\courses\\MyCourses.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\CreateProduct.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\customer\\CustomerDigitalPortal.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\customer\\CustomerLoyalty.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\customer\\CustomerLoyaltyPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\customer\\CustomerMyGiftCards.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\customer\\CustomerMyGiftCardsPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\customer\\CustomerMyInvoices.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\customer\\CustomerMyReturns.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\customer\\CustomerMyWishlist.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\customer\\CustomerPhysicalPortal.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\customer\\CustomerPortal.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\customer\\MyCourses.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\customer\\MyDownloads.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\customer\\MyFavorites.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\customer\\MyOrders.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\customer\\MyProfile.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\customer\\PriceStockAlerts.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\customer\\SharedWishlist.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Customers.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\dashboard\\StoreAffiliateManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Dashboard.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\digital\\BundleDetail.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\digital\\CreateBundle.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\digital\\DigitalBundlesList.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\digital\\DigitalProductAnalytics.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\digital\\DigitalProductDetail.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\digital\\DigitalProductsCompare.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\digital\\DigitalProductsList.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\digital\\DigitalProductsSearch.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\digital\\DigitalProductUpdatesDashboard.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\digital\\LicenseManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\digital\\MyDownloads.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\digital\\MyLicenses.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\disputes\\DisputeDetail.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\EditProduct.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\emails\\EmailAnalyticsPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\emails\\EmailCampaignsPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\emails\\EmailSegmentsPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\emails\\EmailSequencesPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\emails\\EmailTemplateEditorPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\emails\\EmailWorkflowsPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\gamification\\GamificationPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Index.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\inventory\\InventoryDashboard.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\KYC.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Landing.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\legal\\CookiePolicy.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\legal\\PrivacyPolicy.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\legal\\RefundPolicy.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\legal\\TermsOfService.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Marketing.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Marketplace.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\MyTasks.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\NotFound.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\notifications\\NotificationsCenter.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\orders\\OrderMessaging.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Orders.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\PaymentMethods.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\payments\\PayBalance.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\payments\\PayBalanceList.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\payments\\PaymentCancel.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\payments\\PaymentManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\payments\\PaymentManagementList.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\payments\\PaymentSuccess.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Payments.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\PaymentsCustomers.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\physical\\PhysicalProductDetail.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\physical\\PhysicalProductsList.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Pixels.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\PlatformRevenue.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\ProductCreationDemo.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\ProductDetail.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Products.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\promotions\\UnifiedPromotionsPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\Promotions.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Referrals.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\SEOAnalyzer.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\service\\AdvancedCalendarPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\service\\BookingsManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\service\\RecurringBookingsManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\service\\RecurringBookingsPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\service\\ResourceConflictManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\service\\ServiceDetail.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\service\\ServiceManagementPage.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\service\\ServicesList.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\service\\StaffAvailabilityCalendar.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\settings\\NotificationSettings.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Settings.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\shipping\\ContactShippingService.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\shipping\\ShippingDashboard.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\shipping\\ShippingServiceMessages.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\shipping\\ShippingServices.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\store\\StoreTeamManagement.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Store.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": false,
+      "issues": []
+    },
+    {
+      "file": "src\\pages\\StoreAffiliates.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Storefront.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\UnsubscribePage.tsx",
+      "hasI18n": false,
+      "hasHardcodedText": false,
+      "issues": [
+        "Pas d'import i18n détecté"
+      ]
+    },
+    {
+      "file": "src\\pages\\vendor\\VendorMessaging.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    },
+    {
+      "file": "src\\pages\\Withdrawals.tsx",
+      "hasI18n": true,
+      "hasHardcodedText": true,
+      "issues": [
+        "Textes français hardcodés potentiels détectés"
+      ]
+    }
+  ]
+}

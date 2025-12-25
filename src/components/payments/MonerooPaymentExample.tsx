@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMoneroo } from "@/hooks/useMoneroo";
+import { logger } from "@/lib/logger";
 
 /**
  * Exemple de composant utilisant Moneroo pour initier un paiement
@@ -31,7 +32,7 @@ export const MonerooPaymentExample = () => {
         },
       });
     } catch (error) {
-      console.error("Erreur paiement:", error);
+      logger.error("Erreur paiement", { error, amount, email });
     }
   };
 

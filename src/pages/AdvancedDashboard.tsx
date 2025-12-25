@@ -17,7 +17,7 @@ import {
   Zap
 } from "lucide-react";
 import { useAdvancedDashboardStats } from "@/hooks/useAdvancedDashboardStats";
-import { useStore } from "@/hooks/use-store";
+import { useStore } from "@/hooks/useStore";
 import { AdvancedStatsCard, RevenueChart, OrdersChart, ActivityFeed, PerformanceMetrics } from "@/components/dashboard/AdvancedDashboardComponents";
 import { QuickActions, NotificationCard, GoalProgress, RecentActivity, DashboardControls } from "@/components/dashboard/InteractiveWidgets";
 import { Button } from "@/components/ui/button";
@@ -25,8 +25,11 @@ import { useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { logger } from "@/lib/logger";
+import { useTranslation } from "react-i18next";
 
 const AdvancedDashboard = () => {
+  const { t } = useTranslation();
   const { store, loading: storeLoading } = useStore();
   const { stats, loading, refetch } = useAdvancedDashboardStats();
   const navigate = useNavigate();
@@ -36,35 +39,35 @@ const AdvancedDashboard = () => {
   const notifications = useMemo(() => [
     {
       id: '1',
-      title: 'Nouvelle commande',
-      message: 'Commande #ORD-20250121-0001 reçue pour 25,000 FCFA',
+      title: t('dashboard.notifications.newOrder'),
+      message: t('dashboard.notifications.newOrderMessage', { orderNumber: 'ORD-20250121-0001', amount: '25,000' }),
       type: 'success' as const,
       timestamp: new Date().toISOString(),
       read: false
     },
     {
       id: '2',
-      title: 'Produit en rupture',
-      message: 'Le produit "Formation Expert" est en rupture de stock',
+      title: t('dashboard.notifications.outOfStock'),
+      message: t('dashboard.notifications.outOfStockMessage', { productName: 'Formation Expert' }),
       type: 'warning' as const,
       timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
       read: false
     },
     {
       id: '3',
-      title: 'Paiement reçu',
-      message: 'Paiement de 15,000 FCFA confirmé',
+      title: t('dashboard.notifications.paymentReceived'),
+      message: t('dashboard.notifications.paymentReceivedMessage', { amount: '15,000' }),
       type: 'success' as const,
       timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
       read: true
     }
-  ], []);
+  ], [t]);
 
   // Objectifs simulés
   const goals = useMemo(() => [
     {
       id: '1',
-      title: 'Revenus mensuels',
+      title: t('dashboard.goals.monthlyRevenue'),
       target: 500000,
       current: stats.totalRevenue,
       unit: 'FCFA',
@@ -73,23 +76,23 @@ const AdvancedDashboard = () => {
     },
     {
       id: '2',
-      title: 'Nouveaux clients',
+      title: t('dashboard.goals.newCustomers'),
       target: 50,
       current: stats.totalCustomers,
-      unit: 'clients',
+      unit: t('dashboard.goals.customersUnit'),
       deadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
       color: 'green'
     },
     {
       id: '3',
-      title: 'Produits vendus',
+      title: t('dashboard.goals.productsSold'),
       target: 100,
       current: stats.totalOrders,
-      unit: 'commandes',
+      unit: t('dashboard.goals.ordersUnit'),
       deadline: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
       color: 'blue'
     }
-  ], [stats.totalRevenue, stats.totalCustomers, stats.totalOrders]);
+  ], [stats.totalRevenue, stats.totalCustomers, stats.totalOrders, t]);
 
   const handleRefresh = async () => {
     await refetch();
@@ -98,12 +101,12 @@ const AdvancedDashboard = () => {
 
   const handleExport = () => {
     // Logique d'export des données
-    console.log('Exporting dashboard data...');
+    logger.info('Exporting dashboard data');
   };
 
   const handleFilter = () => {
     // Logique de filtrage
-    console.log('Opening filter options...');
+    logger.debug('Opening filter options');
   };
 
   const handleSettings = () => {
@@ -131,15 +134,15 @@ const AdvancedDashboard = () => {
   };
 
   const handleMarkNotificationAsRead = (id: string) => {
-    console.log('Marking notification as read:', id);
+    logger.debug('Marking notification as read', { notificationId: id });
   };
 
   const handleViewAllNotifications = () => {
-    console.log('Viewing all notifications');
+    logger.debug('Viewing all notifications');
   };
 
   const handleViewAllActivity = () => {
-    console.log('Viewing all activity');
+    logger.debug('Viewing all activity');
   };
 
   if (storeLoading || loading) {
@@ -150,7 +153,7 @@ const AdvancedDashboard = () => {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-              <p className="mt-2 text-muted-foreground">Chargement du tableau de bord...</p>
+              <p className="mt-2 text-muted-foreground">{t('dashboard.loading')}</p>
             </div>
           </div>
         </div>
@@ -168,18 +171,18 @@ const AdvancedDashboard = () => {
               <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 px-3 sm:px-4 md:px-6">
                 <SidebarTrigger />
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold truncate">Tableau de bord</h1>
+                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold truncate">{t('dashboard.title')}</h1>
                 </div>
               </div>
             </header>
             <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 bg-gradient-hero overflow-x-hidden">
               <div className="max-w-3xl mx-auto text-center py-12">
-                <h2 className="text-2xl font-bold mb-4">Bienvenue ! 🎉</h2>
+                <h2 className="text-2xl font-bold mb-4">{t('dashboard.welcome')}</h2>
                 <p className="text-muted-foreground mb-6">
-                  Commencez par créer votre boutique pour accéder au tableau de bord avancé
+                  {t('dashboard.createStorePrompt')}
                 </p>
                 <Button onClick={() => navigate("/dashboard/store")} size="lg">
-                  Créer ma boutique
+                  {t('dashboard.createStoreButton')}
                 </Button>
               </div>
             </main>
@@ -201,15 +204,15 @@ const AdvancedDashboard = () => {
               <SidebarTrigger />
               <div className="flex-1 min-w-0">
                 <h1 className="text-lg sm:text-xl md:text-2xl font-bold truncate">
-                  Tableau de bord - {store.name}
+                  {t('dashboard.title')} - {store.name}
                 </h1>
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
                   <Activity className="h-3 w-3 mr-1" />
-                  En ligne
+                  {t('dashboard.online')}
                 </Badge>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" aria-label="Notifications">
                   <Bell className="h-4 w-4" />
                 </Button>
               </div>
@@ -232,50 +235,50 @@ const AdvancedDashboard = () => {
               {/* Stats Grid */}
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
                 <AdvancedStatsCard
-                  title="Produits"
+                  title={t('dashboard.stats.products.title')}
                   value={stats.totalProducts}
-                  description={`${stats.activeProducts} actif${stats.activeProducts > 1 ? "s" : ""}`}
+                  description={t('dashboard.stats.products.active', { count: stats.activeProducts, defaultValue_one: '{{count}} actif', defaultValue_other: '{{count}} actifs' })}
                   icon={Package}
                   color="green"
                   trend={{
                     value: stats.trends.productGrowth,
-                    label: "vs mois dernier",
+                    label: t('dashboard.trends.vsLastMonth'),
                     period: "30j"
                   }}
                 />
                 <AdvancedStatsCard
-                  title="Commandes"
+                  title={t('dashboard.stats.orders.title')}
                   value={stats.totalOrders}
-                  description={`${stats.pendingOrders} en attente`}
+                  description={t('dashboard.stats.orders.pending', { count: stats.pendingOrders })}
                   icon={ShoppingCart}
                   color="blue"
                   trend={{
                     value: stats.trends.orderGrowth,
-                    label: "vs mois dernier",
+                    label: t('dashboard.trends.vsLastMonth'),
                     period: "30j"
                   }}
                 />
                 <AdvancedStatsCard
-                  title="Clients"
+                  title={t('dashboard.stats.customers.title')}
                   value={stats.totalCustomers}
-                  description="Clients enregistrés"
+                  description={t('dashboard.stats.customers.registered')}
                   icon={Users}
                   color="purple"
                   trend={{
                     value: stats.trends.customerGrowth,
-                    label: "vs mois dernier",
+                    label: t('dashboard.trends.vsLastMonth'),
                     period: "30j"
                   }}
                 />
                 <AdvancedStatsCard
-                  title="Revenus"
+                  title={t('dashboard.stats.revenue.title')}
                   value={`${stats.totalRevenue.toLocaleString()} FCFA`}
-                  description="Total des ventes"
+                  description={t('dashboard.stats.revenue.total')}
                   icon={DollarSign}
                   color="yellow"
                   trend={{
                     value: stats.trends.revenueGrowth,
-                    label: "vs mois dernier",
+                    label: t('dashboard.trends.vsLastMonth'),
                     period: "30j"
                   }}
                 />

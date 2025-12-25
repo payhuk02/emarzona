@@ -2,6 +2,19 @@ import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { logger } from '@/lib/logger';
+import { validateCourseData } from '@/lib/validation/courseSchemas';
+
+// Type pour le résultat de la fonction SQL create_full_course
+type CreateFullCourseResult = {
+  success: boolean;
+  product_id?: string;
+  course_id?: string;
+  sections_count?: number;
+  lessons_count?: number;
+  error?: string;
+  error_code?: string;
+};
 
 interface Section {
   id: string;
@@ -16,7 +29,7 @@ interface Lesson {
   id: string;
   title: string;
   description?: string;
-  video_type: 'upload' | 'youtube' | 'vimeo';
+  video_type: 'upload' | 'youtube' | 'vimeo' | 'google-drive' | 'external';
   video_url?: string;
   video_duration_seconds?: number;
   is_preview: boolean;
@@ -31,6 +44,8 @@ interface CreateFullCourseData {
   short_description: string;
   description: string;
   category: string;
+  image_url?: string;
+  images?: string[];
   price: number;
   currency: string;
   promotional_price?: number;
@@ -39,7 +54,7 @@ interface CreateFullCourseData {
   preview_content_description?: string;
   licensing_type?: 'standard' | 'plr' | 'copyrighted';
   license_terms?: string;
-  
+
   // Données du cours
   level: string;
   language: string;
@@ -48,10 +63,10 @@ interface CreateFullCourseData {
   learning_objectives: string[];
   prerequisites: string[];
   target_audience: string[];
-  
+
   // Curriculum
   sections: Section[];
-  
+
   // SEO
   meta_title?: string;
   meta_description?: string;
@@ -59,10 +74,15 @@ interface CreateFullCourseData {
   og_title?: string;
   og_description?: string;
   og_image?: string;
-  
+
   // FAQs
-  faqs?: any[];
-  
+  faqs?: Array<{
+    id?: string;
+    question: string;
+    answer: string;
+    order?: number;
+  }>;
+
   // Affiliation
   affiliate_enabled?: boolean;
   commission_rate?: number;
@@ -74,7 +94,7 @@ interface CreateFullCourseData {
   allow_self_referral?: boolean;
   require_approval?: boolean;
   affiliate_terms_and_conditions?: string;
-  
+
   // Tracking & Pixels
   tracking_enabled?: boolean;
   google_analytics_id?: string;
@@ -99,221 +119,190 @@ export const useCreateFullCourse = () => {
     mutationFn: async (data: CreateFullCourseData) => {
       try {
         // Récupérer l'utilisateur connecté
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) {
           throw new Error('Utilisateur non connecté');
         }
 
-        // ÉTAPE 1 : Créer le produit
-        console.log('📦 Création du produit...');
-        const { data: product, error: productError } = await supabase
-          .from('products')
-          .insert({
-            store_id: data.storeId,
-            name: data.name,
-            slug: data.slug,
-            short_description: data.short_description,
-            description: data.description,
-            category: data.category,
-            product_type: 'course',
-            price: data.pricing_model === 'free' ? 0 : data.price,
-            currency: data.currency,
-            promotional_price: data.promotional_price || null,
-            pricing_model: data.pricing_model || 'one-time',
-            licensing_type: data.licensing_type || 'standard',
-            license_terms: data.license_terms || null,
-            is_active: true,
-            is_draft: false,
-            // SEO
-            meta_title: data.meta_title || null,
-            meta_description: data.meta_description || null,
-            meta_keywords: data.meta_keywords || null,
-            og_image: data.og_image || null,
-            // FAQs
-            faqs: data.faqs || null,
-          })
-          .select()
-          .single();
+        // VALIDATION SERVEUR avec Zod
+        logger.info('Validating course data with Zod schema', { storeId: data.storeId });
+        const validationResult = validateCourseData(data);
 
-        if (productError) {
-          console.error('❌ Erreur création produit:', productError);
-          throw new Error(`Erreur lors de la création du produit: ${productError.message}`);
+        if (!validationResult.success) {
+          const errorMessages = validationResult.errors.errors
+            .map(err => `${err.path.join('.')}: ${err.message}`)
+            .join(', ');
+          logger.error('Course data validation failed', { errors: validationResult.errors.errors });
+          throw new Error(`Erreur de validation: ${errorMessages}`);
         }
 
-        console.log('✅ Produit créé:', product.id);
+        const validatedData = validationResult.data;
+        logger.info('Course data validated successfully', { storeId: validatedData.storeId });
 
-        // ÉTAPE 2 : Créer le cours
-        console.log('🎓 Création du cours...');
-        
-        // Calculer les statistiques
-        const totalLessons = data.sections.reduce((total, section) => total + section.lessons.length, 0);
-        const totalDuration = data.sections.reduce((total, section) => {
-          return total + section.lessons.reduce((sum, lesson) => sum + (lesson.video_duration_seconds || 0), 0);
-        }, 0);
-
-        const { data: course, error: courseError } = await supabase
-          .from('courses')
-          .insert({
-            product_id: product.id,
-            level: data.level,
-            language: data.language,
-            total_duration_minutes: Math.round(totalDuration / 60),
-            total_lessons: totalLessons,
-            learning_objectives: data.learning_objectives,
-            prerequisites: data.prerequisites,
-            target_audience: data.target_audience,
-            certificate_enabled: data.certificate_enabled,
-            certificate_passing_score: data.certificate_passing_score,
-          })
-          .select()
-          .single();
-
-        if (courseError) {
-          console.error('❌ Erreur création cours:', courseError);
-          // Rollback : supprimer le produit
-          await supabase.from('products').delete().eq('id', product.id);
-          throw new Error(`Erreur lors de la création du cours: ${courseError.message}`);
-        }
-
-        console.log('✅ Cours créé:', course.id);
-
-        // ÉTAPE 3 : Créer les sections
-        console.log('📚 Création des sections...');
-        const createdSections: any[] = [];
-
-        for (const section of data.sections) {
-          const { data: createdSection, error: sectionError } = await supabase
-            .from('course_sections')
-            .insert({
-              course_id: course.id,
+        // Utiliser la fonction SQL avec transaction
+        // Convertir les sections en JSONB pour la fonction SQL
+        const sectionsJsonb = JSON.parse(
+          JSON.stringify(
+            validatedData.sections.map(section => ({
               title: section.title,
               description: section.description || null,
               order_index: section.order_index,
-            })
-            .select()
-            .single();
-
-          if (sectionError) {
-            console.error('❌ Erreur création section:', sectionError);
-            // Rollback : supprimer le cours et le produit
-            await supabase.from('courses').delete().eq('id', course.id);
-            await supabase.from('products').delete().eq('id', product.id);
-            throw new Error(`Erreur lors de la création de la section: ${sectionError.message}`);
-          }
-
-          createdSections.push({ ...createdSection, originalSection: section });
-          console.log(`✅ Section créée: ${createdSection.id} - ${section.title}`);
-        }
-
-        // ÉTAPE 4 : Créer les leçons
-        console.log('📹 Création des leçons...');
-        let totalCreatedLessons = 0;
-
-        for (const sectionData of createdSections) {
-          const section = sectionData.originalSection;
-          
-          for (const lesson of section.lessons) {
-            const { error: lessonError } = await supabase
-              .from('course_lessons')
-              .insert({
-                section_id: sectionData.id,
-                course_id: course.id,
+              lessons: section.lessons.map(lesson => ({
                 title: lesson.title,
                 description: lesson.description || null,
                 order_index: lesson.order_index,
-                video_type: lesson.video_type || 'upload',
+                video_type: lesson.video_type,
                 video_url: lesson.video_url || '',
                 video_duration_seconds: lesson.video_duration_seconds || 0,
                 is_preview: lesson.is_preview || false,
-                is_required: true,
-              });
+              })),
+            }))
+          )
+        );
 
-            if (lessonError) {
-              console.error('❌ Erreur création leçon:', lessonError);
-              // Rollback : supprimer tout
-              await supabase.from('courses').delete().eq('id', course.id);
-              await supabase.from('products').delete().eq('id', product.id);
-              throw new Error(`Erreur lors de la création de la leçon: ${lessonError.message}`);
-            }
+        // Appeler la fonction SQL avec transaction
+        // Note: L'ordre des paramètres correspond à la fonction SQL (obligatoires d'abord, optionnels ensuite)
+        logger.info('Calling SQL function create_full_course with transaction', {
+          storeId: validatedData.storeId,
+        });
 
-            totalCreatedLessons++;
-            console.log(`✅ Leçon créée: ${lesson.title}`);
-          }
+        // @ts-expect-error - create_full_course n'est pas encore dans les types générés Supabase
+        const { data: result, error: rpcError } = await supabase.rpc('create_full_course', {
+          // Paramètres obligatoires (dans l'ordre)
+          p_store_id: validatedData.storeId,
+          p_name: validatedData.name,
+          p_slug: validatedData.slug,
+          p_short_description: validatedData.short_description,
+          p_description: validatedData.description,
+          p_category: validatedData.category,
+          p_price: validatedData.price,
+          p_level: validatedData.level,
+          p_sections: sectionsJsonb,
+
+          // Paramètres optionnels (tous avec valeurs par défaut dans SQL)
+          p_image_url: validatedData.image_url || null,
+          p_images: validatedData.images || [],
+          p_currency: validatedData.currency,
+          p_promotional_price: validatedData.promotional_price || null,
+          p_pricing_model: validatedData.pricing_model || 'one-time',
+          p_licensing_type: validatedData.licensing_type || 'standard',
+          p_license_terms: validatedData.license_terms || null,
+          p_meta_title: validatedData.meta_title || null,
+          p_meta_description: validatedData.meta_description || null,
+          p_meta_keywords: validatedData.meta_keywords || null,
+          p_og_image: validatedData.og_image || null,
+          p_faqs: validatedData.faqs || [],
+          p_language: validatedData.language,
+          p_certificate_enabled: validatedData.certificate_enabled,
+          p_certificate_passing_score: validatedData.certificate_passing_score,
+          p_learning_objectives: validatedData.learning_objectives || [],
+          p_prerequisites: validatedData.prerequisites || [],
+          p_target_audience: validatedData.target_audience || [],
+          p_affiliate_enabled: validatedData.affiliate_enabled || false,
+          p_commission_rate: validatedData.commission_rate || null,
+          p_commission_type: validatedData.commission_type || null,
+          p_fixed_commission_amount: validatedData.fixed_commission_amount || null,
+          p_cookie_duration_days: validatedData.cookie_duration_days || null,
+          p_max_commission_per_sale: validatedData.max_commission_per_sale || null,
+          p_min_order_amount: validatedData.min_order_amount || null,
+          p_allow_self_referral: validatedData.allow_self_referral || null,
+          p_require_approval: validatedData.require_approval || null,
+          p_affiliate_terms_and_conditions: validatedData.affiliate_terms_and_conditions || null,
+          p_tracking_enabled: validatedData.tracking_enabled !== false,
+          p_google_analytics_id: validatedData.google_analytics_id || null,
+          p_facebook_pixel_id: validatedData.facebook_pixel_id || null,
+          p_google_tag_manager_id: validatedData.google_tag_manager_id || null,
+          p_tiktok_pixel_id: validatedData.tiktok_pixel_id || null,
+        });
+
+        if (rpcError) {
+          logger.error('Error calling create_full_course SQL function', { error: rpcError });
+          throw new Error(`Erreur lors de la création du cours: ${rpcError.message}`);
         }
 
-        // ÉTAPE 5 : Créer les settings d'affiliation (si activé)
-        if (data.affiliate_enabled) {
-          console.log('💰 Création des settings d\'affiliation...');
-          const { error: affiliateError } = await supabase
-            .from('product_affiliate_settings')
-            .insert({
-              product_id: product.id,
-              store_id: data.storeId,
-              affiliate_enabled: true,
-              commission_rate: data.commission_rate || 20,
-              commission_type: data.commission_type || 'percentage',
-              fixed_commission_amount: data.fixed_commission_amount || 0,
-              cookie_duration_days: data.cookie_duration_days || 30,
-              max_commission_per_sale: data.max_commission_per_sale || null,
-              min_order_amount: data.min_order_amount || 0,
-              allow_self_referral: data.allow_self_referral || false,
-              require_approval: data.require_approval || false,
-              terms_and_conditions: data.affiliate_terms_and_conditions || '',
-            });
+        // Typer explicitement le résultat de la fonction RPC (cast via unknown pour éviter les erreurs de type)
+        const typedResult = result as unknown as CreateFullCourseResult | null;
 
-          if (affiliateError) {
-            console.error('❌ Erreur création settings affiliation:', affiliateError);
-            // Ne pas faire de rollback complet car le cours est déjà créé
-            // Juste logger l'erreur et continuer
-            console.warn('⚠️ Le cours a été créé mais sans configuration d\'affiliation');
-          } else {
-            console.log('✅ Settings d\'affiliation créés');
-          }
-        }
-
-        // ÉTAPE 6 : Configurer le tracking et les pixels
-        console.log('📊 Configuration du tracking...');
-        const { error: analyticsError } = await supabase
-          .from('product_analytics')
-          .upsert({
-            product_id: product.id,
-            store_id: data.storeId,
-            tracking_enabled: data.tracking_enabled !== false, // true par défaut
-            google_analytics_id: data.google_analytics_id || null,
-            facebook_pixel_id: data.facebook_pixel_id || null,
-            google_tag_manager_id: data.google_tag_manager_id || null,
-            tiktok_pixel_id: data.tiktok_pixel_id || null,
+        if (!typedResult || !typedResult.success) {
+          const errorMsg = typedResult?.error || 'Erreur inconnue lors de la création du cours';
+          logger.error('Course creation failed in SQL function', {
+            error: errorMsg,
+            errorCode: typedResult?.error_code,
           });
-
-        if (analyticsError) {
-          console.error('❌ Erreur configuration analytics:', analyticsError);
-          console.warn('⚠️ Le cours a été créé mais sans configuration analytics');
-        } else {
-          console.log('✅ Tracking configuré avec succès');
+          throw new Error(errorMsg);
         }
 
-        console.log('🎉 COURS CRÉÉ AVEC SUCCÈS !');
-        console.log(`📊 Résumé: ${data.sections.length} sections, ${totalCreatedLessons} leçons`);
+        if (!typedResult.product_id || !typedResult.course_id) {
+          logger.error('Course creation returned invalid data', { result: typedResult });
+          throw new Error('Cours créé mais données invalides retournées');
+        }
 
-        // ÉTAPE 7 : Créer le cours preview gratuit si demandé
-        if (data.create_free_preview && data.pricing_model !== 'free') {
+        logger.info('Course created successfully via SQL function', {
+          productId: typedResult.product_id,
+          courseId: typedResult.course_id,
+          sectionsCount: typedResult.sections_count,
+          lessonsCount: typedResult.lessons_count,
+        });
+
+        // Récupérer le produit et le cours créés pour le retour
+        const { data: product, error: productError } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', typedResult.product_id)
+          .single();
+
+        if (productError || !product) {
+          logger.error('Error fetching created product', { error: productError });
+          throw new Error('Cours créé mais erreur lors de la récupération des données');
+        }
+
+        const { data: course, error: courseError } = await supabase
+          .from('courses')
+          .select('*')
+          .eq('id', typedResult.course_id)
+          .single();
+
+        if (courseError || !course) {
+          logger.error('Error fetching created course', { error: courseError });
+          throw new Error('Cours créé mais erreur lors de la récupération des données');
+        }
+
+        // ÉTAPE 7 : Créer le cours preview gratuit si demandé (en dehors de la transaction principale)
+        if (validatedData.create_free_preview && validatedData.pricing_model !== 'free') {
           try {
-            console.log('🎁 Création du cours preview gratuit...');
-            
-            const { data: previewCourseId, error: previewError } = await supabase
-              .rpc('create_free_preview_course', {
+            logger.info('Creating free preview course', { paidProductId: product.id });
+
+            const { data: previewCourseId, error: previewError } = await supabase.rpc(
+              'create_free_preview_course',
+              {
                 p_paid_product_id: product.id,
-                p_preview_content_description: data.preview_content_description || null,
-              });
+                p_preview_content_description:
+                  validatedData.preview_content_description || undefined,
+              }
+            );
 
             if (previewError) {
-              console.error('❌ Erreur création cours preview:', previewError);
-              console.warn('⚠️ Le cours payant a été créé mais le preview gratuit a échoué');
+              logger.error('Error creating free preview course', {
+                error: previewError,
+                paidProductId: product.id,
+              });
+              logger.warn('Paid course created but free preview failed', {
+                paidProductId: product.id,
+              });
             } else {
-              console.log('✅ Cours preview gratuit créé:', previewCourseId);
+              logger.info('Free preview course created successfully', {
+                previewCourseId,
+                paidProductId: product.id,
+              });
             }
-          } catch (error: any) {
-            console.error('💥 Exception création cours preview:', error);
+          } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            logger.error('Exception creating free preview course', {
+              error: errorMessage,
+              paidProductId: product.id,
+            });
             // Ne pas faire échouer la création du cours principal
           }
         }
@@ -321,15 +310,19 @@ export const useCreateFullCourse = () => {
         return {
           product,
           course,
-          sectionsCount: data.sections.length,
-          lessonsCount: totalCreatedLessons,
+          sectionsCount: typedResult.sections_count || 0,
+          lessonsCount: typedResult.lessons_count || 0,
         };
-      } catch (error: any) {
-        console.error('💥 Erreur globale:', error);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error('Global error creating course', {
+          error: errorMessage,
+          storeId: data.storeId,
+        });
         throw error;
       }
     },
-    onSuccess: (result) => {
+    onSuccess: result => {
       toast({
         title: '🎉 Cours créé avec succès !',
         description: `Votre cours "${result.product.name}" a été publié avec ${result.sectionsCount} sections et ${result.lessonsCount} leçons.`,
@@ -341,15 +334,15 @@ export const useCreateFullCourse = () => {
         navigate('/dashboard/products');
       }, 1500);
     },
-    onError: (error: any) => {
-      console.error('❌ Erreur finale:', error);
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Final error creating course', { error: errorMessage });
       toast({
         title: '❌ Erreur lors de la création du cours',
-        description: error.message || 'Une erreur est survenue. Veuillez réessayer.',
+        description: errorMessage || 'Une erreur est survenue. Veuillez réessayer.',
         variant: 'destructive',
         duration: 7000,
       });
     },
   });
 };
-

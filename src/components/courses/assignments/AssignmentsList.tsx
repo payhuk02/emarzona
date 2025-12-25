@@ -3,7 +3,8 @@
  * Liste des assignments pour un cours avec soumissions étudiant
  */
 
-import { FileText } from 'lucide-react';
+import React from 'react';
+import { FileText } from '@/components/icons';
 import { useStudentAssignments } from '@/hooks/courses/useAssignments';
 import { AssignmentCard } from './AssignmentCard';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,7 +15,7 @@ interface AssignmentsListProps {
   onAssignmentClick?: (assignmentId: string) => void;
 }
 
-export const AssignmentsList = ({ 
+const AssignmentsListComponent = ({ 
   courseId, 
   enrollmentId,
   onAssignmentClick 
@@ -54,4 +55,17 @@ export const AssignmentsList = ({
     </div>
   );
 };
+
+AssignmentsListComponent.displayName = 'AssignmentsListComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const AssignmentsList = React.memo(AssignmentsListComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.courseId === nextProps.courseId &&
+    prevProps.enrollmentId === nextProps.enrollmentId &&
+    prevProps.onAssignmentClick === nextProps.onAssignmentClick
+  );
+});
+
+AssignmentsList.displayName = 'AssignmentsList';
 

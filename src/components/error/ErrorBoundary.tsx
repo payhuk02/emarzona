@@ -2,9 +2,11 @@
  * Error Boundary avancée avec logging et UI personnalisable
  */
 
-import React, { Component, ReactNode } from 'react';
+import React, { Component, ReactNode, Suspense, lazy } from 'react';
 import { logError } from '@/lib/error-logger';
-import { ErrorFallback } from './ErrorFallback';
+
+// Lazy load ErrorFallback pour éviter les problèmes de bundling en production
+const ErrorFallback = lazy(() => import('./ErrorFallback').then(module => ({ default: module.ErrorFallback })));
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -70,12 +72,47 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         return this.props.fallback;
       }
 
+      // Fallback minimal en cas d'erreur de chargement du lazy component
+      const FallbackMinimal = () => (
+        <div className="p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg">
+          <div className="flex items-center gap-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                Erreur de chargement
+              </p>
+              <button
+                onClick={this.handleReset}
+                className="mt-2 text-xs text-red-600 dark:text-red-400 hover:underline"
+              >
+                Réessayer
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+
       return (
-        <ErrorFallback
-          error={this.state.error}
-          resetError={this.handleReset}
-          level={this.props.level || 'component'}
-        />
+        <Suspense fallback={<FallbackMinimal />}>
+          <ErrorFallback
+            error={this.state.error}
+            resetError={this.handleReset}
+            level={this.props.level || 'component'}
+          />
+        </Suspense>
       );
     }
 

@@ -42,6 +42,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { PhysicalProductsGrid, InventoryStats, LowStockAlert } from '@/components/physical';
+import { PhysicalProductsListVirtualized } from '@/components/physical/PhysicalProductsListVirtualized';
 import { useToast } from '@/hooks/use-toast';
 
 export const PhysicalProductsList = () => {
@@ -209,12 +210,29 @@ export const PhysicalProductsList = () => {
               </TabsList>
 
               <TabsContent value="all" className="mt-6">
-                <PhysicalProductsGrid
-                  products={filteredProducts || []}
-                  loading={isLoading}
-                  onEdit={(id) => navigate(`/dashboard/products/${id}/edit`)}
-                  onDelete={(id) => setDeleteProductId(id)}
-                />
+                {isLoading ? (
+                  <PhysicalProductsGrid
+                    products={[]}
+                    loading={true}
+                    onEdit={(id) => navigate(`/dashboard/products/${id}/edit`)}
+                    onDelete={(id) => setDeleteProductId(id)}
+                  />
+                ) : (filteredProducts?.length || 0) > 50 ? (
+                  <PhysicalProductsListVirtualized
+                    products={filteredProducts || []}
+                    onEdit={(id) => navigate(`/dashboard/products/${id}/edit`)}
+                    onDelete={(id) => setDeleteProductId(id)}
+                    itemHeight={300}
+                    containerHeight="600px"
+                  />
+                ) : (
+                  <PhysicalProductsGrid
+                    products={filteredProducts || []}
+                    loading={false}
+                    onEdit={(id) => navigate(`/dashboard/products/${id}/edit`)}
+                    onDelete={(id) => setDeleteProductId(id)}
+                  />
+                )}
               </TabsContent>
 
               <TabsContent value="low-stock" className="mt-6">

@@ -7,6 +7,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { generateAndUploadCertificate } from '@/lib/courses/certificate-generator';
+import { logger } from '@/lib/logger';
 
 /**
  * Hook pour récupérer un certificat
@@ -72,24 +74,93 @@ export const useCreateCertificate = () => {
         throw new Error('Vous devez compléter tout le cours pour obtenir le certificat');
       }
 
+      // Récupérer les infos complètes
+      const { data: enrollment, error: enrollmentError } = await supabase
+        .from('course_enrollments')
+        .select(`
+          *,
+          course:courses(
+            *,
+            product:products(name, store_id)
+          )
+        `)
+        .eq('id', enrollmentId)
+        .single();
+
+      if (enrollmentError || !enrollment) {
+        throw new Error('Enrollment not found');
+      }
+
+      // Récupérer le profil utilisateur
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      // Récupérer l'instructeur
+      const { data: instructor } = await supabase
+        .from('course_sections')
+        .select(`
+          lessons:course_lessons(
+            instructor_id,
+            profiles:instructor_id(full_name)
+          )
+        `)
+        .eq('course_id', courseId)
+        .limit(1)
+        .maybeSingle();
+
       // Générer un numéro de certificat unique
       const certificateNumber = `CERT-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`;
 
-      // Créer le certificat
-      const { data, error } = await supabase
+      // Créer le certificat (certificate_url sera mis à jour après génération PDF)
+      const { data: certificate, error } = await supabase
         .from('course_certificates')
         .insert({
           enrollment_id: enrollmentId,
           course_id: courseId,
           user_id: user.id,
           certificate_number: certificateNumber,
-          issued_at: new Date().toISOString(),
+          certificate_url: 'pending', // Temporaire, sera remplacé par l'URL du PDF
+          student_name: profile?.full_name || user.email || 'Étudiant',
+          course_title: (enrollment.course as any)?.product?.name || 'Cours',
+          instructor_name: (instructor?.lessons as any)?.[0]?.profiles?.full_name || 'Emarzona Academy',
+          completion_date: enrollment.completion_date ? enrollment.completion_date.split('T')[0] : new Date().toISOString().split('T')[0],
+          verification_code: await generateVerificationCode(),
         })
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+
+      // 🆕 Générer et uploader le PDF
+      try {
+        const storeId = (enrollment.course as any)?.product?.store_id;
+        if (storeId && certificate) {
+          await generateAndUploadCertificate(
+            certificate.id,
+            courseId,
+            storeId,
+            {
+              student_name: certificate.student_name,
+              course_name: certificate.course_title,
+              completion_date: certificate.completion_date,
+              certificate_number: certificate.certificate_number,
+              instructor_name: certificate.instructor_name,
+              verification_code: certificate.verification_code,
+            }
+          );
+        }
+      } catch (pdfError) {
+        // Ne pas faire échouer la création si le PDF échoue
+        logger.warn('Error generating certificate PDF', {
+          error: pdfError,
+          certificateId: certificate.id,
+        });
+      }
+
+      return certificate;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['certificate', variables.enrollmentId] });
@@ -136,6 +207,18 @@ export const useCanGetCertificate = (enrollmentId: string | undefined) => {
     enabled: !!enrollmentId,
   });
 };
+
+/**
+ * Génère un code de vérification unique
+ */
+async function generateVerificationCode(): Promise<string> {
+  const { data, error } = await supabase.rpc('generate_certificate_verification_code');
+  if (error) {
+    // Fallback si la fonction n'existe pas
+    return `VERIFY-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`;
+  }
+  return data;
+}
 
 /**
  * Hook pour récupérer tous les certificats d'un utilisateur

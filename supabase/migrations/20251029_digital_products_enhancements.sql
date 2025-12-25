@@ -1,7 +1,7 @@
 -- ============================================================================
 -- MIGRATION: Digital Products System Enhancements
 -- Date: 2025-10-29
--- Author: Payhula Team
+-- Author: Emarzona Team
 -- Description: Améliorations et optimisations du système de produits digitaux
 --              Ajout d'indexes, vues, et fonctions utilitaires
 -- ============================================================================

@@ -1,11 +1,5 @@
-import React, { useState } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
+import React, { useState, useMemo, useCallback } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -23,12 +17,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { 
-  Package, 
-  Upload, 
-  Download, 
-  Calendar, 
-  Tag, 
+import {
+  Package,
+  Upload,
+  Download,
+  Calendar,
   MoreVertical,
   Bell,
   Trash2,
@@ -39,14 +32,15 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { 
-  useProductVersions, 
+import {
+  useProductVersions,
   useDeleteVersion,
   useNotifyCustomers,
   type ProductVersion,
   type VersionStatus,
 } from '@/hooks/digital/useProductVersions';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CreateVersionDialog } from '@/components/digital/CreateVersionDialog';
 
 // ============================================================================
 // TYPES
@@ -54,6 +48,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 interface VersionManagementDashboardProps {
   productId: string;
+  digitalProductId?: string;
   onCreateVersion?: () => void;
   onEditVersion?: (version: ProductVersion) => void;
 }
@@ -63,24 +58,27 @@ interface VersionManagementDashboardProps {
 // ============================================================================
 
 function VersionStatusBadge({ status }: { status: VersionStatus }) {
-  const variants: Record<VersionStatus, { variant: any; label: string; icon: React.ReactNode }> = {
-    draft: { 
-      variant: 'secondary', 
+  const variants: Record<
+    VersionStatus,
+    { variant: 'secondary' | 'default' | 'destructive'; label: string; icon: React.ReactNode }
+  > = {
+    draft: {
+      variant: 'secondary',
       label: 'Brouillon',
       icon: <Edit className="h-3 w-3" />,
     },
-    beta: { 
-      variant: 'default', 
+    beta: {
+      variant: 'default',
       label: 'Beta',
       icon: <Package className="h-3 w-3" />,
     },
-    stable: { 
-      variant: 'default', 
+    stable: {
+      variant: 'default',
       label: 'Stable',
       icon: <Shield className="h-3 w-3" />,
     },
-    deprecated: { 
-      variant: 'destructive', 
+    deprecated: {
+      variant: 'destructive',
       label: 'Obsolète',
       icon: <AlertTriangle className="h-3 w-3" />,
     },
@@ -102,12 +100,58 @@ function VersionStatusBadge({ status }: { status: VersionStatus }) {
 
 export function VersionManagementDashboard({
   productId,
+  digitalProductId,
   onCreateVersion,
   onEditVersion,
 }: VersionManagementDashboardProps) {
   const { data: versions, isLoading } = useProductVersions(productId);
   const { mutate: deleteVersion } = useDeleteVersion();
   const { mutate: notifyCustomers } = useNotifyCustomers();
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  // ✅ PHASE 7: Mémoriser handlers pour éviter recréations inutiles
+  const handleCreateVersion = useCallback(() => {
+    if (digitalProductId) {
+      setIsCreateDialogOpen(true);
+    } else {
+      onCreateVersion?.();
+    }
+  }, [digitalProductId, onCreateVersion]);
+
+  const handleEditVersion = useCallback(
+    (version: ProductVersion) => {
+      onEditVersion?.(version);
+    },
+    [onEditVersion]
+  );
+
+  const handleNotifyCustomers = useCallback(
+    (versionId: string, productId: string) => {
+      notifyCustomers({ versionId, productId });
+    },
+    [notifyCustomers]
+  );
+
+  const handleDeleteVersion = useCallback(
+    (versionId: string) => {
+      if (confirm('Supprimer cette version ?')) {
+        deleteVersion(versionId);
+      }
+    },
+    [deleteVersion]
+  );
+
+  // ✅ PHASE 5: Mémoriser les statistiques pour éviter recalculs à chaque render
+  // ⚠️ IMPORTANT: Doit être avant tout return conditionnel pour respecter les règles des hooks
+  const stats = useMemo(
+    () => ({
+      total: versions?.length || 0,
+      stable: versions?.filter(v => v.status === 'stable').length || 0,
+      beta: versions?.filter(v => v.status === 'beta').length || 0,
+      totalDownloads: versions?.reduce((sum, v) => sum + v.download_count, 0) || 0,
+    }),
+    [versions]
+  );
 
   if (isLoading) {
     return (
@@ -117,13 +161,6 @@ export function VersionManagementDashboard({
       </div>
     );
   }
-
-  const stats = {
-    total: versions?.length || 0,
-    stable: versions?.filter(v => v.status === 'stable').length || 0,
-    beta: versions?.filter(v => v.status === 'beta').length || 0,
-    totalDownloads: versions?.reduce((sum, v) => sum + v.download_count, 0) || 0,
-  };
 
   return (
     <div className="space-y-6">
@@ -138,7 +175,7 @@ export function VersionManagementDashboard({
             <div className="text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Versions Stables</CardTitle>
@@ -175,16 +212,26 @@ export function VersionManagementDashboard({
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Gestion des Versions</CardTitle>
-            <CardDescription>
-              Gérez toutes les versions de votre produit digital
-            </CardDescription>
+            <CardDescription>Gérez toutes les versions de votre produit digital</CardDescription>
           </div>
-          {onCreateVersion && (
-            <Button onClick={onCreateVersion} className="gap-2">
+          <div className="flex items-center gap-2">
+            {digitalProductId && (
+              <CreateVersionDialog
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+                digitalProductId={digitalProductId}
+                productId={productId}
+                onSuccess={() => {
+                  // Refresh versions list
+                  window.location.reload();
+                }}
+              />
+            )}
+            <Button onClick={handleCreateVersion} className="gap-2">
               <Upload className="h-4 w-4" />
               Nouvelle Version
             </Button>
-          )}
+          </div>
         </CardHeader>
         <CardContent>
           {!versions || versions.length === 0 ? (
@@ -206,21 +253,27 @@ export function VersionManagementDashboard({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {versions.map((version) => (
+                {versions.map(version => (
                   <TableRow key={version.id}>
                     <TableCell>
                       <div>
                         <div className="font-medium flex items-center gap-2">
                           {version.version_number}
                           {version.is_major_update && (
-                            <Badge variant="outline" className="text-xs">Major</Badge>
+                            <Badge variant="outline" className="text-xs">
+                              Major
+                            </Badge>
                           )}
                           {version.is_security_update && (
-                            <Badge variant="destructive" className="text-xs">Sécurité</Badge>
+                            <Badge variant="destructive" className="text-xs">
+                              Sécurité
+                            </Badge>
                           )}
                         </div>
                         {version.version_name && (
-                          <div className="text-sm text-muted-foreground">{version.version_name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {version.version_name}
+                          </div>
                         )}
                       </div>
                     </TableCell>
@@ -230,10 +283,9 @@ export function VersionManagementDashboard({
                     <TableCell>
                       <div className="flex items-center gap-2 text-sm">
                         <Calendar className="h-3 w-3 text-muted-foreground" />
-                        {version.release_date 
+                        {version.release_date
                           ? format(new Date(version.release_date), 'PPP', { locale: fr })
-                          : 'Non définie'
-                        }
+                          : 'Non définie'}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -248,12 +300,16 @@ export function VersionManagementDashboard({
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            aria-label={`Actions pour la version ${version.version_number || version.id}`}
+                          >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onEditVersion?.(version)}>
+                          <DropdownMenuItem onClick={() => handleEditVersion(version)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Modifier
                           </DropdownMenuItem>
@@ -262,21 +318,17 @@ export function VersionManagementDashboard({
                             Voir détails
                           </DropdownMenuItem>
                           {version.notify_customers && !version.notification_sent_at && (
-                            <DropdownMenuItem 
-                              onClick={() => notifyCustomers({ versionId: version.id, productId: version.product_id })}
+                            <DropdownMenuItem
+                              onClick={() => handleNotifyCustomers(version.id, version.product_id)}
                             >
                               <Bell className="h-4 w-4 mr-2" />
                               Notifier clients
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="text-destructive"
-                            onClick={() => {
-                              if (confirm('Supprimer cette version ?')) {
-                                deleteVersion(version.id);
-                              }
-                            }}
+                            onClick={() => handleDeleteVersion(version.id)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Supprimer
@@ -294,4 +346,3 @@ export function VersionManagementDashboard({
     </div>
   );
 }
-

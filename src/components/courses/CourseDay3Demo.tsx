@@ -8,6 +8,8 @@
  * Date : 29 Octobre 2025
  */
 
+import { logger } from '@/lib/logger';
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EnrollmentHistory, type EnrollmentEvent } from './EnrollmentHistory';
@@ -246,18 +248,18 @@ export const CourseDay3Demo: React.FC = () => {
 
   // Handlers pour EnrollmentHistory
   const handleRefresh = () => {
-    console.log('Refresh events');
+    logger.info('Refresh events');
     alert('Rafraîchissement de l\'historique...');
   };
 
   const handleViewDetails = (enrollmentId: string) => {
-    console.log('View details:', enrollmentId);
+    logger.info('View details', { enrollmentId });
     alert(`Voir les détails de l'inscription: ${enrollmentId}`);
   };
 
   // Handlers pour BulkCourseUpdate
   const handleBulkUpdate = (courseIds: string[], changes: BulkUpdateChange) => {
-    console.log('Bulk update:', courseIds, changes);
+    logger.info('Bulk update', { courseIds, changesCount: Object.keys(changes).length });
 
     // Simuler la mise à jour
     setCourses((prevCourses) =>

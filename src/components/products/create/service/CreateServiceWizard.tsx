@@ -28,6 +28,7 @@ import {
 import { ServiceBasicInfoForm } from './ServiceBasicInfoForm';
 import { ServiceDurationAvailabilityForm } from './ServiceDurationAvailabilityForm';
 import { ServiceStaffResourcesForm } from './ServiceStaffResourcesForm';
+import { logger } from '@/lib/logger';
 import { ServicePricingOptionsForm } from './ServicePricingOptionsForm';
 import { ServicePreview } from './ServicePreview';
 import { useToast } from '@/hooks/use-toast';
@@ -336,7 +337,7 @@ export const CreateServiceWizard = () => {
       
       navigate('/dashboard/products');
     } catch (error) {
-      console.error('Save draft error:', error);
+      logger.error('Save draft error', { error });
       toast({
         title: '❌ Erreur de sauvegarde',
         description: error instanceof Error ? error.message : 'Impossible de sauvegarder le brouillon',
@@ -379,7 +380,7 @@ export const CreateServiceWizard = () => {
       
       navigate('/dashboard/products');
     } catch (error) {
-      console.error('Publish error:', error);
+      logger.error('Publish error', { error });
       toast({
         title: '❌ Erreur de publication',
         description: error instanceof Error ? error.message : 'Impossible de publier le service',

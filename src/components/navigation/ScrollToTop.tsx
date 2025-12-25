@@ -31,9 +31,12 @@ export const ScrollToTop = () => {
           ? "translate-y-0 opacity-100 scale-100"
           : "translate-y-16 opacity-0 scale-0 pointer-events-none"
       }`}
-      aria-label="Retour en haut"
+      aria-label="Retour en haut de la page"
+      aria-hidden={!visible}
+      tabIndex={visible ? 0 : -1}
     >
-      <ArrowUp className="h-4 w-4 sm:h-5 sm:w-5" />
+      <ArrowUp className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+      <span className="sr-only">Retour en haut</span>
     </Button>
   );
 };

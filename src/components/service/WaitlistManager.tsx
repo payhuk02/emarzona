@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
+import { logger } from '@/lib/logger';
 import {
   Users,
   Clock,
@@ -267,7 +268,7 @@ export const WaitlistManager: React.FC<WaitlistManagerProps> = ({
     try {
       await onNotify(entryId);
     } catch (error) {
-      console.error('Error notifying:', error);
+      logger.error('Error notifying', { error, entryId });
     } finally {
       setIsNotifying(null);
     }

@@ -6,6 +6,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 interface AffiliateSettings {
   id: string;
@@ -113,7 +114,7 @@ export const useCourseAffiliateStats = (productId: string) => {
         .eq('status', 'active');
 
       if (affiliatesError && affiliatesError.code !== 'PGRST116') {
-        console.error('Erreur affiliés:', affiliatesError);
+        logger.error('Error fetching course affiliates', { error: affiliatesError, productId });
       }
 
       // Récupérer le total des clics
@@ -123,7 +124,7 @@ export const useCourseAffiliateStats = (productId: string) => {
         .eq('product_id', productId);
 
       if (clicksError && clicksError.code !== 'PGRST116') {
-        console.error('Erreur clics:', clicksError);
+        logger.error('Error fetching affiliate clicks', { error: clicksError, productId });
       }
 
       // Récupérer le total des commissions
@@ -134,7 +135,7 @@ export const useCourseAffiliateStats = (productId: string) => {
         .eq('status', 'paid');
 
       if (commissionsError && commissionsError.code !== 'PGRST116') {
-        console.error('Erreur commissions:', commissionsError);
+        logger.error('Error fetching affiliate commissions', { error: commissionsError, productId });
       }
 
       const totalCommissions = commissions?.reduce((sum, c) => sum + c.amount, 0) || 0;

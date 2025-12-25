@@ -1,3 +1,4 @@
+import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -42,7 +43,7 @@ interface PromotionCardProps {
 /**
  * Carte pour afficher et éditer une promotion
  */
-export const PromotionCard = ({
+const PromotionCardComponent = ({
   promotion,
   index,
   isEditing,
@@ -67,7 +68,7 @@ export const PromotionCard = ({
       promotion.is_active 
         ? "border-gray-700 bg-gray-800/50" 
         : "border-gray-700/50 bg-gray-800/30 opacity-70"
-    )}>
+    )} style={{ willChange: 'transform' }}>
       <CardHeader className="pb-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-2 flex-wrap">
@@ -340,4 +341,26 @@ export const PromotionCard = ({
     </Card>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const PromotionCard = React.memo(PromotionCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.promotion.id === nextProps.promotion.id &&
+    prevProps.promotion.name === nextProps.promotion.name &&
+    prevProps.promotion.type === nextProps.promotion.type &&
+    prevProps.promotion.value === nextProps.promotion.value &&
+    prevProps.promotion.is_active === nextProps.promotion.is_active &&
+    prevProps.promotion.start_date?.getTime() === nextProps.promotion.start_date?.getTime() &&
+    prevProps.promotion.end_date?.getTime() === nextProps.promotion.end_date?.getTime() &&
+    prevProps.isEditing === nextProps.isEditing &&
+    prevProps.index === nextProps.index &&
+    prevProps.currencySymbol === nextProps.currencySymbol &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onToggleActive === nextProps.onToggleActive &&
+    prevProps.onUpdate === nextProps.onUpdate
+  );
+});
+
+PromotionCard.displayName = 'PromotionCard';
 

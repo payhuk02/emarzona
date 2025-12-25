@@ -34,7 +34,7 @@ export const ItemListSchema = ({
 
   const baseUrl = typeof window !== 'undefined' 
     ? window.location.origin 
-    : 'https://payhuk.com';
+    : 'https://emarzona.com';
 
   const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
 
@@ -43,7 +43,7 @@ export const ItemListSchema = ({
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name,
-    description: description || `${name} sur Payhuk`,
+    description: description || `${name} sur Emarzona`,
     url: fullUrl,
     numberOfItems: numberOfItems || items.length,
     itemListElement: items.map((item, index) => ({

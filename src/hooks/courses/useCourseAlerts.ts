@@ -8,7 +8,7 @@
  * - Taux de complétion faible
  * - Paiements en attente
  * 
- * @author Payhuk Team
+ * @author Emarzona Team
  * @date 29 Octobre 2025
  */
 

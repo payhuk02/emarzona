@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
 
 // Types pour les analytics
 export interface ProductAnalytics {
@@ -167,7 +168,7 @@ export const useProductAnalytics = (productId: string) => {
         setAnalytics(data);
       }
     } catch (err) {
-      console.error('Erreur lors du chargement des analytics:', err);
+      logger.error('Error loading product analytics', { error: err, productId });
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
     } finally {
       setLoading(false);
@@ -193,7 +194,7 @@ export const useProductAnalytics = (productId: string) => {
 
       setAnalytics(data);
     } catch (err) {
-      console.error('Erreur lors de la mise à jour des analytics:', err);
+      logger.error('Error updating product analytics', { error: err, productId, updates });
       throw err;
     }
   }, [analytics, user]);
@@ -303,7 +304,7 @@ export const useAnalyticsTracking = () => {
 
       return sessionId;
     } catch (err) {
-      console.error('Erreur lors du tracking:', err);
+      logger.error('Error tracking product analytics event', { error: err, productId, eventType });
       throw err;
     }
   }, [user]);
@@ -371,7 +372,7 @@ export const useUserSessions = (productId: string) => {
 
       setSessions(data || []);
     } catch (err) {
-      console.error('Erreur lors du chargement des sessions:', err);
+      logger.error('Error loading product analytics sessions', { error: err, productId });
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
     } finally {
       setLoading(false);
@@ -405,7 +406,7 @@ export const useUserSessions = (productId: string) => {
 
       return data;
     } catch (err) {
-      console.error('Erreur lors du démarrage de session:', err);
+      logger.error('Error starting product analytics session', { error: err, productId });
       throw err;
     }
   }, []);
@@ -429,7 +430,7 @@ export const useUserSessions = (productId: string) => {
 
       return data;
     } catch (err) {
-      console.error('Erreur lors de la fin de session:', err);
+      logger.error('Error ending product analytics session', { error: err, productId, sessionId });
       throw err;
     }
   }, []);
@@ -473,7 +474,7 @@ export const useAnalyticsReports = (productId: string) => {
 
       setReports(data || []);
     } catch (err) {
-      console.error('Erreur lors du chargement des rapports:', err);
+      logger.error('Error loading product analytics reports', { error: err, productId, dateRange });
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
     } finally {
       setLoading(false);
@@ -515,7 +516,7 @@ export const useAnalyticsReports = (productId: string) => {
 
       return data;
     } catch (err) {
-      console.error('Erreur lors de la génération du rapport:', err);
+      logger.error('Error generating product analytics report', { error: err, productId, reportType });
       throw err;
     }
   }, [productId, user, loadReports]);
@@ -560,7 +561,7 @@ export const useAnalyticsHistory = (productId: string, days: number = 30) => {
 
       setHistory(data || []);
     } catch (err) {
-      console.error('Erreur lors du chargement de l\'historique:', err);
+      logger.error('Error loading product analytics history', { error: err, productId });
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
     } finally {
       setLoading(false);

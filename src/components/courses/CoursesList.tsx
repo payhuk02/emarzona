@@ -356,7 +356,7 @@ export const CoursesList: React.FC<CoursesListProps> = ({
                 <Download className="h-4 w-4 mr-2" />
                 Exporter
               </Button>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" aria-label="Actualiser la liste">
                 <RefreshCw className="h-4 w-4" />
               </Button>
             </div>
@@ -627,7 +627,7 @@ export const CoursesList: React.FC<CoursesListProps> = ({
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" aria-label={`Actions pour ${course.title}`}>
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>

@@ -1,6 +1,7 @@
+import React from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Search } from '@/components/icons';
 
 interface PaymentFiltersProps {
   searchTerm: string;
@@ -11,7 +12,7 @@ interface PaymentFiltersProps {
   onMethodChange: (value: string) => void;
 }
 
-export const PaymentFilters = ({
+const PaymentFiltersComponent = ({
   searchTerm,
   onSearchChange,
   statusFilter,
@@ -61,3 +62,19 @@ export const PaymentFilters = ({
     </div>
   );
 };
+
+PaymentFiltersComponent.displayName = 'PaymentFiltersComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const PaymentFilters = React.memo(PaymentFiltersComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.searchTerm === nextProps.searchTerm &&
+    prevProps.statusFilter === nextProps.statusFilter &&
+    prevProps.methodFilter === nextProps.methodFilter &&
+    prevProps.onSearchChange === nextProps.onSearchChange &&
+    prevProps.onStatusChange === nextProps.onStatusChange &&
+    prevProps.onMethodChange === nextProps.onMethodChange
+  );
+});
+
+PaymentFilters.displayName = 'PaymentFilters';

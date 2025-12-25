@@ -29,5 +29,10 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
-  }
+  },
+  // Ne pas forcer 'Content-Type' au niveau global : Supabase JS s'en charge
+  // et doit pouvoir utiliser le bon mime type pour les uploads Storage.
+  db: {
+    schema: 'public',
+  },
 });

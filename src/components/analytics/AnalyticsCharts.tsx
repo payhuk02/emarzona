@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
 import { LineChart as LineChartIcon, AreaChart as AreaChartIcon, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
 
 interface ChartData {
@@ -81,149 +81,161 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
     switch (chartType) {
       case 'line':
         return (
-          <ResponsiveContainer width="100%" height={256}>
-            <LineChart {...commonProps}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis 
-                dataKey="date" 
-                stroke="#9ca3af"
-                fontSize={12}
-              />
-              <YAxis 
-                stroke="#9ca3af"
-                fontSize={12}
-              />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: '1px solid #374151',
-                  borderRadius: '8px',
-                  color: '#f9fafb'
-                }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="views" 
-                stroke={COLORS.views} 
-                strokeWidth={2}
-                dot={{ fill: COLORS.views, strokeWidth: 2, r: 4 }}
-                name="Vues"
-              />
-              <Line 
-                type="monotone" 
-                dataKey="clicks" 
-                stroke={COLORS.clicks} 
-                strokeWidth={2}
-                dot={{ fill: COLORS.clicks, strokeWidth: 2, r: 4 }}
-                name="Clics"
-              />
-              <Line 
-                type="monotone" 
-                dataKey="conversions" 
-                stroke={COLORS.conversions} 
-                strokeWidth={2}
-                dot={{ fill: COLORS.conversions, strokeWidth: 2, r: 4 }}
-                name="Conversions"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <LazyRechartsWrapper>
+            {(recharts) => (
+              <recharts.ResponsiveContainer width="100%" height={256}>
+                <recharts.LineChart {...commonProps}>
+                  <recharts.CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <recharts.XAxis 
+                    dataKey="date" 
+                    stroke="#9ca3af"
+                    fontSize={12}
+                  />
+                  <recharts.YAxis 
+                    stroke="#9ca3af"
+                    fontSize={12}
+                  />
+                  <recharts.Tooltip 
+                    contentStyle={{
+                      backgroundColor: '#1f2937',
+                      border: '1px solid #374151',
+                      borderRadius: '8px',
+                      color: '#f9fafb'
+                    }}
+                  />
+                  <recharts.Line 
+                    type="monotone" 
+                    dataKey="views" 
+                    stroke={COLORS.views} 
+                    strokeWidth={2}
+                    dot={{ fill: COLORS.views, strokeWidth: 2, r: 4 }}
+                    name="Vues"
+                  />
+                  <recharts.Line 
+                    type="monotone" 
+                    dataKey="clicks" 
+                    stroke={COLORS.clicks} 
+                    strokeWidth={2}
+                    dot={{ fill: COLORS.clicks, strokeWidth: 2, r: 4 }}
+                    name="Clics"
+                  />
+                  <recharts.Line 
+                    type="monotone" 
+                    dataKey="conversions" 
+                    stroke={COLORS.conversions} 
+                    strokeWidth={2}
+                    dot={{ fill: COLORS.conversions, strokeWidth: 2, r: 4 }}
+                    name="Conversions"
+                  />
+                </recharts.LineChart>
+              </recharts.ResponsiveContainer>
+            )}
+          </LazyRechartsWrapper>
         );
 
       case 'area':
         return (
-          <ResponsiveContainer width="100%" height={256}>
-            <AreaChart {...commonProps}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis 
-                dataKey="date" 
-                stroke="#9ca3af"
-                fontSize={12}
-              />
-              <YAxis 
-                stroke="#9ca3af"
-                fontSize={12}
-              />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: '1px solid #374151',
-                  borderRadius: '8px',
-                  color: '#f9fafb'
-                }}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="views" 
-                stackId="1"
-                stroke={COLORS.views} 
-                fill={COLORS.views}
-                fillOpacity={0.6}
-                name="Vues"
-              />
-              <Area 
-                type="monotone" 
-                dataKey="clicks" 
-                stackId="2"
-                stroke={COLORS.clicks} 
-                fill={COLORS.clicks}
-                fillOpacity={0.6}
-                name="Clics"
-              />
-              <Area 
-                type="monotone" 
-                dataKey="conversions" 
-                stackId="3"
-                stroke={COLORS.conversions} 
-                fill={COLORS.conversions}
-                fillOpacity={0.6}
-                name="Conversions"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          <LazyRechartsWrapper>
+            {(recharts) => (
+              <recharts.ResponsiveContainer width="100%" height={256}>
+                <recharts.AreaChart {...commonProps}>
+                  <recharts.CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <recharts.XAxis 
+                    dataKey="date" 
+                    stroke="#9ca3af"
+                    fontSize={12}
+                  />
+                  <recharts.YAxis 
+                    stroke="#9ca3af"
+                    fontSize={12}
+                  />
+                  <recharts.Tooltip 
+                    contentStyle={{
+                      backgroundColor: '#1f2937',
+                      border: '1px solid #374151',
+                      borderRadius: '8px',
+                      color: '#f9fafb'
+                    }}
+                  />
+                  <recharts.Area 
+                    type="monotone" 
+                    dataKey="views" 
+                    stackId="1"
+                    stroke={COLORS.views} 
+                    fill={COLORS.views}
+                    fillOpacity={0.6}
+                    name="Vues"
+                  />
+                  <recharts.Area 
+                    type="monotone" 
+                    dataKey="clicks" 
+                    stackId="2"
+                    stroke={COLORS.clicks} 
+                    fill={COLORS.clicks}
+                    fillOpacity={0.6}
+                    name="Clics"
+                  />
+                  <recharts.Area 
+                    type="monotone" 
+                    dataKey="conversions" 
+                    stackId="3"
+                    stroke={COLORS.conversions} 
+                    fill={COLORS.conversions}
+                    fillOpacity={0.6}
+                    name="Conversions"
+                  />
+                </recharts.AreaChart>
+              </recharts.ResponsiveContainer>
+            )}
+          </LazyRechartsWrapper>
         );
 
       case 'bar':
         return (
-          <ResponsiveContainer width="100%" height={256}>
-            <BarChart {...commonProps}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis 
-                dataKey="date" 
-                stroke="#9ca3af"
-                fontSize={12}
-              />
-              <YAxis 
-                stroke="#9ca3af"
-                fontSize={12}
-              />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: '1px solid #374151',
-                  borderRadius: '8px',
-                  color: '#f9fafb'
-                }}
-              />
-              <Bar 
-                dataKey="views" 
-                fill={COLORS.views}
-                name="Vues"
-                radius={[2, 2, 0, 0]}
-              />
-              <Bar 
-                dataKey="clicks" 
-                fill={COLORS.clicks}
-                name="Clics"
-                radius={[2, 2, 0, 0]}
-              />
-              <Bar 
-                dataKey="conversions" 
-                fill={COLORS.conversions}
-                name="Conversions"
-                radius={[2, 2, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+          <LazyRechartsWrapper>
+            {(recharts) => (
+              <recharts.ResponsiveContainer width="100%" height={256}>
+                <recharts.BarChart {...commonProps}>
+                  <recharts.CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <recharts.XAxis 
+                    dataKey="date" 
+                    stroke="#9ca3af"
+                    fontSize={12}
+                  />
+                  <recharts.YAxis 
+                    stroke="#9ca3af"
+                    fontSize={12}
+                  />
+                  <recharts.Tooltip 
+                    contentStyle={{
+                      backgroundColor: '#1f2937',
+                      border: '1px solid #374151',
+                      borderRadius: '8px',
+                      color: '#f9fafb'
+                    }}
+                  />
+                  <recharts.Bar 
+                    dataKey="views" 
+                    fill={COLORS.views}
+                    name="Vues"
+                    radius={[2, 2, 0, 0]}
+                  />
+                  <recharts.Bar 
+                    dataKey="clicks" 
+                    fill={COLORS.clicks}
+                    name="Clics"
+                    radius={[2, 2, 0, 0]}
+                  />
+                  <recharts.Bar 
+                    dataKey="conversions" 
+                    fill={COLORS.conversions}
+                    name="Conversions"
+                    radius={[2, 2, 0, 0]}
+                  />
+                </recharts.BarChart>
+              </recharts.ResponsiveContainer>
+            )}
+          </LazyRechartsWrapper>
         );
 
       default:
@@ -391,10 +403,26 @@ export const TrafficSourceChart: React.FC<TrafficSourceChartProps> = ({
   );
 };
 
+interface AnalyticsData {
+  views?: number;
+  clicks?: number;
+  conversions?: number;
+  revenue?: number;
+  [key: string]: unknown;
+}
+
+interface ChangePercentages {
+  views?: number;
+  clicks?: number;
+  conversions?: number;
+  revenue?: number;
+  [key: string]: unknown;
+}
+
 // Composant pour les métriques en temps réel
 interface RealtimeMetricsProps {
-  analytics: any;
-  changePercentages: any;
+  analytics: AnalyticsData;
+  changePercentages: ChangePercentages;
   isRealTimeActive: boolean;
   onToggleRealTime: () => void;
 }

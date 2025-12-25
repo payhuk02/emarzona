@@ -7,6 +7,7 @@ import {
   BundleDigitalProduct,
   DigitalBundle,
 } from './DigitalBundleManager';
+import { logger } from '@/lib/logger';
 
 /**
  * Données de démonstration - Produits digitaux
@@ -226,12 +227,12 @@ export const DigitalDay2Demo: React.FC = () => {
 
         <DigitalProductsList
           products={mockProducts}
-          onSelect={(ids) => console.log('Selected products:', ids)}
-          onEdit={(id) => console.log('Edit product:', id)}
-          onDelete={(id) => console.log('Delete product:', id)}
-          onDuplicate={(id) => console.log('Duplicate product:', id)}
-          onArchive={(id) => console.log('Archive product:', id)}
-          onView={(id) => console.log('View product:', id)}
+          onSelect={(ids) => logger.info('Selected products', { count: ids.length, ids })}
+          onEdit={(id) => logger.info('Edit product', { productId: id })}
+          onDelete={(id) => logger.info('Delete product', { productId: id })}
+          onDuplicate={(id) => logger.info('Duplicate product', { productId: id })}
+          onArchive={(id) => logger.info('Archive product', { productId: id })}
+          onView={(id) => logger.info('View product', { productId: id })}
           showBulkActions={true}
           showFilters={true}
           showSearch={true}
@@ -260,10 +261,10 @@ export const DigitalDay2Demo: React.FC = () => {
               <DigitalBundleManager
                 availableProducts={availableProductsForBundles}
                 onSave={(bundle) => {
-                  console.log('Bundle created:', bundle);
+                  logger.info('Bundle created', { bundleId: bundle.id, bundleName: bundle.name });
                   alert(`Bundle "${bundle.name}" créé avec succès !`);
                 }}
-                onCancel={() => console.log('Creation cancelled')}
+                onCancel={() => logger.info('Bundle creation cancelled')}
                 mode="create"
               />
             </Card>
@@ -276,10 +277,10 @@ export const DigitalDay2Demo: React.FC = () => {
                 bundle={existingBundle}
                 availableProducts={availableProductsForBundles}
                 onSave={(bundle) => {
-                  console.log('Bundle updated:', bundle);
+                  logger.info('Bundle updated', { bundleId: bundle.id });
                   alert(`Bundle "${bundle.name}" mis à jour !`);
                 }}
-                onCancel={() => console.log('Edit cancelled')}
+                onCancel={() => logger.info('Bundle edit cancelled')}
                 mode="edit"
               />
             </Card>

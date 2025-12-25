@@ -21,8 +21,12 @@
     "refresh": "Refresh",
     "yes": "Yes",
     "no": "No",
+    "show": "Show",
+    "hide": "Hide",
     "manageAll": "Manage all your",
-    "or": "Or"
+    "or": "Or",
+    "coverage": "Coverage",
+    "language": "Language"
   },
   "nav": {
     "home": "Home",
@@ -37,6 +41,41 @@
     "logout": "Logout",
     "login": "Login",
     "signup": "Sign up"
+  },
+  "wizard": {
+    "title": "New Digital Product",
+    "subtitle": "Create a professional digital product in 6 steps",
+    "back": "Back to type selection",
+    "backShort": "Back",
+    "step": "Step",
+    "of": "of",
+    "steps": "Form steps",
+    "autoSaving": "Auto-saving...",
+    "previous": "Previous step",
+    "prev": "Prev.",
+    "next": "Next",
+    "nextShort": "Next",
+    "saveDraft": "Save as draft",
+    "draft": "Draft",
+    "publish": "Publish product",
+    "publishShort": "Publish",
+    "publishing": "Publishing...",
+    "publishingShort": "Pub...",
+    "shortcuts": {
+      "save": "Draft",
+      "next": "Next",
+      "prev": "Previous"
+    },
+    "seo": {
+      "faq": {
+        "description": "Optimize your SEO and add answers to frequently asked questions"
+      }
+    },
+    "errors": {
+      "title": "Error",
+      "requiredFields": "Please fill in all required fields",
+      "noFiles": "Please add a main link for your product"
+    }
   },
   "auth": {
     "welcome": "Welcome",
@@ -92,7 +131,11 @@
       "button": "Send reset link",
       "success": "Reset email sent!",
       "error": "Error sending email"
-    }
+    },
+    "signOut": "Sign out",
+    "signOutSuccess": "Sign out successful",
+    "signOutSuccessDescription": "You have been successfully signed out.",
+    "signOutError": "An error occurred while signing out."
   },
   "marketplace": {
     "title": "Marketplace",
@@ -156,7 +199,7 @@
       "community": "Active community"
     },
     "hero": {
-      "title": "Payhuk Marketplace",
+      "title": "Emarzona Marketplace",
       "subtitle": "Discover thousands of digital products: courses, ebooks, templates, software, and more.",
       "tagline": "Join the digital commerce revolution in Africa",
       "skipToMain": "Skip to main content"
@@ -178,6 +221,52 @@
       "authRequired": "Authentication Required",
       "loginRequired": "Please log in to make a purchase",
       "paymentError": "Payment Error",
+      "categories": {
+        "all": "For you",
+        "featured": "Best services",
+        "formation": "Training",
+        "cours": "Courses",
+        "design": "Design & Graphics",
+        "marketing": "SEO & Marketing",
+        "developpement": "Web Development",
+        "informatique": "IT",
+        "redaction": "Writing",
+        "video": "Video & Editing",
+        "audio": "Audio & Music",
+        "photographie": "Photography",
+        "ebook": "Ebooks & Guides",
+        "template": "Templates",
+        "logiciel": "Software",
+        "app": "Applications",
+        "vetements": "T-shirts & Clothing",
+        "accessoires": "Accessories",
+        "electronique": "Electronics",
+        "traduction": "Translation",
+        "coaching": "Coaching",
+        "consultation": "Consultation",
+        "conseil": "Business Consulting",
+        "social": "Social Media",
+        "maintenance": "Maintenance",
+        "graphisme": "Graphics",
+        "animation": "Animation",
+        "illustration": "Illustration",
+        "uiUx": "UI/UX Design",
+        "data": "Data & Analytics",
+        "cloud": "Cloud & DevOps",
+        "securite": "Security",
+        "podcast": "Podcast",
+        "voixOff": "Voice-over",
+        "maison": "Home & Garden",
+        "sport": "Sports",
+        "beaute": "Beauty",
+        "livres": "Books",
+        "jouets": "Toys",
+        "alimentation": "Food",
+        "artisanat": "Crafts",
+        "scrollLeft": "Scroll left",
+        "scrollRight": "Scroll right",
+        "ariaLabel": "Service categories"
+      },
       "paymentFailed": "Unable to initialize payment",
       "purchaseOf": "Purchase of",
       "shareSuccess": "Shared successfully",
@@ -214,7 +303,7 @@
     },
     "cta": {
       "title": "Ready to launch your store?",
-      "subtitle": "Join hundreds of entrepreneurs growing their business with Payhuk.",
+      "subtitle": "Join hundreds of entrepreneurs growing their business with Emarzona.",
       "startFree": "Start for free",
       "joinCommunity": "Join the community"
     }
@@ -238,7 +327,7 @@
       "multiCurrency": "Multi-currency"
     },
     "contact": {
-      "title": "Contact {storeName}",
+      "title": "Contact {{storeName}}",
       "description": "Have a question? Don't hesitate to contact us. We'll get back to you as soon as possible.",
       "messageSent": "Message sent!",
       "messageDesc": "We'll respond to you as soon as possible."
@@ -251,44 +340,132 @@
       "noAbout": "No information about this store",
       "noReviews": "No reviews yet",
       "noContact": "No contact information available"
-    }
+    },
+    "noProducts": "No products available"
   },
   "products": {
     "title": "My Products",
     "add": "Add product",
-    "edit": "Edit",
-    "delete": "Delete",
-    "view": "View",
-    "noProducts": "No products",
-    "create": {
-      "title": "Create product",
-      "name": "Product name",
-      "description": "Description",
-      "price": "Price",
-      "currency": "Currency",
-      "category": "Category",
-      "images": "Images",
-      "uploadImage": "Upload image",
-      "stock": "Stock",
-      "sku": "SKU",
-      "tags": "Tags",
-      "success": "Product created successfully!",
-      "error": "Error creating product"
+    "addNew": "New product",
+    "refresh": "Refresh",
+    "export": "Export CSV",
+    "import": "Import CSV",
+    "loadingProducts": "Loading products...",
+    "createStoreFirst": "Create your store first",
+    "createStoreDescription": "You must create a store before you can add products",
+    "createMyStore": "Create my store",
+    "viewMode": {
+      "grid": "Grid",
+      "list": "List"
     },
-    "details": {
-      "description": "Description",
-      "features": "Features",
-      "reviews": "Reviews",
-      "seller": "Seller",
-      "shipping": "Shipping",
-      "returns": "Returns",
-      "addToCart": "Add to cart",
-      "buyNow": "Buy now",
-      "quantity": "Quantity",
+    "stats": {
+      "total": "Total Products",
+      "active": "Active",
+      "inactive": "Inactive",
+      "outOfStock": "Out of Stock"
+    },
+    "filters": {
+      "search": "Search for a product...",
+      "category": "Category",
+      "allCategories": "All categories",
+      "type": "Type",
+      "allTypes": "All types",
+      "status": "Status",
+      "allStatus": "All statuses",
+      "stockStatus": "Stock",
+      "allStock": "All stock",
+      "sortBy": "Sort by",
+      "recent": "Most recent",
+      "oldest": "Oldest",
+      "nameAsc": "Name (A-Z)",
+      "nameDesc": "Name (Z-A)",
+      "priceAsc": "Price ascending",
+      "priceDesc": "Price descending",
+      "stockAsc": "Stock ascending",
+      "stockDesc": "Stock descending"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "draft": "Draft",
+      "published": "Published"
+    },
+    "stockStatus": {
       "inStock": "In stock",
-      "outOfStock": "Out of stock",
-      "price": "Price"
-    }
+      "lowStock": "Low stock",
+      "outOfStock": "Out of stock"
+    },
+    "types": {
+      "digital": "Digital",
+      "physical": "Physical",
+      "service": "Service"
+    },
+    "actions": {
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "view": "View",
+      "bulkDelete": "Delete selection",
+      "bulkActivate": "Activate selection",
+      "bulkDeactivate": "Deactivate selection",
+      "selectAll": "Select all",
+      "deselectAll": "Deselect all",
+      "selected": "{{count}} selected"
+    },
+    "empty": {
+      "title": "No products yet",
+      "description": "Start by adding your first product to sell in your store",
+      "noResults": "No products found",
+      "noResultsDescription": "No products match your search criteria",
+      "tryAdjusting": "Try adjusting your filters or search"
+    },
+    "delete": {
+      "title": "Delete product",
+      "description": "Are you sure you want to delete this product? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "success": "Product deleted successfully",
+      "error": "Error deleting product",
+      "bulkTitle": "Delete {{count}} product(s)",
+      "bulkDescription": "Are you sure you want to delete these {{count}} products? This action cannot be undone."
+    },
+    "edit": {
+      "title": "Edit product",
+      "save": "Save",
+      "cancel": "Cancel",
+      "success": "Product updated successfully",
+      "error": "Error updating product"
+    },
+    "duplicate": {
+      "success": "Product duplicated successfully",
+      "error": "Error duplicating product"
+    },
+    "pagination": {
+      "showing": "Showing {{from}} to {{to}} of {{total}} products",
+      "previous": "Previous",
+      "next": "Next",
+      "first": "First",
+      "last": "Last",
+      "itemsPerPage": "Products per page"
+    },
+    "quickView": {
+      "title": "Quick view",
+      "close": "Close",
+      "price": "Price",
+      "stock": "Stock",
+      "category": "Category",
+      "type": "Type",
+      "status": "Status",
+      "createdAt": "Created at",
+      "updatedAt": "Updated at"
+    },
+    "metadata": {
+      "createdAt": "Created on",
+      "updatedAt": "Last updated",
+      "version": "Version"
+    },
+    "urlCopied": "URL copied",
+    "urlCopiedDescription": "Product URL has been copied to clipboard"
   },
   "cart": {
     "title": "Cart",
@@ -306,89 +483,165 @@
     "error": "Error adding to cart"
   },
   "orders": {
-    "title": "My Orders",
-    "orderNumber": "Order #{{number}}",
-    "date": "Date",
-    "status": "Status",
-    "total": "Total",
-    "items": "Items",
-    "viewDetails": "View details",
-    "trackOrder": "Track order",
-    "noOrders": "No orders",
-    "statuses": {
+    "title": "Orders",
+    "orderNumberLabel": "Order",
+    "new": "New order",
+    "export": "Export CSV",
+    "filters": {
+      "search": "Search by number or customer...",
+      "status": "Status",
+      "allStatus": "All statuses",
+      "paymentStatus": "Payment",
+      "allPayments": "All payments",
+      "dateRange": "Period"
+    },
+    "status": {
       "pending": "Pending",
       "processing": "Processing",
-      "shipped": "Shipped",
-      "delivered": "Delivered",
+      "completed": "Completed",
       "cancelled": "Cancelled",
       "refunded": "Refunded"
+    },
+    "paymentStatus": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    },
+    "table": {
+      "orderNumber": "Number",
+      "customer": "Customer",
+      "amount": "Amount",
+      "status": "Status",
+      "payment": "Payment",
+      "date": "Date",
+      "actions": "Actions"
+    },
+    "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "refund": "Refund",
+      "print": "Print"
+    },
+    "empty": {
+      "title": "No orders",
+      "description": "You haven't received any orders yet",
+      "noResults": "No orders match your filters",
+      "createFirst": "Create manual order"
+    },
+    "toast": {
+      "warning": "Warning",
+      "noOrders": "No orders to export",
+      "success": "Success",
+      "exported": "{{count}} order(s) exported",
+      "error": "Error",
+      "createSuccess": "Order created successfully",
+      "updateSuccess": "Order updated",
+      "cancelSuccess": "Order cancelled",
+      "refundSuccess": "Order refunded"
+    },
+    "pagination": {
+      "showing": "Showing {{from}} to {{to}} of {{total}} orders",
+      "previous": "Previous",
+      "next": "Next",
+      "rowsPerPage": "Rows per page"
+    },
+    "details": {
+      "title": "Order details",
+      "orderNumber": "Order #{{number}}",
+      "customer": "Customer",
+      "products": "Products",
+      "total": "Total",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "tax": "Tax",
+      "discount": "Discount",
+      "notes": "Notes",
+      "timeline": "Timeline",
+      "createdAt": "Created at",
+      "updatedAt": "Updated at"
     }
   },
   "dashboard": {
-    "welcome": "Welcome, {{name}}!",
+    "title": "Dashboard",
+    "loading": "Loading dashboard...",
+    "welcome": "Welcome! 🎉",
+    "createStorePrompt": "Start by creating your store to access the advanced dashboard",
+    "createStoreButton": "Create my store",
+    "online": "Online",
+    "refresh": "Refresh data",
+    "retry": "Retry",
+    "error": {
+      "title": "Loading error",
+      "loading": "Error loading data"
+    },
     "stats": {
-      "totalSales": "Total sales",
-      "totalOrders": "Total orders",
-      "totalProducts": "Products",
-      "totalCustomers": "Customers"
+      "products": {
+        "title": "Products",
+        "active": "{{count}} active",
+        "active_plural": "{{count}} active"
+      },
+      "orders": {
+        "title": "Orders",
+        "pending": "{{count}} pending"
+      },
+      "customers": {
+        "title": "Customers",
+        "registered": "Registered customers"
+      },
+      "revenue": {
+        "title": "Revenue",
+        "total": "Total sales"
+      }
     },
-    "recentOrders": "Recent orders",
-    "topProducts": "Top products",
-    "analytics": "Analytics",
-    "quickActions": "Quick actions"
-  },
-  "settings": {
-    "title": "Settings",
-    "profile": "Profile",
-    "store": "Store",
-    "payment": "Payment",
-    "shipping": "Shipping",
-    "notifications": "Notifications",
-    "security": "Security",
-    "language": "Language",
-    "theme": "Theme",
-    "save": "Save changes",
-    "success": "Settings updated!",
-    "error": "Error updating settings"
-  },
-  "notifications": {
-    "title": "Notifications",
-    "markAllRead": "Mark all as read",
-    "noNotifications": "No notifications",
-    "types": {
-      "order": "New order",
-      "payment": "Payment received",
-      "review": "New review",
-      "message": "New message",
-      "system": "System notification"
-    }
-  },
-  "errors": {
-    "generic": "An error occurred",
-    "network": "Connection error",
-    "notFound": "Page not found",
-    "unauthorized": "Unauthorized",
-    "serverError": "Server error",
-    "validation": "Validation error",
-    "tryAgain": "Please try again"
-  },
-  "footer": {
-    "about": "About",
-    "contact": "Contact",
-    "terms": "Terms of Service",
-    "privacy": "Privacy",
-    "help": "Help",
-    "followUs": "Follow us",
-    "allRightsReserved": "All rights reserved"
-  },
-  "seo": {
-    "home": {
-      "title": "Payhuk - Modern E-commerce Platform",
-      "description": "Create and manage your online store easily with Payhuk"
+    "goals": {
+      "monthlyRevenue": "Monthly revenue",
+      "newCustomers": "New customers",
+      "productsSold": "Products sold",
+      "customersUnit": "customers",
+      "ordersUnit": "orders"
     },
-    "marketplace": {
-      "title": "Marketplace - Discover our products",
-      "description": "Explore our selection of quality products"
+    "trends": {
+      "vsLastMonth": "vs last month"
+    },
+    "notifications": {
+      "title": "Recent notifications",
+      "viewAll": "View all notifications",
+      "empty": "No notifications",
+      "newOrder": "New order",
+      "newOrderMessage": "Order {{orderNumber}} received for {{amount}} FCFA",
+      "outOfStock": "Out of stock",
+      "outOfStockMessage": "Product \"{{productName}}\" is out of stock",
+      "paymentReceived": "Payment received",
+      "paymentReceivedMessage": "Payment of {{amount}} FCFA confirmed"
+    },
+    "quickActions": {
+      "title": "Quick actions",
+      "newProduct": "New Product",
+      "newProductDesc": "Add a product to your store",
+      "newOrder": "New Order",
+      "newOrderDesc": "Create a manual order",
+      "analytics": "Analytics",
+      "analyticsDesc": "View detailed statistics",
+      "createProduct": "Create product",
+      "createProductDesc": "Add a new product to your store",
+      "manageOrders": "Manage orders",
+      "manageOrdersDesc": "View and manage your orders",
+      "viewAnalytics": "View analytics",
+      "viewAnalyticsDesc": "Check your detailed statistics",
+      "manageCustomers": "Manage Customers",
+      "manageCustomersDesc": "View and manage your customers",
+      "viewStore": "View my store",
+      "viewStoreDesc": "Customize your online store",
+      "settings": "Settings",
+      "settingsDesc": "Configure your account and store"
+    },
+    "recentActivity": {
+      "title": "Recent Activity"
+    },
+    "notificationsBadge": {
+      "new": "New"
     }
   },
   "settings": {
@@ -483,271 +736,44 @@
       "cardDescription": "Test connection and database structure"
     }
   },
-  "orders": {
-    "title": "Orders",
-    "new": "New order",
-    "export": "Export CSV",
-    "filters": {
-      "search": "Search by number or customer...",
-      "status": "Status",
-      "allStatus": "All statuses",
-      "paymentStatus": "Payment",
-      "allPayments": "All payments",
-      "dateRange": "Period"
-    },
-    "status": {
-      "pending": "Pending",
-      "processing": "Processing",
-      "completed": "Completed",
-      "cancelled": "Cancelled",
-      "refunded": "Refunded"
-    },
-    "paymentStatus": {
-      "pending": "Pending",
-      "paid": "Paid",
-      "failed": "Failed",
-      "refunded": "Refunded"
-    },
-    "table": {
-      "orderNumber": "Number",
-      "customer": "Customer",
-      "amount": "Amount",
-      "status": "Status",
-      "payment": "Payment",
-      "date": "Date",
-      "actions": "Actions"
-    },
-    "actions": {
-      "view": "View",
-      "edit": "Edit",
-      "cancel": "Cancel",
-      "refund": "Refund",
-      "print": "Print"
-    },
-    "empty": {
-      "title": "No orders",
-      "description": "You haven't received any orders yet",
-      "noResults": "No orders match your filters",
-      "createFirst": "Create manual order"
-    },
-    "toast": {
-      "warning": "Warning",
-      "noOrders": "No orders to export",
-      "success": "Success",
-      "exported": "{{count}} order(s) exported",
-      "error": "Error",
-      "createSuccess": "Order created successfully",
-      "updateSuccess": "Order updated",
-      "cancelSuccess": "Order cancelled",
-      "refundSuccess": "Order refunded"
-    },
-    "pagination": {
-      "showing": "Showing {{from}} to {{to}} of {{total}} orders",
-      "previous": "Previous",
-      "next": "Next",
-      "rowsPerPage": "Rows per page"
-    },
-    "details": {
-      "title": "Order details",
-      "orderNumber": "Order #{{number}}",
-      "customer": "Customer",
-      "products": "Products",
-      "total": "Total",
-      "subtotal": "Subtotal",
-      "shipping": "Shipping",
-      "tax": "Tax",
-      "discount": "Discount",
-      "notes": "Notes",
-      "timeline": "Timeline",
-      "createdAt": "Created at",
-      "updatedAt": "Updated at"
-    }
-  },
-  "products": {
-    "title": "My Products",
-    "add": "Add product",
-    "addNew": "New product",
-    "refresh": "Refresh",
-    "export": "Export CSV",
-    "import": "Import CSV",
-    "loadingProducts": "Loading products...",
-    "createStoreFirst": "Create your store first",
-    "createStoreDescription": "You must create a store before you can add products",
-    "createMyStore": "Create my store",
-    "viewMode": {
-      "grid": "Grid",
-      "list": "List"
-    },
-    "stats": {
-      "total": "Total Products",
-      "active": "Active",
-      "inactive": "Inactive",
-      "outOfStock": "Out of Stock"
-    },
-    "filters": {
-      "search": "Search for a product...",
-      "category": "Category",
-      "allCategories": "All categories",
-      "type": "Type",
-      "allTypes": "All types",
-      "status": "Status",
-      "allStatus": "All statuses",
-      "stockStatus": "Stock",
-      "allStock": "All stock",
-      "sortBy": "Sort by",
-      "recent": "Most recent",
-      "oldest": "Oldest",
-      "nameAsc": "Name (A-Z)",
-      "nameDesc": "Name (Z-A)",
-      "priceAsc": "Price ascending",
-      "priceDesc": "Price descending",
-      "stockAsc": "Stock ascending",
-      "stockDesc": "Stock descending"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive",
-      "draft": "Draft"
-    },
-    "stockStatus": {
-      "inStock": "In stock",
-      "lowStock": "Low stock",
-      "outOfStock": "Out of stock"
-    },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications",
     "types": {
-      "digital": "Digital",
-      "physical": "Physical",
-      "service": "Service"
-    },
-    "actions": {
-      "edit": "Edit",
-      "duplicate": "Duplicate",
-      "delete": "Delete",
-      "view": "View",
-      "bulkDelete": "Delete selection",
-      "bulkActivate": "Activate selection",
-      "bulkDeactivate": "Deactivate selection",
-      "selectAll": "Select all",
-      "deselectAll": "Deselect all",
-      "selected": "{{count}} selected"
-    },
-    "empty": {
-      "title": "No products yet",
-      "description": "Start by adding your first product to sell in your store",
-      "noResults": "No products found",
-      "noResultsDescription": "No products match your search criteria",
-      "tryAdjusting": "Try adjusting your filters or search"
-    },
-    "delete": {
-      "title": "Delete product",
-      "description": "Are you sure you want to delete this product? This action cannot be undone.",
-      "cancel": "Cancel",
-      "confirm": "Delete",
-      "success": "Product deleted successfully",
-      "error": "Error deleting product",
-      "bulkTitle": "Delete {{count}} product(s)",
-      "bulkDescription": "Are you sure you want to delete these {{count}} products? This action cannot be undone."
-    },
-    "edit": {
-      "title": "Edit product",
-      "save": "Save",
-      "cancel": "Cancel",
-      "success": "Product updated successfully",
-      "error": "Error updating product"
-    },
-    "duplicate": {
-      "success": "Product duplicated successfully",
-      "error": "Error duplicating product"
-    },
-    "pagination": {
-      "showing": "Showing {{from}} to {{to}} of {{total}} products",
-      "previous": "Previous",
-      "next": "Next",
-      "first": "First",
-      "last": "Last",
-      "itemsPerPage": "Products per page"
-    },
-    "quickView": {
-      "title": "Quick view",
-      "close": "Close",
-      "price": "Price",
-      "stock": "Stock",
-      "category": "Category",
-      "type": "Type",
-      "status": "Status",
-      "createdAt": "Created at",
-      "updatedAt": "Updated at"
+      "order": "New order",
+      "payment": "Payment received",
+      "review": "New review",
+      "message": "New message",
+      "system": "System notification"
     }
   },
-  "dashboard": {
-    "title": "Dashboard",
-    "titleWithStore": "Dashboard - {{storeName}}",
-    "loading": "Loading dashboard...",
-    "welcome": "Welcome! 🎉",
-    "createStorePrompt": "Start by creating your store to access the advanced dashboard",
-    "createStoreButton": "Create my store",
-    "online": "Online",
-    "refresh": "Refresh data",
-    "retry": "Retry",
-    "error": {
-      "title": "Loading error",
-      "loading": "Error loading data"
+  "errors": {
+    "generic": "An error occurred",
+    "network": "Connection error",
+    "notFound": "Page not found",
+    "unauthorized": "Unauthorized",
+    "serverError": "Server error",
+    "validation": "Validation error",
+    "tryAgain": "Please try again"
+  },
+  "footer": {
+    "about": "About",
+    "contact": "Contact",
+    "terms": "Terms of Service",
+    "privacy": "Privacy",
+    "help": "Help",
+    "followUs": "Follow us",
+    "allRightsReserved": "All rights reserved"
+  },
+  "seo": {
+    "home": {
+      "title": "Emarzona - E-commerce and Marketing Platform",
+      "description": "Create and manage your online store easily with Emarzona"
     },
-    "stats": {
-      "products": {
-        "title": "Products",
-        "active": "{{count}} active"
-      },
-      "orders": {
-        "title": "Orders",
-        "pending": "{{count}} pending"
-      },
-      "customers": {
-        "title": "Customers",
-        "registered": "Registered customers"
-      },
-      "revenue": {
-        "title": "Revenue",
-        "total": "Total sales"
-      }
-    },
-    "notifications": {
-      "title": "Recent notifications",
-      "viewAll": "View all notifications",
-      "empty": "No notifications",
-      "newOrder": "New order",
-      "newOrderMessage": "Order {{orderNumber}} received for {{amount}} FCFA",
-      "outOfStock": "Out of stock",
-      "outOfStockMessage": "Product \"{{productName}}\" is out of stock",
-      "paymentReceived": "Payment received",
-      "paymentReceivedMessage": "Payment of {{amount}} FCFA confirmed"
-    },
-    "quickActions": {
-      "title": "Quick actions",
-      "newProduct": "New Product",
-      "newProductDesc": "Add a product to your store",
-      "newOrder": "New Order",
-      "newOrderDesc": "Create a manual order",
-      "analytics": "Analytics",
-      "analyticsDesc": "View detailed statistics",
-      "createProduct": "Create product",
-      "createProductDesc": "Add a new product to your store",
-      "manageOrders": "Manage orders",
-      "manageOrdersDesc": "View and manage your orders",
-      "viewAnalytics": "View analytics",
-      "viewAnalyticsDesc": "Check your detailed statistics",
-      "manageCustomers": "Manage Customers",
-      "manageCustomersDesc": "View and manage your customers",
-      "viewStore": "View my store",
-      "viewStoreDesc": "Customize your online store",
-      "settings": "Settings",
-      "settingsDesc": "Configure your account and store"
-    },
-    "recentActivity": {
-      "title": "Recent Activity"
-    },
-    "notificationsBadge": {
-      "new": "New"
+    "marketplace": {
+      "title": "Marketplace - Discover our products",
+      "description": "Explore our selection of quality products"
     }
   },
   "landing": {
@@ -774,13 +800,13 @@
       "stores": "Stores"
     },
     "testimonials": {
-      "title": "They succeed with Payhuk",
+      "title": "They succeed with Emarzona",
       "subtitle": "Join hundreds of entrepreneurs growing their business",
       "items": [
         {
           "name": "Amadou K.",
           "role": "Content Creator",
-          "content": "I doubled my income in 3 months thanks to Payhuk. The platform is simple and FCFA payments are a real plus!"
+          "content": "I doubled my income in 3 months thanks to Emarzona. The platform is simple and payments are a real plus!"
         },
         {
           "name": "Fatou D.",
@@ -790,7 +816,7 @@
         {
           "name": "Ibrahim S.",
           "role": "Developer",
-          "content": "Modern interface, complete features and responsive support. Payhuk is the best platform to sell in Africa."
+          "content": "Modern interface, complete features and responsive support. Emarzona is the best platform to sell online."
         }
       ]
     },
@@ -867,7 +893,7 @@
     },
     "cta": {
       "title": "Ready to grow your business?",
-      "subtitle": "Join thousands of African entrepreneurs who succeed with Payhuk",
+      "subtitle": "Join thousands of entrepreneurs who succeed with Emarzona",
       "button": "Create my free account"
     },
     "footer": {
@@ -890,7 +916,7 @@
         "terms": "Terms of Service",
         "privacy": "Privacy Policy"
       },
-      "copyright": "© 2025 Payhuk. All rights reserved."
+      "copyright": "© 2025 Emarzona. All rights reserved."
     },
     "featureSections": {
       "feature1": {
@@ -1033,11 +1059,27 @@
         "zones": {
           "westAfrica": {
             "title": "West Africa (UEMOA Zone - FCFA XOF)",
-            "countries": ["Senegal", "Ivory Coast", "Mali", "Benin", "Burkina Faso", "Niger", "Togo", "Guinea-Bissau"]
+            "countries": [
+              "Senegal",
+              "Ivory Coast",
+              "Mali",
+              "Benin",
+              "Burkina Faso",
+              "Niger",
+              "Togo",
+              "Guinea-Bissau"
+            ]
           },
           "centralAfrica": {
             "title": "Central Africa (CEMAC Zone - FCFA XAF)",
-            "countries": ["Cameroon", "Gabon", "Congo-Brazzaville", "Chad", "CAR", "Equatorial Guinea"]
+            "countries": [
+              "Cameroon",
+              "Gabon",
+              "Congo-Brazzaville",
+              "Chad",
+              "CAR",
+              "Equatorial Guinea"
+            ]
           },
           "northAfrica": {
             "title": "North Africa",
@@ -1045,7 +1087,13 @@
           },
           "eastAfrica": {
             "title": "East Africa",
-            "countries": ["Kenya (KES)", "Tanzania (TZS)", "Uganda (UGX)", "Rwanda (RWF)", "Ethiopia (ETB)"]
+            "countries": [
+              "Kenya (KES)",
+              "Tanzania (TZS)",
+              "Uganda (UGX)",
+              "Rwanda (RWF)",
+              "Ethiopia (ETB)"
+            ]
           },
           "southernAfrica": {
             "title": "Southern Africa",
@@ -1053,7 +1101,13 @@
           },
           "international": {
             "title": "International (Major currencies)",
-            "countries": ["Eurozone (EUR)", "United States (USD)", "United Kingdom (GBP)", "Canada (CAD)", "Switzerland (CHF)"]
+            "countries": [
+              "Eurozone (EUR)",
+              "United States (USD)",
+              "United Kingdom (GBP)",
+              "Canada (CAD)",
+              "Switzerland (CHF)"
+            ]
           }
         },
         "note": "+ 180 other countries and territories worldwide"
@@ -1061,7 +1115,7 @@
     },
     "finalCta": {
       "title": "Start selling digital products today!",
-      "subtitle": "Join hundreds of African entrepreneurs who have already trusted Payhuk",
+      "subtitle": "Join hundreds of entrepreneurs who have already trusted Emarzona",
       "button": "Create my free account"
     }
   },
@@ -1218,7 +1272,446 @@
       "videoUploadFailed": "Video upload failed",
       "quizSubmissionFailed": "Quiz submission failed",
       "certificateGenerationFailed": "Certificate generation failed"
+    },
+    "create": {
+      "title": "Create a new course",
+      "description": "Follow the steps to create a professional course in a few minutes",
+      "backToProducts": "Back to products",
+      "useTemplate": "Use a template",
+      "useTemplateShort": "Template"
+    },
+    "analytics": {
+      "title": "Analytics",
+      "accessDenied": "Access denied",
+      "mustBeLoggedIn": "You must be logged in to access this page.",
+      "courseNotFound": "Course not found",
+      "backToMyCourses": "Back to my courses",
+      "backToCourse": "Back to course",
+      "noPermission": "You do not have permission to view analytics for this course."
     }
+  },
+  "admin": {
+    "batchShipping": {
+      "title": "Batch Shipping",
+      "description": "Process multiple orders simultaneously and generate labels in bulk",
+      "noStore": "No store found",
+      "noStoreDescription": "Please create a store to manage your batch shipments",
+      "stats": {
+        "total": "Total batches",
+        "processing": "Processing",
+        "labelGenerated": "Labels generated",
+        "completed": "Completed"
+      }
+    },
+    "costOptimization": {
+      "title": "Cost and Margin Optimization",
+      "description": "Analyze your costs, margins and optimize your prices to maximize profitability",
+      "noStore": "You must create a store before using cost optimization"
+    },
+    "demandForecasting": {
+      "title": "Demand Forecasting",
+      "description": "Analyze trends and forecast future demand for your products",
+      "noStore": "You must create a store before using demand forecasting"
+    },
+    "physicalPromotions": {
+      "title": "Promotions and Discounts",
+      "description": "Manage your promotions, discount codes and special offers"
+    },
+    "physicalBundles": {
+      "title": "Bundle Management",
+      "description": "Create and manage product bundles with automatic promotions and dynamic pricing"
+    },
+    "physicalBackorders": {
+      "title": "Backorders Management",
+      "description": "Manage out-of-stock orders with prioritization and automatic alerts"
+    },
+    "physicalPreOrders": {
+      "title": "Pre-Orders Management",
+      "description": "Manage pre-orders for your physical products with automatic notifications"
+    },
+    "physicalMultiCurrency": {
+      "title": "Multi-Currency Management",
+      "description": "Manage currencies, exchange rates and regional prices",
+      "tabs": {
+        "currencies": "Currencies & Rates",
+        "currenciesShort": "Currencies",
+        "converter": "Converter"
+      }
+    }
+  },
+  "promotions": {
+    "title": "Promotions",
+    "description": "Manage your promo codes and discounts",
+    "createButton": "New promotion",
+    "createButtonShort": "New",
+    "noStore": {
+      "title": "Store not configured",
+      "description": "Please create your store first to manage your promotions."
+    },
+    "stats": {
+      "total": "Total Promotions",
+      "active": "Active",
+      "totalUses": "Total Uses",
+      "averageDiscount": "Average Discount"
+    },
+    "empty": {
+      "title": "No promotions",
+      "description": "Start by creating your first promotion",
+      "noResults": "No promotions match your filters"
+    },
+    "statistics": {
+      "title": "Statistics",
+      "total": "Total",
+      "totalDescription": "Total number of promotions",
+      "active": "Active",
+      "inactive": "{{count}} inactive",
+      "inactive_plural": "{{count}} inactive",
+      "uses": "Uses",
+      "usesDescription": "Total uses",
+      "averageDiscount": "Average discount",
+      "averageDiscountDescription": "Average of discounts"
+    }
+  },
+  "withdrawals": {
+    "title": "Withdrawals",
+    "description": "Manage your withdrawals and check your available balance",
+    "requestButton": "Request withdrawal",
+    "noStore": "You must create a store before you can make withdrawals.",
+    "migration": {
+      "title": "SQL migration required:",
+      "description": "To enable the withdrawal system, please run the SQL migration {{fileName}} in your Supabase database."
+    }
+  },
+  "store": {
+    "title": "Store",
+    "loading": "Loading your stores...",
+    "viewStore": "View my store",
+    "viewStoreShort": "View",
+    "viewStoreAriaLabel": "Open store {{name}} in a new tab",
+    "tabs": {
+      "ariaLabel": "Store navigation",
+      "manage": "Manage my stores",
+      "manageShort": "Manage",
+      "create": "Create my store",
+      "createShort": "Create"
+    },
+    "create": {
+      "title": "Create a new store",
+      "description": "Configure your new store in settings.",
+      "descriptionExisting": "You can create up to 3 stores. If you have reached the limit, delete an existing store before creating a new one."
+    },
+    "existing": {
+      "title": "Existing stores",
+      "description": "You can create up to 3 stores per user. To create a new store, you must first delete an existing store if you have reached the limit.",
+      "currentStore": "Your current stores:"
+    },
+    "empty": {
+      "title": "Create your first store",
+      "description": "Set up your store to start selling your digital products and services in Africa"
+    },
+    "whatIs": {
+      "title": "What is an Emarzona store?",
+      "feature1": "A unique and customizable link for your business",
+      "feature2": "Sell multiple products and services",
+      "feature3": "Accept payments in FCFA and other currencies",
+      "feature4": "Manage everything from your dashboard"
+    },
+    "goToSettings": "Go to settings"
+  },
+  "affiliate": {
+    "dashboard": {
+      "title": "Affiliate Dashboard",
+      "description": "Overview of your course promotions",
+      "loginRequired": "Login required",
+      "mustBeLoggedIn": "You must be logged in to access the affiliate dashboard.",
+      "findCourses": "Find courses",
+      "discoverCourses": "Discover available courses",
+      "welcome": {
+        "title": "Welcome to the Affiliate Program!",
+        "description": "Start earning commissions by promoting quality online courses."
+      },
+      "steps": {
+        "step1": {
+          "title": "Find a course",
+          "description": "Browse our marketplace and find courses with affiliate enabled"
+        },
+        "step2": {
+          "title": "Create your links",
+          "description": "Generate personalized links for each channel (blog, YouTube, etc.)"
+        },
+        "step3": {
+          "title": "Earn!",
+          "description": "Receive commissions on every enrollment through your links"
+        }
+      },
+      "tips": {
+        "title": "Promotion Tips",
+        "tip1": {
+          "title": "Create valuable content",
+          "description": "Write articles or create videos that bring value to your audience"
+        },
+        "tip2": {
+          "title": "Test different channels",
+          "description": "Create specific links for blog, YouTube, Instagram to analyze performance"
+        },
+        "tip3": {
+          "title": "Be transparent",
+          "description": "Always indicate that you are using an affiliate link"
+        },
+        "tip4": {
+          "title": "Analyze your statistics",
+          "description": "Regularly track your performance and optimize your strategies"
+        }
+      },
+      "faq": {
+        "title": "Frequently Asked Questions",
+        "q1": {
+          "question": "When am I paid?",
+          "answer": "Commissions are paid monthly once you reach the minimum threshold of 50,000 XOF."
+        },
+        "q2": {
+          "question": "How long does the cookie last?",
+          "answer": "It depends on the course. The duration is displayed on each link generation page (usually 30 days)."
+        },
+        "q3": {
+          "question": "Can I promote multiple courses?",
+          "answer": "Yes! You can promote as many courses as you want and create unlimited links."
+        },
+        "q4": {
+          "question": "How to optimize my conversions?",
+          "answer": "Create relevant content, use clear calls to action, and target the right audience for each course."
+        }
+      }
+    }
+  },
+  "emails": {
+    "campaigns": {
+      "title": "Email Campaigns",
+      "subtitle": "Create and manage your email marketing campaigns",
+      "noStore": "Please select a store",
+      "editCampaign": "Edit campaign",
+      "newCampaign": "New campaign",
+      "editCampaignDescription": "Edit your email campaign information",
+      "newCampaignDescription": "Create a new email marketing campaign for your store",
+      "campaignName": "Campaign name",
+      "campaignNamePlaceholder": "January 2025 Newsletter",
+      "campaignType": "Campaign type",
+      "campaignDescriptionPlaceholder": "Campaign description...",
+      "audienceType": "Audience type",
+      "scheduledAt": "Send date and time",
+      "scheduledAtPlaceholder": "Schedule send",
+      "scheduledAtDescription": "Leave empty to send immediately or create a draft",
+      "timezone": "Timezone",
+      "createCampaign": "Create campaign",
+      "types": {
+        "newsletter": "Newsletter",
+        "promotional": "Promotional",
+        "transactional": "Transactional",
+        "abandonCart": "Abandoned cart",
+        "nurture": "Nurture"
+      },
+      "audienceTypes": {
+        "segment": "Segment",
+        "list": "List",
+        "filter": "Filters"
+      },
+      "alert": {
+        "title": "Advanced Email System",
+        "description": "Create targeted email campaigns for your customers. Schedule sends, segment your audience and track performance in real-time."
+      }
+    },
+    "sequences": {
+      "title": "Email Sequences",
+      "subtitle": "Create automated email sequences for your customers",
+      "noStore": "Please select a store",
+      "editStep": "Edit step",
+      "newStep": "New step",
+      "editStepDescription": "Edit the settings for this sequence step",
+      "newStepDescription": "Add a new step to your email sequence",
+      "stepOrder": "Step order",
+      "stepOrderDescription": "The order determines when this step will be executed in the sequence",
+      "templateDescription": "The template to use for this email",
+      "delayType": "Delay type",
+      "delayValue": "Value",
+      "immediate": "Immediate",
+      "minutes": "Minutes",
+      "hours": "Hours",
+      "days": "Days",
+      "day": "day",
+      "hour": "hour",
+      "minute": "minute",
+      "delayDescription": "This step will be sent {{value}} {{unit}}{{plural}} after the previous step",
+      "addStep": "Add step",
+      "tabs": {
+        "list": "List",
+        "steps": "Steps"
+      },
+      "alert": {
+        "title": "Automated Sequences",
+        "description": "Create email sequences that send automatically according to a defined schedule. Perfect for onboarding journeys, follow-ups and nurturing campaigns."
+      }
+    },
+    "workflows": {
+      "title": "Email Workflows",
+      "subtitle": "Automate your emails with smart workflows",
+      "noStore": "Please select a store",
+      "alert": {
+        "title": "Automated Workflows",
+        "description": "Create automated workflows that trigger actions based on events, conditions or schedules. Automate your email campaigns to save time and improve engagement."
+      }
+    },
+    "analytics": {
+      "title": "Email Analytics",
+      "subtitle": "Analyze the performance of your email campaigns and sequences",
+      "noStore": "Please select a store",
+      "alert": {
+        "title": "Advanced Email Analytics",
+        "description": "Visualize your email performance with detailed charts. Analyze open rates, click rates, and revenue generated by your campaigns."
+      }
+    },
+    "segments": {
+      "title": "Audience Segments",
+      "subtitle": "Create and manage your audience segments to target your email campaigns",
+      "noStore": "Please select a store",
+      "tabs": {
+        "list": "Segments list",
+        "preview": "Preview"
+      },
+      "alert": {
+        "title": "Audience Segmentation",
+        "description": "Create static segments (manual list) or dynamic segments (automatically calculated) to precisely target your email campaigns. Dynamic segments update automatically according to your criteria."
+      },
+      "backToList": "Back to list",
+      "back": "Back",
+      "previewLabel": "Preview: "
+    },
+    "templateEditor": {
+      "title": "Email Template Editor",
+      "subtitle": "Create and customize your email templates with a visual editor",
+      "alert": {
+        "title": "Email Template Editor",
+        "description": "Use the editor to create your email templates. You can insert predefined blocks, use dynamic variables, and preview the result on mobile and desktop."
+      },
+      "tabs": {
+        "editor": "Editor",
+        "editorShort": "Edit",
+        "blocks": "Blocks",
+        "blocksShort": "Block",
+        "preview": "Preview",
+        "previewShort": "Preview"
+      },
+      "toast": {
+        "saved": "Template saved",
+        "savedDescription": "The template has been saved successfully.",
+        "error": "Error",
+        "errorDescription": "Error saving the template.",
+        "blockInserted": "Block inserted",
+        "blockInsertedDescription": "The block has been inserted into your template."
+      }
+    },
+    "template": "Email template",
+    "selectTemplate": "Select a template",
+    "noTemplate": "No template"
+  },
+  "digitalUpdates": {
+    "title": "Update Management",
+    "subtitle": "Publish and manage updates for your digital products",
+    "newUpdate": "New update",
+    "newUpdateShort": "New",
+    "selectProduct": "Select a product",
+    "selectProductDesc": "Choose a digital product to manage its updates",
+    "noProducts": "No digital products",
+    "noProductsDesc": "Create a digital product first to manage its updates",
+    "createProduct": "Create a digital product",
+    "currentVersion": "Current version: {{version}}",
+    "productWithoutName": "Product without name",
+    "tabs": {
+      "updates": "Updates",
+      "updatesShort": "Updates",
+      "stats": "Statistics",
+      "statsShort": "Stats",
+      "settings": "Settings",
+      "settingsShort": "Settings"
+    }
+  },
+  "recurringBookings": {
+    "title": "Recurring Bookings",
+    "subtitle": "Manage your recurring booking series",
+    "noStore": "No store found",
+    "noStoreDesc": "Please create a store to manage your recurring bookings",
+    "stats": {
+      "total": "Total",
+      "active": "Active",
+      "bookings": "Bookings",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "common": {
+    "welcome": "Welcome",
+    "startBuilding": "Start building your amazing project here!",
+    "notAvailable": "N/A",
+    "optional": "optional",
+    "cancel": "Cancel",
+    "save": "Save",
+    "description": "Description",
+    "hide": "Hide",
+    "view": "View"
+  },
+  "shipping": {
+    "title": "Shipping",
+    "country": "Country",
+    "countryRequired": "Country required",
+    "selectCountry": "Select a country",
+    "city": "City",
+    "cityPlaceholder": "Ex: Dakar",
+    "postalCode": "Postal code",
+    "postalCodePlaceholder": "Ex: 75001",
+    "calculate": "Calculate shipping",
+    "calculating": "Calculating...",
+    "calculationError": "Error calculating shipping",
+    "baseShipping": "Base shipping",
+    "insurance": "Insurance",
+    "specializedPackaging": "Specialized packaging",
+    "specialHandling": "Special handling",
+    "totalShipping": "Total shipping",
+    "estimatedDelivery": "Estimated delivery: {{days}} days",
+    "recommendedCarriers": "Recommended carriers:",
+    "status": {
+      "pending": "Pending",
+      "labelCreated": "Label created",
+      "pickedUp": "Picked up",
+      "inTransit": "In transit",
+      "outForDelivery": "Out for delivery",
+      "delivered": "Delivered",
+      "failed": "Failed",
+      "returned": "Returned",
+      "cancelled": "Cancelled"
+    },
+    "origin": "Origin",
+    "destination": "Destination",
+    "estimatedDeliveryLabel": "Estimated delivery",
+    "deliveredOn": "Delivered on",
+    "weight": "Weight",
+    "cost": "Cost",
+    "createdOn": "Created on",
+    "track": "Track",
+    "label": "Label",
+    "cancelShipment": "Cancel shipment",
+    "cancelShipmentConfirm": "Are you sure you want to cancel this shipment?",
+    "detailedTracking": "detailed tracking",
+    "artistCalculator": {
+      "title": "Specialized Shipping Calculator",
+      "description": "Calculate specialized shipping costs for this artist's work"
+    }
+  },
+  "countries": {
+    "SN": "Senegal",
+    "CI": "Ivory Coast",
+    "ML": "Mali",
+    "BF": "Burkina Faso",
+    "FR": "France",
+    "BE": "Belgium",
+    "CH": "Switzerland"
   }
 }
-

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { checkStoreDeleteProtection, StoreDependencies } from "@/lib/store-delete-protection";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
 
 interface DeleteStoreDialogProps {
   open: boolean;
@@ -35,7 +36,7 @@ interface DeleteStoreDialogProps {
   onConfirmArchive?: () => Promise<void>;
 }
 
-export const DeleteStoreDialog = ({
+const DeleteStoreDialogComponent = ({
   open,
   onOpenChange,
   storeId,
@@ -63,7 +64,7 @@ export const DeleteStoreDialog = ({
     }
   }, [open, storeId]);
 
-  const checkProtection = async () => {
+  const checkProtection = useCallback(async () => {
     setChecking(true);
     try {
       const result = await checkStoreDeleteProtection(storeId);
@@ -72,27 +73,27 @@ export const DeleteStoreDialog = ({
       setWarnings(result.warnings);
       setErrors(result.errors || []);
     } catch (error) {
-      console.error('Error checking protection:', error);
+      logger.error('Error checking protection', { error, storeId });
       setCanDelete(false);
       setErrors(['Impossible de vérifier les dépendances. Veuillez réessayer.']);
     } finally {
       setChecking(false);
     }
-  };
+  }, [storeId]);
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     setDeleting(true);
     try {
       await onConfirmDelete();
       onOpenChange(false);
     } catch (error) {
-      console.error('Error deleting store:', error);
+      logger.error('Error deleting store', { error, storeId });
     } finally {
       setDeleting(false);
     }
-  };
+  }, [onConfirmDelete, onOpenChange, storeId]);
 
-  const handleArchive = async () => {
+  const handleArchive = useCallback(async () => {
     if (!onConfirmArchive) return;
     
     setArchiving(true);
@@ -100,15 +101,15 @@ export const DeleteStoreDialog = ({
       await onConfirmArchive();
       onOpenChange(false);
     } catch (error) {
-      console.error('Error archiving store:', error);
+      logger.error('Error archiving store', { error, storeId });
     } finally {
       setArchiving(false);
     }
-  };
+  }, [onConfirmArchive, onOpenChange, storeId]);
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <AlertDialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-xl">
             <AlertTriangle className="h-6 w-6 text-destructive" />
@@ -304,4 +305,20 @@ export const DeleteStoreDialog = ({
     </AlertDialog>
   );
 };
+
+DeleteStoreDialogComponent.displayName = 'DeleteStoreDialogComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const DeleteStoreDialog = React.memo(DeleteStoreDialogComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.open === nextProps.open &&
+    prevProps.onOpenChange === nextProps.onOpenChange &&
+    prevProps.storeId === nextProps.storeId &&
+    prevProps.storeName === nextProps.storeName &&
+    prevProps.onConfirmDelete === nextProps.onConfirmDelete &&
+    prevProps.onConfirmArchive === nextProps.onConfirmArchive
+  );
+});
+
+DeleteStoreDialog.displayName = 'DeleteStoreDialog';
 

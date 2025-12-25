@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useStore } from "./use-store";
+import { useStore } from "./useStore";
 import { logger } from '@/lib/logger';
 
 export interface AdvancedDashboardStats {
@@ -201,11 +201,17 @@ export const useAdvancedDashboardStats = () => {
 
       // Récupérer les détails des top produits
       const topProductIds = Object.entries(productStats)
-        .sort(([, a]: any, [, b]: any) => b.orderCount - a.orderCount)
+        .sort(([, a]: [string, { orderCount: number; revenue: number; quantity: number }], [, b]: [string, { orderCount: number; revenue: number; quantity: number }]) => b.orderCount - a.orderCount)
         .slice(0, 10)
         .map(([id]) => id);
 
-      let topProducts: any[] = [];
+      interface TopProductData {
+        id: string;
+        name: string;
+        price: number;
+        image_url?: string | null;
+      }
+      let topProducts: TopProductData[] = [];
       if (topProductIds.length > 0) {
         const { data: topProductsData, error: topProductsError } = await supabase
           .from("products")
@@ -216,7 +222,7 @@ export const useAdvancedDashboardStats = () => {
           logger.error('Error fetching top products:', topProductsError);
           // Continue without throwing - this is not critical
         } else {
-          topProducts = (topProductsData || []).map((product: any) => ({
+          topProducts = (topProductsData || []).map((product: { id: string; name: string; price: number; image_url?: string | null }) => ({
             ...product,
             orderCount: productStats[product.id]?.orderCount || 0,
             revenue: productStats[product.id]?.revenue || 0,
@@ -240,7 +246,15 @@ export const useAdvancedDashboardStats = () => {
       }
 
       // Calculer les revenus par mois
-      const revenueByMonth = (ordersForRevenue || []).reduce((acc: any, order: any) => {
+      interface RevenueByMonthAccumulator {
+        [key: string]: { revenue: number; orders: number; customers: Set<string> };
+      }
+      interface OrderForRevenue {
+        total_amount: number;
+        created_at: string;
+        customer_id: string;
+      }
+      const revenueByMonth = (ordersForRevenue || []).reduce((acc: RevenueByMonthAccumulator, order: OrderForRevenue) => {
         const date = new Date(order.created_at);
         const monthKey = date.toLocaleString("fr-FR", { month: "short", year: "numeric" });
         
@@ -271,7 +285,13 @@ export const useAdvancedDashboardStats = () => {
         .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
 
       // 7. Répartition des commandes par statut
-      const statusCounts = (orders || []).reduce((acc: any, order: any) => {
+      interface StatusCountsAccumulator {
+        [key: string]: number;
+      }
+      interface OrderForStatus {
+        status: string;
+      }
+      const statusCounts = (orders || []).reduce((acc: StatusCountsAccumulator, order: OrderForStatus) => {
         acc[order.status] = (acc[order.status] || 0) + 1;
         return acc;
       }, {});
@@ -285,14 +305,14 @@ export const useAdvancedDashboardStats = () => {
 
       // 8. Activité récente (simulation basée sur les données existantes)
       const recentActivity = [
-        ...(recentOrders || []).slice(0, 5).map((order: any) => ({
+        ...(recentOrders || []).slice(0, 5).map((order: { id: string; order_number: string; total_amount: number; status: string; created_at: string; customers?: { name: string; email: string } | null }) => ({
           id: `order-${order.id}`,
           type: 'order' as const,
           message: `Nouvelle commande #${order.order_number} de ${order.total_amount} FCFA`,
           timestamp: order.created_at,
           status: order.status
         })),
-        ...(topProducts || []).slice(0, 3).map((product: any) => ({
+        ...(topProducts || []).slice(0, 3).map((product: TopProductData) => ({
           id: `product-${product.id}`,
           type: 'product' as const,
           message: `Produit "${product.name}" vendu ${product.orderCount} fois`,
@@ -355,11 +375,12 @@ export const useAdvancedDashboardStats = () => {
 
       logger.info('Advanced dashboard stats loaded successfully');
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching advanced dashboard stats:', error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

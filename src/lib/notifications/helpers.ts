@@ -5,6 +5,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 import type { CreateNotificationData } from '@/types/notifications';
 
 /**
@@ -24,14 +25,14 @@ export const createNotification = async (data: CreateNotificationData) => {
     });
 
     if (error) {
-      console.error('Error creating notification:', error);
+      logger.error('Error creating notification', { error, notificationData: data });
       return false;
     }
 
-    console.log(`✅ Notification créée: ${data.title}`);
+    logger.debug('Notification created', { title: data.title, type: data.type, userId: data.user_id });
     return true;
   } catch (error) {
-    console.error('Exception creating notification:', error);
+    logger.error('Exception creating notification', { error, notificationData: data });
     return false;
   }
 };

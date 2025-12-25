@@ -52,10 +52,11 @@ export default function BundleDetail() {
         title: 'Bundle ajouté au panier',
         description: `${bundle.name} a été ajouté à votre panier`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'ajouter au panier',
+        description: errorMessage || 'Impossible d\'ajouter au panier',
         variant: 'destructive',
       });
     }
@@ -144,7 +145,7 @@ export default function BundleDetail() {
               </div>
 
               <CardHeader>
-                <CardTitle className="text-3xl">{bundle.name}</CardTitle>
+                <CardTitle className="text-lg sm:text-2xl md:text-3xl">{bundle.name}</CardTitle>
                 {bundle.short_description && (
                   <CardDescription className="text-base">
                     {bundle.short_description}
@@ -236,8 +237,8 @@ export default function BundleDetail() {
                   )}
                   <Separator />
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold">Prix du bundle:</span>
-                    <span className="text-3xl font-bold text-primary">
+                    <span className="text-base sm:text-xl md:text-2xl font-bold">Prix du bundle:</span>
+                    <span className="text-lg sm:text-2xl md:text-3xl font-bold text-primary">
                       {formatPrice(bundle.bundle_price)} XOF
                     </span>
                   </div>
@@ -269,7 +270,7 @@ export default function BundleDetail() {
                     <div>
                       <h3 className="font-semibold mb-4">Caractéristiques</h3>
                       <ul className="space-y-2">
-                        {bundle.features.map((feature: any, index: number) => (
+                        {bundle.features.map((feature: string, index: number) => (
                           <li key={index} className="flex items-start gap-2">
                             <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
                             <span>{feature.title || feature}</span>

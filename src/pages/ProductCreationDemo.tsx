@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { ProductAnalyticsDemo } from "@/components/products/tabs/ProductAnalyticsDemo";
 
 export const ProductCreationDemo = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     track_views: true,
     track_clicks: true,
@@ -18,7 +20,7 @@ export const ProductCreationDemo = () => {
     email_alerts: false
   });
 
-  const updateFormData = (field: string, value: any) => {
+  const updateFormData = (field: string, value: string | number | boolean | null | undefined) => {
     setFormData(prev => ({
       ...prev,
       [field]: value

@@ -1,283 +1,83 @@
 /**
- * Service Booking Calendar Custom Styles
- * Date: 28 octobre 2025
+ * Service Booking Calendar - Custom Styles
+ * Date: 2 Février 2025
  * 
- * Personnalisation de react-big-calendar pour notre thème
+ * Styles personnalisés pour le calendrier de réservation
  */
 
-/* Container */
-.service-booking-calendar .rbc-calendar {
-  font-family: inherit;
+/* Styles pour les heures de travail */
+.rbc-calendar-service .business-hours {
+  background-color: rgba(59, 130, 246, 0.05); /* blue-500 avec opacité */
+  border-left: 2px solid rgba(59, 130, 246, 0.2);
 }
 
-/* Toolbar */
-.service-booking-calendar .rbc-toolbar {
-  margin-bottom: 1rem;
+/* Styles pour les heures hors travail */
+.rbc-calendar-service .off-hours {
+  background-color: rgba(107, 114, 128, 0.03); /* gray-500 avec opacité */
+  opacity: 0.6;
 }
 
-/* Header */
-.service-booking-calendar .rbc-header {
-  padding: 0.75rem 0.5rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  border-bottom: 2px solid hsl(var(--border));
-  background-color: hsl(var(--muted));
+/* Styles pour la colonne d'aujourd'hui */
+.rbc-calendar-service .rbc-today-column {
+  background-color: rgba(139, 92, 246, 0.1); /* violet-500 avec opacité */
+  border-left: 2px solid #8b5cf6;
 }
 
-.service-booking-calendar .rbc-header + .rbc-header {
-  border-left: 1px solid hsl(var(--border));
-}
-
-/* Today column highlight */
-.service-booking-calendar .rbc-today-column {
-  background-color: hsl(var(--accent) / 0.1);
-}
-
-/* Past days */
-.service-booking-calendar .rbc-past-day {
+/* Styles pour les jours passés */
+.rbc-calendar-service .rbc-past-day {
   opacity: 0.5;
-  background-color: hsl(var(--muted) / 0.3);
+  pointer-events: none;
 }
 
-/* Business hours */
-.service-booking-calendar .business-hours {
-  background-color: hsl(var(--background));
-}
-
-/* Time slots */
-.service-booking-calendar .rbc-time-slot {
-  min-height: 40px;
-  border-top: 1px solid hsl(var(--border) / 0.3);
-}
-
-.service-booking-calendar .rbc-timeslot-group {
-  border-left: 1px solid hsl(var(--border));
-  min-height: 80px;
-}
-
-/* Time gutter (heures à gauche) */
-.service-booking-calendar .rbc-time-gutter {
-  font-size: 0.75rem;
-  color: hsl(var(--muted-foreground));
-}
-
-.service-booking-calendar .rbc-label {
-  padding: 0 0.5rem;
-}
-
-/* Events */
-.service-booking-calendar .rbc-event {
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.875rem;
+/* Amélioration des événements */
+.rbc-calendar-service .rbc-event {
+  transition: all 0.2s ease-in-out;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.service-booking-calendar .rbc-event:hover {
+.rbc-calendar-service .rbc-event:hover {
   transform: scale(1.02);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 10;
 }
 
-.service-booking-calendar .rbc-event:focus {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
+/* Amélioration des slots sélectionnables */
+.rbc-calendar-service .rbc-time-slot {
+  transition: background-color 0.15s ease-in-out;
 }
 
-/* Event labels */
-.service-booking-calendar .rbc-event-label {
-  font-size: 0.75rem;
-  font-weight: 500;
+.rbc-calendar-service .rbc-time-slot:hover {
+  background-color: rgba(139, 92, 246, 0.1);
 }
 
-/* Event content */
-.service-booking-calendar .rbc-event-content {
-  font-size: 0.875rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* Styles pour les tooltips */
+.rbc-calendar-service .rbc-event-tooltip {
+  z-index: 1000;
 }
 
-/* Selected slot */
-.service-booking-calendar .rbc-selected-cell {
-  background-color: hsl(var(--primary) / 0.2);
-}
-
-/* Day cell */
-.service-booking-calendar .rbc-day-slot .rbc-time-slot {
-  border-top: 1px solid hsl(var(--border) / 0.2);
-}
-
-.service-booking-calendar .rbc-day-slot .rbc-event {
-  border: none;
-}
-
-/* Current time indicator */
-.service-booking-calendar .rbc-current-time-indicator {
-  background-color: hsl(var(--destructive));
-  height: 2px;
-}
-
-.service-booking-calendar .rbc-current-time-indicator::before {
-  content: '';
-  position: absolute;
-  left: -4px;
-  top: -4px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: hsl(var(--destructive));
-}
-
-/* Month view */
-.service-booking-calendar .rbc-month-view {
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.5rem;
-  overflow: hidden;
-}
-
-.service-booking-calendar .rbc-month-row {
-  border-top: 1px solid hsl(var(--border));
-}
-
-.service-booking-calendar .rbc-day-bg {
-  border-left: 1px solid hsl(var(--border));
-  transition: background-color 0.2s ease;
-}
-
-.service-booking-calendar .rbc-day-bg:hover {
-  background-color: hsl(var(--accent) / 0.5);
-  cursor: pointer;
-}
-
-.service-booking-calendar .rbc-off-range-bg {
-  background-color: hsl(var(--muted) / 0.3);
-}
-
-.service-booking-calendar .rbc-today {
-  background-color: hsl(var(--accent) / 0.2);
-}
-
-.service-booking-calendar .rbc-date-cell {
-  padding: 0.5rem;
-  font-size: 0.875rem;
-}
-
-.service-booking-calendar .rbc-now {
-  color: hsl(var(--primary));
-  font-weight: 700;
-}
-
-/* Show more link */
-.service-booking-calendar .rbc-show-more {
-  color: hsl(var(--primary));
-  font-size: 0.75rem;
-  font-weight: 600;
-  margin-top: 0.25rem;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.service-booking-calendar .rbc-show-more:hover {
-  text-decoration: underline;
-}
-
-/* Agenda view */
-.service-booking-calendar .rbc-agenda-view {
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.5rem;
-  overflow: hidden;
-}
-
-.service-booking-calendar .rbc-agenda-table {
-  border-spacing: 0;
-}
-
-.service-booking-calendar .rbc-agenda-table tbody > tr > td {
-  padding: 0.75rem 1rem;
-  border-top: 1px solid hsl(var(--border));
-}
-
-.service-booking-calendar .rbc-agenda-date-cell,
-.service-booking-calendar .rbc-agenda-time-cell {
-  font-size: 0.875rem;
-  white-space: nowrap;
-}
-
-.service-booking-calendar .rbc-agenda-event-cell {
-  font-size: 0.875rem;
-}
-
-/* Week/Day view */
-.service-booking-calendar .rbc-time-view {
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.5rem;
-  overflow: hidden;
-}
-
-.service-booking-calendar .rbc-time-header {
-  border-bottom: 2px solid hsl(var(--border));
-}
-
-.service-booking-calendar .rbc-time-content {
-  border-top: 1px solid hsl(var(--border));
-}
-
-/* Responsive */
+/* Responsive amélioré */
 @media (max-width: 768px) {
-  .service-booking-calendar .rbc-toolbar {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .service-booking-calendar .rbc-toolbar > * {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .service-booking-calendar .rbc-header {
+  .rbc-calendar-service {
     font-size: 0.75rem;
-    padding: 0.5rem 0.25rem;
   }
 
-  .service-booking-calendar .rbc-event {
-    font-size: 0.75rem;
+  .rbc-calendar-service .rbc-event {
+    font-size: 0.7rem;
     padding: 2px 4px;
   }
 
-  .service-booking-calendar .rbc-time-gutter {
-    font-size: 0.625rem;
-  }
-
-  .service-booking-calendar .rbc-label {
-    padding: 0 0.25rem;
+  .rbc-calendar-service .rbc-time-slot {
+    min-height: 30px;
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .service-booking-calendar .rbc-header {
-    background-color: hsl(var(--muted) / 0.5);
-  }
-
-  .service-booking-calendar .rbc-off-range-bg {
-    background-color: hsl(var(--muted) / 0.2);
-  }
-
-  .service-booking-calendar .rbc-today {
-    background-color: hsl(var(--accent) / 0.3);
-  }
-}
-
-/* Animations */
-.service-booking-calendar .rbc-event {
-  animation: fadeIn 0.2s ease-in-out;
-}
-
+/* Animation pour les nouveaux événements */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: translateY(-5px);
   }
   to {
     opacity: 1;
@@ -285,22 +85,43 @@
   }
 }
 
-/* Scrollbar */
-.service-booking-calendar .rbc-time-content::-webkit-scrollbar {
-  width: 8px;
+.rbc-calendar-service .rbc-event {
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-.service-booking-calendar .rbc-time-content::-webkit-scrollbar-track {
-  background: hsl(var(--muted) / 0.3);
-  border-radius: 4px;
+/* Amélioration de la toolbar */
+.rbc-calendar-service .rbc-toolbar {
+  padding: 1rem 0;
 }
 
-.service-booking-calendar .rbc-time-content::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
-  border-radius: 4px;
+.rbc-calendar-service .rbc-toolbar button {
+  transition: all 0.2s ease-in-out;
 }
 
-.service-booking-calendar .rbc-time-content::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
+.rbc-calendar-service .rbc-toolbar button:hover {
+  transform: translateY(-1px);
 }
 
+/* Styles pour les vues différentes */
+.rbc-calendar-service .rbc-month-view {
+  border-radius: 8px;
+}
+
+.rbc-calendar-service .rbc-time-view {
+  border-radius: 8px;
+}
+
+.rbc-calendar-service .rbc-day-view {
+  border-radius: 8px;
+}
+
+/* Amélioration de l'accessibilité */
+.rbc-calendar-service .rbc-event:focus {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+.rbc-calendar-service .rbc-time-slot:focus {
+  outline: 2px solid #8b5cf6;
+  outline-offset: -2px;
+}

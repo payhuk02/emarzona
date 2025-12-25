@@ -148,6 +148,7 @@ export const FavoritesTab = () => {
                 className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={() => removeFavorite.mutate(product.id)}
                 disabled={removeFavorite.isPending}
+                aria-label={`Retirer ${product.name} des favoris`}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

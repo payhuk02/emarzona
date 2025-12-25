@@ -1,7 +1,7 @@
 /**
  * Product SEO Form - Shared Component
  * Date: 28 octobre 2025
- * 
+ *
  * Formulaire SEO réutilisable pour tous types de produits
  * (Digital, Physical, Service, Course)
  */
@@ -11,6 +11,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { ArtistFormField } from '../artist/ArtistFormField';
+import { getFieldHelpHint, formatHelpHint } from '@/lib/artist-product-help-hints';
+import { validateLength, validateGenericURL } from '@/lib/artist-product-validators';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -38,7 +41,7 @@ interface ProductSEOFormProps {
   productName: string;
   productDescription?: string;
   productPrice?: number;
-  data: Partial<SEOData>;
+  data?: Partial<SEOData>;
   onUpdate: (data: Partial<SEOData>) => void;
 }
 
@@ -46,7 +49,7 @@ export const ProductSEOForm = ({
   productName,
   productDescription,
   productPrice,
-  data,
+  data = {},
   onUpdate,
 }: ProductSEOFormProps) => {
   const [seoScore, setSeoScore] = useState(0);
@@ -110,20 +113,20 @@ export const ProductSEOForm = ({
 
   const autoFillFromProduct = () => {
     const updates: Partial<SEOData> = {};
-    
+
     if (!data.meta_title && productName) {
       updates.meta_title = `${productName} - Achetez maintenant`;
     }
-    
+
     if (!data.meta_description && productDescription) {
       const desc = productDescription.replace(/<[^>]*>/g, '').substring(0, 155);
       updates.meta_description = `${desc}...`;
     }
-    
+
     if (!data.og_title) {
       updates.og_title = productName;
     }
-    
+
     if (!data.og_description && productDescription) {
       const desc = productDescription.replace(/<[^>]*>/g, '').substring(0, 200);
       updates.og_description = desc;
@@ -142,14 +145,16 @@ export const ProductSEOForm = ({
               <TrendingUp className="h-5 w-5 text-primary" />
               <div>
                 <CardTitle>Score SEO</CardTitle>
-                <CardDescription>Optimisez votre visibilité sur les moteurs de recherche</CardDescription>
+                <CardDescription>
+                  Optimisez votre visibilité sur les moteurs de recherche
+                </CardDescription>
               </div>
             </div>
             <div className="text-center">
-              <div className={`text-4xl font-bold ${getSeoScoreColor()}`}>
-                {seoScore}
-              </div>
-              <Badge variant={seoScore >= 80 ? 'default' : seoScore >= 50 ? 'secondary' : 'destructive'}>
+              <div className={`text-4xl font-bold ${getSeoScoreColor()}`}>{seoScore}</div>
+              <Badge
+                variant={seoScore >= 80 ? 'default' : seoScore >= 50 ? 'secondary' : 'destructive'}
+              >
                 {getSeoScoreLabel()}
               </Badge>
             </div>
@@ -160,10 +165,7 @@ export const ProductSEOForm = ({
           <div className="mt-4 flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Complétez tous les champs pour 100%</span>
             {seoScore < 80 && (
-              <button
-                onClick={autoFillFromProduct}
-                className="text-primary hover:underline"
-              >
+              <button onClick={autoFillFromProduct} className="text-primary hover:underline">
                 Remplir automatiquement
               </button>
             )}
@@ -184,81 +186,82 @@ export const ProductSEOForm = ({
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Meta Title */}
-          <div className="space-y-2">
-            <Label htmlFor="meta_title">
-              Titre SEO <span className="text-muted-foreground">(30-60 caractères)</span>
-            </Label>
-            <Input
-              id="meta_title"
-              value={data.meta_title || ''}
-              onChange={(e) => onUpdate({ ...data, meta_title: e.target.value })}
-              placeholder={`${productName} - Achetez maintenant`}
-              maxLength={70}
-            />
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">
-                {data.meta_title?.length || 0}/60 caractères
-              </span>
-              {data.meta_title && data.meta_title.length >= 30 && data.meta_title.length <= 60 ? (
-                <span className="text-green-600 flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Longueur optimale
-                </span>
-              ) : (
-                <span className="text-yellow-600 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {data.meta_title && data.meta_title.length > 60 ? 'Trop long' : 'Ajoutez plus de détails'}
-                </span>
-              )}
-            </div>
-          </div>
+          <ArtistFormField
+            id="meta_title"
+            label="Titre SEO (30-60 caractères)"
+            value={data.meta_title || ''}
+            onChange={value => onUpdate({ ...data, meta_title: value as string })}
+            placeholder={`${productName} - Achetez maintenant`}
+            maxLength={70}
+            showCharCount
+            showHelpIcon
+            helpHint={formatHelpHint(
+              getFieldHelpHint('meta_title') || {
+                hint: 'Titre optimisé pour les moteurs de recherche (30-60 caractères recommandés)',
+              }
+            )}
+            validationFn={value => {
+              const strValue = value as string;
+              if (!strValue || strValue.trim().length === 0) return null; // Optionnel
+              if (strValue.length > 70) {
+                return 'Le titre SEO ne peut pas dépasser 70 caractères';
+              }
+              if (strValue.length < 30) {
+                return 'Le titre SEO devrait contenir au moins 30 caractères pour un meilleur référencement';
+              }
+              return null;
+            }}
+          />
 
           {/* Meta Description */}
-          <div className="space-y-2">
-            <Label htmlFor="meta_description">
-              Description SEO <span className="text-muted-foreground">(120-160 caractères)</span>
-            </Label>
-            <Textarea
-              id="meta_description"
-              value={data.meta_description || ''}
-              onChange={(e) => onUpdate({ ...data, meta_description: e.target.value })}
-              placeholder="Décrivez votre produit de manière attractive pour augmenter le taux de clic..."
-              rows={3}
-              maxLength={200}
-            />
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">
-                {data.meta_description?.length || 0}/160 caractères
-              </span>
-              {data.meta_description && data.meta_description.length >= 120 && data.meta_description.length <= 160 ? (
-                <span className="text-green-600 flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Longueur optimale
-                </span>
-              ) : (
-                <span className="text-yellow-600 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {data.meta_description && data.meta_description.length > 160 ? 'Trop long' : 'Ajoutez plus de détails'}
-                </span>
-              )}
-            </div>
-          </div>
+          <ArtistFormField
+            id="meta_description"
+            label="Description SEO (120-160 caractères)"
+            value={data.meta_description || ''}
+            onChange={value => onUpdate({ ...data, meta_description: value as string })}
+            placeholder="Décrivez votre produit de manière attractive pour augmenter le taux de clic..."
+            multiline
+            rows={3}
+            maxLength={200}
+            showCharCount
+            showHelpIcon
+            helpHint={formatHelpHint(
+              getFieldHelpHint('meta_description') || {
+                hint: 'Description optimisée pour les moteurs de recherche (120-160 caractères recommandés)',
+              }
+            )}
+            validationFn={value => {
+              const strValue = value as string;
+              if (!strValue || strValue.trim().length === 0) return null; // Optionnel
+              if (strValue.length > 200) {
+                return 'La description SEO ne peut pas dépasser 200 caractères';
+              }
+              if (strValue.length < 120) {
+                return 'La description SEO devrait contenir au moins 120 caractères pour un meilleur référencement';
+              }
+              return null;
+            }}
+          />
 
           {/* Meta Keywords */}
-          <div className="space-y-2">
-            <Label htmlFor="meta_keywords">
-              Mots-clés <span className="text-muted-foreground">(séparés par des virgules)</span>
-            </Label>
-            <Input
-              id="meta_keywords"
-              value={data.meta_keywords || ''}
-              onChange={(e) => onUpdate({ ...data, meta_keywords: e.target.value })}
-              placeholder="produit digital, ebook, formation, afrique"
-            />
-            <p className="text-xs text-muted-foreground">
-              3-5 mots-clés pertinents pour améliorer le référencement
-            </p>
-          </div>
+          <ArtistFormField
+            id="meta_keywords"
+            label="Mots-clés (séparés par des virgules)"
+            value={data.meta_keywords || ''}
+            onChange={value => onUpdate({ ...data, meta_keywords: value as string })}
+            placeholder="produit digital, ebook, formation, afrique"
+            maxLength={255}
+            showCharCount
+            showHelpIcon
+            helpHint={formatHelpHint(
+              getFieldHelpHint('meta_keywords') || {
+                hint: 'Mots-clés pertinents séparés par des virgules (3-5 mots-clés recommandés)',
+              }
+            )}
+            validationFn={value => {
+              return validateLength(value as string, 0, 255, 'Les mots-clés SEO');
+            }}
+          />
 
           {/* Preview Google Search */}
           <Alert>
@@ -269,11 +272,10 @@ export const ProductSEOForm = ({
                 <div className="text-blue-600 text-lg font-medium">
                   {data.meta_title || productName || 'Titre du produit'}
                 </div>
-                <div className="text-green-700 text-sm">
-                  payhuk.com › produits › ...
-                </div>
+                <div className="text-green-700 text-sm">emarzona.com › produits › ...</div>
                 <div className="text-sm text-muted-foreground mt-1">
-                  {data.meta_description || 'Description du produit qui apparaîtra dans les résultats de recherche...'}
+                  {data.meta_description ||
+                    'Description du produit qui apparaîtra dans les résultats de recherche...'}
                 </div>
               </div>
             </AlertDescription>
@@ -294,44 +296,67 @@ export const ProductSEOForm = ({
         </CardHeader>
         <CardContent className="space-y-4">
           {/* OG Title */}
-          <div className="space-y-2">
-            <Label htmlFor="og_title">Titre pour réseaux sociaux</Label>
-            <Input
-              id="og_title"
-              value={data.og_title || ''}
-              onChange={(e) => onUpdate({ ...data, og_title: e.target.value })}
-              placeholder={productName || 'Titre du produit'}
-            />
-          </div>
+          <ArtistFormField
+            id="og_title"
+            label="Titre pour réseaux sociaux"
+            value={data.og_title || ''}
+            onChange={value => onUpdate({ ...data, og_title: value as string })}
+            placeholder={productName || 'Titre du produit'}
+            maxLength={90}
+            showCharCount
+            showHelpIcon
+            helpHint={formatHelpHint(
+              getFieldHelpHint('og_title') || {
+                hint: 'Titre affiché lors du partage sur les réseaux sociaux',
+              }
+            )}
+            validationFn={value => {
+              return validateLength(value as string, 0, 90, 'Le titre Open Graph');
+            }}
+          />
 
           {/* OG Description */}
-          <div className="space-y-2">
-            <Label htmlFor="og_description">Description pour réseaux sociaux</Label>
-            <Textarea
-              id="og_description"
-              value={data.og_description || ''}
-              onChange={(e) => onUpdate({ ...data, og_description: e.target.value })}
-              placeholder="Description attractive pour les partages sur les réseaux sociaux..."
-              rows={2}
-            />
-          </div>
+          <ArtistFormField
+            id="og_description"
+            label="Description pour réseaux sociaux"
+            value={data.og_description || ''}
+            onChange={value => onUpdate({ ...data, og_description: value as string })}
+            placeholder="Description attractive pour les partages sur les réseaux sociaux..."
+            multiline
+            rows={2}
+            maxLength={200}
+            showCharCount
+            showHelpIcon
+            helpHint={formatHelpHint(
+              getFieldHelpHint('og_description') || {
+                hint: 'Description affichée lors du partage sur les réseaux sociaux',
+              }
+            )}
+            validationFn={value => {
+              return validateLength(value as string, 0, 200, 'La description Open Graph');
+            }}
+          />
 
           {/* OG Image */}
-          <div className="space-y-2">
-            <Label htmlFor="og_image">
-              Image Open Graph <span className="text-muted-foreground">(Recommandé: 1200x630px)</span>
-            </Label>
-            <Input
-              id="og_image"
-              value={data.og_image || ''}
-              onChange={(e) => onUpdate({ ...data, og_image: e.target.value })}
-              placeholder="https://example.com/image.jpg"
-            />
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <ImageIcon className="h-3 w-3" />
-              <span>Image affichée lors du partage (1200x630px pour un résultat optimal)</span>
-            </div>
-          </div>
+          <ArtistFormField
+            id="og_image"
+            label="Image Open Graph (Recommandé: 1200x630px)"
+            value={data.og_image || ''}
+            onChange={value => onUpdate({ ...data, og_image: value as string })}
+            type="url"
+            placeholder="https://example.com/image.jpg"
+            maxLength={500}
+            showHelpIcon
+            helpHint={formatHelpHint(
+              getFieldHelpHint('og_image') || {
+                hint: "URL de l'image affichée lors du partage sur les réseaux sociaux (1200x630px recommandé)",
+              }
+            )}
+            validationFn={value => {
+              if (!value || (value as string).trim().length === 0) return null;
+              return validateGenericURL(value as string);
+            }}
+          />
 
           {/* Preview Social */}
           <Alert>
@@ -341,11 +366,12 @@ export const ProductSEOForm = ({
               <div className="mt-2 border rounded overflow-hidden">
                 {data.og_image && (
                   <div className="bg-muted h-32 flex items-center justify-center text-muted-foreground text-sm">
-                    <img 
-                      src={data.og_image} 
-                      alt="Preview" 
+                    <img
+                      src={data.og_image}
+                      alt="Preview"
                       className="w-full h-full object-cover"
-                      onError={(e) => {
+                      loading="lazy"
+                      onError={e => {
                         e.currentTarget.style.display = 'none';
                       }}
                     />
@@ -358,9 +384,7 @@ export const ProductSEOForm = ({
                   <div className="text-xs text-muted-foreground mt-1">
                     {data.og_description || 'Description du produit pour les réseaux sociaux'}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-2">
-                    payhuk.com
-                  </div>
+                  <div className="text-xs text-muted-foreground mt-2">emarzona.com</div>
                 </div>
               </div>
             </AlertDescription>
@@ -387,4 +411,3 @@ export const ProductSEOForm = ({
     </div>
   );
 };
-

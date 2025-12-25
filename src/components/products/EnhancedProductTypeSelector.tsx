@@ -33,6 +33,11 @@ import {
   ArrowRight,
   Info,
   Keyboard,
+  Palette,
+  Music,
+  BookOpen,
+  Brush,
+  Video,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
@@ -139,6 +144,27 @@ const PRODUCT_TYPES: ProductType[] = [
     buttonClass: 'bg-purple-500 hover:bg-purple-600 focus:ring-purple-500',
     checkIconClass: 'text-purple-500',
   },
+  {
+    value: 'artist',
+    label: 'Œuvre d\'Artiste',
+    icon: Palette,
+    description: 'Livres, musique, arts visuels, designs, créations artistiques',
+    features: [
+      'Portfolio artiste',
+      'Certificats d\'authenticité',
+      'Éditions limitées',
+      'Galerie virtuelle',
+    ],
+    color: 'purple',
+    gradient: 'from-pink-500 to-rose-500',
+    popular: true,
+    recommended: true,
+    examples: ['Livre', 'Album', 'Peinture', 'Design', 'Photo'],
+    bgColorClass: 'bg-pink-500/20 group-hover:bg-pink-500/30',
+    iconTextClass: 'text-pink-500',
+    buttonClass: 'bg-pink-500 hover:bg-pink-600 focus:ring-pink-500',
+    checkIconClass: 'text-pink-500',
+  },
 ];
 
 interface EnhancedProductTypeSelectorProps {
@@ -172,6 +198,7 @@ export const EnhancedProductTypeSelector = ({
     course: 0,
     physical: 0,
     service: 0,
+    artist: 0,
     total: 0,
   });
   const [hoveredType, setHoveredType] = useState<string | null>(null);
@@ -204,6 +231,7 @@ export const EnhancedProductTypeSelector = ({
           course: 0,
           physical: 0,
           service: 0,
+          artist: 0,
           total: data?.length || 0,
         };
 
@@ -217,8 +245,7 @@ export const EnhancedProductTypeSelector = ({
         setStats(newStats);
         logger.info('Statistiques produits chargées', { stats: newStats });
       } catch (error) {
-        logger.error('Erreur lors du chargement des statistiques', error);
-        console.error('Failed to load product stats:', error);
+        logger.error('Erreur lors du chargement des statistiques', { error });
       } finally {
         setLoading(false);
       }

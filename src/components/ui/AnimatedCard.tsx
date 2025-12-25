@@ -4,6 +4,7 @@
 
 import React, { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { LazyImage } from './lazy-image';
 
 interface AnimatedCardProps {
   children: ReactNode;
@@ -13,7 +14,7 @@ interface AnimatedCardProps {
   onClick?: () => void;
 }
 
-export const AnimatedCard: React.FC<AnimatedCardProps> = ({
+const AnimatedCardComponent: React.FC<AnimatedCardProps> = ({
   children,
   className,
   hoverEffect = 'lift',
@@ -34,13 +35,26 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
         hoverClasses[hoverEffect],
         className
       )}
-      style={{ animationDelay: `${delay}ms` }}
+      style={{ animationDelay: `${delay}ms`, willChange: 'transform' }}
       onClick={onClick}
     >
       {children}
     </div>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const AnimatedCard = React.memo(AnimatedCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.children === nextProps.children &&
+    prevProps.className === nextProps.className &&
+    prevProps.hoverEffect === nextProps.hoverEffect &&
+    prevProps.delay === nextProps.delay &&
+    prevProps.onClick === nextProps.onClick
+  );
+});
+
+AnimatedCard.displayName = 'AnimatedCard';
 
 interface AnimatedButtonProps {
   children: ReactNode;
@@ -100,7 +114,12 @@ export const AnimatedImage: React.FC<AnimatedImageProps> = ({
 }) => {
   return (
     <div className={cn(zoom && 'image-zoom', className)}>
-      <img src={src} alt={alt} className="w-full h-full object-cover" />
+      <LazyImage
+        src={src}
+        alt={alt}
+        className="w-full h-full object-cover"
+        skeletonClassName="w-full h-full"
+      />
     </div>
   );
 };

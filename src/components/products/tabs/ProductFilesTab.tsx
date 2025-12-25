@@ -28,6 +28,7 @@ import {
   Unlock
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -128,7 +129,7 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
       });
 
     } catch (error: any) {
-      console.error('Upload error:', error);
+      logger.error('Upload error', { error, productId });
       toast({
         title: "Erreur de téléchargement",
         description: error.message || "Une erreur est survenue lors du téléchargement.",

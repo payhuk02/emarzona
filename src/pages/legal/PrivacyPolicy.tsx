@@ -45,7 +45,7 @@ export default function PrivacyPolicy() {
           
           {/* Introduction */}
           <p className="lead">
-            Chez Payhuk, nous prenons très au sérieux la protection de vos données personnelles. 
+            Chez Emarzona, nous prenons très au sérieux la protection de vos données personnelles. 
             Cette politique de confidentialité explique quelles données nous collectons, 
             comment nous les utilisons et quels sont vos droits.
           </p>
@@ -56,8 +56,8 @@ export default function PrivacyPolicy() {
             Le responsable du traitement de vos données personnelles est :
           </p>
           <ul>
-            <li><strong>Nom :</strong> Payhuk</li>
-            <li><strong>Email :</strong> privacy@payhuk.com</li>
+            <li><strong>Nom :</strong> Emarzona</li>
+            <li><strong>Email :</strong> privacy@emarzona.com</li>
             <li><strong>Adresse :</strong> [Votre adresse]</li>
           </ul>
 
@@ -185,7 +185,7 @@ export default function PrivacyPolicy() {
           </p>
           <ol>
             <li>Via votre espace personnel : Paramètres → Confidentialité & Données</li>
-            <li>Par email : privacy@payhuk.com</li>
+            <li>Par email : privacy@emarzona.com</li>
             <li>Par courrier : [Votre adresse]</li>
           </ol>
           <p className="text-sm text-gray-600">
@@ -228,8 +228,8 @@ export default function PrivacyPolicy() {
             Pour toute question concernant cette politique ou vos données personnelles :
           </p>
           <ul>
-            <li><strong>Email DPO :</strong> dpo@payhuk.com</li>
-            <li><strong>Email général :</strong> privacy@payhuk.com</li>
+            <li><strong>Email DPO :</strong> dpo@emarzona.com</li>
+            <li><strong>Email général :</strong> privacy@emarzona.com</li>
             <li><strong>Courrier :</strong> [Votre adresse]</li>
           </ul>
 

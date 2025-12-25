@@ -28,12 +28,30 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useDemandForecasts, useCalculateForecast, useReorderRecommendations, useGenerateReorderRecommendations, useUpdateRecommendationStatus } from '@/hooks/physical/useDemandForecasting';
+import { useDemandForecasts, useCalculateForecast, useReorderRecommendations, useGenerateReorderRecommendations, useUpdateRecommendationStatus, type DemandForecast, type ReorderRecommendation } from '@/hooks/physical/useDemandForecasting';
 import { useStore } from '@/hooks/useStore';
-import { TrendingUp, TrendingDown, AlertTriangle, Package, Calculator, RefreshCw } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertTriangle, Package, Calculator, RefreshCw, CheckCircle2, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+
+// Types étendus avec relation product
+interface DemandForecastWithProduct extends DemandForecast {
+  product?: {
+    id: string;
+    name: string;
+    image_url?: string | null;
+  } | null;
+}
+
+interface ReorderRecommendationWithProduct extends ReorderRecommendation {
+  product?: {
+    id: string;
+    name: string;
+    image_url?: string | null;
+  } | null;
+}
 
 export default function DemandForecastingDashboard() {
   const { store } = useStore();
@@ -65,10 +83,11 @@ export default function DemandForecastingDashboard() {
       });
       setIsForecastDialogOpen(false);
       setSelectedProductId('');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de calculer la prévision',
+        description: errorMessage || 'Impossible de calculer la prévision',
         variant: 'destructive',
       });
     }
@@ -79,10 +98,11 @@ export default function DemandForecastingDashboard() {
 
     try {
       await generateRecommendations.mutateAsync(store.id);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de générer les recommandations',
+        description: errorMessage || 'Impossible de générer les recommandations',
         variant: 'destructive',
       });
     }
@@ -95,125 +115,156 @@ export default function DemandForecastingDashboard() {
     });
   };
 
+  // Animations
+  const statsRef = useScrollAnimation<HTMLDivElement>();
+  const actionsRef = useScrollAnimation<HTMLDivElement>();
+  const forecastsRef = useScrollAnimation<HTMLDivElement>();
+
   if (forecastsLoading || recommendationsLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-full" />
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <Skeleton className="h-10 flex-1" />
+          <Skeleton className="h-10 w-full sm:w-auto" />
+        </div>
+        <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
         <Skeleton className="h-64 w-full" />
       </div>
     );
   }
 
-  const urgentRecommendations = recommendations?.filter(r => r.priority === 'urgent' && r.status === 'pending') || [];
-  const pendingRecommendations = recommendations?.filter(r => r.status === 'pending') || [];
+  const urgentRecommendations = (recommendations?.filter(r => r.priority === 'urgent' && r.status === 'pending') || []) as ReorderRecommendationWithProduct[];
+  const pendingRecommendations = (recommendations?.filter(r => r.status === 'pending') || []) as ReorderRecommendationWithProduct[];
+  const forecastsWithProducts = (forecasts || []) as DemandForecastWithProduct[];
+  const avgConfidence = forecastsWithProducts.length > 0
+    ? (forecastsWithProducts.reduce((sum, f) => sum + f.confidence_level, 0) / forecastsWithProducts.length * 100).toFixed(0)
+    : 0;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Prévisions de Demande</h2>
-          <p className="text-muted-foreground">
-            Analysez les tendances et prévoyez la demande future
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button onClick={() => setIsForecastDialogOpen(true)} variant="outline">
-            <Calculator className="mr-2 h-4 w-4" />
-            Calculer prévision
-          </Button>
-          <Button onClick={handleGenerateRecommendations} disabled={generateRecommendations.isPending}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${generateRecommendations.isPending ? 'animate-spin' : ''}`} />
-            Générer recommandations
-          </Button>
-        </div>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Action Buttons */}
+      <div
+        ref={actionsRef}
+        className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center animate-in fade-in slide-in-from-bottom-4 duration-700"
+      >
+        <Button 
+          onClick={() => setIsForecastDialogOpen(true)} 
+          variant="outline"
+          className="h-10 sm:h-11 flex-1 sm:flex-none"
+        >
+          <Calculator className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Calculer prévision</span>
+          <span className="sm:hidden">Calculer</span>
+        </Button>
+        <Button 
+          onClick={handleGenerateRecommendations} 
+          disabled={generateRecommendations.isPending}
+          className="h-10 sm:h-11 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white flex-1 sm:flex-none"
+        >
+          <RefreshCw className={`mr-2 h-4 w-4 ${generateRecommendations.isPending ? 'animate-spin' : ''}`} />
+          <span className="hidden sm:inline">Générer recommandations</span>
+          <span className="sm:hidden">Recommandations</span>
+        </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Prévisions actives
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{forecasts?.length || 0}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Recommandations urgentes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">{urgentRecommendations.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Recommandations en attente
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingRecommendations.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Confiance moyenne
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {forecasts && forecasts.length > 0
-                ? `${(forecasts.reduce((sum, f) => sum + f.confidence_level, 0) / forecasts.length * 100).toFixed(0)}%`
-                : '0%'}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats Cards - Responsive & Animated */}
+      <div
+        ref={statsRef}
+        className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
+      >
+        {[
+          {
+            label: 'Prévisions actives',
+            value: forecastsWithProducts.length,
+            icon: TrendingUp,
+            color: 'from-purple-600 to-pink-600',
+          },
+          {
+            label: 'Recommandations urgentes',
+            value: urgentRecommendations.length,
+            icon: AlertTriangle,
+            color: 'from-red-600 to-rose-600',
+          },
+          {
+            label: 'Recommandations en attente',
+            value: pendingRecommendations.length,
+            icon: Clock,
+            color: 'from-yellow-600 to-orange-600',
+          },
+          {
+            label: 'Confiance moyenne',
+            value: `${avgConfidence}%`,
+            icon: CheckCircle2,
+            color: 'from-green-600 to-emerald-600',
+          },
+        ].map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card
+              key={stat.label}
+              className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
+                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
+                  <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  {stat.label}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 pt-0">
+                <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  {stat.value}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Recommandations Urgentes */}
       {urgentRecommendations.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-red-500/10 to-rose-500/5 backdrop-blur-sm border border-red-500/20">
+                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 dark:text-red-400" />
+              </div>
               Recommandations Urgentes
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               {urgentRecommendations.length} recommandation{urgentRecommendations.length > 1 ? 's' : ''} nécessitant une attention immédiate
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
+          <CardContent className="p-4 sm:p-6 pt-0">
+            <div className="rounded-md border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Produit</TableHead>
-                    <TableHead>Stock actuel</TableHead>
-                    <TableHead>Demande prévue</TableHead>
-                    <TableHead>Jours avant rupture</TableHead>
-                    <TableHead>Quantité recommandée</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Produit</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Stock actuel</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Demande prévue</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Jours avant rupture</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Quantité recommandée</TableHead>
+                    <TableHead className="text-right text-xs sm:text-sm">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {urgentRecommendations.map((rec) => (
                     <TableRow key={rec.id}>
-                      <TableCell>
-                        {(rec.product as any)?.name || 'N/A'}
+                      <TableCell className="text-xs sm:text-sm">
+                        {rec.product?.name || 'N/A'}
                       </TableCell>
-                      <TableCell>
-                        <Badge variant={rec.current_stock <= 5 ? 'destructive' : 'secondary'}>
+                      <TableCell className="text-xs sm:text-sm">
+                        <Badge variant={rec.current_stock <= 5 ? 'destructive' : 'secondary'} className="text-xs">
                           {rec.current_stock}
                         </Badge>
                       </TableCell>
-                      <TableCell>{rec.forecasted_demand}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-xs sm:text-sm">{rec.forecasted_demand}</TableCell>
+                      <TableCell className="text-xs sm:text-sm">
                         {rec.days_until_stockout !== null && rec.days_until_stockout !== undefined ? (
                           <div className="flex items-center gap-1 text-destructive">
                             <AlertTriangle className="h-3 w-3" />
@@ -223,15 +274,15 @@ export default function DemandForecastingDashboard() {
                           <span className="text-muted-foreground">-</span>
                         )}
                       </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{rec.recommended_quantity}</Badge>
+                      <TableCell className="text-xs sm:text-sm">
+                        <Badge variant="outline" className="text-xs">{rec.recommended_quantity}</Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <Select
                           value={rec.status}
                           onValueChange={(value) => handleUpdateRecommendationStatus(rec.id, value)}
                         >
-                          <SelectTrigger className="w-32">
+                          <SelectTrigger className="w-28 sm:w-32 h-8 sm:h-10 text-xs sm:text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -252,115 +303,128 @@ export default function DemandForecastingDashboard() {
       )}
 
       {/* Prévisions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Prévisions de Demande</CardTitle>
-          <CardDescription>
-            {forecasts?.length || 0} prévision{forecasts && forecasts.length > 1 ? 's' : ''} active{forecasts && forecasts.length > 1 ? 's' : ''}
+      <Card 
+        ref={forecastsRef}
+        className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700"
+      >
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500 dark:text-purple-400" />
+            </div>
+            Prévisions de Demande
+          </CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
+            {forecastsWithProducts.length} prévision{forecastsWithProducts.length > 1 ? 's' : ''} active{forecastsWithProducts.length > 1 ? 's' : ''}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Produit</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Période</TableHead>
-                  <TableHead>Quantité prévue</TableHead>
-                  <TableHead>Revenu prévu</TableHead>
-                  <TableHead>Confiance</TableHead>
-                  <TableHead>Méthode</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {!forecasts || forecasts.length === 0 ? (
+        <CardContent className="p-4 sm:p-6 pt-0">
+          {forecastsWithProducts.length === 0 ? (
+            <div className="text-center py-8 sm:py-12">
+              <TrendingUp className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-4 opacity-50" />
+              <p className="text-sm sm:text-base text-muted-foreground mb-2">
+                Aucune prévision disponible
+              </p>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Calculez une prévision pour commencer
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-md border overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground">
-                      Aucune prévision disponible
-                    </TableCell>
+                    <TableHead className="text-xs sm:text-sm">Produit</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Type</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Période</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Quantité prévue</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Revenu prévu</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Confiance</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Méthode</TableHead>
                   </TableRow>
-                ) : (
-                  forecasts.map((forecast) => (
+                </TableHeader>
+                <TableBody>
+                  {forecastsWithProducts.map((forecast) => (
                     <TableRow key={forecast.id}>
-                      <TableCell>
-                        {(forecast.product as any)?.name || 'N/A'}
+                      <TableCell className="text-xs sm:text-sm">
+                        {forecast.product?.name || 'N/A'}
                       </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{forecast.forecast_type}</Badge>
+                      <TableCell className="text-xs sm:text-sm">
+                        <Badge variant="secondary" className="text-xs">{forecast.forecast_type}</Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-xs sm:text-sm">
                         {format(new Date(forecast.forecast_period_start), 'dd MMM', { locale: fr })} - {' '}
                         {format(new Date(forecast.forecast_period_end), 'dd MMM yyyy', { locale: fr })}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-xs sm:text-sm">
                         <div className="flex items-center gap-1">
-                          <Package className="h-4 w-4 text-muted-foreground" />
+                          <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                           {forecast.forecasted_quantity}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-xs sm:text-sm">
                         {new Intl.NumberFormat('fr-FR', {
                           style: 'currency',
                           currency: 'XOF',
                         }).format(forecast.forecasted_revenue)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-xs sm:text-sm">
                         <div className="flex items-center gap-1">
                           {forecast.confidence_level >= 0.8 ? (
-                            <TrendingUp className="h-4 w-4 text-green-500" />
+                            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500" />
                           ) : (
-                            <TrendingDown className="h-4 w-4 text-yellow-500" />
+                            <TrendingDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-500" />
                           )}
-                          <span className="text-sm">
+                          <span className="text-xs sm:text-sm">
                             {(forecast.confidence_level * 100).toFixed(0)}%
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-xs sm:text-sm">
                         <Badge variant="outline" className="text-xs">
                           {forecast.forecast_method.replace('_', ' ')}
                         </Badge>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Dialog Calculate Forecast */}
       <Dialog open={isForecastDialogOpen} onOpenChange={setIsForecastDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Calculer une prévision</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-base sm:text-lg">Calculer une prévision</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">
               Calculez une prévision de demande pour un produit
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCalculateForecast}>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="product_id">ID Produit *</Label>
+                <Label htmlFor="product_id" className="text-xs sm:text-sm">ID Produit *</Label>
                 <Input
                   id="product_id"
                   value={selectedProductId}
                   onChange={(e) => setSelectedProductId(e.target.value)}
                   placeholder="UUID du produit"
                   required
+                  className="h-9 sm:h-10 text-xs sm:text-sm"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="forecast_type">Type de prévision *</Label>
+                  <Label htmlFor="forecast_type" className="text-xs sm:text-sm">Type de prévision *</Label>
                   <Select
                     value={forecastType}
-                    onValueChange={(value: any) => setForecastType(value)}
+                    onValueChange={(value: string) => setForecastType(value)}
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -371,13 +435,13 @@ export default function DemandForecastingDashboard() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="forecast_method">Méthode *</Label>
+                  <Label htmlFor="forecast_method" className="text-xs sm:text-sm">Méthode *</Label>
                   <Select
                     value={forecastMethod}
-                    onValueChange={(value: any) => setForecastMethod(value)}
+                    onValueChange={(value: string) => setForecastMethod(value)}
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -388,11 +452,20 @@ export default function DemandForecastingDashboard() {
                 </div>
               </div>
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsForecastDialogOpen(false)}>
+            <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsForecastDialogOpen(false)}
+                className="w-full sm:w-auto h-9 sm:h-10 text-xs sm:text-sm"
+              >
                 Annuler
               </Button>
-              <Button type="submit" disabled={calculateForecast.isPending}>
+              <Button 
+                type="submit" 
+                disabled={calculateForecast.isPending}
+                className="w-full sm:w-auto h-9 sm:h-10 text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+              >
                 {calculateForecast.isPending ? 'Calcul...' : 'Calculer'}
               </Button>
             </DialogFooter>

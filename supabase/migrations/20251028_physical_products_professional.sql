@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK PHYSICAL PRODUCTS SYSTEM - PROFESSIONAL GRADE
+-- EMARZONA PHYSICAL PRODUCTS SYSTEM - PROFESSIONAL GRADE
 -- Date: 28 Octobre 2025
 -- Inspiré de : Shopify, WooCommerce, BigCommerce
 -- Description: Système complet pour produits physiques haut de gamme

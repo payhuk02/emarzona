@@ -259,7 +259,7 @@ const MarketplaceDisplayTest = () => {
       <div className="max-w-7xl mx-auto">
         {/* En-tête de test */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-4">Test d'Affichage Marketplace - Payhula</h1>
+          <h1 className="text-3xl font-bold mb-4">Test d'Affichage Marketplace - Emarzona</h1>
           
           {/* Résultats des tests */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -334,7 +334,7 @@ const MarketplaceDisplayTest = () => {
           <h2 className="text-2xl font-semibold mb-4">Test Responsive</h2>
           <div className="space-y-4">
             <div className="p-4 bg-muted rounded-lg">
-              <h3 className="font-medium mb-2">Mobile (< 640px)</h3>
+              <h3 className="font-medium mb-2">Mobile (&lt; 640px)</h3>
               <p className="text-sm text-muted-foreground">1 produit par ligne, quasi-plein écran</p>
             </div>
             <div className="p-4 bg-muted rounded-lg">
@@ -342,7 +342,7 @@ const MarketplaceDisplayTest = () => {
               <p className="text-sm text-muted-foreground">2 produits par ligne</p>
             </div>
             <div className="p-4 bg-muted rounded-lg">
-              <h3 className="font-medium mb-2">Desktop (> 1024px)</h3>
+              <h3 className="font-medium mb-2">Desktop ({'>'} 1024px)</h3>
               <p className="text-sm text-muted-foreground">3 produits par ligne, format 16:9</p>
             </div>
           </div>

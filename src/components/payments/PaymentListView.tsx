@@ -1,3 +1,4 @@
+import React, { useMemo, useCallback } from "react";
 import { Payment } from "@/hooks/usePayments";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,7 +36,7 @@ interface PaymentListViewProps {
   onView: () => void;
 }
 
-const PaymentListView = ({
+const PaymentListViewComponent = ({
   payment,
   onEdit,
   onDelete,
@@ -43,15 +44,17 @@ const PaymentListView = ({
 }: PaymentListViewProps) => {
   const { toast } = useToast();
 
-  const formatDate = (dateString: string) => {
+  // Mémoriser la fonction de formatage de date
+  const formatDate = useCallback((dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
     });
-  };
+  }, []);
 
-  const getStatusBadge = (status: string) => {
+  // Mémoriser les configurations de status
+  const statusConfig = useMemo(() => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       pending: "secondary",
       completed: "default",
@@ -73,15 +76,20 @@ const PaymentListView = ({
       refunded: <RotateCcw className="h-3 w-3" />,
     };
 
+    return { variants, labels, icons };
+  }, []);
+
+  const getStatusBadge = useCallback((status: string) => {
     return (
-      <Badge variant={variants[status] || "default"} className="flex items-center gap-1">
-        {icons[status]}
-        {labels[status] || status}
+      <Badge variant={statusConfig.variants[status] || "default"} className="flex items-center gap-1">
+        {statusConfig.icons[status]}
+        {statusConfig.labels[status] || status}
       </Badge>
     );
-  };
+  }, [statusConfig]);
 
-  const getMethodLabel = (method: string) => {
+  // Mémoriser les configurations de méthodes de paiement
+  const methodConfig = useMemo(() => {
     const labels: Record<string, string> = {
       cash: "Espèces",
       card: "Carte bancaire",
@@ -90,10 +98,7 @@ const PaymentListView = ({
       check: "Chèque",
       other: "Autre",
     };
-    return labels[method] || method;
-  };
 
-  const getMethodIcon = (method: string) => {
     const icons: Record<string, React.ReactNode> = {
       cash: <DollarSign className="h-4 w-4" />,
       card: <CreditCard className="h-4 w-4" />,
@@ -102,10 +107,19 @@ const PaymentListView = ({
       check: <Receipt className="h-4 w-4" />,
       other: <CreditCard className="h-4 w-4" />,
     };
-    return icons[method] || <CreditCard className="h-4 w-4" />;
-  };
 
-  const handleCopyTransactionId = async () => {
+    return { labels, icons };
+  }, []);
+
+  const getMethodLabel = useCallback((method: string) => {
+    return methodConfig.labels[method] || method;
+  }, [methodConfig]);
+
+  const getMethodIcon = useCallback((method: string) => {
+    return methodConfig.icons[method] || <CreditCard className="h-4 w-4" />;
+  }, [methodConfig]);
+
+  const handleCopyTransactionId = useCallback(async () => {
     if (payment.transaction_id) {
       try {
         await navigator.clipboard.writeText(payment.transaction_id);
@@ -121,7 +135,12 @@ const PaymentListView = ({
         });
       }
     }
-  };
+  }, [payment.transaction_id, toast]);
+
+  // Mémoriser les valeurs formatées
+  const formattedDate = useMemo(() => formatDate(payment.created_at), [payment.created_at, formatDate]);
+  const formattedAmount = useMemo(() => `${payment.amount.toLocaleString()} ${payment.currency}`, [payment.amount, payment.currency]);
+  const transactionDisplay = useMemo(() => payment.transaction_id ? `#${payment.transaction_id.slice(-8)}` : 'Paiement', [payment.transaction_id]);
 
   return (
     <Card className="hover:shadow-md transition-shadow border-border/50">
@@ -140,7 +159,7 @@ const PaymentListView = ({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-semibold text-lg truncate hover:text-primary transition-colors">
-                    {payment.transaction_id ? `#${payment.transaction_id.slice(-8)}` : 'Paiement'}
+                    {transactionDisplay}
                   </h3>
                   {getStatusBadge(payment.status)}
                 </div>
@@ -160,7 +179,7 @@ const PaymentListView = ({
                   
                   <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    <span>{formatDate(payment.created_at)}</span>
+                    <span>{formattedDate}</span>
                   </div>
                 </div>
 
@@ -168,7 +187,7 @@ const PaymentListView = ({
                   <div className="flex items-center gap-1">
                     <DollarSign className="h-4 w-4 text-green-600" />
                     <span className="font-semibold text-green-600">
-                      {payment.amount.toLocaleString()} {payment.currency}
+                      {formattedAmount}
                     </span>
                   </div>
                   
@@ -198,7 +217,7 @@ const PaymentListView = ({
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" aria-label={`Actions pour le paiement ${payment.id || ''}`}>
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -228,5 +247,21 @@ const PaymentListView = ({
     </Card>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+const PaymentListView = React.memo(PaymentListViewComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.payment.id === nextProps.payment.id &&
+    prevProps.payment.status === nextProps.payment.status &&
+    prevProps.payment.amount === nextProps.payment.amount &&
+    prevProps.payment.created_at === nextProps.payment.created_at &&
+    prevProps.payment.updated_at === nextProps.payment.updated_at &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onView === nextProps.onView
+  );
+});
+
+PaymentListView.displayName = 'PaymentListView';
 
 export default PaymentListView;

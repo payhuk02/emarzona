@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dialog';
 import { useCreateOrUpdateProductCost, ProductCost } from '@/hooks/physical/useCostOptimization';
 import { useStore } from '@/hooks/useStore';
-import { DollarSign, Save } from 'lucide-react';
+import { DollarSign, Save } from '@/components/icons';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProductCostFormProps {

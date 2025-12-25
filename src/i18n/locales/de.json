@@ -21,8 +21,12 @@
     "refresh": "Aktualisieren",
     "yes": "Ja",
     "no": "Nein",
+    "show": "Anzeigen",
+    "hide": "Ausblenden",
     "manageAll": "Verwalten Sie alle Ihre",
-    "or": "Oder"
+    "or": "Oder",
+    "coverage": "Abdeckung",
+    "language": "Sprache"
   },
   "nav": {
     "home": "Startseite",
@@ -37,6 +41,52 @@
     "logout": "Abmelden",
     "login": "Anmelden",
     "signup": "Registrieren"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "products": "Produkte",
+    "orders": "Bestellungen",
+    "customers": "Kunden",
+    "marketing": "Marketing",
+    "emails": "E-Mails",
+    "analytics": "Analytik",
+    "settings": "Einstellungen",
+    "myProfile": "Mein Profil"
+  },
+  "wizard": {
+    "title": "Neues Digitales Produkt",
+    "subtitle": "Erstellen Sie ein professionelles digitales Produkt in 6 Schritten",
+    "back": "Zurück zur Typauswahl",
+    "backShort": "Zurück",
+    "step": "Schritt",
+    "of": "von",
+    "steps": "Formularschritte",
+    "autoSaving": "Automatisches Speichern...",
+    "previous": "Vorheriger Schritt",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "nextShort": "Weiter",
+    "saveDraft": "Als Entwurf speichern",
+    "draft": "Entwurf",
+    "publish": "Produkt veröffentlichen",
+    "publishShort": "Veröffentlichen",
+    "publishing": "Veröffentlichen...",
+    "publishingShort": "Ver...",
+    "shortcuts": {
+      "save": "Entwurf",
+      "next": "Weiter",
+      "prev": "Zurück"
+    },
+    "seo": {
+      "faq": {
+        "description": "Optimieren Sie Ihr SEO und fügen Sie Antworten auf häufig gestellte Fragen hinzu"
+      }
+    },
+    "errors": {
+      "title": "Fehler",
+      "requiredFields": "Bitte füllen Sie alle Pflichtfelder aus",
+      "noFiles": "Bitte fügen Sie einen Hauptlink für Ihr Produkt hinzu"
+    }
   },
   "auth": {
     "welcome": "Willkommen",
@@ -92,7 +142,11 @@
       "button": "Link zum Zurücksetzen senden",
       "success": "E-Mail zum Zurücksetzen gesendet!",
       "error": "Fehler beim Senden der E-Mail"
-    }
+    },
+    "signOut": "Abmelden",
+    "signOutSuccess": "Erfolgreich abgemeldet",
+    "signOutSuccessDescription": "Sie wurden erfolgreich abgemeldet.",
+    "signOutError": "Beim Abmelden ist ein Fehler aufgetreten."
   },
   "marketplace": {
     "title": "Marktplatz",
@@ -156,7 +210,7 @@
       "community": "Aktive Community"
     },
     "hero": {
-      "title": "Payhuk Marketplace",
+      "title": "Emarzona Marketplace",
       "subtitle": "Entdecken Sie Tausende von digitalen Produkten: Kurse, E-Books, Vorlagen, Software und mehr.",
       "tagline": "Schließen Sie sich der digitalen Handelsrevolution in Afrika an",
       "skipToMain": "Zum Hauptinhalt springen"
@@ -178,6 +232,52 @@
       "authRequired": "Authentifizierung erforderlich",
       "loginRequired": "Bitte melden Sie sich an, um einen Kauf zu tätigen",
       "paymentError": "Zahlungsfehler",
+      "categories": {
+        "all": "Für Sie",
+        "featured": "Beste Dienstleistungen",
+        "formation": "Ausbildung",
+        "cours": "Kurse",
+        "design": "Design & Grafik",
+        "marketing": "SEO & Marketing",
+        "developpement": "Webentwicklung",
+        "informatique": "IT",
+        "redaction": "Schreiben",
+        "video": "Video & Bearbeitung",
+        "audio": "Audio & Musik",
+        "photographie": "Fotografie",
+        "ebook": "E-Books & Leitfäden",
+        "template": "Vorlagen",
+        "logiciel": "Software",
+        "app": "Anwendungen",
+        "vetements": "T-Shirts & Kleidung",
+        "accessoires": "Zubehör",
+        "electronique": "Elektronik",
+        "traduction": "Übersetzung",
+        "coaching": "Coaching",
+        "consultation": "Beratung",
+        "conseil": "Unternehmensberatung",
+        "social": "Soziale Medien",
+        "maintenance": "Wartung",
+        "graphisme": "Grafik",
+        "animation": "Animation",
+        "illustration": "Illustration",
+        "uiUx": "UI/UX Design",
+        "data": "Daten & Analysen",
+        "cloud": "Cloud & DevOps",
+        "securite": "Sicherheit",
+        "podcast": "Podcast",
+        "voixOff": "Sprecher",
+        "maison": "Haus & Garten",
+        "sport": "Sport",
+        "beaute": "Schönheit",
+        "livres": "Bücher",
+        "jouets": "Spielzeug",
+        "alimentation": "Lebensmittel",
+        "artisanat": "Handwerk",
+        "scrollLeft": "Nach links scrollen",
+        "scrollRight": "Nach rechts scrollen",
+        "ariaLabel": "Dienstleistungskategorien"
+      },
       "paymentFailed": "Zahlung konnte nicht initialisiert werden",
       "purchaseOf": "Kauf von",
       "shareSuccess": "Erfolgreich geteilt",
@@ -214,7 +314,7 @@
     },
     "cta": {
       "title": "Bereit, Ihren Shop zu starten?",
-      "subtitle": "Schließen Sie sich Hunderten von Unternehmern an, die ihr Geschäft mit Payhuk ausbauen.",
+      "subtitle": "Schließen Sie sich Hunderten von Unternehmern an, die ihr Geschäft mit Emarzona ausbauen.",
       "startFree": "Kostenlos starten",
       "joinCommunity": "Der Community beitreten"
     }
@@ -238,7 +338,7 @@
       "multiCurrency": "Mehrwährung"
     },
     "contact": {
-      "title": "{storeName} kontaktieren",
+      "title": "{{storeName}} kontaktieren",
       "description": "Haben Sie eine Frage? Zögern Sie nicht, uns zu kontaktieren. Wir werden Ihnen so schnell wie möglich antworten.",
       "messageSent": "Nachricht gesendet!",
       "messageDesc": "Wir werden Ihnen so schnell wie möglich antworten."
@@ -251,44 +351,132 @@
       "noAbout": "Keine Informationen über diesen Shop",
       "noReviews": "Noch keine Bewertungen",
       "noContact": "Keine Kontaktinformationen verfügbar"
-    }
+    },
+    "noProducts": "Keine Produkte verfügbar"
   },
   "products": {
     "title": "Meine Produkte",
     "add": "Produkt hinzufügen",
-    "edit": "Bearbeiten",
-    "delete": "Löschen",
-    "view": "Ansehen",
-    "noProducts": "Keine Produkte",
-    "create": {
-      "title": "Produkt erstellen",
-      "name": "Produktname",
-      "description": "Beschreibung",
-      "price": "Preis",
-      "currency": "Währung",
-      "category": "Kategorie",
-      "images": "Bilder",
-      "uploadImage": "Bild hochladen",
-      "stock": "Bestand",
-      "sku": "SKU",
-      "tags": "Tags",
-      "success": "Produkt erfolgreich erstellt!",
-      "error": "Fehler beim Erstellen des Produkts"
+    "addNew": "Neues Produkt",
+    "refresh": "Aktualisieren",
+    "export": "CSV exportieren",
+    "import": "CSV importieren",
+    "loadingProducts": "Produkte werden geladen...",
+    "createStoreFirst": "Erstellen Sie zuerst Ihren Shop",
+    "createStoreDescription": "Sie müssen einen Shop erstellen, bevor Sie Produkte hinzufügen können",
+    "createMyStore": "Meinen Shop erstellen",
+    "viewMode": {
+      "grid": "Raster",
+      "list": "Liste"
     },
-    "details": {
-      "description": "Beschreibung",
-      "features": "Funktionen",
-      "reviews": "Bewertungen",
-      "seller": "Verkäufer",
-      "shipping": "Versand",
-      "returns": "Rücksendungen",
-      "addToCart": "In den Warenkorb",
-      "buyNow": "Jetzt kaufen",
-      "quantity": "Menge",
+    "stats": {
+      "total": "Produkte gesamt",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "outOfStock": "Nicht vorrätig"
+    },
+    "filters": {
+      "search": "Nach Produkt suchen...",
+      "category": "Kategorie",
+      "allCategories": "Alle Kategorien",
+      "type": "Typ",
+      "allTypes": "Alle Typen",
+      "status": "Status",
+      "allStatus": "Alle Status",
+      "stockStatus": "Bestand",
+      "allStock": "Aller Bestand",
+      "sortBy": "Sortieren nach",
+      "recent": "Neueste",
+      "oldest": "Älteste",
+      "nameAsc": "Name (A-Z)",
+      "nameDesc": "Name (Z-A)",
+      "priceAsc": "Preis aufsteigend",
+      "priceDesc": "Preis absteigend",
+      "stockAsc": "Bestand aufsteigend",
+      "stockDesc": "Bestand absteigend"
+    },
+    "status": {
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "draft": "Entwurf",
+      "published": "Veröffentlicht"
+    },
+    "stockStatus": {
       "inStock": "Auf Lager",
-      "outOfStock": "Nicht vorrätig",
-      "price": "Preis"
-    }
+      "lowStock": "Niedriger Bestand",
+      "outOfStock": "Nicht vorrätig"
+    },
+    "types": {
+      "digital": "Digital",
+      "physical": "Physisch",
+      "service": "Dienstleistung"
+    },
+    "actions": {
+      "edit": "Bearbeiten",
+      "duplicate": "Duplizieren",
+      "delete": "Löschen",
+      "view": "Ansehen",
+      "bulkDelete": "Auswahl löschen",
+      "bulkActivate": "Auswahl aktivieren",
+      "bulkDeactivate": "Auswahl deaktivieren",
+      "selectAll": "Alle auswählen",
+      "deselectAll": "Auswahl aufheben",
+      "selected": "{{count}} ausgewählt"
+    },
+    "empty": {
+      "title": "Noch keine Produkte",
+      "description": "Fügen Sie Ihr erstes Produkt hinzu, um in Ihrem Shop zu verkaufen",
+      "noResults": "Keine Produkte gefunden",
+      "noResultsDescription": "Keine Produkte entsprechen Ihren Suchkriterien",
+      "tryAdjusting": "Versuchen Sie, Ihre Filter oder Suche anzupassen"
+    },
+    "delete": {
+      "title": "Produkt löschen",
+      "description": "Sind Sie sicher, dass Sie dieses Produkt löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "cancel": "Abbrechen",
+      "confirm": "Löschen",
+      "success": "Produkt erfolgreich gelöscht",
+      "error": "Fehler beim Löschen des Produkts",
+      "bulkTitle": "{{count}} Produkt(e) löschen",
+      "bulkDescription": "Sind Sie sicher, dass Sie diese {{count}} Produkte löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+    },
+    "edit": {
+      "title": "Produkt bearbeiten",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "success": "Produkt erfolgreich aktualisiert",
+      "error": "Fehler beim Aktualisieren des Produkts"
+    },
+    "duplicate": {
+      "success": "Produkt erfolgreich dupliziert",
+      "error": "Fehler beim Duplizieren des Produkts"
+    },
+    "pagination": {
+      "showing": "Zeige {{from}} bis {{to}} von {{total}} Produkten",
+      "previous": "Zurück",
+      "next": "Weiter",
+      "first": "Erste",
+      "last": "Letzte",
+      "itemsPerPage": "Produkte pro Seite"
+    },
+    "quickView": {
+      "title": "Schnellansicht",
+      "close": "Schließen",
+      "price": "Preis",
+      "stock": "Bestand",
+      "category": "Kategorie",
+      "type": "Typ",
+      "status": "Status",
+      "createdAt": "Erstellt am",
+      "updatedAt": "Aktualisiert am"
+    },
+    "metadata": {
+      "createdAt": "Erstellt am",
+      "updatedAt": "Zuletzt aktualisiert",
+      "version": "Version"
+    },
+    "urlCopied": "URL kopiert",
+    "urlCopiedDescription": "Produkt-URL wurde in die Zwischenablage kopiert"
   },
   "cart": {
     "title": "Warenkorb",
@@ -306,89 +494,165 @@
     "error": "Fehler beim Hinzufügen zum Warenkorb"
   },
   "orders": {
-    "title": "Meine Bestellungen",
-    "orderNumber": "Bestellung #{{number}}",
-    "date": "Datum",
-    "status": "Status",
-    "total": "Gesamt",
-    "items": "Artikel",
-    "viewDetails": "Details ansehen",
-    "trackOrder": "Bestellung verfolgen",
-    "noOrders": "Keine Bestellungen",
-    "statuses": {
+    "title": "Bestellungen",
+    "orderNumberLabel": "Bestellung",
+    "new": "Neue Bestellung",
+    "export": "CSV exportieren",
+    "filters": {
+      "search": "Nach Nummer oder Kunde suchen...",
+      "status": "Status",
+      "allStatus": "Alle Status",
+      "paymentStatus": "Zahlung",
+      "allPayments": "Alle Zahlungen",
+      "dateRange": "Zeitraum"
+    },
+    "status": {
       "pending": "Ausstehend",
       "processing": "In Bearbeitung",
-      "shipped": "Versandt",
-      "delivered": "Zugestellt",
+      "completed": "Abgeschlossen",
       "cancelled": "Storniert",
       "refunded": "Erstattet"
+    },
+    "paymentStatus": {
+      "pending": "Ausstehend",
+      "paid": "Bezahlt",
+      "failed": "Fehlgeschlagen",
+      "refunded": "Erstattet"
+    },
+    "table": {
+      "orderNumber": "Nummer",
+      "customer": "Kunde",
+      "amount": "Betrag",
+      "status": "Status",
+      "payment": "Zahlung",
+      "date": "Datum",
+      "actions": "Aktionen"
+    },
+    "actions": {
+      "view": "Ansehen",
+      "edit": "Bearbeiten",
+      "cancel": "Stornieren",
+      "refund": "Erstatten",
+      "print": "Drucken"
+    },
+    "empty": {
+      "title": "Keine Bestellungen",
+      "description": "Sie haben noch keine Bestellungen erhalten",
+      "noResults": "Keine Bestellungen entsprechen Ihren Filtern",
+      "createFirst": "Manuelle Bestellung erstellen"
+    },
+    "toast": {
+      "warning": "Warnung",
+      "noOrders": "Keine Bestellungen zum Exportieren",
+      "success": "Erfolg",
+      "exported": "{{count}} Bestellung(en) exportiert",
+      "error": "Fehler",
+      "createSuccess": "Bestellung erfolgreich erstellt",
+      "updateSuccess": "Bestellung aktualisiert",
+      "cancelSuccess": "Bestellung storniert",
+      "refundSuccess": "Bestellung erstattet"
+    },
+    "pagination": {
+      "showing": "Zeige {{from}} bis {{to}} von {{total}} Bestellungen",
+      "previous": "Zurück",
+      "next": "Weiter",
+      "rowsPerPage": "Zeilen pro Seite"
+    },
+    "details": {
+      "title": "Bestelldetails",
+      "orderNumber": "Bestellung #{{number}}",
+      "customer": "Kunde",
+      "products": "Produkte",
+      "total": "Gesamt",
+      "subtotal": "Zwischensumme",
+      "shipping": "Versand",
+      "tax": "Steuer",
+      "discount": "Rabatt",
+      "notes": "Notizen",
+      "timeline": "Zeitachse",
+      "createdAt": "Erstellt am",
+      "updatedAt": "Aktualisiert am"
     }
   },
   "dashboard": {
-    "welcome": "Willkommen, {{name}}!",
+    "title": "Dashboard",
+    "loading": "Dashboard wird geladen...",
+    "welcome": "Willkommen! 🎉",
+    "createStorePrompt": "Erstellen Sie zunächst Ihren Shop, um auf das erweiterte Dashboard zuzugreifen",
+    "createStoreButton": "Meinen Shop erstellen",
+    "online": "Online",
+    "refresh": "Daten aktualisieren",
+    "retry": "Erneut versuchen",
+    "error": {
+      "title": "Ladefehler",
+      "loading": "Fehler beim Laden der Daten"
+    },
     "stats": {
-      "totalSales": "Gesamtumsatz",
-      "totalOrders": "Gesamtbestellungen",
-      "totalProducts": "Produkte",
-      "totalCustomers": "Kunden"
+      "products": {
+        "title": "Produkte",
+        "active": "{{count}} aktiv",
+        "active_plural": "{{count}} aktiv"
+      },
+      "orders": {
+        "title": "Bestellungen",
+        "pending": "{{count}} ausstehend"
+      },
+      "customers": {
+        "title": "Kunden",
+        "registered": "Registrierte Kunden"
+      },
+      "revenue": {
+        "title": "Umsatz",
+        "total": "Gesamtumsatz"
+      }
     },
-    "recentOrders": "Letzte Bestellungen",
-    "topProducts": "Top-Produkte",
-    "analytics": "Analytik",
-    "quickActions": "Schnellaktionen"
-  },
-  "settings": {
-    "title": "Einstellungen",
-    "profile": "Profil",
-    "store": "Shop",
-    "payment": "Zahlung",
-    "shipping": "Versand",
-    "notifications": "Benachrichtigungen",
-    "security": "Sicherheit",
-    "language": "Sprache",
-    "theme": "Design",
-    "save": "Änderungen speichern",
-    "success": "Einstellungen aktualisiert!",
-    "error": "Fehler beim Aktualisieren der Einstellungen"
-  },
-  "notifications": {
-    "title": "Benachrichtigungen",
-    "markAllRead": "Alle als gelesen markieren",
-    "noNotifications": "Keine Benachrichtigungen",
-    "types": {
-      "order": "Neue Bestellung",
-      "payment": "Zahlung erhalten",
-      "review": "Neue Bewertung",
-      "message": "Neue Nachricht",
-      "system": "Systembenachrichtigung"
-    }
-  },
-  "errors": {
-    "generic": "Ein Fehler ist aufgetreten",
-    "network": "Verbindungsfehler",
-    "notFound": "Seite nicht gefunden",
-    "unauthorized": "Nicht autorisiert",
-    "serverError": "Serverfehler",
-    "validation": "Validierungsfehler",
-    "tryAgain": "Bitte versuchen Sie es erneut"
-  },
-  "footer": {
-    "about": "Über uns",
-    "contact": "Kontakt",
-    "terms": "Nutzungsbedingungen",
-    "privacy": "Datenschutz",
-    "help": "Hilfe",
-    "followUs": "Folgen Sie uns",
-    "allRightsReserved": "Alle Rechte vorbehalten"
-  },
-  "seo": {
-    "home": {
-      "title": "Payhuk - Moderne E-Commerce-Plattform",
-      "description": "Erstellen und verwalten Sie Ihren Online-Shop einfach mit Payhuk"
+    "goals": {
+      "monthlyRevenue": "Monatlicher Umsatz",
+      "newCustomers": "Neue Kunden",
+      "productsSold": "Verkaufte Produkte",
+      "customersUnit": "Kunden",
+      "ordersUnit": "Bestellungen"
     },
-    "marketplace": {
-      "title": "Marktplatz - Entdecken Sie unsere Produkte",
-      "description": "Erkunden Sie unsere Auswahl an Qualitätsprodukten"
+    "trends": {
+      "vsLastMonth": "vs letzten Monat"
+    },
+    "notifications": {
+      "title": "Aktuelle Benachrichtigungen",
+      "viewAll": "Alle Benachrichtigungen anzeigen",
+      "empty": "Keine Benachrichtigungen",
+      "newOrder": "Neue Bestellung",
+      "newOrderMessage": "Bestellung {{orderNumber}} erhalten für {{amount}} FCFA",
+      "outOfStock": "Nicht vorrätig",
+      "outOfStockMessage": "Produkt \"{{productName}}\" ist nicht vorrätig",
+      "paymentReceived": "Zahlung erhalten",
+      "paymentReceivedMessage": "Zahlung von {{amount}} FCFA bestätigt"
+    },
+    "quickActions": {
+      "title": "Schnellaktionen",
+      "newProduct": "Neues Produkt",
+      "newProductDesc": "Produkt zu Ihrem Shop hinzufügen",
+      "newOrder": "Neue Bestellung",
+      "newOrderDesc": "Manuelle Bestellung erstellen",
+      "analytics": "Analytik",
+      "analyticsDesc": "Detaillierte Statistiken ansehen",
+      "createProduct": "Produkt erstellen",
+      "createProductDesc": "Fügen Sie ein neues Produkt zu Ihrem Shop hinzu",
+      "manageOrders": "Bestellungen verwalten",
+      "manageOrdersDesc": "Zeigen und verwalten Sie Ihre Bestellungen",
+      "viewAnalytics": "Analytik anzeigen",
+      "viewAnalyticsDesc": "Überprüfen Sie Ihre detaillierten Statistiken",
+      "manageCustomers": "Kunden verwalten",
+      "manageCustomersDesc": "Zeigen und verwalten Sie Ihre Kunden",
+      "viewStore": "Meinen Shop ansehen",
+      "viewStoreDesc": "Passen Sie Ihren Online-Shop an",
+      "settings": "Einstellungen",
+      "settingsDesc": "Konfigurieren Sie Ihr Konto und Ihren Shop"
+    },
+    "recentActivity": {
+      "title": "Letzte Aktivität"
+    },
+    "notificationsBadge": {
+      "new": "Neu"
     }
   },
   "settings": {
@@ -483,271 +747,44 @@
       "cardDescription": "Verbindung und Datenbankstruktur testen"
     }
   },
-  "orders": {
-    "title": "Bestellungen",
-    "new": "Neue Bestellung",
-    "export": "CSV exportieren",
-    "filters": {
-      "search": "Nach Nummer oder Kunde suchen...",
-      "status": "Status",
-      "allStatus": "Alle Status",
-      "paymentStatus": "Zahlung",
-      "allPayments": "Alle Zahlungen",
-      "dateRange": "Zeitraum"
-    },
-    "status": {
-      "pending": "Ausstehend",
-      "processing": "In Bearbeitung",
-      "completed": "Abgeschlossen",
-      "cancelled": "Storniert",
-      "refunded": "Erstattet"
-    },
-    "paymentStatus": {
-      "pending": "Ausstehend",
-      "paid": "Bezahlt",
-      "failed": "Fehlgeschlagen",
-      "refunded": "Erstattet"
-    },
-    "table": {
-      "orderNumber": "Nummer",
-      "customer": "Kunde",
-      "amount": "Betrag",
-      "status": "Status",
-      "payment": "Zahlung",
-      "date": "Datum",
-      "actions": "Aktionen"
-    },
-    "actions": {
-      "view": "Ansehen",
-      "edit": "Bearbeiten",
-      "cancel": "Stornieren",
-      "refund": "Erstatten",
-      "print": "Drucken"
-    },
-    "empty": {
-      "title": "Keine Bestellungen",
-      "description": "Sie haben noch keine Bestellungen erhalten",
-      "noResults": "Keine Bestellungen entsprechen Ihren Filtern",
-      "createFirst": "Manuelle Bestellung erstellen"
-    },
-    "toast": {
-      "warning": "Warnung",
-      "noOrders": "Keine Bestellungen zum Exportieren",
-      "success": "Erfolg",
-      "exported": "{{count}} Bestellung(en) exportiert",
-      "error": "Fehler",
-      "createSuccess": "Bestellung erfolgreich erstellt",
-      "updateSuccess": "Bestellung aktualisiert",
-      "cancelSuccess": "Bestellung storniert",
-      "refundSuccess": "Bestellung erstattet"
-    },
-    "pagination": {
-      "showing": "Zeige {{from}} bis {{to}} von {{total}} Bestellungen",
-      "previous": "Zurück",
-      "next": "Weiter",
-      "rowsPerPage": "Zeilen pro Seite"
-    },
-    "details": {
-      "title": "Bestelldetails",
-      "orderNumber": "Bestellung #{{number}}",
-      "customer": "Kunde",
-      "products": "Produkte",
-      "total": "Gesamt",
-      "subtotal": "Zwischensumme",
-      "shipping": "Versand",
-      "tax": "Steuer",
-      "discount": "Rabatt",
-      "notes": "Notizen",
-      "timeline": "Zeitachse",
-      "createdAt": "Erstellt am",
-      "updatedAt": "Aktualisiert am"
-    }
-  },
-  "products": {
-    "title": "Meine Produkte",
-    "add": "Produkt hinzufügen",
-    "addNew": "Neues Produkt",
-    "refresh": "Aktualisieren",
-    "export": "CSV exportieren",
-    "import": "CSV importieren",
-    "loadingProducts": "Produkte werden geladen...",
-    "createStoreFirst": "Erstellen Sie zuerst Ihren Shop",
-    "createStoreDescription": "Sie müssen einen Shop erstellen, bevor Sie Produkte hinzufügen können",
-    "createMyStore": "Meinen Shop erstellen",
-    "viewMode": {
-      "grid": "Raster",
-      "list": "Liste"
-    },
-    "stats": {
-      "total": "Produkte gesamt",
-      "active": "Aktiv",
-      "inactive": "Inaktiv",
-      "outOfStock": "Nicht vorrätig"
-    },
-    "filters": {
-      "search": "Nach Produkt suchen...",
-      "category": "Kategorie",
-      "allCategories": "Alle Kategorien",
-      "type": "Typ",
-      "allTypes": "Alle Typen",
-      "status": "Status",
-      "allStatus": "Alle Status",
-      "stockStatus": "Bestand",
-      "allStock": "Aller Bestand",
-      "sortBy": "Sortieren nach",
-      "recent": "Neueste",
-      "oldest": "Älteste",
-      "nameAsc": "Name (A-Z)",
-      "nameDesc": "Name (Z-A)",
-      "priceAsc": "Preis aufsteigend",
-      "priceDesc": "Preis absteigend",
-      "stockAsc": "Bestand aufsteigend",
-      "stockDesc": "Bestand absteigend"
-    },
-    "status": {
-      "active": "Aktiv",
-      "inactive": "Inaktiv",
-      "draft": "Entwurf"
-    },
-    "stockStatus": {
-      "inStock": "Auf Lager",
-      "lowStock": "Niedriger Bestand",
-      "outOfStock": "Nicht vorrätig"
-    },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "noNotifications": "Keine Benachrichtigungen",
     "types": {
-      "digital": "Digital",
-      "physical": "Physisch",
-      "service": "Dienstleistung"
-    },
-    "actions": {
-      "edit": "Bearbeiten",
-      "duplicate": "Duplizieren",
-      "delete": "Löschen",
-      "view": "Ansehen",
-      "bulkDelete": "Auswahl löschen",
-      "bulkActivate": "Auswahl aktivieren",
-      "bulkDeactivate": "Auswahl deaktivieren",
-      "selectAll": "Alle auswählen",
-      "deselectAll": "Auswahl aufheben",
-      "selected": "{{count}} ausgewählt"
-    },
-    "empty": {
-      "title": "Noch keine Produkte",
-      "description": "Fügen Sie Ihr erstes Produkt hinzu, um in Ihrem Shop zu verkaufen",
-      "noResults": "Keine Produkte gefunden",
-      "noResultsDescription": "Keine Produkte entsprechen Ihren Suchkriterien",
-      "tryAdjusting": "Versuchen Sie, Ihre Filter oder Suche anzupassen"
-    },
-    "delete": {
-      "title": "Produkt löschen",
-      "description": "Sind Sie sicher, dass Sie dieses Produkt löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
-      "cancel": "Abbrechen",
-      "confirm": "Löschen",
-      "success": "Produkt erfolgreich gelöscht",
-      "error": "Fehler beim Löschen des Produkts",
-      "bulkTitle": "{{count}} Produkt(e) löschen",
-      "bulkDescription": "Sind Sie sicher, dass Sie diese {{count}} Produkte löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
-    },
-    "edit": {
-      "title": "Produkt bearbeiten",
-      "save": "Speichern",
-      "cancel": "Abbrechen",
-      "success": "Produkt erfolgreich aktualisiert",
-      "error": "Fehler beim Aktualisieren des Produkts"
-    },
-    "duplicate": {
-      "success": "Produkt erfolgreich dupliziert",
-      "error": "Fehler beim Duplizieren des Produkts"
-    },
-    "pagination": {
-      "showing": "Zeige {{from}} bis {{to}} von {{total}} Produkten",
-      "previous": "Zurück",
-      "next": "Weiter",
-      "first": "Erste",
-      "last": "Letzte",
-      "itemsPerPage": "Produkte pro Seite"
-    },
-    "quickView": {
-      "title": "Schnellansicht",
-      "close": "Schließen",
-      "price": "Preis",
-      "stock": "Bestand",
-      "category": "Kategorie",
-      "type": "Typ",
-      "status": "Status",
-      "createdAt": "Erstellt am",
-      "updatedAt": "Aktualisiert am"
+      "order": "Neue Bestellung",
+      "payment": "Zahlung erhalten",
+      "review": "Neue Bewertung",
+      "message": "Neue Nachricht",
+      "system": "Systembenachrichtigung"
     }
   },
-  "dashboard": {
-    "title": "Dashboard",
-    "titleWithStore": "Dashboard - {{storeName}}",
-    "loading": "Dashboard wird geladen...",
-    "welcome": "Willkommen! 🎉",
-    "createStorePrompt": "Erstellen Sie zunächst Ihren Shop, um auf das erweiterte Dashboard zuzugreifen",
-    "createStoreButton": "Meinen Shop erstellen",
-    "online": "Online",
-    "refresh": "Daten aktualisieren",
-    "retry": "Erneut versuchen",
-    "error": {
-      "title": "Ladefehler",
-      "loading": "Fehler beim Laden der Daten"
+  "errors": {
+    "generic": "Ein Fehler ist aufgetreten",
+    "network": "Verbindungsfehler",
+    "notFound": "Seite nicht gefunden",
+    "unauthorized": "Nicht autorisiert",
+    "serverError": "Serverfehler",
+    "validation": "Validierungsfehler",
+    "tryAgain": "Bitte versuchen Sie es erneut"
+  },
+  "footer": {
+    "about": "Über uns",
+    "contact": "Kontakt",
+    "terms": "Nutzungsbedingungen",
+    "privacy": "Datenschutz",
+    "help": "Hilfe",
+    "followUs": "Folgen Sie uns",
+    "allRightsReserved": "Alle Rechte vorbehalten"
+  },
+  "seo": {
+    "home": {
+      "title": "Emarzona - E-Commerce und Marketing-Plattform",
+      "description": "Erstellen und verwalten Sie Ihren Online-Shop einfach mit Emarzona"
     },
-    "stats": {
-      "products": {
-        "title": "Produkte",
-        "active": "{{count}} aktiv"
-      },
-      "orders": {
-        "title": "Bestellungen",
-        "pending": "{{count}} ausstehend"
-      },
-      "customers": {
-        "title": "Kunden",
-        "registered": "Registrierte Kunden"
-      },
-      "revenue": {
-        "title": "Umsatz",
-        "total": "Gesamtumsatz"
-      }
-    },
-    "notifications": {
-      "title": "Aktuelle Benachrichtigungen",
-      "viewAll": "Alle Benachrichtigungen anzeigen",
-      "empty": "Keine Benachrichtigungen",
-      "newOrder": "Neue Bestellung",
-      "newOrderMessage": "Bestellung {{orderNumber}} erhalten für {{amount}} FCFA",
-      "outOfStock": "Nicht vorrätig",
-      "outOfStockMessage": "Produkt \"{{productName}}\" ist nicht vorrätig",
-      "paymentReceived": "Zahlung erhalten",
-      "paymentReceivedMessage": "Zahlung von {{amount}} FCFA bestätigt"
-    },
-    "quickActions": {
-      "title": "Schnellaktionen",
-      "newProduct": "Neues Produkt",
-      "newProductDesc": "Produkt zu Ihrem Shop hinzufügen",
-      "newOrder": "Neue Bestellung",
-      "newOrderDesc": "Manuelle Bestellung erstellen",
-      "analytics": "Analytik",
-      "analyticsDesc": "Detaillierte Statistiken ansehen",
-      "createProduct": "Produkt erstellen",
-      "createProductDesc": "Fügen Sie ein neues Produkt zu Ihrem Shop hinzu",
-      "manageOrders": "Bestellungen verwalten",
-      "manageOrdersDesc": "Zeigen und verwalten Sie Ihre Bestellungen",
-      "viewAnalytics": "Analytik anzeigen",
-      "viewAnalyticsDesc": "Überprüfen Sie Ihre detaillierten Statistiken",
-      "manageCustomers": "Kunden verwalten",
-      "manageCustomersDesc": "Zeigen und verwalten Sie Ihre Kunden",
-      "viewStore": "Meinen Shop ansehen",
-      "viewStoreDesc": "Passen Sie Ihren Online-Shop an",
-      "settings": "Einstellungen",
-      "settingsDesc": "Konfigurieren Sie Ihr Konto und Ihren Shop"
-    },
-    "recentActivity": {
-      "title": "Letzte Aktivität"
-    },
-    "notificationsBadge": {
-      "new": "Neu"
+    "marketplace": {
+      "title": "Marktplatz - Entdecken Sie unsere Produkte",
+      "description": "Erkunden Sie unsere Auswahl an Qualitätsprodukten"
     }
   },
   "landing": {
@@ -774,13 +811,13 @@
       "stores": "Shops"
     },
     "testimonials": {
-      "title": "Sie haben Erfolg mit Payhuk",
+      "title": "Sie haben Erfolg mit Emarzona",
       "subtitle": "Schließen Sie sich Hunderten von Unternehmern an, die ihr Geschäft ausbauen",
       "items": [
         {
           "name": "Amadou K.",
           "role": "Content Creator",
-          "content": "Ich habe mein Einkommen in 3 Monaten dank Payhuk verdoppelt. Die Plattform ist einfach und FCFA-Zahlungen sind ein echtes Plus!"
+          "content": "Ich habe mein Einkommen in 3 Monaten dank Emarzona verdoppelt. Die Plattform ist einfach und Zahlungen sind ein echtes Plus!"
         },
         {
           "name": "Fatou D.",
@@ -790,7 +827,7 @@
         {
           "name": "Ibrahim S.",
           "role": "Entwickler",
-          "content": "Moderne Benutzeroberfläche, vollständige Funktionen und reaktionsschneller Support. Payhuk ist die beste Plattform zum Verkaufen in Afrika."
+          "content": "Moderne Benutzeroberfläche, vollständige Funktionen und reaktionsschneller Support. Emarzona ist die beste Plattform zum Verkaufen online."
         }
       ]
     },
@@ -867,7 +904,7 @@
     },
     "cta": {
       "title": "Bereit, Ihr Geschäft auszubauen?",
-      "subtitle": "Schließen Sie sich Tausenden afrikanischen Unternehmern an, die mit Payhuk erfolgreich sind",
+      "subtitle": "Schließen Sie sich Tausenden von Unternehmern an, die mit Emarzona erfolgreich sind",
       "button": "Mein kostenloses Konto erstellen"
     },
     "footer": {
@@ -890,7 +927,7 @@
         "terms": "Nutzungsbedingungen",
         "privacy": "Datenschutzrichtlinie"
       },
-      "copyright": "© 2025 Payhuk. Alle Rechte vorbehalten."
+      "copyright": "© 2025 Emarzona. Alle Rechte vorbehalten."
     },
     "featureSections": {
       "feature1": {
@@ -1033,11 +1070,27 @@
         "zones": {
           "westAfrica": {
             "title": "Westafrika (UEMOA-Zone - FCFA XOF)",
-            "countries": ["Senegal", "Elfenbeinküste", "Mali", "Benin", "Burkina Faso", "Niger", "Togo", "Guinea-Bissau"]
+            "countries": [
+              "Senegal",
+              "Elfenbeinküste",
+              "Mali",
+              "Benin",
+              "Burkina Faso",
+              "Niger",
+              "Togo",
+              "Guinea-Bissau"
+            ]
           },
           "centralAfrica": {
             "title": "Zentralafrika (CEMAC-Zone - FCFA XAF)",
-            "countries": ["Kamerun", "Gabun", "Kongo-Brazzaville", "Tschad", "ZAR", "Äquatorialguinea"]
+            "countries": [
+              "Kamerun",
+              "Gabun",
+              "Kongo-Brazzaville",
+              "Tschad",
+              "ZAR",
+              "Äquatorialguinea"
+            ]
           },
           "northAfrica": {
             "title": "Nordafrika",
@@ -1045,7 +1098,13 @@
           },
           "eastAfrica": {
             "title": "Ostafrika",
-            "countries": ["Kenia (KES)", "Tansania (TZS)", "Uganda (UGX)", "Ruanda (RWF)", "Äthiopien (ETB)"]
+            "countries": [
+              "Kenia (KES)",
+              "Tansania (TZS)",
+              "Uganda (UGX)",
+              "Ruanda (RWF)",
+              "Äthiopien (ETB)"
+            ]
           },
           "southernAfrica": {
             "title": "Südliches Afrika",
@@ -1053,7 +1112,13 @@
           },
           "international": {
             "title": "International (Hauptwährungen)",
-            "countries": ["Eurozone (EUR)", "Vereinigte Staaten (USD)", "Vereinigtes Königreich (GBP)", "Kanada (CAD)", "Schweiz (CHF)"]
+            "countries": [
+              "Eurozone (EUR)",
+              "Vereinigte Staaten (USD)",
+              "Vereinigtes Königreich (GBP)",
+              "Kanada (CAD)",
+              "Schweiz (CHF)"
+            ]
           }
         },
         "note": "+ 180 weitere Länder und Territorien weltweit"
@@ -1061,9 +1126,589 @@
     },
     "finalCta": {
       "title": "Beginnen Sie heute mit dem Verkauf digitaler Produkte!",
-      "subtitle": "Schließen Sie sich Hunderten afrikanischen Unternehmern an, die bereits Payhuk vertrauen",
+      "subtitle": "Schließen Sie sich Hunderten von Unternehmern an, die bereits Emarzona vertrauen",
       "button": "Mein kostenloses Konto erstellen"
     }
+  },
+  "courses": {
+    "title": "Online-Kurse",
+    "myCourses": "Meine Kurse",
+    "createCourse": "Kurs erstellen",
+    "viewCourse": "Kurs ansehen",
+    "enrollNow": "Jetzt einschreiben",
+    "enrolled": "Eingeschrieben",
+    "continueWatching": "Kurs fortsetzen",
+    "startCourse": "Kurs beginnen",
+    "completeCourse": "Kurs abschließen",
+    "courseCompleted": "Kurs abgeschlossen",
+    "progress": "Fortschritt",
+    "lessons": "Lektionen",
+    "sections": "Abschnitte",
+    "duration": "Dauer",
+    "level": "Niveau",
+    "instructor": "Dozent",
+    "students": "Studenten",
+    "rating": "Bewertung",
+    "reviews": "Bewertungen",
+    "certificate": "Zertifikat",
+    "quiz": "Quiz",
+    "curriculum": "Lehrplan",
+    "description": "Beschreibung",
+    "objectives": "Lernziele",
+    "prerequisites": "Voraussetzungen",
+    "targetAudience": "Zielgruppe",
+    "whatYouWillLearn": "Was Sie lernen werden",
+    "courseContent": "Kursinhalt",
+    "aboutCourse": "Über diesen Kurs",
+    "enrollmentSuccess": "Einschreibung erfolgreich!",
+    "enrollmentError": "Fehler bei der Einschreibung",
+    "completionRate": "Abschlussquote",
+    "lastViewed": "Letzte angesehene Lektion",
+    "resumeWhere": "Dort fortfahren, wo Sie aufgehört haben",
+    "markComplete": "Als abgeschlossen markieren",
+    "downloadCertificate": "Zertifikat herunterladen",
+    "generateCertificate": "Zertifikat generieren",
+    "certificateAvailable": "Zertifikat verfügbar",
+    "takeQuiz": "Quiz durchführen",
+    "quizResults": "Quiz-Ergebnisse",
+    "passingScore": "Erforderliche Punktzahl",
+    "yourScore": "Ihre Punktzahl",
+    "retakeQuiz": "Quiz wiederholen",
+    "videoUpload": "Video hochladen",
+    "youtubeLink": "YouTube-Link",
+    "vimeoLink": "Vimeo-Link",
+    "googleDriveLink": "Google Drive-Link",
+    "preview": "Vorschau",
+    "freePreview": "Kostenlose Vorschau",
+    "lesson": "Lektion",
+    "section": "Abschnitt",
+    "addSection": "Abschnitt hinzufügen",
+    "addLesson": "Lektion hinzufügen",
+    "saveProgress": "Fortschritt gespeichert",
+    "lifetimeAccess": "Lebenslanger Zugang",
+    "moneyBackGuarantee": "30-Tage-Geld-zurück-Garantie",
+    "completedLessons": "Abgeschlossene Lektionen",
+    "totalLessons": "Lektionen insgesamt",
+    "courseOverview": "Kursübersicht",
+    "enrolledStudents": "Eingeschriebene Studenten",
+    "averageRating": "Durchschnittliche Bewertung",
+    "courseMaterials": "Kursmaterialien",
+    "downloadMaterials": "Materialien herunterladen",
+    "discussion": "Diskussion",
+    "announcements": "Ankündigungen",
+    "courseLanguage": "Kurssprache",
+    "subtitles": "Untertitel",
+    "videoQuality": "Videoqualität",
+    "playbackSpeed": "Wiedergabegeschwindigkeit",
+    "fullscreen": "Vollbild",
+    "courseDashboard": "Kurs-Dashboard",
+    "myCoursesDashboard": "Mein Dashboard",
+    "coursesInProgress": "Laufende Kurse",
+    "completedCourses": "Abgeschlossene Kurse",
+    "totalCourses": "Kurse insgesamt",
+    "noCourses": "Keine Kurse gefunden",
+    "noCoursesDescription": "Sie sind derzeit in keinen Kursen eingeschrieben.",
+    "discoverCourses": "Kurse entdecken",
+    "createYourFirstCourse": "Erstellen Sie Ihren ersten Kurs",
+    "courseCreationWizard": "Kurs-Erstellungsassistent",
+    "basicInfo": "Grundinformationen",
+    "curriculumBuilder": "Lehrplan-Ersteller",
+    "advancedSettings": "Erweiterte Einstellungen",
+    "publishCourse": "Kurs veröffentlichen",
+    "saveDraft": "Entwurf speichern",
+    "courseTitle": "Kurstitel",
+    "courseSlug": "Kurs-URL",
+    "courseCategory": "Kategorie",
+    "coursePrice": "Preis",
+    "promotionalPrice": "Promotionspreis",
+    "courseImage": "Kursbild",
+    "videoPlayer": "Video-Player",
+    "uploadVideo": "Video hochladen",
+    "videoSource": "Videoquelle",
+    "directUpload": "Direkter Upload",
+    "externalLink": "Externer Link",
+    "videoProcessing": "Video wird verarbeitet...",
+    "videoReady": "Video bereit",
+    "lessonTitle": "Lektionstitel",
+    "lessonDescription": "Lektionsbeschreibung",
+    "lessonDuration": "Lektionsdauer",
+    "lessonOrder": "Lektionsreihenfolge",
+    "sectionTitle": "Abschnittstitel",
+    "sectionDescription": "Abschnittsbeschreibung",
+    "sectionOrder": "Abschnittsreihenfolge",
+    "quizTitle": "Quiz-Titel",
+    "quizPassingScore": "Erforderliche Quiz-Punktzahl",
+    "quizQuestions": "Fragen",
+    "addQuestion": "Frage hinzufügen",
+    "questionType": "Fragetyp",
+    "multipleChoice": "Multiple Choice",
+    "trueFalse": "Wahr/Falsch",
+    "textInput": "Freitext",
+    "correctAnswer": "Richtige Antwort",
+    "questionText": "Fragetext",
+    "answerOptions": "Antwortoptionen",
+    "addOption": "Option hinzufügen",
+    "certificateTemplate": "Zertifikatsvorlage",
+    "certificateCustomization": "Zertifikatsanpassung",
+    "instructorName": "Name des Dozenten",
+    "completionDate": "Abschlussdatum",
+    "courseName": "Kursname",
+    "studentName": "Studentenname",
+    "enableCertificate": "Zertifikat aktivieren",
+    "enableQuiz": "Quiz aktivieren",
+    "productTypes": {
+      "course": "Online-Kurs",
+      "digital": "Digitales Produkt",
+      "physical": "Physisches Produkt",
+      "service": "Service"
+    },
+    "levels": {
+      "beginner": "Anfänger",
+      "intermediate": "Mittelstufe",
+      "advanced": "Fortgeschritten",
+      "all": "Alle Niveaus"
+    },
+    "notifications": {
+      "lessonCompleted": "Lektion erfolgreich abgeschlossen",
+      "quizPassed": "Quiz bestanden! Glückwunsch!",
+      "quizFailed": "Punktzahl unzureichend. Versuchen Sie es erneut!",
+      "certificateGenerated": "Zertifikat erfolgreich generiert",
+      "enrollmentSuccess": "Kurseinschreibung erfolgreich",
+      "progressSaved": "Fortschritt gespeichert",
+      "videoPositionSaved": "Videoposition gespeichert"
+    },
+    "errors": {
+      "enrollmentFailed": "Fehler bei der Einschreibung",
+      "loadingCourseFailed": "Fehler beim Laden des Kurses",
+      "videoUploadFailed": "Fehler beim Hochladen des Videos",
+      "quizSubmissionFailed": "Fehler beim Einreichen des Quiz",
+      "certificateGenerationFailed": "Fehler bei der Zertifikatsgenerierung"
+    },
+    "create": {
+      "title": "Neuen Kurs erstellen",
+      "description": "Folgen Sie den Schritten, um in wenigen Minuten einen professionellen Kurs zu erstellen",
+      "backToProducts": "Zurück zu Produkten",
+      "useTemplate": "Vorlage verwenden",
+      "useTemplateShort": "Vorlage"
+    },
+    "analytics": {
+      "title": "Analysen",
+      "accessDenied": "Zugriff verweigert",
+      "mustBeLoggedIn": "Sie müssen angemeldet sein, um auf diese Seite zuzugreifen.",
+      "courseNotFound": "Kurs nicht gefunden",
+      "backToMyCourses": "Zurück zu meinen Kursen",
+      "backToCourse": "Zurück zum Kurs",
+      "noPermission": "Sie haben keine Berechtigung, die Analysen für diesen Kurs anzuzeigen."
+    }
+  },
+  "admin": {
+    "batchShipping": {
+      "title": "Batch-Versand",
+      "description": "Verarbeiten Sie mehrere Bestellungen gleichzeitig und generieren Sie Etiketten in großen Mengen",
+      "noStore": "Kein Geschäft gefunden",
+      "noStoreDescription": "Bitte erstellen Sie ein Geschäft, um Ihre Batch-Sendungen zu verwalten",
+      "stats": {
+        "total": "Gesamte Chargen",
+        "processing": "In Bearbeitung",
+        "labelGenerated": "Etiketten generiert",
+        "completed": "Abgeschlossen"
+      }
+    },
+    "costOptimization": {
+      "title": "Kosten- und Margenoptimierung",
+      "description": "Analysieren Sie Ihre Kosten, Margen und optimieren Sie Ihre Preise, um die Rentabilität zu maximieren",
+      "noStore": "Sie müssen ein Geschäft erstellen, bevor Sie die Kostenoptimierung verwenden können"
+    },
+    "demandForecasting": {
+      "title": "Nachfrageprognose",
+      "description": "Analysieren Sie Trends und prognostizieren Sie die zukünftige Nachfrage nach Ihren Produkten",
+      "noStore": "Sie müssen ein Geschäft erstellen, bevor Sie die Nachfrageprognose verwenden können"
+    },
+    "physicalPromotions": {
+      "title": "Aktionen und Rabatte",
+      "description": "Verwalten Sie Ihre Aktionen, Rabattcodes und Sonderangebote"
+    },
+    "physicalBundles": {
+      "title": "Bündel-Verwaltung",
+      "description": "Erstellen und verwalten Sie Produktbündel mit automatischen Aktionen und dynamischen Preisen"
+    },
+    "physicalBackorders": {
+      "title": "Vorbestellungen-Verwaltung",
+      "description": "Verwalten Sie ausverkaufte Bestellungen mit Priorisierung und automatischen Benachrichtigungen"
+    },
+    "physicalPreOrders": {
+      "title": "Vorbestellungen-Verwaltung",
+      "description": "Verwalten Sie Vorbestellungen für Ihre physischen Produkte mit automatischen Benachrichtigungen"
+    },
+    "physicalMultiCurrency": {
+      "title": "Multi-Währungs-Verwaltung",
+      "description": "Verwalten Sie Währungen, Wechselkurse und regionale Preise",
+      "tabs": {
+        "currencies": "Währungen & Kurse",
+        "currenciesShort": "Währungen",
+        "converter": "Konverter"
+      }
+    }
+  },
+  "promotions": {
+    "title": "Aktionen",
+    "description": "Verwalten Sie Ihre Promo-Codes und Rabatte",
+    "createButton": "Neue Aktion",
+    "createButtonShort": "Neu",
+    "noStore": {
+      "title": "Geschäft nicht konfiguriert",
+      "description": "Bitte erstellen Sie zuerst Ihr Geschäft, um Ihre Aktionen zu verwalten."
+    },
+    "stats": {
+      "total": "Gesamte Aktionen",
+      "active": "Aktiv",
+      "totalUses": "Gesamte Nutzungen",
+      "averageDiscount": "Durchschnittlicher Rabatt"
+    },
+    "empty": {
+      "title": "Keine Aktionen",
+      "description": "Beginnen Sie mit der Erstellung Ihrer ersten Aktion",
+      "noResults": "Keine Aktionen entsprechen Ihren Filtern"
+    },
+    "statistics": {
+      "title": "Statistiken",
+      "total": "Gesamt",
+      "totalDescription": "Gesamtzahl der Aktionen",
+      "active": "Aktiv",
+      "inactive": "{{count}} inaktiv",
+      "inactive_plural": "{{count}} inaktiv",
+      "uses": "Nutzungen",
+      "usesDescription": "Gesamte Nutzungen",
+      "averageDiscount": "Durchschnittlicher Rabatt",
+      "averageDiscountDescription": "Durchschnitt der Rabatte"
+    }
+  },
+  "withdrawals": {
+    "title": "Auszahlungen",
+    "description": "Verwalten Sie Ihre Auszahlungen und prüfen Sie Ihr verfügbares Guthaben",
+    "requestButton": "Auszahlung beantragen",
+    "noStore": "Sie müssen ein Geschäft erstellen, bevor Sie Auszahlungen vornehmen können.",
+    "migration": {
+      "title": "SQL-Migration erforderlich:",
+      "description": "Um das Auszahlungssystem zu aktivieren, führen Sie bitte die SQL-Migration {{fileName}} in Ihrer Supabase-Datenbank aus."
+    }
+  },
+  "store": {
+    "title": "Geschäft",
+    "loading": "Laden Ihrer Geschäfte...",
+    "viewStore": "Mein Geschäft ansehen",
+    "viewStoreShort": "Ansehen",
+    "viewStoreAriaLabel": "Geschäft {{name}} in einem neuen Tab öffnen",
+    "tabs": {
+      "ariaLabel": "Geschäftsnavigation",
+      "manage": "Meine Geschäfte verwalten",
+      "manageShort": "Verwalten",
+      "create": "Mein Geschäft erstellen",
+      "createShort": "Erstellen"
+    },
+    "create": {
+      "title": "Neues Geschäft erstellen",
+      "description": "Konfigurieren Sie Ihr neues Geschäft in den Einstellungen.",
+      "descriptionExisting": "Sie können bis zu 3 Geschäfte erstellen. Wenn Sie das Limit erreicht haben, löschen Sie ein bestehendes Geschäft, bevor Sie ein neues erstellen."
+    },
+    "existing": {
+      "title": "Bestehende Geschäfte",
+      "description": "Sie können bis zu 3 Geschäfte pro Benutzer erstellen. Um ein neues Geschäft zu erstellen, müssen Sie zuerst ein bestehendes Geschäft löschen, wenn Sie das Limit erreicht haben.",
+      "currentStore": "Ihre aktuellen Geschäfte:"
+    },
+    "empty": {
+      "title": "Erstellen Sie Ihr erstes Geschäft",
+      "description": "Richten Sie Ihr Geschäft ein, um mit dem Verkauf Ihrer digitalen Produkte und Dienstleistungen in Afrika zu beginnen"
+    },
+    "whatIs": {
+      "title": "Was ist ein Emarzona-Geschäft?",
+      "feature1": "Ein eindeutiger und anpassbarer Link für Ihr Unternehmen",
+      "feature2": "Verkaufen Sie mehrere Produkte und Dienstleistungen",
+      "feature3": "Akzeptieren Sie Zahlungen in FCFA und anderen Währungen",
+      "feature4": "Verwalten Sie alles von Ihrem Dashboard aus"
+    },
+    "goToSettings": "Zu den Einstellungen gehen"
+  },
+  "affiliate": {
+    "dashboard": {
+      "title": "Partner-Dashboard",
+      "description": "Übersicht über Ihre Kurs-Promotionen",
+      "loginRequired": "Anmeldung erforderlich",
+      "mustBeLoggedIn": "Sie müssen angemeldet sein, um auf das Partner-Dashboard zuzugreifen.",
+      "findCourses": "Kurse finden",
+      "discoverCourses": "Verfügbare Kurse entdecken",
+      "welcome": {
+        "title": "Willkommen im Partner-Programm!",
+        "description": "Beginnen Sie, Provisionen zu verdienen, indem Sie qualitativ hochwertige Online-Kurse bewerben."
+      },
+      "steps": {
+        "step1": {
+          "title": "Einen Kurs finden",
+          "description": "Durchsuchen Sie unseren Marktplatz und finden Sie Kurse mit aktivierter Partnerschaft"
+        },
+        "step2": {
+          "title": "Ihre Links erstellen",
+          "description": "Generieren Sie personalisierte Links für jeden Kanal (Blog, YouTube, etc.)"
+        },
+        "step3": {
+          "title": "Verdienen!",
+          "description": "Erhalten Sie Provisionen bei jeder Einschreibung über Ihre Links"
+        }
+      },
+      "tips": {
+        "title": "Promotion-Tipps",
+        "tip1": {
+          "title": "Erstellen Sie wertvollen Inhalt",
+          "description": "Schreiben Sie Artikel oder erstellen Sie Videos, die Ihrem Publikum einen Mehrwert bieten"
+        },
+        "tip2": {
+          "title": "Testen Sie verschiedene Kanäle",
+          "description": "Erstellen Sie spezifische Links für Blog, YouTube, Instagram, um die Leistung zu analysieren"
+        },
+        "tip3": {
+          "title": "Seien Sie transparent",
+          "description": "Geben Sie immer an, dass Sie einen Partner-Link verwenden"
+        },
+        "tip4": {
+          "title": "Analysieren Sie Ihre Statistiken",
+          "description": "Verfolgen Sie regelmäßig Ihre Leistung und optimieren Sie Ihre Strategien"
+        }
+      },
+      "faq": {
+        "title": "Häufig gestellte Fragen",
+        "q1": {
+          "question": "Wann werde ich bezahlt?",
+          "answer": "Provisionen werden monatlich ausgezahlt, sobald Sie die Mindestschwelle von 50.000 XOF erreichen."
+        },
+        "q2": {
+          "question": "Wie lange hält das Cookie?",
+          "answer": "Es hängt vom Kurs ab. Die Dauer wird auf jeder Link-Generierungsseite angezeigt (normalerweise 30 Tage)."
+        },
+        "q3": {
+          "question": "Kann ich mehrere Kurse bewerben?",
+          "answer": "Ja! Sie können so viele Kurse bewerben, wie Sie möchten, und unbegrenzt Links erstellen."
+        },
+        "q4": {
+          "question": "Wie optimiere ich meine Conversion-Rate?",
+          "answer": "Erstellen Sie relevante Inhalte, verwenden Sie klare Handlungsaufforderungen und zielen Sie auf die richtige Zielgruppe für jeden Kurs."
+        }
+      }
+    }
+  },
+  "emails": {
+    "campaigns": {
+      "title": "E-Mail-Kampagnen",
+      "subtitle": "Erstellen und verwalten Sie Ihre E-Mail-Marketing-Kampagnen",
+      "noStore": "Bitte wählen Sie einen Shop aus",
+      "editCampaign": "Kampagne bearbeiten",
+      "newCampaign": "Neue Kampagne",
+      "editCampaignDescription": "Bearbeiten Sie die Informationen Ihrer E-Mail-Kampagne",
+      "newCampaignDescription": "Erstellen Sie eine neue E-Mail-Marketing-Kampagne für Ihren Shop",
+      "campaignName": "Kampagnenname",
+      "campaignNamePlaceholder": "Newsletter Januar 2025",
+      "campaignType": "Kampagnentyp",
+      "campaignDescriptionPlaceholder": "Kampagnenbeschreibung...",
+      "audienceType": "Zielgruppentyp",
+      "scheduledAt": "Versanddatum und -zeit",
+      "scheduledAtPlaceholder": "Versand planen",
+      "scheduledAtDescription": "Leer lassen, um sofort zu senden oder einen Entwurf zu erstellen",
+      "timezone": "Zeitzone",
+      "createCampaign": "Kampagne erstellen",
+      "types": {
+        "newsletter": "Newsletter",
+        "promotional": "Werbeaktion",
+        "transactional": "Transaktional",
+        "abandonCart": "Verlassener Warenkorb",
+        "nurture": "Nurture"
+      },
+      "audienceTypes": {
+        "segment": "Segment",
+        "list": "Liste",
+        "filter": "Filter"
+      },
+      "alert": {
+        "title": "Erweitertes E-Mail-System",
+        "description": "Erstellen Sie gezielte E-Mail-Kampagnen für Ihre Kunden. Planen Sie Versendungen, segmentieren Sie Ihr Publikum und verfolgen Sie die Leistung in Echtzeit."
+      }
+    },
+    "sequences": {
+      "title": "E-Mail-Sequenzen",
+      "subtitle": "Erstellen Sie automatisierte E-Mail-Sequenzen für Ihre Kunden",
+      "noStore": "Bitte wählen Sie einen Shop aus",
+      "editStep": "Schritt bearbeiten",
+      "newStep": "Neuer Schritt",
+      "editStepDescription": "Bearbeiten Sie die Einstellungen für diesen Sequenzschritt",
+      "newStepDescription": "Fügen Sie einen neuen Schritt zu Ihrer E-Mail-Sequenz hinzu",
+      "stepOrder": "Schrittreihenfolge",
+      "stepOrderDescription": "Die Reihenfolge bestimmt, wann dieser Schritt in der Sequenz ausgeführt wird",
+      "templateDescription": "Die Vorlage, die für diese E-Mail verwendet werden soll",
+      "delayType": "Verzögerungstyp",
+      "delayValue": "Wert",
+      "immediate": "Sofort",
+      "minutes": "Minuten",
+      "hours": "Stunden",
+      "days": "Tage",
+      "day": "Tag",
+      "hour": "Stunde",
+      "minute": "Minute",
+      "delayDescription": "Dieser Schritt wird {{value}} {{unit}}{{plural}} nach dem vorherigen Schritt gesendet",
+      "addStep": "Schritt hinzufügen",
+      "tabs": {
+        "list": "Liste",
+        "steps": "Schritte"
+      },
+      "alert": {
+        "title": "Automatisierte Sequenzen",
+        "description": "Erstellen Sie E-Mail-Sequenzen, die automatisch nach einem definierten Zeitplan gesendet werden. Perfekt für Onboarding-Journeys, Follow-ups und Nurturing-Kampagnen."
+      }
+    },
+    "workflows": {
+      "title": "E-Mail-Workflows",
+      "subtitle": "Automatisieren Sie Ihre E-Mails mit intelligenten Workflows",
+      "noStore": "Bitte wählen Sie einen Shop aus",
+      "alert": {
+        "title": "Automatisierte Workflows",
+        "description": "Erstellen Sie automatisierte Workflows, die Aktionen basierend auf Ereignissen, Bedingungen oder Zeitplänen auslösen. Automatisieren Sie Ihre E-Mail-Kampagnen, um Zeit zu sparen und das Engagement zu verbessern."
+      }
+    },
+    "analytics": {
+      "title": "E-Mail-Analytik",
+      "subtitle": "Analysieren Sie die Leistung Ihrer E-Mail-Kampagnen und -Sequenzen",
+      "noStore": "Bitte wählen Sie einen Shop aus",
+      "alert": {
+        "title": "Erweiterte E-Mail-Analytik",
+        "description": "Visualisieren Sie die Leistung Ihrer E-Mails mit detaillierten Diagrammen. Analysieren Sie Öffnungsraten, Klickraten und die von Ihren Kampagnen generierten Einnahmen."
+      }
+    },
+    "segments": {
+      "title": "Zielgruppensegmente",
+      "subtitle": "Erstellen und verwalten Sie Ihre Zielgruppensegmente, um Ihre E-Mail-Kampagnen zu zielen",
+      "noStore": "Bitte wählen Sie einen Shop aus",
+      "tabs": {
+        "list": "Segmentliste",
+        "preview": "Vorschau"
+      },
+      "alert": {
+        "title": "Zielgruppensegmentierung",
+        "description": "Erstellen Sie statische Segmente (manuelle Liste) oder dynamische Segmente (automatisch berechnet), um Ihre E-Mail-Kampagnen präzise zu zielen. Dynamische Segmente aktualisieren sich automatisch nach Ihren Kriterien."
+      },
+      "backToList": "Zurück zur Liste",
+      "back": "Zurück",
+      "previewLabel": "Vorschau: "
+    },
+    "templateEditor": {
+      "title": "E-Mail-Vorlagen-Editor",
+      "subtitle": "Erstellen und personalisieren Sie Ihre E-Mail-Vorlagen mit einem visuellen Editor",
+      "alert": {
+        "title": "E-Mail-Vorlagen-Editor",
+        "description": "Verwenden Sie den Editor, um Ihre E-Mail-Vorlagen zu erstellen. Sie können vordefinierte Blöcke einfügen, dynamische Variablen verwenden und das Ergebnis auf Mobilgerät und Desktop in der Vorschau anzeigen."
+      },
+      "tabs": {
+        "editor": "Editor",
+        "editorShort": "Bearbeiten",
+        "blocks": "Blöcke",
+        "blocksShort": "Block",
+        "preview": "Vorschau",
+        "previewShort": "Vorschau"
+      },
+      "toast": {
+        "saved": "Vorlage gespeichert",
+        "savedDescription": "Die Vorlage wurde erfolgreich gespeichert.",
+        "error": "Fehler",
+        "errorDescription": "Fehler beim Speichern der Vorlage.",
+        "blockInserted": "Block eingefügt",
+        "blockInsertedDescription": "Der Block wurde in Ihre Vorlage eingefügt."
+      }
+    }
+  },
+  "digitalUpdates": {
+    "title": "Update-Verwaltung",
+    "subtitle": "Veröffentlichen und verwalten Sie Updates für Ihre digitalen Produkte",
+    "newUpdate": "Neues Update",
+    "newUpdateShort": "Neu",
+    "selectProduct": "Produkt auswählen",
+    "selectProductDesc": "Wählen Sie ein digitales Produkt aus, um dessen Updates zu verwalten",
+    "noProducts": "Keine digitalen Produkte",
+    "noProductsDesc": "Erstellen Sie zuerst ein digitales Produkt, um dessen Updates zu verwalten",
+    "createProduct": "Digitales Produkt erstellen",
+    "currentVersion": "Aktuelle Version: {{version}}",
+    "productWithoutName": "Produkt ohne Namen",
+    "tabs": {
+      "updates": "Updates",
+      "updatesShort": "Updates",
+      "stats": "Statistiken",
+      "statsShort": "Stat.",
+      "settings": "Einstellungen",
+      "settingsShort": "Einst."
+    }
+  },
+  "recurringBookings": {
+    "title": "Wiederkehrende Buchungen",
+    "subtitle": "Verwalten Sie Ihre wiederkehrenden Buchungsserien",
+    "noStore": "Kein Shop gefunden",
+    "noStoreDesc": "Bitte erstellen Sie einen Shop, um Ihre wiederkehrenden Buchungen zu verwalten",
+    "stats": {
+      "total": "Gesamt",
+      "active": "Aktiv",
+      "bookings": "Buchungen",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert"
+    }
+  },
+  "shipping": {
+    "title": "Versand",
+    "country": "Land",
+    "countryRequired": "Land erforderlich",
+    "selectCountry": "Land auswählen",
+    "city": "Stadt",
+    "cityPlaceholder": "Z.B: Dakar",
+    "postalCode": "Postleitzahl",
+    "postalCodePlaceholder": "Z.B: 75001",
+    "calculate": "Versand berechnen",
+    "calculating": "Berechnung läuft...",
+    "calculationError": "Fehler bei der Versandberechnung",
+    "baseShipping": "Grundversand",
+    "insurance": "Versicherung",
+    "specializedPackaging": "Spezialverpackung",
+    "specialHandling": "Spezialbehandlung",
+    "totalShipping": "Gesamtversand",
+    "estimatedDelivery": "Geschätzte Lieferung: {{days}} Tage",
+    "recommendedCarriers": "Empfohlene Spediteure:",
+    "status": {
+      "pending": "Ausstehend",
+      "labelCreated": "Etikett erstellt",
+      "pickedUp": "Abgeholt",
+      "inTransit": "Unterwegs",
+      "outForDelivery": "Zur Zustellung",
+      "delivered": "Zugestellt",
+      "failed": "Fehlgeschlagen",
+      "returned": "Zurückgegeben",
+      "cancelled": "Storniert"
+    },
+    "origin": "Ursprung",
+    "destination": "Ziel",
+    "estimatedDeliveryLabel": "Geschätzte Lieferung",
+    "deliveredOn": "Zugestellt am",
+    "weight": "Gewicht",
+    "cost": "Kosten",
+    "createdOn": "Erstellt am",
+    "track": "Verfolgen",
+    "label": "Etikett",
+    "cancelShipment": "Versand stornieren",
+    "cancelShipmentConfirm": "Sind Sie sicher, dass Sie diesen Versand stornieren möchten?",
+    "detailedTracking": "detaillierte Verfolgung",
+    "artistCalculator": {
+      "title": "Spezialversand-Rechner",
+      "description": "Berechnen Sie die spezialisierten Versandkosten für dieses Kunstwerk"
+    }
+  },
+  "countries": {
+    "SN": "Senegal",
+    "CI": "Elfenbeinküste",
+    "ML": "Mali",
+    "BF": "Burkina Faso",
+    "FR": "Frankreich",
+    "BE": "Belgien",
+    "CH": "Schweiz"
   }
 }
-

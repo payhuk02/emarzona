@@ -1,41 +1,53 @@
 {
-  "name": "Payhuk - Marketplace Digital",
-  "short_name": "Payhuk",
-  "description": "Marketplace de produits digitaux et solution de paiement en ligne",
-  "start_url": "/?source=pwa",
-  "scope": "/",
+  "name": "Emarzona - Plateforme de ecommerce et marketing",
+  "short_name": "Emarzona",
+  "description": "Plateforme de ecommerce et marketing - Solution SaaS E-commerce multi-vendeurs pour produits digitaux, physiques, services et cours en ligne",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0f2a",
-  "theme_color": "#007bff",
+  "background_color": "#ffffff",
+  "theme_color": "#3B82F6",
   "orientation": "portrait-primary",
+  "scope": "/",
   "icons": [
     {
-      "src": "/payhuk-logo.png",
+      "src": "/emarzona-logo.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/payhuk-logo.png",
+      "src": "/emarzona-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    },
-    {
-      "src": "/favicon.ico?v=2",
-      "sizes": "64x64 32x32 16x16",
-      "type": "image/x-icon"
     }
   ],
+  "categories": ["shopping", "business", "education"],
+  "screenshots": [],
   "shortcuts": [
     {
-      "name": "Ouvrir Payhuk",
-      "short_name": "Accueil",
-      "url": "/"
+      "name": "Marketplace",
+      "short_name": "Marketplace",
+      "description": "Accéder au marketplace",
+      "url": "/marketplace",
+      "icons": [{ "src": "/favicon.ico", "sizes": "192x192" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Accéder au tableau de bord",
+      "url": "/dashboard",
+      "icons": [{ "src": "/favicon.ico", "sizes": "192x192" }]
     }
   ],
-  "lang": "fr",
-  "dir": "ltr",
-  "categories": ["shopping", "business", "finance", "productivity"],
-  "prefer_related_applications": false
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }

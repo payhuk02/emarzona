@@ -1,7 +1,7 @@
 /**
  * Page My Favorites - Mes Favoris (Customer Portal)
  * Date: 26 Janvier 2025
- * 
+ *
  * Fonctionnalités:
  * - Liste tous produits favoris
  * - Statistiques favoris
@@ -33,6 +33,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
 import { useCart } from '@/hooks/cart/useCart';
+import type { ProductType } from '@/types/cart';
 import {
   Heart,
   Search,
@@ -80,9 +81,10 @@ interface FavoriteProduct {
 export default function MyFavorites() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { favorites, toggleFavorite, clearAllFavorites, favoritesCount } = useMarketplaceFavorites();
+  const { favorites, toggleFavorite, clearAllFavorites, favoritesCount } =
+    useMarketplaceFavorites();
   const { addItem } = useCart();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<ProductType>('all');
   const [sortOption, setSortOption] = useState<SortOption>('date');
@@ -102,7 +104,8 @@ export default function MyFavorites() {
 
       let query = supabase
         .from('user_favorites')
-        .select(`
+        .select(
+          `
           id,
           product_id,
           created_at,
@@ -123,7 +126,8 @@ export default function MyFavorites() {
               slug
             )
           )
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .in('product_id', Array.from(favorites));
 
@@ -137,12 +141,10 @@ export default function MyFavorites() {
       if (error) throw error;
 
       // Sort products
-      let sorted = (data as FavoriteProduct[]) || [];
+      const sorted = (data as FavoriteProduct[]) || [];
 
       if (sortOption === 'date') {
-        sorted.sort((a, b) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
+        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       } else if (sortOption === 'price_asc') {
         sorted.sort((a, b) => {
           const priceA = a.product.promotional_price || a.product.price;
@@ -165,10 +167,11 @@ export default function MyFavorites() {
   });
 
   // Filter by search query
-  const filteredProducts = favoriteProducts?.filter((item) => {
-    const productName = item.product?.name || '';
-    return productName.toLowerCase().includes(searchQuery.toLowerCase());
-  }) || [];
+  const filteredProducts =
+    favoriteProducts?.filter(item => {
+      const productName = item.product?.name || '';
+      return productName.toLowerCase().includes(searchQuery.toLowerCase());
+    }) || [];
 
   // Statistics
   const stats = {
@@ -179,11 +182,13 @@ export default function MyFavorites() {
     course: favoriteProducts?.filter(p => p.product?.product_type === 'course').length || 0,
   };
 
-  const handleAddToCart = async (product: any) => {
+  const handleAddToCart = async (
+    product: FavoriteProduct['product'] & { id: string; product_type: string }
+  ) => {
     try {
       await addItem({
         product_id: product.id,
-        product_type: product.product_type as any,
+        product_type: product.product_type as ProductType,
         quantity: 1,
       });
     } catch (error) {
@@ -215,7 +220,7 @@ export default function MyFavorites() {
             <div className="max-w-7xl mx-auto space-y-6">
               <Skeleton className="h-10 w-64" />
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map((i) => (
+                {[1, 2, 3, 4].map(i => (
                   <Skeleton key={i} className="h-32" />
                 ))}
               </div>
@@ -240,11 +245,12 @@ export default function MyFavorites() {
                     variant="ghost"
                     size="icon"
                     onClick={() => navigate('/account')}
+                    aria-label="Retour au compte"
                   >
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
-                  <h1 className="text-3xl font-bold flex items-center gap-2">
-                    <Heart className="h-8 w-8 text-red-500 fill-red-500" />
+                  <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
+                    <Heart className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-red-500 fill-red-500" />
                     Mes Favoris
                   </h1>
                 </div>
@@ -272,57 +278,87 @@ export default function MyFavorites() {
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total</CardTitle>
-                  <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
+                    Total
+                  </CardTitle>
+                  <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-500 fill-red-500" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.total}</div>
-                  <p className="text-xs text-muted-foreground">Produits favoris</p>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">
+                    {stats.total}
+                  </div>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+                    Produits favoris
+                  </p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Digitaux</CardTitle>
-                  <Download className="h-4 w-4 text-blue-600" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
+                    Digitaux
+                  </CardTitle>
+                  <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">{stats.digital}</div>
-                  <p className="text-xs text-muted-foreground">Produits</p>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-blue-600">
+                    {stats.digital}
+                  </div>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+                    Produits
+                  </p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Physiques</CardTitle>
-                  <Package className="h-4 w-4 text-green-600" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
+                    Physiques
+                  </CardTitle>
+                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{stats.physical}</div>
-                  <p className="text-xs text-muted-foreground">Produits</p>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-green-600">
+                    {stats.physical}
+                  </div>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+                    Produits
+                  </p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Services</CardTitle>
-                  <Calendar className="h-4 w-4 text-purple-600" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
+                    Services
+                  </CardTitle>
+                  <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-purple-600">{stats.service}</div>
-                  <p className="text-xs text-muted-foreground">Produits</p>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-purple-600">
+                    {stats.service}
+                  </div>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+                    Produits
+                  </p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Cours</CardTitle>
-                  <BookOpen className="h-4 w-4 text-orange-600" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
+                    Cours
+                  </CardTitle>
+                  <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-orange-600">{stats.course}</div>
-                  <p className="text-xs text-muted-foreground">Produits</p>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-orange-600">
+                    {stats.course}
+                  </div>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+                    Produits
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -337,13 +373,13 @@ export default function MyFavorites() {
                     <Input
                       placeholder="Rechercher un produit..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={e => setSearchQuery(e.target.value)}
                       className="pl-10"
                     />
                   </div>
 
                   {/* Type Filter */}
-                  <Tabs value={typeFilter} onValueChange={(v) => setTypeFilter(v as ProductType)}>
+                  <Tabs value={typeFilter} onValueChange={v => setTypeFilter(v as ProductType)}>
                     <TabsList>
                       <TabsTrigger value="all">Tous</TabsTrigger>
                       <TabsTrigger value="digital">Digitaux</TabsTrigger>
@@ -354,7 +390,7 @@ export default function MyFavorites() {
                   </Tabs>
 
                   {/* Sort */}
-                  <Tabs value={sortOption} onValueChange={(v) => setSortOption(v as SortOption)}>
+                  <Tabs value={sortOption} onValueChange={v => setSortOption(v as SortOption)}>
                     <TabsList>
                       <TabsTrigger value="date">
                         <SortAsc className="h-4 w-4 mr-1" />
@@ -372,6 +408,7 @@ export default function MyFavorites() {
                       variant={viewMode === 'grid' ? 'default' : 'outline'}
                       size="icon"
                       onClick={() => setViewMode('grid')}
+                      aria-label="Vue en grille"
                     >
                       <Grid className="h-4 w-4" />
                     </Button>
@@ -379,6 +416,7 @@ export default function MyFavorites() {
                       variant={viewMode === 'list' ? 'default' : 'outline'}
                       size="icon"
                       onClick={() => setViewMode('list')}
+                      aria-label="Vue en liste"
                     >
                       <List className="h-4 w-4" />
                     </Button>
@@ -391,7 +429,8 @@ export default function MyFavorites() {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  {filteredProducts.length} {filteredProducts.length === 1 ? 'produit favori' : 'produits favoris'}
+                  {filteredProducts.length}{' '}
+                  {filteredProducts.length === 1 ? 'produit favori' : 'produits favoris'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -402,12 +441,12 @@ export default function MyFavorites() {
                       {searchQuery || typeFilter !== 'all'
                         ? 'Aucun produit ne correspond à vos critères'
                         : favoritesCount === 0
-                        ? 'Aucun favori'
-                        : 'Aucun produit trouvé'}
+                          ? 'Aucun favori'
+                          : 'Aucun produit trouvé'}
                     </h3>
                     <p className="text-muted-foreground mb-4">
                       {favoritesCount === 0
-                        ? 'Ajoutez des produits à vos favoris en cliquant sur l\'icône cœur'
+                        ? "Ajoutez des produits à vos favoris en cliquant sur l'icône cœur"
                         : 'Essayez de modifier vos filtres de recherche'}
                     </p>
                     {favoritesCount === 0 && (
@@ -418,10 +457,11 @@ export default function MyFavorites() {
                   </div>
                 ) : viewMode === 'grid' ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredProducts.map((item) => {
+                    {filteredProducts.map(item => {
                       const product = item.product;
                       const price = product.promotional_price || product.price;
-                      const hasPromo = product.promotional_price && product.promotional_price < product.price;
+                      const hasPromo =
+                        product.promotional_price && product.promotional_price < product.price;
 
                       return (
                         <Card key={item.id} className="hover:shadow-lg transition-shadow">
@@ -437,6 +477,7 @@ export default function MyFavorites() {
                                 size="icon"
                                 className="absolute top-2 right-2 bg-white/90 hover:bg-white"
                                 onClick={() => handleRemoveFavorite(product.id)}
+                                aria-label={`Retirer ${product.name} des favoris`}
                               >
                                 <Heart className="h-5 w-5 text-red-500 fill-red-500" />
                               </Button>
@@ -445,7 +486,9 @@ export default function MyFavorites() {
                           <CardHeader>
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
-                                <CardTitle className="line-clamp-2 text-lg">{product.name}</CardTitle>
+                                <CardTitle className="line-clamp-2 text-lg">
+                                  {product.name}
+                                </CardTitle>
                                 {product.stores && (
                                   <CardDescription className="mt-1">
                                     Par {product.stores.name}
@@ -470,13 +513,10 @@ export default function MyFavorites() {
 
                             {/* Actions */}
                             <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1"
-                                asChild
-                              >
-                                <Link to={`/stores/${product.stores?.slug}/products/${product.slug}`}>
+                              <Button variant="outline" size="sm" className="flex-1" asChild>
+                                <Link
+                                  to={`/stores/${product.stores?.slug}/products/${product.slug}`}
+                                >
                                   <Eye className="h-4 w-4 mr-2" />
                                   Voir
                                 </Link>
@@ -497,10 +537,11 @@ export default function MyFavorites() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {filteredProducts.map((item) => {
+                    {filteredProducts.map(item => {
                       const product = item.product;
                       const price = product.promotional_price || product.price;
-                      const hasPromo = product.promotional_price && product.promotional_price < product.price;
+                      const hasPromo =
+                        product.promotional_price && product.promotional_price < product.price;
 
                       return (
                         <Card key={item.id} className="hover:shadow-lg transition-shadow">
@@ -525,13 +566,16 @@ export default function MyFavorites() {
                                     <div className="flex items-center gap-3 flex-wrap">
                                       <Badge variant="outline">
                                         {getProductTypeIcon(product.product_type)}
-                                        <span className="ml-1 capitalize">{product.product_type}</span>
+                                        <span className="ml-1 capitalize">
+                                          {product.product_type}
+                                        </span>
                                       </Badge>
                                       {product.category && (
                                         <Badge variant="secondary">{product.category}</Badge>
                                       )}
                                       <span className="text-sm text-muted-foreground">
-                                        Ajouté le {new Date(item.created_at).toLocaleDateString('fr-FR')}
+                                        Ajouté le{' '}
+                                        {new Date(item.created_at).toLocaleDateString('fr-FR')}
                                       </span>
                                     </div>
                                   </div>
@@ -547,20 +591,15 @@ export default function MyFavorites() {
                                       </p>
                                     </div>
                                     <div className="flex gap-2">
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        asChild
-                                      >
-                                        <Link to={`/stores/${product.stores?.slug}/products/${product.slug}`}>
+                                      <Button variant="outline" size="sm" asChild>
+                                        <Link
+                                          to={`/stores/${product.stores?.slug}/products/${product.slug}`}
+                                        >
                                           <Eye className="h-4 w-4 mr-2" />
                                           Voir
                                         </Link>
                                       </Button>
-                                      <Button
-                                        size="sm"
-                                        onClick={() => handleAddToCart(product)}
-                                      >
+                                      <Button size="sm" onClick={() => handleAddToCart(product)}>
                                         <ShoppingBag className="h-4 w-4 mr-2" />
                                         Panier
                                       </Button>
@@ -568,6 +607,7 @@ export default function MyFavorites() {
                                         variant="ghost"
                                         size="icon"
                                         onClick={() => handleRemoveFavorite(product.id)}
+                                        aria-label={`Retirer ${product.name} des favoris`}
                                       >
                                         <Heart className="h-5 w-5 text-red-500 fill-red-500" />
                                       </Button>
@@ -590,4 +630,3 @@ export default function MyFavorites() {
     </SidebarProvider>
   );
 }
-

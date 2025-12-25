@@ -1,6 +1,6 @@
 /**
  * LicenseManagementDashboard - Tableau de bord de gestion des licences
- * 
+ *
  * Interface professionnelle pour vendeurs permettant de :
  * - Voir toutes les licences d'un produit
  * - Générer de nouvelles licences
@@ -10,7 +10,7 @@
  */
 
 import { useState } from 'react';
-import { 
+import {
   useLicenseManagement,
   type DigitalProductLicense,
   formatLicenseKey,
@@ -21,7 +21,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -79,19 +79,15 @@ export const LicenseManagementDashboard = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLicense, setSelectedLicense] = useState<DigitalProductLicense | null>(null);
   const [showGenerator, setShowGenerator] = useState(false);
-  
-  const {
-    licenses,
-    loadingLicenses,
-    revokeLicense,
-    isRevoking,
-    useActivations,
-  } = useLicenseManagement(productId);
+
+  const { licenses, loadingLicenses, revokeLicense, isRevoking, useActivations } =
+    useLicenseManagement(productId);
 
   // Filtrer les licences
-  const filteredLicenses = licenses.filter(license =>
-    license.license_key.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    license.customer_id?.includes(searchQuery)
+  const filteredLicenses = licenses.filter(
+    license =>
+      license.license_key.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      license.customer_id?.includes(searchQuery)
   );
 
   // Statistiques
@@ -115,7 +111,7 @@ export const LicenseManagementDashboard = ({
   // Révoquer une licence
   const handleRevoke = async (licenseId: string) => {
     if (!confirm('Êtes-vous sûr de vouloir révoquer cette licence ?')) return;
-    
+
     try {
       await revokeLicense(licenseId);
     } catch (error) {
@@ -129,10 +125,18 @@ export const LicenseManagementDashboard = ({
       return <Badge variant="destructive">Révoquée</Badge>;
     }
     if (isLicenseExpired(license)) {
-      return <Badge variant="outline" className="border-orange-500 text-orange-500">Expirée</Badge>;
+      return (
+        <Badge variant="outline" className="border-orange-500 text-orange-500">
+          Expirée
+        </Badge>
+      );
     }
     if (license.status === 'active') {
-      return <Badge variant="default" className="bg-green-500">Active</Badge>;
+      return (
+        <Badge variant="default" className="bg-green-500">
+          Active
+        </Badge>
+      );
     }
     return <Badge variant="secondary">{license.status}</Badge>;
   };
@@ -145,7 +149,7 @@ export const LicenseManagementDashboard = ({
       unlimited: 'bg-yellow-100 text-yellow-800',
       subscription: 'bg-green-100 text-green-800',
     };
-    
+
     const labels = {
       single: 'Unique',
       multi: 'Multi',
@@ -169,11 +173,9 @@ export const LicenseManagementDashboard = ({
             <Key className="h-6 w-6 text-primary" />
             Gestion des Licences
           </h2>
-          <p className="text-muted-foreground">
-            {productName}
-          </p>
+          <p className="text-muted-foreground">{productName}</p>
         </div>
-        
+
         <Button onClick={() => setShowGenerator(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Générer une licence
@@ -235,11 +237,11 @@ export const LicenseManagementDashboard = ({
           <Input
             placeholder="Rechercher par clé de licence..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             className="pl-10"
           />
         </div>
-        
+
         <Button variant="outline">
           <Download className="h-4 w-4 mr-2" />
           Exporter
@@ -253,9 +255,7 @@ export const LicenseManagementDashboard = ({
         </CardHeader>
         <CardContent>
           {loadingLicenses ? (
-            <div className="text-center py-12 text-muted-foreground">
-              Chargement...
-            </div>
+            <div className="text-center py-12 text-muted-foreground">Chargement...</div>
           ) : filteredLicenses.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Key className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -279,7 +279,7 @@ export const LicenseManagementDashboard = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredLicenses.map((license) => (
+                {filteredLicenses.map(license => (
                   <TableRow key={license.id}>
                     <TableCell className="font-mono">
                       <div className="flex items-center gap-2">
@@ -288,6 +288,7 @@ export const LicenseManagementDashboard = ({
                           size="sm"
                           variant="ghost"
                           onClick={() => handleCopyKey(license.license_key)}
+                          aria-label="Copier la clé de licence"
                         >
                           <Copy className="h-3 w-3" />
                         </Button>
@@ -335,7 +336,11 @@ export const LicenseManagementDashboard = ({
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            aria-label={`Actions pour la licence ${license.license_key || license.id}`}
+                          >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -421,12 +426,8 @@ const LicenseDetailDialog = ({ license, open, onClose }: LicenseDetailDialogProp
         <Tabs defaultValue="info">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="info">Informations</TabsTrigger>
-            <TabsTrigger value="activations">
-              Activations ({activations.length})
-            </TabsTrigger>
-            <TabsTrigger value="history">
-              Historique ({events.length})
-            </TabsTrigger>
+            <TabsTrigger value="activations">Activations ({activations.length})</TabsTrigger>
+            <TabsTrigger value="history">Historique ({events.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="info" className="space-y-4">
@@ -454,17 +455,17 @@ const LicenseDetailDialog = ({ license, open, onClose }: LicenseDetailDialogProp
 
           <TabsContent value="activations">
             {activations.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">
-                Aucune activation
-              </p>
+              <p className="text-center py-8 text-muted-foreground">Aucune activation</p>
             ) : (
               <div className="space-y-2">
-                {activations.map((activation) => (
+                {activations.map(activation => (
                   <Card key={activation.id}>
                     <CardContent className="pt-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium">{activation.device_name || 'Appareil inconnu'}</p>
+                          <p className="font-medium">
+                            {activation.device_name || 'Appareil inconnu'}
+                          </p>
                           <p className="text-sm text-muted-foreground">
                             IP: {activation.ip_address}
                           </p>
@@ -482,12 +483,10 @@ const LicenseDetailDialog = ({ license, open, onClose }: LicenseDetailDialogProp
 
           <TabsContent value="history">
             {events.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">
-                Aucun événement
-              </p>
+              <p className="text-center py-8 text-muted-foreground">Aucun événement</p>
             ) : (
               <div className="space-y-2">
-                {events.map((event) => (
+                {events.map(event => (
                   <div key={event.id} className="flex items-start gap-3 text-sm">
                     <div className="text-muted-foreground">
                       {format(new Date(event.created_at), 'HH:mm', { locale: fr })}
@@ -549,9 +548,7 @@ const LicenseGeneratorDialog = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Générer une Nouvelle Licence</DialogTitle>
-          <DialogDescription>
-            La clé sera générée automatiquement
-          </DialogDescription>
+          <DialogDescription>La clé sera générée automatiquement</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -559,8 +556,8 @@ const LicenseGeneratorDialog = ({
             <label className="text-sm font-medium">Type de licence</label>
             <select
               value={licenseType}
-              onChange={(e) => setLicenseType(e.target.value as any)}
-              className="w-full mt-1 p-2 border rounded"
+              onChange={e => setLicenseType(e.target.value as 'single' | 'multi' | 'unlimited')}
+              className="w-full mt-1 p-2 min-h-[44px] border rounded text-base sm:text-sm touch-manipulation cursor-pointer"
             >
               <option value="single">Unique (1 activation)</option>
               <option value="multi">Multi (plusieurs activations)</option>
@@ -576,16 +573,12 @@ const LicenseGeneratorDialog = ({
                 min={1}
                 max={100}
                 value={maxActivations}
-                onChange={(e) => setMaxActivations(parseInt(e.target.value))}
+                onChange={e => setMaxActivations(parseInt(e.target.value))}
               />
             </div>
           )}
 
-          <Button
-            onClick={handleGenerate}
-            disabled={isGenerating}
-            className="w-full"
-          >
+          <Button onClick={handleGenerate} disabled={isGenerating} className="w-full">
             {isGenerating ? 'Génération...' : 'Générer la Licence'}
           </Button>
         </div>
@@ -593,4 +586,3 @@ const LicenseGeneratorDialog = ({
     </Dialog>
   );
 };
-

@@ -1,7 +1,7 @@
 /**
  * Warranties Management Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les garanties, enregistrements et réclamations
  */
 
@@ -25,7 +25,7 @@ export interface ProductWarranty {
   duration_months: number;
   starts_from: 'purchase' | 'manufacture' | 'delivery';
   coverage_type: 'full' | 'parts_only' | 'labor_only' | 'partial';
-  coverage_details: Record<string, any>;
+  coverage_details: Record<string, unknown>;
   conditions?: string;
   exclusions?: string;
   requires_registration: boolean;
@@ -62,8 +62,8 @@ export interface WarrantyRegistration {
   customer_name: string;
   customer_email: string;
   customer_phone?: string;
-  customer_address?: Record<string, any>;
-  registration_data: Record<string, any>;
+  customer_address?: Record<string, unknown>;
+  registration_data: Record<string, unknown>;
   notes?: string;
   created_at: string;
   updated_at: string;
@@ -78,7 +78,14 @@ export interface WarrantyClaim {
   claim_type: 'repair' | 'replacement' | 'refund' | 'credit';
   description: string;
   issue_category?: string;
-  status: 'submitted' | 'under_review' | 'approved' | 'rejected' | 'in_progress' | 'completed' | 'cancelled';
+  status:
+    | 'submitted'
+    | 'under_review'
+    | 'approved'
+    | 'rejected'
+    | 'in_progress'
+    | 'completed'
+    | 'cancelled';
   submitted_date: string;
   review_date?: string;
   approved_date?: string;
@@ -122,7 +129,8 @@ export const useProductWarranties = (productId?: string, variantId?: string) => 
         query = query.is('variant_id', null);
       }
 
-      query = query.order('is_default', { ascending: false })
+      query = query
+        .order('is_default', { ascending: false })
         .order('duration_months', { ascending: false });
 
       const { data, error } = await query;
@@ -141,10 +149,13 @@ export const useProductWarranties = (productId?: string, variantId?: string) => 
 /**
  * useWarrantyRegistrations - Récupère les enregistrements de garantie
  */
-export const useWarrantyRegistrations = (userId?: string, filters?: {
-  status?: WarrantyRegistration['status'];
-  expired?: boolean;
-}) => {
+export const useWarrantyRegistrations = (
+  userId?: string,
+  filters?: {
+    status?: WarrantyRegistration['status'];
+    expired?: boolean;
+  }
+) => {
   return useQuery({
     queryKey: ['warranty-registrations', userId, filters],
     queryFn: async () => {
@@ -152,20 +163,22 @@ export const useWarrantyRegistrations = (userId?: string, filters?: {
 
       let query = supabase
         .from('warranty_registrations')
-        .select(`
+        .select(
+          `
           *,
-          warranty:product_warranties (
+          product_warranties (
             id,
             warranty_name,
             warranty_type,
             duration_months
           ),
-          product:products (
+          products (
             id,
             name,
             image_url
           )
-        `)
+        `
+        )
         .eq('user_id', userId);
 
       if (filters?.status) {
@@ -193,10 +206,13 @@ export const useWarrantyRegistrations = (userId?: string, filters?: {
 /**
  * useWarrantyClaims - Récupère les réclamations
  */
-export const useWarrantyClaims = (userId?: string, filters?: {
-  status?: WarrantyClaim['status'];
-  storeId?: string;
-}) => {
+export const useWarrantyClaims = (
+  userId?: string,
+  filters?: {
+    status?: WarrantyClaim['status'];
+    storeId?: string;
+  }
+) => {
   return useQuery({
     queryKey: ['warranty-claims', userId, filters],
     queryFn: async () => {
@@ -204,14 +220,16 @@ export const useWarrantyClaims = (userId?: string, filters?: {
 
       let query = supabase
         .from('warranty_claims')
-        .select(`
+        .select(
+          `
           *,
           registration:warranty_registrations (
             id,
             registration_number,
             product:products (id, name)
           )
-        `)
+        `
+        )
         .eq('user_id', userId);
 
       if (filters?.status) {
@@ -275,10 +293,12 @@ export const useRegisterWarranty = () => {
       customerName: string;
       customerEmail: string;
       customerPhone?: string;
-      customerAddress?: Record<string, any>;
+      customerAddress?: Record<string, unknown>;
     }) => {
       // Générer numéro d'enregistrement
-      const { data: registrationNumber, error: regNumberError } = await supabase.rpc('generate_warranty_registration_number');
+      const { data: registrationNumber, error: regNumberError } = await supabase.rpc(
+        'generate_warranty_registration_number'
+      );
       if (regNumberError) throw regNumberError;
 
       // Récupérer la garantie pour calculer les dates
@@ -296,7 +316,9 @@ export const useRegisterWarranty = () => {
       endDate.setMonth(endDate.getMonth() + warranty.duration_months);
 
       // Récupérer user_id
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non authentifié');
 
       // Créer enregistrement
@@ -331,18 +353,20 @@ export const useRegisterWarranty = () => {
 
       return data as WarrantyRegistration;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['warranty-registrations', data.user_id] });
       toast({
         title: '✅ Garantie enregistrée',
         description: `Votre garantie ${data.registration_number} a été enregistrée`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error in useRegisterWarranty', { error });
+      const errorMessage =
+        error instanceof Error ? error.message : "Impossible d'enregistrer la garantie";
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'enregistrer la garantie',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -377,11 +401,15 @@ export const useCreateWarrantyClaim = () => {
       priority?: WarrantyClaim['priority'];
     }) => {
       // Générer numéro de réclamation
-      const { data: claimNumber, error: claimNumberError } = await supabase.rpc('generate_warranty_claim_number');
+      const { data: claimNumber, error: claimNumberError } = await supabase.rpc(
+        'generate_warranty_claim_number'
+      );
       if (claimNumberError) throw claimNumberError;
 
       // Récupérer user_id
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non authentifié');
 
       // Créer réclamation
@@ -410,21 +438,22 @@ export const useCreateWarrantyClaim = () => {
 
       return data as WarrantyClaim;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['warranty-claims', data.user_id] });
       toast({
         title: '✅ Réclamation créée',
         description: `Votre réclamation ${data.claim_number} a été soumise`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error in useCreateWarrantyClaim', { error });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Impossible de créer la réclamation';
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer la réclamation',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
   });
 };
-

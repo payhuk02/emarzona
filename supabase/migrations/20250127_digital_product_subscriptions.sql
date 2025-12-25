@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK DIGITAL PRODUCT SUBSCRIPTIONS SYSTEM
+-- EMARZONA DIGITAL PRODUCT SUBSCRIPTIONS SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système complet pour produits digitaux avec abonnements récurrents
 -- =====================================================
@@ -134,7 +134,7 @@ BEGIN
       
       -- Payment info
       payment_method_id TEXT,
-      payment_provider TEXT, -- 'moneroo', 'paydunya', etc.
+      payment_provider TEXT, -- ex: 'moneroo'
       
       -- License link (si applicable)
       license_id UUID REFERENCES public.digital_licenses(id) ON DELETE SET NULL,

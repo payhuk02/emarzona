@@ -19,6 +19,9 @@ import {
   FileText,
   CheckCircle2,
   XCircle,
+  FileDown,
+  Globe,
+  Code,
 } from 'lucide-react';
 import {
   useDigitalProductAnalytics,
@@ -26,11 +29,25 @@ import {
   useTopDownloadedFiles,
   useUserDownloadStats,
   useLicenseAnalytics,
+  useGeographicAnalytics,
+  useVersionAnalytics,
+  DownloadTrend,
+  TopFile,
 } from '@/hooks/digital/useDigitalAnalytics';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { subDays } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { exportAnalyticsToPDF, exportAnalyticsToExcel, exportAnalyticsToCSV } from '@/utils/exportDigitalAnalytics';
+import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface DigitalAnalyticsDashboardProps {
   productId: string;
@@ -41,6 +58,7 @@ export const DigitalAnalyticsDashboard = ({
   productId,
   digitalProductId,
 }: DigitalAnalyticsDashboardProps) => {
+  const { toast } = useToast();
   const [dateRange] = useState({
     from: subDays(new Date(), 30),
     to: new Date(),
@@ -51,6 +69,145 @@ export const DigitalAnalyticsDashboard = ({
   const { data: topFiles } = useTopDownloadedFiles(digitalProductId, 5);
   const { data: userStats } = useUserDownloadStats(digitalProductId, 10);
   const { data: licenseAnalytics } = useLicenseAnalytics(digitalProductId);
+  const { data: geographicAnalytics } = useGeographicAnalytics(digitalProductId, dateRange);
+  const { data: versionAnalytics } = useVersionAnalytics(digitalProductId, dateRange);
+  
+  // Export handlers
+  const handleExportPDF = async () => {
+    try {
+      await exportAnalyticsToPDF(
+        {
+          total_downloads: analytics?.total_downloads || 0,
+          unique_downloaders: analytics?.unique_downloaders || 0,
+          success_rate: analytics?.success_rate || 0,
+          total_revenue: analytics?.total_revenue || 0,
+          total_bandwidth: analytics?.total_bandwidth || 0,
+          trends: trends?.map((t: DownloadTrend) => ({
+            date: t.date,
+            downloads: t.downloads,
+            users: t.users,
+          })),
+          topFiles: topFiles?.map((f: TopFile) => ({
+            filename: f.filename,
+            downloads: f.downloads,
+            size: f.size,
+          })),
+          licenseStats: licenseAnalytics ? {
+            total: licenseAnalytics.total_licenses || 0,
+            active: licenseAnalytics.active_licenses || 0,
+            expired: licenseAnalytics.expired_licenses || 0,
+            suspended: licenseAnalytics.suspended_licenses || 0,
+          } : undefined,
+        },
+        {
+          format: 'pdf',
+          dateRange,
+          includeCharts: true,
+        }
+      );
+      toast({
+        title: 'Export réussi',
+        description: 'Le rapport PDF a été téléchargé avec succès',
+      });
+    } catch (error) {
+      logger.error('Erreur lors de l\'export PDF', { error });
+      toast({
+        title: 'Erreur',
+        description: 'Impossible d\'exporter le rapport PDF',
+        variant: 'destructive',
+      });
+    }
+  };
+  
+  const handleExportExcel = () => {
+    try {
+      exportAnalyticsToExcel(
+        {
+          total_downloads: analytics?.total_downloads || 0,
+          unique_downloaders: analytics?.unique_downloaders || 0,
+          success_rate: analytics?.success_rate || 0,
+          total_revenue: analytics?.total_revenue || 0,
+          total_bandwidth: analytics?.total_bandwidth || 0,
+          trends: trends?.map((t: DownloadTrend) => ({
+            date: t.date,
+            downloads: t.downloads,
+            users: t.users,
+          })),
+          topFiles: topFiles?.map((f: TopFile) => ({
+            filename: f.filename,
+            downloads: f.downloads,
+            size: f.size,
+          })),
+          licenseStats: licenseAnalytics ? {
+            total: licenseAnalytics.total_licenses || 0,
+            active: licenseAnalytics.active_licenses || 0,
+            expired: licenseAnalytics.expired_licenses || 0,
+            suspended: licenseAnalytics.suspended_licenses || 0,
+          } : undefined,
+        },
+        {
+          format: 'excel',
+          dateRange,
+        }
+      );
+      toast({
+        title: 'Export réussi',
+        description: 'Le rapport Excel a été téléchargé avec succès',
+      });
+    } catch (error) {
+      logger.error('Erreur lors de l\'export Excel', { error });
+      toast({
+        title: 'Erreur',
+        description: 'Impossible d\'exporter le rapport Excel',
+        variant: 'destructive',
+      });
+    }
+  };
+  
+  const handleExportCSV = () => {
+    try {
+      exportAnalyticsToCSV(
+        {
+          total_downloads: analytics?.total_downloads || 0,
+          unique_downloaders: analytics?.unique_downloaders || 0,
+          success_rate: analytics?.success_rate || 0,
+          total_revenue: analytics?.total_revenue || 0,
+          total_bandwidth: analytics?.total_bandwidth || 0,
+          trends: trends?.map((t: DownloadTrend) => ({
+            date: t.date,
+            downloads: t.downloads,
+            users: t.users,
+          })),
+          topFiles: topFiles?.map((f: TopFile) => ({
+            filename: f.filename,
+            downloads: f.downloads,
+            size: f.size,
+          })),
+          licenseStats: licenseAnalytics ? {
+            total: licenseAnalytics.total_licenses || 0,
+            active: licenseAnalytics.active_licenses || 0,
+            expired: licenseAnalytics.expired_licenses || 0,
+            suspended: licenseAnalytics.suspended_licenses || 0,
+          } : undefined,
+        },
+        {
+          format: 'csv',
+          dateRange,
+        }
+      );
+      toast({
+        title: 'Export réussi',
+        description: 'Le rapport CSV a été téléchargé avec succès',
+      });
+    } catch (error) {
+      logger.error('Erreur lors de l\'export CSV', { error });
+      toast({
+        title: 'Erreur',
+        description: 'Impossible d\'exporter le rapport CSV',
+        variant: 'destructive',
+      });
+    }
+  };
 
   if (analyticsLoading) {
     return (
@@ -70,6 +227,32 @@ export const DigitalAnalyticsDashboard = ({
 
   return (
     <div className="space-y-6">
+      {/* Export Button */}
+      <div className="flex justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <FileDown className="h-4 w-4 mr-2" />
+              Exporter
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleExportPDF}>
+              <FileText className="h-4 w-4 mr-2" />
+              Export PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportExcel}>
+              <FileText className="h-4 w-4 mr-2" />
+              Export Excel
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportCSV}>
+              <FileText className="h-4 w-4 mr-2" />
+              Export CSV
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      
       {/* Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
@@ -140,6 +323,8 @@ export const DigitalAnalyticsDashboard = ({
       <Tabs defaultValue="trends" className="w-full">
         <TabsList>
           <TabsTrigger value="trends">Tendances</TabsTrigger>
+          <TabsTrigger value="geographic">Géographique</TabsTrigger>
+          <TabsTrigger value="versions">Versions</TabsTrigger>
           <TabsTrigger value="files">Fichiers</TabsTrigger>
           <TabsTrigger value="users">Utilisateurs</TabsTrigger>
           <TabsTrigger value="licenses">Licenses</TabsTrigger>
@@ -153,34 +338,196 @@ export const DigitalAnalyticsDashboard = ({
               <CardDescription>30 derniers jours</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={trends || []}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={(value) => format(new Date(value), 'dd MMM', { locale: fr })}
-                  />
-                  <YAxis />
-                  <Tooltip
-                    labelFormatter={(value) => format(new Date(value as string), 'dd MMMM yyyy', { locale: fr })}
-                  />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="downloads"
-                    stroke="#8884d8"
-                    name="Téléchargements"
-                    strokeWidth={2}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="unique_users"
-                    stroke="#82ca9d"
-                    name="Utilisateurs uniques"
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <LazyRechartsWrapper>
+                {(recharts) => (
+                  <recharts.ResponsiveContainer width="100%" height={300}>
+                    <recharts.LineChart data={trends || []}>
+                      <recharts.CartesianGrid strokeDasharray="3 3" />
+                      <recharts.XAxis
+                        dataKey="date"
+                        tickFormatter={(value) => format(new Date(value), 'dd MMM', { locale: fr })}
+                      />
+                      <recharts.YAxis />
+                      <recharts.Tooltip
+                        labelFormatter={(value) => format(new Date(value as string), 'dd MMMM yyyy', { locale: fr })}
+                      />
+                      <recharts.Legend />
+                      <recharts.Line
+                        type="monotone"
+                        dataKey="downloads"
+                        stroke="#8884d8"
+                        name="Téléchargements"
+                        strokeWidth={2}
+                      />
+                      <recharts.Line
+                        type="monotone"
+                        dataKey="unique_users"
+                        stroke="#82ca9d"
+                        name="Utilisateurs uniques"
+                        strokeWidth={2}
+                      />
+                    </recharts.LineChart>
+                  </recharts.ResponsiveContainer>
+                )}
+              </LazyRechartsWrapper>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Geographic Analytics */}
+        <TabsContent value="geographic" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Analytics Géographiques</CardTitle>
+              <CardDescription>Répartition des téléchargements par pays</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {geographicAnalytics && geographicAnalytics.length > 0 ? (
+                <div className="space-y-4">
+                  {/* Bar Chart */}
+                  <LazyRechartsWrapper>
+                    {(recharts) => (
+                      <recharts.ResponsiveContainer width="100%" height={300}>
+                        <recharts.BarChart data={geographicAnalytics.slice(0, 10)}>
+                          <recharts.CartesianGrid strokeDasharray="3 3" />
+                          <recharts.XAxis 
+                            dataKey="country" 
+                            angle={-45}
+                            textAnchor="end"
+                            height={80}
+                          />
+                          <recharts.YAxis />
+                          <recharts.Tooltip />
+                          <recharts.Legend />
+                          <recharts.Bar dataKey="downloads" fill="#8884d8" name="Téléchargements" />
+                          <recharts.Bar dataKey="unique_users" fill="#82ca9d" name="Utilisateurs uniques" />
+                        </recharts.BarChart>
+                      </recharts.ResponsiveContainer>
+                    )}
+                  </LazyRechartsWrapper>
+
+                  {/* Pie Chart */}
+                  <LazyRechartsWrapper>
+                    {(recharts) => (
+                      <recharts.ResponsiveContainer width="100%" height={300}>
+                        <recharts.PieChart>
+                          <recharts.Pie
+                            data={geographicAnalytics.slice(0, 10)}
+                            dataKey="downloads"
+                            nameKey="country"
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={100}
+                            label={(entry) => `${entry.country}: ${entry.downloads}`}
+                          >
+                            {geographicAnalytics.slice(0, 10).map((entry, index) => (
+                              <recharts.Cell key={`cell-${index}`} fill={`hsl(${index * 36}, 70%, 50%)`} />
+                            ))}
+                          </recharts.Pie>
+                          <recharts.Tooltip />
+                          <recharts.Legend />
+                        </recharts.PieChart>
+                      </recharts.ResponsiveContainer>
+                    )}
+                  </LazyRechartsWrapper>
+
+                  {/* Table */}
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Top Pays</h4>
+                    <div className="space-y-2">
+                      {geographicAnalytics.slice(0, 10).map((geo, index) => (
+                        <div key={geo.country} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <h4 className="font-medium">{geo.country}</h4>
+                              <p className="text-xs text-muted-foreground">
+                                {geo.unique_users} utilisateurs uniques
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold">{geo.downloads}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {geo.percentage.toFixed(1)}%
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  Aucune donnée géographique disponible
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Version Analytics */}
+        <TabsContent value="versions" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Analytics par Version</CardTitle>
+              <CardDescription>Répartition des téléchargements par version de fichier</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {versionAnalytics && versionAnalytics.length > 0 ? (
+                <div className="space-y-4">
+                  {/* Bar Chart */}
+                  <LazyRechartsWrapper>
+                    {(recharts) => (
+                      <recharts.ResponsiveContainer width="100%" height={300}>
+                        <recharts.BarChart data={versionAnalytics}>
+                          <recharts.CartesianGrid strokeDasharray="3 3" />
+                          <recharts.XAxis dataKey="version" />
+                          <recharts.YAxis />
+                          <recharts.Tooltip />
+                          <recharts.Legend />
+                          <recharts.Bar dataKey="downloads" fill="#8884d8" name="Téléchargements" />
+                          <recharts.Bar dataKey="unique_users" fill="#82ca9d" name="Utilisateurs uniques" />
+                        </recharts.BarChart>
+                      </recharts.ResponsiveContainer>
+                    )}
+                  </LazyRechartsWrapper>
+
+                  {/* Table */}
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Versions</h4>
+                    <div className="space-y-2">
+                      {versionAnalytics.map((version, index) => (
+                        <div key={version.version} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <h4 className="font-medium">Version {version.version}</h4>
+                              <p className="text-xs text-muted-foreground">
+                                {version.unique_users} utilisateurs uniques • {version.success_rate.toFixed(1)}% succès
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold">{version.downloads}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {version.percentage.toFixed(1)}%
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  Aucune donnée de version disponible
+                </p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -314,33 +661,37 @@ export const DigitalAnalyticsDashboard = ({
               <CardTitle>Répartition des licenses</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart
-                  data={[
-                    {
-                      name: 'Actives',
-                      value: licenseAnalytics?.active_licenses || 0,
-                      fill: '#10b981',
-                    },
-                    {
-                      name: 'Expirées',
-                      value: licenseAnalytics?.expired_licenses || 0,
-                      fill: '#ef4444',
-                    },
-                    {
-                      name: 'Suspendues',
-                      value: licenseAnalytics?.suspended_licenses || 0,
-                      fill: '#f59e0b',
-                    },
-                  ]}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="value" />
-                </BarChart>
-              </ResponsiveContainer>
+              <LazyRechartsWrapper>
+                {(recharts) => (
+                  <recharts.ResponsiveContainer width="100%" height={250}>
+                    <recharts.BarChart
+                      data={[
+                        {
+                          name: 'Actives',
+                          value: licenseAnalytics?.active_licenses || 0,
+                          fill: '#10b981',
+                        },
+                        {
+                          name: 'Expirées',
+                          value: licenseAnalytics?.expired_licenses || 0,
+                          fill: '#ef4444',
+                        },
+                        {
+                          name: 'Suspendues',
+                          value: licenseAnalytics?.suspended_licenses || 0,
+                          fill: '#f59e0b',
+                        },
+                      ]}
+                    >
+                      <recharts.CartesianGrid strokeDasharray="3 3" />
+                      <recharts.XAxis dataKey="name" />
+                      <recharts.YAxis />
+                      <recharts.Tooltip />
+                      <recharts.Bar dataKey="value" />
+                    </recharts.BarChart>
+                  </recharts.ResponsiveContainer>
+                )}
+              </LazyRechartsWrapper>
             </CardContent>
           </Card>
         </TabsContent>

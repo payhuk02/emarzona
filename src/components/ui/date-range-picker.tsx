@@ -1,13 +1,14 @@
-import * as React from "react";
-import { addDays, format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { Calendar as CalendarIcon, X } from "lucide-react";
-import { DateRange } from "react-day-picker";
+import * as React from 'react';
+import { addDays, format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Calendar as CalendarIcon, X } from 'lucide-react';
+import { DateRange } from 'react-day-picker';
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DateRangePickerProps {
   dateRange?: DateRange;
@@ -15,12 +16,9 @@ interface DateRangePickerProps {
   className?: string;
 }
 
-export function DateRangePicker({
-  dateRange,
-  onDateRangeChange,
-  className,
-}: DateRangePickerProps) {
+export function DateRangePicker({ dateRange, onDateRangeChange, className }: DateRangePickerProps) {
   const [open, setOpen] = React.useState(false);
+  const isMobile = useIsMobile();
 
   const handleReset = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -28,15 +26,15 @@ export function DateRangePicker({
   };
 
   return (
-    <div className={cn("grid gap-2", className)}>
+    <div className={cn('grid gap-2', className)}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             id="date"
-            variant={"outline"}
+            variant={'outline'}
             className={cn(
-              "w-full sm:w-[280px] justify-start text-left font-normal",
-              !dateRange && "text-muted-foreground"
+              'w-full sm:w-[280px] justify-start text-left font-normal min-h-[44px]',
+              !dateRange && 'text-muted-foreground'
             )}
             aria-label="Sélectionner une plage de dates"
           >
@@ -44,21 +42,24 @@ export function DateRangePicker({
             {dateRange?.from ? (
               dateRange.to ? (
                 <>
-                  {format(dateRange.from, "dd MMM yyyy", { locale: fr })} -{" "}
-                  {format(dateRange.to, "dd MMM yyyy", { locale: fr })}
+                  {format(dateRange.from, 'dd MMM yyyy', { locale: fr })} -{' '}
+                  {format(dateRange.to, 'dd MMM yyyy', { locale: fr })}
                 </>
               ) : (
-                format(dateRange.from, "dd MMM yyyy", { locale: fr })
+                format(dateRange.from, 'dd MMM yyyy', { locale: fr })
               )
             ) : (
               <span>Filtrer par date</span>
             )}
             {dateRange?.from && (
-              <X
-                className="ml-auto h-4 w-4 opacity-50 hover:opacity-100"
+              <button
+                type="button"
                 onClick={handleReset}
                 aria-label="Réinitialiser les dates"
-              />
+                className="ml-auto inline-flex min-h-[44px] min-w-[44px] items-center justify-center opacity-70 hover:opacity-100 touch-manipulation"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </button>
             )}
           </Button>
         </PopoverTrigger>
@@ -68,21 +69,21 @@ export function DateRangePicker({
             mode="range"
             defaultMonth={dateRange?.from}
             selected={dateRange}
-            onSelect={(range) => {
+            onSelect={range => {
               onDateRangeChange(range);
               // Close popover when both dates are selected
               if (range?.from && range?.to) {
                 setOpen(false);
               }
             }}
-            numberOfMonths={2}
+            numberOfMonths={isMobile ? 1 : 2}
             locale={fr}
           />
           <div className="p-3 border-t border-border flex justify-between items-center gap-2">
             <div className="text-xs text-muted-foreground">
               {dateRange?.from && dateRange?.to
-                ? `${format(dateRange.from, "dd MMM", { locale: fr })} - ${format(dateRange.to, "dd MMM", { locale: fr })}`
-                : "Sélectionnez une plage"}
+                ? `${format(dateRange.from, 'dd MMM', { locale: fr })} - ${format(dateRange.to, 'dd MMM', { locale: fr })}`
+                : 'Sélectionnez une plage'}
             </div>
             <div className="flex gap-2">
               <Button
@@ -95,6 +96,7 @@ export function DateRangePicker({
                   });
                   setOpen(false);
                 }}
+                className="min-h-[44px]"
               >
                 7 jours
               </Button>
@@ -108,6 +110,7 @@ export function DateRangePicker({
                   });
                   setOpen(false);
                 }}
+                className="min-h-[44px]"
               >
                 30 jours
               </Button>
@@ -118,4 +121,3 @@ export function DateRangePicker({
     </div>
   );
 }
-

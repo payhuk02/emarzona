@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 export interface Store {
   id: string;
@@ -14,6 +15,7 @@ export interface Store {
   domain_verification_token: string | null;
   domain_verified_at: string | null;
   domain_error_message: string | null;
+  info_message?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -39,7 +41,7 @@ export const useStore = () => {
         .limit(1);
 
       if (error) {
-        console.error('Error fetching store:', error);
+        logger.error('Error fetching store', { error, userId: user.id });
         setStore(null);
         return;
       }

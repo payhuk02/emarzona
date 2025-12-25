@@ -1,35 +1,54 @@
-import { useState, useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AlertCircle, Eye, EyeOff, Mail, CheckCircle2 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import payhukLogo from "@/assets/payhuk-logo.png";
-import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
-import { SEOMeta } from "@/components/seo/SEOMeta";
-import { OptimizedImage } from "@/components/ui/OptimizedImage";
-import { logger } from "@/lib/logger";
-import { getStoredReferralCode, clearStoredReferralCode } from "@/components/referral/ReferralTracker";
+import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { MobileFormField } from '@/components/ui/mobile-form-field';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { AlertCircle, Eye, EyeOff, Mail, CheckCircle2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { usePlatformLogo } from '@/hooks/usePlatformLogo';
+import { SEOMeta } from '@/components/seo/SEOMeta';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
+import { logger } from '@/lib/logger';
+import {
+  getStoredReferralCode,
+  clearStoredReferralCode,
+} from '@/components/referral/ReferralTracker';
+import { usePageCustomization } from '@/hooks/usePageCustomization';
 
 const Auth = () => {
   const { t } = useTranslation();
+  const { getValue } = usePageCustomization('auth');
+  const platformLogo = usePlatformLogo();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState({ login: false, signup: false });
   const [passwordStrength, setPasswordStrength] = useState<number>(0);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
+  const [resetEmail, setResetEmail] = useState('');
   const [isResetLoading, setIsResetLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
-  const [resetError, setResetError] = useState<string>("");
+  const [resetError, setResetError] = useState<string>('');
+  // États contrôlés pour les formulaires
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [signupName, setSignupName] = useState('');
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -49,7 +68,7 @@ const Auth = () => {
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const type = hashParams.get('type');
       const accessToken = hashParams.get('access_token');
-      
+
       if (type === 'recovery' && accessToken) {
         // User clicked on password reset link from email
         setShowForgotPassword(false);
@@ -84,18 +103,20 @@ const Auth = () => {
 
   const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setResetError("");
+    setResetError('');
     setIsResetLoading(true);
 
     if (!resetEmail || !resetEmail.includes('@')) {
-      setResetError(t('auth.forgotPassword.errorInvalidEmail', 'Veuillez entrer une adresse email valide'));
+      setResetError(
+        t('auth.forgotPassword.errorInvalidEmail', 'Veuillez entrer une adresse email valide')
+      );
       setIsResetLoading(false);
       return;
     }
 
     try {
       const redirectUrl = `${window.location.origin}/auth?type=reset-password`;
-      
+
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo: redirectUrl,
       });
@@ -105,17 +126,24 @@ const Auth = () => {
       setResetSent(true);
       toast({
         title: t('auth.forgotPassword.successTitle', 'Email envoyé'),
-        description: t('auth.forgotPassword.successDescription', `Un email de réinitialisation a été envoyé à ${resetEmail}. Vérifiez votre boîte de réception.`),
+        description: t(
+          'auth.forgotPassword.successDescription',
+          `Un email de réinitialisation a été envoyé à ${resetEmail}. Vérifiez votre boîte de réception.`
+        ),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Reset password error', {
-        error: error.message,
+        error: errorMessage,
         email: resetEmail,
       });
-      setResetError(error.message || t('auth.forgotPassword.error', 'Une erreur est survenue lors de l\'envoi de l\'email'));
+      setResetError(
+        errorMessage ||
+          t('auth.forgotPassword.error', "Une erreur est survenue lors de l'envoi de l'email")
+      );
       toast({
         title: t('auth.forgotPassword.errorTitle', 'Erreur'),
-        description: error.message || t('auth.forgotPassword.error', 'Une erreur est survenue'),
+        description: errorMessage || t('auth.forgotPassword.error', 'Une erreur est survenue'),
         variant: 'destructive',
       });
     } finally {
@@ -125,13 +153,12 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
+    setError('');
     setIsLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email-signup') as string;
-    const password = formData.get('password-signup') as string;
-    const name = formData.get('name') as string;
+    const email = signupEmail;
+    const password = signupPassword;
+    const name = signupName;
 
     // Validation
     if (!email || !password || !name) {
@@ -155,9 +182,9 @@ const Auth = () => {
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            full_name: name
-          }
-        }
+            full_name: name,
+          },
+        },
       });
 
       if (signUpError) throw signUpError;
@@ -178,20 +205,22 @@ const Auth = () => {
               // Créer la relation de parrainage
               const { createReferralRelation } = await import('@/lib/referral-helpers');
               await createReferralRelation(referrerProfile.user_id, data.user.id, referralCode);
-              
+
               // Nettoyer le code stocké
               clearStoredReferralCode();
-              
-              logger.info('Referral relation created on signup', { 
-                referrerId: referrerProfile.user_id, 
-                referredId: data.user.id 
+
+              logger.info('Referral relation created on signup', {
+                referrerId: referrerProfile.user_id,
+                referredId: data.user.id,
               });
             }
-          } catch (referralError: any) {
+          } catch (referralError: unknown) {
             // Ne pas bloquer l'inscription si l'erreur est sur le parrainage
-            logger.error('Error processing referral on signup', { 
-              error: referralError.message,
-              referralCode 
+            const referralErrorMessage =
+              referralError instanceof Error ? referralError.message : String(referralError);
+            logger.error('Error processing referral on signup', {
+              error: referralErrorMessage,
+              referralCode,
             });
           }
         }
@@ -200,14 +229,15 @@ const Auth = () => {
           title: t('auth.signup.success'),
           description: t('auth.signup.successDescription'),
         });
-        navigate("/dashboard");
+        navigate('/dashboard');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Signup error', {
-        error: error.message,
-        email: formData.email,
+        error: errorMessage,
+        email: signupEmail,
       });
-      setError(error.message || t('auth.signup.error'));
+      setError(errorMessage || t('auth.signup.error'));
     } finally {
       setIsLoading(false);
     }
@@ -215,12 +245,11 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
+    setError('');
     setIsLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email-login') as string;
-    const password = formData.get('password-login') as string;
+    const email = loginEmail;
+    const password = loginPassword;
 
     if (!email || !password) {
       setError(t('auth.login.errorRequired'));
@@ -241,17 +270,18 @@ const Auth = () => {
           title: t('auth.login.success'),
           description: t('auth.login.successDescription'),
         });
-        navigate("/dashboard");
+        navigate('/dashboard');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Login error', {
-        error: error.message,
-        email: formData.email,
+        error: errorMessage,
+        email: loginEmail,
       });
-      if (error.message.includes('Invalid login credentials')) {
+      if (errorMessage.includes('Invalid login credentials')) {
         setError(t('auth.login.error'));
       } else {
-        setError(error.message || t('auth.login.error'));
+        setError(errorMessage || t('auth.login.error'));
       }
     } finally {
       setIsLoading(false);
@@ -261,12 +291,12 @@ const Auth = () => {
   const baseUrl = window.location.origin;
 
   return (
-    <div className="min-h-screen gradient-hero flex items-center justify-center p-4 relative">
+    <div className="min-h-screen gradient-hero flex items-center justify-center p-3 sm:p-4 md:p-6 relative">
       {/* SEO Meta Tags */}
       <SEOMeta
-        title={`${t('nav.login')} / ${t('nav.signup')} - Payhuk`}
+        title={`${t('nav.login')} / ${t('nav.signup')} - Emarzona`}
         description={t('auth.welcomeSubtitle')}
-        keywords="payhuk, connexion, inscription, authentification, compte utilisateur"
+        keywords="emarzona, connexion, inscription, authentification, compte utilisateur"
         url={`${baseUrl}/auth`}
         canonical={`${baseUrl}/auth`}
         type="website"
@@ -275,35 +305,49 @@ const Auth = () => {
       />
 
       {/* Language Switcher - Top Right */}
-      <div className="absolute top-4 right-4 z-50">
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50">
         <LanguageSwitcher variant="outline" showLabel={false} />
       </div>
 
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-6" aria-label="Retour à l'accueil">
-            <OptimizedImage
-              src={payhukLogo}
-              alt="Payhuk Logo"
-              width={40}
-              height={40}
-              className="h-10 w-10"
-              priority
-            />
-            <span className="text-3xl font-bold">
-              Payhuk
+        <div className="flex justify-center mb-6 sm:mb-8">
+          <Link
+            to="/"
+            className="relative inline-flex items-center gap-2 mb-4 sm:mb-6"
+            aria-label="Retour à l'accueil"
+          >
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-8 sm:relative sm:left-auto sm:top-auto sm:translate-y-0 sm:h-10 sm:w-10 z-0">
+              {platformLogo ? (
+                <img
+                  src={platformLogo}
+                  alt="Emarzona Logo"
+                  width={40}
+                  height={40}
+                  className="h-full w-full opacity-60 sm:opacity-100 flex-shrink-0 object-contain"
+                  loading="eager"
+                />
+              ) : (
+                <div className="h-full w-full bg-primary rounded flex items-center justify-center opacity-60 sm:opacity-100 flex-shrink-0">
+                  <span className="text-sm font-bold text-primary-foreground">E</span>
+                </div>
+              )}
+            </div>
+            <span className="relative z-10 pl-9 sm:pl-0 text-2xl sm:text-3xl font-bold">
+              Emarzona
             </span>
           </Link>
         </div>
 
         <Card className="shadow-large" role="main" aria-labelledby="auth-title">
-          <CardHeader>
-            <CardTitle id="auth-title">{t('auth.welcome')}</CardTitle>
-            <CardDescription>
-              {t('auth.welcomeSubtitle')}
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle id="auth-title" className="text-xl sm:text-2xl">
+              {getValue('auth.welcome') || t('auth.welcome')}
+            </CardTitle>
+            <CardDescription className="text-sm sm:text-base">
+              {getValue('auth.welcomeSubtitle') || t('auth.welcomeSubtitle')}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0">
             {error && (
               <Alert variant="destructive" className="mb-4">
                 <AlertCircle className="h-4 w-4" />
@@ -312,33 +356,37 @@ const Auth = () => {
             )}
 
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">{t('nav.login')}</TabsTrigger>
-                <TabsTrigger value="signup">{t('nav.signup')}</TabsTrigger>
+              <TabsList className="w-full overflow-x-auto flex-nowrap justify-start">
+                <TabsTrigger value="login" className="min-h-[44px] shrink-0">
+                  {getValue('auth.login.title') || t('nav.login')}
+                </TabsTrigger>
+                <TabsTrigger value="signup" className="min-h-[44px] shrink-0">
+                  {getValue('auth.signup.title') || t('nav.signup')}
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
-                <form 
+                <form
                   ref={loginFormRef}
-                  onSubmit={handleSignIn} 
+                  onSubmit={handleSignIn}
                   className="space-y-4"
                   aria-label={t('auth.login.formLabel')}
                   noValidate
                 >
-                  <div className="space-y-2">
-                    <Label htmlFor="email-login">{t('auth.login.email')}</Label>
-                    <Input
-                      id="email-login"
-                      name="email-login"
-                      type="email"
-                      placeholder={t('auth.login.emailPlaceholder')}
-                      required
-                      disabled={isLoading}
-                      autoComplete="email"
-                      aria-required="true"
-                      aria-invalid={error.includes('email') || error.includes('Email')}
-                    />
-                  </div>
+                  <MobileFormField
+                    label={t('auth.login.email')}
+                    name="email-login"
+                    type="email"
+                    value={loginEmail}
+                    onChange={setLoginEmail}
+                    required
+                    error={error.includes('email') || error.includes('Email') ? error : undefined}
+                    fieldProps={{
+                      disabled: isLoading,
+                      autoComplete: 'email',
+                      placeholder: t('auth.login.emailPlaceholder'),
+                    }}
+                  />
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="password-login">{t('auth.login.password')}</Label>
@@ -347,10 +395,10 @@ const Auth = () => {
                         onClick={() => {
                           setShowForgotPassword(true);
                           setResetSent(false);
-                          setResetError("");
-                          setResetEmail("");
+                          setResetError('');
+                          setResetEmail('');
                         }}
-                        className="text-xs text-primary hover:underline"
+                        className="text-xs sm:text-sm text-primary hover:underline min-h-[44px] px-2 flex items-center touch-manipulation"
                         aria-label="Réinitialiser le mot de passe"
                       >
                         {t('auth.login.forgotPassword', 'Mot de passe oublié ?')}
@@ -360,80 +408,99 @@ const Auth = () => {
                       <Input
                         id="password-login"
                         name="password-login"
-                        type={showPassword.login ? "text" : "password"}
+                        type={showPassword.login ? 'text' : 'password'}
+                        value={loginPassword}
+                        onChange={e => setLoginPassword(e.target.value)}
                         placeholder={t('auth.login.passwordPlaceholder')}
                         required
                         disabled={isLoading}
                         autoComplete="current-password"
                         aria-required="true"
                         aria-invalid={error.includes('password') || error.includes('mot de passe')}
-                        className="pr-10"
+                        className="pr-12 min-h-[44px] text-base"
                       />
                       <button
                         type="button"
-                        onClick={() => setShowPassword({ ...showPassword, login: !showPassword.login })}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        aria-label={showPassword.login ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                        onClick={() =>
+                          setShowPassword({ ...showPassword, login: !showPassword.login })
+                        }
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        aria-label={
+                          showPassword.login
+                            ? 'Masquer le mot de passe'
+                            : 'Afficher le mot de passe'
+                        }
                         tabIndex={-1}
                       >
-                        {showPassword.login ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showPassword.login ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
                       </button>
                     </div>
                   </div>
                   <Button
                     type="submit"
-                    className="w-full gradient-primary"
+                    className="w-full gradient-primary min-h-[44px] text-base"
                     disabled={isLoading}
                     aria-busy={isLoading}
                   >
-                    {isLoading ? t('auth.login.buttonLoading') : t('auth.login.button')}
+                    {isLoading
+                      ? t('auth.login.buttonLoading')
+                      : getValue('auth.login.button') || t('auth.login.button')}
                   </Button>
                 </form>
               </TabsContent>
 
               <TabsContent value="signup">
-                <form 
+                <form
                   ref={signupFormRef}
-                  onSubmit={handleSignUp} 
+                  onSubmit={handleSignUp}
                   className="space-y-4"
                   aria-label={t('auth.signup.formLabel')}
                   noValidate
                 >
-                  <div className="space-y-2">
-                    <Label htmlFor="name">{t('auth.signup.name')}</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      type="text"
-                      placeholder={t('auth.signup.namePlaceholder')}
-                      required
-                      disabled={isLoading}
-                      autoComplete="name"
-                      aria-required="true"
-                      aria-invalid={error.includes('name') || error.includes('nom')}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email-signup">{t('auth.signup.email')}</Label>
-                    <Input
-                      id="email-signup"
-                      name="email-signup"
-                      type="email"
-                      placeholder={t('auth.signup.emailPlaceholder')}
-                      required
-                      disabled={isLoading}
-                      autoComplete="email"
-                      aria-required="true"
-                      aria-invalid={error.includes('email') || error.includes('Email')}
-                    />
-                  </div>
+                  <MobileFormField
+                    label={t('auth.signup.name')}
+                    name="name"
+                    type="text"
+                    value={signupName}
+                    onChange={setSignupName}
+                    required
+                    error={error.includes('name') || error.includes('nom') ? error : undefined}
+                    fieldProps={{
+                      disabled: isLoading,
+                      autoComplete: 'name',
+                      placeholder: t('auth.signup.namePlaceholder'),
+                    }}
+                  />
+                  <MobileFormField
+                    label={t('auth.signup.email')}
+                    name="email-signup"
+                    type="email"
+                    value={signupEmail}
+                    onChange={setSignupEmail}
+                    required
+                    error={error.includes('email') || error.includes('Email') ? error : undefined}
+                    fieldProps={{
+                      disabled: isLoading,
+                      autoComplete: 'email',
+                      placeholder: t('auth.signup.emailPlaceholder'),
+                    }}
+                  />
                   <div className="space-y-2">
                     <Label htmlFor="password-signup">{t('auth.signup.password')}</Label>
                     <div className="relative">
                       <Input
                         id="password-signup"
                         name="password-signup"
-                        type={showPassword.signup ? "text" : "password"}
+                        type={showPassword.signup ? 'text' : 'password'}
+                        value={signupPassword}
+                        onChange={e => {
+                          setSignupPassword(e.target.value);
+                          handlePasswordChange(e.target.value, 'signup');
+                        }}
                         placeholder={t('auth.signup.passwordPlaceholder')}
                         required
                         minLength={6}
@@ -441,23 +508,32 @@ const Auth = () => {
                         autoComplete="new-password"
                         aria-required="true"
                         aria-invalid={error.includes('password') || error.includes('mot de passe')}
-                        className="pr-10"
-                        onChange={(e) => handlePasswordChange(e.target.value, 'signup')}
+                        className="pr-12 min-h-[44px] text-base"
                       />
                       <button
                         type="button"
-                        onClick={() => setShowPassword({ ...showPassword, signup: !showPassword.signup })}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        aria-label={showPassword.signup ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                        onClick={() =>
+                          setShowPassword({ ...showPassword, signup: !showPassword.signup })
+                        }
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        aria-label={
+                          showPassword.signup
+                            ? 'Masquer le mot de passe'
+                            : 'Afficher le mot de passe'
+                        }
                         tabIndex={-1}
                       >
-                        {showPassword.signup ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showPassword.signup ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
                       </button>
                     </div>
                     {passwordStrength > 0 && (
                       <div className="space-y-1">
                         <div className="flex gap-1 h-1.5">
-                          {[1, 2, 3, 4, 5].map((level) => (
+                          {[1, 2, 3, 4, 5].map(level => (
                             <div
                               key={level}
                               className={`flex-1 rounded-full transition-colors ${
@@ -465,8 +541,8 @@ const Auth = () => {
                                   ? level <= 2
                                     ? 'bg-red-500'
                                     : level <= 4
-                                    ? 'bg-yellow-500'
-                                    : 'bg-green-500'
+                                      ? 'bg-yellow-500'
+                                      : 'bg-green-500'
                                   : 'bg-muted'
                               }`}
                               aria-hidden="true"
@@ -474,24 +550,27 @@ const Auth = () => {
                           ))}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          {passwordStrength <= 2 && t('auth.signup.passwordStrength.weak', 'Faible')}
-                          {passwordStrength === 3 && t('auth.signup.passwordStrength.medium', 'Moyen')}
+                          {passwordStrength <= 2 &&
+                            t('auth.signup.passwordStrength.weak', 'Faible')}
+                          {passwordStrength === 3 &&
+                            t('auth.signup.passwordStrength.medium', 'Moyen')}
                           {passwordStrength === 4 && t('auth.signup.passwordStrength.good', 'Bon')}
-                          {passwordStrength >= 5 && t('auth.signup.passwordStrength.strong', 'Fort')}
+                          {passwordStrength >= 5 &&
+                            t('auth.signup.passwordStrength.strong', 'Fort')}
                         </p>
                       </div>
                     )}
-                    <p className="text-xs text-muted-foreground">
-                      {t('auth.signup.passwordHint')}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{t('auth.signup.passwordHint')}</p>
                   </div>
                   <Button
                     type="submit"
-                    className="w-full gradient-primary"
+                    className="w-full gradient-primary min-h-[44px] text-base"
                     disabled={isLoading}
                     aria-busy={isLoading}
                   >
-                    {isLoading ? t('auth.signup.buttonLoading') : t('auth.signup.button')}
+                    {isLoading
+                      ? t('auth.signup.buttonLoading')
+                      : getValue('auth.signup.button') || t('auth.signup.button')}
                   </Button>
                 </form>
               </TabsContent>
@@ -499,21 +578,26 @@ const Auth = () => {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-muted-foreground mt-4">
+        <p className="text-center text-xs sm:text-sm text-muted-foreground mt-4 px-2">
           {t('auth.termsNote')}
         </p>
       </div>
 
       {/* Dialog Réinitialisation du mot de passe */}
       <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle>{t('auth.forgotPassword.title', 'Réinitialiser le mot de passe')}</DialogTitle>
+            <DialogTitle>
+              {t('auth.forgotPassword.title', 'Réinitialiser le mot de passe')}
+            </DialogTitle>
             <DialogDescription>
-              {t('auth.forgotPassword.description', 'Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.')}
+              {t(
+                'auth.forgotPassword.description',
+                'Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.'
+              )}
             </DialogDescription>
           </DialogHeader>
-          
+
           {resetSent ? (
             <div className="space-y-4 py-4">
               <div className="flex flex-col items-center text-center space-y-4">
@@ -521,18 +605,23 @@ const Auth = () => {
                   <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="font-semibold text-lg">{t('auth.forgotPassword.successTitle', 'Email envoyé !')}</h3>
+                  <h3 className="font-semibold text-lg">
+                    {t('auth.forgotPassword.successTitle', 'Email envoyé !')}
+                  </h3>
                   <p className="text-sm text-muted-foreground">
-                    {t('auth.forgotPassword.successMessage', `Nous avons envoyé un lien de réinitialisation à ${resetEmail}. Vérifiez votre boîte de réception et votre dossier spam.`)}
+                    {t(
+                      'auth.forgotPassword.successMessage',
+                      `Nous avons envoyé un lien de réinitialisation à ${resetEmail}. Vérifiez votre boîte de réception et votre dossier spam.`
+                    )}
                   </p>
                 </div>
                 <Button
                   onClick={() => {
                     setShowForgotPassword(false);
                     setResetSent(false);
-                    setResetEmail("");
+                    setResetEmail('');
                   }}
-                  className="w-full"
+                  className="w-full min-h-[44px] text-base"
                 >
                   {t('common.close', 'Fermer')}
                 </Button>
@@ -546,9 +635,11 @@ const Auth = () => {
                   <AlertDescription>{resetError}</AlertDescription>
                 </Alert>
               )}
-              
+
               <div className="space-y-2">
-                <Label htmlFor="reset-email">{t('auth.forgotPassword.emailLabel', 'Adresse email')}</Label>
+                <Label htmlFor="reset-email">
+                  {t('auth.forgotPassword.emailLabel', 'Adresse email')}
+                </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -556,20 +647,20 @@ const Auth = () => {
                     type="email"
                     placeholder={t('auth.forgotPassword.emailPlaceholder', 'votre@email.com')}
                     value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
+                    onChange={e => setResetEmail(e.target.value)}
                     required
                     disabled={isResetLoading}
                     autoComplete="email"
-                    className="pl-10"
+                    className="pl-10 min-h-[44px] text-base"
                     aria-required="true"
                   />
                 </div>
               </div>
-              
+
               <div className="flex flex-col gap-2">
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full min-h-[44px] text-base"
                   disabled={isResetLoading || !resetEmail}
                   aria-busy={isResetLoading}
                 >
@@ -587,10 +678,11 @@ const Auth = () => {
                   variant="outline"
                   onClick={() => {
                     setShowForgotPassword(false);
-                    setResetEmail("");
-                    setResetError("");
+                    setResetEmail('');
+                    setResetError('');
                   }}
                   disabled={isResetLoading}
+                  className="min-h-[44px] text-base"
                 >
                   {t('common.cancel', 'Annuler')}
                 </Button>

@@ -4,6 +4,8 @@
  * Date : 27 octobre 2025
  */
 
+import { logger } from './logger';
+
 // Types pour Crisp
 declare global {
   interface Window {
@@ -40,7 +42,7 @@ export const initCrisp = (websiteId: string) => {
   
   // Éviter double initialisation
   if (window.$crisp) {
-    console.warn('⚠️  Crisp déjà initialisé');
+    logger.warn('Crisp already initialized');
     return;
   }
 
@@ -54,11 +56,11 @@ export const initCrisp = (websiteId: string) => {
   document.head.appendChild(script);
 
   script.onload = () => {
-    console.log('✅ Crisp Chat initialisé avec succès');
+    logger.info('Crisp Chat initialized successfully');
   };
 
   script.onerror = () => {
-    console.error('❌ Erreur lors du chargement de Crisp');
+    logger.error('Error loading Crisp', { error });
   };
 };
 
@@ -245,7 +247,7 @@ export const triggerCrispAutoMessage = (context: 'product' | 'checkout' | 'suppo
 
   // On n'envoie pas le message automatiquement, mais on peut l'afficher comme suggestion
   // Pour éviter de spammer l'utilisateur
-  console.log('Crisp auto-message ready:', messages[context]);
+  logger.debug('Crisp auto-message ready', { context, message: messages[context] });
 };
 
 /**

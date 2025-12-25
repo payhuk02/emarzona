@@ -33,11 +33,22 @@ interface LicenseTableProps {
   statusFilter: string;
 }
 
+interface License {
+  id: string;
+  product_id: string;
+  license_key: string;
+  status: 'active' | 'expired' | 'suspended' | 'revoked';
+  activations_count: number;
+  max_activations: number;
+  expires_at?: string;
+  created_at: string;
+}
+
 export const LicenseTable = ({ searchQuery, statusFilter }: LicenseTableProps) => {
   const [selectedLicenses, setSelectedLicenses] = useState<string[]>([]);
 
   // Mock data - À remplacer par les vrais hooks
-  const licenses: any[] = [];
+  const licenses: License[] = [];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -155,7 +166,7 @@ export const LicenseTable = ({ searchQuery, statusFilter }: LicenseTableProps) =
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" aria-label={`Actions pour la licence ${license.license_key || license.id}`}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>

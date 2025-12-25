@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK PHYSICAL PRODUCTS - ADVANCED FEATURES
+-- EMARZONA PHYSICAL PRODUCTS - ADVANCED FEATURES
 -- Date: 29 Octobre 2025
 -- Description: Tables pour Pre-orders, Backorders, Alerts, Size Charts, Bundles
 -- Version: 1.0

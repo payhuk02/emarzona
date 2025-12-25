@@ -59,7 +59,7 @@ export const CourseSEOForm = ({
   const autoFill = () => {
     onChange({
       ...data,
-      meta_title: data.meta_title || `${courseTitle} | Cours en ligne Payhuk`,
+      meta_title: data.meta_title || `${courseTitle} | Cours en ligne Emarzona`,
       meta_description: data.meta_description || courseDescription.substring(0, 160),
       og_title: data.og_title || courseTitle,
       og_description: data.og_description || courseDescription.substring(0, 200),
@@ -144,7 +144,7 @@ export const CourseSEOForm = ({
                 {data.meta_title || courseTitle || 'Titre du cours'}
               </div>
               <div className="text-green-700 text-sm mt-1">
-                payhula.vercel.app › courses › {courseTitle.toLowerCase().replace(/\s+/g, '-')}
+                emarzona.vercel.app › courses › {courseTitle.toLowerCase().replace(/\s+/g, '-')}
               </div>
               <div className="text-gray-600 text-sm mt-2">
                 {data.meta_description || courseDescription || 'Description du cours...'}
@@ -292,7 +292,7 @@ export const CourseSEOForm = ({
                 <p className="text-xs text-muted-foreground flex items-center gap-2">
                   Image affichée lors du partage. Dimensions recommandées : 1200x630px (Open Graph).
                   <a
-                    href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                    href="https://github.com/payhuk02/emarzona/blob/main/docs/MEDIA_GUIDELINES.md"
                     target="_blank"
                     rel="noreferrer"
                     className="text-blue-600 underline"

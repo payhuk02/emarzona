@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { useStoreContext } from '@/contexts/StoreContext';
+import { shouldRetryError, getRetryDelay } from '@/lib/error-handling';
 
 /**
  * Produit digital complet
@@ -61,6 +63,41 @@ export interface DigitalProductsPaginationOptions {
 }
 
 /**
+ * Structure du produit associé depuis la jointure Supabase
+ */
+interface ProductFromJoin {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  price: number;
+  currency?: string | null;
+  is_active: boolean;
+  image_url?: string | null;
+  store_id: string;
+}
+
+/**
+ * Structure d'un item digital_products avec jointure products
+ */
+interface DigitalProductWithJoin {
+  id: string;
+  product_id: string;
+  [key: string]: unknown;
+  products: ProductFromJoin | ProductFromJoin[] | null;
+}
+
+/**
+ * Structure mappée finale avec product non-null
+ */
+interface MappedDigitalProduct {
+  id: string;
+  product_id: string;
+  product: ProductFromJoin;
+  [key: string]: unknown;
+}
+
+/**
  * useDigitalProducts - Hook pour lister les produits digitaux
  * Avec jointure sur products pour avoir toutes les infos
  * Support pagination côté serveur pour performance optimale
@@ -70,9 +107,12 @@ export const useDigitalProducts = (
   paginationOptions?: DigitalProductsPaginationOptions
 ) => {
   const { page = 1, itemsPerPage = 12, sortBy = 'recent', sortOrder = 'desc' } = paginationOptions || {};
+  // Utiliser le contexte pour obtenir la boutique sélectionnée si storeId n'est pas fourni
+  const { selectedStoreId } = useStoreContext();
+  const effectiveStoreId = storeId || selectedStoreId;
 
   return useQuery({
-    queryKey: ['digitalProducts', storeId, page, itemsPerPage, sortBy, sortOrder],
+    queryKey: ['digitalProducts', effectiveStoreId, page, itemsPerPage, sortBy, sortOrder],
     queryFn: async () => {
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -90,67 +130,36 @@ export const useDigitalProducts = (
         // Étape 1: Obtenir les product_ids pertinents
         let productIds: string[] = [];
 
-        if (storeId) {
-          // Si storeId est fourni, obtenir tous les products de ce store
+        if (effectiveStoreId) {
+          // Si storeId est fourni (explicitement ou via contexte), obtenir tous les products de ce store
           const { data: products, error: productsError } = await supabase
             .from('products')
             .select('id')
-            .eq('store_id', storeId);
+            .eq('store_id', effectiveStoreId);
 
           if (productsError) {
             logger.error('Erreur lors de la récupération des products', {
               error: productsError.message,
               code: productsError.code,
-              storeId,
+              storeId: effectiveStoreId,
             });
             throw new Error('Erreur lors de la récupération des produits: ' + productsError.message);
           }
           productIds = products?.map(p => p.id) || [];
         } else {
-          // Sinon, obtenir tous les stores de l'utilisateur, puis leurs products
-          const { data: stores, error: storesError } = await supabase
-            .from('stores')
-            .select('id')
-            .eq('user_id', user.id);
-
-          if (storesError) {
-            logger.error('Erreur lors de la récupération des stores', {
-              error: storesError.message,
-              code: storesError.code,
-              userId: user.id,
-            });
-            throw new Error('Erreur lors de la récupération des boutiques: ' + storesError.message);
-          }
-
-          if (stores && stores.length > 0) {
-            const storeIds = stores.map(s => s.id);
-            const { data: products, error: productsError } = await supabase
-              .from('products')
-              .select('id')
-              .in('store_id', storeIds);
-
-            if (productsError) {
-              logger.error('Erreur lors de la récupération des products pour les stores', {
-                error: productsError.message,
-                code: productsError.code,
-                storeIds: storeIds.length,
-              });
-              throw new Error('Erreur lors de la récupération des produits: ' + productsError.message);
-            }
-            productIds = products?.map(p => p.id) || [];
-          } else {
-            // Pas de stores, retourner structure paginée vide
-            logger.debug('Aucune boutique trouvée pour l\'utilisateur', {
-              userId: user.id,
-            });
-            return {
-              data: [],
-              total: 0,
-              page,
-              itemsPerPage,
-              totalPages: 0,
-            };
-          }
+          // Pas de boutique sélectionnée, retourner structure paginée vide
+          logger.debug('Aucune boutique sélectionnée', {
+            userId: user.id,
+            providedStoreId: storeId,
+            selectedStoreId,
+          });
+          return {
+            data: [],
+            total: 0,
+            page,
+            itemsPerPage,
+            totalPages: 0,
+          };
         }
 
         // Si aucun product_id trouvé, retourner structure paginée vide
@@ -267,9 +276,9 @@ export const useDigitalProducts = (
           }
           
           // Utiliser les données de la requête alternative
-          const mappedAltData = (altData || []).map((item: any) => {
+          const mappedAltData = (altData || []).map((item: DigitalProductWithJoin): MappedDigitalProduct | null => {
             const productData = item.products;
-            let product = null;
+            let product: ProductFromJoin | null = null;
             
             if (productData) {
               if (Array.isArray(productData)) {
@@ -301,8 +310,8 @@ export const useDigitalProducts = (
             return {
               ...item,
               product: product,
-            };
-          }).filter((item: any) => item !== null && item.product !== null);
+            } as MappedDigitalProduct;
+          }).filter((item): item is MappedDigitalProduct => item !== null && item.product !== null);
           
           // Tri côté client pour prix et nom
           if (sortBy === 'price-asc' || sortBy === 'price-desc' || sortBy === 'name') {
@@ -322,7 +331,7 @@ export const useDigitalProducts = (
           }
           
           return {
-            data: mappedAltData as any[],
+            data: mappedAltData,
             total: totalCount || 0,
             page,
             itemsPerPage,
@@ -343,7 +352,7 @@ export const useDigitalProducts = (
         }
 
         // Mapper les données pour avoir la structure attendue avec `product`
-        const mappedData = (data || []).map((item: any) => {
+        const mappedData = (data || []).map((item: DigitalProductWithJoin): MappedDigitalProduct | null => {
           // S'assurer que products n'est pas null
           const productData = item.products;
           let product = null;
@@ -378,8 +387,8 @@ export const useDigitalProducts = (
           return {
             ...item,
             product: product,
-          };
-        }).filter((item: any) => item !== null && item.product !== null); // Filtrer les items sans produit associé
+          } as MappedDigitalProduct;
+        }).filter((item): item is MappedDigitalProduct => item !== null && item.product !== null); // Filtrer les items sans produit associé
 
         // Tri côté client pour prix et nom (car les données sont dans products)
         if (sortBy === 'price-asc' || sortBy === 'price-desc' || sortBy === 'name') {
@@ -400,21 +409,35 @@ export const useDigitalProducts = (
 
         // Retourner avec métadonnées de pagination
         return {
-          data: mappedData as any[],
+          data: mappedData,
           total: totalCount || 0,
           page,
           itemsPerPage,
           totalPages: Math.ceil((totalCount || 0) / itemsPerPage),
         };
-      } catch (error: any) {
-        console.error('Erreur dans useDigitalProducts:', error);
-        // Re-lancer l'erreur avec un message plus clair
-        throw new Error(error.message || 'Impossible de charger les produits digitaux. Veuillez réessayer.');
+      } catch (error: unknown) {
+        // Logger l'erreur avec contexte
+        logger.error('Erreur dans useDigitalProducts', {
+          error: error instanceof Error ? error.message : String(error),
+          storeId,
+          page,
+          itemsPerPage,
+          sortBy,
+        });
+        
+        // Re-lancer l'erreur pour que React Query la gère
+        throw error;
       }
     },
     enabled: true,
-    retry: 1, // Réessayer une fois en cas d'erreur
-    retryDelay: 1000, // Attendre 1 seconde avant de réessayer
+    retry: (failureCount, error) => {
+      return shouldRetryError(error, failureCount);
+    },
+    retryDelay: (attemptIndex) => {
+      return getRetryDelay(attemptIndex);
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (anciennement cacheTime)
   });
 };
 
@@ -712,15 +735,22 @@ export const useRemainingDownloads = (digitalProductId: string | undefined) => {
 
 /**
  * useHasDownloadAccess - Hook pour vérifier si l'utilisateur a accès au téléchargement
+ * Amélioré avec plusieurs méthodes de vérification pour plus de robustesse
  */
 export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
   return useQuery({
     queryKey: ['digitalProduct', digitalProductId, 'hasAccess'],
     queryFn: async () => {
-      if (!digitalProductId) throw new Error('ID produit manquant');
+      if (!digitalProductId) {
+        logger.warn('Digital product ID missing for access check');
+        return { hasAccess: false, purchaseCount: 0, paymentStatus: 'unknown', method: 'none' };
+      }
 
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Non authentifié');
+      if (!user) {
+        logger.debug('User not authenticated for access check');
+        return { hasAccess: false, purchaseCount: 0, paymentStatus: 'not_authenticated', method: 'none' };
+      }
 
       // Étape 1: Récupérer le product_id depuis digital_products
       const { data: digitalProduct, error: digitalError } = await supabase
@@ -730,42 +760,70 @@ export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
         .single();
 
       if (digitalError || !digitalProduct) {
-        logger.warn('Digital product not found', { digitalProductId });
-        return { hasAccess: false, purchaseCount: 0, paymentStatus: 'unknown' };
+        logger.warn('Digital product not found', { digitalProductId, error: digitalError });
+        return { hasAccess: false, purchaseCount: 0, paymentStatus: 'product_not_found', method: 'none' };
       }
 
-      // Étape 2: Vérifier l'accès via order_items avec vérification explicite du paiement
-      // Vérification par email
-      const { data: orderItemsByEmail, error: emailError } = await supabase
-        .from('order_items')
-        .select(`
-          id,
-          orders!inner (
-            id,
-            payment_status,
-            status,
-            customers!inner (
-              id,
-              email
-            )
-          )
-        `)
-        .eq('product_id', digitalProduct.product_id)
-        .eq('orders.payment_status', 'paid') // ⚠️ CRITIQUE: Vérification explicite paiement
-        .eq('orders.status', 'completed') // Status commande doit être complété
-        .eq('orders.customers.email', user.email)
-        .limit(1);
+      const productId = digitalProduct.product_id;
 
-      // Vérification alternative par customer_id si disponible
-      let orderItemsByCustomer = null;
-      const { data: customer } = await supabase
-        .from('customers')
+      // Étape 2: Méthode 1 - Vérification par customer_id (plus fiable)
+      let hasAccessByCustomer = false;
+      let purchaseCountByCustomer = 0;
+      let paymentStatusByCustomer = 'unknown';
+
+      // Récupérer le customer_id pour ce store
+      const { data: stores } = await supabase
+        .from('stores')
         .select('id')
-        .eq('email', user.email)
+        .eq('user_id', user.id)
         .limit(1);
 
-      if (customer && customer.length > 0) {
-        const { data: orderItemsByCustomerId } = await supabase
+      // Essayer de trouver le customer par email dans tous les stores
+      const { data: customers } = await supabase
+        .from('customers')
+        .select('id, store_id, email')
+        .eq('email', user.email);
+
+      if (customers && customers.length > 0) {
+        // Vérifier l'accès pour chaque customer trouvé
+        for (const customer of customers) {
+          const { data: orderItems, error: customerError } = await supabase
+            .from('order_items')
+            .select(`
+              id,
+              orders!inner (
+                id,
+                payment_status,
+                status,
+                customer_id,
+                store_id
+              )
+            `)
+            .eq('product_id', productId)
+            .eq('orders.payment_status', 'paid')
+            .eq('orders.status', 'completed')
+            .eq('orders.customer_id', customer.id);
+
+          if (!customerError && orderItems && orderItems.length > 0) {
+            hasAccessByCustomer = true;
+            purchaseCountByCustomer = orderItems.length;
+            paymentStatusByCustomer = orderItems[0].orders?.payment_status || 'paid';
+            logger.debug('Access found by customer_id', {
+              customerId: customer.id,
+              purchaseCount: purchaseCountByCustomer,
+            });
+            break;
+          }
+        }
+      }
+
+      // Étape 3: Méthode 2 - Vérification par email (fallback)
+      let hasAccessByEmail = false;
+      let purchaseCountByEmail = 0;
+      let paymentStatusByEmail = 'unknown';
+
+      if (!hasAccessByCustomer) {
+        const { data: orderItemsByEmail, error: emailError } = await supabase
           .from('order_items')
           .select(`
             id,
@@ -773,48 +831,117 @@ export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
               id,
               payment_status,
               status,
-              customer_id
+              customers!inner (
+                id,
+                email
+              )
             )
           `)
-          .eq('product_id', digitalProduct.product_id)
-          .eq('orders.payment_status', 'paid') // ⚠️ CRITIQUE: Vérification explicite paiement
+          .eq('product_id', productId)
+          .eq('orders.payment_status', 'paid')
           .eq('orders.status', 'completed')
-          .eq('orders.customer_id', customer[0].id)
-          .limit(1);
+          .eq('orders.customers.email', user.email);
 
-        orderItemsByCustomer = orderItemsByCustomerId;
+        if (!emailError && orderItemsByEmail && orderItemsByEmail.length > 0) {
+          hasAccessByEmail = true;
+          purchaseCountByEmail = orderItemsByEmail.length;
+          paymentStatusByEmail = orderItemsByEmail[0].orders?.payment_status || 'paid';
+          logger.debug('Access found by email', {
+            email: user.email,
+            purchaseCount: purchaseCountByEmail,
+          });
+        }
       }
 
-      // Utiliser les résultats de l'une ou l'autre vérification
-      const orderItems = orderItemsByEmail || orderItemsByCustomer;
-      const error = emailError;
+      // Étape 4: Méthode 3 - Vérification par user_id dans order_items metadata (si disponible)
+      let hasAccessByUserId = false;
+      let purchaseCountByUserId = 0;
 
-      if (error) {
-        logger.error('Error checking download access', { error, digitalProductId });
-        throw error;
+      if (!hasAccessByCustomer && !hasAccessByEmail) {
+        // Récupérer tous les order_items pour ce produit et filtrer côté client
+        const { data: allOrderItems, error: metadataError } = await supabase
+          .from('order_items')
+          .select(`
+            id,
+            item_metadata,
+            orders!inner (
+              id,
+              payment_status,
+              status
+            )
+          `)
+          .eq('product_id', productId)
+          .eq('orders.payment_status', 'paid')
+          .eq('orders.status', 'completed');
+
+        if (!metadataError && allOrderItems) {
+          // Filtrer côté client pour trouver ceux avec user_id dans metadata
+          const matchingItems = allOrderItems.filter((item: { item_metadata?: { user_id?: string } }) => {
+            const metadata = item.item_metadata;
+            return metadata && typeof metadata === 'object' && metadata.user_id === user.id;
+          });
+
+          if (matchingItems.length > 0) {
+            hasAccessByUserId = true;
+            purchaseCountByUserId = matchingItems.length;
+            logger.debug('Access found by user_id in metadata', {
+              userId: user.id,
+              purchaseCount: purchaseCountByUserId,
+            });
+          }
+        }
       }
 
-      const hasAccess = orderItems && orderItems.length > 0;
-      const paymentStatus = orderItems && orderItems.length > 0 
-        ? orderItems[0].orders?.payment_status || 'unknown'
-        : 'not_paid';
+      // Résultat final : utiliser la première méthode qui a trouvé un accès
+      const hasAccess = hasAccessByCustomer || hasAccessByEmail || hasAccessByUserId;
+      const purchaseCount = hasAccessByCustomer 
+        ? purchaseCountByCustomer 
+        : hasAccessByEmail 
+        ? purchaseCountByEmail 
+        : purchaseCountByUserId;
+      const paymentStatus = hasAccessByCustomer 
+        ? paymentStatusByCustomer 
+        : hasAccessByEmail 
+        ? paymentStatusByEmail 
+        : 'paid';
+      const method = hasAccessByCustomer 
+        ? 'customer_id' 
+        : hasAccessByEmail 
+        ? 'email' 
+        : hasAccessByUserId 
+        ? 'user_id_metadata' 
+        : 'none';
 
       // Log pour debugging
       if (!hasAccess) {
         logger.debug('User does not have download access', {
           digitalProductId,
+          productId,
           userId: user.id,
           userEmail: user.email,
+          method: 'none',
+          customerIdsChecked: customers?.map(c => c.id) || [],
+        });
+      } else {
+        logger.debug('User has download access', {
+          digitalProductId,
+          productId,
+          userId: user.id,
+          method,
+          purchaseCount,
           paymentStatus,
         });
       }
 
       return {
         hasAccess,
-        purchaseCount: orderItems?.length || 0,
-        paymentStatus, // Retourner le statut pour debug
+        purchaseCount,
+        paymentStatus,
+        method, // Retourner la méthode utilisée pour debug
       };
     },
     enabled: !!digitalProductId,
+    retry: 1, // Réessayer une fois en cas d'erreur réseau
+    retryDelay: 1000,
   });
 };

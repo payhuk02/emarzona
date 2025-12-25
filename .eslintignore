@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+dist/
+build/
+.vercel/
+
+# Supabase Edge Functions (Deno environment)
+supabase/functions/**
+
+# Generated files
+src/integrations/supabase/types.ts
+
+# Config files
+*.config.{js,ts}
+scripts/**
+
+# Test files (optional - uncomment if needed)
+# tests/**
+

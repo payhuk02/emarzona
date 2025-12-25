@@ -145,8 +145,48 @@ export default function BookingsManagement() {
         return [];
       }
 
-      // Utiliser any pour les tables non typées dans Supabase
-      const { data, error } = await (supabase as any)
+      // Type pour la réponse Supabase avec relations
+      interface ServiceBookingWithRelations {
+        id: string;
+        product_id: string;
+        customer_id: string;
+        booking_date: string;
+        start_time: string;
+        end_time?: string;
+        status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
+        total_price: number;
+        staff_member_id?: string;
+        participants_count: number;
+        deposit_paid: number;
+        cancellation_reason?: string;
+        meeting_url?: string;
+        customer_notes?: string;
+        internal_notes?: string;
+        reminder_sent_at?: string;
+        created_at: string;
+        updated_at: string;
+        service_product?: Array<{
+          id: string;
+          product_id: string;
+          store_id: string;
+          service_type: string;
+          duration_minutes: number;
+          product?: {
+            id: string;
+            name: string;
+            price: number;
+            currency: string;
+          };
+        }>;
+        customer?: {
+          full_name: string;
+          email: string;
+          phone: string;
+        };
+      }
+
+      // Requête optimisée avec relations (évite N+1)
+      const { data, error } = await supabase
         .from('service_bookings')
         .select(`
           *,
@@ -157,17 +197,18 @@ export default function BookingsManagement() {
           customer:customers(full_name, email, phone)
         `)
         .order('booking_date', { ascending: false })
-        .order('start_time', { ascending: true });
+        .order('start_time', { ascending: true })
+        .returns<ServiceBookingWithRelations[]>();
 
       if (error) {
         logger.error('Error fetching bookings', { error: error.message });
         throw error;
       }
 
-      // Filtrer par store_id via service_products
-      const filtered = data?.filter((booking: any) => {
-        return booking.service_product?.some((sp: any) => sp.store_id === storeId);
-      }) || [];
+      // Filtrer par store_id via service_products (côté client car relation complexe)
+      const filtered = (data || []).filter((booking) => {
+        return booking.service_product?.some((sp) => sp.store_id === storeId);
+      });
 
       return filtered;
     },
@@ -176,11 +217,39 @@ export default function BookingsManagement() {
   });
 
   // Fetch availabilities
-  const { data: availabilities } = useQuery({
+  // Type temporaire pour service_availability en attendant la régénération des types Supabase
+  // TODO: Ajouter service_availability aux types Supabase générés (voir docs/TODOS.md)
+  interface ServiceAvailability {
+    id: string;
+    service_product_id: string;
+    staff_id: string | null;
+    date: string;
+    start_time: string;
+    end_time: string;
+    is_available: boolean;
+    created_at: string;
+    updated_at: string;
+    service_products?: {
+      id: string;
+      product_id: string;
+      products?: {
+        name: string;
+      } | null;
+    } | null;
+  }
+
+  const { data: availabilities } = useQuery<ServiceAvailability[]>({
     queryKey: ['service-availabilities'],
     queryFn: async () => {
-      // Utiliser any pour les tables non typées dans Supabase
-      const { data, error } = await (supabase as any)
+      // Type assertion nécessaire car service_availability n'est pas dans les types générés
+      const { data, error } = await (supabase as unknown as {
+        from: (table: string) => {
+          select: (query: string) => Promise<{
+            data: ServiceAvailability[] | null;
+            error: { message: string } | null;
+          }>;
+        };
+      })
         .from('service_availability')
         .select(`
           *,
@@ -195,16 +264,31 @@ export default function BookingsManagement() {
         logger.error('Error fetching availabilities', { error: error.message });
         throw error;
       }
-      return data;
+      return data || [];
     },
   });
+
+  // Type pour les availabilities
+  interface ServiceAvailabilityWithRelations {
+    id: string;
+    day_of_week: number;
+    start_time: string;
+    end_time: string;
+    is_available: boolean;
+    service_product?: Array<{
+      id: string;
+      product?: {
+        name: string;
+      };
+    }>;
+  }
 
   // Transform bookings to calendar events
   const events = useMemo((): ExtendedBookingEvent[] => {
     const bookingEvents: ExtendedBookingEvent[] = [];
 
     if (bookings) {
-      bookings.forEach((booking: any) => {
+      bookings.forEach((booking) => {
         try {
           const start = parseISO(`${booking.booking_date}T${booking.start_time || booking.booking_time || '00:00:00'}`);
           const end = parseISO(`${booking.booking_date}T${booking.end_time || booking.booking_time || '00:00:00'}`);
@@ -246,7 +330,7 @@ export default function BookingsManagement() {
         currentDate.setDate(now.getDate() + i);
         const dayOfWeek = currentDate.getDay();
 
-        availabilities.forEach((availability: any) => {
+        (availabilities as ServiceAvailabilityWithRelations[] | null)?.forEach((availability) => {
           if (availability.day_of_week === dayOfWeek) {
             const [startHour, startMinute] = availability.start_time.split(':');
             const [endHour, endMinute] = availability.end_time.split(':');
@@ -286,7 +370,7 @@ export default function BookingsManagement() {
   const filteredBookings = useMemo(() => {
     if (!bookings) return [];
 
-    return bookings.filter((booking: any) => {
+    return bookings.filter((booking) => {
       // Search filter
       const searchLower = debouncedSearch.toLowerCase();
       const matchesSearch = 
@@ -323,12 +407,12 @@ export default function BookingsManagement() {
     if (!bookings) return { total: 0, confirmed: 0, pending: 0, cancelled: 0, totalRevenue: 0 };
 
     const total = bookings.length;
-    const confirmed = bookings.filter((b: any) => b.status === 'confirmed').length;
-    const pending = bookings.filter((b: any) => b.status === 'pending').length;
-    const cancelled = bookings.filter((b: any) => b.status === 'cancelled').length;
+    const confirmed = bookings.filter((b) => b.status === 'confirmed').length;
+    const pending = bookings.filter((b) => b.status === 'pending').length;
+    const cancelled = bookings.filter((b) => b.status === 'cancelled').length;
     const totalRevenue = bookings
-      .filter((b: any) => b.status === 'confirmed' || b.status === 'completed')
-      .reduce((sum: number, b: any) => sum + (b.total_price || 0), 0);
+      .filter((b) => b.status === 'confirmed' || b.status === 'completed')
+      .reduce((sum: number, b) => sum + (b.total_price || 0), 0);
 
     return { total, confirmed, pending, cancelled, totalRevenue };
   }, [bookings]);
@@ -362,11 +446,12 @@ export default function BookingsManagement() {
       });
       setIsDialogOpen(false);
       logger.info('Booking confirmed', { bookingId });
-    } catch (error: any) {
-      logger.error('Error confirming booking', { bookingId, error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de confirmer la réservation';
+      logger.error('Error confirming booking', { bookingId, error: errorMessage });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de confirmer la réservation',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -384,11 +469,12 @@ export default function BookingsManagement() {
       });
       setIsDialogOpen(false);
       logger.info('Booking cancelled', { bookingId });
-    } catch (error: any) {
-      logger.error('Error cancelling booking', { bookingId, error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible d\'annuler la réservation';
+      logger.error('Error cancelling booking', { bookingId, error: errorMessage });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'annuler la réservation',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -404,11 +490,12 @@ export default function BookingsManagement() {
       });
       setIsDialogOpen(false);
       logger.info('Booking completed', { bookingId });
-    } catch (error: any) {
-      logger.error('Error completing booking', { bookingId, error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de terminer la réservation';
+      logger.error('Error completing booking', { bookingId, error: errorMessage });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de terminer la réservation',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -424,8 +511,9 @@ export default function BookingsManagement() {
       });
       setIsDialogOpen(false);
       logger.warn('Booking marked as no-show', { bookingId });
-    } catch (error: any) {
-      logger.error('Error marking no-show', { bookingId, error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de marquer comme absent';
+      logger.error('Error marking no-show', { bookingId, error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de marquer comme absent',
@@ -448,22 +536,22 @@ export default function BookingsManagement() {
     setIsExporting(true);
     try {
       const headers = ['ID', 'Date', 'Heure', 'Client', 'Email', 'Téléphone', 'Service', 'Statut', 'Prix', 'Participants'];
-      const rows = filteredBookings.map((booking: any) => [
+      const rows = filteredBookings.map((booking) => [
         booking.id,
         booking.booking_date,
-        booking.start_time || booking.booking_time || '',
+        booking.start_time || '',
         booking.customer?.full_name || '',
         booking.customer?.email || '',
         booking.customer?.phone || '',
         booking.service_product?.[0]?.product?.name || '',
         booking.status,
         booking.total_price || 0,
-        booking.participants_count || booking.participants || 1,
+        booking.participants_count || 1,
       ]);
 
       const csvContent = [
         headers.join(','),
-        ...rows.map((row: any[]) => row.map((cell: any) => `"${cell}"`).join(','))
+        ...rows.map((row) => row.map((cell) => `"${String(cell)}"`).join(','))
       ].join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -481,8 +569,9 @@ export default function BookingsManagement() {
         description: `${filteredBookings.length} réservation(s) exportée(s) en CSV.`,
       });
       logger.info('Bookings exported to CSV', { count: filteredBookings.length });
-    } catch (error: any) {
-      logger.error('Error exporting bookings', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Error exporting bookings', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'exporter les réservations.',
@@ -553,15 +642,15 @@ export default function BookingsManagement() {
           {/* Header avec animation - Style MyTemplates */}
           <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
           <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                  <Calendar className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                <div className="p-1 sm:p-1.5 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                  <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-4.5 md:w-4.5 lg:h-5 lg:w-5 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                 </div>
                 <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   Gestion des réservations
                 </span>
               </h1>
-              <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+              <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground">
               Gérez vos réservations de services et disponibilités
             </p>
             </div>
@@ -569,10 +658,11 @@ export default function BookingsManagement() {
               <Button
                 onClick={() => refetch()}
                 size="sm"
-                className="h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="h-8 sm:h-9 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
               >
-                <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                <span className="hidden sm:inline text-xs sm:text-sm">Actualiser</span>
+                <RefreshCw className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
+                <span className="hidden sm:inline">Actualiser</span>
+                <span className="sm:hidden">Raf.</span>
               </Button>
             </div>
           </div>
@@ -596,18 +686,18 @@ export default function BookingsManagement() {
                   className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
-                    <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
-                      <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <CardHeader className="pb-2 sm:pb-3 p-2.5 sm:p-3 md:p-4">
+                    <CardTitle className="text-[9px] sm:text-[10px] md:text-xs font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
+                      <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                       {stat.label}
                 </CardTitle>
               </CardHeader>
-                  <CardContent className="p-3 sm:p-4 pt-0">
-                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                    <div className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                       {stat.value}
                     </div>
                     {stat.subtitle && (
-                      <p className="text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
+                      <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
                     )}
               </CardContent>
             </Card>
@@ -627,7 +717,7 @@ export default function BookingsManagement() {
                     placeholder="Rechercher (client, service, email...)"
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
-                    className="pl-8 sm:pl-10 pr-8 sm:pr-20 h-9 sm:h-10 text-xs sm:text-sm"
+                    className="pl-8 sm:pl-10 pr-8 sm:pr-20 h-9 sm:h-10 text-[10px] sm:text-xs md:text-sm"
                     aria-label="Rechercher"
                   />
                   {searchInput && (
@@ -651,7 +741,7 @@ export default function BookingsManagement() {
 
                 {/* Filtres */}
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-[160px] h-9 sm:h-10 text-xs sm:text-sm">
+                  <SelectTrigger className="w-full sm:w-[160px] h-9 sm:h-10 text-[10px] sm:text-xs md:text-sm">
                     <SelectValue placeholder="Statut" />
                   </SelectTrigger>
                   <SelectContent>
@@ -665,7 +755,7 @@ export default function BookingsManagement() {
                 </Select>
 
                 <Select value={dateFilter} onValueChange={setDateFilter}>
-                  <SelectTrigger className="w-full sm:w-[160px] h-9 sm:h-10 text-xs sm:text-sm">
+                  <SelectTrigger className="w-full sm:w-[160px] h-9 sm:h-10 text-[10px] sm:text-xs md:text-sm">
                     <SelectValue placeholder="Période" />
                   </SelectTrigger>
                   <SelectContent>
@@ -681,14 +771,14 @@ export default function BookingsManagement() {
                   <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1">
                     <TabsTrigger 
                       value="list" 
-                      className="gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                      className="gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs md:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
                     >
                       <List className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="hidden sm:inline">Liste</span>
                     </TabsTrigger>
                     <TabsTrigger 
                       value="grid" 
-                      className="gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                      className="gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs md:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
                     >
                       <Grid3x3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="hidden sm:inline">Grille</span>
@@ -702,14 +792,15 @@ export default function BookingsManagement() {
                   variant="outline"
                   size="sm"
                   disabled={isExporting || filteredBookings.length === 0}
-                  className="h-9 sm:h-10 transition-all hover:scale-105"
+                  className="h-8 sm:h-9 transition-all hover:scale-105 text-xs sm:text-sm"
                 >
                   {isExporting ? (
-                    <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
+                    <Loader2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2 animate-spin" />
                   ) : (
-                    <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                    <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
                   )}
-                  <span className="hidden sm:inline text-xs sm:text-sm">Exporter</span>
+                  <span className="hidden sm:inline">Exporter</span>
+                  <span className="sm:hidden">Exp.</span>
             </Button>
           </div>
             </CardContent>
@@ -737,8 +828,8 @@ export default function BookingsManagement() {
             ) : (
               <Card>
                 <CardHeader>
-                  <CardTitle>Liste des réservations</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-sm sm:text-base md:text-lg">Liste des réservations</CardTitle>
+                  <CardDescription className="text-[10px] sm:text-xs md:text-sm">
                     {filteredBookings.length} réservation(s) trouvée(s)
                   </CardDescription>
                 </CardHeader>
@@ -746,8 +837,8 @@ export default function BookingsManagement() {
                   {filteredBookings.length === 0 ? (
                     <div className="text-center py-12">
                       <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                      <h3 className="text-lg font-semibold mb-2">Aucune réservation</h3>
-                      <p className="text-muted-foreground">
+                      <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-2">Aucune réservation</h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         {searchInput || statusFilter !== 'all' || dateFilter !== 'all'
                           ? 'Aucune réservation ne correspond aux filtres sélectionnés.'
                           : 'Les réservations apparaîtront ici.'}
@@ -767,7 +858,7 @@ export default function BookingsManagement() {
                               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                 <div className="flex-1 space-y-2">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <h3 className="font-semibold">
+                                    <h3 className="text-sm sm:text-base font-semibold">
                                       {booking.customer?.full_name || 'Client anonyme'}
                                     </h3>
                                     <Badge
@@ -794,7 +885,7 @@ export default function BookingsManagement() {
                                         : booking.status}
                                     </Badge>
                                   </div>
-                                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                                  <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[10px] sm:text-xs md:text-sm text-muted-foreground">
                                     <div className="flex items-center gap-2">
                                       <Calendar className="h-4 w-4" />
                                       {format(parseISO(`${booking.booking_date}T00:00:00`), 'PPP', { locale: fr })}
@@ -812,7 +903,7 @@ export default function BookingsManagement() {
                                       {booking.total_price?.toLocaleString('fr-FR') || 0} XOF
                                     </div>
                                   </div>
-                                  <p className="text-sm text-muted-foreground">
+                                  <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
                                     {booking.service_product?.[0]?.product?.name || 'Service'}
                                   </p>
                                 </div>
@@ -873,7 +964,7 @@ export default function BookingsManagement() {
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-2xl">{selectedEvent?.title}</DialogTitle>
+                <DialogTitle className="text-lg sm:text-xl md:text-2xl">{selectedEvent?.title}</DialogTitle>
                 <DialogDescription>
                   {selectedEvent && (
                     <>

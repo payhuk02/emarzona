@@ -23,20 +23,7 @@ import {
 } from 'lucide-react';
 import { useCourseAnalytics, useCourseViewsTimeline } from '@/hooks/courses/useCourseAnalytics';
 import { useCourseDetail } from '@/hooks/courses/useCourseDetail';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart as RechartsPieChart,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts';
+import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
 
 interface AdvancedCourseAnalyticsProps {
   courseId: string;
@@ -175,17 +162,21 @@ export const AdvancedCourseAnalytics = ({ courseId, productId }: AdvancedCourseA
                 <CardTitle>Évolution des Vues (30 jours)</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={timeline || []}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="views" stroke="#3b82f6" name="Vues" />
-                    <Line type="monotone" dataKey="enrollments" stroke="#10b981" name="Inscriptions" />
-                  </LineChart>
-                </ResponsiveContainer>
+                <LazyRechartsWrapper>
+                  {(recharts) => (
+                    <recharts.ResponsiveContainer width="100%" height={300}>
+                      <recharts.LineChart data={timeline || []}>
+                        <recharts.CartesianGrid strokeDasharray="3 3" />
+                        <recharts.XAxis dataKey="date" />
+                        <recharts.YAxis />
+                        <recharts.Tooltip />
+                        <recharts.Legend />
+                        <recharts.Line type="monotone" dataKey="views" stroke="#3b82f6" name="Vues" />
+                        <recharts.Line type="monotone" dataKey="enrollments" stroke="#10b981" name="Inscriptions" />
+                      </recharts.LineChart>
+                    </recharts.ResponsiveContainer>
+                  )}
+                </LazyRechartsWrapper>
               </CardContent>
             </Card>
 
@@ -195,25 +186,29 @@ export const AdvancedCourseAnalytics = ({ courseId, productId }: AdvancedCourseA
                 <CardTitle>Statut des Inscriptions</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <RechartsPieChart>
-                    <RechartsPieChart
-                      data={enrollmentData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {enrollmentData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </RechartsPieChart>
-                    <Tooltip />
-                  </RechartsPieChart>
-                </ResponsiveContainer>
+                <LazyRechartsWrapper>
+                  {(recharts) => (
+                    <recharts.ResponsiveContainer width="100%" height={300}>
+                      <recharts.PieChart>
+                        <recharts.Pie
+                          data={enrollmentData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }: { name: string; percent: number }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {enrollmentData.map((entry, index) => (
+                            <recharts.Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </recharts.Pie>
+                        <recharts.Tooltip />
+                      </recharts.PieChart>
+                    </recharts.ResponsiveContainer>
+                  )}
+                </LazyRechartsWrapper>
               </CardContent>
             </Card>
           </div>
@@ -224,15 +219,19 @@ export const AdvancedCourseAnalytics = ({ courseId, productId }: AdvancedCourseA
               <CardTitle>Distribution de la Progression</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={progressData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#3b82f6" />
-                </BarChart>
-              </ResponsiveContainer>
+              <LazyRechartsWrapper>
+                {(recharts) => (
+                  <recharts.ResponsiveContainer width="100%" height={300}>
+                    <recharts.BarChart data={progressData}>
+                      <recharts.CartesianGrid strokeDasharray="3 3" />
+                      <recharts.XAxis dataKey="name" />
+                      <recharts.YAxis />
+                      <recharts.Tooltip />
+                      <recharts.Bar dataKey="value" fill="#3b82f6" />
+                    </recharts.BarChart>
+                  </recharts.ResponsiveContainer>
+                )}
+              </LazyRechartsWrapper>
             </CardContent>
           </Card>
         </TabsContent>

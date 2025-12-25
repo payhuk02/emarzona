@@ -5,6 +5,8 @@
  * Impact: -80% temps de création, +40% qualité SEO
  */
 
+import { logger } from './logger';
+
 export type AIProvider = 'openai' | 'claude' | 'local' | 'fallback';
 
 export interface AIGenerationOptions {
@@ -50,7 +52,7 @@ export const generateProductContent = async (
       // Tentative avec l'API IA réelle
       return await generateWithAI(productInfo, provider, options);
     } catch (error) {
-      console.warn('AI generation failed, falling back to templates:', error);
+      logger.warn('AI generation failed, falling back to templates', { error });
       // Fallback vers templates en cas d'erreur
       return generateWithTemplates(productInfo, language);
     }
@@ -347,7 +349,7 @@ ${price ? `## Prix exceptionnel\n\nPour seulement ${price.toLocaleString()} XOF,
     : template.benefits;
 
   // Meta title
-  const metaTitle = `${name}${category ? ` - ${category}` : ''} | Payhuk`;
+  const metaTitle = `${name}${category ? ` - ${category}` : ''} | Emarzona`;
 
   // Meta description
   const metaDescription = `${shortDescription.slice(0, 140)}... ${template.cta[randomIndex]}`.slice(0, 160);
@@ -357,7 +359,7 @@ ${price ? `## Prix exceptionnel\n\nPour seulement ${price.toLocaleString()} XOF,
     name.toLowerCase(),
     type === 'digital' ? 'produit numérique' : type === 'physical' ? 'produit physique' : 'service',
     category?.toLowerCase() || '',
-    'payhuk',
+    'emarzona',
     'boutique en ligne',
     'acheter',
     ...(features?.slice(0, 3) || []).map(f => f.toLowerCase()),
@@ -390,7 +392,7 @@ export const generateKeywordSuggestions = (productInfo: ProductInfo): string[] =
     ...base,
     ...typeKeywords[type],
     category?.toLowerCase() || '',
-    'payhuk',
+    'emarzona',
     'en ligne',
   ].filter(Boolean);
 };

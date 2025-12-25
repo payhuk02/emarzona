@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK WARRANTIES & GUARANTEES SYSTEM
+-- EMARZONA WARRANTIES & GUARANTEES SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système de gestion des garanties et warranties pour produits physiques
 --              Suivi des réclamations, réparations et remplacements

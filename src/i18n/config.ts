@@ -49,7 +49,7 @@ i18n
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
-      lookupLocalStorage: 'payhuk_language',
+      lookupLocalStorage: 'emarzona_language',
     },
     
     // Options d'interpolation

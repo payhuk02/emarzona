@@ -7,6 +7,13 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  sendBookingNotifications,
+  scheduleBookingReminders,
+  getUserBookingNotificationPreferences,
+} from '@/lib/notifications/service-booking-notifications';
+import { createServiceRefund } from '@/lib/services/cancellation-policy';
+import { logger } from '@/lib/logger';
 
 export interface ServiceBooking {
   id: string;
@@ -122,6 +129,64 @@ export const useCreateBooking = () => {
         .single();
 
       if (error) throw error;
+
+      // 🆕 Envoyer les notifications et planifier les rappels
+      if (result && data.booking_date && data.booking_time) {
+        try {
+          // Récupérer les infos du produit et du client
+          const [productResult, customerResult] = await Promise.all([
+            supabase
+              .from('products')
+              .select('name, store_id')
+              .eq('id', result.product_id)
+              .single(),
+            supabase
+              .from('customers')
+              .select('name, email, phone')
+              .eq('id', result.customer_id)
+              .maybeSingle(),
+          ]);
+
+          const product = productResult.data;
+          const customer = customerResult.data;
+
+          if (product && customer && result.user_id) {
+            // Récupérer les préférences
+            const preferences = await getUserBookingNotificationPreferences(result.user_id);
+
+            // Envoyer la notification de confirmation
+            await sendBookingNotifications(
+              result.user_id,
+              preferences,
+              {
+                booking_id: result.id,
+                service_name: product.name,
+                customer_name: customer.name || 'Client',
+                customer_email: customer.email || '',
+                customer_phone: customer.phone || undefined,
+                booking_date: data.booking_date,
+                booking_time: data.booking_time,
+              },
+              'confirmation'
+            );
+
+            // Planifier les rappels automatiques
+            await scheduleBookingReminders(
+              result.id,
+              data.booking_date,
+              data.booking_time,
+              preferences
+            );
+          }
+        } catch (notificationError) {
+          // Ne pas faire échouer la création si les notifications échouent
+          logger.warn('Error sending booking notifications', {
+            error: notificationError,
+            bookingId: result.id,
+          });
+        }
+      }
+
       return result;
     },
     onSuccess: () => {
@@ -169,12 +234,76 @@ export const useCancelBooking = () => {
         .update({
           status: 'cancelled',
           cancellation_reason: reason,
+          cancelled_at: new Date().toISOString(),
         })
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
+
+      // 🆕 Envoyer la notification d'annulation et créer le remboursement
+      if (result) {
+        try {
+          const [productResult, userProfileResult] = await Promise.all([
+            supabase
+              .from('products')
+              .select('name')
+              .eq('id', result.product_id)
+              .single(),
+            supabase
+              .from('profiles')
+              .select('full_name, email, phone')
+              .eq('id', result.user_id)
+              .maybeSingle(),
+          ]);
+
+          const product = productResult.data;
+          const userProfile = userProfileResult.data;
+
+          if (product && result.user_id) {
+            const preferences = await getUserBookingNotificationPreferences(result.user_id);
+
+            await sendBookingNotifications(
+              result.user_id,
+              preferences,
+              {
+                booking_id: result.id,
+                service_name: product.name,
+                customer_name: userProfile?.full_name || 'Client',
+                customer_email: userProfile?.email || '',
+                customer_phone: userProfile?.phone || undefined,
+                booking_date: result.scheduled_date || result.booking_date,
+                booking_time: result.scheduled_start_time || result.booking_time,
+                cancellation_reason: reason,
+              },
+              'cancellation'
+            );
+
+            // 🆕 Créer automatiquement le remboursement selon la politique
+            try {
+              await createServiceRefund(
+                result.id,
+                'original_payment',
+                reason,
+                false
+              );
+            } catch (refundError) {
+              // Ne pas faire échouer l'annulation si le remboursement échoue
+              logger.warn('Error creating automatic refund', {
+                error: refundError,
+                bookingId: result.id,
+              });
+            }
+          }
+        } catch (notificationError) {
+          logger.warn('Error sending cancellation notification', {
+            error: notificationError,
+            bookingId: id,
+          });
+        }
+      }
+
       return result;
     },
     onSuccess: () => {
@@ -200,6 +329,52 @@ export const useConfirmBooking = () => {
         .single();
 
       if (error) throw error;
+
+      // 🆕 Envoyer la notification de confirmation
+      if (result) {
+        try {
+          const [productResult, userProfileResult] = await Promise.all([
+            supabase
+              .from('products')
+              .select('name')
+              .eq('id', result.product_id)
+              .single(),
+            supabase
+              .from('profiles')
+              .select('full_name, email, phone')
+              .eq('id', result.user_id)
+              .maybeSingle(),
+          ]);
+
+          const product = productResult.data;
+          const userProfile = userProfileResult.data;
+
+          if (product && result.user_id) {
+            const preferences = await getUserBookingNotificationPreferences(result.user_id);
+
+            await sendBookingNotifications(
+              result.user_id,
+              preferences,
+              {
+                booking_id: result.id,
+                service_name: product.name,
+                customer_name: userProfile?.full_name || 'Client',
+                customer_email: userProfile?.email || '',
+                customer_phone: userProfile?.phone || undefined,
+                booking_date: result.scheduled_date || result.booking_date,
+                booking_time: result.scheduled_start_time || result.booking_time,
+              },
+              'confirmation'
+            );
+          }
+        } catch (notificationError) {
+          logger.warn('Error sending confirmation notification', {
+            error: notificationError,
+            bookingId: id,
+          });
+        }
+      }
+
       return result;
     },
     onSuccess: () => {

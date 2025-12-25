@@ -24,6 +24,7 @@ import {
   Copy
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 interface SecurityConfig {
   dnssec: boolean;
@@ -107,7 +108,7 @@ export const AdvancedSecurityPanel = ({
 
       setSecurityConfig(mockConfig);
     } catch (error) {
-      console.error('Error loading security config:', error);
+      logger.error('Error loading security config', { error, domain });
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +121,7 @@ export const AdvancedSecurityPanel = ({
         setSecurityConfig(prev => ({ ...prev, dnssec: !prev.dnssec }));
       }
     } catch (error) {
-      console.error('Error toggling DNSSEC:', error);
+      logger.error('Error toggling DNSSEC', { error, domain });
     }
   };
 
@@ -131,7 +132,7 @@ export const AdvancedSecurityPanel = ({
         setSecurityConfig(prev => ({ ...prev, hsts: !prev.hsts }));
       }
     } catch (error) {
-      console.error('Error toggling HSTS:', error);
+      logger.error('Error toggling HSTS', { error, domain });
     }
   };
 
@@ -142,7 +143,7 @@ export const AdvancedSecurityPanel = ({
         setSecurityConfig(prev => ({ ...prev, csp: !prev.csp }));
       }
     } catch (error) {
-      console.error('Error toggling CSP:', error);
+      logger.error('Error toggling CSP', { error, domain });
     }
   };
 
@@ -156,7 +157,7 @@ export const AdvancedSecurityPanel = ({
         });
       }
     } catch (error) {
-      console.error('Error updating CSP policy:', error);
+      logger.error('Error updating CSP policy', { error, domain, policy: securityConfig.cspPolicy });
     }
   };
 
@@ -340,6 +341,7 @@ export const AdvancedSecurityPanel = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => setShowCSPPolicy(!showCSPPolicy)}
+                      aria-label={showCSPPolicy ? "Masquer la politique CSP" : "Afficher la politique CSP"}
                     >
                       {showCSPPolicy ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
@@ -424,7 +426,7 @@ export const AdvancedSecurityPanel = ({
                       {vuln.type === 'high' ? 'Élevé' : 
                        vuln.type === 'medium' ? 'Moyen' : 'Faible'}
                     </Badge>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" aria-label={`En savoir plus sur la vulnérabilité ${vuln.title}`} onClick={() => vuln.link && window.open(vuln.link, '_blank')}>
                       <ExternalLink className="h-4 w-4" />
                     </Button>
                   </div>

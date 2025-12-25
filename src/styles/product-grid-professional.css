@@ -39,57 +39,127 @@
 .products-grid-mobile,
 .products-grid-tablet,
 .products-grid-desktop {
-  animation: fadeInUp 0.6s ease-out;
+  /* Animations supprimées */
 }
 
-/* Carte produit avec animations */
+/* Carte produit - Affichage statique et professionnel - Pas d'ombres */
 .product-card-professional {
   position: relative;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: fadeInUp 0.5s ease-out backwards;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: none;
 }
 
-.product-card-professional:nth-child(1) {
-  animation-delay: 0.1s;
-}
-
-.product-card-professional:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.product-card-professional:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-.product-card-professional:nth-child(4) {
-  animation-delay: 0.4s;
-}
-
-/* Hover effects avancés - Ombre retirée sur demande */
+/* Pas d'effet hover - Affichage statique */
 .product-card-professional:hover {
-  transform: translateY(-8px) scale(1.02);
-  /* Ombre retirée pour meilleure visibilité de l'image */
+  transform: none;
+  box-shadow: none;
 }
 
-.product-card-professional:hover .product-image-overlay {
-  opacity: 1;
+/* Mode sombre - Pas d'ombres */
+.dark .product-card-professional {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
 }
 
-.product-card-professional:hover .product-image {
-  transform: scale(1.1);
+.dark .product-card-professional:hover {
+  box-shadow: none;
 }
+
+/* Hover effects supprimés */
+
+/* Hover effects supprimés */
 
 /* Image avec effet parallaxe au hover */
 .product-image-container {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: hsl(var(--muted) / 0.3); /* Fond adaptatif pour les espaces vides */
+  width: 100%;
+  min-height: 250px; /* Hauteur minimale mobile */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Prend plus d'espace avec flex-grow, contenu repoussé en bas */
 }
 
+/* Assurer que l'image occupe toute la largeur disponible */
+.product-image-container .product-image,
+.product-image-container picture,
+.product-image-container img {
+  width: 100% !important;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Hauteur minimale responsive */
+@media (min-width: 640px) {
+  .product-image-container {
+    min-height: 350px; /* Tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-image-container {
+    min-height: 450px; /* Desktop */
+  }
+}
+
+/* Image produit - Affichage statique et professionnel - Pas d'ombres, pas d'animations */
 .product-image {
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
+  /* Qualité d'affichage optimisée */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: optimize-quality;
+  /* Pas d'ombres, affichage statique */
+  box-shadow: none !important;
+  filter: none;
+  /* Assurer que l'image occupe toute la largeur */
+  width: 100% !important;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Classe pour netteté professionnelle des images */
+.image-sharp {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: optimize-quality;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  filter: contrast(1.05) saturate(1.1);
+}
+
+/* Netteté optimisée pour mobile (écrans Retina) */
+@media (max-width: 639px) {
+  .image-sharp {
+    filter: contrast(1.08) saturate(1.12) brightness(1.01);
+    /* Optimisation pour écrans haute densité */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+}
+
+/* Pas d'effet hover - Affichage statique */
+.product-card-professional:hover .product-image {
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+
+/* Container d'image avec ratio aspect uniforme */
+.product-image-container {
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  aspect-ratio: 16 / 9; /* Ratio uniforme professionnel */
 }
 
 .product-image-overlay {
@@ -97,25 +167,28 @@
   inset: 0;
   background: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.7) 0%,
-    rgba(0, 0, 0, 0.4) 50%,
-    transparent 100%
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.2) 30%,
+    transparent 60%
   );
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease-out;
   pointer-events: none;
+  z-index: 1;
 }
 
-/* Badges avec animation */
+/* Overlay visible au hover pour effet professionnel */
+.product-card-professional:hover .product-image-overlay {
+  opacity: 1;
+}
+
+/* Badges - animations supprimées */
 .product-badge {
-  animation: scaleIn 0.4s ease-out backwards;
   backdrop-filter: blur(8px);
 }
 
 .product-badge-promo {
-  animation-delay: 0.2s;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
 }
 
 /* Boutons d'action avec effets */
@@ -135,7 +208,9 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.3);
   transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  transition:
+    width 0.6s,
+    height 0.6s;
 }
 
 .product-action-button:hover::before {
@@ -149,23 +224,13 @@
 
 /* Skeleton loading amélioré */
 .product-skeleton {
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 25%,
-    #e0e0e0 50%,
-    #f0f0f0 75%
-  );
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
 .dark .product-skeleton {
-  background: linear-gradient(
-    90deg,
-    #2a2a2a 25%,
-    #3a3a3a 50%,
-    #2a2a2a 75%
-  );
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
   background-size: 200% 100%;
 }
 
@@ -219,14 +284,133 @@
   }
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
+/* ============================================================
+   OPTIMISATIONS MOBILE PROFESSIONNELLES
+   ============================================================ */
+
+/* Mobile (< 640px) - Optimisations spécifiques */
+@media (max-width: 639px) {
   .product-card-professional {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 0.75rem; /* 12px - plus arrondi sur mobile */
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.08),
+      0 1px 3px rgba(0, 0, 0, 0.12);
   }
-  
+
+  /* Pas d'effet hover sur mobile - Affichage statique */
   .product-card-professional:hover {
-    transform: translateY(-4px);
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Désactiver zoom image sur mobile */
+  .product-card-professional:hover .product-image {
+    transform: none;
+    filter: none;
+  }
+
+  /* Container image optimisé mobile */
+  .product-image-container {
+    border-radius: 0.75rem 0.75rem 0 0; /* Arrondi seulement en haut */
+  }
+
+  /* Image optimisée pour netteté mobile - Toujours visible lors du scroll - Stable et optimisée */
+  .product-image {
+    /* Netteté optimale pour écrans Retina mobile */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    /* Forcer l'affichage de l'image */
+    display: block !important;
+    /* S'assurer que l'image reste visible lors du scroll */
+    position: relative !important;
+    z-index: 1 !important;
+    /* Pas de will-change pour éviter les problèmes de rendu */
+    will-change: auto;
+    /* Pas de filtres coûteux sur mobile */
+    filter: none;
+    /* Stabilité garantie - pas de transformations */
+    transform: none !important;
+    /* Toujours visible */
+    visibility: visible !important;
+    opacity: 1 !important;
+    /* Optimisation performance */
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+  }
+
+  /* S'assurer que l'image se charge même si lazy loading échoue */
+  .product-image-container picture {
+    min-height: 200px; /* Hauteur minimum pour éviter le collapse */
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Forcer l'affichage de l'image sur mobile - Toujours visible lors du scroll */
+  .product-image-container picture img,
+  .product-image-container picture,
+  .product-image {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    position: relative !important;
+    z-index: 1 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Améliorer le placeholder sur mobile */
+  .product-image-container picture img[src=''],
+  .product-image-container picture img:not([src]) {
+    opacity: 0;
+  }
+
+  /* Skeleton placeholder amélioré pour mobile */
+  .product-image-container picture .animate-pulse {
+    background: linear-gradient(90deg, #e5e7eb 25%, #d1d5db 50%, #e5e7eb 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .dark .product-image-container picture .animate-pulse {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    background-size: 200% 100%;
+  }
+
+  /* Badges plus compacts sur mobile */
+  .product-badge {
+    font-size: 0.625rem; /* 10px */
+    padding: 0.25rem 0.5rem;
+  }
+
+  /* Boutons avec touch targets optimisés */
+  .product-action-button {
+    min-height: 44px; /* Touch target minimum Apple/Google */
+    min-width: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+
+  /* Amélioration de la lisibilité du texte sur mobile */
+  .product-card-professional h3 {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Prix plus visible sur mobile */
+  .product-card-professional .product-price {
+    font-size: 1.125rem; /* 18px */
+    font-weight: 700;
+  }
+}
+
+/* Tablet (640px - 1024px) */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .product-card-professional {
+    margin-bottom: 1.25rem;
   }
 }
 
@@ -246,10 +430,24 @@
 .product-card-professional,
 .product-image,
 .product-action-button {
-  will-change: transform;
   backface-visibility: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transform: translateZ(0); /* Force GPU acceleration */
+}
+
+/* Amélioration de la netteté des images avec filtres subtils */
+.product-image {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: optimize-quality;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Smooth transitions pour tous les éléments interactifs */
+.product-card-professional * {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Loading states */
@@ -275,4 +473,3 @@
     page-break-inside: avoid;
   }
 }
-

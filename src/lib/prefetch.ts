@@ -3,6 +3,8 @@
  * Précharge les ressources avant qu'elles ne soient nécessaires
  */
 
+import { logger } from './logger';
+
 interface PrefetchOptions {
   priority?: 'high' | 'low' | 'auto';
   as?: 'document' | 'script' | 'style' | 'image' | 'font' | 'fetch';
@@ -30,7 +32,7 @@ export function prefetchURL(url: string, options: PrefetchOptions = {}): void {
   }
   
   document.head.appendChild(link);
-  console.log('[Prefetch] URL prefetched:', url);
+  logger.debug('URL prefetched', { url });
 }
 
 /**
@@ -48,7 +50,7 @@ export function preconnect(url: string): void {
   link.rel = 'preconnect';
   link.href = url;
   document.head.appendChild(link);
-  console.log('[Preconnect] Domain preconnected:', url);
+  logger.debug('Domain preconnected', { url });
 }
 
 /**
@@ -59,7 +61,7 @@ export function dnsPrefetch(url: string): void {
   link.rel = 'dns-prefetch';
   link.href = url;
   document.head.appendChild(link);
-  console.log('[DNS Prefetch] Domain prefetched:', url);
+  logger.debug('DNS prefetch domain', { url });
 }
 
 /**
@@ -191,7 +193,17 @@ export function prefetchCriticalResources(): void {
  */
 export function smartPrefetch(urls: string[]): void {
   // Vérifier le type de connexion
-  const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+  type NavigatorWithConnection = typeof navigator & {
+    connection?: NetworkInformation;
+    mozConnection?: NetworkInformation;
+    webkitConnection?: NetworkInformation;
+  };
+  type NetworkInformation = {
+    effectiveType?: '2g' | '3g' | '4g' | 'wifi';
+    saveData?: boolean;
+  };
+  const nav = navigator as NavigatorWithConnection;
+  const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
 
   if (!connection) {
     // Si pas d'info de connexion, précharger normalement
@@ -204,15 +216,15 @@ export function smartPrefetch(urls: string[]): void {
   const saveData = connection.saveData;
 
   if (saveData) {
-    console.log('[Prefetch] Save data mode enabled, skipping prefetch');
+    logger.debug('Save data mode enabled, skipping prefetch');
     return;
   }
 
   if (effectiveType === '4g' || effectiveType === 'wifi') {
-    console.log('[Prefetch] Fast connection detected, prefetching:', urls.length, 'URLs');
+    logger.debug('Fast connection detected, prefetching', { count: urls.length });
     prefetchURLs(urls);
   } else {
-    console.log('[Prefetch] Slow connection detected, skipping prefetch');
+    logger.debug('Slow connection detected, skipping prefetch');
   }
 }
 

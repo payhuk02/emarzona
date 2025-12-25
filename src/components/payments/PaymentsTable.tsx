@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,11 +16,11 @@ interface PaymentsTableProps {
   onPaymentUpdated: () => void;
 }
 
-export const PaymentsTable = ({ payments, loading, onPaymentUpdated }: PaymentsTableProps) => {
+const PaymentsTableComponent = ({ payments, loading, onPaymentUpdated }: PaymentsTableProps) => {
   const { toast } = useToast();
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!deleteId) return;
 
     try {
@@ -37,18 +37,19 @@ export const PaymentsTable = ({ payments, loading, onPaymentUpdated }: PaymentsT
       });
 
       onPaymentUpdated();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setDeleteId(null);
     }
-  };
+  }, [deleteId, onPaymentUpdated]); // Note: toast est stable, pas besoin de le mettre dans les dépendances
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = useCallback((status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       pending: "secondary",
       completed: "default",
@@ -68,9 +69,9 @@ export const PaymentsTable = ({ payments, loading, onPaymentUpdated }: PaymentsT
         {labels[status] || status}
       </Badge>
     );
-  };
+  }, []);
 
-  const getMethodLabel = (method: string) => {
+  const getMethodLabel = useCallback((method: string) => {
     const labels: Record<string, string> = {
       cash: "Espèces",
       card: "Carte bancaire",
@@ -81,7 +82,7 @@ export const PaymentsTable = ({ payments, loading, onPaymentUpdated }: PaymentsT
     };
 
     return labels[method] || method;
-  };
+  }, []);
 
   if (loading) {
     return <div className="text-center py-8">Chargement...</div>;
@@ -140,6 +141,7 @@ export const PaymentsTable = ({ payments, loading, onPaymentUpdated }: PaymentsT
                     variant="ghost"
                     size="icon"
                     onClick={() => setDeleteId(payment.id)}
+                    aria-label={`Supprimer le paiement ${payment.id}`}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -167,3 +169,20 @@ export const PaymentsTable = ({ payments, loading, onPaymentUpdated }: PaymentsT
     </>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const PaymentsTable = React.memo(PaymentsTableComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.loading === nextProps.loading &&
+    prevProps.payments.length === nextProps.payments.length &&
+    prevProps.onPaymentUpdated === nextProps.onPaymentUpdated &&
+    // Comparaison superficielle des payments (comparer les IDs)
+    prevProps.payments.every((payment, index) => 
+      payment.id === nextProps.payments[index]?.id &&
+      payment.amount === nextProps.payments[index]?.amount &&
+      payment.status === nextProps.payments[index]?.status
+    )
+  );
+});
+
+PaymentsTable.displayName = 'PaymentsTable';

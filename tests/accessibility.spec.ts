@@ -6,12 +6,15 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:8084';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 
 const pages = [
   { name: 'Accueil', path: '/' },
   { name: 'Marketplace', path: '/marketplace' },
   { name: 'Authentification', path: '/auth' },
+  { name: 'Dashboard', path: '/dashboard' },
+  { name: 'Produits', path: '/products' },
+  { name: 'Commandes', path: '/orders' },
 ];
 
 test.describe('Accessibilité - Scan Automatique', () => {

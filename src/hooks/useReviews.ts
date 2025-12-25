@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
 import type {
   Review,
   ReviewReply,
@@ -26,10 +27,7 @@ import type {
 /**
  * Hook pour récupérer les reviews d'un produit
  */
-export const useProductReviews = (
-  productId?: string,
-  filters?: ReviewFilters
-) => {
+export const useProductReviews = (productId?: string, filters?: ReviewFilters) => {
   return useQuery({
     queryKey: ['product-reviews', productId, filters],
     queryFn: async (): Promise<Review[]> => {
@@ -37,7 +35,8 @@ export const useProductReviews = (
 
       let query = supabase
         .from('reviews')
-        .select(`
+        .select(
+          `
           *,
           replies:review_replies(
             *,
@@ -45,7 +44,8 @@ export const useProductReviews = (
           ),
           media:review_media(*),
           user_vote:review_votes!review_votes_review_id_fkey(*)
-        `)
+        `
+        )
         .eq('product_id', productId)
         .eq('is_approved', true);
 
@@ -79,28 +79,48 @@ export const useProductReviews = (
           query = query.order('created_at', { ascending: false });
       }
 
-      // Pagination
-      if (filters?.limit) {
-        query = query.limit(filters.limit);
-      }
-      if (filters?.offset) {
-        query = query.range(
-          filters.offset,
-          filters.offset + (filters.limit || 10) - 1
-        );
-      }
+      // Pagination (par défaut: 20 reviews, max 100)
+      const limit = filters?.limit || 20;
+      const offset = filters?.offset || 0;
+      query = query.range(offset, offset + Math.min(limit, 100) - 1);
 
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching product reviews:', error);
-        throw error;
+        // Erreur 400/404 sont normales si les tables n'existent pas encore
+        const errorCode = error.code;
+        const errorMessage = error.message || '';
+
+        // Erreur 400 Bad Request (table ou relation n'existe pas)
+        if (
+          errorCode === 'PGRST116' ||
+          errorMessage.includes('Bad Request') ||
+          errorMessage.includes('400')
+        ) {
+          logger.warn('Reviews table or relations may not exist yet:', errorMessage);
+          return [];
+        }
+
+        // Erreur 404 Not Found
+        if (
+          errorCode === 'PGRST301' ||
+          errorMessage.includes('Not Found') ||
+          errorMessage.includes('404')
+        ) {
+          logger.warn('Reviews endpoint not found:', errorMessage);
+          return [];
+        }
+
+        // Pour les autres erreurs, logger en warning (non-critique)
+        logger.warn('Error fetching product reviews (non-critical):', error);
+        return [];
       }
 
-      return data as Review[];
+      return (data || []) as Review[];
     },
     enabled: !!productId,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: false, // Ne pas réessayer en cas d'erreur pour éviter le spam
   });
 };
 
@@ -120,14 +140,40 @@ export const useProductReviewStats = (productId?: string) => {
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching product review stats:', error);
-        throw error;
+        // Erreur 404 est normale si la vue/table n'existe pas encore
+        const errorCode = error.code;
+        const errorMessage = error.message || '';
+
+        // Erreur 404 Not Found (table/vue n'existe pas)
+        if (
+          errorCode === 'PGRST301' ||
+          errorMessage.includes('Not Found') ||
+          errorMessage.includes('404')
+        ) {
+          logger.warn('product_review_stats view may not exist yet:', errorMessage);
+          return null;
+        }
+
+        // Erreur 400 Bad Request
+        if (
+          errorCode === 'PGRST116' ||
+          errorMessage.includes('Bad Request') ||
+          errorMessage.includes('400')
+        ) {
+          logger.warn('Bad Request for product_review_stats:', errorMessage);
+          return null;
+        }
+
+        // Pour les autres erreurs, logger en warning (non-critique)
+        logger.warn('Error fetching product review stats (non-critical):', error);
+        return null;
       }
 
       return data as ProductReviewStats | null;
     },
     enabled: !!productId,
     staleTime: 1000 * 60 * 10, // 10 minutes
+    retry: false, // Ne pas réessayer en cas d'erreur pour éviter le spam
   });
 };
 
@@ -140,21 +186,23 @@ export const useReview = (reviewId?: string) => {
     queryFn: async (): Promise<Review | null> => {
       if (!reviewId) return null;
 
-        const { data, error } = await supabase
-          .from('reviews')
-          .select(`
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(
+          `
             *,
           replies:review_replies(
             *,
             user:profiles(id, full_name, avatar_url)
           ),
           media:review_media(*)
-        `)
+        `
+        )
         .eq('id', reviewId)
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching review:', error);
+        logger.error('Error fetching review', { error, reviewId });
         throw error;
       }
 
@@ -182,40 +230,134 @@ export const useCanReview = (productId?: string) => {
         return { can_review: false, reason: 'Not authenticated' };
       }
 
-      // Vérifier si l'utilisateur a déjà laissé un avis
-      const { data: existingReview } = await supabase
-        .from('reviews')
-        .select('id')
-        .eq('product_id', productId)
-        .eq('user_id', user.id)
-        .maybeSingle();
+      try {
+        // Vérifier si l'utilisateur a déjà laissé un avis
+        const { data: existingReview, error: reviewError } = await supabase
+          .from('reviews')
+          .select('id')
+          .eq('product_id', productId)
+          .eq('user_id', user.id)
+          .maybeSingle();
 
-      if (existingReview) {
-        return {
-          can_review: false,
-          reason: 'Already reviewed',
-          existing_review_id: existingReview.id,
-        };
-      }
+        // Gérer les erreurs 400/404 (table n'existe pas encore)
+        if (reviewError) {
+          const errorCode = reviewError.code;
+          const errorMessage = reviewError.message || '';
 
-      // Vérifier si l'utilisateur a acheté le produit
-      const { data: order } = await supabase
-        .from('orders')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('status', 'completed')
-        .or(`product_id.eq.${productId}`)
-        .limit(1)
-        .maybeSingle();
+          if (
+            errorCode === 'PGRST116' ||
+            errorCode === 'PGRST301' ||
+            errorMessage.includes('Bad Request') ||
+            errorMessage.includes('Not Found')
+          ) {
+            logger.warn('Reviews table may not exist yet:', errorMessage);
+            return { can_review: false, reason: 'Reviews system not available' };
+          }
+        }
 
-      if (!order) {
+        if (existingReview) {
+          return {
+            can_review: false,
+            reason: 'Already reviewed',
+            existing_review_id: existingReview.id,
+          };
+        }
+
+        // Récupérer le customer_id de l'utilisateur
+        const { data: customer, error: customerError } = await supabase
+          .from('customers')
+          .select('id')
+          .eq('email', user.email)
+          .maybeSingle();
+
+        // Si pas de customer trouvé ou erreur, on ne peut pas vérifier l'achat
+        if (customerError || !customer) {
+          // Erreur 400/404 est normale si la table n'existe pas encore
+          if (customerError) {
+            const errorCode = customerError.code;
+            const errorMessage = customerError.message || '';
+
+            if (
+              errorCode === 'PGRST116' ||
+              errorCode === 'PGRST301' ||
+              errorMessage.includes('Bad Request') ||
+              errorMessage.includes('Not Found')
+            ) {
+              logger.warn('Customers table may not exist yet:', errorMessage);
+              return { can_review: false, reason: 'Order verification not available' };
+            }
+          }
+
+          return { can_review: false, reason: 'No customer profile found' };
+        }
+
+        // Vérifier si l'utilisateur a acheté le produit via order_items
+        // D'abord, récupérer les commandes complétées du customer
+        const { data: completedOrders, error: ordersError } = await supabase
+          .from('orders')
+          .select('id')
+          .eq('customer_id', customer.id)
+          .eq('status', 'completed');
+
+        // Gérer les erreurs 400/404 (table n'existe pas encore)
+        if (ordersError) {
+          const errorCode = ordersError.code;
+          const errorMessage = ordersError.message || '';
+
+          if (
+            errorCode === 'PGRST116' ||
+            errorCode === 'PGRST301' ||
+            errorMessage.includes('Bad Request') ||
+            errorMessage.includes('Not Found')
+          ) {
+            logger.warn('Orders table may not exist yet:', errorMessage);
+            return { can_review: false, reason: 'Order verification not available' };
+          }
+        }
+
+        if (!completedOrders || completedOrders.length === 0) {
+          return { can_review: false, reason: 'No completed orders found' };
+        }
+
+        // Vérifier si le produit est dans une de ces commandes
+        const orderIds = completedOrders.map(o => o.id);
+        const { data: orderItem, error: orderItemsError } = await supabase
+          .from('order_items')
+          .select('id')
+          .eq('product_id', productId)
+          .in('order_id', orderIds)
+          .limit(1)
+          .maybeSingle();
+
+        // Gérer les erreurs 400/404 (table n'existe pas encore)
+        if (orderItemsError) {
+          const errorCode = orderItemsError.code;
+          const errorMessage = orderItemsError.message || '';
+
+          if (
+            errorCode === 'PGRST116' ||
+            errorCode === 'PGRST301' ||
+            errorMessage.includes('Bad Request') ||
+            errorMessage.includes('Not Found')
+          ) {
+            logger.warn('Order items table may not exist yet:', errorMessage);
+            return { can_review: false, reason: 'Order verification not available' };
+          }
+        }
+
+        if (orderItem) {
+          return { can_review: true };
+        }
+
         return { can_review: false, reason: 'No purchase found' };
+      } catch (error) {
+        logger.warn('Exception in useCanReview (non-critical):', error);
+        return { can_review: false, reason: 'Verification error' };
       }
-
-      return { can_review: true };
     },
     enabled: !!productId && !!user,
     staleTime: 1000 * 60 * 5,
+    retry: false, // Ne pas réessayer en cas d'erreur pour éviter le spam
   });
 };
 
@@ -259,7 +401,7 @@ export const useCreateReview = () => {
         .single();
 
       if (error) {
-        console.error('Error creating review:', error);
+        logger.error('Error creating review', { error, productId, payload });
         throw error;
       }
 
@@ -275,9 +417,9 @@ export const useCreateReview = () => {
             .upload(fileName, file);
 
           if (!uploadError) {
-            const { data: { publicUrl } } = supabase.storage
-              .from('review-media')
-              .getPublicUrl(fileName);
+            const {
+              data: { publicUrl },
+            } = supabase.storage.from('review-media').getPublicUrl(fileName);
 
             await supabase.from('review_media').insert({
               review_id: data.id,
@@ -301,10 +443,11 @@ export const useCreateReview = () => {
         description: 'Votre avis a été publié avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -320,7 +463,13 @@ export const useUpdateReview = () => {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ reviewId, payload }: { reviewId: string; payload: UpdateReviewPayload }) => {
+    mutationFn: async ({
+      reviewId,
+      payload,
+    }: {
+      reviewId: string;
+      payload: UpdateReviewPayload;
+    }) => {
       if (!user) throw new Error('User not authenticated');
 
       const { data, error } = await supabase
@@ -332,13 +481,13 @@ export const useUpdateReview = () => {
         .single();
 
       if (error) {
-        console.error('Error updating review:', error);
+        logger.error('Error updating review', { error, reviewId, payload });
         throw error;
       }
 
       return data as Review;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['review', data.id] });
       queryClient.invalidateQueries({ queryKey: ['product-reviews', data.product_id] });
       queryClient.invalidateQueries({ queryKey: ['product-review-stats', data.product_id] });
@@ -347,10 +496,11 @@ export const useUpdateReview = () => {
         description: 'Votre avis a été modifié avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -383,13 +533,13 @@ export const useDeleteReview = () => {
         .eq('user_id', user.id); // Sécurité
 
       if (error) {
-        console.error('Error deleting review:', error);
+        logger.error('Error deleting review', { error, reviewId });
         throw error;
       }
 
       return { reviewId, productId: review?.product_id };
     },
-    onSuccess: (result) => {
+    onSuccess: result => {
       queryClient.invalidateQueries({ queryKey: ['product-reviews', result.productId] });
       queryClient.invalidateQueries({ queryKey: ['product-review-stats', result.productId] });
       queryClient.invalidateQueries({ queryKey: ['can-review', result.productId] });
@@ -398,10 +548,11 @@ export const useDeleteReview = () => {
         description: 'Votre avis a été supprimé.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -437,7 +588,7 @@ export const useVoteReview = () => {
         .single();
 
       if (error) {
-        console.error('Error voting review:', error);
+        logger.error('Error voting review', { error, reviewId, voteType });
         throw error;
       }
 
@@ -463,7 +614,11 @@ export const useReplyToReview = () => {
   const { user, profile } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ reviewId, content, replyType = 'customer' }: {
+    mutationFn: async ({
+      reviewId,
+      content,
+      replyType = 'customer',
+    }: {
       reviewId: string;
       content: string;
       replyType?: 'seller' | 'admin' | 'customer';
@@ -483,7 +638,7 @@ export const useReplyToReview = () => {
         .single();
 
       if (error) {
-        console.error('Error replying to review:', error);
+        logger.error('Error replying to review', { error, reviewId, reply });
         throw error;
       }
 
@@ -497,10 +652,11 @@ export const useReplyToReview = () => {
         description: 'Votre réponse a été publiée.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -522,16 +678,18 @@ export const useUserReviews = (userId?: string, limit: number = 50) => {
 
       const { data, error } = await supabase
         .from('reviews')
-        .select(`
+        .select(
+          `
           *,
           media:review_media(*)
-        `)
+        `
+        )
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) {
-        console.error('Error fetching user reviews:', error);
+        logger.error('Error fetching user reviews', { error, userId });
         throw error;
       }
 

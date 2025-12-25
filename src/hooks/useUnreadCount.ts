@@ -9,6 +9,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
 
 export const useUnreadCount = (orderId: string) => {
   const { user } = useAuth();
@@ -35,7 +36,7 @@ export const useUnreadCount = (orderId: string) => {
         });
 
       if (error) {
-        console.error('Error fetching unread count:', error);
+        logger.error('Error fetching unread count', { error, orderId, userId: user.id });
         return 0;
       }
 

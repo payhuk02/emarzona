@@ -1,0 +1,126 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+// Fonction pour déterminer l'origine autorisée pour CORS
+function getCorsOrigin(req: Request): string {
+  const origin = req.headers.get('origin');
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://payhula.vercel.app';
+  
+  // Autoriser localhost pour le développement
+  if (origin && (
+    origin.startsWith('http://localhost:') ||
+    origin.startsWith('http://127.0.0.1:') ||
+    origin.includes('localhost') ||
+    origin.includes('127.0.0.1')
+  )) {
+    return origin; // Autoriser l'origine exacte pour localhost
+  }
+  
+  // Autoriser le domaine de production
+  if (origin === siteUrl || origin === `${siteUrl}/`) {
+    return origin;
+  }
+  
+  // Par défaut, utiliser SITE_URL (sans slash final)
+  return siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl;
+}
+
+// Fonction pour créer les headers CORS dynamiques
+function getCorsHeaders(req: Request) {
+  return {
+    'Access-Control-Allow-Origin': getCorsOrigin(req),
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Max-Age': '86400',
+  };
+}
+
+// URL de base de l'API Moneroo
+// Vérifier la documentation officielle pour l'URL correcte
+const MONEROO_API_URL = Deno.env.get('MONEROO_API_URL') || 'https://api.moneroo.io/v1';
+
+serve(async (req) => {
+  // Log de début de requête pour diagnostic
+  console.log('[Moneroo Edge Function] Request received:', {
+    method: req.method,
+    url: req.url,
+    headers: Object.fromEntries(req.headers.entries()),
+    timestamp: new Date().toISOString(),
+  });
+
+  // Créer les headers CORS dynamiques basés sur l'origine de la requête
+  const corsHeaders = getCorsHeaders(req);
+  
+  // Log de l'origine et des headers CORS pour diagnostic
+  const origin = req.headers.get('origin');
+  console.log('[Moneroo Edge Function] CORS config:', {
+    origin,
+    allowedOrigin: corsHeaders['Access-Control-Allow-Origin'],
+    method: req.method,
+  });
+
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    console.log('[Moneroo Edge Function] Handling CORS preflight');
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    // Vérifier les clés API
+    const monerooApiKey = Deno.env.get('MONEROO_API_KEY');
+    console.log('[Moneroo Edge Function] API Key check:', {
+      hasApiKey: !!monerooApiKey,
+      apiKeyLength: monerooApiKey?.length || 0,
+    });
+    
+    if (!monerooApiKey) {
+      console.error('MONEROO_API_KEY is not configured');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Configuration API manquante',
+          message: 'La clé API Moneroo n\'est pas configurée dans Supabase Edge Functions Secrets',
+          hint: 'Veuillez configurer MONEROO_API_KEY dans Supabase Dashboard → Edge Functions → Secrets'
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Parser le JSON de la requête
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (jsonError) {
+      console.error('Error parsing request JSON:', jsonError);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Requête invalide',
+          message: 'Le corps de la requête n\'est pas un JSON valide',
+          details: jsonError instanceof Error ? jsonError.message : 'Unknown error'
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { action, data } = requestBody;
+    
+    if (!action) {
+      return new Response(
+        JSON.stringify({ error: 'Action manquante', message: 'Le paramètre "action" est requis' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('[Moneroo Edge Function] Processing request:', { 
+      action, 
+      hasData: !!data,
+      dataKeys: data ? Object.keys(data) : [],
+    });
+
+    let endpoint = '';
+    let method = 'POST';
+    let body = data;
+
+
+
+

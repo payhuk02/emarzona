@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK MULTI-WAREHOUSE MANAGEMENT SYSTEM
+-- EMARZONA MULTI-WAREHOUSE MANAGEMENT SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système de gestion multi-entrepôts avec allocations, transferts et inventaire par localisation
 -- Version: 1.0

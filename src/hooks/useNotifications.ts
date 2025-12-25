@@ -7,28 +7,52 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
-import type { Notification, CreateNotificationData, NotificationPreferences } from '@/types/notifications';
+import { logger } from '@/lib/logger';
+import type { Json } from '@/integrations/supabase/types';
+import type {
+  Notification,
+  CreateNotificationData,
+  NotificationPreferences,
+} from '@/types/notifications';
 
 /**
- * Hook pour récupérer les notifications de l'utilisateur
+ * Hook pour récupérer les notifications de l'utilisateur avec pagination
  */
-export const useNotifications = (limit = 50) => {
+export const useNotifications = (options?: {
+  page?: number;
+  pageSize?: number;
+  includeArchived?: boolean;
+}) => {
+  const page = options?.page || 1;
+  const pageSize = options?.pageSize || 20;
+  const includeArchived = options?.includeArchived ?? false;
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
   return useQuery({
-    queryKey: ['notifications', limit],
-    queryFn: async (): Promise<Notification[]> => {
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('is_archived', false)
+    queryKey: ['notifications', page, pageSize, includeArchived],
+    queryFn: async (): Promise<{ data: Notification[]; count: number }> => {
+      let query = supabase.from('notifications').select('*', { count: 'exact' });
+
+      // Si on n'inclut pas les archivées, filtrer
+      if (!includeArchived) {
+        query = query.eq('is_archived', false);
+      }
+
+      const { data, error, count } = await query
         .order('created_at', { ascending: false })
-        .limit(limit);
+        .range(from, to);
 
       if (error) {
-        console.error('Error fetching notifications:', error);
+        logger.error('Error fetching notifications', { error, page, pageSize, includeArchived });
         throw new Error(error.message);
       }
 
-      return data || [];
+      // Type assertion nécessaire car Supabase retourne des types plus larges
+      return {
+        data: (data || []) as Notification[],
+        count: count || 0,
+      };
     },
   });
 };
@@ -43,7 +67,7 @@ export const useUnreadCount = () => {
       const { data, error } = await supabase.rpc('get_unread_count');
 
       if (error) {
-        console.error('Error fetching unread count:', error);
+        logger.error('Error fetching unread count', { error });
         return 0;
       }
 
@@ -126,10 +150,7 @@ export const useDeleteNotification = () => {
 
   return useMutation({
     mutationFn: async (notificationId: string) => {
-      const { error } = await supabase
-        .from('notifications')
-        .delete()
-        .eq('id', notificationId);
+      const { error } = await supabase.from('notifications').delete().eq('id', notificationId);
 
       if (error) {
         throw new Error(error.message);
@@ -154,7 +175,7 @@ export const useCreateNotification = () => {
         type: data.type,
         title: data.title,
         message: data.message,
-        metadata: data.metadata || {},
+        metadata: (data.metadata || {}) as Json,
         action_url: data.action_url,
         action_label: data.action_label,
         priority: data.priority || 'normal',
@@ -177,7 +198,9 @@ export const useNotificationPreferences = () => {
   return useQuery({
     queryKey: ['notification-preferences'],
     queryFn: async (): Promise<NotificationPreferences | null> => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
         return null;
@@ -190,7 +213,7 @@ export const useNotificationPreferences = () => {
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching notification preferences:', error);
+        logger.error('Error fetching notification preferences', { error });
         throw new Error(error.message);
       }
 
@@ -203,14 +226,14 @@ export const useNotificationPreferences = () => {
           .single();
 
         if (insertError) {
-          console.error('Error creating notification preferences:', insertError);
+          logger.error('Error creating notification preferences', { error: insertError });
           return null;
         }
 
-        return newPrefs;
+        return newPrefs as NotificationPreferences;
       }
 
-      return data;
+      return data as NotificationPreferences;
     },
   });
 };
@@ -223,7 +246,9 @@ export const useUpdateNotificationPreferences = () => {
 
   return useMutation({
     mutationFn: async (preferences: Partial<NotificationPreferences>) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
         throw new Error('User not authenticated');
@@ -252,13 +277,18 @@ export const useRealtimeNotifications = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
-    const setupSubscription = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let isMounted = true;
 
-      if (!user) return;
+    const setupSubscription = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user || !isMounted) return;
 
       // S'abonner aux nouvelles notifications
-      const channel = supabase
+      channel = supabase
         .channel('notifications')
         .on(
           'postgres_changes',
@@ -268,33 +298,63 @@ export const useRealtimeNotifications = () => {
             table: 'notifications',
             filter: `user_id=eq.${user.id}`,
           },
-          (payload) => {
-            console.log('📬 New notification received:', payload);
+          payload => {
+            if (!isMounted) return;
+
+            logger.info('New notification received', {
+              notificationId: payload.new?.id,
+              type: payload.new?.type,
+            });
             // Invalider le cache pour rafraîchir
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
-            
-            // Optionnel : Afficher une notification browser
+
+            // Afficher une notification browser avec son et vibration
             if ('Notification' in window && Notification.permission === 'granted') {
               const notif = payload.new as Notification;
-              new Notification(notif.title, {
+              const notification = new Notification(notif.title, {
                 body: notif.message,
-                icon: '/logo.png',
-              });
+                icon: '/icon-192x192.png',
+                badge: '/badge-72x72.png',
+                tag: notif.type || 'default',
+                data: {
+                  notificationId: notif.id,
+                  type: notif.type,
+                  action_url: notif.action_url,
+                },
+                requireInteraction: false,
+                silent: false, // ✅ SON ACTIVÉ - La notification fera du bruit
+                vibrate: [200, 100, 200] as number[], // ✅ Vibration pour mobile (type assertion)
+                timestamp: Date.now(),
+              } as NotificationOptions);
+
+              // Ouvrir l'application quand on clique sur la notification
+              notification.onclick = event => {
+                event.preventDefault();
+                const url = notif.action_url || '/';
+                window.focus();
+                window.location.href = url;
+                notification.close();
+              };
             }
           }
         )
         .subscribe();
 
-      setIsSubscribed(true);
-
-      // Cleanup
-      return () => {
-        channel.unsubscribe();
-        setIsSubscribed(false);
-      };
+      if (isMounted) {
+        setIsSubscribed(true);
+      }
     };
 
     setupSubscription();
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+      setIsSubscribed(false);
+    };
   }, [queryClient]);
 
   return { isSubscribed };
@@ -310,7 +370,7 @@ export const useRequestNotificationPermission = () => {
 
   const requestPermission = async () => {
     if (!('Notification' in window)) {
-      console.log('Browser does not support notifications');
+      logger.warn('Browser does not support notifications');
       return;
     }
 
@@ -321,4 +381,3 @@ export const useRequestNotificationPermission = () => {
 
   return { permission, requestPermission };
 };
-

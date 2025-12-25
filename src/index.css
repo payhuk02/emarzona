@@ -1,6 +1,9 @@
 /* All @import statements must come first */
 /* Google Fonts chargé via <link> dans index.html pour éviter les problèmes CSP */
 @import './styles/animations.css';
+@import './styles/mobile-optimizations.css';
+@import './styles/mobile-first-system.css';
+@import './styles/sidebar-optimized.css';
 
 /**
  * Font optimization: font-display: swap
@@ -20,56 +23,58 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 220 30% 12%;
-    --foreground: 0 0% 98%;
+    /* Thème clair par défaut (Professionnel) */
+    --background: 0 0% 100%;
+    --foreground: 220 40% 10%; /* Plus foncé pour meilleur contraste sur fond blanc (WCAG AA) */
 
-    --card: 220 25% 16%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 40% 10%; /* Plus foncé pour meilleur contraste */
 
-    --popover: 220 25% 16%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 40% 10%; /* Plus foncé pour meilleur contraste */
 
-    --primary: 210 100% 60%;
+    --primary: 217 91% 60%; /* Bleu moderne #3B82F6 (inspiré Linear, Stripe) */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 20% 22%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96%; /* Gris très clair moderne */
+    --secondary-foreground: 0 0% 12%; /* Noir doux */
 
-    --muted: 220 20% 20%;
-    --muted-foreground: 220 10% 65%;
+    --muted: 0 0% 98%; /* Gris ultra clair */
+    --muted-foreground: 0 0% 35%; /* Gris foncé pour meilleur contraste sur fond blanc (WCAG AA) */
 
-    --accent: 45 100% 60%;
-    --accent-foreground: 220 30% 12%;
+    --accent: 38 92% 50%; /* Orange/Jaune moderne pour contraste avec primary */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 24%;
-    --input: 220 20% 24%;
-    --ring: 210 100% 60%;
+    --border: 0 0% 90%; /* Gris clair moderne */
+    --input: 0 0% 90%; /* Gris clair moderne */
+    --ring: 217 91% 60%; /* Bleu moderne */
 
-    --radius: 1rem;
+    --radius: 0.5rem; /* 8px - Border radius moderne et cohérent */
 
-    --gradient-primary: linear-gradient(135deg, hsl(210, 100%, 60%) 0%, hsl(220, 90%, 50%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(45, 100%, 60%) 0%, hsl(40, 100%, 55%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(220, 40%, 15%) 0%, hsl(220, 50%, 8%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 60%) 0%, hsl(217, 91%, 50%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(38, 92%, 50%) 0%, hsl(38, 92%, 45%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220, 50%, 12%) 0%, hsl(220, 45%, 18%) 100%);
     --gradient-dark: linear-gradient(180deg, hsl(220, 30%, 12%) 0%, hsl(220, 35%, 18%) 100%);
 
-    --shadow-soft: 0 4px 16px -2px hsl(220 100% 10% / 0.3);
-    --shadow-medium: 0 8px 32px -4px hsl(220 100% 10% / 0.4);
-    --shadow-large: 0 16px 64px -8px hsl(220 100% 10% / 0.5);
-    --shadow-glow: 0 0 40px hsl(210 100% 60% / 0.3);
+    --shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
 
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
+    /* Sidebar claire par défaut */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 20 14.3% 4.1%;
-    --sidebar-primary: 25 95% 53%;
+    --sidebar-foreground: 220 40% 10%; /* Plus foncé pour meilleur contraste sur fond blanc */
+    --sidebar-primary: 217 91% 60%; /* Bleu moderne */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 33 100% 96.5%;
-    --sidebar-accent-foreground: 25 95% 53%;
-    --sidebar-border: 20 5.9% 90%;
-    --sidebar-ring: 25 95% 53%;
+    --sidebar-accent: 0 0% 96%; /* Gris très clair */
+    --sidebar-accent-foreground: 0 0% 12%; /* Noir doux */
+    --sidebar-border: 0 0% 90%; /* Gris clair */
+    --sidebar-ring: 217 91% 60%; /* Bleu moderne */
   }
 
   .dark {
@@ -82,42 +87,43 @@ All colors MUST be HSL.
     --popover: 220 30% 12%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 210 100% 65%;
+    --primary: 217 91% 65%; /* Bleu moderne plus clair pour dark mode */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 25% 18%;
+    --secondary: 0 0% 18%; /* Gris foncé moderne */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 25% 16%;
-    --muted-foreground: 220 10% 70%;
+    --muted: 0 0% 16%; /* Gris très foncé */
+    --muted-foreground: 0 0% 65%; /* Gris moyen */
 
-    --accent: 45 100% 62%;
-    --accent-foreground: 220 35% 8%;
+    --accent: 38 92% 55%; /* Orange/Jaune moderne pour contraste avec primary */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 25% 20%;
-    --input: 220 25% 20%;
-    --ring: 210 100% 65%;
+    --border: 0 0% 20%; /* Gris foncé */
+    --input: 0 0% 20%; /* Gris foncé */
+    --ring: 217 91% 65%; /* Bleu moderne */
 
-    --gradient-primary: linear-gradient(135deg, hsl(210, 100%, 65%) 0%, hsl(220, 95%, 55%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(45, 100%, 62%) 0%, hsl(40, 100%, 58%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(220, 45%, 12%) 0%, hsl(220, 55%, 6%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 65%) 0%, hsl(217, 91%, 55%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(38, 92%, 55%) 0%, hsl(38, 92%, 50%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220, 50%, 12%) 0%, hsl(220, 45%, 18%) 100%);
     --gradient-dark: linear-gradient(180deg, hsl(220, 35%, 8%) 0%, hsl(220, 40%, 14%) 100%);
 
-    --shadow-soft: 0 4px 16px -2px hsl(220 100% 5% / 0.4);
-    --shadow-medium: 0 8px 32px -4px hsl(220 100% 5% / 0.5);
-    --shadow-large: 0 16px 64px -8px hsl(220 100% 5% / 0.6);
-    --shadow-glow: 0 0 50px hsl(210 100% 65% / 0.4);
+    --shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.4);
 
-    --sidebar-background: 24 9.8% 10%;
-    --sidebar-foreground: 0 0% 95%;
+    /* Sidebar toujours en thème clair même en mode sombre */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 0%;
     --sidebar-primary: 25 95% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 25 9.1% 14.9%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 24 9.8% 15%;
+    --sidebar-accent: 33 100% 96.5%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 20 5.9% 90%;
     --sidebar-ring: 25 95% 53%;
   }
 }
@@ -127,6 +133,20 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  /* Times New Roman pour les titres */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Times New Roman', Times, serif;
+  }
+
+  /* OPTIMISATION: CSS du sidebar déplacé dans sidebar-optimized.css
+     pour permettre le chargement asynchrone et réduire le CSS critique */
+  /* Les styles du sidebar sont maintenant dans ./styles/sidebar-optimized.css */
+
   html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
@@ -135,11 +155,141 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    font-family:
+      'Inter',
+      system-ui,
+      -apple-system,
+      sans-serif;
+    font-size: 1rem; /* 16px - Taille professionnelle */
+    line-height: 1.625; /* Amélioré pour meilleure lisibilité */
+    letter-spacing: 0;
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     overflow-x: hidden;
     max-width: 100vw;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Hiérarchie typographique moderne */
+  h1 {
+    font-size: 2.5rem; /* 40px */
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    font-size: 2rem; /* 32px */
+    line-height: 1.25;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-size: 1.5rem; /* 24px */
+    line-height: 1.3;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  h4 {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  h5 {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  h6 {
+    font-size: 1rem; /* 16px */
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  /* Responsive typography */
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem; /* 32px */
+    }
+    h2 {
+      font-size: 1.75rem; /* 28px */
+    }
+    h3 {
+      font-size: 1.5rem; /* 24px */
+    }
+  }
+
+  /* Optimisations pour très petits écrans (< 360px) */
+  @media (max-width: 360px) {
+    h1 {
+      font-size: 1.75rem; /* 28px */
+      line-height: 1.2;
+    }
+    h2 {
+      font-size: 1.5rem; /* 24px */
+      line-height: 1.25;
+    }
+    h3 {
+      font-size: 1.25rem; /* 20px */
+      line-height: 1.3;
+    }
+
+    /* Padding réduit pour très petits écrans */
+    .container {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    /* Textes plus petits mais lisibles - Minimum 14px pour accessibilité */
+    body {
+      font-size: 0.875rem; /* 14px - Minimum recommandé WCAG */
+      line-height: 1.5;
+    }
+
+    /* Boutons compacts mais touch-friendly */
+    button {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      min-height: 40px; /* Légèrement réduit mais toujours touch-friendly */
+      min-width: 40px;
+    }
+
+    /* Cards plus compactes */
+    [class*='card'],
+    [class*='Card'] {
+      padding: 0.75rem;
+    }
+
+    /* Espacement réduit */
+    .space-y-3 > * + * {
+      margin-top: 0.5rem;
+    }
+
+    .space-y-4 > * + * {
+      margin-top: 0.75rem;
+    }
+
+    .gap-3 {
+      gap: 0.5rem;
+    }
+
+    .gap-4 {
+      gap: 0.75rem;
+    }
+
+    /* Grilles adaptées */
+    .grid {
+      gap: 0.5rem;
+    }
   }
 
   #root {
@@ -149,17 +299,39 @@ All colors MUST be HSL.
   }
 
   * {
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     box-sizing: border-box;
   }
 
-  img, video {
+  /*
+   * ⚠️ PERF: éviter les transitions globales sur `*`
+   * Cela augmente le coût des recalculs de style (surtout sur mobile) et peut dégrader le scroll.
+   * On applique des transitions uniquement aux éléments interactifs et composants UI.
+   */
+  button,
+  a,
+  input,
+  textarea,
+  select,
+  [role='button'] {
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  img,
+  video {
     max-width: 100%;
     height: auto;
     display: block;
   }
 
-  .animate-fade-in, .animate-fade-in-up, .hover-scale {
+  .animate-fade-in,
+  .animate-fade-in-up,
+  .hover-scale {
     will-change: transform, opacity;
     transform: translateZ(0);
     backface-visibility: hidden;
@@ -176,12 +348,56 @@ All colors MUST be HSL.
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Réduction des animations pour économiser la batterie */
+  /* Réduction des animations pour l'accessibilité */
   @media (prefers-reduced-motion: reduce) {
-    * {
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    /* Désactiver les animations spécifiques */
+    .animate-fade-in-up,
+    .animate-float,
+    .animate-pulse {
+      animation: none !important;
+    }
+
+    /* Désactiver les transformations au hover */
+    *:hover {
+      transform: none !important;
+    }
+  }
+
+  /* OPTIMISATION PERFORMANCE: Réduire les animations sur mobile pour économiser la batterie */
+  @media (max-width: 768px) {
+    /* Réduire la durée des animations */
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.2s !important;
+      transition-duration: 0.15s !important;
+    }
+
+    /* Désactiver les animations non-essentielles */
+    .animate-float,
+    .animate-pulse:not([aria-busy='true']) {
+      animation: none !important;
+    }
+
+    /* Désactiver les transformations au hover (peu utiles sur mobile) */
+    .hover-smooth-lift:hover,
+    .hover-smooth-scale:hover,
+    .product-card-zoom:hover {
+      transform: none !important;
+    }
+
+    /* Réduire les effets de glow et shadow sur mobile */
+    .shadow-glow {
+      box-shadow: var(--shadow-soft) !important;
     }
   }
 
@@ -191,18 +407,54 @@ All colors MUST be HSL.
       padding-left: 0.75rem;
       padding-right: 0.75rem;
     }
-    
+
     .text-responsive-xs {
       font-size: 0.75rem;
       line-height: 1rem;
     }
-    
+
     .p-responsive-xs {
       padding: 0.5rem;
     }
-    
+
     .gap-responsive-xs {
       gap: 0.5rem;
+    }
+  }
+
+  /* Optimisations supplémentaires pour très petits écrans (< 360px) */
+  @media (max-width: 360px) {
+    .container {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    /* Textes adaptés - Minimum 14px pour accessibilité WCAG */
+    .text-responsive-xs {
+      font-size: 0.875rem; /* 14px minimum pour accessibilité */
+      line-height: 1.25rem;
+    }
+
+    /* Padding minimal */
+    .p-responsive-xs {
+      padding: 0.375rem;
+    }
+
+    /* Gap minimal */
+    .gap-responsive-xs {
+      gap: 0.375rem;
+    }
+
+    /* Cards plus compactes */
+    .card {
+      padding: 0.75rem;
+    }
+
+    /* Boutons compacts mais touch-friendly */
+    button {
+      min-height: 40px; /* Légèrement réduit mais toujours touch-friendly */
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
     }
   }
 
@@ -267,29 +519,50 @@ All colors MUST be HSL.
 
   /* 3. Boutons accessibles - Respecte WCAG 2.1.1 */
   button:disabled,
-  [aria-disabled="true"] {
+  [aria-disabled='true'] {
     cursor: not-allowed;
     opacity: 0.6;
   }
 
   button:focus-visible,
-  [role="button"]:focus-visible {
+  [role='button']:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
     outline: 3px solid hsl(var(--ring));
+    outline-offset: 3px;
+    outline-style: solid;
+    border-radius: 0.25rem;
+  }
+
+  /* Focus visible amélioré pour navigation clavier - WCAG 2.4.7 */
+  *:focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 3px;
+    outline-style: solid;
+  }
+
+  /* Exception pour les éléments avec focus interne (inputs, etc.) */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid hsl(var(--ring));
     outline-offset: 2px;
   }
 
   /* 4. Messages d'erreur et status - Respecte WCAG 3.3.1 & 3.3.2 */
-  [role="alert"],
-  [aria-live="assertive"],
-  [aria-live="polite"] {
+  [role='alert'],
+  [aria-live='assertive'],
+  [aria-live='polite'] {
     position: relative;
   }
 
   /* 5. Cibles tactiles minimum 44x44px - Respecte WCAG 2.5.5 */
   button,
   a,
-  input[type="checkbox"],
-  input[type="radio"],
+  input[type='checkbox'],
+  input[type='radio'],
   select {
     min-height: 44px;
     min-width: 44px;
@@ -318,20 +591,20 @@ All colors MUST be HSL.
 
   /* 8. États hover et active clairs - Respecte WCAG 1.4.1 */
   button:hover:not(:disabled),
-  [role="button"]:hover:not([aria-disabled="true"]) {
+  [role='button']:hover:not([aria-disabled='true']) {
     filter: brightness(1.1);
   }
 
   button:active:not(:disabled),
-  [role="button"]:active:not([aria-disabled="true"]) {
+  [role='button']:active:not([aria-disabled='true']) {
     filter: brightness(0.9);
   }
 
   /* 9. Navigation au clavier visible */
   [tabindex]:focus-visible,
-  [role="tab"]:focus-visible,
-  [role="menuitem"]:focus-visible,
-  [role="option"]:focus-visible {
+  [role='tab']:focus-visible,
+  [role='menuitem']:focus-visible,
+  [role='option']:focus-visible {
     outline: 3px solid hsl(var(--ring));
     outline-offset: 2px;
     z-index: 10;
@@ -347,8 +620,8 @@ All colors MUST be HSL.
     }
   }
 
-  [aria-busy="true"]::before {
-    content: "";
+  [aria-busy='true']::before {
+    content: '';
     display: inline-block;
     width: 1em;
     height: 1em;
@@ -380,7 +653,7 @@ All colors MUST be HSL.
   }
 
   /* 13. Tooltips accessibles */
-  [role="tooltip"] {
+  [role='tooltip'] {
     background-color: hsl(var(--popover));
     color: hsl(var(--popover-foreground));
     border: 1px solid hsl(var(--border));
@@ -391,13 +664,13 @@ All colors MUST be HSL.
   }
 
   /* 14. Indicateur de page actuelle */
-  [aria-current="page"] {
+  [aria-current='page'] {
     font-weight: 600;
     position: relative;
   }
 
-  [aria-current="page"]::after {
-    content: "";
+  [aria-current='page']::after {
+    content: '';
     position: absolute;
     bottom: -2px;
     left: 0;
@@ -426,15 +699,83 @@ All colors MUST be HSL.
   }
 }
 
+/* ============================================
+   ACCESSIBILITY - Focus Visible & Keyboard Navigation
+   ============================================ */
+
+/* Amélioration du focus visible pour la navigation clavier */
 @layer utilities {
+  /* Screen reader only */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .focus\:not-sr-only:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  /* Focus visible amélioré pour tous les éléments interactifs */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: calc(var(--radius) - 2px);
+  }
+
+  /* Focus visible pour les boutons */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px hsl(var(--ring));
+  }
+
+  /* Focus visible pour les éléments avec tabindex */
+  [tabindex]:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Amélioration du contraste du focus */
+  .dark *:focus-visible {
+    outline-color: hsl(var(--primary));
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px hsl(var(--primary));
+  }
+}
+
+@layer utilities {
+  /* Sidebar styles optimisés - Utilisation de variables CSS au lieu de !important */
+  /* Les styles détaillés sont dans sidebar-optimized.css */
+
   .gradient-primary {
     background: var(--gradient-primary);
   }
-  
+
   .gradient-accent {
     background: var(--gradient-accent);
   }
-  
+
   .gradient-hero {
     background: var(--gradient-hero);
   }
@@ -461,6 +802,56 @@ All colors MUST be HSL.
 
   .transition-smooth {
     transition: var(--transition-smooth);
+  }
+
+  /* Micro-interactions améliorées */
+  .micro-interaction-scale {
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .micro-interaction-scale:active {
+    transform: scale(0.95);
+  }
+
+  .micro-interaction-bounce {
+    transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .micro-interaction-bounce:active {
+    transform: scale(0.9);
+  }
+
+  /* Smooth hover effects avec GPU acceleration */
+  .hover-smooth-lift {
+    transition:
+      transform 0.2s ease-out,
+      box-shadow 0.2s ease-out;
+    will-change: transform;
+  }
+
+  .hover-smooth-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .hover-smooth-scale {
+    transition: transform 0.2s ease-out;
+    will-change: transform;
+  }
+
+  .hover-smooth-scale:hover {
+    transform: scale(1.02);
+  }
+
+  /* Respect des préférences utilisateur (reduced motion) */
+  @media (prefers-reduced-motion: reduce) {
+    .micro-interaction-scale,
+    .micro-interaction-bounce,
+    .hover-smooth-lift,
+    .hover-smooth-scale {
+      transition: none !important;
+      transform: none !important;
+    }
   }
 
   .animate-float {
@@ -523,7 +914,9 @@ All colors MUST be HSL.
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.3);
     transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
+    transition:
+      width 0.6s,
+      height 0.6s;
   }
 
   .btn-ripple:active::after {
@@ -545,7 +938,8 @@ All colors MUST be HSL.
   }
 
   @keyframes float {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0px);
     }
     50% {
@@ -606,6 +1000,20 @@ All colors MUST be HSL.
       opacity: 0;
       transform: translateX(30px);
     }
+  }
+
+  /* Animation shimmer pour LazyImage et effets de brillance */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+    100% {
+      transform: translateX(200%) translateY(200%) rotate(45deg);
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 3s infinite;
   }
 }
 
@@ -669,3 +1077,42 @@ All colors MUST be HSL.
 .ProseMirror u {
   @apply underline;
 }
+
+/* ============================================================
+   SCROLLBARS PERSONNALISÉES POUR SIDEBARS
+   Design professionnel et moderne
+   ============================================================ */
+
+/* Scrollbar personnalisée pour les sidebars */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.3);
+}
+
+/* Scrollbar pour Firefox */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+/* OPTIMISATION: CSS du sidebar déplacé dans sidebar-optimized.css
+   pour permettre le chargement asynchrone et réduire le CSS critique */

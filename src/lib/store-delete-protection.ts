@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from './logger';
 
 export interface StoreDependencies {
   productsCount: number;
@@ -121,7 +122,7 @@ export const checkStoreDeleteProtection = async (
       errors: errors.length > 0 ? errors : undefined
     };
   } catch (error: any) {
-    console.error('Error checking delete protection:', error);
+    logger.error('Error checking delete protection', { error });
     return {
       canDelete: false,
       dependencies: {
@@ -167,7 +168,7 @@ export const deleteStoreWithDependencies = async (
       .eq('id', storeId);
 
     if (deleteError) {
-      console.error('Delete error:', deleteError);
+      logger.error('Delete error', { error: deleteError });
       return {
         success: false,
         error: `Erreur lors de la suppression : ${deleteError.message}`
@@ -176,7 +177,7 @@ export const deleteStoreWithDependencies = async (
 
     return { success: true };
   } catch (error: any) {
-    console.error('Unexpected delete error:', error);
+    logger.error('Unexpected delete error', { error });
     return {
       success: false,
       error: error.message || 'Une erreur inattendue est survenue'

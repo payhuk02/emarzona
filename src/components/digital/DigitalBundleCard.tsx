@@ -5,6 +5,7 @@
  * Composant pour afficher une carte de bundle de produits digitaux
  */
 
+import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -72,6 +73,7 @@ export const DigitalBundleCard = ({
           bundle.is_featured && "border-primary",
           className
         )}
+        style={{ willChange: 'transform' }}
         onClick={handleView}
       >
         <CardContent className="p-4">
@@ -128,6 +130,7 @@ export const DigitalBundleCard = ({
         variant === 'featured' && "bg-gradient-to-br from-primary/5 to-primary/10",
         className
       )}
+      style={{ willChange: 'transform' }}
     >
       {/* Header avec image */}
       <div className="relative">
@@ -135,7 +138,7 @@ export const DigitalBundleCard = ({
           <img
             src={bundle.image_url}
             alt={bundle.name}
-            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300 sm:duration-500"
           />
         ) : (
           <div className="w-full h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">

@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sanitizeString } from "@/lib/validation";
-import { sanitizeHTML } from "@/lib/html-sanitizer";
+import { sanitizeProductDescription } from "@/lib/html-sanitizer";
 import React from "react";
 
 /**
@@ -122,7 +122,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
    */
   const computeReadability = (text: string) => {
     if (!text) return null;
-    const sentences = Math.max(1, (text.match(/[\.\!\?]+/g) || []).length);
+    const sentences = Math.max(1, (text.match(/[.!?]+/g) || []).length);
     const wordsArr = text.split(/\s+/).filter(Boolean);
     const words = Math.max(1, wordsArr.length);
     const syllables = wordsArr.reduce((acc, w) => acc + countSyllablesFr(w), 0);
@@ -374,7 +374,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
     for (const [pattern, repl] of replacements) {
       text = text.replace(pattern, repl);
     }
-    text = text.replace(/\s+/g, " ").replace(/([\.!?])+/g, "$1").trim();
+    text = text.replace(/\s+/g, " ").replace(/([.!?])+/g, "$1").trim();
     handleShortDescriptionChange(text);
   };
 
@@ -589,7 +589,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
               {previewMode ? (
                 <div 
                   className="prose max-w-none p-4 border rounded-lg bg-gray-50"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(formData.description || "", 'productDescription') }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeProductDescription(formData.description || "") }}
                 />
               ) : (
                 <RichTextEditorPro

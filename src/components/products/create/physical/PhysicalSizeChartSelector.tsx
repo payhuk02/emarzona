@@ -3,11 +3,10 @@
  * Date: 26 Janvier 2025
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -28,6 +27,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useStore } from '@/hooks/useStore';
 import { Ruler, Plus, Eye, Trash2 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -43,7 +43,7 @@ export function PhysicalSizeChartSelector({
   const { store } = useStore();
   const { toast } = useToast();
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
-  const [newChart, setNewChart] = useState<SizeChart | null>(null);
+  const [newChart] = useState<SizeChart | null>(null);
 
   // Récupérer les size charts de la boutique
   const { data: sizeCharts, refetch } = useQuery({
@@ -53,32 +53,36 @@ export function PhysicalSizeChartSelector({
 
       const { data, error } = await supabase
         .from('size_charts')
-        .select(`
+        .select(
+          `
           *,
           size_chart_measurements (
             *
           )
-        `)
+        `
+        )
         .eq('store_id', store.id)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching size charts:', error);
+        logger.error('Error fetching size charts', { error, storeId: store.id });
         return [];
       }
 
       // Mapper les données au format attendu par SizeChart
-      return (data || []).map((chart: any) => ({
+      return (data || []).map((chart: Record<string, unknown>) => ({
         id: chart.id,
         name: chart.name,
         system: chart.system,
         sizes: chart.sizes || [],
-        measurements: (chart.size_chart_measurements || []).map((m: any) => ({
-          label: m.label,
-          unit: m.unit,
-          values: m.values || {},
-          description: m.description,
-        })),
+        measurements: ((chart.size_chart_measurements as Array<Record<string, unknown>>) || []).map(
+          (m: Record<string, unknown>) => ({
+            label: m.label,
+            unit: m.unit,
+            values: m.values || {},
+            description: m.description,
+          })
+        ),
         notes: chart.notes,
         is_default: chart.is_default,
         created_at: chart.created_at,
@@ -113,12 +117,14 @@ export function PhysicalSizeChartSelector({
         name: chart.name,
         system: chart.system,
         sizes: chart.sizes || [],
-        measurements: (measurements || []).map((m: any) => ({
-          label: m.label,
-          unit: m.unit,
-          values: m.values || {},
-          description: m.description,
-        })),
+        measurements: ((measurements as Array<Record<string, unknown>>) || []).map(
+          (m: Record<string, unknown>) => ({
+            label: m.label,
+            unit: m.unit,
+            values: m.values || {},
+            description: m.description,
+          })
+        ),
         notes: chart.notes,
         is_default: chart.is_default,
         created_at: chart.created_at,
@@ -157,10 +163,7 @@ export function PhysicalSizeChartSelector({
         if (updateError) throw updateError;
 
         // Supprimer les anciennes mesures
-        await supabase
-          .from('size_chart_measurements')
-          .delete()
-          .eq('size_chart_id', chart.id);
+        await supabase.from('size_chart_measurements').delete().eq('size_chart_id', chart.id);
 
         // Créer les nouvelles mesures
         if (chart.measurements.length > 0) {
@@ -230,10 +233,11 @@ export function PhysicalSizeChartSelector({
 
       setIsBuilderOpen(false);
       refetch();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de sauvegarder le size chart',
+        description: errorMessage || 'Impossible de sauvegarder le size chart',
         variant: 'destructive',
       });
     }
@@ -254,17 +258,17 @@ export function PhysicalSizeChartSelector({
         {/* Sélection size chart existant */}
         <div className="space-y-2">
           <Label>Size Chart existant</Label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Select
-              value={selectedSizeChartId || ''}
-              onValueChange={(value) => onSelectSizeChart(value || null)}
+              value={selectedSizeChartId || '__none__'}
+              onValueChange={value => onSelectSizeChart(value === '__none__' ? null : value)}
             >
               <SelectTrigger className="flex-1">
                 <SelectValue placeholder="Aucun size chart sélectionné" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Aucun size chart</SelectItem>
-                {sizeCharts?.map((chart) => (
+                <SelectItem value="__none__">Aucun size chart</SelectItem>
+                {sizeCharts?.map(chart => (
                   <SelectItem key={chart.id} value={chart.id}>
                     {chart.name} ({chart.system.toUpperCase()})
                   </SelectItem>
@@ -273,22 +277,19 @@ export function PhysicalSizeChartSelector({
             </Select>
             <Dialog open={isBuilderOpen} onOpenChange={setIsBuilderOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" className="w-full sm:w-auto">
                   <Plus className="h-4 w-4 mr-2" />
                   Créer
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-[95vw] sm:max-w-6xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Créer un Guide des Tailles</DialogTitle>
                   <DialogDescription>
                     Créez un nouveau guide des tailles avec mesures personnalisées
                   </DialogDescription>
                 </DialogHeader>
-                <SizeChartBuilder
-                  onSave={handleSaveChart}
-                  initialChart={newChart || undefined}
-                />
+                <SizeChartBuilder onSave={handleSaveChart} initialChart={newChart || undefined} />
               </DialogContent>
             </Dialog>
           </div>
@@ -303,15 +304,14 @@ export function PhysicalSizeChartSelector({
                 <div>
                   <strong>{selectedChart.name}</strong> ({selectedChart.system.toUpperCase()})
                   {selectedChart.notes && (
-                    <div className="text-sm text-muted-foreground mt-1">
-                      {selectedChart.notes}
-                    </div>
+                    <div className="text-sm text-muted-foreground mt-1">{selectedChart.notes}</div>
                   )}
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onSelectSizeChart(null)}
+                  aria-label="Retirer le tableau de tailles"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -324,8 +324,8 @@ export function PhysicalSizeChartSelector({
         {!selectedSizeChartId && (
           <Alert>
             <AlertDescription>
-              Les guides des tailles aident les clients à choisir la bonne taille. Vous pouvez
-              créer un nouveau guide ou utiliser un guide existant.
+              Les guides des tailles aident les clients à choisir la bonne taille. Vous pouvez créer
+              un nouveau guide ou utiliser un guide existant.
             </AlertDescription>
           </Alert>
         )}
@@ -333,4 +333,3 @@ export function PhysicalSizeChartSelector({
     </Card>
   );
 }
-

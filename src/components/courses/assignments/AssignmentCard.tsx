@@ -3,6 +3,7 @@
  * Affiche un assignment dans une carte
  */
 
+import React from 'react';
 import { FileText, Calendar, Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +22,7 @@ interface AssignmentCardProps {
   className?: string;
 }
 
-export const AssignmentCard = ({
+const AssignmentCardComponent = ({
   assignment,
   submission,
   enrollmentId,
@@ -156,4 +157,23 @@ export const AssignmentCard = ({
     </Card>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const AssignmentCard = React.memo(AssignmentCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.assignment.id === nextProps.assignment.id &&
+    prevProps.assignment.title === nextProps.assignment.title &&
+    prevProps.assignment.due_date === nextProps.assignment.due_date &&
+    prevProps.assignment.points_possible === nextProps.assignment.points_possible &&
+    prevProps.assignment.is_required === nextProps.assignment.is_required &&
+    prevProps.submission?.id === nextProps.submission?.id &&
+    prevProps.submission?.status === nextProps.submission?.status &&
+    prevProps.submission?.is_late === nextProps.submission?.is_late &&
+    prevProps.enrollmentId === nextProps.enrollmentId &&
+    prevProps.onView === nextProps.onView &&
+    prevProps.onSubmit === nextProps.onSubmit
+  );
+});
+
+AssignmentCard.displayName = 'AssignmentCard';
 

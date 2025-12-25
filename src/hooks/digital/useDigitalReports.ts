@@ -187,25 +187,31 @@ export const useSalesReport = (period: ReportPeriod = 'month') => {
         });
       });
 
-      // Récupérer les noms des produits
-      const topProductsData = await Promise.all(
-        Array.from(productSales.entries())
-          .sort((a, b) => b[1].revenue - a[1].revenue)
-          .slice(0, 5)
-          .map(async ([productId, stats]) => {
-            const { data: product } = await supabase
-              .from('digital_products')
-              .select('name')
-              .eq('id', productId)
-              .single();
+      // OPTIMIZED: Fetch all product names in one query (N+1 fix)
+      const topProductIds = Array.from(productSales.entries())
+        .sort((a, b) => b[1].revenue - a[1].revenue)
+        .slice(0, 5)
+        .map(([productId]) => productId);
 
-            return {
-              id: productId,
-              name: product?.name || 'Inconnu',
-              ...stats,
-            };
-          })
+      const { data: topProducts } = topProductIds.length > 0
+        ? await supabase
+            .from('digital_products')
+            .select('id, name')
+            .in('id', topProductIds)
+        : { data: [] };
+
+      const productsMap = new Map(
+        (topProducts || []).map((p: any) => [p.id, p.name])
       );
+
+      const topProductsData = Array.from(productSales.entries())
+        .sort((a, b) => b[1].revenue - a[1].revenue)
+        .slice(0, 5)
+        .map(([productId, stats]) => ({
+          id: productId,
+          name: productsMap.get(productId) || 'Inconnu',
+          ...stats,
+        }));
 
       // Revenue par jour
       const revenueByDay: Array<{ date: string; revenue: number; orders: number }> = [];
@@ -299,25 +305,32 @@ export const useDownloadsReport = (period: ReportPeriod = 'month') => {
         productDownloads.set(log.product_id, existing);
       });
 
-      const topProductsData = await Promise.all(
-        Array.from(productDownloads.entries())
-          .sort((a, b) => b[1].downloads - a[1].downloads)
-          .slice(0, 5)
-          .map(async ([productId, stats]) => {
-            const { data: product } = await supabase
-              .from('digital_products')
-              .select('name')
-              .eq('id', productId)
-              .single();
+      // OPTIMIZED: Fetch all product names in one query (N+1 fix)
+      const topProductIds = Array.from(productDownloads.entries())
+        .sort((a, b) => b[1].downloads - a[1].downloads)
+        .slice(0, 5)
+        .map(([productId]) => productId);
 
-            return {
-              id: productId,
-              name: product?.name || 'Inconnu',
-              downloads: stats.downloads,
-              uniqueCustomers: stats.customers.size,
-            };
-          })
+      const { data: topProducts } = topProductIds.length > 0
+        ? await supabase
+            .from('digital_products')
+            .select('id, name')
+            .in('id', topProductIds)
+        : { data: [] };
+
+      const productsMap = new Map(
+        (topProducts || []).map((p: any) => [p.id, p.name])
       );
+
+      const topProductsData = Array.from(productDownloads.entries())
+        .sort((a, b) => b[1].downloads - a[1].downloads)
+        .slice(0, 5)
+        .map(([productId, stats]) => ({
+          id: productId,
+          name: productsMap.get(productId) || 'Inconnu',
+          downloads: stats.downloads,
+          uniqueCustomers: stats.customers.size,
+        }));
 
       // Téléchargements par jour
       const downloadsByDay: Array<{ date: string; downloads: number; customers: number }> = [];
@@ -437,17 +450,22 @@ export const useLicensesReport = (period: ReportPeriod = 'month') => {
         .sort((a, b) => b.issued - a.issued)
         .slice(0, 5);
 
-      // Récupérer les noms
-      await Promise.all(
-        topProducts.map(async (product) => {
-          const { data } = await supabase
-            .from('digital_products')
-            .select('name')
-            .eq('id', product.id)
-            .single();
-          product.name = data?.name || 'Inconnu';
-        })
-      );
+      // OPTIMIZED: Fetch all product names in one query (N+1 fix)
+      const productIds = topProducts.map((p) => p.id);
+      if (productIds.length > 0) {
+        const { data: products } = await supabase
+          .from('digital_products')
+          .select('id, name')
+          .in('id', productIds);
+
+        const productsMap = new Map(
+          (products || []).map((p: any) => [p.id, p.name])
+        );
+
+        topProducts.forEach((product) => {
+          product.name = productsMap.get(product.id) || 'Inconnu';
+        });
+      }
 
       return {
         period,
@@ -531,16 +549,28 @@ export const useCustomersReport = (period: ReportPeriod = 'month') => {
         customerSpending.set(p.customer_id, existing);
       });
 
-      const topCustomersData = await Promise.all(
-        Array.from(customerSpending.entries())
-          .sort((a, b) => b[1].totalSpent - a[1].totalSpent)
-          .slice(0, 10)
-          .map(async ([customerId, stats]) => {
-            const { data: customer } = await supabase
-              .from('customers')
-              .select('name, email')
-              .eq('id', customerId)
-              .single();
+      // OPTIMIZED: Fetch all customer names in one query (N+1 fix)
+      const topCustomerIds = Array.from(customerSpending.entries())
+        .sort((a, b) => b[1].totalSpent - a[1].totalSpent)
+        .slice(0, 10)
+        .map(([customerId]) => customerId);
+
+      const { data: topCustomers } = topCustomerIds.length > 0
+        ? await supabase
+            .from('customers')
+            .select('id, name, email')
+            .in('id', topCustomerIds)
+        : { data: [] };
+
+      const customersMap = new Map(
+        (topCustomers || []).map((c: any) => [c.id, { name: c.name, email: c.email }])
+      );
+
+      const topCustomersData = Array.from(customerSpending.entries())
+        .sort((a, b) => b[1].totalSpent - a[1].totalSpent)
+        .slice(0, 10)
+        .map(([customerId, stats]) => {
+          const customer = customersMap.get(customerId);
 
             return {
               id: customerId,

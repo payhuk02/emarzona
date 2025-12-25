@@ -1,7 +1,8 @@
+import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { Search } from "lucide-react";
+import { Search } from '@/components/icons';
 import { DateRange } from "react-day-picker";
 
 interface OrderFiltersProps {
@@ -15,7 +16,7 @@ interface OrderFiltersProps {
   onDateRangeChange: (range: DateRange | undefined) => void;
 }
 
-export const OrderFilters = ({
+const OrderFiltersComponent = ({
   searchQuery,
   onSearchChange,
   statusFilter,
@@ -71,3 +72,20 @@ export const OrderFilters = ({
     </div>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const OrderFilters = React.memo(OrderFiltersComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.searchQuery === nextProps.searchQuery &&
+    prevProps.statusFilter === nextProps.statusFilter &&
+    prevProps.paymentStatusFilter === nextProps.paymentStatusFilter &&
+    prevProps.dateRange?.from?.getTime() === nextProps.dateRange?.from?.getTime() &&
+    prevProps.dateRange?.to?.getTime() === nextProps.dateRange?.to?.getTime() &&
+    prevProps.onSearchChange === nextProps.onSearchChange &&
+    prevProps.onStatusChange === nextProps.onStatusChange &&
+    prevProps.onPaymentStatusChange === nextProps.onPaymentStatusChange &&
+    prevProps.onDateRangeChange === nextProps.onDateRangeChange
+  );
+});
+
+OrderFilters.displayName = 'OrderFilters';

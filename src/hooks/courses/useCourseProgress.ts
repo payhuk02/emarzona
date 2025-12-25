@@ -139,6 +139,7 @@ export const useUpdateVideoPosition = () => {
 
 /**
  * Hook pour marquer une leçon comme complétée
+ * Attribue automatiquement des points (10 points par défaut)
  */
 export const useMarkLessonComplete = () => {
   const queryClient = useQueryClient();
@@ -148,9 +149,11 @@ export const useMarkLessonComplete = () => {
     mutationFn: async ({
       enrollmentId,
       lessonId,
+      points = 10, // Points par défaut pour une leçon complétée
     }: {
       enrollmentId: string;
       lessonId: string;
+      points?: number;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non connecté');
@@ -163,6 +166,22 @@ export const useMarkLessonComplete = () => {
       });
 
       if (error) throw error;
+
+      // Attribuer des points automatiquement
+      try {
+        await supabase.rpc('award_points', {
+          p_enrollment_id: enrollmentId,
+          p_user_id: user.id,
+          p_points: points,
+          p_source_type: 'lesson_completed',
+          p_source_id: lessonId,
+          p_source_description: 'Leçon complétée',
+        });
+      } catch (pointsError) {
+        // Ne pas bloquer si l'attribution de points échoue
+        logger.error('Error awarding points for lesson', { error: pointsError, enrollmentId, lessonId });
+      }
+
       return data;
     },
     onSuccess: (_, variables) => {
@@ -175,10 +194,16 @@ export const useMarkLessonComplete = () => {
       queryClient.invalidateQueries({ 
         queryKey: ['course-enrollment', variables.enrollmentId] 
       });
+      queryClient.invalidateQueries({ 
+        queryKey: ['student-points', variables.enrollmentId] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['course-leaderboard'] 
+      });
       
       toast({
         title: 'Leçon complétée ! 🎉',
-        description: 'Vous avez terminé cette leçon.',
+        description: `+${variables.points || 10} points gagnés !`,
       });
     },
     onError: (error: any) => {

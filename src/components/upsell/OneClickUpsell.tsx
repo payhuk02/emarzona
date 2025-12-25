@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { X, ShoppingBag, TrendingDown, Sparkles, Check } from 'lucide-react';
+import { X, ShoppingBag, TrendingDown, Sparkles, Check } from '@/components/icons';
 import { useCart } from '@/hooks/cart/useCart';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -213,7 +213,7 @@ export function OneClickUpsell({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -225,7 +225,7 @@ export function OneClickUpsell({
                 Complétez votre achat avec ces produits complémentaires à prix réduit
               </DialogDescription>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose}>
+            <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fermer l'offre complémentaire">
               <X className="h-4 w-4" />
             </Button>
           </div>

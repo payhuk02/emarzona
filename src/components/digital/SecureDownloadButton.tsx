@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Loader2, Shield, CheckCircle2 } from 'lucide-react';
+import { Download, Loader2, Shield, CheckCircle2 } from '@/components/icons';
 import { useGenerateDownloadToken, useLogDownload } from '@/hooks/digital/useSecureDownload';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // TYPES
@@ -96,8 +97,9 @@ export function SecureDownloadButton({
       // Reset success state after 3 seconds
       setTimeout(() => setDownloadSuccess(false), 3000);
 
-    } catch (error: any) {
-      console.error('Download error:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Download error', { error: errorMessage, productId, fileUrl });
       
       // Log the failed download
       logDownload({
@@ -155,7 +157,7 @@ export function SecureDownloadButton({
  */
 export function SecureDownloadIconButton(props: Omit<SecureDownloadButtonProps, 'children'>) {
   return (
-    <SecureDownloadButton {...props} size="icon" variant="ghost">
+    <SecureDownloadButton {...props} size="icon" variant="ghost" aria-label={`Télécharger ${props.fileName || 'le fichier'}`}>
       <Download className="h-4 w-4" />
     </SecureDownloadButton>
   );

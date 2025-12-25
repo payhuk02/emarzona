@@ -1,5 +1,5 @@
 -- Migration pour créer les tables d'analytics de produits
--- Payhuk - Système d'analytics dynamique et en temps réel
+-- Emarzona - Système d'analytics dynamique et en temps réel
 
 -- Table principale pour les analytics de produits
 CREATE TABLE IF NOT EXISTS public.product_analytics (

@@ -30,12 +30,13 @@ export const formatDuration = (
       }
       return `${secs}s`;
 
-    case 'long':
+    case 'long': {
       const parts: string[] = [];
       if (hours > 0) parts.push(`${hours} heure${hours > 1 ? 's' : ''}`);
       if (minutes > 0) parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
       if (secs > 0 || parts.length === 0) parts.push(`${secs} seconde${secs > 1 ? 's' : ''}`);
       return parts.join(', ');
+    }
 
     case 'hms':
       return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;

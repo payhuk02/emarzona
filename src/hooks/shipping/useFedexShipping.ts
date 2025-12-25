@@ -15,24 +15,57 @@ import { useToast } from '@/hooks/use-toast';
 // TYPES
 // =====================================================
 
+export interface ShipmentAddress {
+  name?: string;
+  city?: string;
+  country?: string;
+  address_line1?: string;
+  address_line2?: string;
+  postal_code?: string;
+  state?: string;
+  phone?: string;
+}
+
+export interface TrackingEvent {
+  id?: string;
+  status?: string;
+  location?: string;
+  timestamp?: string;
+  description?: string;
+}
+
+export interface ShipmentLabel {
+  id: string;
+  shipment_id: string;
+  label_url?: string;
+  label_data?: string;
+  created_at?: string;
+}
+
 export interface Shipment {
   id: string;
   order_id: string;
   carrier_id: string;
   store_id: string;
   tracking_number: string;
-  tracking_url: string;
+  tracking_url?: string;
   service_type: string;
   status: string;
   weight_value: number;
-  shipping_cost: number;
-  ship_from: any;
-  ship_to: any;
-  estimated_delivery: string;
+  shipping_cost?: number;
+  currency?: string;
+  ship_from?: ShipmentAddress;
+  ship_to?: ShipmentAddress;
+  estimated_delivery?: string;
   actual_delivery?: string;
-  tracking_events: any[];
+  tracking_events?: TrackingEvent[];
+  labels?: ShipmentLabel[];
+  order?: {
+    order_number?: string;
+    total_amount?: number;
+  };
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 // =====================================================
@@ -244,10 +277,11 @@ export const useCreateFedexShipment = () => {
         description: 'L\'étiquette d\'expédition a été générée avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de créer l\'expédition';
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer l\'expédition',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -363,10 +397,11 @@ export const useCancelShipment = () => {
         description: 'L\'expédition a été annulée avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       toast({
         title: '❌ Erreur',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -383,7 +418,7 @@ export const useRequestPickup = () => {
   return useMutation({
     mutationFn: async (data: {
       storeId: string;
-      address: any;
+      address: ShipmentAddress;
       pickupDate: string;
       packageCount: number;
       totalWeight: number;
@@ -498,10 +533,11 @@ export const usePrintLabel = () => {
         description: 'L\'étiquette a été envoyée à l\'impression.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       toast({
         title: '❌ Erreur',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     },

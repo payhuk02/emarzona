@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Plus, Search } from 'lucide-react';
 import { ServicesGrid } from '@/components/service';
+import { ServicesListVirtualized } from '@/components/service/ServicesListVirtualized';
 import { useToast } from '@/hooks/use-toast';
 
 export const ServicesList = () => {
@@ -66,47 +67,66 @@ export const ServicesList = () => {
         <AppSidebar />
 
         <main className="flex-1 overflow-x-hidden">
-          <div className="container mx-auto p-6 space-y-6">
+          <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-5 md:space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
               <div>
-                <h1 className="text-3xl font-bold">Services</h1>
-                <p className="text-muted-foreground mt-1">
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold">Services</h1>
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-0.5 sm:mt-1">
                   Gérez vos services et réservations
                 </p>
               </div>
 
-              <Button onClick={() => navigate('/products/create?type=service')}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nouveau service
+              <Button onClick={() => navigate('/products/create?type=service')} size="sm" className="text-xs sm:text-sm">
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                <span className="hidden sm:inline">Nouveau service</span>
+                <span className="sm:hidden">Nouveau</span>
               </Button>
             </div>
 
             {/* Search */}
             <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher un service..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-8 sm:pl-10 text-xs sm:text-sm min-h-[44px]"
               />
             </div>
 
-            {/* Services Grid */}
-            <ServicesGrid
-              services={filteredServices || []}
-              loading={isLoading}
-              onEdit={(id) => navigate(`/dashboard/services/${id}/edit`)}
-              onDelete={(id) => setDeleteServiceId(id)}
-            />
+            {/* Services Grid ou Virtualized */}
+            {isLoading ? (
+              <ServicesGrid
+                services={[]}
+                loading={true}
+                onEdit={(id) => navigate(`/dashboard/services/${id}/edit`)}
+                onDelete={(id) => setDeleteServiceId(id)}
+              />
+            ) : (filteredServices?.length || 0) > 50 ? (
+              <ServicesListVirtualized
+                services={filteredServices || []}
+                onEdit={(id) => navigate(`/dashboard/services/${id}/edit`)}
+                onDelete={(id) => setDeleteServiceId(id)}
+                showActions={true}
+                itemHeight={300}
+                containerHeight="600px"
+              />
+            ) : (
+              <ServicesGrid
+                services={filteredServices || []}
+                loading={false}
+                onEdit={(id) => navigate(`/dashboard/services/${id}/edit`)}
+                onDelete={(id) => setDeleteServiceId(id)}
+              />
+            )}
 
             {/* Delete Confirmation */}
             <AlertDialog open={!!deleteServiceId} onOpenChange={(open) => !open && setDeleteServiceId(null)}>
-              <AlertDialogContent>
+              <AlertDialogContent className="p-4 sm:p-6">
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                  <AlertDialogDescription>
+                  <AlertDialogTitle className="text-xs sm:text-sm md:text-base lg:text-lg">Confirmer la suppression</AlertDialogTitle>
+                  <AlertDialogDescription className="text-[10px] sm:text-xs md:text-sm">
                     Êtes-vous sûr de vouloir supprimer ce service ? Cette action est irréversible.
                   </AlertDialogDescription>
                 </AlertDialogHeader>

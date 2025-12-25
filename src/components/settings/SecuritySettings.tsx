@@ -25,6 +25,7 @@ import {
   Settings,
   Activity
 } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 interface SecuritySettings {
   // Password
@@ -115,7 +116,7 @@ export const SecuritySettings = () => {
         marketingEmails: privacyData?.marketing_emails ?? false,
       }));
     } catch (error: any) {
-      console.error('Error loading security settings:', error);
+      logger.error('Error loading security settings', { error });
       // Don't show error toast if tables don't exist yet (graceful degradation)
     } finally {
       setLoading(false);

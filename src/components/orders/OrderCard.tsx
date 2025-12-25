@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ interface OrderCardProps {
   storeId: string;
 }
 
-export const OrderCard = ({ order, onUpdate, storeId }: OrderCardProps) => {
+const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -143,7 +143,7 @@ export const OrderCard = ({ order, onUpdate, storeId }: OrderCardProps) => {
 
   return (
     <>
-      <Card className="w-full hover:shadow-lg transition-shadow">
+      <Card className="w-full hover:shadow-lg transition-shadow" style={{ willChange: 'transform' }}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
@@ -286,4 +286,19 @@ export const OrderCard = ({ order, onUpdate, storeId }: OrderCardProps) => {
     </>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const OrderCard = React.memo(OrderCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.order.id === nextProps.order.id &&
+    prevProps.order.status === nextProps.order.status &&
+    prevProps.order.payment_status === nextProps.order.payment_status &&
+    prevProps.order.total_amount === nextProps.order.total_amount &&
+    prevProps.order.created_at === nextProps.order.created_at &&
+    prevProps.storeId === nextProps.storeId &&
+    prevProps.onUpdate === nextProps.onUpdate
+  );
+});
+
+OrderCard.displayName = 'OrderCard';
 

@@ -3,6 +3,8 @@
  * Preconnect, DNS-prefetch, Preload, Prefetch
  */
 
+import { logger } from './logger';
+
 /**
  * Ajouter un resource hint
  */
@@ -104,7 +106,7 @@ export function setupResourceHints(): void {
     crossorigin: 'anonymous',
   });
 
-  console.log('[Resource Hints] Resource hints configured');
+  logger.info('[Resource Hints] Resource hints configured');
 }
 
 /**
@@ -174,6 +176,6 @@ export function cleanupResourceHints(): void {
       hint.parentNode.removeChild(hint);
     }
   });
-  console.log('[Resource Hints] Cleaned up unused hints');
+  logger.info('[Resource Hints] Cleaned up unused hints');
 }
 

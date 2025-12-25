@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Plus, X, Trash2 } from 'lucide-react';
+import { Plus, X, Trash2 } from '@/components/icons';
 import type { PhysicalProductFormData, PhysicalProductOption, PhysicalProductVariant } from '@/types/physical-product';
 
 interface PhysicalVariantsBuilderProps {

@@ -5,6 +5,7 @@
  * Professional card for displaying service bookings
  */
 
+import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,8 +34,27 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import type { ServiceBooking } from '@/hooks/service';
 
+interface BookingProduct {
+  id: string;
+  name: string;
+  price: number;
+  currency: string;
+}
+
+interface BookingCustomer {
+  full_name: string;
+  email: string;
+  phone?: string;
+}
+
+interface BookingStaff {
+  id: string;
+  name: string;
+  email?: string;
+}
+
 interface BookingCardProps {
-  booking: ServiceBooking & { product?: any; customer?: any; staff?: any };
+  booking: ServiceBooking & { product?: BookingProduct; customer?: BookingCustomer; staff?: BookingStaff };
   onConfirm?: (id: string) => void;
   onCancel?: (id: string) => void;
   onComplete?: (id: string) => void;
@@ -42,7 +62,7 @@ interface BookingCardProps {
   showActions?: boolean;
 }
 
-export const BookingCard = ({
+const BookingCardComponent = ({
   booking,
   onConfirm,
   onCancel,
@@ -129,7 +149,7 @@ export const BookingCard = ({
           {showActions && booking.status !== 'completed' && booking.status !== 'cancelled' && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour la réservation ${booking.id}`}>
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -280,6 +300,24 @@ export const BookingCard = ({
     </Card>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const BookingCard = React.memo(BookingCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.booking.id === nextProps.booking.id &&
+    prevProps.booking.status === nextProps.booking.status &&
+    prevProps.booking.start_time === nextProps.booking.start_time &&
+    prevProps.booking.end_time === nextProps.booking.end_time &&
+    prevProps.booking.total_price === nextProps.booking.total_price &&
+    prevProps.showActions === nextProps.showActions &&
+    prevProps.onConfirm === nextProps.onConfirm &&
+    prevProps.onCancel === nextProps.onCancel &&
+    prevProps.onComplete === nextProps.onComplete &&
+    prevProps.onNoShow === nextProps.onNoShow
+  );
+});
+
+BookingCard.displayName = 'BookingCard';
 
 /**
  * Bookings List

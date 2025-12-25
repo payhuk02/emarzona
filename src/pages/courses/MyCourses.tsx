@@ -44,10 +44,11 @@ import {
   Award,
   Users,
   Star,
-  BarChart3
+  BarChart3,
 } from 'lucide-react';
 import { useMyEnrollments } from '@/hooks/courses/useCourseEnrollment';
 import { useCourseProgressPercentage } from '@/hooks/courses/useCourseProgress';
+import type { CourseEnrollment } from '@/types/courses';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
@@ -57,7 +58,7 @@ const ITEMS_PER_PAGE = 9;
 const PAGINATION_OPTIONS = [9, 18, 27, 36];
 
 interface CourseCardProps {
-  enrollment: any;
+  enrollment: CourseEnrollment;
   viewMode?: 'grid' | 'list';
 }
 
@@ -68,12 +69,11 @@ const CourseCard = ({ enrollment, viewMode = 'grid' }: CourseCardProps) => {
   const course = enrollment.course;
   const [imageError, setImageError] = useState(false);
 
-  if (!product || !course) return null;
-
   const handleContinue = useCallback(() => {
+    if (!product) return;
     logger.info(`Navigation vers le cours: ${product.slug}`);
     navigate(`/courses/${product.slug}`);
-  }, [navigate, product.slug]);
+  }, [navigate, product]);
 
   const getProgressColor = () => {
     if (percentage === 100) return 'bg-green-500';
@@ -81,6 +81,8 @@ const CourseCard = ({ enrollment, viewMode = 'grid' }: CourseCardProps) => {
     if (percentage > 0) return 'bg-orange-500';
     return 'bg-gray-400';
   };
+
+  if (!product || !course) return null;
 
   if (viewMode === 'list') {
     return (
@@ -122,7 +124,9 @@ const CourseCard = ({ enrollment, viewMode = 'grid' }: CourseCardProps) => {
                   {product.name}
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-2 sm:mb-3">
-                  {product.short_description || product.description?.replace(/<[^>]*>/g, '') || 'Aucune description disponible'}
+                  {product.short_description ||
+                    product.description?.replace(/<[^>]*>/g, '') ||
+                    'Aucune description disponible'}
                 </p>
               </div>
 
@@ -146,7 +150,8 @@ const CourseCard = ({ enrollment, viewMode = 'grid' }: CourseCardProps) => {
                 <div className="flex items-center gap-1">
                   <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   <span>
-                    {Math.floor((course.total_duration_minutes || 0) / 60)}h {(course.total_duration_minutes || 0) % 60}m
+                    {Math.floor((course.total_duration_minutes || 0) / 60)}h{' '}
+                    {(course.total_duration_minutes || 0) % 60}m
                   </span>
                 </div>
                 {course.rating && (
@@ -164,7 +169,11 @@ const CourseCard = ({ enrollment, viewMode = 'grid' }: CourseCardProps) => {
               onClick={handleContinue}
             >
               <PlayCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-              {percentage === 0 ? 'Commencer' : percentage === 100 ? 'Revoir le cours' : 'Continuer'}
+              {percentage === 0
+                ? 'Commencer'
+                : percentage === 100
+                  ? 'Revoir le cours'
+                  : 'Continuer'}
             </Button>
           </CardContent>
         </div>
@@ -219,7 +228,9 @@ const CourseCard = ({ enrollment, viewMode = 'grid' }: CourseCardProps) => {
             {product.name}
           </h3>
           <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
-            {product.short_description || product.description?.replace(/<[^>]*>/g, '') || 'Aucune description disponible'}
+            {product.short_description ||
+              product.description?.replace(/<[^>]*>/g, '') ||
+              'Aucune description disponible'}
           </p>
         </div>
 
@@ -243,7 +254,8 @@ const CourseCard = ({ enrollment, viewMode = 'grid' }: CourseCardProps) => {
           <div className="flex items-center gap-1">
             <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span>
-              {Math.floor((course.total_duration_minutes || 0) / 60)}h {(course.total_duration_minutes || 0) % 60}m
+              {Math.floor((course.total_duration_minutes || 0) / 60)}h{' '}
+              {(course.total_duration_minutes || 0) % 60}m
             </span>
           </div>
           {course.rating && (
@@ -275,7 +287,9 @@ const MyCourses = () => {
 
   // États
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'in_progress' | 'not_started'>('all');
+  const [statusFilter, setStatusFilter] = useState<
+    'all' | 'completed' | 'in_progress' | 'not_started'
+  >('all');
   const [sortBy, setSortBy] = useState<'recent' | 'progress' | 'name' | 'duration'>('recent');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
@@ -291,10 +305,10 @@ const MyCourses = () => {
     if (!enrollments) return { total: 0, completed: 0, inProgress: 0, notStarted: 0 };
 
     const total = enrollments.length;
-    const completed = enrollments.filter((e: any) => {
+    const completed = enrollments.filter((e: CourseEnrollment) => {
       return e.completed_lessons === e.total_lessons && e.total_lessons > 0;
     }).length;
-    const inProgress = enrollments.filter((e: any) => {
+    const inProgress = enrollments.filter((e: CourseEnrollment) => {
       return e.completed_lessons > 0 && e.completed_lessons < e.total_lessons;
     }).length;
     const notStarted = total - completed - inProgress;
@@ -311,7 +325,7 @@ const MyCourses = () => {
     // Filtre de recherche
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((enrollment: any) => {
+      filtered = filtered.filter((enrollment: CourseEnrollment) => {
         const product = enrollment.course?.product;
         return (
           product?.name?.toLowerCase().includes(query) ||
@@ -323,12 +337,18 @@ const MyCourses = () => {
 
     // Filtre de statut
     if (statusFilter !== 'all') {
-      filtered = filtered.filter((enrollment: any) => {
+      filtered = filtered.filter((enrollment: CourseEnrollment) => {
         if (statusFilter === 'completed') {
-          return enrollment.completed_lessons === enrollment.total_lessons && enrollment.total_lessons > 0;
+          return (
+            enrollment.completed_lessons === enrollment.total_lessons &&
+            enrollment.total_lessons > 0
+          );
         }
         if (statusFilter === 'in_progress') {
-          return enrollment.completed_lessons > 0 && enrollment.completed_lessons < enrollment.total_lessons;
+          return (
+            enrollment.completed_lessons > 0 &&
+            enrollment.completed_lessons < enrollment.total_lessons
+          );
         }
         if (statusFilter === 'not_started') {
           return enrollment.completed_lessons === 0;
@@ -338,9 +358,12 @@ const MyCourses = () => {
     }
 
     // Tri
-    filtered.sort((a: any, b: any) => {
+    filtered.sort((a: CourseEnrollment, b: CourseEnrollment) => {
       if (sortBy === 'recent') {
-        return new Date(b.created_at || b.enrolled_at || 0).getTime() - new Date(a.created_at || a.enrolled_at || 0).getTime();
+        return (
+          new Date(b.created_at || b.enrolled_at || 0).getTime() -
+          new Date(a.created_at || a.enrolled_at || 0).getTime()
+        );
       }
       if (sortBy === 'progress') {
         const progressA = a.total_lessons > 0 ? (a.completed_lessons / a.total_lessons) * 100 : 0;
@@ -377,8 +400,8 @@ const MyCourses = () => {
     logger.info('Actualisation de la liste des cours');
     refetch();
     toast({
-      title: "Actualisation",
-      description: "Liste des cours mise à jour",
+      title: 'Actualisation',
+      description: 'Liste des cours mise à jour',
     });
   }, [refetch, toast]);
 
@@ -419,7 +442,7 @@ const MyCourses = () => {
       // G : Basculer vue grille/liste
       if (e.key === 'g' && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
-        setViewMode(prev => prev === 'grid' ? 'list' : 'grid');
+        setViewMode(prev => (prev === 'grid' ? 'list' : 'grid'));
       }
     };
 
@@ -438,54 +461,70 @@ const MyCourses = () => {
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         <AppSidebar />
-        
+
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <header className="sticky top-0 z-20 border-b bg-card/95 backdrop-blur-md shadow-sm transition-all duration-300" role="banner">
+          <header
+            className="sticky top-0 z-20 border-b bg-card/95 backdrop-blur-md shadow-sm transition-all duration-300"
+            role="banner"
+          >
             <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-3 lg:gap-4 px-2 sm:px-3 lg:px-6 overflow-hidden">
-              <SidebarTrigger 
+              <SidebarTrigger
                 aria-label={t('dashboard.sidebarToggle', 'Toggle sidebar')}
                 className="hover:bg-accent/50 transition-colors duration-200 flex-shrink-0 touch-manipulation min-h-[44px] min-w-[44px]"
               />
               <div className="flex-1 min-w-0 overflow-hidden">
-                <h1 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate px-1" id="courses-title">
+                <h1
+                  className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate px-1"
+                  id="courses-title"
+                >
                   {t('courses.myCourses', 'Mes Cours')}
                 </h1>
               </div>
               <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 flex-shrink-0">
-                <Button 
+                <Button
                   variant="ghost"
                   size="icon"
-                  onClick={handleRefresh} 
+                  onClick={handleRefresh}
                   disabled={isLoading}
                   aria-label={t('common.refresh', 'Actualiser')}
                   className="sm:hidden hover:scale-110 active:scale-95 transition-transform duration-200 touch-manipulation min-h-[44px] min-w-[44px]"
                   title="Actualiser"
                 >
-                  <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
+                  <RefreshCw
+                    className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+                    aria-hidden="true"
+                  />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleRefresh} 
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRefresh}
                   disabled={isLoading}
                   aria-label={t('common.refresh', 'Actualiser')}
                   className="hidden sm:flex hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[36px]"
                   title="Actualiser (F5)"
                 >
-                  <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
+                  <RefreshCw
+                    className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+                    aria-hidden="true"
+                  />
                   <span className="hidden lg:inline ml-2">{t('common.refresh', 'Actualiser')}</span>
                 </Button>
               </div>
             </div>
           </header>
 
-          <main className="flex-1 bg-gradient-to-br from-background via-background to-muted/20 overflow-x-hidden" role="main" aria-labelledby="courses-title">
+          <main
+            className="flex-1 bg-gradient-to-br from-background via-background to-muted/20 overflow-x-hidden"
+            role="main"
+            aria-labelledby="courses-title"
+          >
             {isLoading ? (
               <div className="p-4 sm:p-6 lg:p-8">
                 <Skeleton className="h-10 w-64 mb-6" />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {[1, 2, 3].map((i) => (
+                  {[1, 2, 3].map(i => (
                     <Skeleton key={i} className="h-96" />
                   ))}
                 </div>
@@ -502,11 +541,11 @@ const MyCourses = () => {
             ) : (
               <>
                 {/* Hero Section - Bannière Bleue Professionnelle */}
-                <div 
+                <div
                   ref={headerRef}
                   className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-700"
                 >
-                  <div 
+                  <div
                     className="absolute inset-0 opacity-20 pointer-events-none"
                     style={{
                       backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
@@ -518,17 +557,24 @@ const MyCourses = () => {
                       <div className="p-2 sm:p-3 rounded-lg bg-white/10 backdrop-blur-sm">
                         <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
                       </div>
-                      <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold">
+                      <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold">
                         {t('courses.myCourses', 'Mes Cours')}
                       </h1>
                     </div>
-                    <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-blue-100 max-w-2xl">
-                      {t('courses.subtitle', 'Suivez votre progression et continuez votre apprentissage')}
+                    <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-blue-100 max-w-2xl">
+                      {t(
+                        'courses.subtitle',
+                        'Suivez votre progression et continuez votre apprentissage'
+                      )}
                     </p>
-                    <div className="mt-4 sm:mt-6 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-300 animate-pulse" />
-                      <span className="text-xs sm:text-sm text-blue-100">
-                        {stats.total} {stats.total > 1 ? t('courses.courses', 'cours') : t('courses.course', 'cours')} {stats.total > 0 ? t('courses.enrolled', 'inscrits') : ''}
+                    <div className="mt-2 sm:mt-3 md:mt-4 flex items-center gap-1.5 sm:gap-2">
+                      <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-yellow-300 animate-pulse" />
+                      <span className="text-[9px] sm:text-[10px] md:text-xs text-blue-100">
+                        {stats.total}{' '}
+                        {stats.total > 1
+                          ? t('courses.courses', 'cours')
+                          : t('courses.course', 'cours')}{' '}
+                        {stats.total > 0 ? t('courses.enrolled', 'inscrits') : ''}
                       </span>
                     </div>
                   </div>
@@ -537,52 +583,58 @@ const MyCourses = () => {
                 {/* Contenu */}
                 <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-6 lg:p-8 space-y-3 sm:space-y-4 lg:space-y-6">
                   {/* Statistiques */}
-                  <div 
+                  <div
                     ref={statsRef}
                     className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
                     role="region"
                     aria-label={t('courses.stats.ariaLabel', 'Statistiques des cours')}
                   >
                     <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 lg:p-6">
-                        <CardTitle className="text-[11px] sm:text-xs lg:text-sm font-medium">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4 lg:p-6">
+                        <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
                           {t('courses.stats.total', 'Total des cours')}
                         </CardTitle>
-                        <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-blue-600 group-hover:text-blue-700 transition-colors duration-200 flex-shrink-0" />
+                        <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 text-blue-600 group-hover:text-blue-700 transition-colors duration-200 flex-shrink-0" />
                       </CardHeader>
-                      <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
-                        <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">{stats.total}</div>
-                        <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
+                      <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 pt-0">
+                        <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold mb-0.5 sm:mb-1">
+                          {stats.total}
+                        </div>
+                        <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
                           {t('courses.stats.totalDescription', 'Cours inscrits')}
                         </p>
                       </CardContent>
                     </Card>
 
                     <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 lg:p-6">
-                        <CardTitle className="text-[11px] sm:text-xs lg:text-sm font-medium">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4 lg:p-6">
+                        <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
                           {t('courses.stats.inProgress', 'En cours')}
                         </CardTitle>
-                        <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-blue-600 group-hover:text-blue-700 transition-colors duration-200 flex-shrink-0" />
+                        <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 text-blue-600 group-hover:text-blue-700 transition-colors duration-200 flex-shrink-0" />
                       </CardHeader>
-                      <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
-                        <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">{stats.inProgress}</div>
-                        <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
+                      <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 pt-0">
+                        <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold mb-0.5 sm:mb-1">
+                          {stats.inProgress}
+                        </div>
+                        <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
                           {t('courses.stats.inProgressDescription', 'En progression')}
                         </p>
                       </CardContent>
                     </Card>
 
                     <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 lg:p-6">
-                        <CardTitle className="text-[11px] sm:text-xs lg:text-sm font-medium">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4 lg:p-6">
+                        <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
                           {t('courses.stats.completed', 'Terminés')}
                         </CardTitle>
-                        <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-green-600 group-hover:text-green-700 transition-colors duration-200 flex-shrink-0" />
+                        <Trophy className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 text-green-600 group-hover:text-green-700 transition-colors duration-200 flex-shrink-0" />
                       </CardHeader>
-                      <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
-                        <div className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">{stats.completed}</div>
-                        <p className="text-[9px] sm:text-[10px] lg:text-xs text-muted-foreground">
+                      <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 pt-0">
+                        <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold mb-0.5 sm:mb-1">
+                          {stats.completed}
+                        </div>
+                        <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
                           {t('courses.stats.completedDescription', 'Cours terminés')}
                         </p>
                       </CardContent>
@@ -597,10 +649,13 @@ const MyCourses = () => {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                         <Input
                           type="search"
-                          placeholder={t('courses.search.placeholder', 'Rechercher un cours... (Cmd/Ctrl+K)')}
+                          placeholder={t(
+                            'courses.search.placeholder',
+                            'Rechercher un cours... (Cmd/Ctrl+K)'
+                          )}
                           value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="pl-10 pr-9 sm:pr-20 h-9 sm:h-10 bg-background/50 border-border/50 focus:bg-background focus:border-primary/50 transition-all duration-200"
+                          onChange={e => setSearchQuery(e.target.value)}
+                          className="pl-10 pr-9 sm:pr-20 h-9 sm:h-10 bg-background/50 border-border/50 focus:bg-background focus:border-primary/50 transition-all duration-200 text-[10px] sm:text-xs md:text-sm"
                         />
                         {searchQuery ? (
                           <Button
@@ -623,29 +678,48 @@ const MyCourses = () => {
 
                       {/* Filtres */}
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
-                          <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px] h-9 sm:h-10 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200">
-                            <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                        <Select
+                          value={statusFilter}
+                          onValueChange={(value: string) => setStatusFilter(value)}
+                        >
+                          <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px] min-h-[44px] h-11 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200 text-sm">
+                            <Filter className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
                             <SelectValue placeholder={t('courses.filters.status', 'Statut')} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">{t('courses.filters.all', 'Tous les statuts')}</SelectItem>
-                            <SelectItem value="completed">{t('courses.filters.completed', 'Terminés')}</SelectItem>
-                            <SelectItem value="in_progress">{t('courses.filters.inProgress', 'En cours')}</SelectItem>
-                            <SelectItem value="not_started">{t('courses.filters.notStarted', 'Non commencés')}</SelectItem>
+                            <SelectItem value="all">
+                              {t('courses.filters.all', 'Tous les statuts')}
+                            </SelectItem>
+                            <SelectItem value="completed">
+                              {t('courses.filters.completed', 'Terminés')}
+                            </SelectItem>
+                            <SelectItem value="in_progress">
+                              {t('courses.filters.inProgress', 'En cours')}
+                            </SelectItem>
+                            <SelectItem value="not_started">
+                              {t('courses.filters.notStarted', 'Non commencés')}
+                            </SelectItem>
                           </SelectContent>
                         </Select>
 
-                        <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-                          <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px] h-9 sm:h-10 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200">
-                            <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                        <Select value={sortBy} onValueChange={(value: string) => setSortBy(value)}>
+                          <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px] min-h-[44px] h-11 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200 text-sm">
+                            <BarChart3 className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
                             <SelectValue placeholder={t('courses.sort.placeholder', 'Trier par')} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="recent">{t('courses.sort.recent', 'Plus récents')}</SelectItem>
-                            <SelectItem value="progress">{t('courses.sort.progress', 'Progression')}</SelectItem>
-                            <SelectItem value="name">{t('courses.sort.name', 'Nom (A-Z)')}</SelectItem>
-                            <SelectItem value="duration">{t('courses.sort.duration', 'Durée')}</SelectItem>
+                            <SelectItem value="recent">
+                              {t('courses.sort.recent', 'Plus récents')}
+                            </SelectItem>
+                            <SelectItem value="progress">
+                              {t('courses.sort.progress', 'Progression')}
+                            </SelectItem>
+                            <SelectItem value="name">
+                              {t('courses.sort.name', 'Nom (A-Z)')}
+                            </SelectItem>
+                            <SelectItem value="duration">
+                              {t('courses.sort.duration', 'Durée')}
+                            </SelectItem>
                           </SelectContent>
                         </Select>
 
@@ -681,7 +755,9 @@ const MyCourses = () => {
                             className="h-9 sm:h-10 text-xs sm:text-sm hover:bg-accent/50 transition-all duration-200"
                           >
                             <X className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
-                            <span className="hidden sm:inline">{t('common.clearFilters', 'Réinitialiser')}</span>
+                            <span className="hidden sm:inline">
+                              {t('common.clearFilters', 'Réinitialiser')}
+                            </span>
                           </Button>
                         )}
                       </div>
@@ -693,19 +769,25 @@ const MyCourses = () => {
                     <Card className="shadow-sm border-border/50 bg-card/30 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
                       <CardContent className="py-8 sm:py-12 text-center">
                         <GraduationCap className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground animate-pulse" />
-                        <h3 className="text-base sm:text-lg lg:text-xl font-semibold mb-2">
-                          {searchQuery || statusFilter !== 'all' 
+                        <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold mb-1 sm:mb-2">
+                          {searchQuery || statusFilter !== 'all'
                             ? t('courses.empty.noResults', 'Aucun cours trouvé')
                             : t('courses.empty.noCourses', 'Aucun cours pour le moment')}
                         </h3>
-                        <p className="text-sm sm:text-base text-muted-foreground mb-4 max-w-md mx-auto">
+                        <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-3 sm:mb-4 max-w-md mx-auto">
                           {searchQuery || statusFilter !== 'all'
-                            ? t('courses.empty.noResultsDescription', 'Essayez de modifier vos filtres de recherche')
-                            : t('courses.empty.noCoursesDescription', 'Explorez notre catalogue et inscrivez-vous à votre premier cours !')}
+                            ? t(
+                                'courses.empty.noResultsDescription',
+                                'Essayez de modifier vos filtres de recherche'
+                              )
+                            : t(
+                                'courses.empty.noCoursesDescription',
+                                'Explorez notre catalogue et inscrivez-vous à votre premier cours !'
+                              )}
                         </p>
                         {(searchQuery || statusFilter !== 'all') && (
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             onClick={clearFilters}
                             className="hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95"
                           >
@@ -713,7 +795,7 @@ const MyCourses = () => {
                           </Button>
                         )}
                         {!searchQuery && statusFilter === 'all' && (
-                          <Button 
+                          <Button
                             onClick={() => navigate('/marketplace')}
                             className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 group"
                           >
@@ -729,7 +811,12 @@ const MyCourses = () => {
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 p-2.5 sm:p-3 lg:p-4 bg-card/50 rounded-lg border border-border/50 backdrop-blur-sm">
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="text-xs sm:text-sm font-medium text-foreground">
-                            {filteredAndSortedCourses.length} {filteredAndSortedCourses.length > 1 ? t('courses.courses', 'cours') : t('courses.course', 'cours')} {t('courses.found', 'trouvé')}{filteredAndSortedCourses.length > 1 ? 's' : ''}
+                            {filteredAndSortedCourses.length}{' '}
+                            {filteredAndSortedCourses.length > 1
+                              ? t('courses.courses', 'cours')
+                              : t('courses.course', 'cours')}{' '}
+                            {t('courses.found', 'trouvé')}
+                            {filteredAndSortedCourses.length > 1 ? 's' : ''}
                           </p>
                           {searchQuery && (
                             <Badge variant="secondary" className="text-xs">
@@ -739,36 +826,48 @@ const MyCourses = () => {
                         </div>
                         {totalPages > 1 && (
                           <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                            <label htmlFor="items-per-page" className="sr-only">{t('common.itemsPerPage', 'Éléments par page')}</label>
-                            <span className="hidden sm:inline">{t('common.displaying', 'Affichage de')}</span>
+                            <label htmlFor="items-per-page" className="sr-only">
+                              {t('common.itemsPerPage', 'Éléments par page')}
+                            </label>
+                            <span className="hidden sm:inline">
+                              {t('common.displaying', 'Affichage de')}
+                            </span>
                             <select
                               id="items-per-page"
                               value={itemsPerPage}
-                              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                              className="px-2 py-1.5 border rounded-md bg-background text-xs sm:text-sm hover:bg-accent/50 transition-colors duration-200 focus:ring-2 focus:ring-primary focus:ring-offset-1"
-                              aria-label={t('common.selectItemsPerPage', 'Sélectionner le nombre d\'éléments par page')}
+                              onChange={e => handleItemsPerPageChange(Number(e.target.value))}
+                              className="px-2 py-1.5 min-h-[44px] border rounded-md bg-background text-xs sm:text-sm hover:bg-accent/50 transition-colors duration-200 focus:ring-2 focus:ring-primary focus:ring-offset-1 touch-manipulation cursor-pointer"
+                              aria-label={t(
+                                'common.selectItemsPerPage',
+                                "Sélectionner le nombre d'éléments par page"
+                              )}
                             >
                               {PAGINATION_OPTIONS.map(option => (
-                                <option key={option} value={option}>{option}</option>
+                                <option key={option} value={option}>
+                                  {option}
+                                </option>
                               ))}
                             </select>
-                            <span className="hidden sm:inline">{t('common.perPage', 'par page')}</span>
+                            <span className="hidden sm:inline">
+                              {t('common.perPage', 'par page')}
+                            </span>
                             <span className="sm:hidden">/ page</span>
                           </div>
                         )}
                       </div>
 
                       {/* Liste des cours */}
-                      <div 
+                      <div
                         ref={coursesRef}
-                        className={viewMode === 'grid' 
-                          ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
-                          : "space-y-2.5 sm:space-y-3 lg:space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
+                        className={
+                          viewMode === 'grid'
+                            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700'
+                            : 'space-y-2.5 sm:space-y-3 lg:space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700'
                         }
                         role="region"
                         aria-label={t('courses.list.ariaLabel', 'Liste des cours')}
                       >
-                        {paginatedCourses.map((enrollment: any, index) => (
+                        {paginatedCourses.map((enrollment: CourseEnrollment, index) => (
                           <div
                             key={enrollment.id}
                             className="animate-in fade-in"
@@ -783,12 +882,27 @@ const MyCourses = () => {
                       {totalPages > 1 && (
                         <Card className="shadow-sm border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-2 duration-500">
                           <CardContent className="p-3 sm:p-4">
-                            <nav className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4" role="navigation" aria-label={t('courses.pagination.ariaLabel', 'Navigation des pages')}>
+                            <nav
+                              className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4"
+                              role="navigation"
+                              aria-label={t('courses.pagination.ariaLabel', 'Navigation des pages')}
+                            >
                               <div className="text-xs sm:text-sm text-muted-foreground font-medium">
-                                {t('courses.pagination.page', 'Page')} {currentPage} <span className="hidden sm:inline">{t('courses.pagination.of', 'sur')}</span> <span className="sm:hidden">/</span> {totalPages}
+                                {t('courses.pagination.page', 'Page')} {currentPage}{' '}
+                                <span className="hidden sm:inline">
+                                  {t('courses.pagination.of', 'sur')}
+                                </span>{' '}
+                                <span className="sm:hidden">/</span> {totalPages}
                               </div>
 
-                              <div className="flex items-center gap-1" role="group" aria-label={t('courses.pagination.controls', 'Contrôles de pagination')}>
+                              <div
+                                className="flex items-center gap-1"
+                                role="group"
+                                aria-label={t(
+                                  'courses.pagination.controls',
+                                  'Contrôles de pagination'
+                                )}
+                              >
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -797,7 +911,9 @@ const MyCourses = () => {
                                   aria-label={t('courses.pagination.firstPage', 'Première page')}
                                   className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40 touch-manipulation"
                                 >
-                                  <span className="sr-only">{t('courses.pagination.firstPage', 'Première page')}</span>
+                                  <span className="sr-only">
+                                    {t('courses.pagination.firstPage', 'Première page')}
+                                  </span>
                                   «
                                 </Button>
                                 <Button
@@ -805,10 +921,15 @@ const MyCourses = () => {
                                   size="sm"
                                   onClick={() => handlePageChange(currentPage - 1)}
                                   disabled={currentPage === 1}
-                                  aria-label={t('courses.pagination.previousPage', 'Page précédente')}
+                                  aria-label={t(
+                                    'courses.pagination.previousPage',
+                                    'Page précédente'
+                                  )}
                                   className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40 touch-manipulation"
                                 >
-                                  <span className="sr-only">{t('courses.pagination.previousPage', 'Page précédente')}</span>
+                                  <span className="sr-only">
+                                    {t('courses.pagination.previousPage', 'Page précédente')}
+                                  </span>
                                   ‹
                                 </Button>
 
@@ -828,12 +949,14 @@ const MyCourses = () => {
                                     return (
                                       <Button
                                         key={pageNumber}
-                                        variant={currentPage === pageNumber ? "default" : "outline"}
+                                        variant={currentPage === pageNumber ? 'default' : 'outline'}
                                         size="sm"
                                         onClick={() => handlePageChange(pageNumber)}
                                         className="min-w-[32px] sm:min-w-[36px] h-8 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation"
                                         aria-label={`${t('courses.pagination.goToPage', 'Aller à la page')} ${pageNumber}`}
-                                        aria-current={currentPage === pageNumber ? "page" : undefined}
+                                        aria-current={
+                                          currentPage === pageNumber ? 'page' : undefined
+                                        }
                                       >
                                         {pageNumber}
                                       </Button>
@@ -849,7 +972,9 @@ const MyCourses = () => {
                                   aria-label={t('courses.pagination.nextPage', 'Page suivante')}
                                   className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40 touch-manipulation"
                                 >
-                                  <span className="sr-only">{t('courses.pagination.nextPage', 'Page suivante')}</span>
+                                  <span className="sr-only">
+                                    {t('courses.pagination.nextPage', 'Page suivante')}
+                                  </span>
                                   ›
                                 </Button>
                                 <Button
@@ -860,7 +985,9 @@ const MyCourses = () => {
                                   aria-label={t('courses.pagination.lastPage', 'Dernière page')}
                                   className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40 touch-manipulation"
                                 >
-                                  <span className="sr-only">{t('courses.pagination.lastPage', 'Dernière page')}</span>
+                                  <span className="sr-only">
+                                    {t('courses.pagination.lastPage', 'Dernière page')}
+                                  </span>
                                   »
                                 </Button>
                               </div>

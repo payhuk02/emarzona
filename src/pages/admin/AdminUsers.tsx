@@ -49,6 +49,8 @@ import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
 import { useAdminMFA } from '@/hooks/useAdminMFA';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { RequireAAL2 } from '@/components/admin/RequireAAL2';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 
 const AdminUsers = () => {
   // États pour pagination, tri et filtres
@@ -86,6 +88,7 @@ const AdminUsers = () => {
   const { toast } = useToast();
   const { can } = useCurrentAdminPermissions();
   const { isAAL2 } = useAdminMFA();
+  const isMobile = useIsMobile();
   
   // Fonction pour gérer le tri
   const handleSort = useCallback((column: typeof sortBy) => {
@@ -239,14 +242,21 @@ const AdminUsers = () => {
 
   return (
     <AdminLayout>
+      {/* RequireAAL2 permet maintenant à l'administrateur principal de contourner */}
       <RequireAAL2>
-      <div className="container mx-auto p-6 space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+        {/* Header avec animation - Style Inventory */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Gestion des utilisateurs
+            <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+              </div>
+              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Gestion des utilisateurs
+              </span>
             </h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
               {totalCount} utilisateur{totalCount > 1 ? 's' : ''} inscrit{totalCount > 1 ? 's' : ''}
             </p>
           </div>
@@ -272,7 +282,7 @@ const AdminUsers = () => {
 
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
               <div>
                 <CardTitle>Liste des utilisateurs</CardTitle>
                 <CardDescription>
@@ -281,9 +291,10 @@ const AdminUsers = () => {
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="min-h-[44px]">
                     <FileDown className="h-4 w-4 mr-2" />
-                    Exporter
+                    <span className="hidden sm:inline">Exporter</span>
+                    <span className="sm:hidden">Export</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -305,7 +316,7 @@ const AdminUsers = () => {
                 <Filter className="h-4 w-4" />
                 Filtres
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {/* Recherche */}
                 <div className="space-y-2">
                   <Label htmlFor="search">Rechercher</Label>
@@ -316,7 +327,7 @@ const AdminUsers = () => {
                       placeholder="Email, nom, prénom..."
                       value={filters.searchTerm || ''}
                       onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
-                      className="pl-10"
+                      className="pl-10 min-h-[44px]"
                     />
                   </div>
                 </div>
@@ -328,7 +339,7 @@ const AdminUsers = () => {
                     value={filters.role || 'all'}
                     onValueChange={(value) => handleFilterChange('role', value)}
                   >
-                    <SelectTrigger id="role-filter">
+                    <SelectTrigger id="role-filter" className="min-h-[44px]">
                       <SelectValue placeholder="Tous les rôles" />
                     </SelectTrigger>
                     <SelectContent>
@@ -356,7 +367,7 @@ const AdminUsers = () => {
                     value={filters.status || 'all'}
                     onValueChange={(value) => handleFilterChange('status', value)}
                   >
-                    <SelectTrigger id="status-filter">
+                    <SelectTrigger id="status-filter" className="min-h-[44px]">
                       <SelectValue placeholder="Tous les statuts" />
                     </SelectTrigger>
                     <SelectContent>
@@ -380,84 +391,55 @@ const AdminUsers = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  {/* Email - non triable (dans auth.users) */}
-                  <TableHead>Email</TableHead>
-                  
-                  {/* Nom - triable */}
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 -ml-3"
-                      onClick={() => handleSort('display_name')}
-                    >
-                      Nom complet
-                      {sortBy === 'display_name' ? (
-                        sortDirection === 'asc' ? (
-                          <ArrowUp className="ml-2 h-4 w-4" />
-                        ) : (
-                          <ArrowDown className="ml-2 h-4 w-4" />
-                        )
-                      ) : (
-                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                      )}
-                    </Button>
-                  </TableHead>
-                  
-                  <TableHead>Rôle</TableHead>
-                  <TableHead>Statut</TableHead>
-                  
-                  {/* Date d'inscription - triable */}
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 -ml-3"
-                      onClick={() => handleSort('created_at')}
-                    >
-                      Date d'inscription
-                      {sortBy === 'created_at' ? (
-                        sortDirection === 'asc' ? (
-                          <ArrowUp className="ml-2 h-4 w-4" />
-                        ) : (
-                          <ArrowDown className="ml-2 h-4 w-4" />
-                        )
-                      ) : (
-                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
-                      )}
-                    </Button>
-                  </TableHead>
-                  
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.email}</TableCell>
-                    <TableCell>
-                      {user.first_name || user.last_name
-                        ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
-                        : user.display_name || 'N/A'}
-                    </TableCell>
-                    <TableCell>
+            {users.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Users className="mx-auto h-12 w-12 opacity-50 mb-4" />
+                <p className="font-medium">Aucun utilisateur trouvé</p>
+                <p className="text-sm">Essayez de modifier vos filtres</p>
+              </div>
+            ) : isMobile ? (
+              <MobileTableCard
+                data={users.map((u) => ({ id: u.user_id, ...u }))}
+                columns={[
+                  {
+                    key: 'email',
+                    header: 'Email',
+                    priority: 'high',
+                    className: 'font-medium',
+                  },
+                  {
+                    key: 'display_name',
+                    header: 'Nom complet',
+                    priority: 'high',
+                    render: (value, row) =>
+                      row.first_name || row.last_name
+                        ? `${row.first_name || ''} ${row.last_name || ''}`.trim()
+                        : row.display_name || 'N/A',
+                  },
+                  {
+                    key: 'role',
+                    header: 'Rôle',
+                    priority: 'high',
+                    render: (value, row) => (
                       <Badge
-                        variant={user.role === 'admin' ? 'default' : 'secondary'}
+                        variant={row.role === 'admin' ? 'default' : 'secondary'}
                         className="flex items-center gap-1 w-fit"
                       >
-                        {user.role === 'admin' ? (
+                        {row.role === 'admin' ? (
                           <Shield className="h-3 w-3" />
                         ) : (
                           <User className="h-3 w-3" />
                         )}
-                        {user.role}
+                        {row.role}
                       </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {user.is_suspended ? (
+                    ),
+                  },
+                  {
+                    key: 'is_suspended',
+                    header: 'Statut',
+                    priority: 'high',
+                    render: (value, row) =>
+                      row.is_suspended ? (
                         <Badge variant="destructive" className="flex items-center gap-1 w-fit">
                           <Ban className="h-3 w-3" />
                           Suspendu
@@ -467,134 +449,325 @@ const AdminUsers = () => {
                           <CheckCircle className="h-3 w-3" />
                           Actif
                         </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {new Date(user.created_at).toLocaleDateString('fr-FR')}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {can('users.roles') && (
-                        <TooltipProvider>
+                      ),
+                  },
+                  {
+                    key: 'created_at',
+                    header: 'Date d\'inscription',
+                    priority: 'medium',
+                    render: (value) => (
+                      <span className="text-muted-foreground">
+                        {new Date(value).toLocaleDateString('fr-FR')}
+                      </span>
+                    ),
+                  },
+                ]}
+                actions={(row) => (
+                  <div className="flex items-center justify-end gap-2 flex-wrap">
+                    {can('users.roles') && (
+                      <TooltipProvider>
                         <Tooltip>
-                        <TooltipTrigger asChild>
-                        <span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={!isAAL2}
-                          onClick={() => {
-                            setRoleTargetUser({ id: user.user_id, email: user.email });
-                            setNewRole(user.role || 'user');
-                            setRoleDialogOpen(true);
-                          }}
-                        >
-                          <Edit3 className="h-4 w-4 mr-1" />
-                          Rôle
-                        </Button>
-                        </span>
-                        </TooltipTrigger>
-                        {!isAAL2 && (<TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>)}
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={!isAAL2}
+                              onClick={() => {
+                                setRoleTargetUser({ id: row.user_id, email: row.email });
+                                setNewRole(row.role || 'user');
+                                setRoleDialogOpen(true);
+                              }}
+                              className="min-h-[44px] min-w-[44px]"
+                              aria-label={`Modifier le rôle de ${row.email}`}
+                            >
+                              <Edit3 className="h-4 w-4" aria-hidden="true" />
+                            </Button>
+                          </TooltipTrigger>
+                          {!isAAL2 && <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>}
                         </Tooltip>
-                        </TooltipProvider>
-                        )}
-                        {user.is_suspended ? (
-                          can('users.manage') && (
-                          <TooltipProvider>
-                          <Tooltip>
-                          <TooltipTrigger asChild>
-                          <span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={!isAAL2}
-                            onClick={async () => {
-                              await unsuspendUser(user.user_id);
-                              refetch();
-                            }}
-                          >
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            Réactiver
-                          </Button>
-                          </span>
-                          </TooltipTrigger>
-                          {!isAAL2 && (<TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>)}
-                          </Tooltip>
-                          </TooltipProvider>
-                          )
-                        ) : (
-                          can('users.manage') && (
-                          <TooltipProvider>
-                          <Tooltip>
-                          <TooltipTrigger asChild>
-                          <span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={!isAAL2}
-                            onClick={() => {
-                              setSelectedUser(user.user_id);
-                              setSuspendDialogOpen(true);
-                            }}
-                          >
-                            <Ban className="h-4 w-4 mr-1" />
-                            Suspendre
-                          </Button>
-                          </span>
-                          </TooltipTrigger>
-                          {!isAAL2 && (<TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>)}
-                          </Tooltip>
-                          </TooltipProvider>
-                          )
-                        )}
-                        {can('users.manage') && (
+                      </TooltipProvider>
+                    )}
+                    {row.is_suspended ? (
+                      can('users.manage') && (
                         <TooltipProvider>
-                        <Tooltip>
-                        <TooltipTrigger asChild>
-                        <span>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          disabled={!isAAL2}
-                          onClick={() => {
-                            setSelectedUser(user.user_id);
-                            setDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                        </span>
-                        </TooltipTrigger>
-                        {!isAAL2 && (<TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>)}
-                        </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={!isAAL2}
+                                onClick={async () => {
+                                  const success = await unsuspendUser(row.user_id);
+                                  if (success) {
+                                    await refetch();
+                                  }
+                                }}
+                                className="min-h-[44px] min-w-[44px]"
+                                aria-label={`Réactiver l'utilisateur ${row.email}`}
+                              >
+                                <CheckCircle className="h-4 w-4" aria-hidden="true" />
+                              </Button>
+                            </TooltipTrigger>
+                            {!isAAL2 && <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>}
+                          </Tooltip>
                         </TooltipProvider>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {users.length === 0 && !loading && (
-              <div className="text-center py-12 text-muted-foreground">
-                <Users className="mx-auto h-12 w-12 opacity-50 mb-4" />
-                <p className="font-medium">Aucun utilisateur trouvé</p>
-                <p className="text-sm">Essayez de modifier vos filtres</p>
+                      )
+                    ) : (
+                      can('users.manage') && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={!isAAL2}
+                                onClick={() => {
+                                  setSelectedUser(row.user_id);
+                                  setSuspendDialogOpen(true);
+                                }}
+                                className="min-h-[44px] min-w-[44px]"
+                                aria-label={`Suspendre l'utilisateur ${row.email}`}
+                              >
+                                <Ban className="h-4 w-4" aria-hidden="true" />
+                              </Button>
+                            </TooltipTrigger>
+                            {!isAAL2 && <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>}
+                          </Tooltip>
+                        </TooltipProvider>
+                      )
+                    )}
+                    {can('users.manage') && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              disabled={!isAAL2}
+                              onClick={() => {
+                                setSelectedUser(row.user_id);
+                                setDeleteDialogOpen(true);
+                              }}
+                              className="min-h-[44px] min-w-[44px]"
+                              aria-label={`Supprimer l'utilisateur ${row.email}`}
+                            >
+                              <Trash2 className="h-4 w-4" aria-hidden="true" />
+                            </Button>
+                          </TooltipTrigger>
+                          {!isAAL2 && <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>}
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </div>
+                )}
+              />
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="min-h-[44px] h-11 -ml-3"
+                          onClick={() => handleSort('display_name')}
+                        >
+                          Nom complet
+                          {sortBy === 'display_name' ? (
+                            sortDirection === 'asc' ? (
+                              <ArrowUp className="ml-2 h-4 w-4" />
+                            ) : (
+                              <ArrowDown className="ml-2 h-4 w-4" />
+                            )
+                          ) : (
+                            <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+                          )}
+                        </Button>
+                      </TableHead>
+                      <TableHead>Rôle</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="min-h-[44px] h-11 -ml-3"
+                          onClick={() => handleSort('created_at')}
+                        >
+                          Date d'inscription
+                          {sortBy === 'created_at' ? (
+                            sortDirection === 'asc' ? (
+                              <ArrowUp className="ml-2 h-4 w-4" />
+                            ) : (
+                              <ArrowDown className="ml-2 h-4 w-4" />
+                            )
+                          ) : (
+                            <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+                          )}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((user) => (
+                      <TableRow key={user.user_id}>
+                        <TableCell className="font-medium">{user.email}</TableCell>
+                        <TableCell>
+                          {user.first_name || user.last_name
+                            ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
+                            : user.display_name || 'N/A'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={user.role === 'admin' ? 'default' : 'secondary'}
+                            className="flex items-center gap-1 w-fit"
+                          >
+                            {user.role === 'admin' ? (
+                              <Shield className="h-3 w-3" />
+                            ) : (
+                              <User className="h-3 w-3" />
+                            )}
+                            {user.role}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {user.is_suspended ? (
+                            <Badge variant="destructive" className="flex items-center gap-1 w-fit">
+                              <Ban className="h-3 w-3" />
+                              Suspendu
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="flex items-center gap-1 w-fit">
+                              <CheckCircle className="h-3 w-3" />
+                              Actif
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {new Date(user.created_at).toLocaleDateString('fr-FR')}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {can('users.roles') && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      disabled={!isAAL2}
+                                      onClick={() => {
+                                        setRoleTargetUser({ id: user.user_id, email: user.email });
+                                        setNewRole(user.role || 'user');
+                                        setRoleDialogOpen(true);
+                                      }}
+                                      className="min-h-[44px] min-w-[44px] sm:min-w-auto"
+                                      aria-label={`Modifier le rôle de ${user.email}`}
+                                    >
+                                      <Edit3 className="h-4 w-4 sm:mr-1" aria-hidden="true" />
+                                      <span className="hidden sm:inline">Rôle</span>
+                                    </Button>
+                                  </TooltipTrigger>
+                                  {!isAAL2 && <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>}
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                            {user.is_suspended ? (
+                              can('users.manage') && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={!isAAL2}
+                                        onClick={async () => {
+                                          const success = await unsuspendUser(user.user_id);
+                                          if (success) {
+                                            await refetch();
+                                          }
+                                        }}
+                                        className="min-h-[44px] min-w-[44px] sm:min-w-auto"
+                                        aria-label={`Réactiver l'utilisateur ${user.email}`}
+                                      >
+                                        <CheckCircle className="h-4 w-4 sm:mr-1" aria-hidden="true" />
+                                        <span className="hidden sm:inline">Réactiver</span>
+                                      </Button>
+                                    </TooltipTrigger>
+                                    {!isAAL2 && <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>}
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )
+                            ) : (
+                              can('users.manage') && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={!isAAL2}
+                                        onClick={() => {
+                                          setSelectedUser(user.user_id);
+                                          setSuspendDialogOpen(true);
+                                        }}
+                                        className="min-h-[44px] min-w-[44px] sm:min-w-auto"
+                                        aria-label={`Suspendre l'utilisateur ${user.email}`}
+                                      >
+                                        <Ban className="h-4 w-4 sm:mr-1" aria-hidden="true" />
+                                        <span className="hidden sm:inline">Suspendre</span>
+                                      </Button>
+                                    </TooltipTrigger>
+                                    {!isAAL2 && <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>}
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )
+                            )}
+                            {can('users.manage') && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="destructive"
+                                      size="sm"
+                                      disabled={!isAAL2}
+                                      onClick={() => {
+                                        setSelectedUser(user.user_id);
+                                        setDeleteDialogOpen(true);
+                                      }}
+                                      className="min-h-[44px] min-w-[44px]"
+                                      aria-label={`Supprimer l'utilisateur ${user.email}`}
+                                    >
+                                      <Trash2 className="h-4 w-4" aria-hidden="true" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  {!isAAL2 && <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>}
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             )}
             
             {/* Pagination */}
             {totalCount > 0 && (
-              <div className="flex items-center justify-between px-2 py-4 border-t">
-                <div className="flex items-center gap-4">
-                  <p className="text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 px-2 py-4 border-t">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Affichage de {from} à {to} sur {totalCount} résultat{totalCount > 1 ? 's' : ''}
                   </p>
                   <Select value={pageSize.toString()} onValueChange={(value) => {
                     setPageSize(Number(value));
                     setPage(1);
                   }}>
-                    <SelectTrigger className="w-[100px]">
+                    <SelectTrigger className="w-full sm:w-[100px] min-h-[44px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -606,22 +779,28 @@ const AdminUsers = () => {
                   </Select>
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2 justify-center sm:justify-end">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setPage(1)}
                     disabled={page === 1}
+                    className="min-h-[44px] min-w-[44px] sm:min-w-auto"
+                    aria-label="Première page"
                   >
-                    Premier
+                    <ChevronsLeft className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Premier</span>
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setPage(page - 1)}
                     disabled={page === 1}
+                    className="min-h-[44px] min-w-[44px] sm:min-w-auto"
+                    aria-label="Page précédente"
                   >
-                    Précédent
+                    <ChevronLeft className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Précédent</span>
                   </Button>
                   
                   <div className="flex items-center gap-1">
@@ -642,8 +821,9 @@ const AdminUsers = () => {
                           key={pageNum}
                           variant={page === pageNum ? 'default' : 'outline'}
                           size="sm"
-                          className="w-8"
+                          className="min-h-[44px] min-w-[44px] h-11 w-11 sm:h-8 sm:w-8 p-0"
                           onClick={() => setPage(pageNum)}
+                          aria-label={`Page ${pageNum}`}
                         >
                           {pageNum}
                         </Button>
@@ -656,16 +836,22 @@ const AdminUsers = () => {
                     size="sm"
                     onClick={() => setPage(page + 1)}
                     disabled={page === totalPages}
+                    className="min-h-[44px] min-w-[44px] sm:min-w-auto"
+                    aria-label="Page suivante"
                   >
-                    Suivant
+                    <ChevronRight className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Suivant</span>
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setPage(totalPages)}
                     disabled={page === totalPages}
+                    className="min-h-[44px] min-w-[44px] sm:min-w-auto"
+                    aria-label="Dernière page"
                   >
-                    Dernier
+                    <ChevronsRight className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Dernier</span>
                   </Button>
                 </div>
               </div>
@@ -699,8 +885,8 @@ const AdminUsers = () => {
                 </SelectContent>
               </Select>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setRoleDialogOpen(false)}>Annuler</Button>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button variant="outline" onClick={() => setRoleDialogOpen(false)} className="w-full sm:w-auto">Annuler</Button>
               <Button
                 onClick={async () => {
                   if (roleTargetUser) {
@@ -711,6 +897,7 @@ const AdminUsers = () => {
                     }
                   }
                 }}
+                className="w-full sm:w-auto"
               >
                 Enregistrer
               </Button>
@@ -750,8 +937,8 @@ const AdminUsers = () => {
                 </Select>
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setAddAdminOpen(false)}>Annuler</Button>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button variant="outline" onClick={() => setAddAdminOpen(false)} className="w-full sm:w-auto">Annuler</Button>
               <Button
                 onClick={async () => {
                   if (!addAdminEmail.trim()) return;
@@ -762,6 +949,7 @@ const AdminUsers = () => {
                     refetch();
                   }
                 }}
+                className="w-full sm:w-auto"
               >
                 Ajouter
               </Button>
@@ -785,20 +973,23 @@ const AdminUsers = () => {
               onChange={(e) => setSuspensionReason(e.target.value)}
               rows={4}
             />
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setSuspendDialogOpen(false)}>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button variant="outline" onClick={() => setSuspendDialogOpen(false)} className="w-full sm:w-auto">
                 Annuler
               </Button>
               <Button
                 variant="destructive"
                 onClick={async () => {
                   if (selectedUser && suspensionReason.trim()) {
-                    await suspendUser(selectedUser, suspensionReason);
-                    setSuspendDialogOpen(false);
-                    setSuspensionReason('');
-                    refetch();
+                    const success = await suspendUser(selectedUser, suspensionReason);
+                    if (success) {
+                      setSuspendDialogOpen(false);
+                      setSuspensionReason('');
+                      await refetch();
+                    }
                   }
                 }}
+                className="w-full sm:w-auto"
               >
                 Suspendre
               </Button>
@@ -823,8 +1014,12 @@ const AdminUsers = () => {
               <AlertDialogAction
                 onClick={async () => {
                   if (selectedUser) {
-                    await deleteUser(selectedUser);
-                    refetch();
+                    const success = await deleteUser(selectedUser);
+                    if (success) {
+                      setDeleteDialogOpen(false);
+                      setSelectedUser(null);
+                      await refetch();
+                    }
                   }
                 }}
                 className="bg-destructive hover:bg-destructive/90"

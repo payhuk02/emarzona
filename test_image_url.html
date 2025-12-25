@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test URL Image Supabase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        img {
+            max-width: 300px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test URL Image Supabase</h1>
+    
+    <div class="test-section">
+        <h2>1. Entrer l'URL de l'image</h2>
+        <input type="text" id="imageUrl" placeholder="Collez l'URL de l'image ici..." />
+        <button onclick="testImage()">Tester l'URL</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Résultats du test</h2>
+        <div id="results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Aperçu de l'image</h2>
+        <div id="preview"></div>
+    </div>
+
+    <script>
+        async function testImage() {
+            const url = document.getElementById('imageUrl').value.trim();
+            const resultsDiv = document.getElementById('results');
+            const previewDiv = document.getElementById('preview');
+            
+            if (!url) {
+                resultsDiv.innerHTML = '<p class="error">Veuillez entrer une URL</p>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<p class="info">Test en cours...</p>';
+            previewDiv.innerHTML = '';
+            
+            try {
+                // Test 1: HEAD request
+                const headResponse = await fetch(url, { method: 'HEAD', mode: 'cors' });
+                const headInfo = {
+                    status: headResponse.status,
+                    statusText: headResponse.statusText,
+                    contentType: headResponse.headers.get('content-type'),
+                    contentLength: headResponse.headers.get('content-length'),
+                    cacheControl: headResponse.headers.get('cache-control'),
+                    accessControl: headResponse.headers.get('access-control-allow-origin'),
+                };
+                
+                // Test 2: GET request
+                let getInfo = null;
+                try {
+                    const getResponse = await fetch(url, { method: 'GET', mode: 'cors' });
+                    getInfo = {
+                        status: getResponse.status,
+                        statusText: getResponse.statusText,
+                        contentType: getResponse.headers.get('content-type'),
+                        ok: getResponse.ok,
+                    };
+                    
+                    if (getResponse.ok) {
+                        const blob = await getResponse.blob();
+                        getInfo.blobType = blob.type;
+                        getInfo.blobSize = blob.size;
+                        
+                        // Créer une URL blob pour l'aperçu
+                        const blobUrl = URL.createObjectURL(blob);
+                        previewDiv.innerHTML = `
+                            <p class="success">✅ Image chargée avec succès !</p>
+                            <img src="${blobUrl}" alt="Aperçu" />
+                            <p><strong>Type:</strong> ${blob.type}</p>
+                            <p><strong>Taille:</strong> ${(blob.size / 1024).toFixed(2)} KB</p>
+                        `;
+                    }
+                } catch (getError) {
+                    getInfo = { error: getError.message };
+                }
+                
+                // Afficher les résultats
+                resultsDiv.innerHTML = `
+                    <h3>Résultats du test HEAD:</h3>
+                    <pre>${JSON.stringify(headInfo, null, 2)}</pre>
+                    
+                    <h3>Résultats du test GET:</h3>
+                    <pre>${JSON.stringify(getInfo, null, 2)}</pre>
+                    
+                    <h3>Analyse:</h3>
+                    <ul>
+                        <li class="${headResponse.ok ? 'success' : 'error'}">
+                            Status: ${headResponse.status} ${headResponse.statusText}
+                        </li>
+                        <li class="${headInfo.contentType?.startsWith('image/') ? 'success' : 'error'}">
+                            Content-Type: ${headInfo.contentType || 'Non défini'}
+                        </li>
+                        <li>
+                            ${headResponse.ok && headInfo.contentType?.startsWith('image/') 
+                                ? '<span class="success">✅ L\'URL est accessible et retourne une image</span>'
+                                : '<span class="error">❌ L\'URL n\'est pas accessible ou ne retourne pas une image</span>'}
+                        </li>
+                        ${headResponse.status === 403 
+                            ? '<li class="error">⚠️ Erreur 403: Problème de permissions RLS</li>'
+                            : ''}
+                        ${headResponse.status === 404 
+                            ? '<li class="error">⚠️ Erreur 404: Fichier non trouvé</li>'
+                            : ''}
+                    </ul>
+                `;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <p class="error">❌ Erreur lors du test:</p>
+                    <pre>${error.message}</pre>
+                    <pre>${error.stack}</pre>
+                `;
+            }
+        }
+        
+        // Permettre de tester avec Enter
+        document.getElementById('imageUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                testImage();
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

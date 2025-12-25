@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { PhysicalBasicInfoForm } from './PhysicalBasicInfoForm';
 import { PhysicalVariantsBuilder } from './PhysicalVariantsBuilder';
+import { logger } from '@/lib/logger';
 import { PhysicalInventoryConfig } from './PhysicalInventoryConfig';
 import { PhysicalShippingConfig } from './PhysicalShippingConfig';
 import { PhysicalPreview } from './PhysicalPreview';
@@ -352,7 +353,7 @@ export const CreatePhysicalProductWizard = () => {
       
       navigate('/dashboard/products');
     } catch (error) {
-      console.error('Save draft error:', error);
+      logger.error('Save draft error', { error });
       toast({
         title: '❌ Erreur de sauvegarde',
         description: error instanceof Error ? error.message : 'Impossible de sauvegarder le brouillon',
@@ -395,7 +396,7 @@ export const CreatePhysicalProductWizard = () => {
       
       navigate('/dashboard/products');
     } catch (error) {
-      console.error('Publish error:', error);
+      logger.error('Publish error', { error });
       toast({
         title: '❌ Erreur de publication',
         description: error instanceof Error ? error.message : 'Impossible de publier le produit',

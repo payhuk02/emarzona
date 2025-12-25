@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { DigitalProductStatusIndicator } from './DigitalProductStatusIndicator';
 import { DownloadInfoDisplay } from './DownloadInfoDisplay';
+import { logger } from '@/lib/logger';
 
 /**
  * Composant de démonstration pour les composants du Jour 1
@@ -326,7 +327,7 @@ export const DigitalDay1Demo: React.FC = () => {
                 licenseKey="REACT-2024-ABCD-1234-EFGH"
                 protectionLevel="standard"
                 showActions={true}
-                onAction={(action) => console.log('Action:', action)}
+                onAction={(action) => logger.info('Action', { action })}
               />
 
               {/* Completed */}
@@ -377,7 +378,7 @@ export const DigitalDay1Demo: React.FC = () => {
                 downloadCount={0}
                 downloadLimit={10}
                 showActions={true}
-                onAction={(action) => console.log('Action:', action)}
+                onAction={(action) => logger.info('Action', { action })}
               />
             </Card>
           </TabsContent>
@@ -419,7 +420,7 @@ export const DigitalDay1Demo: React.FC = () => {
                 paymentMethod="Carte bancaire"
                 protectionLevel="advanced"
                 showActions={true}
-                onAction={(action) => console.log('Action:', action)}
+                onAction={(action) => logger.info('Action', { action })}
               />
 
               {/* Completed sans licence restante */}
@@ -482,7 +483,7 @@ export const DigitalDay1Demo: React.FC = () => {
                 paymentMethod="Stripe"
                 protectionLevel="basic"
                 showActions={true}
-                onAction={(action) => console.log('Action:', action)}
+                onAction={(action) => logger.info('Action', { action })}
               />
 
               {/* Suspended avec activité suspecte */}

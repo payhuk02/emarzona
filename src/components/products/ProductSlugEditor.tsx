@@ -137,6 +137,7 @@ const ProductSlugEditor = ({
               variant="default"
               onClick={handleSave}
               disabled={!isAvailable || isChecking || disabled}
+              aria-label="Enregistrer le slug"
             >
               <Check className="h-4 w-4" />
             </Button>
@@ -145,6 +146,7 @@ const ProductSlugEditor = ({
               variant="outline"
               onClick={handleCancel}
               disabled={disabled}
+              aria-label="Annuler la modification"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -156,6 +158,7 @@ const ProductSlugEditor = ({
               variant="outline"
               onClick={handleEdit}
               disabled={disabled}
+              aria-label="Modifier le slug"
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -164,6 +167,7 @@ const ProductSlugEditor = ({
               variant="outline"
               onClick={handleCopyLink}
               disabled={disabled}
+              aria-label="Copier le lien du slug"
             >
               <Copy className="h-4 w-4" />
             </Button>
@@ -172,6 +176,7 @@ const ProductSlugEditor = ({
               variant="outline"
               onClick={handlePreview}
               disabled={disabled || !currentSlug}
+              aria-label="Prévisualiser le slug"
             >
               <ExternalLink className="h-4 w-4" />
             </Button>

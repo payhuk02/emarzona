@@ -35,7 +35,7 @@ export interface DigitalProductBundle {
   total_sales: number;
   total_revenue: number;
   total_downloads: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   // Relations
@@ -396,7 +396,9 @@ export const useUpdateBundle = () => {
         .eq('id', bundleId)
         .single();
 
-      if (!bundle || (bundle as any).stores?.user_id !== user.id) {
+      type BundleWithStore = typeof bundle & { stores?: { user_id?: string } };
+      const bundleWithStore = bundle as BundleWithStore;
+      if (!bundle || bundleWithStore.stores?.user_id !== user.id) {
         throw new Error('Non autorisé à modifier ce bundle');
       }
 
@@ -418,7 +420,7 @@ export const useUpdateBundle = () => {
 
       // Mettre à jour le produit associé si nécessaire
       if (updates.name || updates.description || updates.bundle_price) {
-        const updateProduct: any = {};
+        const updateProduct: { name?: string; description?: string; price?: number } = {};
         if (updates.name) updateProduct.name = updates.name;
         if (updates.description) updateProduct.description = updates.description;
         if (updates.bundle_price) updateProduct.price = updates.bundle_price;
@@ -470,7 +472,9 @@ export const useDeleteBundle = () => {
         .eq('id', bundleId)
         .single();
 
-      if (!bundle || (bundle as any).stores?.user_id !== user.id) {
+      type BundleWithStore = typeof bundle & { stores?: { user_id?: string } };
+      const bundleWithStore = bundle as BundleWithStore;
+      if (!bundle || bundleWithStore.stores?.user_id !== user.id) {
         throw new Error('Non autorisé à supprimer ce bundle');
       }
 

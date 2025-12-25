@@ -3,6 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type EffectivePermissions = Record<string, boolean>;
 
+// Email de l'administrateur principal avec accès complet
+const PRINCIPAL_ADMIN_EMAIL = 'contact@edigit-agence.com';
+
 export const useCurrentAdminPermissions = () => {
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<string>('user');
@@ -16,6 +19,27 @@ export const useCurrentAdminPermissions = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
+
+      // Vérifier si c'est l'administrateur principal
+      if (user.email === PRINCIPAL_ADMIN_EMAIL) {
+        // Administrateur principal : accès complet
+        setRole('admin');
+        setIsSuperAdmin(true);
+        // Toutes les permissions activées
+        setPermissions({
+          'users.manage': true,
+          'users.roles': true,
+          'products.manage': true,
+          'orders.manage': true,
+          'payments.manage': true,
+          'disputes.manage': true,
+          'settings.manage': true,
+          'emails.manage': true,
+          'analytics.view': true,
+        });
+        setLoading(false);
+        return;
+      }
 
       const { data: profile, error: pErr } = await supabase
         .from('profiles')
@@ -35,9 +59,9 @@ export const useCurrentAdminPermissions = () => {
         .maybeSingle();
       if (rErr) throw rErr;
 
-      setPermissions((roleRow?.permissions as any) || {});
-    } catch (e: any) {
-      setError(e.message);
+      setPermissions((roleRow?.permissions as EffectivePermissions) || {});
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -49,7 +73,7 @@ export const useCurrentAdminPermissions = () => {
 
   const can = useCallback((key: string) => {
     if (isSuperAdmin) return true; // full access
-    return Boolean((permissions as any)?.[key]);
+    return Boolean(permissions?.[key]);
   }, [isSuperAdmin, permissions]);
 
   return { loading, error, role, isSuperAdmin, permissions, can, refresh };

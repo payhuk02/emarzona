@@ -5,6 +5,7 @@
 
 import { useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 export type AnalyticsEventType =
   | 'page_view'
@@ -42,7 +43,7 @@ const generateSessionId = (): string => {
  * Récupère ou crée une session analytics
  */
 const getOrCreateSession = (): AnalyticsSession => {
-  const stored = sessionStorage.getItem('payhuk_analytics_session');
+  const stored = sessionStorage.getItem('emarzona_analytics_session');
   
   if (stored) {
     try {
@@ -64,7 +65,7 @@ const getOrCreateSession = (): AnalyticsSession => {
     startTime: Date.now()
   };
   
-  sessionStorage.setItem('payhuk_analytics_session', JSON.stringify(newSession));
+  sessionStorage.setItem('emarzona_analytics_session', JSON.stringify(newSession));
   return newSession;
 };
 
@@ -149,11 +150,11 @@ export const useAnalytics = (storeId?: string) => {
         .insert(eventPayload);
       
       if (error) {
-        console.error('Error tracking event:', error);
+        logger.error('Error tracking analytics event', { error, storeId, eventType, eventData });
       }
     } catch (error) {
       // Ne pas bloquer l'application si le tracking échoue
-      console.error('Error in trackEvent:', error);
+      logger.error('Error in trackEvent', { error, storeId, eventType });
     }
   }, []);
 

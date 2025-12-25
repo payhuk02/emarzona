@@ -1,5 +1,6 @@
 import { onCLS, onINP, onLCP, onFCP, onTTFB, Metric } from 'web-vitals';
 import * as Sentry from '@sentry/react';
+import { logger } from './logger';
 
 /**
  * Configuration Web Vitals pour surveiller les performances
@@ -33,23 +34,26 @@ function sendToSentry(metric: Metric) {
  * Envoyer vers Google Analytics (si configuré)
  */
 function sendToAnalytics(metric: Metric) {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', metric.name, {
-      value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
-      metric_id: metric.id,
-      metric_value: metric.value,
-      metric_delta: metric.delta,
-    });
+  if (typeof window !== 'undefined') {
+    const windowWithGtag = window as typeof window & { gtag?: (command: string, eventName: string, params: Record<string, unknown>) => void };
+    if (windowWithGtag.gtag) {
+      windowWithGtag.gtag('event', metric.name, {
+        value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+        metric_id: metric.id,
+        metric_value: metric.value,
+        metric_delta: metric.delta,
+      });
+    }
   }
 }
 
 /**
- * Logger en console (dev uniquement)
+ * Logger les métriques (dev uniquement)
  */
 function logMetric(metric: Metric) {
   if (import.meta.env.DEV) {
     const emoji = metric.rating === 'good' ? '✅' : metric.rating === 'needs-improvement' ? '⚠️' : '❌';
-    console.log(`${emoji} ${metric.name}:`, {
+    logger.log(`${emoji} ${metric.name}:`, {
       value: metric.value,
       rating: metric.rating,
       delta: metric.delta,
@@ -90,7 +94,7 @@ export const initWebVitals = () => {
   // Bon: < 800ms, Needs improvement: 800-1800ms, Poor: > 1800ms
   onTTFB(handleMetric);
   
-  console.log('✅ Web Vitals tracking initialisé');
+  logger.info('✅ Web Vitals tracking initialisé');
 };
 
 /**

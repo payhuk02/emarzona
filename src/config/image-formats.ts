@@ -1,9 +1,9 @@
 /**
  * 📐 IMAGE FORMATS CONFIGURATION
- * Standard image dimensions for Payhuk platform
- * 
+ * Standard image dimensions for Emarzona platform
+ *
  * @version 1.0.0
- * @author Payhuk Team
+ * @author Emarzona Team
  */
 
 // ============================================================================
@@ -11,43 +11,43 @@
 // ============================================================================
 
 export const IMAGE_FORMATS = {
-  // Product Images (Main format 16:9)
+  // Product Images (Main format 3:2)
   product: {
-    width: 1280,
-    height: 720,
-    aspectRatio: '16:9',
+    width: 1536,
+    height: 1024,
+    aspectRatio: '3:2',
     description: 'Format principal pour les images de produits',
   },
 
-  // Thumbnail (16:9)
+  // Thumbnail (3:2)
   thumbnail: {
-    width: 640,
-    height: 360,
-    aspectRatio: '16:9',
+    width: 768,
+    height: 512,
+    aspectRatio: '3:2',
     description: 'Miniature pour les listes et aperçus',
   },
 
-  // Large Product Image (16:9)
+  // Large Product Image (3:2)
   productLarge: {
-    width: 1920,
-    height: 1080,
-    aspectRatio: '16:9',
+    width: 2304,
+    height: 1536,
+    aspectRatio: '3:2',
     description: 'Image haute résolution pour le zoom',
   },
 
-  // Gallery Images (16:9)
+  // Gallery Images (3:2)
   gallery: {
-    width: 1280,
-    height: 720,
-    aspectRatio: '16:9',
+    width: 1536,
+    height: 1024,
+    aspectRatio: '3:2',
     description: 'Images de galerie produit',
   },
 
-  // Template Preview (16:9)
+  // Template Preview (3:2)
   templatePreview: {
-    width: 1280,
-    height: 720,
-    aspectRatio: '16:9',
+    width: 1536,
+    height: 1024,
+    aspectRatio: '3:2',
     description: 'Aperçu des templates',
   },
 
@@ -78,7 +78,7 @@ export interface ImageDimensions {
 }
 
 /**
- * Validate if image dimensions match the product format (1280x720)
+ * Validate if image dimensions match the product format (1536x1024)
  */
 export function isValidProductImageSize(dimensions: ImageDimensions): boolean {
   return (
@@ -94,7 +94,7 @@ export function hasCorrectAspectRatio(dimensions: ImageDimensions): boolean {
   const aspectRatio = dimensions.width / dimensions.height;
   const targetRatio = IMAGE_FORMATS.product.width / IMAGE_FORMATS.product.height;
   const tolerance = 0.01; // 1% tolerance
-  
+
   return Math.abs(aspectRatio - targetRatio) < tolerance;
 }
 
@@ -150,14 +150,14 @@ export const IMAGE_FILE_LIMITS = {
 
 export const IMAGE_UPLOAD_GUIDELINES = {
   product: {
-    dimensions: '1280x720 pixels',
-    aspectRatio: '16:9',
+    dimensions: '1536x1024 pixels',
+    aspectRatio: '3:2',
     format: 'JPEG, PNG, ou WebP',
     maxSize: '5MB',
     recommendations: [
       'Utilisez des images haute qualité',
       'Fond blanc ou transparent recommandé',
-      'Produit centré dans l\'image',
+      "Produit centré dans l'image",
       'Éclairage uniforme',
       'Plusieurs angles si possible',
     ],
@@ -167,11 +167,7 @@ export const IMAGE_UPLOAD_GUIDELINES = {
     aspectRatio: '16:9',
     format: 'JPEG ou WebP',
     maxSize: '1MB',
-    recommendations: [
-      'Image claire et nette',
-      'Produit bien visible',
-      'Contraste élevé',
-    ],
+    recommendations: ['Image claire et nette', 'Produit bien visible', 'Contraste élevé'],
   },
 } as const;
 
@@ -180,4 +176,3 @@ export const IMAGE_UPLOAD_GUIDELINES = {
 // ============================================================================
 
 export default IMAGE_FORMATS;
-

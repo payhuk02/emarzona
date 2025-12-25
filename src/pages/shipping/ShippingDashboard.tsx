@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
+import { TrackingAutoRefresh } from '@/components/shipping/TrackingAutoRefresh';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,7 +32,7 @@ import {
   Loader2,
   Sparkles,
 } from 'lucide-react';
-import { useShipments, useUpdateShipmentTracking } from '@/hooks/shipping/useFedexShipping';
+import { useShipments, useUpdateShipmentTracking, type Shipment } from '@/hooks/shipping/useFedexShipping';
 import { useStore } from '@/hooks/useStore';
 import { ShipmentCard } from '@/components/shipping/ShipmentCard';
 import { CreateShipmentDialog } from '@/components/shipping/CreateShipmentDialog';
@@ -112,8 +113,9 @@ export default function ShippingDashboard() {
         description: 'Les informations de suivi ont été actualisées.',
       });
       logger.info('Tracking refreshed', { shipmentId });
-    } catch (error: any) {
-      logger.error('Error refreshing tracking', { shipmentId, error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Error refreshing tracking', { shipmentId, error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible de mettre à jour le suivi.',
@@ -142,8 +144,9 @@ export default function ShippingDashboard() {
         description: `${filteredShipments.length} expédition(s) actualisée(s).`,
       });
       logger.info('All tracking refreshed', { count: filteredShipments.length });
-    } catch (error: any) {
-      logger.error('Error refreshing all tracking', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Error refreshing all tracking', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Erreur lors de la mise à jour des suivis.',
@@ -166,7 +169,7 @@ export default function ShippingDashboard() {
     setIsExporting(true);
     try {
       const headers = ['ID', 'Numéro de tracking', 'Commande', 'Statut', 'Type service', 'Coût', 'Date création', 'Date livraison estimée'];
-      const rows = filteredShipments.map((shipment: any) => [
+      const rows = filteredShipments.map((shipment) => [
         shipment.id,
         shipment.tracking_number || '',
         shipment.order?.order_number || '',
@@ -179,7 +182,7 @@ export default function ShippingDashboard() {
 
       const csvContent = [
         headers.join(','),
-        ...rows.map((row: any[]) => row.map((cell: any) => `"${cell}"`).join(','))
+        ...rows.map((row) => row.map((cell) => `"${String(cell)}"`).join(','))
       ].join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -197,8 +200,9 @@ export default function ShippingDashboard() {
         description: `${filteredShipments.length} expédition(s) exportée(s) en CSV.`,
       });
       logger.info('Shipments exported to CSV', { count: filteredShipments.length });
-    } catch (error: any) {
-      logger.error('Error exporting shipments', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Error exporting shipments', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'exporter les expéditions.',
@@ -266,8 +270,8 @@ export default function ShippingDashboard() {
               <Card className="animate-in fade-in slide-in-from-top-4">
                 <CardContent className="p-12 text-center">
                   <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h2 className="text-2xl font-bold mb-2">Aucune boutique trouvée</h2>
-                  <p className="text-muted-foreground mb-6">
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold mb-1.5 sm:mb-2">Aucune boutique trouvée</h2>
+                  <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-4 sm:mb-6">
                     Vous devez créer une boutique avant de pouvoir gérer les expéditions.
                   </p>
                   <Button onClick={() => navigate('/store')} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
@@ -284,6 +288,7 @@ export default function ShippingDashboard() {
 
   return (
     <SidebarProvider>
+      <TrackingAutoRefresh enabled={true} intervalMs={5 * 60 * 1000} />
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <main className="flex-1 overflow-auto">
@@ -291,15 +296,15 @@ export default function ShippingDashboard() {
             {/* Header avec animation - Style MyTemplates */}
             <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                    <Truck className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                    <Truck className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-7 lg:w-7 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                   </div>
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     Expéditions
                   </span>
                 </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                   Gérez vos envois et suivez vos colis en temps réel
                 </p>
               </div>
@@ -335,14 +340,14 @@ export default function ShippingDashboard() {
                     className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
-                      <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
-                        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
+                      <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                        <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
                         {stat.label}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-3 sm:p-4 pt-0">
-                      <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                    <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                      <div className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                         {stat.value}
                       </div>
                     </CardContent>

@@ -144,7 +144,7 @@ export const useCreatePhysicalOrder = () => {
       }
 
       // Récupérer les options de paiement configurées
-      const paymentOptions = (product.payment_options as any) || { payment_type: 'full', percentage_rate: 30 };
+      const paymentOptions = (product.payment_options as { payment_type?: string; percentage_rate?: number } | null) || { payment_type: 'full', percentage_rate: 30 };
       const paymentType = paymentOptions.payment_type || 'full';
       const percentageRate = paymentOptions.percentage_rate || 30;
 
@@ -381,7 +381,9 @@ export const useCreatePhysicalOrder = () => {
           currency: order.currency,
           payment_status: order.payment_status,
           created_at: order.created_at,
-        }).catch(console.error);
+        }).catch((err) => {
+          logger.error('Error in analytics tracking', { error: err, orderId: order.id });
+        });
       });
 
       // 11. Créer l'order_item avec les références spécialisées
@@ -492,15 +494,54 @@ export const useCreatePhysicalOrder = () => {
       };
     },
 
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast({
         title: '✅ Commande créée',
         description: 'Stock réservé. Redirection vers le paiement...',
       });
+
+      // Déclencher webhook pour achat (en arrière-plan) - Système unifié
+      if (data.orderId && storeId) {
+        import('@/lib/webhooks/unified-webhook-service')
+          .then(({ triggerPurchaseWebhook }) => {
+            // Récupérer les détails de la commande pour le payload
+            supabase
+              .from('orders')
+              .select('*, order_items(*, product_id, products(*))')
+              .eq('id', data.orderId)
+              .single()
+              .then(({ data: orderData }) => {
+                if (orderData) {
+                  triggerPurchaseWebhook(
+                    storeId,
+                    orderData.id,
+                    {
+                      order_id: orderData.id,
+                      order_number: orderData.order_number || data.orderId,
+                      customer_id: orderData.customer_id,
+                      total_amount: orderData.total_amount,
+                      currency: orderData.currency,
+                      payment_status: orderData.payment_status,
+                      status: orderData.status,
+                      items: orderData.order_items || [],
+                    }
+                  ).catch((error) => {
+                    logger.error('Error triggering purchase webhook', { error });
+                  });
+                }
+              })
+              .catch((error) => {
+                logger.error('Error fetching order for webhook', { error });
+              });
+          })
+          .catch((error) => {
+            logger.error('Error loading unified webhook service', { error });
+          });
+      }
     },
 
     onError: (error: Error) => {
-      console.error('Physical order creation error:', error);
+      logger.error('Physical order creation error', { error });
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de créer la commande',

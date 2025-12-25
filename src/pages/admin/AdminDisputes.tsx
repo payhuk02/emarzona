@@ -1,12 +1,14 @@
 import { useState, useMemo, useCallback } from "react";
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { MobileTableCard } from "@/components/ui/mobile-table-card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,11 +27,11 @@ import { Link } from "react-router-dom";
 import { ProtectedAction } from "@/components/admin/ProtectedAction";
 import { Admin2FABanner } from "@/components/admin/Admin2FABanner";
 import { useAdminMFA } from "@/hooks/useAdminMFA";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RequireAAL2 } from "@/components/admin/RequireAAL2";
 
 const AdminDisputes = () => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [statusFilter, setStatusFilter] = useState<DisputeStatus | "all">("all");
   const [initiatorFilter, setInitiatorFilter] = useState<InitiatorType | "all">("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
@@ -84,34 +86,70 @@ const AdminDisputes = () => {
     setPage(1); // Reset à la page 1 lors du tri
   }, [sortByColumn, sortDir]);
 
-  // Fonction pour exporter les litiges en CSV
-  const handleExportCSV = useCallback(() => {
+  // Fonction pour exporter les litiges en CSV (TOUS les litiges filtrés, pas seulement la page actuelle)
+  const handleExportCSV = useCallback(async () => {
     try {
-      if (disputes.length === 0) {
+      setLoading(true);
+      logger.info('Début de l\'export CSV de tous les litiges filtrés');
+      
+      // Récupérer TOUS les litiges avec les filtres appliqués (sans pagination)
+      let query = supabase
+        .from("disputes")
+        .select("*")
+        .order(sortByColumn, { ascending: sortDir === 'asc' });
+
+      // Appliquer les mêmes filtres que pour l'affichage
+      if (statusFilter !== "all") {
+        query = query.eq("status", statusFilter);
+      }
+      if (initiatorFilter !== "all") {
+        query = query.eq("initiator_type", initiatorFilter);
+      }
+      if (priorityFilter !== "all") {
+        query = query.eq("priority", priorityFilter);
+      }
+
+      // Recherche textuelle
+      if (debouncedSearch.trim()) {
+        const searchTerm = debouncedSearch.trim();
+        query = query.or(`subject.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,order_id.ilike.%${searchTerm}%`);
+      }
+
+      const { data: allDisputes, error: queryError } = await query;
+
+      if (queryError) {
+        throw queryError;
+      }
+
+      if (!allDisputes || allDisputes.length === 0) {
         logger.warn('Export CSV: aucun litige à exporter');
         toast({
           title: "Aucune donnée",
-          description: "Il n'y a aucun litige à exporter",
+          description: "Il n'y a aucun litige à exporter avec les filtres appliqués",
           variant: "destructive",
         });
         return;
       }
-      logger.info(`Export CSV de ${disputes.length} litiges`);
-      exportDisputesToCSV(disputes);
+
+      logger.info(`Export CSV de ${allDisputes.length} litiges`);
+      exportDisputesToCSV(allDisputes);
       logger.info('Export CSV réussi');
       toast({
         title: "Export réussi",
-        description: `${disputes.length} litige(s) exporté(s) en CSV`,
+        description: `${allDisputes.length} litige(s) exporté(s) en CSV`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de l\'export CSV:', error);
       toast({
         title: "Erreur d'export",
-        description: error.message || "Impossible d'exporter les litiges",
+        description: errorMessage || "Impossible d'exporter les litiges",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
-  }, [disputes, toast]);
+  }, [statusFilter, initiatorFilter, priorityFilter, debouncedSearch, sortByColumn, sortDir, toast]);
 
   const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -168,7 +206,8 @@ const AdminDisputes = () => {
   }, [selectedDispute, actionType, inputValue, assignDispute, updateAdminNotes, resolveDispute, toast]);
 
   const getStatusBadge = (status: DisputeStatus) => {
-    const config: Record<DisputeStatus, { color: string; icon: any; label: string }> = {
+    type IconComponent = React.ComponentType<{ className?: string }>;
+    const config: Record<DisputeStatus, { color: string; icon: IconComponent; label: string }> = {
       open: { color: "bg-yellow-100 text-yellow-800 border-yellow-300", icon: AlertTriangle, label: "Ouvert" },
       investigating: { color: "bg-blue-100 text-blue-800 border-blue-300", icon: Clock, label: "En investigation" },
       waiting_customer: { color: "bg-orange-100 text-orange-800 border-orange-300", icon: Clock, label: "Attente client" },
@@ -188,7 +227,8 @@ const AdminDisputes = () => {
   };
 
   const getInitiatorBadge = (type: InitiatorType) => {
-    const config: Record<InitiatorType, { color: string; icon: any; label: string }> = {
+    type IconComponent = React.ComponentType<{ className?: string }>;
+    const config: Record<InitiatorType, { color: string; icon: IconComponent; label: string }> = {
       customer: { color: "bg-blue-50 text-blue-700 border-blue-200", icon: User, label: "Client" },
       seller: { color: "bg-green-50 text-green-700 border-green-200", icon: Store, label: "Vendeur" },
       admin: { color: "bg-red-50 text-red-700 border-red-200", icon: Shield, label: "Admin" },
@@ -547,22 +587,167 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                     <p>Aucun litige trouvé</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <SortableHeader column="order_id" label="Commande" />
-                          <TableHead>Initiateur</TableHead>
-                          <SortableHeader column="subject" label="Sujet" />
-                          <TableHead>Priorité</TableHead>
-                          <TableHead>Statut</TableHead>
-                          <TableHead>Assigné à</TableHead>
-                          <SortableHeader column="created_at" label="Date" />
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {disputes.map((dispute) => (
+                  isMobile ? (
+                    <MobileTableCard
+                      data={disputes.map(d => ({ ...d, id: d.id }))}
+                      columns={[
+                        {
+                          key: 'order_id',
+                          header: 'Commande',
+                          priority: 'high',
+                          render: (row: Dispute) => (
+                            <div className="flex items-center gap-2">
+                              {row.order_id ? (
+                                <Link 
+                                  to={`/orders`}
+                                  className="text-primary hover:underline flex items-center gap-1 font-medium"
+                                >
+                                  {row.order_id.substring(0, 8)}
+                                  <ExternalLink className="h-3 w-3" />
+                                </Link>
+                              ) : (
+                                <span className="text-muted-foreground">N/A</span>
+                              )}
+                              {isNewDispute(row.created_at) && (
+                                <Badge variant="secondary" className="text-xs bg-yellow-200 text-yellow-800">
+                                  NOUVEAU
+                                </Badge>
+                              )}
+                            </div>
+                          ),
+                        },
+                        {
+                          key: 'initiator',
+                          header: 'Initiateur',
+                          priority: 'medium',
+                          render: (row: Dispute) => getInitiatorBadge(row.initiator_type),
+                        },
+                        {
+                          key: 'subject',
+                          header: 'Sujet',
+                          priority: 'high',
+                          render: (row: Dispute) => (
+                            <div>
+                              <p className="font-medium text-sm">{row.subject}</p>
+                              <p className="text-xs text-muted-foreground line-clamp-2">{row.description}</p>
+                            </div>
+                          ),
+                        },
+                        {
+                          key: 'priority',
+                          header: 'Priorité',
+                          priority: 'high',
+                          render: (row: Dispute) => getPriorityBadge(row.priority),
+                        },
+                        {
+                          key: 'status',
+                          header: 'Statut',
+                          priority: 'high',
+                          render: (row: Dispute) => getStatusBadge(row.status),
+                        },
+                        {
+                          key: 'assigned',
+                          header: 'Assigné',
+                          priority: 'low',
+                          render: (row: Dispute) => (
+                            row.assigned_admin_id ? (
+                              <div className="flex items-center gap-1">
+                                <Shield className="h-3 w-3 text-primary" />
+                                <span className="text-xs">Admin</span>
+                              </div>
+                            ) : (
+                              <Badge variant="outline" className="text-xs">Non assigné</Badge>
+                            )
+                          ),
+                        },
+                        {
+                          key: 'created_at',
+                          header: 'Date',
+                          priority: 'low',
+                          render: (row: Dispute) => (
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(row.created_at), "dd MMM yyyy", { locale: fr })}
+                            </span>
+                          ),
+                        },
+                      ]}
+                      actions={(row: Dispute) => (
+                        <div className="flex flex-col gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedDispute(row);
+                              setDetailsDialogOpen(true);
+                            }}
+                            className="min-h-[44px] w-full"
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Voir détails
+                          </Button>
+                          <ProtectedAction permission="disputes.manage">
+                            {!row.assigned_admin_id && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={!isAAL2}
+                                onClick={() => isAAL2 && handleOpenDialog(row, "assign")}
+                                className="min-h-[44px] w-full"
+                              >
+                                M'assigner
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={!isAAL2}
+                              onClick={() => isAAL2 && handleOpenDialog(row, "notes")}
+                              className="min-h-[44px] w-full"
+                            >
+                              Notes
+                            </Button>
+                            {row.status !== "resolved" && row.status !== "closed" && (
+                              <Button
+                                size="sm"
+                                disabled={!isAAL2}
+                                onClick={() => isAAL2 && handleOpenDialog(row, "resolve")}
+                                className="min-h-[44px] w-full"
+                              >
+                                Résoudre
+                              </Button>
+                            )}
+                            {row.status === "resolved" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={!isAAL2}
+                                onClick={() => isAAL2 && closeDispute(row.id)}
+                                className="min-h-[44px] w-full"
+                              >
+                                Fermer
+                              </Button>
+                            )}
+                          </ProtectedAction>
+                        </div>
+                      )}
+                    />
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <SortableHeader column="order_id" label="Commande" />
+                            <TableHead>Initiateur</TableHead>
+                            <SortableHeader column="subject" label="Sujet" />
+                            <TableHead>Priorité</TableHead>
+                            <TableHead>Statut</TableHead>
+                            <TableHead>Assigné à</TableHead>
+                            <SortableHeader column="created_at" label="Date" />
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {disputes.map((dispute) => (
                           <TableRow key={dispute.id} className={isNewDispute(dispute.created_at) ? "bg-yellow-50/30" : ""}>
                             <TableCell className="font-medium">
                               {dispute.order_id ? (
@@ -614,9 +799,14 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                               <ProtectedAction permission="disputes.manage">
                                 <Select
                                   value={dispute.priority || 'normal'}
-                                  onValueChange={(value) => isAAL2 && updateDisputePriority(dispute.id, value as any)}
+                                  onValueChange={(value) => {
+                                    if (isAAL2) {
+                                      const priority = value as 'low' | 'normal' | 'high' | 'urgent';
+                                      updateDisputePriority(dispute.id, priority);
+                                    }
+                                  }}
                                 >
-                                  <SelectTrigger className="w-[140px] h-8">
+                                  <SelectTrigger className="w-[140px] min-h-[44px]">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -634,7 +824,7 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                                   value={dispute.status}
                                   onValueChange={(value) => isAAL2 && updateDisputeStatus(dispute.id, value as DisputeStatus)}
                                 >
-                                  <SelectTrigger className="w-[160px] h-8">
+                                  <SelectTrigger className="w-[160px] min-h-[44px]">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -759,6 +949,7 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
                       </TableBody>
                     </Table>
                   </div>
+                  )
                 )}
 
                 {/* Pagination */}

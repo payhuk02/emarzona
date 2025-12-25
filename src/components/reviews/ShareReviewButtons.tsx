@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Share2, Twitter, Facebook, Linkedin, MessageCircle, Link as LinkIcon, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 import type { Review } from '@/types/review';
 
 interface ShareReviewButtonsProps {
@@ -107,7 +108,7 @@ export const ShareReviewButtons: React.FC<ShareReviewButtonsProps> = ({
   // Track share (can be implemented with analytics)
   const trackShare = (platform: string) => {
     // TODO: Implement analytics tracking
-    console.log(`Review ${review.id} shared on ${platform}`);
+    logger.info('Review shared', { reviewId: review.id, platform });
     
     // Example: Track with custom event
     if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -178,7 +179,7 @@ export const CompactShareButton: React.FC<ShareReviewButtonsProps> = (props) => 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" aria-label="Partager l'avis">
           <Share2 className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>

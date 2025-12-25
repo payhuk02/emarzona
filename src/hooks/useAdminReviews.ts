@@ -6,18 +6,26 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 import type { Review } from '@/types/review';
 
 /**
- * Fetch all reviews for admin (avec filtres)
+ * Fetch all reviews for admin (avec filtres et pagination)
  */
 export function useAdminReviews(filters?: {
   status?: 'pending' | 'approved' | 'flagged' | 'all';
   productType?: string;
   searchQuery?: string;
+  page?: number;
+  pageSize?: number;
 }) {
+  const page = filters?.page || 1;
+  const pageSize = filters?.pageSize || 20;
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
   return useQuery({
-    queryKey: ['admin-reviews', filters],
+    queryKey: ['admin-reviews', filters, page, pageSize],
     queryFn: async () => {
       let query = supabase
         .from('reviews')
@@ -25,7 +33,7 @@ export function useAdminReviews(filters?: {
           *,
           user:profiles(full_name, email),
           product:products(name, product_type)
-        `)
+        `, { count: 'exact' })
         .order('created_at', { ascending: false });
 
       // Apply status filter
@@ -42,10 +50,18 @@ export function useAdminReviews(filters?: {
         query = query.eq('product_type', filters.productType);
       }
 
-      const { data, error } = await query;
+      // Apply search query filter
+      if (filters?.searchQuery) {
+        query = query.or(`comment.ilike.%${filters.searchQuery}%,reviewer_name.ilike.%${filters.searchQuery}%`);
+      }
+
+      // Apply pagination
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
 
       if (error) throw error;
-      return data as Review[];
+      return { data: data as Review[], count: count || 0 };
     },
   });
 }
@@ -74,13 +90,13 @@ export function useApproveReviews() {
         description: `${reviewIds.length} avis ont été approuvés avec succès.`,
       });
     },
-    onError: (error) => {
+    onError: (error, reviewIds) => {
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'approuver les avis.',
         variant: 'destructive',
       });
-      console.error('Approve error:', error);
+      logger.error('Error approving reviews', { error, reviewIds });
     },
   });
 }
@@ -108,13 +124,13 @@ export function useRejectReviews() {
         description: `${reviewIds.length} avis ont été rejetés.`,
       });
     },
-    onError: (error) => {
+    onError: (error, reviewIds) => {
       toast({
         title: '❌ Erreur',
         description: 'Impossible de rejeter les avis.',
         variant: 'destructive',
       });
-      console.error('Reject error:', error);
+      logger.error('Error rejecting reviews', { error, reviewIds });
     },
   });
 }
@@ -142,13 +158,13 @@ export function useFlagReviews() {
         description: `${reviewIds.length} avis ont été signalés.`,
       });
     },
-    onError: (error) => {
+    onError: (error, reviewIds) => {
       toast({
         title: '❌ Erreur',
         description: 'Impossible de signaler les avis.',
         variant: 'destructive',
       });
-      console.error('Flag error:', error);
+      logger.error('Error flagging reviews', { error, reviewIds });
     },
   });
 }
@@ -177,13 +193,13 @@ export function useDeleteReviews() {
         description: `${reviewIds.length} avis ont été supprimés.`,
       });
     },
-    onError: (error) => {
+    onError: (error, reviewIds) => {
       toast({
         title: '❌ Erreur',
         description: 'Impossible de supprimer les avis.',
         variant: 'destructive',
       });
-      console.error('Delete error:', error);
+      logger.error('Error deleting reviews', { error, reviewIds });
     },
   });
 }

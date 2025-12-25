@@ -1,0 +1,46 @@
+{
+  "reference": "FR",
+  "referenceKeys": 1080,
+  "languages": [
+    {
+      "language": "FR",
+      "totalKeys": 1080,
+      "missingKeys": 0,
+      "extraKeys": 0,
+      "completeness": 100,
+      "missingKeysList": []
+    },
+    {
+      "language": "EN",
+      "totalKeys": 1091,
+      "missingKeys": 0,
+      "extraKeys": 11,
+      "completeness": "101.0",
+      "missingKeysList": []
+    },
+    {
+      "language": "ES",
+      "totalKeys": 1090,
+      "missingKeys": 0,
+      "extraKeys": 10,
+      "completeness": "100.9",
+      "missingKeysList": []
+    },
+    {
+      "language": "DE",
+      "totalKeys": 1088,
+      "missingKeys": 0,
+      "extraKeys": 8,
+      "completeness": "100.7",
+      "missingKeysList": []
+    },
+    {
+      "language": "PT",
+      "totalKeys": 1160,
+      "missingKeys": 0,
+      "extraKeys": 80,
+      "completeness": "107.4",
+      "missingKeysList": []
+    }
+  ]
+}

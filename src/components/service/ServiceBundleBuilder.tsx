@@ -1,19 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
+import { useResponsiveModal } from '@/hooks/use-responsive-modal';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +14,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { BottomSheet, BottomSheetContent } from '@/components/ui/bottom-sheet';
+import { MobileFormField } from '@/components/ui/mobile-form-field';
 import { Checkbox } from '@/components/ui/checkbox';
+import { logger } from '@/lib/logger';
 import {
   Package,
   Plus,
@@ -31,7 +26,6 @@ import {
   Copy,
   Save,
   X,
-  DollarSign,
   Clock,
   Percent,
   AlertCircle,
@@ -120,6 +114,7 @@ export const ServiceBundleBuilder: React.FC<ServiceBundleBuilderProps> = ({
   currency = 'EUR',
   className,
 }) => {
+  const { useBottomSheet } = useResponsiveModal();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBundle, setEditingBundle] = useState<Partial<ServiceBundle> | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -234,7 +229,7 @@ export const ServiceBundleBuilder: React.FC<ServiceBundleBuilderProps> = ({
       setIsDialogOpen(false);
       setEditingBundle(null);
     } catch (error) {
-      console.error('Error saving bundle:', error);
+      logger.error('Error saving bundle', { error, bundleId: editingBundle?.id });
     } finally {
       setIsSaving(false);
     }
@@ -406,288 +401,559 @@ export const ServiceBundleBuilder: React.FC<ServiceBundleBuilderProps> = ({
       )}
 
       {/* Dialog d'édition */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingBundle?.id ? 'Modifier' : 'Nouveau'} pack de services
-            </DialogTitle>
-            <DialogDescription>
-              Combinez plusieurs services avec une réduction
-            </DialogDescription>
-          </DialogHeader>
+      {editingBundle && (
+        <>
+          {useBottomSheet ? (
+            <BottomSheet open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <BottomSheetContent
+                title={`${editingBundle.id ? 'Modifier' : 'Nouveau'} pack de services`}
+                description="Combinez plusieurs services avec une réduction"
+                className="max-h-[90vh] overflow-y-auto"
+              >
+                <div className="space-y-4">
+                  {/* Nom et description */}
+                  <MobileFormField
+                    label="Nom du pack"
+                    name="name"
+                    type="text"
+                    value={editingBundle.name || ''}
+                    onChange={(value) => setEditingBundle({ ...editingBundle, name: value })}
+                    required
+                    fieldProps={{
+                      placeholder: "Ex: Pack Bien-être Complet",
+                    }}
+                  />
 
-          {editingBundle && (
-            <div className="space-y-4">
-              {/* Nom et description */}
-              <div className="space-y-2">
-                <Label htmlFor="name">Nom du pack *</Label>
-                <Input
-                  id="name"
-                  value={editingBundle.name}
-                  onChange={(e) =>
-                    setEditingBundle({ ...editingBundle, name: e.target.value })
-                  }
-                  placeholder="Ex: Pack Bien-être Complet"
-                />
-              </div>
+                  <MobileFormField
+                    label="Description"
+                    name="description"
+                    type="textarea"
+                    value={editingBundle.description || ''}
+                    onChange={(value) => setEditingBundle({ ...editingBundle, description: value })}
+                    fieldProps={{
+                      placeholder: "Décrivez les avantages de ce pack",
+                      rows: 2,
+                    }}
+                  />
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={editingBundle.description}
-                  onChange={(e) =>
-                    setEditingBundle({ ...editingBundle, description: e.target.value })
-                  }
-                  placeholder="Décrivez les avantages de ce pack"
-                  rows={2}
-                />
-              </div>
+                  <Separator />
 
-              <Separator />
-
-              {/* Sélection de services */}
-              <div className="space-y-3">
-                <Label>Services inclus ({editingBundle.items?.length || 0})</Label>
-                
-                <div className="border rounded-lg p-3 max-h-[200px] overflow-y-auto space-y-2">
-                  {availableServices.map((service) => {
-                    const item = editingBundle.items?.find((i) => i.serviceId === service.id);
-                    return (
-                      <div
-                        key={service.id}
-                        className="flex items-center justify-between p-2 rounded hover:bg-muted/50"
-                      >
-                        <div className="flex items-center gap-3 flex-1">
-                          <Checkbox
-                            checked={!!item}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                addServiceToBundle(service);
-                              } else {
-                                removeServiceFromBundle(service.id);
-                              }
-                            }}
-                          />
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">{service.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {service.price} {currency} • {service.duration} min
-                            </p>
+                  {/* Sélection de services */}
+                  <div className="space-y-3">
+                    <Label>Services inclus ({editingBundle.items?.length || 0})</Label>
+                    
+                    <div className="border rounded-lg p-3 max-h-[200px] overflow-y-auto space-y-2">
+                      {availableServices.map((service) => {
+                        const item = editingBundle.items?.find((i) => i.serviceId === service.id);
+                        return (
+                          <div
+                            key={service.id}
+                            className="flex items-center justify-between p-2 rounded hover:bg-muted/50 active:scale-[0.98] transition-transform"
+                          >
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <Checkbox
+                                checked={!!item}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    addServiceToBundle(service);
+                                  } else {
+                                    removeServiceFromBundle(service.id);
+                                  }
+                                }}
+                                className="min-h-[44px] min-w-[44px]"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{service.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {service.price} {currency} • {service.duration} min
+                                </p>
+                              </div>
+                            </div>
+                            {item && (
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => updateItemQuantity(service.id, item.quantity - 1)}
+                                  className="h-8 w-8 p-0 min-h-[44px] min-w-[44px]"
+                                >
+                                  -
+                                </Button>
+                                <span className="text-sm font-medium w-8 text-center">
+                                  {item.quantity}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => updateItemQuantity(service.id, item.quantity + 1)}
+                                  className="h-8 w-8 p-0 min-h-[44px] min-w-[44px]"
+                                >
+                                  +
+                                </Button>
+                              </div>
+                            )}
                           </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Réduction */}
+                  <div className="space-y-3">
+                    <Label>Réduction</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <MobileFormField
+                        label="Type"
+                        name="discountType"
+                        type="select"
+                        value={editingBundle.discountType || 'percentage'}
+                        onChange={(value) =>
+                          setEditingBundle({ ...editingBundle, discountType: value as 'fixed' | 'percentage' })
+                        }
+                        selectOptions={[
+                          { value: 'percentage', label: 'Pourcentage' },
+                          { value: 'fixed', label: 'Montant fixe' },
+                        ]}
+                      />
+                      <MobileFormField
+                        label={`Valeur ${editingBundle.discountType === 'percentage' ? '(%)' : `(${currency})`}`}
+                        name="discountValue"
+                        type="number"
+                        value={editingBundle.discountValue || 0}
+                        onChange={(value) =>
+                          setEditingBundle({
+                            ...editingBundle,
+                            discountValue: parseFloat(value) || 0,
+                          })
+                        }
+                        fieldProps={{
+                          min: 0,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Aperçu du prix */}
+                  {editingBundle.items && editingBundle.items.length > 0 && (
+                    <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Prix original:</span>
+                          <span className="font-medium">{pricing.originalPrice} {currency}</span>
                         </div>
-                        {item && (
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => updateItemQuantity(service.id, item.quantity - 1)}
-                              className="h-6 w-6 p-0"
-                            >
-                              -
-                            </Button>
-                            <span className="text-sm font-medium w-6 text-center">
-                              {item.quantity}
-                            </span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => updateItemQuantity(service.id, item.quantity + 1)}
-                              className="h-6 w-6 p-0"
-                            >
-                              +
-                            </Button>
-                          </div>
-                        )}
+                        <div className="flex justify-between text-sm text-green-600">
+                          <span>Réduction:</span>
+                          <span className="font-medium">-{pricing.savings.toFixed(2)} {currency}</span>
+                        </div>
+                        <Separator />
+                        <div className="flex justify-between">
+                          <span className="font-semibold">Prix final:</span>
+                          <span className="text-2xl font-bold text-primary">
+                            {pricing.finalPrice.toFixed(2)} {currency}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Durée totale: {pricing.totalDuration} minutes
+                        </p>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
+                    </div>
+                  )}
 
-              <Separator />
+                  <Separator />
 
-              {/* Réduction */}
-              <div className="space-y-3">
-                <Label>Réduction</Label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="discountType">Type</Label>
-                    <Select
-                      value={editingBundle.discountType}
-                      onValueChange={(value: 'fixed' | 'percentage') =>
-                        setEditingBundle({ ...editingBundle, discountType: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="percentage">Pourcentage</SelectItem>
-                        <SelectItem value="fixed">Montant fixe</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="discountValue">
-                      Valeur {editingBundle.discountType === 'percentage' ? '(%)' : `(${currency})`}
-                    </Label>
-                    <Input
-                      id="discountValue"
+                  {/* Options avancées */}
+                  <div className="space-y-3">
+                    <Label>Options avancées</Label>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <MobileFormField
+                        label="Valide à partir du"
+                        name="validFrom"
+                        type="text"
+                        value={
+                          editingBundle.validFrom
+                            ? typeof editingBundle.validFrom === 'string'
+                              ? editingBundle.validFrom.split('T')[0]
+                              : editingBundle.validFrom.toISOString().split('T')[0]
+                            : ''
+                        }
+                        onChange={(value) =>
+                          setEditingBundle({
+                            ...editingBundle,
+                            validFrom: value || undefined,
+                          })
+                        }
+                        fieldProps={{
+                          type: 'date',
+                        }}
+                      />
+                      <MobileFormField
+                        label="Valide jusqu'au"
+                        name="validUntil"
+                        type="text"
+                        value={
+                          editingBundle.validUntil
+                            ? typeof editingBundle.validUntil === 'string'
+                              ? editingBundle.validUntil.split('T')[0]
+                              : editingBundle.validUntil.toISOString().split('T')[0]
+                            : ''
+                        }
+                        onChange={(value) =>
+                          setEditingBundle({
+                            ...editingBundle,
+                            validUntil: value || undefined,
+                          })
+                        }
+                        fieldProps={{
+                          type: 'date',
+                        }}
+                      />
+                    </div>
+
+                    <MobileFormField
+                      label="Limite d'achats (optionnel)"
+                      name="maxPurchases"
                       type="number"
-                      min="0"
-                      value={editingBundle.discountValue}
-                      onChange={(e) =>
+                      value={editingBundle.maxPurchases || ''}
+                      onChange={(value) =>
                         setEditingBundle({
                           ...editingBundle,
-                          discountValue: parseFloat(e.target.value) || 0,
+                          maxPurchases: value ? parseInt(value) : undefined,
                         })
                       }
+                      fieldProps={{
+                        min: 0,
+                        placeholder: "Illimité",
+                      }}
                     />
+
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <Label htmlFor="isActive">Pack actif</Label>
+                      <Switch
+                        id="isActive"
+                        checked={editingBundle.isActive}
+                        onCheckedChange={(checked) =>
+                          setEditingBundle({ ...editingBundle, isActive: checked })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                    <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5" />
+                    <div className="text-sm text-orange-900">
+                      <p className="font-medium">À propos des packs</p>
+                      <p className="text-xs mt-1">
+                        Les clients achètent le pack et peuvent réserver les services individuellement
+                        selon leur convenance.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t">
+                    <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSaving} className="w-full sm:w-auto">
+                      <X className="h-4 w-4 mr-2" />
+                      Annuler
+                    </Button>
+                    <Button onClick={handleSave} disabled={isSaving || !editingBundle?.items?.length} className="w-full sm:w-auto">
+                      {isSaving ? (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-2 animate-spin" />
+                          Enregistrement...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="h-4 w-4 mr-2" />
+                          Enregistrer
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
-              </div>
+              </BottomSheetContent>
+            </BottomSheet>
+          ) : (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingBundle.id ? 'Modifier' : 'Nouveau'} pack de services
+                  </DialogTitle>
+                  <DialogDescription>
+                    Combinez plusieurs services avec une réduction
+                  </DialogDescription>
+                </DialogHeader>
 
-              {/* Aperçu du prix */}
-              {editingBundle.items && editingBundle.items.length > 0 && (
-                <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Prix original:</span>
-                      <span className="font-medium">{pricing.originalPrice} {currency}</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-green-600">
-                      <span>Réduction:</span>
-                      <span className="font-medium">-{pricing.savings.toFixed(2)} {currency}</span>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between">
-                      <span className="font-semibold">Prix final:</span>
-                      <span className="text-2xl font-bold text-primary">
-                        {pricing.finalPrice.toFixed(2)} {currency}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Durée totale: {pricing.totalDuration} minutes
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <Separator />
-
-              {/* Options avancées */}
-              <div className="space-y-3">
-                <Label>Options avancées</Label>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="validFrom">Valide à partir du</Label>
-                    <Input
-                      id="validFrom"
-                      type="date"
-                      value={
-                        editingBundle.validFrom
-                          ? typeof editingBundle.validFrom === 'string'
-                            ? editingBundle.validFrom.split('T')[0]
-                            : editingBundle.validFrom.toISOString().split('T')[0]
-                          : ''
-                      }
-                      onChange={(e) =>
-                        setEditingBundle({
-                          ...editingBundle,
-                          validFrom: e.target.value || undefined,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="validUntil">Valide jusqu'au</Label>
-                    <Input
-                      id="validUntil"
-                      type="date"
-                      value={
-                        editingBundle.validUntil
-                          ? typeof editingBundle.validUntil === 'string'
-                            ? editingBundle.validUntil.split('T')[0]
-                            : editingBundle.validUntil.toISOString().split('T')[0]
-                          : ''
-                      }
-                      onChange={(e) =>
-                        setEditingBundle({
-                          ...editingBundle,
-                          validUntil: e.target.value || undefined,
-                        })
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="maxPurchases">Limite d'achats (optionnel)</Label>
-                  <Input
-                    id="maxPurchases"
-                    type="number"
-                    min="0"
-                    value={editingBundle.maxPurchases || ''}
-                    onChange={(e) =>
-                      setEditingBundle({
-                        ...editingBundle,
-                        maxPurchases: e.target.value ? parseInt(e.target.value) : undefined,
-                      })
-                    }
-                    placeholder="Illimité"
+                <div className="space-y-4">
+                  {/* Nom et description */}
+                  <MobileFormField
+                    label="Nom du pack"
+                    name="name"
+                    type="text"
+                    value={editingBundle.name || ''}
+                    onChange={(value) => setEditingBundle({ ...editingBundle, name: value })}
+                    required
+                    fieldProps={{
+                      placeholder: "Ex: Pack Bien-être Complet",
+                    }}
                   />
-                </div>
 
-                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <Label htmlFor="isActive">Pack actif</Label>
-                  <Switch
-                    id="isActive"
-                    checked={editingBundle.isActive}
-                    onCheckedChange={(checked) =>
-                      setEditingBundle({ ...editingBundle, isActive: checked })
-                    }
+                  <MobileFormField
+                    label="Description"
+                    name="description"
+                    type="textarea"
+                    value={editingBundle.description || ''}
+                    onChange={(value) => setEditingBundle({ ...editingBundle, description: value })}
+                    fieldProps={{
+                      placeholder: "Décrivez les avantages de ce pack",
+                      rows: 2,
+                    }}
                   />
-                </div>
-              </div>
 
-              {/* Info */}
-              <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5" />
-                <div className="text-sm text-orange-900">
-                  <p className="font-medium">À propos des packs</p>
-                  <p className="text-xs mt-1">
-                    Les clients achètent le pack et peuvent réserver les services individuellement
-                    selon leur convenance.
-                  </p>
+                  <Separator />
+
+                  {/* Sélection de services */}
+                  <div className="space-y-3">
+                    <Label>Services inclus ({editingBundle.items?.length || 0})</Label>
+                    
+                    <div className="border rounded-lg p-3 max-h-[200px] overflow-y-auto space-y-2">
+                      {availableServices.map((service) => {
+                        const item = editingBundle.items?.find((i) => i.serviceId === service.id);
+                        return (
+                          <div
+                            key={service.id}
+                            className="flex items-center justify-between p-2 rounded hover:bg-muted/50"
+                          >
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <Checkbox
+                                checked={!!item}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    addServiceToBundle(service);
+                                  } else {
+                                    removeServiceFromBundle(service.id);
+                                  }
+                                }}
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{service.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {service.price} {currency} • {service.duration} min
+                                </p>
+                              </div>
+                            </div>
+                            {item && (
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => updateItemQuantity(service.id, item.quantity - 1)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  -
+                                </Button>
+                                <span className="text-sm font-medium w-8 text-center">
+                                  {item.quantity}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => updateItemQuantity(service.id, item.quantity + 1)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  +
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Réduction */}
+                  <div className="space-y-3">
+                    <Label>Réduction</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <MobileFormField
+                        label="Type"
+                        name="discountType"
+                        type="select"
+                        value={editingBundle.discountType || 'percentage'}
+                        onChange={(value) =>
+                          setEditingBundle({ ...editingBundle, discountType: value as 'fixed' | 'percentage' })
+                        }
+                        selectOptions={[
+                          { value: 'percentage', label: 'Pourcentage' },
+                          { value: 'fixed', label: 'Montant fixe' },
+                        ]}
+                      />
+                      <MobileFormField
+                        label={`Valeur ${editingBundle.discountType === 'percentage' ? '(%)' : `(${currency})`}`}
+                        name="discountValue"
+                        type="number"
+                        value={editingBundle.discountValue || 0}
+                        onChange={(value) =>
+                          setEditingBundle({
+                            ...editingBundle,
+                            discountValue: parseFloat(value) || 0,
+                          })
+                        }
+                        fieldProps={{
+                          min: 0,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Aperçu du prix */}
+                  {editingBundle.items && editingBundle.items.length > 0 && (
+                    <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Prix original:</span>
+                          <span className="font-medium">{pricing.originalPrice} {currency}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-green-600">
+                          <span>Réduction:</span>
+                          <span className="font-medium">-{pricing.savings.toFixed(2)} {currency}</span>
+                        </div>
+                        <Separator />
+                        <div className="flex justify-between">
+                          <span className="font-semibold">Prix final:</span>
+                          <span className="text-2xl font-bold text-primary">
+                            {pricing.finalPrice.toFixed(2)} {currency}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Durée totale: {pricing.totalDuration} minutes
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <Separator />
+
+                  {/* Options avancées */}
+                  <div className="space-y-3">
+                    <Label>Options avancées</Label>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <MobileFormField
+                        label="Valide à partir du"
+                        name="validFrom"
+                        type="text"
+                        value={
+                          editingBundle.validFrom
+                            ? typeof editingBundle.validFrom === 'string'
+                              ? editingBundle.validFrom.split('T')[0]
+                              : editingBundle.validFrom.toISOString().split('T')[0]
+                            : ''
+                        }
+                        onChange={(value) =>
+                          setEditingBundle({
+                            ...editingBundle,
+                            validFrom: value || undefined,
+                          })
+                        }
+                        fieldProps={{
+                          type: 'date',
+                        }}
+                      />
+                      <MobileFormField
+                        label="Valide jusqu'au"
+                        name="validUntil"
+                        type="text"
+                        value={
+                          editingBundle.validUntil
+                            ? typeof editingBundle.validUntil === 'string'
+                              ? editingBundle.validUntil.split('T')[0]
+                              : editingBundle.validUntil.toISOString().split('T')[0]
+                            : ''
+                        }
+                        onChange={(value) =>
+                          setEditingBundle({
+                            ...editingBundle,
+                            validUntil: value || undefined,
+                          })
+                        }
+                        fieldProps={{
+                          type: 'date',
+                        }}
+                      />
+                    </div>
+
+                    <MobileFormField
+                      label="Limite d'achats (optionnel)"
+                      name="maxPurchases"
+                      type="number"
+                      value={editingBundle.maxPurchases || ''}
+                      onChange={(value) =>
+                        setEditingBundle({
+                          ...editingBundle,
+                          maxPurchases: value ? parseInt(value) : undefined,
+                        })
+                      }
+                      fieldProps={{
+                        min: 0,
+                        placeholder: "Illimité",
+                      }}
+                    />
+
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <Label htmlFor="isActive">Pack actif</Label>
+                      <Switch
+                        id="isActive"
+                        checked={editingBundle.isActive}
+                        onCheckedChange={(checked) =>
+                          setEditingBundle({ ...editingBundle, isActive: checked })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                    <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5" />
+                    <div className="text-sm text-orange-900">
+                      <p className="font-medium">À propos des packs</p>
+                      <p className="text-xs mt-1">
+                        Les clients achètent le pack et peuvent réserver les services individuellement
+                        selon leur convenance.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSaving} className="w-full sm:w-auto">
+                    <X className="h-4 w-4 mr-2" />
+                    Annuler
+                  </Button>
+                  <Button onClick={handleSave} disabled={isSaving || !editingBundle?.items?.length} className="w-full sm:w-auto">
+                    {isSaving ? (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2 animate-spin" />
+                        Enregistrement...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Enregistrer
+                      </>
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           )}
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSaving}>
-              <X className="h-4 w-4 mr-2" />
-              Annuler
-            </Button>
-            <Button onClick={handleSave} disabled={isSaving || !editingBundle?.items?.length}>
-              {isSaving ? (
-                <>
-                  <Sparkles className="h-4 w-4 mr-2 animate-spin" />
-                  Enregistrement...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Enregistrer
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </>
+      )}
     </div>
   );
 };

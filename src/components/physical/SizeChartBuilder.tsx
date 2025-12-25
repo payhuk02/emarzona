@@ -75,78 +75,21 @@ export interface SizeChartBuilderProps {
 }
 
 // ============================================================================
-// TEMPLATES
+// TEMPLATES (utilise maintenant le système centralisé)
 // ============================================================================
 
-const SIZE_TEMPLATES: Record<string, Partial<SizeChart>> = {
-  tshirt_eu: {
-    name: 'T-Shirt Standard (EU)',
-    system: 'eu',
-    sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-    measurements: [
-      {
-        label: 'Tour de poitrine',
-        unit: 'cm',
-        values: { XS: 86, S: 91, M: 96, L: 101, XL: 106, XXL: 111 },
-      },
-      {
-        label: 'Longueur',
-        unit: 'cm',
-        values: { XS: 68, S: 70, M: 72, L: 74, XL: 76, XXL: 78 },
-      },
-      {
-        label: 'Largeur épaules',
-        unit: 'cm',
-        values: { XS: 41, S: 42, M: 44, L: 46, XL: 48, XXL: 50 },
-      },
-    ],
-  },
-  shoes_eu: {
-    name: 'Chaussures (EU)',
-    system: 'eu',
-    sizes: ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45'],
-    measurements: [
-      {
-        label: 'Longueur du pied',
-        unit: 'cm',
-        values: {
-          '36': 23.0,
-          '37': 23.5,
-          '38': 24.0,
-          '39': 24.5,
-          '40': 25.0,
-          '41': 25.5,
-          '42': 26.0,
-          '43': 26.5,
-          '44': 27.0,
-          '45': 27.5,
-        },
-      },
-    ],
-  },
-  pants_universal: {
-    name: 'Pantalon Universel',
-    system: 'universal',
-    sizes: ['28', '30', '32', '34', '36', '38', '40'],
-    measurements: [
-      {
-        label: 'Tour de taille',
-        unit: 'cm',
-        values: { '28': 71, '30': 76, '32': 81, '34': 86, '36': 91, '38': 96, '40': 101 },
-      },
-      {
-        label: 'Tour de hanches',
-        unit: 'cm',
-        values: { '28': 89, '30': 94, '32': 99, '34': 104, '36': 109, '38': 114, '40': 119 },
-      },
-      {
-        label: 'Longueur jambe',
-        unit: 'cm',
-        values: { '28': 81, '30': 81, '32': 81, '34': 81, '36': 81, '38': 81, '40': 81 },
-      },
-    ],
-  },
-};
+import {
+  SIZE_CHART_TEMPLATES,
+  TEMPLATES_BY_CATEGORY,
+  getTemplatesByCategory,
+  type ProductCategory,
+} from '@/lib/size-charts/templates';
+import {
+  convertSizeChartUnit,
+  autoConvertUnits,
+  getRecommendedUnit,
+  type MeasurementUnit,
+} from '@/lib/size-charts/unit-converter';
 
 // ============================================================================
 // MAIN COMPONENT
@@ -249,18 +192,45 @@ export function SizeChartBuilder({
   };
 
   // Load template
-  const handleLoadTemplate = (templateKey: string) => {
-    const template = SIZE_TEMPLATES[templateKey];
+  const handleLoadTemplate = (templateId: string) => {
+    const template = SIZE_CHART_TEMPLATES.find((t) => t.id === templateId);
     if (!template) return;
 
+    // Convertir automatiquement les unités selon le système
+    const convertedChart = autoConvertUnits({
+      system: template.chart.system || 'eu',
+      measurements: template.chart.measurements || [],
+    });
+
     setChart({
-      ...template,
+      ...template.chart,
+      ...convertedChart,
       id: chart.id || `chart_${Date.now()}`,
       created_at: chart.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString(),
       is_default: false,
     });
     setShowTemplates(false);
+  };
+
+  // Convert unit for a measurement
+  const handleConvertMeasurementUnit = (measurementIndex: number, targetUnit: MeasurementUnit) => {
+    setChart((prev) => {
+      const measurement = prev.measurements?.[measurementIndex];
+      if (!measurement) return prev;
+
+      const converted = convertSizeChartUnit(
+        { measurements: [measurement] },
+        targetUnit
+      );
+
+      return {
+        ...prev,
+        measurements: prev.measurements?.map((m, i) =>
+          i === measurementIndex ? converted.measurements[0] : m
+        ) || [],
+      };
+    });
   };
 
   // Save chart

@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Copy, Check } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 export default function AdminSecurity() {
   const [enrolling, setEnrolling] = useState(false);
@@ -36,7 +37,7 @@ export default function AdminSecurity() {
     try {
       const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
       if (error) {
-        console.error('MFA enroll error:', error);
+        logger.error('MFA enroll error', { error });
         throw error;
       }
       if (!data) {
@@ -55,8 +56,8 @@ export default function AdminSecurity() {
       if (data.totp?.uri) {
         setUri(data.totp.uri);
       }
-    } catch (e: any) {
-      const errorMsg = e.message || 'Erreur lors de l\'enrollment 2FA';
+    } catch (e: unknown) {
+      const errorMsg = e instanceof Error ? e.message : String(e) || 'Erreur lors de l\'enrollment 2FA';
       setError(errorMsg);
       toast({
         title: 'Erreur d\'activation',
@@ -88,7 +89,7 @@ export default function AdminSecurity() {
     try {
       const { error } = await supabase.auth.mfa.verify({ factorId, code: verifyCode });
       if (error) {
-        console.error('MFA verify error:', error);
+        logger.error('MFA verify error', { error });
         // Si le facteur n'existe plus (expiré ou invalidé), proposer de relancer
         if (error.message?.includes('not found') || error.message?.includes('challenge ID')) {
           toast({
@@ -123,10 +124,11 @@ export default function AdminSecurity() {
       setSecret(null);
       setUri(null);
       setVerifyCode('');
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
       toast({
         title: 'Erreur',
-        description: e.message || 'Erreur lors de la vérification',
+        description: errorMessage || 'Erreur lors de la vérification',
         variant: 'destructive',
       });
     }
@@ -169,7 +171,7 @@ export default function AdminSecurity() {
                   </Alert>
                 )}
                 {!qr && !secret ? (
-                  <Button onClick={startEnroll} disabled={enrolling}>
+                  <Button onClick={startEnroll} disabled={enrolling} className="min-h-[44px]">
                     {enrolling ? 'Activation en cours...' : 'Commencer l\'activation'}
                   </Button>
                 ) : (
@@ -209,12 +211,13 @@ export default function AdminSecurity() {
                           <Input 
                             value={secret} 
                             readOnly 
-                            className="font-mono text-sm"
+                            className="font-mono text-sm min-h-[44px]"
                           />
                           <Button 
                             variant="outline" 
                             size="sm"
                             onClick={copySecret}
+                            className="min-h-[44px] min-w-[44px]"
                           >
                             {secretCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                           </Button>
@@ -232,10 +235,10 @@ export default function AdminSecurity() {
                           placeholder="000000" 
                           value={verifyCode} 
                           onChange={e => setVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))} 
-                          className="w-48 font-mono text-center text-lg tracking-widest"
+                          className="w-48 font-mono text-center text-lg tracking-widest min-h-[44px]"
                           maxLength={6}
                         />
-                        <Button onClick={verifyEnroll} disabled={!verifyCode || verifyCode.length !== 6}>
+                        <Button onClick={verifyEnroll} disabled={!verifyCode || verifyCode.length !== 6} className="min-h-[44px]">
                           Vérifier
                         </Button>
                       </div>
@@ -245,6 +248,7 @@ export default function AdminSecurity() {
                           size="sm"
                           onClick={startEnroll}
                           disabled={enrolling}
+                          className="min-h-[44px]"
                         >
                           {enrolling ? 'Génération...' : 'Générer un nouveau QR code'}
                         </Button>

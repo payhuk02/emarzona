@@ -330,7 +330,7 @@ export const EnrollmentHistory: React.FC<EnrollmentHistoryProps> = ({
             <Download className="h-4 w-4 mr-2" />
             Exporter
           </Button>
-          <Button variant="outline" size="icon" onClick={onRefresh} disabled={isLoading}>
+          <Button variant="outline" size="icon" onClick={onRefresh} disabled={isLoading} aria-label="Actualiser l'historique des inscriptions">
             <RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
           </Button>
         </div>

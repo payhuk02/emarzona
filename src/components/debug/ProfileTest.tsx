@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { logger } from '@/lib/logger';
 import { CheckCircle2, XCircle, Loader2, RefreshCw, User, AlertCircle, Database } from 'lucide-react';
 
 export const ProfileTest = () => {
@@ -16,9 +17,9 @@ export const ProfileTest = () => {
     setTestLoading(true);
     try {
       await refetch();
-      console.log('✅ Profile test completed');
+      logger.info('Profile test completed');
     } catch (error) {
-      console.error('❌ Profile test failed:', error);
+      logger.error('Profile test failed', { error });
     } finally {
       setTestLoading(false);
     }

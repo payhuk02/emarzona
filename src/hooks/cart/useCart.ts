@@ -40,7 +40,7 @@ export function useCart() {
   const queryClient = useQueryClient();
   const [sessionId] = useState(() => getSessionId());
   // Récupérer l'utilisateur de manière synchrone au besoin
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -76,46 +76,20 @@ export function useCart() {
     staleTime: 1000 * 60, // 1 minute
   });
 
-  // Récupérer le coupon appliqué depuis localStorage
-  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
-
-  useEffect(() => {
-    const savedCoupon = localStorage.getItem('applied_coupon');
-    if (savedCoupon) {
-      try {
-        const coupon = JSON.parse(savedCoupon);
-        // Vérifier que le coupon n'est pas expiré (24h)
-        const appliedAt = new Date(coupon.appliedAt);
-        const now = new Date();
-        const hoursDiff = (now.getTime() - appliedAt.getTime()) / (1000 * 60 * 60);
-        
-        if (hoursDiff < 24) {
-          setAppliedCoupon(coupon);
-        } else {
-          localStorage.removeItem('applied_coupon');
-          sessionStorage.removeItem('applied_coupon');
-          setAppliedCoupon(null);
-        }
-      } catch (e) {
-        localStorage.removeItem('applied_coupon');
-        sessionStorage.removeItem('applied_coupon');
-        setAppliedCoupon(null);
-      }
-    }
-  }, []);
-
   // Calculer le summary
+  // NOTE: Les coupons sont maintenant gérés uniquement dans Checkout.tsx (nouveau système)
+  // Le summary ne contient que les remises sur items, pas les coupons
   const subtotal = items.reduce((sum, item) => {
     const itemPrice = (item.unit_price - (item.discount_amount || 0)) * item.quantity;
     return sum + itemPrice;
   }, 0);
 
-  // Calculer la réduction du coupon
-  const couponDiscount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  // Calculer uniquement les remises sur items (sans coupons)
+  const itemDiscounts = items.reduce((sum, item) => (item.discount_amount || 0) * item.quantity, 0);
 
   const summary: CartSummary = {
     subtotal,
-    discount_amount: couponDiscount + items.reduce((sum, item) => (item.discount_amount || 0) * item.quantity, 0),
+    discount_amount: itemDiscounts, // Uniquement les remises sur items, pas les coupons
     tax_amount: 0, // Calculé côté checkout selon pays
     shipping_amount: 0, // Calculé côté checkout selon adresse
     total: 0,
@@ -213,11 +187,12 @@ export function useCart() {
         description: 'Le produit a été ajouté avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible d\'ajouter au panier';
       logger.error('Error adding to cart:', error);
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible d\'ajouter au panier',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -255,7 +230,7 @@ export function useCart() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error updating cart item:', error);
       toast({
         title: '❌ Erreur',
@@ -284,7 +259,7 @@ export function useCart() {
         description: 'L\'article a été retiré',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error removing cart item:', error);
       toast({
         title: '❌ Erreur',
@@ -317,7 +292,7 @@ export function useCart() {
         description: 'Tous les articles ont été retirés',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error clearing cart:', error);
       toast({
         title: '❌ Erreur',
@@ -327,88 +302,8 @@ export function useCart() {
     },
   });
 
-  /**
-   * Appliquer un coupon
-   */
-  const applyCoupon = useMutation({
-    mutationFn: async (couponCode: string) => {
-      if (items.length === 0) {
-        throw new Error('Votre panier est vide');
-      }
-
-      // Récupérer les IDs et types de produits du panier
-      const productIds = items.map(item => item.product_id).filter(Boolean);
-      const productTypes = items.map(item => item.product_type).filter(Boolean);
-
-      // Appeler la fonction RPC de validation
-      const { data: validationResult, error } = await supabase
-        .rpc('validate_coupon', {
-          coupon_code: couponCode.toUpperCase().trim(),
-          cart_subtotal: summary.subtotal,
-          product_ids: productIds.length > 0 ? productIds : null,
-          product_types: productTypes.length > 0 ? productTypes : null,
-        });
-
-      if (error) {
-        logger.error('Error validating coupon:', error);
-        throw error;
-      }
-
-      if (!validationResult || !validationResult.valid) {
-        throw new Error(validationResult?.error || 'Code coupon invalide');
-      }
-
-      const promotion = validationResult.promotion;
-
-      // Stocker le coupon appliqué dans localStorage et session
-      const couponData = {
-        code: couponCode.toUpperCase().trim(),
-        promotionId: promotion.id,
-        discountAmount: parseFloat(promotion.discount_amount),
-        discountType: promotion.discount_type,
-        discountValue: parseFloat(promotion.discount_value),
-        appliedAt: new Date().toISOString(),
-      };
-
-      localStorage.setItem('applied_coupon', JSON.stringify(couponData));
-      sessionStorage.setItem('applied_coupon', JSON.stringify(couponData));
-
-      return {
-        valid: true,
-        promotion,
-        message: 'Coupon appliqué avec succès',
-      };
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
-      toast({
-        title: '✅ Coupon appliqué',
-        description: `${data.promotion.discount_amount.toLocaleString('fr-FR')} XOF de réduction appliquée`,
-      });
-    },
-    onError: (error: any) => {
-      logger.error('Error applying coupon:', error);
-      toast({
-        title: '❌ Coupon invalide',
-        description: error.message || 'Ce code promo n\'est pas valide',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  /**
-   * Retirer le coupon appliqué
-   */
-  const removeCoupon = useCallback(() => {
-    localStorage.removeItem('applied_coupon');
-    sessionStorage.removeItem('applied_coupon');
-    setAppliedCoupon(null);
-    queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
-    toast({
-      title: 'Coupon retiré',
-      description: 'Le coupon a été retiré de votre panier',
-    });
-  }, [queryClient, toast]);
+  // NOTE: Les coupons sont maintenant gérés uniquement dans Checkout.tsx via le nouveau système
+  // Les fonctions applyCoupon et removeCoupon de l'ancien système ont été supprimées
 
   return {
     items,
@@ -419,9 +314,7 @@ export function useCart() {
     updateItem: updateItem.mutateAsync,
     removeItem: removeItem.mutateAsync,
     clearCart: clearCart.mutateAsync,
-    applyCoupon: applyCoupon.mutateAsync,
-    removeCoupon,
-    appliedCoupon,
+    // NOTE: applyCoupon et removeCoupon supprimés - les coupons sont gérés dans Checkout.tsx
     itemCount: items.length,
     isEmpty: items.length === 0,
   };

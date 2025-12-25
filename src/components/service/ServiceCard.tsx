@@ -1,10 +1,12 @@
 /**
  * Service Card Component
  * Date: 28 octobre 2025
- * 
+ *
  * Professional card for displaying service products
+ * Optimisé avec React.memo et LazyImage pour performance mobile
  */
 
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,6 +33,9 @@ import {
 import { useNavigate } from 'react-router-dom';
 import type { ServiceProduct } from '@/hooks/service';
 import type { Product } from '@/types/product';
+import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
+import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ServiceCardProps {
   service: ServiceProduct & { product?: Product };
@@ -39,13 +44,25 @@ interface ServiceCardProps {
   showActions?: boolean;
 }
 
-const ServiceCard = ({
+const ServiceCardComponent = ({
   service,
   onEdit,
   onDelete,
   showActions = true,
 }: ServiceCardProps) => {
   const navigate = useNavigate();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Récupérer l'utilisateur pour les alertes
+  useEffect(() => {
+    const fetchUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    fetchUser();
+  }, []);
 
   const getLocationIcon = () => {
     switch (service.location_type) {
@@ -79,27 +96,26 @@ const ServiceCard = ({
     return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
   };
 
+  const imageSizes =
+    '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw';
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       {/* Service Image */}
       <div className="relative aspect-video bg-muted">
-        {service.product?.image_url ? (
-          <img
-            src={service.product.image_url}
-            alt={service.product.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Calendar className="h-16 w-16 text-muted-foreground" />
-          </div>
-        )}
+        <ResponsiveProductImage
+          src={service.product?.image_url}
+          alt={service.product?.name || 'Service'}
+          sizes={imageSizes}
+          context="grid"
+          fit="cover"
+          className="h-full w-full"
+          fallbackIcon={<Calendar className="h-16 w-16 text-muted-foreground" />}
+        />
 
         {/* Service Type Badge */}
         <div className="absolute top-2 left-2">
-          <Badge variant="secondary">
-            {getServiceTypeLabel(service.service_type)}
-          </Badge>
+          <Badge variant="secondary">{getServiceTypeLabel(service.service_type)}</Badge>
         </div>
 
         {/* Actions Menu */}
@@ -107,7 +123,12 @@ const ServiceCard = ({
           <div className="absolute top-2 right-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="secondary" size="icon" className="h-8 w-8">
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="h-11 w-11 sm:h-8 sm:w-8"
+                  aria-label={`Actions pour ${service.name || service.id}`}
+                >
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -166,34 +187,55 @@ const ServiceCard = ({
       <CardContent className="pb-3">
         <div className="space-y-3">
           {/* Price */}
-          <div>
-            <p className="text-2xl font-bold text-primary">
-              {service.product?.price?.toLocaleString() || 0} XOF
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {service.pricing_type === 'fixed' && 'Prix fixe'}
-              {service.pricing_type === 'hourly' && 'Tarif horaire'}
-              {service.pricing_type === 'per_participant' && 'Par participant'}
-            </p>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-col min-w-0 flex-1">
+              <div className="flex items-baseline gap-1.5 sm:gap-2">
+                <p className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-primary whitespace-nowrap">
+                  {service.product?.price?.toLocaleString() || 0}{' '}
+                  {service.product?.currency || 'XOF'}
+                </p>
+              </div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                {service.pricing_type === 'fixed' && 'Prix fixe'}
+                {service.pricing_type === 'hourly' && 'Tarif horaire'}
+                {service.pricing_type === 'per_participant' && 'Par participant'}
+              </p>
+            </div>
+            {service.product?.id && (
+              <PriceStockAlertButton
+                productId={service.product.id}
+                productName={service.product.name}
+                currentPrice={service.product.price || 0}
+                currency={service.product.currency || 'XOF'}
+                productType="service"
+                variant="outline"
+                size="sm"
+                className="flex-shrink-0"
+              />
+            )}
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <p className="text-muted-foreground text-xs">Réservations</p>
-              <p className="font-semibold flex items-center gap-1">
-                <TrendingUp className="h-3 w-3 text-green-600" />
-                {service.total_bookings || 0}
-              </p>
+          {!service.product?.hide_purchase_count && (
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <p className="text-muted-foreground text-xs">Réservations</p>
+                <p className="font-semibold flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3 text-green-600" />
+                  {service.total_bookings || 0}
+                </p>
+              </div>
+              {!service.product?.hide_rating && (
+                <div>
+                  <p className="text-muted-foreground text-xs">Note moyenne</p>
+                  <p className="font-semibold flex items-center gap-1">
+                    <Star className="h-3 w-3 text-yellow-500" />
+                    {service.average_rating || 0}
+                  </p>
+                </div>
+              )}
             </div>
-            <div>
-              <p className="text-muted-foreground text-xs">Note moyenne</p>
-              <p className="font-semibold flex items-center gap-1">
-                <Star className="h-3 w-3 text-yellow-500" />
-                {service.average_rating || 0}
-              </p>
-            </div>
-          </div>
+          )}
 
           {/* Description preview */}
           {service.product?.description && (
@@ -205,10 +247,7 @@ const ServiceCard = ({
       </CardContent>
 
       <CardFooter className="pt-3">
-        <Button
-          className="w-full"
-          onClick={() => navigate(`/services/${service.product_id}`)}
-        >
+        <Button className="w-full" onClick={() => navigate(`/services/${service.product_id}`)}>
           <Calendar className="h-4 w-4 mr-2" />
           Réserver
         </Button>
@@ -216,6 +255,30 @@ const ServiceCard = ({
     </Card>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+const ServiceCard = React.memo(ServiceCardComponent, (prevProps, nextProps) => {
+  // Comparaison personnalisée pour éviter re-renders inutiles
+  return (
+    prevProps.service.id === nextProps.service.id &&
+    prevProps.service.product_id === nextProps.service.product_id &&
+    prevProps.service.product?.price === nextProps.service.product?.price &&
+    prevProps.service.product?.image_url === nextProps.service.product?.image_url &&
+    prevProps.service.product?.name === nextProps.service.product?.name &&
+    prevProps.service.total_bookings === nextProps.service.total_bookings &&
+    prevProps.service.average_rating === nextProps.service.average_rating &&
+    prevProps.service.duration_minutes === nextProps.service.duration_minutes &&
+    prevProps.service.location_type === nextProps.service.location_type &&
+    prevProps.showActions === nextProps.showActions &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onDelete === nextProps.onDelete
+  );
+});
+
+ServiceCard.displayName = 'ServiceCard';
+
+// Export par défaut pour compatibilité
+export default ServiceCard;
 
 /**
  * Grid of Service Cards
@@ -238,7 +301,7 @@ const ServicesGrid = ({
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
+        {[1, 2, 3, 4, 5, 6].map(i => (
           <Card key={i} className="overflow-hidden">
             <div className="aspect-video bg-muted animate-pulse" />
             <CardContent className="p-4 space-y-3">
@@ -268,7 +331,7 @@ const ServicesGrid = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {services.map((service) => (
+      {services.map(service => (
         <ServiceCard
           key={service.id}
           service={service}
@@ -281,5 +344,4 @@ const ServicesGrid = ({
   );
 };
 
-export default ServiceCard;
 export { ServicesGrid };

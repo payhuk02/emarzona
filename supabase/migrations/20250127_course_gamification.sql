@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK COURSES GAMIFICATION SYSTEM
+-- EMARZONA COURSES GAMIFICATION SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système complet de gamification pour cours en ligne
 --              Points, badges, achievements, leaderboard, streaks

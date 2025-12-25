@@ -23,6 +23,7 @@ import { Copy, RefreshCw, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useDigitalProducts } from '@/hooks/digital/useDigitalProducts';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 interface LicenseGeneratorProps {
   onSuccess?: () => void;
@@ -138,7 +139,7 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
       
       onSuccess?.();
     } catch (error: any) {
-      console.error('Save licenses error:', error);
+      logger.error('Save licenses error', { error, productId, quantity });
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible d\'enregistrer les licenses',

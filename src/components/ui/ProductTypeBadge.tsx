@@ -3,6 +3,7 @@
  * Date: 27 octobre 2025
  */
 
+import React, { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from 'react-i18next';
 import { getProductTypeLabel, getProductTypeColor, getProductTypeIcon } from '@/lib/productTypeHelper';
@@ -22,13 +23,16 @@ const iconComponents: Record<string, LucideIcon> = {
   'GraduationCap': GraduationCap,
 };
 
-export const ProductTypeBadge = ({ type, showIcon = true, className }: ProductTypeBadgeProps) => {
+const ProductTypeBadgeComponent = ({ type, showIcon = true, className }: ProductTypeBadgeProps) => {
   const { t } = useTranslation();
   
-  const label = getProductTypeLabel(type, t);
-  const colorClass = getProductTypeColor(type);
-  const iconName = getProductTypeIcon(type);
-  const IconComponent = iconComponents[iconName] || Package;
+  const { label, colorClass, IconComponent } = useMemo(() => {
+    const label = getProductTypeLabel(type, t);
+    const colorClass = getProductTypeColor(type);
+    const iconName = getProductTypeIcon(type);
+    const IconComponent = iconComponents[iconName] || Package;
+    return { label, colorClass, IconComponent };
+  }, [type, t]);
 
   return (
     <Badge 
@@ -43,4 +47,17 @@ export const ProductTypeBadge = ({ type, showIcon = true, className }: ProductTy
     </Badge>
   );
 };
+
+ProductTypeBadgeComponent.displayName = 'ProductTypeBadgeComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const ProductTypeBadge = React.memo(ProductTypeBadgeComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.type === nextProps.type &&
+    prevProps.showIcon === nextProps.showIcon &&
+    prevProps.className === nextProps.className
+  );
+});
+
+ProductTypeBadge.displayName = 'ProductTypeBadge';
 

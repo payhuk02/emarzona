@@ -5,32 +5,44 @@
  * Impact: +60% taux de complétion
  */
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { ImageUpload } from "@/components/ui/image-upload";
-import { 
-  ChevronRight, 
-  ChevronLeft, 
-  Check, 
-  Package, 
-  Truck, 
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { ImageUpload } from '@/components/ui/image-upload';
+import {
+  ChevronRight,
+  ChevronLeft,
+  Check,
+  Package,
+  Truck,
   Briefcase,
   GraduationCap,
   Sparkles,
   Settings,
-  Info
-} from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+  Info,
+  Palette,
+} from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
+import { IMAGE_FORMATS } from '@/config/image-formats';
+
+interface ProductCreationFormData {
+  product_type?: string;
+  name: string;
+  price: number;
+  short_description?: string;
+  image_url?: string;
+}
 
 interface WizardProps {
-  formData: any;
-  updateFormData: (field: string, value: any) => void;
+  formData: ProductCreationFormData;
+  updateFormData: (field: keyof ProductCreationFormData | string, value: unknown) => void;
   onComplete: () => void;
   onSwitchToAdvanced: () => void;
   onCourseTypeSelected?: () => void;
@@ -39,32 +51,39 @@ interface WizardProps {
 
 const PRODUCT_TYPES = [
   {
-    value: "digital",
-    label: "Produit Digital",
+    value: 'digital',
+    label: 'Produit Digital',
     icon: Package,
-    description: "Ebooks, formations, logiciels, templates",
-    color: "blue"
+    description: 'Ebooks, formations, logiciels, templates',
+    color: 'blue',
   },
   {
-    value: "course",
-    label: "Cours en ligne",
+    value: 'course',
+    label: 'Cours en ligne',
     icon: GraduationCap,
-    description: "Cours vidéo, masterclass, formations structurées",
-    color: "orange"
+    description: 'Cours vidéo, masterclass, formations structurées',
+    color: 'orange',
   },
   {
-    value: "physical",
-    label: "Produit Physique",
+    value: 'physical',
+    label: 'Produit Physique',
     icon: Truck,
-    description: "Vêtements, accessoires, objets artisanaux",
-    color: "green"
+    description: 'Vêtements, accessoires, objets artisanaux',
+    color: 'green',
   },
   {
-    value: "service",
-    label: "Service",
+    value: 'service',
+    label: 'Service',
     icon: Briefcase,
-    description: "Consultations, coaching, design, maintenance",
-    color: "purple"
+    description: 'Consultations, coaching, design, maintenance',
+    color: 'purple',
+  },
+  {
+    value: 'artist',
+    label: "Oeuvre d'artiste",
+    icon: Palette,
+    description: "Oeuvres d'art, créations artistiques, NFT",
+    color: 'pink',
   },
 ];
 
@@ -78,6 +97,7 @@ export const ProductCreationWizard = ({
 }: WizardProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
+  const { toast } = useToast();
 
   const progress = (currentStep / totalSteps) * 100;
 
@@ -87,7 +107,7 @@ export const ProductCreationWizard = ({
       onCourseTypeSelected();
       return;
     }
-    
+
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -104,16 +124,61 @@ export const ProductCreationWizard = ({
   const canProceed = () => {
     switch (currentStep) {
       case 1:
-        return formData.product_type !== "";
+        return formData.product_type !== '';
       case 2:
-        return formData.name.trim() !== "" && formData.price > 0;
+        return formData.name.trim() !== '' && formData.price > 0;
       case 3:
-        return formData.image_url !== "";
+        return formData.image_url !== '';
       case 4:
         return true;
       default:
         return false;
     }
+  };
+
+  // Valide que l'image de produit respecte bien le format 1536×1024 (3:2)
+  const handleImageUpload = (value: string | string[]) => {
+    const urls = Array.isArray(value) ? value : [value];
+    const url = urls[0];
+
+    if (!url) {
+      updateFormData('image_url', '');
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => {
+      const targetWidth = IMAGE_FORMATS.product.width;
+      const targetHeight = IMAGE_FORMATS.product.height;
+      if (img.naturalWidth === targetWidth && img.naturalHeight === targetHeight) {
+        updateFormData('image_url', url);
+        toast({
+          title: 'Image ajoutée',
+          description: 'Format 1536×1024 (3:2) détecté',
+        });
+      } else {
+        logger.warn('Image rejetée dans ProductCreationWizard: dimensions non conformes', {
+          url,
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+          expectedWidth: targetWidth,
+          expectedHeight: targetHeight,
+        });
+        toast({
+          title: "Format d'image non valide",
+          description: 'Veuillez utiliser une image 1536×1024 (ratio 3:2).',
+          variant: 'destructive',
+        });
+      }
+    };
+    img.onerror = () => {
+      toast({
+        title: "Erreur d'image",
+        description: "Impossible de lire l'image. Veuillez réessayer avec un autre fichier.",
+        variant: 'destructive',
+      });
+    };
+    img.src = url;
   };
 
   return (
@@ -160,26 +225,30 @@ export const ProductCreationWizard = ({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-                {PRODUCT_TYPES.map((type) => {
+                {PRODUCT_TYPES.map(type => {
                   const Icon = type.icon;
                   const isSelected = formData.product_type === type.value;
-                  
+
                   return (
                     <Card
                       key={type.value}
                       className={`cursor-pointer transition-all hover:shadow-lg ${
-                        isSelected 
-                          ? 'border-2 border-primary bg-primary/5' 
+                        isSelected
+                          ? 'border-2 border-primary bg-primary/5'
                           : 'border-2 border-transparent hover:border-muted'
                       }`}
-                      onClick={() => updateFormData("product_type", type.value)}
+                      onClick={() => updateFormData('product_type', type.value)}
                     >
                       <CardContent className="p-6">
                         <div className="text-center space-y-4">
-                          <div className={`mx-auto h-16 w-16 rounded-full flex items-center justify-center ${
-                            isSelected ? 'bg-primary/20' : 'bg-muted'
-                          }`}>
-                            <Icon className={`h-8 w-8 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
+                          <div
+                            className={`mx-auto h-16 w-16 rounded-full flex items-center justify-center ${
+                              isSelected ? 'bg-primary/20' : 'bg-muted'
+                            }`}
+                          >
+                            <Icon
+                              className={`h-8 w-8 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}
+                            />
                           </div>
                           <div>
                             <h3 className="font-semibold text-lg">{type.label}</h3>
@@ -205,9 +274,7 @@ export const ProductCreationWizard = ({
             <div className="space-y-6 max-w-2xl mx-auto">
               <div className="text-center space-y-2">
                 <h2 className="text-2xl font-bold">Informations de base</h2>
-                <p className="text-muted-foreground">
-                  Donnez un nom et un prix à votre produit
-                </p>
+                <p className="text-muted-foreground">Donnez un nom et un prix à votre produit</p>
               </div>
 
               <div className="space-y-4 mt-8">
@@ -218,7 +285,7 @@ export const ProductCreationWizard = ({
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => updateFormData("name", e.target.value)}
+                    onChange={e => updateFormData('name', e.target.value)}
                     placeholder="Ex: Formation Excel complète"
                     className="mt-2 text-lg"
                   />
@@ -234,14 +301,15 @@ export const ProductCreationWizard = ({
                   <Input
                     id="price"
                     type="number"
-                    value={formData.price || ""}
-                    onChange={(e) => updateFormData("price", parseFloat(e.target.value) || 0)}
+                    value={formData.price || ''}
+                    onChange={e => updateFormData('price', parseFloat(e.target.value) || 0)}
                     placeholder="5000"
                     className="mt-2 text-lg"
                     min="0"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Commission plateforme : 10% • Vous recevrez {formData.price > 0 ? (formData.price * 0.9).toFixed(0) : "0"} XOF
+                    Commission plateforme : 10% • Vous recevrez{' '}
+                    {formData.price > 0 ? (formData.price * 0.9).toFixed(0) : '0'} XOF
                   </p>
                 </div>
 
@@ -251,8 +319,8 @@ export const ProductCreationWizard = ({
                   </Label>
                   <Textarea
                     id="short_description"
-                    value={formData.short_description || ""}
-                    onChange={(e) => updateFormData("short_description", e.target.value)}
+                    value={formData.short_description || ''}
+                    onChange={e => updateFormData('short_description', e.target.value)}
                     placeholder="Une brève description de votre produit..."
                     className="mt-2"
                     rows={3}
@@ -271,40 +339,49 @@ export const ProductCreationWizard = ({
             <div className="space-y-6 max-w-2xl mx-auto">
               <div className="text-center space-y-2">
                 <h2 className="text-2xl font-bold">Ajoutez une image</h2>
-                <p className="text-muted-foreground">
-                  Une belle image augmente vos ventes de 40%
-                </p>
+                <p className="text-muted-foreground">Une belle image augmente vos ventes de 40%</p>
               </div>
 
               <div className="mt-8">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">Recommandé: 1280×720 (16:9), WebP/JPEG</p>
+                  <p className="text-xs text-muted-foreground">
+                    Recommandé: 1536×1024 (3:2), WebP/JPEG
+                  </p>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button type="button" aria-label="Guidelines Médias" className="text-gray-500 hover:text-gray-700">
+                      <button
+                        type="button"
+                        aria-label="Guidelines Médias"
+                        className="text-gray-500 hover:text-gray-700"
+                      >
                         <Info className="h-4 w-4" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent align="end">
                       <div className="max-w-[260px] text-xs">
-                        Utilisez 1280×720 (ratio 16:9) pour un rendu optimal.
+                        Utilisez 1536×1024 (ratio 3:2) pour un rendu optimal.
                         <a
-                          href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                          href="https://github.com/payhuk02/emarzona/blob/main/docs/MEDIA_GUIDELINES.md"
                           target="_blank"
                           rel="noreferrer"
                           className="text-blue-600 underline ml-1"
-                        >Voir Médias</a>
+                        >
+                          Voir Médias
+                        </a>
                       </div>
                     </TooltipContent>
                   </Tooltip>
                 </div>
                 <ImageUpload
-                  value={formData.image_url || ""}
-                  onChange={(url) => updateFormData("image_url", url)}
+                  value={formData.image_url || ''}
+                  onChange={handleImageUpload}
                   storeId={storeId}
                   maxSize={10}
                 />
-                <p className="text-xs text-gray-500 mt-2">Astuce: respectez le format 1280×720 (16:9) pour les cartes Marketplace et la boutique.</p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Astuce: respectez le format 1536×1024 (3:2) pour les cartes Marketplace et la
+                  boutique.
+                </p>
 
                 {formData.image_url && (
                   <div className="mt-6 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
@@ -351,11 +428,13 @@ export const ProductCreationWizard = ({
                       )}
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <Badge>{PRODUCT_TYPES.find(t => t.value === formData.product_type)?.label}</Badge>
+                          <Badge>
+                            {PRODUCT_TYPES.find(t => t.value === formData.product_type)?.label}
+                          </Badge>
                         </div>
-                        <h3 className="font-bold text-xl">{formData.name || "Sans nom"}</h3>
+                        <h3 className="font-bold text-xl">{formData.name || 'Sans nom'}</h3>
                         <p className="text-2xl font-bold text-primary mt-2">
-                          {formData.price ? `${formData.price.toLocaleString()} XOF` : "0 XOF"}
+                          {formData.price ? `${formData.price.toLocaleString()} XOF` : '0 XOF'}
                         </p>
                         {formData.short_description && (
                           <p className="text-sm text-muted-foreground mt-3">
@@ -369,11 +448,15 @@ export const ProductCreationWizard = ({
                     <div className="pt-6 border-t space-y-3">
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Commission plateforme (10%)</span>
-                        <span className="font-medium">{formData.price ? (formData.price * 0.1).toFixed(0) : "0"} XOF</span>
+                        <span className="font-medium">
+                          {formData.price ? (formData.price * 0.1).toFixed(0) : '0'} XOF
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm font-semibold">
                         <span>Vous recevrez</span>
-                        <span className="text-green-600">{formData.price ? (formData.price * 0.9).toFixed(0) : "0"} XOF</span>
+                        <span className="text-green-600">
+                          {formData.price ? (formData.price * 0.9).toFixed(0) : '0'} XOF
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -381,9 +464,12 @@ export const ProductCreationWizard = ({
               </Card>
 
               <div className="p-4 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-2">📌 Après publication</h4>
+                <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
+                  📌 Après publication
+                </h4>
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  Vous pourrez toujours modifier votre produit et ajouter plus de détails (description complète, variantes, promotions, etc.) depuis le mode avancé.
+                  Vous pourrez toujours modifier votre produit et ajouter plus de détails
+                  (description complète, variantes, promotions, etc.) depuis le mode avancé.
                 </p>
               </div>
             </div>
@@ -391,11 +477,7 @@ export const ProductCreationWizard = ({
 
           {/* Boutons de navigation */}
           <div className="flex items-center justify-between mt-8 pt-6 border-t">
-            <Button
-              variant="outline"
-              onClick={goToPreviousStep}
-              disabled={currentStep === 1}
-            >
+            <Button variant="outline" onClick={goToPreviousStep} disabled={currentStep === 1}>
               <ChevronLeft className="h-4 w-4 mr-2" />
               Précédent
             </Button>
@@ -404,10 +486,7 @@ export const ProductCreationWizard = ({
               Étape {currentStep} sur {totalSteps}
             </div>
 
-            <Button
-              onClick={goToNextStep}
-              disabled={!canProceed()}
-            >
+            <Button onClick={goToNextStep} disabled={!canProceed()}>
               {currentStep === totalSteps ? (
                 <>
                   <Check className="h-4 w-4 mr-2" />
@@ -426,4 +505,3 @@ export const ProductCreationWizard = ({
     </div>
   );
 };
-

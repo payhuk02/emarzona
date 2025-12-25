@@ -3,6 +3,7 @@
  * Liste des cohorts pour un cours
  */
 
+import React from 'react';
 import { Users, Calendar, Lock, UserPlus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,7 @@ interface CohortsListProps {
   className?: string;
 }
 
-export const CohortsList = ({ courseId, onCohortClick, className }: CohortsListProps) => {
+const CohortsListComponent = ({ courseId, onCohortClick, className }: CohortsListProps) => {
   const { data: cohorts = [], isLoading } = useCourseCohorts(courseId);
 
   if (isLoading) {
@@ -96,4 +97,17 @@ export const CohortsList = ({ courseId, onCohortClick, className }: CohortsListP
     </div>
   );
 };
+
+CohortsListComponent.displayName = 'CohortsListComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const CohortsList = React.memo(CohortsListComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.courseId === nextProps.courseId &&
+    prevProps.onCohortClick === nextProps.onCohortClick &&
+    prevProps.className === nextProps.className
+  );
+});
+
+CohortsList.displayName = 'CohortsList';
 

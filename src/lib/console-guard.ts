@@ -4,7 +4,7 @@
  */
 import { logger } from './logger';
 
-type ConsoleMethod = (...args: any[]) => void;
+type ConsoleMethod = (...args: unknown[]) => void;
 
 const bind = (fn: ConsoleMethod): ConsoleMethod => fn.bind(null);
 
@@ -29,7 +29,11 @@ export function installConsoleGuard(): void {
   console.debug = bind(logger.log as ConsoleMethod);
 
   // Provide a way to restore if ever needed during debugging
-  (window as any).__restoreConsole = () => {
+  // Utiliser une interface pour éviter any
+  interface WindowWithRestoreConsole extends Window {
+    __restoreConsole?: () => void;
+  }
+  (window as WindowWithRestoreConsole).__restoreConsole = () => {
     console.log = original.log;
     console.info = original.info;
     console.warn = original.warn;

@@ -1,18 +1,19 @@
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
-import { ImageUpload } from "@/components/ui/image-upload";
-import { 
-  Image as ImageIcon, 
-  Video, 
-  Palette, 
-  Layout, 
-  Eye, 
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import { ImageUpload } from '@/components/ui/image-upload';
+import { logger } from '@/lib/logger';
+import {
+  Image as ImageIcon,
+  Video,
+  Palette,
+  Layout,
+  Eye,
   Upload,
   Trash2,
   Download,
@@ -26,11 +27,12 @@ import {
   Monitor,
   Smartphone,
   Tablet,
-  Info
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+  Info,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { IMAGE_FORMATS } from '@/config/image-formats';
 
 /**
  * Form data interface pour ProductVisualTab
@@ -48,11 +50,16 @@ interface ProductFormData {
   featured?: boolean;
   hide_from_store?: boolean;
   hide_purchase_count?: boolean;
+  hide_likes_count?: boolean;
+  hide_recommendations_count?: boolean;
+  hide_downloads_count?: boolean;
+  hide_reviews_count?: boolean;
+  hide_rating?: boolean;
 }
 
 interface ProductVisualTabProps {
   formData: ProductFormData;
-  updateFormData: (field: string, value: any) => void;
+  updateFormData: (field: string, value: unknown) => void;
   storeId: string;
 }
 
@@ -64,12 +71,12 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
   const handleImageUpload = (urls: string | string[]) => {
     const toArray = Array.isArray(urls) ? urls : [urls];
     const validateImage = async (url: string): Promise<boolean> => {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         const img = new Image();
         img.onload = () => {
-          const ratio = img.width / img.height;
-          const target = 1280 / 720; // 16:9
-          const ok = Math.abs(ratio - target) <= 0.03; // tolérance ~3%
+          const targetWidth = IMAGE_FORMATS.product.width;
+          const targetHeight = IMAGE_FORMATS.product.height;
+          const ok = img.width === targetWidth && img.height === targetHeight;
           resolve(ok);
         };
         img.onerror = () => resolve(false);
@@ -83,23 +90,28 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
         if (await validateImage(u)) {
           valids.push(u);
         } else {
-          console.warn('Image rejetée: ratio non conforme 16:9 (1280x720 attendu)', u);
+          logger.warn('Image rejetée: dimensions non conformes au format produit requis', {
+            url: u,
+          });
           toast({
             title: "Format d'image non valide",
-            description: "Veuillez utiliser une image 1280×720 (ratio 16:9).",
-            variant: "destructive",
+            description: 'Veuillez utiliser une image 1536×1024 (ratio 3:2).',
+            variant: 'destructive',
           });
         }
       }
       if (Array.isArray(urls)) {
-        updateFormData("gallery_images", valids);
+        updateFormData('gallery_images', valids);
         if (valids.length > 0) {
-          toast({ title: "Images ajoutées", description: `${valids.length} image(s) conforme(s) 16:9` });
+          toast({
+            title: 'Images ajoutées',
+            description: `${valids.length} image(s) conforme(s) 1536×1024 (3:2)`,
+          });
         }
       } else {
-        updateFormData("image_url", valids[0] || "");
+        updateFormData('image_url', valids[0] || '');
         if (valids[0]) {
-          toast({ title: "Image principale ajoutée", description: "Format 1280×720 détecté" });
+          toast({ title: 'Image principale ajoutée', description: 'Format 1536×1024 détecté' });
         }
       }
     };
@@ -109,10 +121,12 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
 
   const removeImage = (index: number, type: 'main' | 'gallery') => {
     if (type === 'main') {
-      updateFormData("image_url", "");
+      updateFormData('image_url', '');
     } else {
-      const newGallery = (formData.gallery_images || []).filter((_: any, i: number) => i !== index);
-      updateFormData("gallery_images", newGallery);
+      const newGallery = (formData.gallery_images || []).filter(
+        (_: string, i: number) => i !== index
+      );
+      updateFormData('gallery_images', newGallery);
     }
   };
 
@@ -120,14 +134,17 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
     const gallery = [...(formData.gallery_images || [])];
     const [movedImage] = gallery.splice(fromIndex, 1);
     gallery.splice(toIndex, 0, movedImage);
-    updateFormData("gallery_images", gallery);
+    updateFormData('gallery_images', gallery);
   };
 
   const getPreviewSize = () => {
     switch (activePreview) {
-      case 'mobile': return 'w-80';
-      case 'tablet': return 'w-96';
-      default: return 'w-full';
+      case 'mobile':
+        return 'w-80';
+      case 'tablet':
+        return 'w-96';
+      default:
+        return 'w-full';
     }
   };
 
@@ -137,9 +154,15 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold">Visuel & Design</h2>
-          <p className="text-sm sm:text-base text-gray-600">Configurez l'apparence visuelle de votre produit</p>
+          <p className="text-sm sm:text-base text-gray-600">
+            Configurez l'apparence visuelle de votre produit
+          </p>
         </div>
-        <div className="flex items-center gap-2" role="group" aria-label="Sélecteur de mode d'aperçu">
+        <div
+          className="flex items-center gap-2"
+          role="group"
+          aria-label="Sélecteur de mode d'aperçu"
+        >
           <Button
             variant={activePreview === 'desktop' ? 'default' : 'outline'}
             size="sm"
@@ -184,37 +207,43 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                 Image principale
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button type="button" aria-label="Guidelines Médias" className="text-gray-500 hover:text-gray-700">
+                    <button
+                      type="button"
+                      aria-label="Guidelines Médias"
+                      className="text-gray-500 hover:text-gray-700"
+                    >
                       <Info className="h-4 w-4" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent align="start">
                     <div className="max-w-[260px] text-xs">
-                      Utilisez des images 1280×720 (16:9), idéalement WebP.
+                      Utilisez des images 1536×1024 (3:2), idéalement WebP.
                       <a
-                        href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                        href="https://github.com/payhuk02/emarzona/blob/main/docs/MEDIA_GUIDELINES.md"
                         target="_blank"
                         rel="noreferrer"
                         className="text-blue-600 underline ml-1"
-                      >Voir Médias</a>
+                      >
+                        Voir Médias
+                      </a>
                     </div>
                   </TooltipContent>
                 </Tooltip>
               </CardTitle>
-              <CardDescription>
-                Image affichée en premier sur votre produit
-              </CardDescription>
+              <CardDescription>Image affichée en premier sur votre produit</CardDescription>
             </CardHeader>
             <CardContent>
               <ImageUpload
-                value={formData.image_url || ""}
-                onChange={(url) => updateFormData("image_url", url)}
+                value={formData.image_url || ''}
+                onChange={handleImageUpload}
                 storeId={storeId}
                 multiple={false}
                 maxSize={10}
               />
-              <p className="text-xs text-gray-500 mt-2">Format recommandé: 1280×720 (ratio 16:9), WebP/JPEG, qualité 80–90.</p>
-              
+              <p className="text-xs text-gray-500 mt-2">
+                Format requis: 1536×1024 (ratio 3:2), WebP/JPEG, qualité 80–90.
+              </p>
+
               {formData.image_url && (
                 <div className="mt-4">
                   <div className="flex items-center gap-2 mb-2">
@@ -231,7 +260,7 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => updateFormData("image_url", "")}
+                      onClick={() => updateFormData('image_url', '')}
                       className="touch-manipulation min-h-[44px]"
                       aria-label="Supprimer l'image principale"
                     >
@@ -256,38 +285,45 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                 Galerie d'images
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button type="button" aria-label="Guidelines Médias" className="text-gray-500 hover:text-gray-700">
+                    <button
+                      type="button"
+                      aria-label="Guidelines Médias"
+                      className="text-gray-500 hover:text-gray-700"
+                    >
                       <Info className="h-4 w-4" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent align="start">
                     <div className="max-w-[260px] text-xs">
-                      Chaque image devrait être en 1280×720 (16:9) pour un rendu optimal.
+                      Chaque image devrait être en 1536×1024 (3:2) pour un rendu optimal.
                       <a
-                        href="https://github.com/payhuk02/payhula/blob/main/docs/MEDIA_GUIDELINES.md"
+                        href="https://github.com/payhuk02/emarzona/blob/main/docs/MEDIA_GUIDELINES.md"
                         target="_blank"
                         rel="noreferrer"
                         className="text-blue-600 underline ml-1"
-                      >Voir Médias</a>
+                      >
+                        Voir Médias
+                      </a>
                     </div>
                   </TooltipContent>
                 </Tooltip>
               </CardTitle>
-              <CardDescription>
-                Images supplémentaires pour votre produit
-              </CardDescription>
+              <CardDescription>Images supplémentaires pour votre produit</CardDescription>
             </CardHeader>
             <CardContent>
               <ImageUpload
                 value={formData.gallery_images || []}
-                onChange={(urls) => updateFormData("gallery_images", urls)}
+                onChange={handleImageUpload}
                 storeId={storeId}
                 multiple={true}
                 maxFiles={10}
                 maxSize={10}
               />
-              <p className="text-xs text-gray-500 mt-2">Chaque image: 1280×720 (ratio 16:9) pour un rendu optimal sur Marketplace et boutique.</p>
-              
+              <p className="text-xs text-gray-500 mt-2">
+                Chaque image: 1536×1024 (ratio 3:2) pour un rendu optimal sur Marketplace et
+                boutique.
+              </p>
+
               {(formData.gallery_images || []).length > 0 && (
                 <div className="mt-4">
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -340,17 +376,15 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                 <Video className="h-5 w-5" />
                 Vidéo du produit
               </CardTitle>
-              <CardDescription>
-                Vidéo de présentation ou démonstration
-              </CardDescription>
+              <CardDescription>Vidéo de présentation ou démonstration</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="video_url">URL de la vidéo</Label>
                 <Input
                   id="video_url"
-                  value={formData.video_url || ""}
-                  onChange={(e) => updateFormData("video_url", e.target.value)}
+                  value={formData.video_url || ''}
+                  onChange={e => updateFormData('video_url', e.target.value)}
                   placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..."
                   aria-label="URL de la vidéo du produit"
                   aria-describedby="video-url-hint"
@@ -359,7 +393,7 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                   Supporte YouTube, Vimeo et autres plateformes
                 </p>
               </div>
-              
+
               {formData.video_url && (
                 <div className="mt-4">
                   <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
@@ -399,7 +433,7 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                 <Switch
                   id="featured-switch"
                   checked={formData.featured || false}
-                  onCheckedChange={(checked) => updateFormData("featured", checked)}
+                  onCheckedChange={checked => updateFormData('featured', checked)}
                   aria-label="Mettre ce produit en vedette"
                 />
               </div>
@@ -412,7 +446,7 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                 <Switch
                   id="hide-store-switch"
                   checked={formData.hide_from_store || false}
-                  onCheckedChange={(checked) => updateFormData("hide_from_store", checked)}
+                  onCheckedChange={checked => updateFormData('hide_from_store', checked)}
                   aria-label="Masquer ce produit du magasin"
                 />
               </div>
@@ -425,8 +459,81 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                 <Switch
                   id="hide-count-switch"
                   checked={formData.hide_purchase_count || false}
-                  onCheckedChange={(checked) => updateFormData("hide_purchase_count", checked)}
+                  onCheckedChange={checked => updateFormData('hide_purchase_count', checked)}
                   aria-label="Masquer le compteur d'achats"
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-4 min-h-[60px]">
+                <div className="flex-1">
+                  <Label htmlFor="hide-likes-switch">Masquer le nombre de likes</Label>
+                  <p className="text-sm text-gray-600">Ne pas afficher le nombre de likes</p>
+                </div>
+                <Switch
+                  id="hide-likes-switch"
+                  checked={formData.hide_likes_count || false}
+                  onCheckedChange={checked => updateFormData('hide_likes_count', checked)}
+                  aria-label="Masquer le nombre de likes"
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-4 min-h-[60px]">
+                <div className="flex-1">
+                  <Label htmlFor="hide-recommendations-switch">
+                    Masquer le nombre de recommandations
+                  </Label>
+                  <p className="text-sm text-gray-600">
+                    Ne pas afficher le nombre de recommandations
+                  </p>
+                </div>
+                <Switch
+                  id="hide-recommendations-switch"
+                  checked={formData.hide_recommendations_count || false}
+                  onCheckedChange={checked => updateFormData('hide_recommendations_count', checked)}
+                  aria-label="Masquer le nombre de recommandations"
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-4 min-h-[60px]">
+                <div className="flex-1">
+                  <Label htmlFor="hide-downloads-switch">
+                    Masquer le nombre de téléchargements
+                  </Label>
+                  <p className="text-sm text-gray-600">
+                    Ne pas afficher le nombre de téléchargements
+                  </p>
+                </div>
+                <Switch
+                  id="hide-downloads-switch"
+                  checked={formData.hide_downloads_count || false}
+                  onCheckedChange={checked => updateFormData('hide_downloads_count', checked)}
+                  aria-label="Masquer le nombre de téléchargements"
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-4 min-h-[60px]">
+                <div className="flex-1">
+                  <Label htmlFor="hide-reviews-switch">Masquer le nombre d'avis</Label>
+                  <p className="text-sm text-gray-600">Ne pas afficher le nombre d'avis</p>
+                </div>
+                <Switch
+                  id="hide-reviews-switch"
+                  checked={formData.hide_reviews_count || false}
+                  onCheckedChange={checked => updateFormData('hide_reviews_count', checked)}
+                  aria-label="Masquer le nombre d'avis"
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-4 min-h-[60px]">
+                <div className="flex-1">
+                  <Label htmlFor="hide-rating-switch">Masquer la note moyenne</Label>
+                  <p className="text-sm text-gray-600">Ne pas afficher la note moyenne (étoiles)</p>
+                </div>
+                <Switch
+                  id="hide-rating-switch"
+                  checked={formData.hide_rating || false}
+                  onCheckedChange={checked => updateFormData('hide_rating', checked)}
+                  aria-label="Masquer la note moyenne"
                 />
               </div>
             </CardContent>
@@ -441,12 +548,15 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                 <Eye className="h-5 w-5" />
                 Aperçu du produit
               </CardTitle>
-              <CardDescription>
-                Comment votre produit apparaîtra aux clients
-              </CardDescription>
+              <CardDescription>Comment votre produit apparaîtra aux clients</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className={cn("mx-auto bg-white border rounded-lg shadow-sm overflow-hidden", getPreviewSize())}>
+              <div
+                className={cn(
+                  'mx-auto bg-white border rounded-lg shadow-sm overflow-hidden',
+                  getPreviewSize()
+                )}
+              >
                 {/* Image principale */}
                 <div className="aspect-square bg-gray-100 flex items-center justify-center">
                   {formData.image_url ? (
@@ -465,18 +575,18 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
 
                 {/* Informations du produit */}
                 <div className="p-4 space-y-3">
-                  <h3 className="font-semibold text-lg">
-                    {formData.name || "Nom du produit"}
-                  </h3>
-                  
+                  <h3 className="font-semibold text-lg">{formData.name || 'Nom du produit'}</h3>
+
                   <p className="text-sm text-gray-600 line-clamp-2">
-                    {formData.short_description || formData.description || "Description du produit"}
+                    {formData.short_description || formData.description || 'Description du produit'}
                   </p>
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-lg font-bold">
-                        {formData.price ? `${formData.price} ${formData.currency || 'XOF'}` : 'Prix'}
+                        {formData.price
+                          ? `${formData.price} ${formData.currency || 'XOF'}`
+                          : 'Prix'}
                       </span>
                       {formData.promotional_price && (
                         <span className="text-sm text-gray-500 line-through">
@@ -484,23 +594,27 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
                         </span>
                       )}
                     </div>
-                    
+
                     {formData.featured && (
-                      <Badge variant="secondary" aria-label="Produit en vedette">Vedette</Badge>
+                      <Badge variant="secondary" aria-label="Produit en vedette">
+                        Vedette
+                      </Badge>
                     )}
                   </div>
 
                   {/* Galerie miniatures */}
                   {(formData.gallery_images || []).length > 0 && (
                     <div className="flex gap-2 overflow-x-auto">
-                      {(formData.gallery_images || []).slice(0, 4).map((url: string, index: number) => (
-                        <img
-                          key={index}
-                          src={url}
-                          alt={`Miniature ${index + 1} de la galerie`}
-                          className="w-12 h-12 object-cover rounded border"
-                        />
-                      ))}
+                      {(formData.gallery_images || [])
+                        .slice(0, 4)
+                        .map((url: string, index: number) => (
+                          <img
+                            key={index}
+                            src={url}
+                            alt={`Miniature ${index + 1} de la galerie`}
+                            className="w-12 h-12 object-cover rounded border"
+                          />
+                        ))}
                       {(formData.gallery_images || []).length > 4 && (
                         <div className="w-12 h-12 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-500">
                           +{(formData.gallery_images || []).length - 4}
@@ -525,29 +639,25 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Images principales</span>
-                  <Badge variant="secondary">
-                    {formData.image_url ? 1 : 0}
-                  </Badge>
+                  <Badge variant="secondary">{formData.image_url ? 1 : 0}</Badge>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Images galerie</span>
-                  <Badge variant="secondary">
-                    {(formData.gallery_images || []).length}
-                  </Badge>
+                  <Badge variant="secondary">{(formData.gallery_images || []).length}</Badge>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Vidéo</span>
-                  <Badge variant={formData.video_url ? "default" : "secondary"}>
-                    {formData.video_url ? "Oui" : "Non"}
+                  <Badge variant={formData.video_url ? 'default' : 'secondary'}>
+                    {formData.video_url ? 'Oui' : 'Non'}
                   </Badge>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Statut</span>
-                  <Badge variant={formData.featured ? "default" : "secondary"}>
-                    {formData.featured ? "Vedette" : "Normal"}
+                  <Badge variant={formData.featured ? 'default' : 'secondary'}>
+                    {formData.featured ? 'Vedette' : 'Normal'}
                   </Badge>
                 </div>
               </div>

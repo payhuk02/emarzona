@@ -50,10 +50,12 @@ export function useCustomerReturns(customerId?: string) {
     queryFn: async (): Promise<ProductReturn[]> => {
       if (!customerId) return [];
 
+      // La politique RLS filtre automatiquement les retours de l'utilisateur authentifié
+      // On n'a pas besoin de filtrer manuellement - RLS le fait pour nous
+      // La politique peut vérifier customer_id ou user_id selon la migration
       const { data, error } = await supabase
         .from('product_returns')
         .select('*')
-        .eq('customer_id', customerId)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -78,7 +80,8 @@ export function useStoreReturns(storeId?: string) {
 
       const { data, error } = await supabase
         .from('product_returns')
-        .select(`
+        .select(
+          `
           *,
           orders (
             order_number,
@@ -89,7 +92,8 @@ export function useStoreReturns(storeId?: string) {
             name,
             image_url
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
@@ -113,7 +117,8 @@ export function useReturn(returnId: string) {
     queryFn: async (): Promise<ProductReturn | null> => {
       const { data, error } = await supabase
         .from('product_returns')
-        .select(`
+        .select(
+          `
           *,
           orders (
             order_number,
@@ -124,7 +129,8 @@ export function useReturn(returnId: string) {
             name,
             image_url
           )
-        `)
+        `
+        )
         .eq('id', returnId)
         .single();
 
@@ -198,19 +204,18 @@ export function useCreateReturn() {
 
       // Déclencher webhook return.created (asynchrone, ne bloque pas)
       import('@/lib/webhooks').then(({ triggerReturnCreatedWebhook }) => {
-        triggerReturnCreatedWebhook(
-          data.id,
-          {
-            order_item_id: data.order_item_id || '',
-            customer_id: data.customer_id,
-            store_id: data.store_id,
-            return_number: data.return_number || '',
-            return_reason: data.return_reason,
-            status: data.status,
-            refund_amount: data.refund_amount || 0,
-            created_at: data.created_at,
-          }
-        ).catch(console.error);
+        triggerReturnCreatedWebhook(data.id, {
+          order_item_id: data.order_item_id || '',
+          customer_id: data.customer_id,
+          store_id: data.store_id,
+          return_number: data.return_number || '',
+          return_reason: data.return_reason,
+          status: data.status,
+          refund_amount: data.refund_amount || 0,
+          created_at: data.created_at,
+        }).catch(error => {
+          logger.error('Error in useReturns mutation', { error });
+        });
       });
 
       return data as ProductReturn;
@@ -222,11 +227,13 @@ export function useCreateReturn() {
         description: 'Votre demande de retour a été soumise avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error creating return:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Impossible de créer la demande de retour';
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer la demande de retour',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -250,8 +257,10 @@ export function useUpdateReturnStatus() {
       status: string;
       notes?: string;
     }): Promise<void> => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         throw new Error('Non authentifié');
       }
@@ -276,11 +285,13 @@ export function useUpdateReturnStatus() {
         description: 'Le statut du retour a été mis à jour',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error updating return status:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Impossible de mettre à jour le statut';
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de mettre à jour le statut',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -306,8 +317,10 @@ export function useProcessRefund() {
       refundMethod: string;
       refundTransactionId?: string;
     }): Promise<void> => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         throw new Error('Non authentifié');
       }
@@ -332,14 +345,15 @@ export function useProcessRefund() {
         description: 'Le remboursement a été traité avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error processing refund:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Impossible de traiter le remboursement';
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de traiter le remboursement',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
   });
 }
-

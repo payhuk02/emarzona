@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -33,14 +33,28 @@ import {
 import Papa from "papaparse";
 import { validateProductsImport } from "@/lib/validation/productSchemas";
 import { useToast } from "@/hooks/use-toast";
+import type { Product } from "@/hooks/useProducts";
+import type { z } from "zod";
+import type { ProductImportSchema } from "@/lib/validation/productSchemas";
+
+type ValidatedProduct = z.infer<typeof ProductImportSchema>;
+type ValidationSuccess = { index: number; data: ValidatedProduct };
+type ValidationError = { index: number; errors: Array<{ path: (string | number)[]; message: string }>; originalData: unknown };
+type ValidationResult = {
+  successes: ValidationSuccess[];
+  errors: ValidationError[];
+  total: number;
+  successCount: number;
+  errorCount: number;
+};
 
 interface ImportCSVDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onImportConfirmed: (products: any[]) => Promise<void>;
+  onImportConfirmed: (products: Product[]) => Promise<void>;
 }
 
-export const ImportCSVDialog = ({
+const ImportCSVDialogComponent = ({
   open,
   onOpenChange,
   onImportConfirmed,
@@ -50,11 +64,11 @@ export const ImportCSVDialog = ({
 
   const [parsing, setParsing] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [parsedData, setParsedData] = useState<any>(null);
-  const [validationResult, setValidationResult] = useState<any>(null);
+  const [parsedData, setParsedData] = useState<Papa.ParseResult<unknown> | null>(null);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [step, setStep] = useState<'upload' | 'preview'>('upload');
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -95,14 +109,14 @@ export const ImportCSVDialog = ({
         });
       },
     });
-  };
+  }, []); // Note: toast est stable, setParsing, setStep, setParsedData, setValidationResult sont stables
 
-  const handleConfirmImport = async () => {
+  const handleConfirmImport = useCallback(async () => {
     if (!validationResult || validationResult.successCount === 0) return;
 
     setImporting(true);
     try {
-      const validProducts = validationResult.successes.map((s: any) => s.data);
+      const validProducts = validationResult.successes.map((s: ValidationSuccess) => s.data) as Product[];
       await onImportConfirmed(validProducts);
       
       toast({
@@ -120,9 +134,9 @@ export const ImportCSVDialog = ({
     } finally {
       setImporting(false);
     }
-  };
+  }, [validationResult, onImportConfirmed]); // Note: toast est stable
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setParsedData(null);
     setValidationResult(null);
     setStep('upload');
@@ -130,9 +144,9 @@ export const ImportCSVDialog = ({
       fileInputRef.current.value = '';
     }
     onOpenChange(false);
-  };
+  }, [onOpenChange]);
 
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplate = useCallback(() => {
     const template = [
       ['name', 'slug', 'description', 'price', 'currency', 'product_type', 'category', 'licensing_type', 'license_terms', 'is_active', 'stock_quantity', 'sku', 'promotional_price', 'image_url'],
       ['Mon Produit', 'mon-produit', 'Description du produit', '10000', 'XOF', 'digital', 'Formation', 'standard', '', 'true', '100', 'SKU-001', '', ''],
@@ -151,11 +165,11 @@ export const ImportCSVDialog = ({
       title: "Template téléchargé",
       description: "Utilisez ce fichier comme modèle pour votre import",
     });
-  };
+  }, []); // Note: toast est stable
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileSpreadsheet className="h-5 w-5" />
@@ -263,7 +277,7 @@ export const ImportCSVDialog = ({
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {validationResult.successes.slice(0, 10).map((item: any, idx: number) => (
+                          {validationResult.successes.slice(0, 10).map((item: ValidationSuccess, idx: number) => (
                             <TableRow key={idx}>
                               <TableCell className="font-mono text-xs">{item.index + 1}</TableCell>
                               <TableCell className="font-medium">{item.data.name}</TableCell>
@@ -308,7 +322,7 @@ export const ImportCSVDialog = ({
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {validationResult.errors.slice(0, 5).map((item: any, idx: number) => (
+                          {validationResult.errors.slice(0, 5).map((item: ValidationError, idx: number) => (
                             <TableRow key={idx}>
                               <TableCell className="font-mono text-xs">{item.index + 1}</TableCell>
                               <TableCell className="text-xs">
@@ -316,7 +330,7 @@ export const ImportCSVDialog = ({
                               </TableCell>
                               <TableCell>
                                 <div className="space-y-1">
-                                  {item.errors.slice(0, 2).map((error: any, i: number) => (
+                                  {item.errors.slice(0, 2).map((error: { path: (string | number)[]; message: string }, i: number) => (
                                     <Badge key={i} variant="destructive" className="text-xs">
                                       {error.path.join('.')}: {error.message}
                                     </Badge>
@@ -382,4 +396,17 @@ export const ImportCSVDialog = ({
     </Dialog>
   );
 };
+
+ImportCSVDialogComponent.displayName = 'ImportCSVDialogComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const ImportCSVDialog = React.memo(ImportCSVDialogComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.open === nextProps.open &&
+    prevProps.onOpenChange === nextProps.onOpenChange &&
+    prevProps.onImportConfirmed === nextProps.onImportConfirmed
+  );
+});
+
+ImportCSVDialog.displayName = 'ImportCSVDialog';
 

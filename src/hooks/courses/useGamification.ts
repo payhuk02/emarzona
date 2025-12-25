@@ -43,7 +43,7 @@ export interface CourseBadge {
   icon_url?: string;
   badge_type: 'lesson_completion' | 'quiz_perfect' | 'streak' | 'engagement' | 'custom';
   points_required: number;
-  criteria: Record<string, any>;
+  criteria: Record<string, unknown>;
   display_order: number;
   is_visible: boolean;
   created_at: string;
@@ -68,7 +68,7 @@ export interface CourseAchievement {
   description?: string;
   icon_url?: string;
   achievement_type: 'completion' | 'perfect_score' | 'speed' | 'engagement' | 'streak' | 'custom';
-  criteria: Record<string, any>;
+  criteria: Record<string, unknown>;
   reward_points: number;
   display_order: number;
   is_visible: boolean;
@@ -310,15 +310,24 @@ export const useCourseLeaderboard = (courseId: string | undefined, limit: number
       }
 
       // Transform data
-      const leaderboard: LeaderboardEntry[] = (data || []).map((entry, index) => ({
-        user_id: entry.user_id,
-        user_name: (entry.user as any)?.raw_user_meta_data?.full_name || 'Utilisateur',
-        user_avatar: (entry.user as any)?.raw_user_meta_data?.avatar_url,
-        total_points: entry.total_points,
-        current_streak_days: entry.current_streak_days,
-        total_lessons_completed: entry.total_lessons_completed,
-        rank: index + 1,
-      }));
+      type UserWithMetadata = {
+        raw_user_meta_data?: {
+          full_name?: string;
+          avatar_url?: string;
+        };
+      };
+      const leaderboard: LeaderboardEntry[] = (data || []).map((entry, index) => {
+        const user = entry.user as UserWithMetadata | null;
+        return {
+          user_id: entry.user_id,
+          user_name: user?.raw_user_meta_data?.full_name || 'Utilisateur',
+          user_avatar: user?.raw_user_meta_data?.avatar_url,
+          total_points: entry.total_points,
+          current_streak_days: entry.current_streak_days,
+          total_lessons_completed: entry.total_lessons_completed,
+          rank: index + 1,
+        };
+      });
 
       return leaderboard;
     },
@@ -381,11 +390,12 @@ export const useAwardPoints = () => {
         description: variables.sourceDescription || 'Points gagnés',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible d\'attribuer les points';
       logger.error('Error in useAwardPoints', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'attribuer les points',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -479,11 +489,12 @@ export const useCreateBadge = () => {
         description: 'Le badge a été créé avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de créer le badge';
       logger.error('Error in useCreateBadge', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer le badge',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -524,11 +535,12 @@ export const useCreateAchievement = () => {
         description: 'L\'achievement a été créé avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de créer l\'achievement';
       logger.error('Error in useCreateAchievement', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer l\'achievement',
+        description: errorMessage,
         variant: 'destructive',
       });
     },

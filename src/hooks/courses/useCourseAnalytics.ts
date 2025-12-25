@@ -272,10 +272,10 @@ export const useTopLessons = (courseId: string) => {
  * Helper pour générer un session_id unique
  */
 export const getSessionId = (): string => {
-  let sessionId = sessionStorage.getItem('payhuk_session_id');
+  let sessionId = sessionStorage.getItem('emarzona_session_id');
   if (!sessionId) {
     sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    sessionStorage.setItem('payhuk_session_id', sessionId);
+    sessionStorage.setItem('emarzona_session_id', sessionId);
   }
   return sessionId;
 };

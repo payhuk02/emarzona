@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { useAuth } from '@/contexts/AuthContext';
+import { DHLService, FedExService, UPSService, ChronopostService } from '@/integrations/shipping';
 
 // =====================================================
 // TYPES
@@ -376,13 +377,49 @@ export const useCreateReturn = () => {
 
       return data as ProductReturn;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['returns'] });
       queryClient.invalidateQueries({ queryKey: ['store-returns'] });
       toast({
         title: '✅ Demande de retour créée',
         description: `Votre demande de retour ${data.return_number} a été créée avec succès`,
       });
+
+      // Déclencher la notification de retour (création)
+      import('@/services/physical/notificationTriggers')
+        .then(({ triggerReturnNotification }) => {
+          triggerReturnNotification(data.id, 'requested').catch((error) => {
+            logger.error('Error triggering return notification', { error });
+          });
+        })
+        .catch((error) => {
+          logger.error('Error loading notification triggers', { error });
+        });
+
+      // Déclencher webhook pour retour demandé - Système unifié
+      if (data.store_id) {
+        import('@/lib/webhooks/unified-webhook-service')
+          .then(({ triggerUnifiedWebhook }) => {
+            triggerUnifiedWebhook(
+              data.store_id,
+              'return.requested',
+              {
+                return_id: data.id,
+                return_number: data.return_number,
+                order_id: data.order_id,
+                status: 'requested',
+                return_reason: data.return_reason,
+                quantity: data.quantity,
+              },
+              data.id
+            ).catch((error) => {
+              logger.error('Error triggering return_requested webhook', { error });
+            });
+          })
+          .catch((error) => {
+            logger.error('Error loading unified webhook service', { error });
+          });
+      }
     },
     onError: (error: any) => {
       logger.error('Error in useCreateReturn', { error });
@@ -426,13 +463,47 @@ export const useApproveReturn = () => {
 
       return data as ProductReturn;
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['returns'] });
       queryClient.invalidateQueries({ queryKey: ['store-returns'] });
       toast({
         title: '✅ Retour approuvé',
         description: 'Le retour a été approuvé avec succès',
       });
+
+      // Déclencher la notification de retour
+      import('@/services/physical/notificationTriggers')
+        .then(({ triggerReturnNotification }) => {
+          triggerReturnNotification(data.id, 'approved').catch((error) => {
+            logger.error('Error triggering return notification', { error });
+          });
+        })
+        .catch((error) => {
+          logger.error('Error loading notification triggers', { error });
+        });
+
+      // Déclencher webhook pour retour approuvé - Système unifié
+      if (data.store_id) {
+        import('@/lib/webhooks/unified-webhook-service')
+          .then(({ triggerUnifiedWebhook }) => {
+            triggerUnifiedWebhook(
+              data.store_id,
+              'return.approved',
+              {
+                return_id: data.id,
+                return_number: data.return_number,
+                order_id: data.order_id,
+                status: 'approved',
+              },
+              data.id
+            ).catch((error) => {
+              logger.error('Error triggering return_approved webhook', { error });
+            });
+          })
+          .catch((error) => {
+            logger.error('Error loading unified webhook service', { error });
+          });
+      }
     },
     onError: (error: any) => {
       logger.error('Error in useApproveReturn', { error });
@@ -477,13 +548,48 @@ export const useRejectReturn = () => {
 
       return data as ProductReturn;
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['returns'] });
       queryClient.invalidateQueries({ queryKey: ['store-returns'] });
       toast({
         title: '✅ Retour rejeté',
         description: 'Le retour a été rejeté',
       });
+
+      // Déclencher la notification de retour
+      import('@/services/physical/notificationTriggers')
+        .then(({ triggerReturnNotification }) => {
+          triggerReturnNotification(data.id, 'rejected').catch((error) => {
+            logger.error('Error triggering return notification', { error });
+          });
+        })
+        .catch((error) => {
+          logger.error('Error loading notification triggers', { error });
+        });
+
+      // Déclencher webhook pour retour rejeté - Système unifié
+      if (data.store_id) {
+        import('@/lib/webhooks/unified-webhook-service')
+          .then(({ triggerUnifiedWebhook }) => {
+            triggerUnifiedWebhook(
+              data.store_id,
+              'return.rejected',
+              {
+                return_id: data.id,
+                return_number: data.return_number,
+                order_id: data.order_id,
+                status: 'rejected',
+                rejection_reason: data.rejection_reason || variables.rejectionReason,
+              },
+              data.id
+            ).catch((error) => {
+              logger.error('Error triggering return_rejected webhook', { error });
+            });
+          })
+          .catch((error) => {
+            logger.error('Error loading unified webhook service', { error });
+          });
+      }
     },
     onError: (error: any) => {
       logger.error('Error in useRejectReturn', { error });
@@ -549,19 +655,341 @@ export const useUpdateReturnStatus = () => {
 
       return data as ProductReturn;
     },
-    onSuccess: () => {
+    onSuccess: async (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['returns'] });
       queryClient.invalidateQueries({ queryKey: ['store-returns'] });
       toast({
         title: '✅ Statut mis à jour',
         description: 'Le statut du retour a été mis à jour',
       });
+
+      // Déclencher la notification de retour
+      import('@/services/physical/notificationTriggers')
+        .then(({ triggerReturnNotification }) => {
+          triggerReturnNotification(data.id, variables.status).catch((error) => {
+            logger.error('Error triggering return notification', { error });
+          });
+        })
+        .catch((error) => {
+          logger.error('Error loading notification triggers', { error });
+        });
+
+      // Déclencher webhook pour changement de statut retour - Système unifié
+      if (data.store_id) {
+        import('@/lib/webhooks/unified-webhook-service')
+          .then(({ triggerUnifiedWebhook }) => {
+            const eventTypeMap: Record<string, string> = {
+              'approved': 'return.approved',
+              'rejected': 'return.rejected',
+              'return_received': 'return.received',
+              'refunded': 'return.refunded',
+            };
+
+            const eventType = eventTypeMap[variables.status];
+            if (eventType) {
+              triggerUnifiedWebhook(
+                data.store_id,
+                eventType,
+                {
+                  return_id: data.id,
+                  return_number: data.return_number,
+                  order_id: data.order_id,
+                  status: variables.status,
+                  refund_amount: data.refund_amount,
+                },
+                data.id
+              ).catch((error) => {
+                logger.error(`Error triggering ${eventType} webhook`, { error });
+              });
+            }
+          })
+          .catch((error) => {
+            logger.error('Error loading unified webhook service', { error });
+          });
+      }
     },
     onError: (error: any) => {
       logger.error('Error in useUpdateReturnStatus', { error });
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de mettre à jour le statut',
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
+/**
+ * useGenerateReturnLabel - Générer une étiquette de retour
+ * 
+ * Récupère les détails de la commande originale, inverse les adresses,
+ * et génère un label de retour via le même transporteur
+ */
+export const useGenerateReturnLabel = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({
+      returnId,
+      serviceType = 'standard',
+    }: {
+      returnId: string;
+      serviceType?: string;
+    }) => {
+      // 1. Récupérer les détails du retour
+      const { data: returnData, error: returnError } = await supabase
+        .from('product_returns')
+        .select(`
+          *,
+          order:orders(
+            id,
+            store_id,
+            shipping_address,
+            customer_email,
+            customer_phone
+          )
+        `)
+        .eq('id', returnId)
+        .single();
+
+      if (returnError || !returnData) {
+        throw new Error('Retour non trouvé');
+      }
+
+      const returnItem = returnData as ProductReturn & {
+        order: {
+          id: string;
+          store_id: string;
+          shipping_address: Record<string, any>;
+          customer_email?: string;
+          customer_phone?: string;
+        };
+      };
+
+      // 2. Récupérer le label d'expédition original de la commande
+      const { data: originalLabel, error: labelError } = await supabase
+        .from('shipping_labels')
+        .select(`
+          *,
+          carrier:shipping_carriers(*)
+        `)
+        .eq('order_id', returnItem.order_id)
+        .eq('status', 'generated')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (labelError || !originalLabel) {
+        throw new Error('Label d\'expédition original non trouvé. Impossible de générer un label de retour.');
+      }
+
+      const carrier = originalLabel.carrier as any;
+
+      // 3. Récupérer l'adresse du store (adresse de retour)
+      const { data: store, error: storeError } = await supabase
+        .from('stores')
+        .select('id, name, address, city, state, postal_code, country, phone, email')
+        .eq('id', returnItem.store_id)
+        .single();
+
+      if (storeError || !store) {
+        throw new Error('Boutique non trouvée');
+      }
+
+      // 4. Préparer les adresses (inversées pour le retour)
+      const fromAddress = {
+        name: returnItem.order.shipping_address?.name || 'Client',
+        addressLine1: returnItem.order.shipping_address?.address_line1 || returnItem.order.shipping_address?.address || '',
+        addressLine2: returnItem.order.shipping_address?.address_line2 || '',
+        city: returnItem.order.shipping_address?.city || '',
+        state: returnItem.order.shipping_address?.state || returnItem.order.shipping_address?.state_province || '',
+        postalCode: returnItem.order.shipping_address?.postal_code || returnItem.order.shipping_address?.zip_code || '',
+        country: returnItem.order.shipping_address?.country || returnItem.order.shipping_address?.country_code || '',
+        phone: returnItem.order.customer_phone || returnItem.order.shipping_address?.phone || '',
+        email: returnItem.order.customer_email || returnItem.order.shipping_address?.email || '',
+      };
+
+      const toAddress = {
+        name: store.name || 'Boutique',
+        addressLine1: store.address || '',
+        addressLine2: '',
+        city: store.city || '',
+        state: store.state || '',
+        postalCode: store.postal_code || '',
+        country: store.country || '',
+        phone: store.phone || '',
+        email: store.email || '',
+      };
+
+      // 5. Utiliser les mêmes dimensions et poids que l'expédition originale
+      const weight = originalLabel.weight || 1;
+      const dimensions = originalLabel.dimensions || { length: 10, width: 10, height: 10 };
+
+      // 6. Générer le numéro d'étiquette de retour
+      const { data: labelNumber } = await supabase.rpc('generate_shipping_label_number');
+
+      // 7. Générer l'étiquette via l'API du transporteur
+      let labelResponse: any;
+
+      if (carrier.carrier_name === 'DHL' || carrier.carrier_name === 'DHL_Express') {
+        const dhlService = new DHLService({
+          apiKey: carrier.api_key || '',
+          apiSecret: carrier.api_secret || '',
+          apiUrl: carrier.api_url,
+          testMode: carrier.test_mode,
+        });
+
+        labelResponse = await dhlService.createLabel({
+          shipment: {
+            shipper: fromAddress,
+            recipient: toAddress,
+            packages: [{
+              weight,
+              dimensions: dimensions as { length: number; width: number; height: number },
+            }],
+            serviceType,
+          },
+        });
+      } else if (carrier.carrier_name === 'FedEx' || carrier.carrier_name === 'FedEx_Express') {
+        const fedexService = new FedExService({
+          apiKey: carrier.api_key || '',
+          apiSecret: carrier.api_secret || '',
+          accountNumber: carrier.account_number || '',
+          meterNumber: carrier.meter_number,
+          apiUrl: carrier.api_url,
+          testMode: carrier.test_mode,
+        });
+
+        labelResponse = await fedexService.createLabel({
+          shipment: {
+            shipper: fromAddress,
+            recipient: toAddress,
+            packages: [{
+              weight,
+              dimensions: dimensions as { length: number; width: number; height: number },
+            }],
+            serviceType,
+          },
+        });
+      } else if (carrier.carrier_name === 'UPS' || carrier.carrier_name === 'UPS_Express') {
+        const upsService = new UPSService({
+          apiKey: carrier.api_key || '',
+          apiSecret: carrier.api_secret || '',
+          accountNumber: carrier.account_number || '',
+          apiUrl: carrier.api_url,
+          testMode: carrier.test_mode,
+        });
+
+        labelResponse = await upsService.createLabel({
+          shipment: {
+            shipper: {
+              ...fromAddress,
+              state: fromAddress.state || fromAddress.state,
+            },
+            recipient: {
+              ...toAddress,
+              state: toAddress.state || toAddress.state,
+            },
+            packages: [{
+              weight,
+              dimensions: dimensions as { length: number; width: number; height: number },
+            }],
+            serviceType,
+          },
+        });
+      } else if (carrier.carrier_name === 'Chronopost') {
+        const chronopostService = new ChronopostService({
+          accountNumber: carrier.account_number || '',
+          password: carrier.api_secret || '',
+          apiUrl: carrier.api_url,
+          testMode: carrier.test_mode,
+        });
+
+        labelResponse = await chronopostService.createLabel({
+          shipment: {
+            shipper: fromAddress,
+            recipient: toAddress,
+            packages: [{
+              weight,
+              dimensions: dimensions as { length: number; width: number; height: number },
+            }],
+            serviceType,
+          },
+        });
+      } else {
+        throw new Error(`Transporteur non supporté pour les retours: ${carrier.carrier_name}`);
+      }
+
+      // 8. Sauvegarder l'étiquette de retour en base
+      const { data: returnLabel, error: labelSaveError } = await supabase
+        .from('shipping_labels')
+        .insert({
+          store_id: returnItem.store_id,
+          order_id: returnItem.order_id,
+          carrier_id: carrier.id,
+          label_number: labelNumber || `RET-${Date.now()}`,
+          tracking_number: labelResponse.trackingNumber,
+          service_type: serviceType,
+          service_name: labelResponse.serviceName || 'Retour standard',
+          shipping_cost: labelResponse.shippingCost || 0,
+          currency: labelResponse.currency || 'XOF',
+          insurance_cost: 0,
+          label_url: labelResponse.labelUrl,
+          label_format: 'PDF',
+          weight,
+          weight_unit: originalLabel.weight_unit || 'kg',
+          dimensions,
+          from_address: fromAddress,
+          to_address: toAddress,
+          status: 'generated',
+          generated_at: new Date().toISOString(),
+          api_response: labelResponse,
+          notes: `Label de retour pour RMA ${returnItem.return_number}`,
+        })
+        .select()
+        .single();
+
+      if (labelSaveError) {
+        logger.error('Error saving return shipping label', { error: labelSaveError });
+        throw labelSaveError;
+      }
+
+      // 9. Mettre à jour le retour avec le tracking number et le carrier
+      const { error: updateReturnError } = await supabase
+        .from('product_returns')
+        .update({
+          return_tracking_number: labelResponse.trackingNumber,
+          return_carrier: carrier.carrier_name,
+          return_shipping_cost: labelResponse.shippingCost || 0,
+        })
+        .eq('id', returnId);
+
+      if (updateReturnError) {
+        logger.error('Error updating return with tracking number', { error: updateReturnError });
+        // Ne pas faire échouer la mutation si la mise à jour échoue
+      }
+
+      return {
+        label: returnLabel,
+        trackingNumber: labelResponse.trackingNumber,
+        labelUrl: labelResponse.labelUrl,
+      };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['returns'] });
+      queryClient.invalidateQueries({ queryKey: ['store-returns'] });
+      queryClient.invalidateQueries({ queryKey: ['shipping-labels'] });
+      toast({
+        title: '✅ Étiquette de retour générée',
+        description: `L'étiquette de retour a été générée avec succès. Numéro de suivi: ${data.trackingNumber}`,
+      });
+    },
+    onError: (error: any) => {
+      logger.error('Error in useGenerateReturnLabel', { error });
+      toast({
+        title: '❌ Erreur',
+        description: error.message || 'Impossible de générer l\'étiquette de retour',
         variant: 'destructive',
       });
     },

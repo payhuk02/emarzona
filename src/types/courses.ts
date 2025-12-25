@@ -424,22 +424,22 @@ export interface InstructorProfile {
 // FORM DATA (Pour les formulaires)
 // ==============================================
 
-export interface CourseFormData extends Partial<Course> {
+export type CourseFormData = Partial<Course> & {
   // Champs additionnels pour le formulaire
-}
+};
 
-export interface CourseSectionFormData extends Partial<CourseSection> {
+export type CourseSectionFormData = Partial<CourseSection> & {
   // Champs additionnels
-}
+};
 
-export interface CourseLessonFormData extends Partial<CourseLesson> {
+export type CourseLessonFormData = Partial<CourseLesson> & {
   // Champs additionnels
   video_file?: File;
-}
+};
 
-export interface CourseQuizFormData extends Partial<CourseQuiz> {
+export type CourseQuizFormData = Partial<CourseQuiz> & {
   // Champs additionnels
-}
+};
 
 export interface DiscussionFormData {
   title: string;

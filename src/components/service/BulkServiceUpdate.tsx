@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
+import { logger } from '@/lib/logger';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -173,7 +174,7 @@ export const BulkServiceUpdate: React.FC<BulkServiceUpdateProps> = ({
   const calculateChanges = () => {
     return Array.from(selectedIds).map((id) => {
       const service = services.find((s) => s.id === id)!;
-      let changes: Partial<BulkServiceItem> = {};
+      const changes: Partial<BulkServiceItem> = {};
 
       switch (updateField) {
         case 'price':
@@ -246,7 +247,7 @@ export const BulkServiceUpdate: React.FC<BulkServiceUpdateProps> = ({
       setSelectedIds(new Set());
       setUpdateValue('');
     } catch (error) {
-      console.error('Error updating services:', error);
+      logger.error('Error updating services', { error, selectedIds: Array.from(selectedIds) });
     } finally {
       setIsUpdating(false);
       setUpdateProgress(0);

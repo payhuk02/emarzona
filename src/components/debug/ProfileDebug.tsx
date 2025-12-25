@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 import { CheckCircle2, XCircle, Loader2, RefreshCw, Database, User, AlertCircle } from 'lucide-react';
 
 export const ProfileDebug = () => {
@@ -118,7 +119,7 @@ export const ProfileDebug = () => {
       .single();
     
     if (error) {
-      console.error('Error fetching profile:', error);
+      logger.error('Error fetching profile', { error, userId: user.id });
       return;
     }
     

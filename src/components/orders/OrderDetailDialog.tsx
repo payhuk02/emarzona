@@ -1,15 +1,35 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { Calendar, User, CreditCard, Package, MapPin, Phone, Mail, FileText, MessageSquare, Shield, AlertCircle, Percent } from "lucide-react";
-import { Order } from "@/hooks/useOrders";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useUnreadCount } from "@/hooks/useUnreadCount";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import {
+  Calendar,
+  User,
+  CreditCard,
+  Package,
+  MapPin,
+  Phone,
+  Mail,
+  FileText,
+  MessageSquare,
+  Shield,
+  AlertCircle,
+  Percent,
+} from 'lucide-react';
+import { Order, OrderTransaction } from '@/hooks/useOrders';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useUnreadCount } from '@/hooks/useUnreadCount';
+import { logger } from '@/lib/logger';
 
 interface OrderDetailDialogProps {
   open: boolean;
@@ -25,101 +45,130 @@ interface OrderItem {
   total_price: number;
 }
 
-export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDialogProps) => {
+const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDialogProps) => {
   const navigate = useNavigate();
   const [items, setItems] = useState<OrderItem[]>([]);
+  const [transactions, setTransactions] = useState<OrderTransaction[]>([]);
   const [loading, setLoading] = useState(false);
-  
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
+
   // Hook pour compter les messages non lus
   const { data: unreadCount = 0 } = useUnreadCount(order?.id || '');
 
   useEffect(() => {
-    const fetchOrderItems = async () => {
+    const fetchOrderData = async () => {
       if (!order?.id) return;
-      
+
       setLoading(true);
+      setTransactionsLoading(true);
+
       try {
-        const { data, error } = await supabase
+        // Fetch order items
+        const { data: itemsData, error: itemsError } = await supabase
           .from('order_items')
           .select('*')
           .eq('order_id', order.id);
 
-        if (error) throw error;
-        setItems(data || []);
+        if (itemsError) throw itemsError;
+        setItems(itemsData || []);
+
+        // Fetch transactions
+        const { data: transactionsData, error: transactionsError } = await supabase
+          .from('transactions')
+          .select(
+            'id, moneroo_transaction_id, amount, currency, status, moneroo_payment_method, created_at, completed_at'
+          )
+          .eq('order_id', order.id)
+          .order('created_at', { ascending: false });
+
+        if (transactionsError) {
+          logger.warn('Erreur chargement transactions', {
+            error: transactionsError,
+            orderId: order.id,
+          });
+        } else {
+          setTransactions(
+            (transactionsData || []).map(t => ({
+              id: t.id,
+              moneroo_transaction_id: t.moneroo_transaction_id,
+              amount: Number(t.amount || 0),
+              currency: t.currency || 'XOF',
+              status: t.status || 'pending',
+              payment_method: t.moneroo_payment_method,
+              created_at: t.created_at,
+              completed_at: t.completed_at,
+            }))
+          );
+        }
       } catch (error) {
-        console.error('Erreur chargement items:', error);
+        logger.error('Erreur chargement données commande', { error, orderId: order.id });
       } finally {
         setLoading(false);
+        setTransactionsLoading(false);
       }
     };
 
     if (open && order) {
-      fetchOrderItems();
+      fetchOrderData();
+    } else {
+      // Reset when dialog closes
+      setItems([]);
+      setTransactions([]);
     }
   }, [open, order]);
 
   if (!order) return null;
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      pending: "secondary",
-      processing: "default",
-      completed: "outline",
-      cancelled: "destructive",
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+      pending: 'secondary',
+      processing: 'default',
+      completed: 'outline',
+      cancelled: 'destructive',
     };
 
     const labels: Record<string, string> = {
-      pending: "En attente",
-      processing: "En cours",
-      completed: "Terminée",
-      cancelled: "Annulée",
+      pending: 'En attente',
+      processing: 'En cours',
+      completed: 'Terminée',
+      cancelled: 'Annulée',
     };
 
-    return (
-      <Badge variant={variants[status] || "default"}>
-        {labels[status] || status}
-      </Badge>
-    );
+    return <Badge variant={variants[status] || 'default'}>{labels[status] || status}</Badge>;
   };
 
   const getPaymentBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      pending: "secondary",
-      paid: "outline",
-      failed: "destructive",
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+      pending: 'secondary',
+      paid: 'outline',
+      failed: 'destructive',
     };
 
     const labels: Record<string, string> = {
-      pending: "En attente",
-      paid: "Payée",
-      failed: "Échouée",
+      pending: 'En attente',
+      paid: 'Payée',
+      failed: 'Échouée',
     };
 
-    return (
-      <Badge variant={variants[status] || "default"}>
-        {labels[status] || status}
-      </Badge>
-    );
+    return <Badge variant={variants[status] || 'default'}>{labels[status] || status}</Badge>;
   };
 
   const formatPrice = (price: number) => {
-    return price.toLocaleString('fr-FR', { 
+    return price.toLocaleString('fr-FR', {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2 
+      maximumFractionDigits: 2,
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
             Commande {order.order_number}
           </DialogTitle>
-          <DialogDescription>
-            Détails complets de la commande
-          </DialogDescription>
+          <DialogDescription>Détails complets de la commande</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -130,7 +179,7 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
                 <FileText className="h-4 w-4" />
                 Informations
               </h3>
-              
+
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -168,7 +217,7 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
                 <User className="h-4 w-4" />
                 Client
               </h3>
-              
+
               {order.customers ? (
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
@@ -189,12 +238,105 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
                       <span className="text-muted-foreground">{order.customers.phone}</span>
                     </div>
                   )}
+
+                  {/* Adresse client complète */}
+                  {(order.customers.address ||
+                    order.customers.city ||
+                    order.customers.postal_code ||
+                    order.customers.country) && (
+                    <div className="flex items-start gap-2 pt-1">
+                      <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                      <div className="text-muted-foreground space-y-0.5">
+                        {order.customers.address && <p>{order.customers.address}</p>}
+                        {[
+                          order.customers.postal_code,
+                          order.customers.city,
+                          order.customers.country,
+                        ].filter(Boolean).length > 0 && (
+                          <p>
+                            {[
+                              order.customers.postal_code,
+                              order.customers.city,
+                              order.customers.country,
+                            ]
+                              .filter(Boolean)
+                              .join(', ')}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">Client non spécifié</p>
               )}
             </div>
           </div>
+
+          {/* Adresse de livraison depuis checkout */}
+          {order.shipping_address && (
+            <>
+              <Separator />
+              <div className="space-y-3">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Adresse de livraison
+                </h3>
+                <div className="space-y-2 text-sm">
+                  {order.shipping_address.full_name && (
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{order.shipping_address.full_name}</span>
+                    </div>
+                  )}
+
+                  {order.shipping_address.email && (
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">{order.shipping_address.email}</span>
+                    </div>
+                  )}
+
+                  {order.shipping_address.phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">{order.shipping_address.phone}</span>
+                    </div>
+                  )}
+
+                  {order.shipping_address.address_line1 && (
+                    <div className="flex items-start gap-2 pt-1">
+                      <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                      <div className="text-muted-foreground space-y-0.5">
+                        <p>
+                          {order.shipping_address.address_line1}
+                          {order.shipping_address.address_line2 &&
+                            `, ${order.shipping_address.address_line2}`}
+                        </p>
+                        {[
+                          order.shipping_address.postal_code,
+                          order.shipping_address.city,
+                          order.shipping_address.state,
+                          order.shipping_address.country,
+                        ].filter(Boolean).length > 0 && (
+                          <p>
+                            {[
+                              order.shipping_address.postal_code,
+                              order.shipping_address.city,
+                              order.shipping_address.state,
+                              order.shipping_address.country,
+                            ]
+                              .filter(Boolean)
+                              .join(', ')}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
 
           <Separator />
 
@@ -209,9 +351,9 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
               <div className="text-sm text-muted-foreground">Chargement...</div>
             ) : items.length > 0 ? (
               <div className="space-y-2">
-                {items.map((item) => (
-                  <div 
-                    key={item.id} 
+                {items.map(item => (
+                  <div
+                    key={item.id}
                     className="flex justify-between items-center p-3 bg-muted/50 rounded-lg"
                   >
                     <div className="flex-1">
@@ -239,7 +381,9 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
           <div className="space-y-2">
             <div className="flex justify-between items-center text-lg font-bold">
               <span>Total</span>
-              <span>{formatPrice(order.total_amount)} {order.currency}</span>
+              <span>
+                {formatPrice(order.total_amount)} {order.currency}
+              </span>
             </div>
           </div>
 
@@ -254,14 +398,17 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
                   Paiement Complet
                 </Badge>
               )}
-              
+
               {order.payment_type === 'percentage' && (
                 <Badge variant="default" className="bg-blue-600 gap-1">
                   <Percent className="h-3 w-3" />
-                  Paiement Partiel {order.percentage_paid && order.total_amount ? `(${Math.round((order.percentage_paid / order.total_amount) * 100)}%)` : ''}
+                  Paiement Partiel{' '}
+                  {order.percentage_paid && order.total_amount
+                    ? `(${Math.round((order.percentage_paid / order.total_amount) * 100)}%)`
+                    : ''}
                 </Badge>
               )}
-              
+
               {order.payment_type === 'delivery_secured' && (
                 <Badge variant="default" className="bg-yellow-600 gap-1">
                   <Shield className="h-3 w-3" />
@@ -287,9 +434,9 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
                         {formatPrice(order.remaining_amount)} {order.currency}
                       </span>
                     </div>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
+                    <Button
+                      size="sm"
+                      variant="outline"
                       className="w-full mt-2 border-blue-500 text-blue-700 hover:bg-blue-50"
                     >
                       Payer le solde
@@ -309,7 +456,8 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
                       Fonds sécurisés en escrow
                     </p>
                     <p className="text-xs text-yellow-700 dark:text-yellow-300">
-                      Les fonds seront libérés après confirmation de livraison ou automatiquement après le délai de sécurité.
+                      Les fonds seront libérés après confirmation de livraison ou automatiquement
+                      après le délai de sécurité.
                     </p>
                   </div>
                 </div>
@@ -333,6 +481,134 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
             </>
           )}
 
+          {/* Metadata (informations supplémentaires) */}
+          {order.metadata && Object.keys(order.metadata).length > 0 && (
+            <>
+              <Separator />
+              <div className="space-y-2">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Informations supplémentaires
+                </h3>
+                <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                  <pre className="whitespace-pre-wrap text-xs">
+                    {JSON.stringify(order.metadata, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Transactions/Paiements */}
+          <Separator />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                Paiements ({transactions.length})
+              </h3>
+              {transactions.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    navigate('/dashboard/payments-customers');
+                    onOpenChange(false);
+                  }}
+                >
+                  Voir tous les paiements
+                </Button>
+              )}
+            </div>
+
+            {transactionsLoading ? (
+              <div className="text-sm text-muted-foreground">Chargement des paiements...</div>
+            ) : transactions.length > 0 ? (
+              <div className="space-y-2">
+                {transactions.map(transaction => {
+                  const getTransactionStatusBadge = (status: string) => {
+                    const variants: Record<
+                      string,
+                      'default' | 'secondary' | 'destructive' | 'outline'
+                    > = {
+                      completed: 'outline',
+                      processing: 'default',
+                      pending: 'secondary',
+                      failed: 'destructive',
+                      cancelled: 'destructive',
+                    };
+
+                    const labels: Record<string, string> = {
+                      completed: 'Complété',
+                      processing: 'En traitement',
+                      pending: 'En attente',
+                      failed: 'Échoué',
+                      cancelled: 'Annulé',
+                    };
+
+                    return (
+                      <Badge variant={variants[status] || 'default'}>
+                        {labels[status] || status}
+                      </Badge>
+                    );
+                  };
+
+                  return (
+                    <div
+                      key={transaction.id}
+                      className="flex justify-between items-center p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+                      onClick={() => {
+                        navigate('/dashboard/payments-customers');
+                        onOpenChange(false);
+                      }}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium text-sm">
+                            {transaction.amount.toLocaleString('fr-FR')} {transaction.currency}
+                          </span>
+                          {getTransactionStatusBadge(transaction.status)}
+                          {transaction.payment_method && (
+                            <Badge variant="outline" className="text-xs">
+                              {transaction.payment_method}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {transaction.moneroo_transaction_id && (
+                            <span className="font-mono">
+                              ID: {transaction.moneroo_transaction_id.substring(0, 12)}...
+                            </span>
+                          )}
+                          {transaction.moneroo_transaction_id && transaction.completed_at && ' • '}
+                          {transaction.completed_at && (
+                            <span>
+                              {format(new Date(transaction.completed_at), 'dd MMM yyyy HH:mm', {
+                                locale: fr,
+                              })}
+                            </span>
+                          )}
+                          {!transaction.completed_at && (
+                            <span>
+                              {format(new Date(transaction.created_at), 'dd MMM yyyy HH:mm', {
+                                locale: fr,
+                              })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Aucun paiement associé à cette commande
+              </p>
+            )}
+          </div>
+
           {/* Actions */}
           <div className="space-y-4 pt-4">
             {/* Primary Actions - Messagerie & Paiements */}
@@ -353,9 +629,9 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
                   </Badge>
                 )}
               </Button>
-              
+
               {/* Show Payment Management button for physical/service products */}
-              {(order as any).payment_type && (order as any).payment_type !== 'full' && (
+              {'payment_type' in order && order.payment_type && order.payment_type !== 'full' && (
                 <Button
                   variant="outline"
                   className="w-full border-blue-500 text-blue-700 hover:bg-blue-50"
@@ -403,3 +679,17 @@ export const OrderDetailDialog = ({ open, onOpenChange, order }: OrderDetailDial
   );
 };
 
+OrderDetailDialogComponent.displayName = 'OrderDetailDialogComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const OrderDetailDialog = React.memo(OrderDetailDialogComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.open === nextProps.open &&
+    prevProps.onOpenChange === nextProps.onOpenChange &&
+    prevProps.order?.id === nextProps.order?.id &&
+    prevProps.order?.status === nextProps.order?.status &&
+    prevProps.order?.total === nextProps.order?.total
+  );
+});
+
+OrderDetailDialog.displayName = 'OrderDetailDialog';

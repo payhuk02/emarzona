@@ -3,7 +3,7 @@
  * Bouton flottant pour ajouter rapidement une note pendant la lecture
  */
 
-import { FileText } from 'lucide-react';
+import { FileText } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { useAddNote } from '@/hooks/courses/useCourseNotes';
 import { useAuth } from '@/contexts/AuthContext';

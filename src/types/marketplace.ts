@@ -1,4 +1,6 @@
 // Types partagés pour le Marketplace
+import type { JSONValue } from './common';
+
 export interface Product {
   id: string;
   store_id: string;
@@ -10,7 +12,7 @@ export interface Product {
   promotional_price?: number | null;
   currency: string;
   image_url: string | null;
-  images?: any; // Json field
+  images?: JSONValue; // Json field
   category: string | null;
   product_type: string | null;
   rating: number | null;
@@ -22,6 +24,10 @@ export interface Product {
   tags?: string[];
   licensing_type?: 'standard' | 'plr' | 'copyrighted' | null;
   license_terms?: string | null;
+  // Champs pour produits physiques
+  free_shipping?: boolean | null;
+  shipping_cost?: number | null;
+  stock_quantity?: number | null;
   stores?: {
     id: string;
     name: string;
@@ -45,6 +51,31 @@ export interface FilterState {
   verifiedOnly: boolean;
   featuredOnly: boolean;
   inStock: boolean;
+
+  // Filtres spécifiques Digital
+  digitalSubType?: string;
+  instantDelivery?: boolean;
+
+  // Filtres spécifiques Physical
+  stockAvailability?: 'all' | 'in_stock' | 'low_stock' | 'out_of_stock';
+  shippingType?: 'all' | 'free' | 'paid' | 'pickup';
+  physicalCategory?: string;
+
+  // Filtres spécifiques Service
+  serviceType?: string;
+  locationType?: 'all' | 'online' | 'on_site' | 'customer_location';
+  calendarAvailable?: boolean;
+
+  // Filtres spécifiques Course
+  difficulty?: 'all' | 'beginner' | 'intermediate' | 'advanced';
+  accessType?: 'all' | 'lifetime' | 'subscription';
+  courseDuration?: 'all' | '<1h' | '1-5h' | '5-10h' | '10h+';
+
+  // Filtres spécifiques Artist
+  artistType?: string;
+  editionType?: 'all' | 'original' | 'limited_edition' | 'print' | 'reproduction';
+  certificateOfAuthenticity?: boolean;
+  artworkAvailability?: 'all' | 'available' | 'limited' | 'sold_out';
 }
 
 export interface PaginationState {

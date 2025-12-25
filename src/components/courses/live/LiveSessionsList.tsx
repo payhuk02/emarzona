@@ -3,6 +3,7 @@
  * Liste des sessions en direct à venir et passées
  */
 
+import React, { useCallback } from 'react';
 import { Video, Calendar, Clock, Users, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,17 +21,17 @@ interface LiveSessionsListProps {
   userId: string;
 }
 
-export const LiveSessionsList = ({ courseId, enrollmentId, userId }: LiveSessionsListProps) => {
+const LiveSessionsListComponent = ({ courseId, enrollmentId, userId }: LiveSessionsListProps) => {
   const { data: sessions = [], isLoading } = useUpcomingSessions(courseId);
   const registerForSession = useRegisterForSession();
 
-  const handleRegister = (sessionId: string) => {
+  const handleRegister = useCallback((sessionId: string) => {
     registerForSession.mutate({
       sessionId,
       enrollmentId,
       userId,
     });
-  };
+  }, [registerForSession, enrollmentId, userId]);
 
   if (isLoading) {
     return (
@@ -158,4 +159,17 @@ export const LiveSessionsList = ({ courseId, enrollmentId, userId }: LiveSession
     </div>
   );
 };
+
+LiveSessionsListComponent.displayName = 'LiveSessionsListComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const LiveSessionsList = React.memo(LiveSessionsListComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.courseId === nextProps.courseId &&
+    prevProps.enrollmentId === nextProps.enrollmentId &&
+    prevProps.userId === nextProps.userId
+  );
+});
+
+LiveSessionsList.displayName = 'LiveSessionsList';
 

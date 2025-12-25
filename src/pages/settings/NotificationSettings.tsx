@@ -22,14 +22,24 @@ import {
   useUpdateNotificationPreferences,
   useRequestNotificationPermission,
 } from '@/hooks/useNotifications';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
+import type { NotificationPreferences } from '@/types/notifications';
 
 const NotificationSettings = () => {
   const { toast } = useToast();
   const { data: preferences, isLoading } = useNotificationPreferences();
   const updatePreferences = useUpdateNotificationPreferences();
   const { permission, requestPermission } = useRequestNotificationPermission();
+  const {
+    permission: pushPermission,
+    isSupported: isPushSupported,
+    isSubscribed: isPushSubscribed,
+    isLoading: isPushLoading,
+    subscribe: subscribePush,
+    unsubscribe: unsubscribePush,
+  } = usePushNotifications();
 
   const [localPrefs, setLocalPrefs] = useState(preferences);
 
@@ -52,8 +62,11 @@ const NotificationSettings = () => {
     );
   }
 
-  const handleToggle = (field: string, value: boolean) => {
-    setLocalPrefs((prev: any) => ({ ...prev, [field]: value }));
+  const handleToggle = (field: string, value: boolean | string) => {
+    setLocalPrefs((prev: NotificationPreferences | null) => {
+      if (!prev) return prev;
+      return { ...prev, [field]: value } as NotificationPreferences;
+    });
   };
 
   const handleSave = async () => {
@@ -85,8 +98,61 @@ const NotificationSettings = () => {
           </p>
         </div>
 
-        {/* Notifications navigateur */}
-        {permission !== 'granted' && (
+        {/* Notifications Push */}
+        {isPushSupported && (
+          <Card className="mb-6 border-blue-200 bg-blue-50 dark:bg-blue-950/20">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Smartphone className="w-5 h-5 text-blue-600" />
+                Notifications Push
+              </CardTitle>
+              <CardDescription>
+                Recevez des notifications push même quand l'application est fermée
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Notifications Push</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {pushPermission.permission === 'granted'
+                      ? isPushSubscribed
+                        ? 'Vous êtes abonné aux notifications push'
+                        : 'Permission accordée mais non abonné'
+                      : pushPermission.permission === 'denied'
+                      ? 'Notifications push désactivées'
+                      : 'Demander la permission pour les notifications push'}
+                  </p>
+                </div>
+                {isPushSubscribed ? (
+                  <Button
+                    onClick={unsubscribePush}
+                    disabled={isPushLoading}
+                    variant="destructive"
+                  >
+                    Désactiver
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={subscribePush}
+                    disabled={isPushLoading || pushPermission.permission === 'denied'}
+                    className="bg-blue-600"
+                  >
+                    {isPushLoading ? 'Chargement...' : 'Activer'}
+                  </Button>
+                )}
+              </div>
+              {pushPermission.permission === 'denied' && (
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  Les notifications push ont été désactivées. Activez-les dans les paramètres de votre navigateur.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Notifications navigateur (legacy) */}
+        {permission !== 'granted' && !isPushSupported && (
           <Card className="mb-6 border-blue-200 bg-blue-50 dark:bg-blue-950/20">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
@@ -275,7 +341,7 @@ const NotificationSettings = () => {
               <Label htmlFor="digest">Fréquence</Label>
               <Select
                 value={localPrefs.email_digest_frequency}
-                onValueChange={(value: any) => handleToggle('email_digest_frequency', value)}
+                onValueChange={(value: string) => handleToggle('email_digest_frequency', value)}
               >
                 <SelectTrigger className="w-48">
                   <SelectValue />

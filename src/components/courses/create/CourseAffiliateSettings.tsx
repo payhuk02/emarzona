@@ -9,24 +9,26 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  TrendingUp, 
-  Users, 
-  Clock, 
-  DollarSign, 
-  Settings, 
+import {
+  TrendingUp,
+  Users,
+  Clock,
+  DollarSign,
+  Settings,
   Info,
   CheckCircle2,
-  Lightbulb
+  Lightbulb,
 } from 'lucide-react';
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export interface CourseAffiliateData {
   affiliate_enabled: boolean;
@@ -55,7 +57,7 @@ export const CourseAffiliateSettings = ({
   const calculateCommission = () => {
     if (data.commission_type === 'percentage') {
       // Commission sur le montant vendeur (après commission plateforme 10%)
-      const sellerAmount = coursePrice * 0.90;
+      const sellerAmount = coursePrice * 0.9;
       return (sellerAmount * data.commission_rate) / 100;
     }
     return data.fixed_commission_amount;
@@ -89,7 +91,7 @@ export const CourseAffiliateSettings = ({
             </div>
             <Switch
               checked={data.affiliate_enabled}
-              onCheckedChange={(checked) => onChange({ ...data, affiliate_enabled: checked })}
+              onCheckedChange={checked => onChange({ ...data, affiliate_enabled: checked })}
             />
           </div>
         </CardHeader>
@@ -127,43 +129,53 @@ export const CourseAffiliateSettings = ({
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <Card 
+                <Card
                   className={`cursor-pointer transition-all ${
-                    data.commission_type === 'percentage' 
-                      ? 'border-2 border-primary bg-primary/5' 
+                    data.commission_type === 'percentage'
+                      ? 'border-2 border-primary bg-primary/5'
                       : 'border-2 border-transparent hover:border-muted'
                   }`}
                   onClick={() => onChange({ ...data, commission_type: 'percentage' })}
                 >
                   <CardContent className="pt-6">
                     <div className="flex items-start gap-3">
-                      <TrendingUp className={`h-5 w-5 mt-0.5 ${
-                        data.commission_type === 'percentage' ? 'text-primary' : 'text-muted-foreground'
-                      }`} />
+                      <TrendingUp
+                        className={`h-5 w-5 mt-0.5 ${
+                          data.commission_type === 'percentage'
+                            ? 'text-primary'
+                            : 'text-muted-foreground'
+                        }`}
+                      />
                       <div>
                         <h4 className="font-semibold">Pourcentage</h4>
                         <p className="text-sm text-muted-foreground mt-1">
                           Commission basée sur un % du montant vendeur
                         </p>
-                        <Badge variant="outline" className="mt-2">Recommandé</Badge>
+                        <Badge variant="outline" className="mt-2">
+                          Recommandé
+                        </Badge>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card 
+                <Card
                   className={`cursor-pointer transition-all ${
-                    data.commission_type === 'fixed' 
-                      ? 'border-2 border-primary bg-primary/5' 
+                    data.commission_type === 'fixed'
+                      ? 'border-2 border-primary bg-primary/5'
                       : 'border-2 border-transparent hover:border-muted'
                   }`}
                   onClick={() => onChange({ ...data, commission_type: 'fixed' })}
                 >
                   <CardContent className="pt-6">
                     <div className="flex items-start gap-3">
-                      <DollarSign className={`h-5 w-5 mt-0.5 ${
-                        data.commission_type === 'fixed' ? 'text-primary' : 'text-muted-foreground'
-                      }`} />
+                      <DollarSign
+                        className={`h-5 w-5 mt-0.5 ${
+                          data.commission_type === 'fixed'
+                            ? 'text-primary'
+                            : 'text-muted-foreground'
+                        }`}
+                      />
                       <div>
                         <h4 className="font-semibold">Montant fixe</h4>
                         <p className="text-sm text-muted-foreground mt-1">
@@ -195,28 +207,38 @@ export const CourseAffiliateSettings = ({
                     max="100"
                     step="0.5"
                     value={data.commission_rate}
-                    onChange={(e) => onChange({ ...data, commission_rate: parseFloat(e.target.value) || 0 })}
+                    onChange={e =>
+                      onChange({ ...data, commission_rate: parseFloat(e.target.value) || 0 })
+                    }
                     className="max-w-xs"
                   />
                   <Badge variant="outline" className="text-base px-4 py-2">
                     {data.commission_rate}%
                   </Badge>
                 </div>
-                
+
                 {/* Calcul exemple */}
                 <Alert>
                   <Info className="h-4 w-4" />
                   <AlertTitle>Exemple de calcul pour ce cours</AlertTitle>
                   <AlertDescription>
                     <div className="mt-2 space-y-1 text-sm">
-                      <p>Prix cours : <strong>{coursePrice.toLocaleString()} XOF</strong></p>
-                      <p>Commission plateforme (10%) : <strong>{(coursePrice * 0.10).toFixed(0)} XOF</strong></p>
-                      <p>Montant vendeur : <strong>{(coursePrice * 0.90).toFixed(0)} XOF</strong></p>
+                      <p>
+                        Prix cours : <strong>{coursePrice.toLocaleString()} XOF</strong>
+                      </p>
+                      <p>
+                        Commission plateforme (10%) :{' '}
+                        <strong>{(coursePrice * 0.1).toFixed(0)} XOF</strong>
+                      </p>
+                      <p>
+                        Montant vendeur : <strong>{(coursePrice * 0.9).toFixed(0)} XOF</strong>
+                      </p>
                       <p className="text-primary font-semibold mt-2">
-                        Commission affilié ({data.commission_rate}%) : {calculateCommission().toFixed(0)} XOF
+                        Commission affilié ({data.commission_rate}%) :{' '}
+                        {calculateCommission().toFixed(0)} XOF
                       </p>
                       <p className="text-green-600 font-semibold">
-                        Vous recevrez : {(coursePrice * 0.90 - calculateCommission()).toFixed(0)} XOF
+                        Vous recevrez : {(coursePrice * 0.9 - calculateCommission()).toFixed(0)} XOF
                       </p>
                     </div>
                   </AlertDescription>
@@ -233,7 +255,9 @@ export const CourseAffiliateSettings = ({
                   min="0"
                   step="100"
                   value={data.fixed_commission_amount}
-                  onChange={(e) => onChange({ ...data, fixed_commission_amount: parseFloat(e.target.value) || 0 })}
+                  onChange={e =>
+                    onChange({ ...data, fixed_commission_amount: parseFloat(e.target.value) || 0 })
+                  }
                   className="max-w-xs"
                 />
                 <p className="text-sm text-muted-foreground">
@@ -246,7 +270,10 @@ export const CourseAffiliateSettings = ({
 
             {/* Durée du cookie */}
             <div className="space-y-3">
-              <Label htmlFor="cookie_duration" className="text-base font-semibold flex items-center gap-2">
+              <Label
+                htmlFor="cookie_duration"
+                className="text-base font-semibold flex items-center gap-2"
+              >
                 <Clock className="h-4 w-4" />
                 Durée du cookie de tracking
               </Label>
@@ -255,12 +282,14 @@ export const CourseAffiliateSettings = ({
               </p>
               <Select
                 value={data.cookie_duration_days.toString()}
-                onValueChange={(value) => onChange({ ...data, cookie_duration_days: parseInt(value) })}
+                onValueChange={value =>
+                  onChange({ ...data, cookie_duration_days: parseInt(value) })
+                }
               >
                 <SelectTrigger className="max-w-xs">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent mobileVariant="sheet">
                   <SelectItem value="7">7 jours</SelectItem>
                   <SelectItem value="15">15 jours</SelectItem>
                   <SelectItem value="30">30 jours (recommandé)</SelectItem>
@@ -286,11 +315,14 @@ export const CourseAffiliateSettings = ({
                   min="0"
                   step="1000"
                   value={data.min_order_amount}
-                  onChange={(e) => onChange({ ...data, min_order_amount: parseFloat(e.target.value) || 0 })}
+                  onChange={e =>
+                    onChange({ ...data, min_order_amount: parseFloat(e.target.value) || 0 })
+                  }
                   className="max-w-xs"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Commission versée uniquement si l'inscription dépasse ce montant (utile pour promotions)
+                  Commission versée uniquement si l'inscription dépasse ce montant (utile pour
+                  promotions)
                 </p>
               </div>
 
@@ -305,10 +337,14 @@ export const CourseAffiliateSettings = ({
                   step="1000"
                   placeholder="Illimité"
                   value={data.max_commission_per_sale || ''}
-                  onChange={(e) => onChange({ 
-                    ...data, 
-                    max_commission_per_sale: e.target.value ? parseFloat(e.target.value) : undefined 
-                  })}
+                  onChange={e =>
+                    onChange({
+                      ...data,
+                      max_commission_per_sale: e.target.value
+                        ? parseFloat(e.target.value)
+                        : undefined,
+                    })
+                  }
                   className="max-w-xs"
                 />
               </div>
@@ -323,7 +359,7 @@ export const CourseAffiliateSettings = ({
                 <Switch
                   id="self_referral"
                   checked={data.allow_self_referral}
-                  onCheckedChange={(checked) => onChange({ ...data, allow_self_referral: checked })}
+                  onCheckedChange={checked => onChange({ ...data, allow_self_referral: checked })}
                 />
               </div>
 
@@ -337,7 +373,7 @@ export const CourseAffiliateSettings = ({
                 <Switch
                   id="require_approval"
                   checked={data.require_approval}
-                  onCheckedChange={(checked) => onChange({ ...data, require_approval: checked })}
+                  onCheckedChange={checked => onChange({ ...data, require_approval: checked })}
                 />
               </div>
             </div>
@@ -353,7 +389,7 @@ export const CourseAffiliateSettings = ({
                 id="terms"
                 placeholder="Ex: Les affiliés doivent promouvoir le cours de manière éthique et honnête..."
                 value={data.terms_and_conditions}
-                onChange={(e) => onChange({ ...data, terms_and_conditions: e.target.value })}
+                onChange={e => onChange({ ...data, terms_and_conditions: e.target.value })}
                 rows={4}
               />
               <p className="text-xs text-muted-foreground">
@@ -373,14 +409,25 @@ export const CourseAffiliateSettings = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
-          <p>✅ <strong>Taux recommandé :</strong> 20-30% pour les cours en ligne</p>
-          <p>✅ <strong>Cookie 30 jours :</strong> Durée standard et équitable</p>
-          <p>✅ <strong>Approbation auto :</strong> Gagnez du temps en acceptant automatiquement les affiliés</p>
-          <p>✅ <strong>Commission attractive :</strong> Plus elle est élevée, plus vous aurez d'affiliés motivés</p>
-          <p>⚠️ <strong>Auto-affiliation :</strong> Désactivez-la si vous voulez éviter les abus</p>
+          <p>
+            ✅ <strong>Taux recommandé :</strong> 20-30% pour les cours en ligne
+          </p>
+          <p>
+            ✅ <strong>Cookie 30 jours :</strong> Durée standard et équitable
+          </p>
+          <p>
+            ✅ <strong>Approbation auto :</strong> Gagnez du temps en acceptant automatiquement les
+            affiliés
+          </p>
+          <p>
+            ✅ <strong>Commission attractive :</strong> Plus elle est élevée, plus vous aurez
+            d'affiliés motivés
+          </p>
+          <p>
+            ⚠️ <strong>Auto-affiliation :</strong> Désactivez-la si vous voulez éviter les abus
+          </p>
         </CardContent>
       </Card>
     </div>
   );
 };
-

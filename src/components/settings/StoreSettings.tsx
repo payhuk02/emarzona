@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useStores } from "@/hooks/useStores";
+import { useStoreContext } from "@/contexts/StoreContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { DeleteStoreDialog } from "@/components/store/DeleteStoreDialog";
 import { deleteStoreWithDependencies, archiveStore } from "@/lib/store-delete-protection";
+import { logger } from "@/lib/logger";
+import { useSpaceInputFix } from "@/hooks/useSpaceInputFix";
 import { 
   Store, 
   Settings, 
@@ -21,12 +24,16 @@ import {
   Trash2,
   ExternalLink,
   Copy,
-  CheckCircle2
+  CheckCircle2,
+  Palette
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const StoreSettings = ({ action }: { action?: string | null }) => {
-  const { stores, loading: storesLoading, canCreateStore, getRemainingStores, createStore, updateStore, deleteStore, refetch } = useStores();
+  const { stores, loading: storesLoading, createStore, updateStore, deleteStore, refetch, canCreateStore, getRemainingStores } = useStores();
+  const { refreshStores } = useStoreContext();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("list");
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
@@ -38,6 +45,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
     description: "",
     slug: ""
   });
+  const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
 
   // Sélectionner la première boutique par défaut
   useEffect(() => {
@@ -73,11 +81,14 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
         slug: slug
       });
 
+      // Rafraîchir le contexte pour mettre à jour la liste
+      await refreshStores();
+
       setNewStoreData({ name: "", description: "", slug: "" });
       setIsCreating(false);
       setActiveTab("list");
     } catch (error) {
-      console.error('Erreur lors de la création:', error);
+      logger.error('Erreur lors de la création', { error });
     } finally {
       setSaving(false);
     }
@@ -115,11 +126,12 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
           variant: "destructive"
         });
       }
-    } catch (error: any) {
-      console.error('Erreur lors de la suppression:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Erreur lors de la suppression', { error: errorMessage, storeId: storeToDelete.id });
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue",
+        description: errorMessage || "Une erreur est survenue",
         variant: "destructive"
       });
     }
@@ -146,11 +158,12 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
           variant: "destructive"
         });
       }
-    } catch (error: any) {
-      console.error('Erreur lors de l\'archivage:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Erreur lors de l\'archivage', { error: errorMessage, storeId });
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue",
+        description: errorMessage || "Une erreur est survenue",
         variant: "destructive"
       });
     }
@@ -190,18 +203,24 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
       {/* Header avec statistiques */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold">Gestion des boutiques</h2>
+          <h2 className="text-xl sm:text-2xl font-bold">Gestion de la boutique</h2>
           <p className="text-sm text-muted-foreground">
-            Vous avez {stores.length} boutique(s) sur {3} maximum
+            {stores.length > 0 ? "Votre boutique" : "Créez votre boutique pour commencer"}
           </p>
         </div>
       </div>
 
       {/* Onglets */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="list">Mes boutiques</TabsTrigger>
-          <TabsTrigger value="create">Créer</TabsTrigger>
+        <TabsList className={canCreateStore() ? "grid w-full grid-cols-2" : "grid w-full grid-cols-1"}>
+          <TabsTrigger value="list">
+            {stores.length === 1 ? "Ma boutique" : stores.length > 1 ? `Mes boutiques (${stores.length})` : "Liste"}
+          </TabsTrigger>
+          {canCreateStore() && (
+            <TabsTrigger value="create">
+              Créer {getRemainingStores() > 0 && `(${getRemainingStores()} restante${getRemainingStores() > 1 ? 's' : ''})`}
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Liste des boutiques */}
@@ -212,14 +231,12 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
                 <Store className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Aucune boutique</h3>
                 <p className="text-muted-foreground mb-4">
-                  Vous n'avez pas encore créé de boutique. Créez votre première boutique pour commencer à vendre.
+                  Vous n'avez pas encore créé de boutique. Créez votre boutique pour commencer à vendre.
                 </p>
-                {canCreateStore() && (
-                  <Button onClick={() => setActiveTab("create")}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Créer ma première boutique
-                  </Button>
-                )}
+                <Button onClick={() => setActiveTab("create")}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Créer ma boutique
+                </Button>
           </CardContent>
         </Card>
           ) : (
@@ -257,9 +274,20 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
             </div>
                       <div className="flex items-center gap-2">
                         <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => navigate('/dashboard/store')}
+                          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                          title="Personnalisation avancée"
+                        >
+                          <Palette className="h-4 w-4 mr-1.5" />
+                          <span className="hidden sm:inline">Personnalisation</span>
+                        </Button>
+                        <Button
                           variant="outline"
                           size="sm"
                           onClick={() => window.open(`/stores/${store.slug}`, '_blank')}
+                          title="Voir la boutique"
                         >
                           <ExternalLink className="h-4 w-4" />
                         </Button>
@@ -267,6 +295,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
                           variant="outline"
                           size="sm"
                           onClick={() => copyStoreUrl(store.slug)}
+                          title="Copier le lien"
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
@@ -275,6 +304,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
                           size="sm"
                           onClick={() => handleDeleteStore(store.id, store.name)}
                           disabled={saving}
+                          title="Supprimer la boutique"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -293,15 +323,18 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Vous avez atteint la limite de 3 boutiques. Supprimez une boutique existante pour en créer une nouvelle.
+                Limite de 3 boutiques par utilisateur atteinte. Vous devez supprimer une boutique existante avant d'en créer une nouvelle.
               </AlertDescription>
             </Alert>
           ) : (
         <Card>
           <CardHeader>
-                <CardTitle>Créer une nouvelle boutique</CardTitle>
+                <CardTitle>Créer votre boutique</CardTitle>
             <CardDescription>
-                  Vous pouvez créer {getRemainingStores()} boutique(s) supplémentaire(s)
+                  {stores.length > 0 
+                    ? `Vous avez ${stores.length} boutique${stores.length > 1 ? 's' : ''}. Vous pouvez créer jusqu'à ${getRemainingStores()} boutique${getRemainingStores() > 1 ? 's' : ''} supplémentaire${getRemainingStores() > 1 ? 's' : ''}.`
+                    : "Configurez votre boutique pour commencer à vendre vos produits"
+                  }
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -317,6 +350,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
                         slug: prev.slug || generateSlug(e.target.value)
                       }));
                     }}
+                    onKeyDown={handleSpaceKeyDown}
                     placeholder="Ex: Ma Boutique Digitale"
                   />
                 </div>
@@ -324,7 +358,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
                 <div className="space-y-2">
                   <Label htmlFor="slug">URL de la boutique</Label>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">payhula.com/stores/</span>
+                    <span className="text-sm text-muted-foreground">emarzona.com/stores/</span>
                   <Input
                       id="slug"
                       value={newStoreData.slug}
@@ -340,6 +374,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
                     id="description"
                     value={newStoreData.description}
                     onChange={(e) => setNewStoreData(prev => ({ ...prev, description: e.target.value }))}
+                    onKeyDown={handleSpaceKeyDown}
                     placeholder="Décrivez votre boutique..."
                     rows={3}
                   />

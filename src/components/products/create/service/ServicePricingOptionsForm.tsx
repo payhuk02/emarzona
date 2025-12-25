@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { DollarSign, Calendar, XCircle } from 'lucide-react';
+import { DollarSign, Calendar } from 'lucide-react';
 import type { ServiceProductFormData } from '@/types/service-product';
 
 interface ServicePricingOptionsFormProps {
@@ -37,12 +37,14 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
         <CardContent className="space-y-4">
           <Select
             value={data.pricing_type}
-            onValueChange={(value) => onUpdate({ pricing_type: value as any })}
+            onValueChange={value =>
+              onUpdate({ pricing_type: value as 'fixed' | 'hourly' | 'per_participant' })
+            }
           >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent mobileVariant="sheet">
               <SelectItem value="fixed">Prix fixe</SelectItem>
               <SelectItem value="hourly">Tarif horaire</SelectItem>
               <SelectItem value="per_participant">Par participant</SelectItem>
@@ -69,13 +71,11 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Acompte requis</CardTitle>
-              <CardDescription>
-                Demander un acompte à la réservation ?
-              </CardDescription>
+              <CardDescription>Demander un acompte à la réservation ?</CardDescription>
             </div>
             <Switch
               checked={data.deposit_required ?? false}
-              onCheckedChange={(checked) => onUpdate({ deposit_required: checked })}
+              onCheckedChange={checked => onUpdate({ deposit_required: checked })}
             />
           </div>
         </CardHeader>
@@ -86,12 +86,12 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
               <Label htmlFor="deposit_type">Type d'acompte</Label>
               <Select
                 value={data.deposit_type}
-                onValueChange={(value) => onUpdate({ deposit_type: value as 'fixed' | 'percentage' })}
+                onValueChange={value => onUpdate({ deposit_type: value as 'fixed' | 'percentage' })}
               >
                 <SelectTrigger id="deposit_type">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent mobileVariant="sheet">
                   <SelectItem value="fixed">Montant fixe (XOF)</SelectItem>
                   <SelectItem value="percentage">Pourcentage (%)</SelectItem>
                 </SelectContent>
@@ -99,9 +99,7 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="deposit_amount">
-                Montant de l'acompte *
-              </Label>
+              <Label htmlFor="deposit_amount">Montant de l'acompte *</Label>
               <Input
                 id="deposit_amount"
                 type="number"
@@ -110,13 +108,12 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
                 max={data.deposit_type === 'percentage' ? '100' : undefined}
                 placeholder={data.deposit_type === 'percentage' ? '50' : '10000'}
                 value={data.deposit_amount || ''}
-                onChange={(e) => onUpdate({ deposit_amount: parseFloat(e.target.value) || 0 })}
+                onChange={e => onUpdate({ deposit_amount: parseFloat(e.target.value) || 0 })}
               />
               <p className="text-xs text-muted-foreground">
-                {data.deposit_type === 'percentage' 
+                {data.deposit_type === 'percentage'
                   ? 'Pourcentage du prix total'
-                  : 'Montant fixe en XOF'
-                }
+                  : 'Montant fixe en XOF'}
               </p>
             </div>
           </CardContent>
@@ -142,7 +139,7 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
             </div>
             <Switch
               checked={data.booking_options?.allow_booking_cancellation ?? true}
-              onCheckedChange={(checked) => 
+              onCheckedChange={checked =>
                 onUpdate({
                   booking_options: {
                     ...data.booking_options!,
@@ -156,15 +153,13 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
           {/* Cancellation Deadline */}
           {data.booking_options?.allow_booking_cancellation && (
             <div className="space-y-2">
-              <Label htmlFor="cancellation_deadline">
-                Délai d'annulation (heures avant RDV)
-              </Label>
+              <Label htmlFor="cancellation_deadline">Délai d'annulation (heures avant RDV)</Label>
               <Input
                 id="cancellation_deadline"
                 type="number"
                 min="0"
                 value={data.booking_options?.cancellation_deadline_hours || 24}
-                onChange={(e) =>
+                onChange={e =>
                   onUpdate({
                     booking_options: {
                       ...data.booking_options!,
@@ -189,7 +184,7 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
             </div>
             <Switch
               checked={data.booking_options?.require_approval ?? false}
-              onCheckedChange={(checked) =>
+              onCheckedChange={checked =>
                 onUpdate({
                   booking_options: {
                     ...data.booking_options!,
@@ -209,7 +204,7 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
                 type="number"
                 min="0"
                 value={data.booking_options?.buffer_time_before || 0}
-                onChange={(e) =>
+                onChange={e =>
                   onUpdate({
                     booking_options: {
                       ...data.booking_options!,
@@ -227,7 +222,7 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
                 type="number"
                 min="0"
                 value={data.booking_options?.buffer_time_after || 0}
-                onChange={(e) =>
+                onChange={e =>
                   onUpdate({
                     booking_options: {
                       ...data.booking_options!,
@@ -238,21 +233,17 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
               />
             </div>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Temps de pause entre les rendez-vous
-          </p>
+          <p className="text-xs text-muted-foreground">Temps de pause entre les rendez-vous</p>
 
           {/* Advance Booking Days */}
           <div className="space-y-2">
-            <Label htmlFor="advance_booking_days">
-              Réservation à l'avance (jours)
-            </Label>
+            <Label htmlFor="advance_booking_days">Réservation à l'avance (jours)</Label>
             <Input
               id="advance_booking_days"
               type="number"
               min="1"
               value={data.booking_options?.advance_booking_days || 30}
-              onChange={(e) =>
+              onChange={e =>
                 onUpdate({
                   booking_options: {
                     ...data.booking_options!,
@@ -277,7 +268,7 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
               min="0"
               placeholder="Illimité"
               value={data.booking_options?.max_bookings_per_day || ''}
-              onChange={(e) =>
+              onChange={e =>
                 onUpdate({
                   booking_options: {
                     ...data.booking_options!,
@@ -292,4 +283,3 @@ export const ServicePricingOptionsForm = ({ data, onUpdate }: ServicePricingOpti
     </div>
   );
 };
-

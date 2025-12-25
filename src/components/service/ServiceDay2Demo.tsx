@@ -8,6 +8,7 @@
 import React from 'react';
 import { ServicesList, Service } from './ServicesList';
 import { ServicePackageManager, ServicePackage } from './ServicePackageManager';
+import { logger } from '@/lib/logger';
 
 // Sample data
 const sampleServices: Service[] = [
@@ -186,19 +187,19 @@ const samplePackages: ServicePackage[] = [
 
 export const ServiceDay2Demo: React.FC = () => {
   const handleServiceEdit = (service: Service) => {
-    console.log('Edit service:', service);
+    logger.info('Edit service', { serviceId: service.id });
   };
 
   const handleServiceDelete = (service: Service) => {
-    console.log('Delete service:', service);
+    logger.info('Delete service', { serviceId: service.id });
   };
 
   const handleBulkAction = (action: string, ids: string[]) => {
-    console.log('Bulk action:', action, ids);
+    logger.info('Bulk action', { action, count: ids.length, ids });
   };
 
   const handlePackagesSave = (packages: ServicePackage[]) => {
-    console.log('Save packages:', packages);
+    logger.info('Save packages', { count: packages.length });
   };
 
   return (
@@ -223,8 +224,8 @@ export const ServiceDay2Demo: React.FC = () => {
           services={sampleServices}
           onEdit={handleServiceEdit}
           onDelete={handleServiceDelete}
-          onView={(service) => console.log('View', service)}
-          onDuplicate={(service) => console.log('Duplicate', service)}
+          onView={(service) => logger.info('View service', { serviceId: service.id })}
+          onDuplicate={(service) => logger.info('Duplicate service', { serviceId: service.id })}
           onBulkAction={handleBulkAction}
           enableSelection={true}
           showStats={true}
@@ -238,8 +239,8 @@ export const ServiceDay2Demo: React.FC = () => {
             'Dr. Martin',
             'Dev Team',
           ]}
-          onCreate={() => console.log('Create new service')}
-          onRefresh={() => console.log('Refresh services')}
+          onCreate={() => logger.info('Create new service')}
+          onRefresh={() => logger.info('Refresh services')}
         />
       </section>
 

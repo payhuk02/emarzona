@@ -160,10 +160,12 @@ const FIELD_CONFIG: Record<
  * 
  * @example
  * ```tsx
+ * import { logger } from '@/lib/logger';
+ * 
  * <BulkDigitalUpdate 
  *   products={selectedProducts}
- *   onSave={(ids, changes) => console.log('Update:', ids, changes)}
- *   onCancel={() => console.log('Cancelled')}
+ *   onSave={(ids, changes) => logger.info('Bulk update', { productIds: ids, changes })}
+ *   onCancel={() => logger.info('Bulk update cancelled')}
  * />
  * ```
  */

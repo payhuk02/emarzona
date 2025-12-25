@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { PhysicalProductsList } from './PhysicalProductsList';
 import { VariantManager } from './VariantManager';
+import { logger } from '@/lib/logger';
 import type { VariantOption, ProductVariant } from './VariantManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -82,9 +83,9 @@ export function PhysicalDay2Demo() {
             <TabsContent value="list" className="space-y-4 mt-6">
               <PhysicalProductsList
                 storeId="demo-store-123"
-                onCreateProduct={() => console.log('Create product')}
-                onEditProduct={(id) => console.log('Edit product:', id)}
-                onViewProduct={(id) => console.log('View product:', id)}
+                onCreateProduct={() => logger.info('Create product action')}
+                onEditProduct={(id) => logger.info('Edit product', { productId: id })}
+                onViewProduct={(id) => logger.info('View product', { productId: id })}
               />
             </TabsContent>
 

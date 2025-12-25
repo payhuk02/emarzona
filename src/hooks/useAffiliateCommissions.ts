@@ -13,19 +13,72 @@ import {
   AffiliateStats,
   ApproveCommissionForm,
   RejectCommissionForm,
-  PayCommissionForm
+  PayCommissionForm,
+  PaginationParams
 } from '@/types/affiliate';
 import { logger } from '@/lib/logger';
+import { handleSupabaseError, AffiliateErrors } from '@/lib/affiliate-errors';
 
-export const useAffiliateCommissions = (filters?: CommissionFilters) => {
+export const useAffiliateCommissions = (
+  filters?: CommissionFilters,
+  pagination?: PaginationParams
+) => {
   const [commissions, setCommissions] = useState<AffiliateCommission[]>([]);
   const [stats, setStats] = useState<AffiliateStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(pagination?.page || 1);
+  const [pageSize, setPageSize] = useState(pagination?.pageSize || 20);
   const { toast } = useToast();
 
-  const fetchCommissions = async () => {
+  const fetchCommissions = async (currentPage: number = page) => {
     try {
       setLoading(true);
+
+      // Compter le total
+      let countQuery = supabase
+        .from('affiliate_commissions')
+        .select('*', { count: 'exact', head: true });
+
+      if (filters?.status) {
+        countQuery = countQuery.eq('status', filters.status);
+      }
+
+      if (filters?.affiliate_id) {
+        countQuery = countQuery.eq('affiliate_id', filters.affiliate_id);
+      }
+
+      if (filters?.product_id) {
+        countQuery = countQuery.eq('product_id', filters.product_id);
+      }
+
+      if (filters?.store_id) {
+        countQuery = countQuery.eq('store_id', filters.store_id);
+      }
+
+      if (filters?.date_from) {
+        countQuery = countQuery.gte('created_at', filters.date_from);
+      }
+
+      if (filters?.date_to) {
+        countQuery = countQuery.lte('created_at', filters.date_to);
+      }
+
+      if (filters?.min_amount !== undefined) {
+        countQuery = countQuery.gte('commission_amount', filters.min_amount);
+      }
+
+      if (filters?.max_amount !== undefined) {
+        countQuery = countQuery.lte('commission_amount', filters.max_amount);
+      }
+
+      const { count, error: countError } = await countQuery;
+      if (countError) throw countError;
+      setTotal(count || 0);
+
+      // Requête principale avec pagination
+      const from = (currentPage - 1) * pageSize;
+      const to = from + pageSize - 1;
 
       let query = supabase
         .from('affiliate_commissions')
@@ -35,7 +88,8 @@ export const useAffiliateCommissions = (filters?: CommissionFilters) => {
           affiliate:affiliates(display_name, email, affiliate_code),
           order:orders(order_number)
         `)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       if (filters?.status) {
         query = query.eq('status', filters.status);
@@ -71,9 +125,13 @@ export const useAffiliateCommissions = (filters?: CommissionFilters) => {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        const affiliateError = handleSupabaseError(error);
+        throw affiliateError;
+      }
 
       setCommissions(data || []);
+      setPage(currentPage);
 
       // Calculer les stats
       if (data && data.length > 0) {
@@ -115,11 +173,12 @@ export const useAffiliateCommissions = (filters?: CommissionFilters) => {
           average_commission_per_sale: 0,
         });
       }
-    } catch (error: any) {
-      logger.error('Error fetching commissions:', error);
+    } catch (error: unknown) {
+      const affiliateError = handleSupabaseError(error);
+      logger.error('Error fetching commissions:', affiliateError);
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: affiliateError.getUserMessage(),
         variant: 'destructive',
       });
     } finally {
@@ -129,6 +188,10 @@ export const useAffiliateCommissions = (filters?: CommissionFilters) => {
 
   const approveCommission = async (formData: ApproveCommissionForm): Promise<boolean> => {
     try {
+      if (!formData.commission_id) {
+        throw AffiliateErrors.commissionNotFound();
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
 
       const { error } = await supabase
@@ -141,20 +204,23 @@ export const useAffiliateCommissions = (filters?: CommissionFilters) => {
         })
         .eq('id', formData.commission_id);
 
-      if (error) throw error;
+      if (error) {
+        throw handleSupabaseError(error);
+      }
 
       toast({ 
         title: 'Commission approuvée ✅',
         description: 'La commission peut maintenant être payée' 
       });
       
-      await fetchCommissions();
+      await fetchCommissions(page);
       return true;
-    } catch (error: any) {
-      logger.error('Error approving commission:', error);
+    } catch (error: unknown) {
+      const affiliateError = handleSupabaseError(error);
+      logger.error('Error approving commission:', affiliateError);
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: affiliateError.getUserMessage(),
         variant: 'destructive',
       });
       return false;
@@ -163,6 +229,14 @@ export const useAffiliateCommissions = (filters?: CommissionFilters) => {
 
   const rejectCommission = async (formData: RejectCommissionForm): Promise<boolean> => {
     try {
+      if (!formData.commission_id) {
+        throw AffiliateErrors.commissionNotFound();
+      }
+
+      if (!formData.rejection_reason || formData.rejection_reason.trim().length === 0) {
+        throw AffiliateErrors.validationError('rejection_reason', 'La raison du rejet est requise');
+      }
+
       const { error } = await supabase
         .from('affiliate_commissions')
         .update({
@@ -172,20 +246,23 @@ export const useAffiliateCommissions = (filters?: CommissionFilters) => {
         })
         .eq('id', formData.commission_id);
 
-      if (error) throw error;
+      if (error) {
+        throw handleSupabaseError(error);
+      }
 
       toast({ 
         title: 'Commission rejetée',
         description: 'La commission a été refusée' 
       });
       
-      await fetchCommissions();
+      await fetchCommissions(page);
       return true;
-    } catch (error: any) {
-      logger.error('Error rejecting commission:', error);
+    } catch (error: unknown) {
+      const affiliateError = handleSupabaseError(error);
+      logger.error('Error rejecting commission:', affiliateError);
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: affiliateError.getUserMessage(),
         variant: 'destructive',
       });
       return false;
@@ -203,7 +280,9 @@ export const useAffiliateCommissions = (filters?: CommissionFilters) => {
         .eq('id', formData.commission_id)
         .single();
 
-      if (commissionError) throw commissionError;
+      if (commissionError || !commission) {
+        throw AffiliateErrors.commissionNotFound(formData.commission_id);
+      }
 
       // Mettre à jour la commission
       const { error } = await supabase
@@ -243,13 +322,14 @@ export const useAffiliateCommissions = (filters?: CommissionFilters) => {
         description: `${commission.commission_amount} XOF versés` 
       });
       
-      await fetchCommissions();
+      await fetchCommissions(page);
       return true;
-    } catch (error: any) {
-      logger.error('Error marking commission as paid:', error);
+    } catch (error: unknown) {
+      const affiliateError = handleSupabaseError(error);
+      logger.error('Error marking commission as paid:', affiliateError);
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: affiliateError.getUserMessage(),
         variant: 'destructive',
       });
       return false;
@@ -258,6 +338,10 @@ export const useAffiliateCommissions = (filters?: CommissionFilters) => {
 
   const cancelCommission = async (commissionId: string, reason: string): Promise<boolean> => {
     try {
+      if (!commissionId) {
+        throw AffiliateErrors.commissionNotFound();
+      }
+
       const { error } = await supabase
         .from('affiliate_commissions')
         .update({
@@ -266,20 +350,23 @@ export const useAffiliateCommissions = (filters?: CommissionFilters) => {
         })
         .eq('id', commissionId);
 
-      if (error) throw error;
+      if (error) {
+        throw handleSupabaseError(error);
+      }
 
       toast({ 
         title: 'Commission annulée',
         description: 'La commission a été annulée' 
       });
       
-      await fetchCommissions();
+      await fetchCommissions(page);
       return true;
-    } catch (error: any) {
-      logger.error('Error cancelling commission:', error);
+    } catch (error: unknown) {
+      const affiliateError = handleSupabaseError(error);
+      logger.error('Error cancelling commission:', affiliateError);
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: affiliateError.getUserMessage(),
         variant: 'destructive',
       });
       return false;
@@ -287,18 +374,55 @@ export const useAffiliateCommissions = (filters?: CommissionFilters) => {
   };
 
   useEffect(() => {
-    fetchCommissions();
-  }, [JSON.stringify(filters)]);
+    fetchCommissions(page);
+  }, [JSON.stringify(filters), page, pageSize]);
+
+  const totalPages = Math.ceil(total / pageSize);
+  const hasNextPage = page < totalPages;
+  const hasPreviousPage = page > 1;
+
+  const goToPage = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      fetchCommissions(newPage);
+    }
+  };
+
+  const nextPage = () => {
+    if (hasNextPage) {
+      goToPage(page + 1);
+    }
+  };
+
+  const previousPage = () => {
+    if (hasPreviousPage) {
+      goToPage(page - 1);
+    }
+  };
 
   return {
     commissions,
     stats,
     loading,
+    // Pagination
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages,
+      hasNextPage,
+      hasPreviousPage,
+    },
+    // Navigation
+    goToPage,
+    nextPage,
+    previousPage,
+    setPageSize,
+    // CRUD
     approveCommission,
     rejectCommission,
     markAsPaid,
     cancelCommission,
-    refetch: fetchCommissions,
+    refetch: () => fetchCommissions(page),
   };
 };
 

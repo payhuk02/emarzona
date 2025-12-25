@@ -5,17 +5,18 @@
 
 import { TFunction } from 'i18next';
 
-export type ProductType = 'digital' | 'physical' | 'service' | 'course';
+export type ProductType = 'digital' | 'physical' | 'service' | 'course' | 'artist';
 
 /**
  * Traduit le type de produit
  */
 export const getProductTypeLabel = (type: string, t: TFunction): string => {
   const typeMap: Record<string, string> = {
-    'digital': t('courses.productTypes.digital', 'Produit digital'),
-    'physical': t('courses.productTypes.physical', 'Produit physique'),
-    'service': t('courses.productTypes.service', 'Service'),
-    'course': t('courses.productTypes.course', 'Cours en ligne'),
+    digital: t('courses.productTypes.digital', 'Produit digital'),
+    physical: t('courses.productTypes.physical', 'Produit physique'),
+    service: t('courses.productTypes.service', 'Service'),
+    course: t('courses.productTypes.course', 'Cours en ligne'),
+    artist: t('courses.productTypes.artist', "Oeuvre d'artiste"),
   };
 
   return typeMap[type] || type;
@@ -26,10 +27,11 @@ export const getProductTypeLabel = (type: string, t: TFunction): string => {
  */
 export const getProductTypeColor = (type: string): string => {
   const colorMap: Record<string, string> = {
-    'digital': 'bg-blue-500',
-    'physical': 'bg-green-500',
-    'service': 'bg-purple-500',
-    'course': 'bg-orange-500',
+    digital: 'bg-blue-500',
+    physical: 'bg-green-500',
+    service: 'bg-purple-500',
+    course: 'bg-orange-500',
+    artist: 'bg-pink-500',
   };
 
   return colorMap[type] || 'bg-gray-500';
@@ -40,10 +42,11 @@ export const getProductTypeColor = (type: string): string => {
  */
 export const getProductTypeIcon = (type: string): string => {
   const iconMap: Record<string, string> = {
-    'digital': 'Download',
-    'physical': 'Package',
-    'service': 'Briefcase',
-    'course': 'GraduationCap',
+    digital: 'Download',
+    physical: 'Package',
+    service: 'Briefcase',
+    course: 'GraduationCap',
+    artist: 'Palette',
   };
 
   return iconMap[type] || 'Package';
@@ -53,7 +56,7 @@ export const getProductTypeIcon = (type: string): string => {
  * Liste tous les types de produits disponibles
  */
 export const getAllProductTypes = (): ProductType[] => {
-  return ['digital', 'physical', 'service', 'course'];
+  return ['digital', 'physical', 'service', 'course', 'artist'];
 };
 
 /**
@@ -62,4 +65,3 @@ export const getAllProductTypes = (): ProductType[] => {
 export const isValidProductType = (type: string): type is ProductType => {
   return getAllProductTypes().includes(type as ProductType);
 };
-

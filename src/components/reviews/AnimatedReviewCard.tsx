@@ -3,6 +3,7 @@
  * Date : 27 octobre 2025
  */
 
+import React from 'react';
 import { motion } from 'framer-motion';
 import { ReactNode } from 'react';
 
@@ -11,7 +12,7 @@ interface AnimatedReviewCardProps {
   index?: number;
 }
 
-export const AnimatedReviewCard = ({ children, index = 0 }: AnimatedReviewCardProps) => {
+const AnimatedReviewCardComponent = ({ children, index = 0 }: AnimatedReviewCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -30,6 +31,16 @@ export const AnimatedReviewCard = ({ children, index = 0 }: AnimatedReviewCardPr
     </motion.div>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const AnimatedReviewCard = React.memo(AnimatedReviewCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.index === nextProps.index &&
+    prevProps.children === nextProps.children
+  );
+});
+
+AnimatedReviewCard.displayName = 'AnimatedReviewCard';
 
 /**
  * Bouton de vote animé

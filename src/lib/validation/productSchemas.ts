@@ -37,11 +37,11 @@ export const ProductImportSchema = z.object({
   // Licensing (optionnel)
   licensing_type: z.union([
     z.enum(['standard', 'plr', 'copyrighted']),
-    z.string().transform((val) => {
+    z.string().transform((val): 'standard' | 'plr' | 'copyrighted' | undefined => {
       const v = (val || '').toString().trim().toLowerCase();
-      if (!v) return undefined as any;
-      if (['standard', 'plr', 'copyrighted'].includes(v)) return v as any;
-      return undefined as any;
+      if (!v) return undefined;
+      if (v === 'standard' || v === 'plr' || v === 'copyrighted') return v;
+      return undefined;
     })
   ]).optional(),
   
@@ -144,11 +144,11 @@ export function validateProductsImport(data: unknown[]) {
   return {
     successes: successes.map(s => ({
       index: s.index,
-      data: (s.result as any).data,
+      data: s.result.success ? s.result.data : null,
     })),
     errors: errors.map(e => ({
       index: e.index,
-      errors: (e.result as any).error.errors,
+      errors: !e.result.success ? e.result.error.errors : [],
       originalData: e.originalData,
     })),
     total: data.length,

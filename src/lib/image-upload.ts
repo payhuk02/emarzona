@@ -4,8 +4,18 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from './logger';
 
-export type ImageType = 'store-logo' | 'store-banner' | 'product-image' | 'product-gallery' | 'avatar';
+export type ImageType =
+  | 'store-logo'
+  | 'store-banner'
+  | 'product-image'
+  | 'product-gallery'
+  | 'avatar'
+  | 'store-favicon'
+  | 'store-apple-touch-icon'
+  | 'store-watermark'
+  | 'store-placeholder';
 
 interface UploadImageOptions {
   file: File;
@@ -22,7 +32,14 @@ interface UploadImageResult {
   error?: string;
 }
 
-const BUCKET_NAME = 'store-images';
+// IMPORTANT :
+// - Le bucket `product-images` est déjà utilisé et configuré pour les images produits
+//   (voir `src/components/ui/image-upload.ts` et `src/components/products/ImageUpload.tsx`).
+// - Pour fiabiliser l'upload des logos/bannières de boutique sans configuration
+//   supplémentaire côté Supabase, on réutilise ce même bucket au lieu de `store-images`.
+// - Si vous préférez un bucket séparé, créez un bucket public `store-images` dans
+//   Supabase Storage et remplacez cette constante par 'store-images'.
+const BUCKET_NAME = 'product-images';
 
 // Formats acceptés par défaut
 const DEFAULT_FORMATS = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
@@ -43,8 +60,8 @@ export const validateImageFile = (
     return {
       valid: false,
       error: `Format non supporté. Formats acceptés : ${acceptedFormats
-        .map((f) => f.split('/')[1].toUpperCase())
-        .join(', ')}`
+        .map(f => f.split('/')[1].toUpperCase())
+        .join(', ')}`,
     };
   }
 
@@ -57,7 +74,7 @@ export const validateImageFile = (
         file.size /
         1024 /
         1024
-      ).toFixed(2)}MB)`
+      ).toFixed(2)}MB)`,
     };
   }
 
@@ -71,7 +88,7 @@ const generateFileName = (userId: string, type: ImageType, originalName: string)
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 8);
   const extension = originalName.split('.').pop()?.toLowerCase() || 'jpg';
-  
+
   return `${userId}/${type}/${timestamp}_${random}.${extension}`;
 };
 
@@ -93,7 +110,7 @@ export const uploadImage = async ({
   userId,
   maxSizeMB = DEFAULT_MAX_SIZE_MB,
   acceptedFormats = DEFAULT_FORMATS,
-  compress = false
+  compress = false,
 }: UploadImageOptions): Promise<UploadImageResult> => {
   try {
     // 1. Validation
@@ -101,7 +118,7 @@ export const uploadImage = async ({
     if (!validation.valid) {
       return {
         success: false,
-        error: validation.error
+        error: validation.error,
       };
     }
 
@@ -119,31 +136,31 @@ export const uploadImage = async ({
       .from(BUCKET_NAME)
       .upload(fileName, fileToUpload, {
         cacheControl: '3600',
-        upsert: false
+        upsert: false,
       });
 
     if (uploadError) {
-      console.error('Upload error:', uploadError);
+      logger.error('Image upload error', { error: uploadError, fileName, type, userId });
       return {
         success: false,
-        error: `Erreur lors de l'upload : ${uploadError.message}`
+        error: `Erreur lors de l'upload : ${uploadError.message}`,
       };
     }
 
     // 5. Récupérer l'URL publique
-    const { data: urlData } = supabase.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(fileName);
+    const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(fileName);
 
     return {
       success: true,
-      url: urlData.publicUrl
+      url: urlData.publicUrl,
     };
-  } catch (error: any) {
-    console.error('Unexpected upload error:', error);
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Une erreur inattendue est survenue';
+    logger.error('Unexpected image upload error', { error, fileName, type, userId });
     return {
       success: false,
-      error: error.message || 'Une erreur inattendue est survenue'
+      error: errorMessage,
     };
   }
 };
@@ -156,26 +173,24 @@ export const deleteImage = async (imageUrl: string): Promise<boolean> => {
     // Extraire le chemin du fichier depuis l'URL
     const url = new URL(imageUrl);
     const pathParts = url.pathname.split(`/${BUCKET_NAME}/`);
-    
+
     if (pathParts.length < 2) {
-      console.error('Invalid image URL format');
+      logger.error('Invalid image URL format', { imageUrl });
       return false;
     }
 
     const filePath = pathParts[1];
 
-    const { error } = await supabase.storage
-      .from(BUCKET_NAME)
-      .remove([filePath]);
+    const { error } = await supabase.storage.from(BUCKET_NAME).remove([filePath]);
 
     if (error) {
-      console.error('Delete error:', error);
+      logger.error('Image delete error', { error, filePath });
       return false;
     }
 
     return true;
   } catch (error) {
-    console.error('Unexpected delete error:', error);
+    logger.error('Unexpected image delete error', { error, imageUrl });
     return false;
   }
 };
@@ -194,7 +209,7 @@ export const replaceImage = async (
     const uploadResult = await uploadImage({
       file: newFile,
       type,
-      userId
+      userId,
     });
 
     if (!uploadResult.success) {
@@ -207,10 +222,12 @@ export const replaceImage = async (
     }
 
     return uploadResult;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Erreur lors du remplacement de l'image";
     return {
       success: false,
-      error: error.message || 'Erreur lors du remplacement de l\'image'
+      error: errorMessage,
     };
   }
 };
@@ -225,25 +242,25 @@ export const checkStorageBucket = async (): Promise<{ exists: boolean; error?: s
     if (error) {
       return {
         exists: false,
-        error: `Erreur lors de la vérification du bucket : ${error.message}`
+        error: `Erreur lors de la vérification du bucket : ${error.message}`,
       };
     }
 
-    const bucketExists = data?.some((bucket) => bucket.name === BUCKET_NAME);
+    const bucketExists = data?.some(bucket => bucket.name === BUCKET_NAME);
 
     if (!bucketExists) {
       return {
         exists: false,
-        error: `Le bucket "${BUCKET_NAME}" n'existe pas. Veuillez le créer dans Supabase Dashboard.`
+        error: `Le bucket "${BUCKET_NAME}" n'existe pas. Veuillez le créer dans Supabase Dashboard.`,
       };
     }
 
     return { exists: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur de connexion au Storage';
     return {
       exists: false,
-      error: error.message || 'Erreur de connexion au Storage'
+      error: errorMessage,
     };
   }
 };
-

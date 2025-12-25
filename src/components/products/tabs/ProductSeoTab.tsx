@@ -1,43 +1,64 @@
-import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Search, 
-  Eye, 
-  Link as LinkIcon, 
-  Image as ImageIcon,
-  Globe,
-  Target,
+import { useState, useEffect, useCallback } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Search,
+  Eye,
   TrendingUp,
   AlertCircle,
   CheckCircle2,
   Info,
   Copy,
-  ExternalLink,
   BarChart3,
-  Hash,
   Share2,
   Zap,
   Settings,
-  FileText,
-  Tag,
-  Calendar,
-  Users,
   Monitor,
   Smartphone,
-  Tablet
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+  Tablet,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { generateProductUrl } from '@/lib/store-utils';
+
+interface ProductSeoFormData {
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+  description?: string;
+  og_image?: string;
+  og_title?: string;
+  og_description?: string;
+  og_type?: 'product' | 'article' | 'website';
+  structured_data?: Record<string, unknown>;
+  canonical_url?: string;
+  seo_indexable?: boolean;
+  seo_follow?: boolean;
+  robots_meta?: string;
+  slug?: string;
+  name?: string;
+  price?: number;
+  currency?: string;
+  is_active?: boolean;
+  image_url?: string;
+  [key: string]: unknown;
+}
 
 interface ProductSeoTabProps {
-  formData: any;
-  updateFormData: (field: string, value: any) => void;
+  formData: ProductSeoFormData;
+  updateFormData: (field: string, value: unknown) => void;
+  storeSlug: string;
 }
 
 interface SEOAnalysis {
@@ -48,93 +69,108 @@ interface SEOAnalysis {
   readability: 'excellent' | 'good' | 'fair' | 'poor';
 }
 
-export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) => {
+export const ProductSeoTab = ({ formData, updateFormData, storeSlug }: ProductSeoTabProps) => {
   const [seoAnalysis, setSeoAnalysis] = useState<SEOAnalysis>({
     score: 0,
     issues: [],
     suggestions: [],
     keywords: [],
-    readability: 'fair'
+    readability: 'fair',
   });
   const [activePreview, setActivePreview] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
-  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const productSlug = (formData.slug as string) || '';
+  const defaultProductUrl =
+    storeSlug && productSlug
+      ? generateProductUrl(storeSlug, productSlug)
+      : 'https://votreboutique.nomdedomaineplateforme.com/nom-de-produit';
 
   // Analyser le SEO
-  const analyzeSEO = () => {
+  const analyzeSEO = useCallback(() => {
     let score = 0;
     const issues: string[] = [];
     const suggestions: string[] = [];
     const keywords: string[] = [];
 
     // Titre SEO (20 points)
-    if (formData.meta_title && formData.meta_title.length > 0) {
+    if (formData.meta_title && (formData.meta_title as string).length > 0) {
       score += 10;
-      if (formData.meta_title.length >= 30 && formData.meta_title.length <= 60) {
+      if (
+        (formData.meta_title as string).length >= 30 &&
+        (formData.meta_title as string).length <= 60
+      ) {
         score += 10;
       } else {
-        issues.push("Le titre SEO doit faire entre 30 et 60 caractères");
+        issues.push('Le titre SEO doit faire entre 30 et 60 caractères');
       }
     } else {
-      issues.push("Le titre SEO est manquant");
+      issues.push('Le titre SEO est manquant');
     }
 
     // Description SEO (20 points)
-    if (formData.meta_description && formData.meta_description.length > 0) {
+    if (formData.meta_description && (formData.meta_description as string).length > 0) {
       score += 10;
-      if (formData.meta_description.length >= 120 && formData.meta_description.length <= 160) {
+      if (
+        (formData.meta_description as string).length >= 120 &&
+        (formData.meta_description as string).length <= 160
+      ) {
         score += 10;
       } else {
-        issues.push("La description SEO doit faire entre 120 et 160 caractères");
+        issues.push('La description SEO doit faire entre 120 et 160 caractères');
       }
     } else {
-      issues.push("La description SEO est manquante");
+      issues.push('La description SEO est manquante');
     }
 
     // Mots-clés (15 points)
-    if (formData.meta_keywords && formData.meta_keywords.length > 0) {
+    if (formData.meta_keywords && (formData.meta_keywords as string).length > 0) {
       score += 15;
-      keywords.push(...formData.meta_keywords.split(',').map((k: string) => k.trim()));
+      keywords.push(...(formData.meta_keywords as string).split(',').map((k: string) => k.trim()));
     } else {
-      issues.push("Les mots-clés sont manquants");
+      issues.push('Les mots-clés sont manquants');
     }
 
     // Description du produit (25 points)
-    if (formData.description && formData.description.length > 0) {
+    if (formData.description && (formData.description as string).length > 0) {
       score += 10;
-      if (formData.description.length >= 200) {
+      if ((formData.description as string).length >= 200) {
         score += 15;
       } else {
-        issues.push("La description du produit doit faire au moins 200 caractères");
+        issues.push('La description du produit doit faire au moins 200 caractères');
       }
     } else {
-      issues.push("La description du produit est manquante");
+      issues.push('La description du produit est manquante');
     }
 
     // Image Open Graph (10 points)
-    if (formData.og_image && formData.og_image.length > 0) {
+    if (formData.og_image && (formData.og_image as string).length > 0) {
       score += 10;
     } else {
       issues.push("L'image Open Graph est manquante");
     }
 
     // Titre Open Graph (10 points)
-    if (formData.og_title && formData.og_title.length > 0) {
+    if (formData.og_title && (formData.og_title as string).length > 0) {
       score += 10;
     } else {
-      suggestions.push("Ajoutez un titre Open Graph pour améliorer le partage social");
+      suggestions.push('Ajoutez un titre Open Graph pour améliorer le partage social');
     }
 
     // Suggestions automatiques
-    if (formData.name && !formData.meta_title?.includes(formData.name)) {
-      suggestions.push("Incluez le nom du produit dans le titre SEO");
+    if (
+      formData.name &&
+      formData.meta_title &&
+      !(formData.meta_title as string).includes(formData.name as string)
+    ) {
+      suggestions.push('Incluez le nom du produit dans le titre SEO');
     }
 
-    if (formData.description && formData.description.length < 300) {
-      suggestions.push("Enrichissez la description du produit avec plus de détails");
+    if (formData.description && (formData.description as string).length < 300) {
+      suggestions.push('Enrichissez la description du produit avec plus de détails');
     }
 
     if (!formData.structured_data || Object.keys(formData.structured_data).length === 0) {
-      suggestions.push("Ajoutez des données structurées pour améliorer le référencement");
+      suggestions.push('Ajoutez des données structurées pour améliorer le référencement');
     }
 
     setSeoAnalysis({
@@ -142,53 +178,73 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
       issues,
       suggestions,
       keywords,
-      readability: score >= 80 ? 'excellent' : score >= 60 ? 'good' : score >= 40 ? 'fair' : 'poor'
+      readability: score >= 80 ? 'excellent' : score >= 60 ? 'good' : score >= 40 ? 'fair' : 'poor',
     });
-  };
+  }, [
+    formData.currency,
+    formData.description,
+    formData.image_url,
+    formData.is_active,
+    formData.meta_description,
+    formData.meta_keywords,
+    formData.meta_title,
+    formData.name,
+    formData.og_image,
+    formData.og_title,
+    formData.price,
+    formData.structured_data,
+  ]);
 
   useEffect(() => {
     analyzeSEO();
-  }, [formData.meta_title, formData.meta_description, formData.meta_keywords, formData.description, formData.og_image, formData.og_title]);
+  }, [analyzeSEO]);
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600 bg-green-100";
-    if (score >= 60) return "text-yellow-600 bg-yellow-100";
-    return "text-red-600 bg-red-100";
+    if (score >= 80) return 'text-green-600 bg-green-100';
+    if (score >= 60) return 'text-yellow-600 bg-yellow-100';
+    return 'text-red-600 bg-red-100';
   };
 
   const getScoreLabel = (score: number) => {
-    if (score >= 80) return "Excellent";
-    if (score >= 60) return "Bon";
-    if (score >= 40) return "Moyen";
-    return "À améliorer";
+    if (score >= 80) return 'Excellent';
+    if (score >= 60) return 'Bon';
+    if (score >= 40) return 'Moyen';
+    return 'À améliorer';
   };
 
   const getReadabilityColor = (readability: string) => {
     switch (readability) {
-      case 'excellent': return "text-green-600";
-      case 'good': return "text-blue-600";
-      case 'fair': return "text-yellow-600";
-      case 'poor': return "text-red-600";
-      default: return "text-gray-600";
+      case 'excellent':
+        return 'text-green-600';
+      case 'good':
+        return 'text-blue-600';
+      case 'fair':
+        return 'text-yellow-600';
+      case 'poor':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
     }
   };
 
   const generateStructuredData = () => {
     const structuredData = {
-      "@context": "https://schema.org",
-      "@type": "Product",
-      "name": formData.name || "",
-      "description": formData.description || "",
-      "image": formData.image_url || "",
-      "offers": {
-        "@type": "Offer",
-        "price": formData.price || 0,
-        "priceCurrency": formData.currency || "XOF",
-        "availability": formData.is_active ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-      }
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: formData.name || '',
+      description: formData.description || '',
+      image: formData.image_url || '',
+      offers: {
+        '@type': 'Offer',
+        price: formData.price || 0,
+        priceCurrency: formData.currency || 'XOF',
+        availability: formData.is_active
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+      },
     };
 
-    updateFormData("structured_data", structuredData);
+    updateFormData('structured_data', structuredData);
   };
 
   const copyToClipboard = (text: string) => {
@@ -205,7 +261,12 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <div className={cn("px-3 py-1 rounded-full text-sm font-medium", getScoreColor(seoAnalysis.score))}>
+            <div
+              className={cn(
+                'px-3 py-1 rounded-full text-sm font-medium',
+                getScoreColor(seoAnalysis.score)
+              )}
+            >
               Score SEO: {seoAnalysis.score}/100
             </div>
             <p className="text-xs text-gray-500 mt-1">{getScoreLabel(seoAnalysis.score)}</p>
@@ -255,19 +316,19 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
                 <Label htmlFor="meta_title">Titre SEO *</Label>
                 <Input
                   id="meta_title"
-                  value={formData.meta_title || ""}
-                  onChange={(e) => updateFormData("meta_title", e.target.value)}
-                  placeholder={formData.name || "Titre pour les moteurs de recherche"}
+                  value={formData.meta_title || ''}
+                  onChange={e => updateFormData('meta_title', e.target.value)}
+                  placeholder={formData.name || 'Titre pour les moteurs de recherche'}
                   maxLength={60}
                 />
                 <div className="flex items-center justify-between mt-1">
                   <p className="text-xs text-gray-500">
-                    {(formData.meta_title || "").length}/60 caractères
+                    {(formData.meta_title || '').length}/60 caractères
                   </p>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => copyToClipboard(formData.meta_title || "")}
+                    onClick={() => copyToClipboard(formData.meta_title || '')}
                   >
                     <Copy className="h-3 w-3" />
                   </Button>
@@ -278,20 +339,20 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
                 <Label htmlFor="meta_description">Description SEO *</Label>
                 <Textarea
                   id="meta_description"
-                  value={formData.meta_description || ""}
-                  onChange={(e) => updateFormData("meta_description", e.target.value)}
+                  value={formData.meta_description || ''}
+                  onChange={e => updateFormData('meta_description', e.target.value)}
                   placeholder="Description pour les moteurs de recherche..."
                   rows={3}
                   maxLength={160}
                 />
                 <div className="flex items-center justify-between mt-1">
                   <p className="text-xs text-gray-500">
-                    {(formData.meta_description || "").length}/160 caractères
+                    {(formData.meta_description || '').length}/160 caractères
                   </p>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => copyToClipboard(formData.meta_description || "")}
+                    onClick={() => copyToClipboard(formData.meta_description || '')}
                   >
                     <Copy className="h-3 w-3" />
                   </Button>
@@ -302,22 +363,20 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
                 <Label htmlFor="meta_keywords">Mots-clés</Label>
                 <Input
                   id="meta_keywords"
-                  value={formData.meta_keywords || ""}
-                  onChange={(e) => updateFormData("meta_keywords", e.target.value)}
+                  value={formData.meta_keywords || ''}
+                  onChange={e => updateFormData('meta_keywords', e.target.value)}
                   placeholder="mot-clé1, mot-clé2, mot-clé3"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Séparez les mots-clés par des virgules
-                </p>
+                <p className="text-xs text-gray-500 mt-1">Séparez les mots-clés par des virgules</p>
               </div>
 
               <div>
                 <Label htmlFor="canonical_url">URL canonique</Label>
                 <Input
                   id="canonical_url"
-                  value={formData.canonical_url || ""}
-                  onChange={(e) => updateFormData("canonical_url", e.target.value)}
-                  placeholder="https://example.com/product"
+                  value={formData.canonical_url || ''}
+                  onChange={e => updateFormData('canonical_url', e.target.value)}
+                  placeholder={defaultProductUrl}
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   URL principale de ce produit (optionnel)
@@ -333,17 +392,15 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
                 <Share2 className="h-5 w-5" />
                 Partage social (Open Graph)
               </CardTitle>
-              <CardDescription>
-                Optimisation pour Facebook, Twitter, LinkedIn, etc.
-              </CardDescription>
+              <CardDescription>Optimisation pour Facebook, Twitter, LinkedIn, etc.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="og_title">Titre Open Graph</Label>
                 <Input
                   id="og_title"
-                  value={formData.og_title || ""}
-                  onChange={(e) => updateFormData("og_title", e.target.value)}
+                  value={formData.og_title || ''}
+                  onChange={e => updateFormData('og_title', e.target.value)}
                   placeholder="Titre pour les réseaux sociaux..."
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -355,39 +412,35 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
                 <Label htmlFor="og_description">Description Open Graph</Label>
                 <Textarea
                   id="og_description"
-                  value={formData.og_description || ""}
-                  onChange={(e) => updateFormData("og_description", e.target.value)}
+                  value={formData.og_description || ''}
+                  onChange={e => updateFormData('og_description', e.target.value)}
                   placeholder="Description pour les réseaux sociaux..."
                   rows={3}
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Description affichée lors du partage
-                </p>
+                <p className="text-xs text-gray-500 mt-1">Description affichée lors du partage</p>
               </div>
 
               <div>
                 <Label htmlFor="og_image">Image Open Graph</Label>
                 <Input
                   id="og_image"
-                  value={formData.og_image || ""}
-                  onChange={(e) => updateFormData("og_image", e.target.value)}
+                  value={formData.og_image || ''}
+                  onChange={e => updateFormData('og_image', e.target.value)}
                   placeholder="https://example.com/image.jpg"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Image recommandée: 1200x630px
-                </p>
+                <p className="text-xs text-gray-500 mt-1">Image recommandée: 1200x630px</p>
               </div>
 
               <div>
                 <Label htmlFor="og_type">Type Open Graph</Label>
-                <Select 
-                  value={formData.og_type || "product"} 
-                  onValueChange={(value) => updateFormData("og_type", value)}
+                <Select
+                  value={formData.og_type ?? 'product'}
+                  onValueChange={value => updateFormData('og_type', value)}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent mobileVariant="sheet">
                     <SelectItem value="product">Produit</SelectItem>
                     <SelectItem value="article">Article</SelectItem>
                     <SelectItem value="website">Site web</SelectItem>
@@ -412,12 +465,11 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
               <div className="flex items-center justify-between">
                 <div>
                   <Label>Données structurées automatiques</Label>
-                  <p className="text-sm text-gray-600">Générer automatiquement les données Schema.org</p>
+                  <p className="text-sm text-gray-600">
+                    Générer automatiquement les données Schema.org
+                  </p>
                 </div>
-                <Button
-                  variant="outline"
-                  onClick={generateStructuredData}
-                >
+                <Button variant="outline" onClick={generateStructuredData}>
                   <Zap className="h-4 w-4 mr-2" />
                   Générer
                 </Button>
@@ -434,7 +486,9 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
                       variant="outline"
                       size="sm"
                       className="absolute top-2 right-2"
-                      onClick={() => copyToClipboard(JSON.stringify(formData.structured_data, null, 2))}
+                      onClick={() =>
+                        copyToClipboard(JSON.stringify(formData.structured_data, null, 2))
+                      }
                     >
                       <Copy className="h-3 w-3" />
                     </Button>
@@ -460,7 +514,7 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
                 </div>
                 <Switch
                   checked={formData.seo_indexable !== false}
-                  onCheckedChange={(checked) => updateFormData("seo_indexable", checked)}
+                  onCheckedChange={checked => updateFormData('seo_indexable', checked)}
                 />
               </div>
 
@@ -471,7 +525,7 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
                 </div>
                 <Switch
                   checked={formData.seo_follow !== false}
-                  onCheckedChange={(checked) => updateFormData("seo_follow", checked)}
+                  onCheckedChange={checked => updateFormData('seo_follow', checked)}
                 />
               </div>
 
@@ -479,8 +533,8 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
                 <Label htmlFor="robots_meta">Meta robots</Label>
                 <Input
                   id="robots_meta"
-                  value={formData.robots_meta || ""}
-                  onChange={(e) => updateFormData("robots_meta", e.target.value)}
+                  value={formData.robots_meta || ''}
+                  onChange={e => updateFormData('robots_meta', e.target.value)}
                   placeholder="index, follow"
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -504,15 +558,20 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
             <CardContent>
               <div className="space-y-4">
                 <div className="text-center">
-                  <div className={cn("w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold mx-auto", getScoreColor(seoAnalysis.score))}>
+                  <div
+                    className={cn(
+                      'w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold mx-auto',
+                      getScoreColor(seoAnalysis.score)
+                    )}
+                  >
                     {seoAnalysis.score}
                   </div>
                   <p className="text-sm text-gray-600 mt-2">{getScoreLabel(seoAnalysis.score)}</p>
-                  <p className={cn("text-xs mt-1", getReadabilityColor(seoAnalysis.readability))}>
+                  <p className={cn('text-xs mt-1', getReadabilityColor(seoAnalysis.readability))}>
                     Lisibilité: {seoAnalysis.readability}
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm">Problèmes détectés</h4>
                   {seoAnalysis.issues.length === 0 ? (
@@ -562,13 +621,13 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
                   <h4 className="font-medium text-sm mb-2">Google Search</h4>
                   <div className="border rounded p-3 bg-white">
                     <div className="text-blue-600 text-sm font-medium mb-1">
-                      {formData.meta_title || "Titre SEO"}
+                      {formData.meta_title || 'Titre SEO'}
                     </div>
                     <div className="text-green-600 text-xs mb-1">
-                      {formData.canonical_url || "https://example.com/product"}
+                      {formData.canonical_url || defaultProductUrl}
                     </div>
                     <div className="text-gray-600 text-xs">
-                      {formData.meta_description || "Description SEO"}
+                      {formData.meta_description || 'Description SEO'}
                     </div>
                   </div>
                 </div>
@@ -577,10 +636,10 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
                   <h4 className="font-medium text-sm mb-2">Réseaux sociaux</h4>
                   <div className="border rounded p-3 bg-gray-50">
                     <div className="font-medium text-sm mb-1">
-                      {formData.og_title || formData.meta_title || "Titre"}
+                      {formData.og_title || formData.meta_title || 'Titre'}
                     </div>
                     <div className="text-gray-600 text-xs mb-2">
-                      {formData.og_description || formData.meta_description || "Description"}
+                      {formData.og_description || formData.meta_description || 'Description'}
                     </div>
                     {formData.og_image && (
                       <div className="w-full h-20 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
@@ -605,29 +664,25 @@ export const ProductSeoTab = ({ formData, updateFormData }: ProductSeoTabProps) 
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Mots-clés</span>
-                  <Badge variant="secondary">
-                    {seoAnalysis.keywords.length}
-                  </Badge>
+                  <Badge variant="secondary">{seoAnalysis.keywords.length}</Badge>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Problèmes</span>
-                  <Badge variant={seoAnalysis.issues.length > 0 ? "destructive" : "secondary"}>
+                  <Badge variant={seoAnalysis.issues.length > 0 ? 'destructive' : 'secondary'}>
                     {seoAnalysis.issues.length}
                   </Badge>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Suggestions</span>
-                  <Badge variant="secondary">
-                    {seoAnalysis.suggestions.length}
-                  </Badge>
+                  <Badge variant="secondary">{seoAnalysis.suggestions.length}</Badge>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Données structurées</span>
-                  <Badge variant={formData.structured_data ? "default" : "secondary"}>
-                    {formData.structured_data ? "Configurées" : "Manquantes"}
+                  <Badge variant={formData.structured_data ? 'default' : 'secondary'}>
+                    {formData.structured_data ? 'Configurées' : 'Manquantes'}
                   </Badge>
                 </div>
               </div>

@@ -161,9 +161,10 @@ export function AffiliateLinkTracker() {
             window.history.replaceState({}, '', location.pathname);
           }
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Unexpected error tracking affiliate click', {
-          error: error.message,
+          error: errorMessage,
           code: affiliateCode,
         });
       }

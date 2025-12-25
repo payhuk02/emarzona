@@ -12,8 +12,10 @@ import { ReviewReplyForm } from './ReviewReplyForm';
 import { ExportReviewsButton } from './ExportReviewsButton';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
+import { useResponsiveModal } from '@/hooks/use-responsive-modal';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Star, AlertCircle } from 'lucide-react';
+import { Star, AlertCircle } from '@/components/icons';
 import {
   useProductReviewStats,
   useCanReview,
@@ -109,11 +111,12 @@ export const ProductReviewsSummary: React.FC<ProductReviewsSummaryProps> = ({
       </ReviewsErrorBoundary>
 
       {/* Dialog formulaire de review */}
-      <Dialog open={showReviewForm} onOpenChange={setShowReviewForm}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Laisser un avis</DialogTitle>
-          </DialogHeader>
+      {useResponsiveModal().useBottomSheet ? (
+        <BottomSheet
+          open={showReviewForm}
+          onOpenChange={setShowReviewForm}
+          title="Laisser un avis"
+        >
           <FormErrorBoundary
             formName="Review Form"
             onReset={() => setShowReviewForm(false)}
@@ -126,15 +129,36 @@ export const ProductReviewsSummary: React.FC<ProductReviewsSummaryProps> = ({
               isLoading={createReview.isPending}
             />
           </FormErrorBoundary>
-        </DialogContent>
-      </Dialog>
+        </BottomSheet>
+      ) : (
+        <Dialog open={showReviewForm} onOpenChange={setShowReviewForm}>
+          <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Laisser un avis</DialogTitle>
+            </DialogHeader>
+            <FormErrorBoundary
+              formName="Review Form"
+              onReset={() => setShowReviewForm(false)}
+            >
+              <ReviewForm
+                productId={productId}
+                productType={productType}
+                onSubmit={handleCreateReview}
+                onCancel={() => setShowReviewForm(false)}
+                isLoading={createReview.isPending}
+              />
+            </FormErrorBoundary>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Dialog réponse à une review */}
-      <Dialog open={!!replyToReviewId} onOpenChange={() => setReplyToReviewId(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Répondre à l'avis</DialogTitle>
-          </DialogHeader>
+      {useResponsiveModal().useBottomSheet ? (
+        <BottomSheet
+          open={!!replyToReviewId}
+          onOpenChange={() => setReplyToReviewId(null)}
+          title="Répondre à l'avis"
+        >
           {replyToReviewId && (
             <FormErrorBoundary
               formName="Review Reply Form"
@@ -147,8 +171,28 @@ export const ProductReviewsSummary: React.FC<ProductReviewsSummaryProps> = ({
               />
             </FormErrorBoundary>
           )}
-        </DialogContent>
-      </Dialog>
+        </BottomSheet>
+      ) : (
+        <Dialog open={!!replyToReviewId} onOpenChange={() => setReplyToReviewId(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Répondre à l'avis</DialogTitle>
+            </DialogHeader>
+            {replyToReviewId && (
+              <FormErrorBoundary
+                formName="Review Reply Form"
+                onReset={() => setReplyToReviewId(null)}
+              >
+                <ReviewReplyForm
+                  reviewId={replyToReviewId}
+                  onSuccess={() => setReplyToReviewId(null)}
+                  onCancel={() => setReplyToReviewId(null)}
+                />
+              </FormErrorBoundary>
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

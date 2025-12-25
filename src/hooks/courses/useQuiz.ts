@@ -7,6 +7,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
+import { useAwardPoints } from '@/hooks/courses/useGamification';
 
 /**
  * Hook pour récupérer un quiz par son ID
@@ -166,6 +168,7 @@ export const useQuizQuestions = (quizId: string | undefined) => {
 export const useSubmitQuiz = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const awardPoints = useAwardPoints();
 
   return useMutation({
     mutationFn: async ({
@@ -220,6 +223,7 @@ export const useSubmitQuiz = () => {
         .single();
 
       const passed = scorePercentage >= (quiz?.passing_score || 70);
+      const isPerfect = scorePercentage === 100;
 
       // 4. Enregistrer la tentative
       const { data: attempt, error: attemptError } = await supabase
@@ -238,21 +242,51 @@ export const useSubmitQuiz = () => {
 
       if (attemptError) throw attemptError;
 
+      // 5. Attribuer des points automatiquement si le quiz est réussi
+      if (passed) {
+        try {
+          // Points de base pour avoir réussi le quiz
+          const basePoints = 20;
+          // Bonus pour score parfait
+          const bonusPoints = isPerfect ? 10 : 0;
+          const totalPointsToAward = basePoints + bonusPoints;
+
+          await awardPoints.mutateAsync({
+            enrollmentId,
+            userId: user.id,
+            points: totalPointsToAward,
+            sourceType: isPerfect ? 'quiz_perfect' : 'quiz_passed',
+            sourceId: quizId,
+            sourceDescription: isPerfect 
+              ? `Quiz réussi avec score parfait (100%)` 
+              : `Quiz réussi avec ${scorePercentage}%`,
+          });
+        } catch (pointsError) {
+          // Ne pas bloquer si l'attribution de points échoue
+          logger.error('Error awarding points for quiz', { error: pointsError, quizId, enrollmentId });
+        }
+      }
+
       return {
         attempt,
         score: scorePercentage,
         passed,
+        isPerfect,
         totalPoints,
         earnedPoints: score,
       };
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['quiz-attempts'] });
+      queryClient.invalidateQueries({ queryKey: ['student-points', result.attempt?.enrollment_id] });
+      queryClient.invalidateQueries({ queryKey: ['course-leaderboard'] });
       
       if (result.passed) {
         toast({
           title: 'Félicitations ! 🎉',
-          description: `Vous avez réussi avec ${result.score}% !`,
+          description: result.isPerfect 
+            ? `Score parfait ! +30 points gagnés !` 
+            : `Vous avez réussi avec ${result.score}% ! +20 points gagnés !`,
         });
       } else {
         toast({

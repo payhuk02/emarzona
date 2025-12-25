@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { Check, AlertCircle, Package } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { useState, useEffect } from 'react';
+import { Check, AlertCircle, Package } from '@/components/icons';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface Variant {
   id: string;
@@ -33,19 +33,15 @@ export const ProductVariantSelector = ({
   const [selectedAttributes, setSelectedAttributes] = useState<{ [key: string]: string }>({});
 
   // Extraire tous les types d'attributs disponibles
-  const attributeTypes = Array.from(
-    new Set(
-      variants.flatMap((v) => Object.keys(v.attributes))
-    )
-  );
+  const attributeTypes = Array.from(new Set(variants.flatMap(v => Object.keys(v.attributes))));
 
   // Obtenir les valeurs uniques pour chaque type d'attribut
   const getAttributeValues = (attributeType: string): string[] => {
     return Array.from(
       new Set(
         variants
-          .filter((v) => v.is_active !== false)
-          .map((v) => v.attributes[attributeType])
+          .filter(v => v.is_active !== false)
+          .map(v => v.attributes[attributeType])
           .filter(Boolean)
       )
     );
@@ -55,11 +51,9 @@ export const ProductVariantSelector = ({
   const isAttributeAvailable = (attributeType: string, value: string): boolean => {
     const tempSelection = { ...selectedAttributes, [attributeType]: value };
     return variants.some(
-      (v) =>
+      v =>
         v.is_active !== false &&
-        Object.entries(tempSelection).every(
-          ([key, val]) => !val || v.attributes[key] === val
-        )
+        Object.entries(tempSelection).every(([key, val]) => !val || v.attributes[key] === val)
     );
   };
 
@@ -67,11 +61,9 @@ export const ProductVariantSelector = ({
   const getStock = (attributeType: string, value: string): number | undefined => {
     const tempSelection = { ...selectedAttributes, [attributeType]: value };
     const variant = variants.find(
-      (v) =>
+      v =>
         v.is_active !== false &&
-        Object.entries(tempSelection).every(
-          ([key, val]) => v.attributes[key] === val
-        )
+        Object.entries(tempSelection).every(([key, val]) => v.attributes[key] === val)
     );
     return variant?.stock;
   };
@@ -83,11 +75,9 @@ export const ProductVariantSelector = ({
 
     // Trouver la variante correspondante
     const matchingVariant = variants.find(
-      (v) =>
+      v =>
         v.is_active !== false &&
-        Object.entries(newSelection).every(
-          ([key, val]) => v.attributes[key] === val
-        )
+        Object.entries(newSelection).every(([key, val]) => v.attributes[key] === val)
     );
 
     setSelectedVariant(matchingVariant || null);
@@ -106,15 +96,15 @@ export const ProductVariantSelector = ({
   // Affichage des labels selon le type d'attribut
   const getAttributeLabel = (type: string): string => {
     const labels: { [key: string]: string } = {
-      color: "Couleur",
-      colour: "Couleur",
-      size: "Taille",
-      material: "Matière",
-      pattern: "Motif",
-      finish: "Finition",
-      dimension: "Dimension",
-      weight: "Poids",
-      style: "Style",
+      color: 'Couleur',
+      colour: 'Couleur',
+      size: 'Taille',
+      material: 'Matière',
+      pattern: 'Motif',
+      finish: 'Finition',
+      dimension: 'Dimension',
+      weight: 'Poids',
+      style: 'Style',
     };
     return labels[type.toLowerCase()] || type.charAt(0).toUpperCase() + type.slice(1);
   };
@@ -126,25 +116,23 @@ export const ProductVariantSelector = ({
   return (
     <div className="space-y-6 pt-6 border-t border-border">
       <div className="space-y-4">
-        {attributeTypes.map((attributeType) => {
+        {attributeTypes.map(attributeType => {
           const values = getAttributeValues(attributeType);
           if (values.length === 0) return null;
 
           return (
             <div key={attributeType} className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-semibold">
-                  {getAttributeLabel(attributeType)}
-                </label>
+                <label className="text-sm font-semibold">{getAttributeLabel(attributeType)}</label>
                 {selectedAttributes[attributeType] && (
                   <span className="text-sm text-muted-foreground">
                     {selectedAttributes[attributeType]}
                   </span>
                 )}
               </div>
-              
+
               <div className="flex flex-wrap gap-2">
-                {values.map((value) => {
+                {values.map(value => {
                   const isSelected = selectedAttributes[attributeType] === value;
                   const isAvailable = isAttributeAvailable(attributeType, value);
                   const stock = getStock(attributeType, value);
@@ -153,14 +141,15 @@ export const ProductVariantSelector = ({
                   return (
                     <Button
                       key={value}
-                      variant={isSelected ? "default" : "outline"}
+                      variant={isSelected ? 'default' : 'outline'}
                       size="sm"
                       disabled={!isAvailable}
                       onClick={() => handleAttributeSelect(attributeType, value)}
                       className={cn(
-                        "relative",
-                        isSelected && "ring-2 ring-primary ring-offset-2",
-                        !isAvailable && "opacity-50 cursor-not-allowed"
+                        // Mobile touch target: 44px min
+                        'relative min-h-[44px] sm:min-h-9',
+                        isSelected && 'ring-2 ring-primary ring-offset-2',
+                        !isAvailable && 'opacity-50 cursor-not-allowed'
                       )}
                     >
                       {isSelected && <Check className="h-3 w-3 mr-1" />}
@@ -206,8 +195,8 @@ export const ProductVariantSelector = ({
                 {finalStock > 0 ? (
                   <>
                     <Badge
-                      variant={finalStock < 5 ? "destructive" : "secondary"}
-                      className={finalStock < 5 ? "animate-pulse" : ""}
+                      variant={finalStock < 5 ? 'destructive' : 'secondary'}
+                      className={finalStock < 5 ? 'animate-pulse' : ''}
                     >
                       {finalStock} en stock
                     </Badge>
@@ -237,4 +226,3 @@ export const ProductVariantSelector = ({
     </div>
   );
 };
-

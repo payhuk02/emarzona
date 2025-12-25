@@ -18,7 +18,7 @@ import {
   CheckCircle2,
   Activity,
   BarChart3,
-} from 'lucide-react';
+} from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { Service } from './ServicesList';
 

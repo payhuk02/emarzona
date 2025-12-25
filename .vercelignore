@@ -1,73 +1,44 @@
-# Fichiers et dossiers à ignorer lors du déploiement Vercel
+# Supabase Edge Functions (déployées séparément via Supabase CLI)
+supabase/functions/
 
-# Dossiers de développement
-node_modules
-.git
-.gitignore
-.vscode
-.idea
-
-# Fichiers de configuration locale
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# Fichiers temporaires
-.tmp
-.temp
-*.tmp
-*.temp
-
-# Fichiers de cache
-.cache
-.parcel-cache
-.next
-.nuxt
-.vuepress/dist
-
-# Fichiers de test
-coverage
-.nyc_output
-test-results
-playwright-report
-
-# Fichiers de documentation de développement
-README.md
-CREATE_FUNCTIONS_README.md
-FUNCTIONS_SUMMARY.md
-IMPROVEMENTS.md
-SPA_ROUTING_FIX.md
-VERCEL_FIX_DOCUMENTATION.md
-VERCEL_DEPLOYMENT.md
-VERCEL_CONFIG_SUMMARY.md
-
-# Scripts de développement
-scripts/
+# Migrations SQL (gérées par Supabase)
 supabase/migrations/
-supabase/functions/create-missing-functions.sql
 
-# Fichiers de configuration de développement
-.eslintrc.*
-.prettierrc.*
-tsconfig.json
+# Documentation
+docs/
+*.md
 
-# Fichiers de test
-*.test.*
-*.spec.*
-__tests__/
-test/
+# Tests
 tests/
+playwright/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
 
-# Fichiers de déploiement alternatifs
-netlify.toml
-firebase.json
-docker-compose.yml
-Dockerfile
+# Scripts
+scripts/
+
+# Backups
+payhula-backup*/
+
+# Node modules (déjà ignoré mais explicite)
+node_modules/
+
+# Build artifacts
+dist/
+dist-ssr/
+
+# Environment files
+.env*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

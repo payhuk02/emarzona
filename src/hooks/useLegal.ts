@@ -5,6 +5,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 import type { 
   LegalDocument, 
   UserConsent, 
@@ -107,7 +108,7 @@ export const useCookiePreferences = (userId: string | undefined) => {
           .from('cookie_preferences')
           .select('*')
           .eq('user_id', userId)
-          .single();
+          .maybeSingle(); // Utiliser maybeSingle au lieu de single pour éviter erreur si pas de ligne
 
         // PGRST116 = aucune ligne trouvée (normal si l'utilisateur n'a pas encore configuré)
         // Ignorer les erreurs 404 et PGRST116
@@ -117,14 +118,18 @@ export const useCookiePreferences = (userId: string | undefined) => {
             return null;
           }
           // Pour les autres erreurs, log mais ne pas throw
-          console.warn('Erreur lors de la récupération des préférences cookies:', error);
+          logger.warn('Erreur lors de la récupération des préférences cookies', { error, userId });
           return null;
         }
         
         return data || null;
-      } catch (err: any) {
-        // Gérer les erreurs inattendues
-        console.warn('Erreur inattendue lors de la récupération des préférences cookies:', err);
+      } catch (err: unknown) {
+        const errorObj = err as { code?: string; message?: string };
+        // Gérer les erreurs inattendues (table n'existe pas, etc.)
+        if (errorObj?.code === '42P01' || errorObj?.message?.includes('does not exist') || errorObj?.message?.includes('404')) {
+          return null; // Table n'existe pas, retourner null silencieusement
+        }
+        logger.warn('Erreur inattendue lors de la récupération des préférences cookies', { error: err, userId });
         return null;
       }
     },
@@ -157,24 +162,38 @@ export const useUpdateCookiePreferences = () => {
             user_id: userId,
             ...preferences,
             updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id'
           })
           .select()
-          .single();
+          .maybeSingle(); // Utiliser maybeSingle pour éviter erreur si pas de ligne
 
         // Si la table n'existe pas, sauvegarder en localStorage comme fallback
         if (error && (error.code === '42P01' || error.message?.includes('does not exist') || error.message?.includes('404'))) {
-          console.warn('Table cookie_preferences n\'existe pas, sauvegarde en localStorage');
+          logger.warn('Table cookie_preferences n\'existe pas, sauvegarde en localStorage', { userId });
           localStorage.setItem('cookiePreferences', JSON.stringify(preferences));
-          return preferences as any;
+          return preferences as Partial<CookiePreferences>;
         }
 
-        if (error) throw error;
-        return data;
-      } catch (err: any) {
+        if (error) {
+          // Pour les autres erreurs, fallback localStorage
+          logger.warn('Erreur lors de la sauvegarde des préférences cookies', { error, userId });
+          localStorage.setItem('cookiePreferences', JSON.stringify(preferences));
+          return preferences as Partial<CookiePreferences>;
+        }
+        
+        return data || preferences as Partial<CookiePreferences>;
+      } catch (err: unknown) {
+        const errorObj = err as { code?: string; message?: string };
         // Fallback: sauvegarder en localStorage si erreur Supabase
-        console.warn('Erreur lors de la sauvegarde des préférences cookies, fallback localStorage:', err);
+        if (errorObj?.code === '42P01' || errorObj?.message?.includes('does not exist') || errorObj?.message?.includes('404')) {
+          // Table n'existe pas, utiliser localStorage silencieusement
+          localStorage.setItem('cookiePreferences', JSON.stringify(preferences));
+          return preferences as Partial<CookiePreferences>;
+        }
+        logger.warn('Erreur lors de la sauvegarde des préférences cookies, fallback localStorage', { error: err, userId });
         localStorage.setItem('cookiePreferences', JSON.stringify(preferences));
-        return preferences as any;
+        return preferences as Partial<CookiePreferences>;
       }
     },
     onSuccess: (_, variables) => {

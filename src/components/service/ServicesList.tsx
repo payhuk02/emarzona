@@ -139,10 +139,12 @@ export interface ServicesListProps {
  * 
  * @example
  * ```tsx
+ * import { logger } from '@/lib/logger';
+ * 
  * <ServicesList 
  *   services={services}
- *   onEdit={(service) => console.log('Edit', service)}
- *   onDelete={(service) => console.log('Delete', service)}
+ *   onEdit={(service) => logger.info('Edit service', { serviceId: service.id })}
+ *   onDelete={(service) => logger.info('Delete service', { serviceId: service.id })}
  *   enableSelection={true}
  *   showStats={true}
  *   categories={['Coaching', 'Consultation', 'Formation']}
@@ -150,7 +152,7 @@ export interface ServicesListProps {
  * />
  * ```
  */
-export const ServicesList: React.FC<ServicesListProps> = ({
+const ServicesListComponent: React.FC<ServicesListProps> = ({
   services,
   onServiceSelect,
   onEdit,
@@ -224,8 +226,8 @@ export const ServicesList: React.FC<ServicesListProps> = ({
     // Sorting
     if (filters.sortBy) {
       result.sort((a, b) => {
-        let aValue: any = a[filters.sortBy!];
-        let bValue: any = b[filters.sortBy!];
+        let aValue: string | number | Date | undefined = a[filters.sortBy as keyof typeof a];
+        let bValue: string | number | Date | undefined = b[filters.sortBy as keyof typeof b];
 
         // Handle dates
         if (filters.sortBy === 'createdAt' || filters.sortBy === 'updatedAt') {
@@ -335,6 +337,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
           'p-4 hover:shadow-md transition-shadow cursor-pointer',
           isSelected && 'ring-2 ring-primary'
         )}
+        style={{ willChange: 'transform' }}
         onClick={() => onServiceSelect?.(service)}
       >
         <div className="space-y-3">
@@ -367,7 +370,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
             {/* Actions */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] p-0 touch-manipulation" aria-label={`Actions pour ${service.name}`}>
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -475,7 +478,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
               setFilters({ ...filters, status: value as any })
             }
           >
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full sm:w-[140px] min-h-[44px] h-11">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
@@ -494,7 +497,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                 setFilters({ ...filters, category: value })
               }
             >
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-full sm:w-[140px] min-h-[44px] h-11">
                 <SelectValue placeholder="Catégorie" />
               </SelectTrigger>
               <SelectContent>
@@ -513,7 +516,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
               value={filters.staff || 'all'}
               onValueChange={(value) => setFilters({ ...filters, staff: value })}
             >
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-full sm:w-[140px] min-h-[44px] h-11">
                 <SelectValue placeholder="Staff" />
               </SelectTrigger>
               <SelectContent>
@@ -536,6 +539,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
               size="sm"
               onClick={onRefresh}
               disabled={isLoading}
+              aria-label="Actualiser la liste des services"
             >
               <RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
             </Button>
@@ -652,6 +656,25 @@ export const ServicesList: React.FC<ServicesListProps> = ({
     </div>
   );
 };
+
+ServicesListComponent.displayName = 'ServicesListComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const ServicesList = React.memo(ServicesListComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.services.length === nextProps.services.length &&
+    prevProps.onSelect === nextProps.onSelect &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onView === nextProps.onView &&
+    // Comparaison superficielle des services (comparer les IDs)
+    prevProps.services.every((service, index) => 
+      service.id === nextProps.services[index]?.id &&
+      service.is_active === nextProps.services[index]?.is_active &&
+      service.price === nextProps.services[index]?.price
+    )
+  );
+});
 
 ServicesList.displayName = 'ServicesList';
 

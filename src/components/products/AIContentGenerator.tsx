@@ -22,6 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { logger } from '@/lib/logger';
 import {
   Sparkles,
   Wand2,
@@ -103,7 +104,7 @@ export const AIContentGenerator = ({
         description: `Score qualité: ${analysis.score}/100`,
       });
     } catch (error: any) {
-      console.error('Generation error:', error);
+      logger.error('Generation error', { error, type: selectedType });
       toast({
         title: 'Erreur de génération',
         description: error.message || 'Une erreur est survenue',
@@ -141,7 +142,7 @@ export const AIContentGenerator = ({
           Générer avec l'IA
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wand2 className="h-5 w-5 text-primary" />

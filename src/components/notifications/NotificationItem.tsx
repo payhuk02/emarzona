@@ -4,6 +4,7 @@
  * Date : 27 octobre 2025
  */
 
+import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -97,7 +98,7 @@ const getNotificationMeta = (type: NotificationType) => {
   return meta[type] || meta.system;
 };
 
-export const NotificationItem = ({ notification, onClick }: NotificationItemProps) => {
+const NotificationItemComponent = ({ notification, onClick }: NotificationItemProps) => {
   const { icon: Icon, color, bgColor } = getNotificationMeta(notification.type);
 
   const timeAgo = notification.created_at
@@ -113,6 +114,7 @@ export const NotificationItem = ({ notification, onClick }: NotificationItemProp
         'p-4 hover:bg-accent cursor-pointer transition-colors',
         !notification.is_read && 'bg-blue-50/30 dark:bg-blue-950/20'
       )}
+      style={{ willChange: 'transform' }}
       onClick={onClick}
     >
       <div className="flex gap-3">
@@ -149,4 +151,19 @@ export const NotificationItem = ({ notification, onClick }: NotificationItemProp
     </div>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const NotificationItem = React.memo(NotificationItemComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.notification.id === nextProps.notification.id &&
+    prevProps.notification.is_read === nextProps.notification.is_read &&
+    prevProps.notification.type === nextProps.notification.type &&
+    prevProps.notification.title === nextProps.notification.title &&
+    prevProps.notification.message === nextProps.notification.message &&
+    prevProps.notification.created_at === nextProps.notification.created_at &&
+    prevProps.onClick === nextProps.onClick
+  );
+});
+
+NotificationItem.displayName = 'NotificationItem';
 

@@ -6,6 +6,8 @@
  * Architecture prête pour basculer vers la vraie API
  */
 
+import { logger } from '@/lib/logger';
+
 // =====================================================
 // TYPES
 // =====================================================
@@ -306,7 +308,7 @@ class MockFedexService {
   async cancelShipment(trackingNumber: string): Promise<{ success: boolean }> {
     await this.simulateDelay();
 
-    console.log(`[Mock FedEx] Cancelled shipment: ${trackingNumber}`);
+    logger.info('Mock FedEx: Cancelled shipment', { trackingNumber });
 
     return { success: true };
   }

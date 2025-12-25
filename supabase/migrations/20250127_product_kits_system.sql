@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK PRODUCT KITS & ASSEMBLY SYSTEM
+-- EMARZONA PRODUCT KITS & ASSEMBLY SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système de kits produits et assemblage
 --              Produits composés de plusieurs sous-produits

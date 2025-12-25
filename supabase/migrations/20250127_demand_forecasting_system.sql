@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK DEMAND FORECASTING SYSTEM
+-- EMARZONA DEMAND FORECASTING SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système de prévisions de demande basé sur l'historique des ventes
 --              Analyse des tendances, saisonnalité et prédictions

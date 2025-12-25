@@ -1,6 +1,6 @@
 /**
  * Page: Politique des Cookies / Cookie Policy
- * Détails des cookies utilisés sur Payhuk
+ * Détails des cookies utilisés sur Emarzona
  * Date: 27 octobre 2025
  */
 
@@ -48,7 +48,7 @@ export default function CookiePolicy() {
           
           {/* Introduction */}
           <p className="lead">
-            Cette politique explique ce que sont les cookies, comment nous les utilisons sur Payhuk, 
+            Cette politique explique ce que sont les cookies, comment nous les utilisons sur Emarzona, 
             et comment vous pouvez contrôler vos préférences.
           </p>
 
@@ -275,7 +275,7 @@ export default function CookiePolicy() {
             Pour toute question sur notre utilisation des cookies :
           </p>
           <ul>
-            <li><strong>Email :</strong> privacy@payhuk.com</li>
+            <li><strong>Email :</strong> privacy@emarzona.com</li>
             <li><strong>Support :</strong> Via le chat en bas à droite</li>
           </ul>
 

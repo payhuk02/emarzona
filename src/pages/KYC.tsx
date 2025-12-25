@@ -6,10 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MobileFormField } from '@/components/ui/mobile-form-field';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useKYC, KYCFormData } from '@/hooks/useKYC';
 import { Shield, Upload, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const KYC = () => {
   const { submission, isLoading, submitKYC, isSubmitting } = useKYC();
@@ -32,81 +35,100 @@ const KYC = () => {
     });
   };
 
+  // Refs for animations
+  const headerRef = useScrollAnimation<HTMLDivElement>();
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'verified':
-        return <Badge className="bg-green-500 hover:bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" />Vérifié</Badge>;
+        return <Badge className="bg-green-500 hover:bg-green-600 text-xs sm:text-sm"><CheckCircle2 className="h-3 w-3 mr-1" />Vérifié</Badge>;
       case 'rejected':
-        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejeté</Badge>;
+        return <Badge variant="destructive" className="text-xs sm:text-sm"><XCircle className="h-3 w-3 mr-1" />Rejeté</Badge>;
       default:
-        return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />En attente</Badge>;
+        return <Badge variant="secondary" className="text-xs sm:text-sm"><Clock className="h-3 w-3 mr-1" />En attente</Badge>;
     }
   };
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="flex min-h-screen w-full overflow-x-hidden">
         <AppSidebar />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-            <div className="flex items-center gap-3">
-              <Shield className="h-8 w-8 text-primary" />
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold">Vérification KYC</h1>
-                <p className="text-sm text-muted-foreground">Know Your Customer - Vérification d'identité</p>
+        <main className="flex-1 overflow-auto">
+          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+            {/* Header - Responsive & Animated */}
+            <div 
+              ref={headerRef}
+              className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+            >
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                  <Shield className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
+                    <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      Vérification KYC
+                    </span>
+                  </h1>
+                  <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">Know Your Customer - Vérification d'identité</p>
+                </div>
               </div>
             </div>
 
             {isLoading ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">Chargement...</p>
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                <CardContent className="p-6 sm:p-8">
+                  <div className="space-y-4">
+                    <Skeleton className="h-8 w-48 sm:w-64" />
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
+                  </div>
                 </CardContent>
               </Card>
             ) : submission ? (
-              <Card>
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle>Statut de votre vérification</CardTitle>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                    <CardTitle className="text-lg sm:text-xl">Statut de votre vérification</CardTitle>
                     {getStatusBadge(submission.status)}
                   </div>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Soumis le {new Date(submission.created_at).toLocaleDateString('fr-FR')}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
+                <CardContent className="space-y-4 sm:space-y-6">
+                  <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
                     <div>
-                      <Label className="text-muted-foreground">Nom complet</Label>
-                      <p className="font-medium">{submission.full_name}</p>
+                      <Label className="text-xs sm:text-sm text-muted-foreground">Nom complet</Label>
+                      <p className="font-medium text-sm sm:text-base mt-1">{submission.full_name}</p>
                     </div>
                     <div>
-                      <Label className="text-muted-foreground">Date de naissance</Label>
-                      <p className="font-medium">{new Date(submission.date_of_birth).toLocaleDateString('fr-FR')}</p>
+                      <Label className="text-xs sm:text-sm text-muted-foreground">Date de naissance</Label>
+                      <p className="font-medium text-sm sm:text-base mt-1">{new Date(submission.date_of_birth).toLocaleDateString('fr-FR')}</p>
                     </div>
                     <div>
-                      <Label className="text-muted-foreground">Ville</Label>
-                      <p className="font-medium">{submission.city}</p>
+                      <Label className="text-xs sm:text-sm text-muted-foreground">Ville</Label>
+                      <p className="font-medium text-sm sm:text-base mt-1">{submission.city}</p>
                     </div>
                     <div>
-                      <Label className="text-muted-foreground">Pays</Label>
-                      <p className="font-medium">{submission.country}</p>
+                      <Label className="text-xs sm:text-sm text-muted-foreground">Pays</Label>
+                      <p className="font-medium text-sm sm:text-base mt-1">{submission.country}</p>
                     </div>
                   </div>
 
                   {submission.status === 'rejected' && submission.rejection_reason && (
                     <Alert variant="destructive">
                       <XCircle className="h-4 w-4" />
-                      <AlertDescription>
+                      <AlertDescription className="text-xs sm:text-sm">
                         <strong>Motif du rejet :</strong> {submission.rejection_reason}
                       </AlertDescription>
                     </Alert>
                   )}
 
                   {submission.status === 'verified' && (
-                    <Alert className="bg-green-50 text-green-900 border-green-200">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      <AlertDescription>
+                    <Alert className="bg-green-50 text-green-900 border-green-200 dark:bg-green-900/20 dark:text-green-100 dark:border-green-800">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      <AlertDescription className="text-xs sm:text-sm">
                         Votre identité a été vérifiée avec succès. Vous avez désormais accès à toutes les fonctionnalités.
                       </AlertDescription>
                     </Alert>
@@ -114,92 +136,91 @@ const KYC = () => {
                 </CardContent>
               </Card>
             ) : (
-              <Card>
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <CardHeader>
-                  <CardTitle>Soumettre votre vérification KYC</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-lg sm:text-xl">Soumettre votre vérification KYC</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
                     Remplissez le formulaire ci-dessous pour vérifier votre identité
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="full_name">Nom complet *</Label>
-                        <Input
-                          id="full_name"
+                  <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                    <div className="space-y-3 sm:space-y-4">
+                      <MobileFormField
+                        label="Nom complet"
+                        name="full_name"
+                        type="text"
+                        value={formData.full_name || ''}
+                        onChange={(value) => setFormData({ ...formData, full_name: value })}
+                        required
+                        fieldProps={{
+                          placeholder: "Jean Dupont",
+                        }}
+                      />
+
+                      <MobileFormField
+                        label="Date de naissance"
+                        name="date_of_birth"
+                        type="date"
+                        value={formData.date_of_birth || ''}
+                        onChange={(value) => setFormData({ ...formData, date_of_birth: value })}
+                        required
+                      />
+
+                      <MobileFormField
+                        label="Adresse complète"
+                        name="address"
+                        type="text"
+                        value={formData.address || ''}
+                        onChange={(value) => setFormData({ ...formData, address: value })}
+                        required
+                        fieldProps={{
+                          placeholder: "123 Rue Example",
+                        }}
+                      />
+
+                      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
+                        <MobileFormField
+                          label="Ville"
+                          name="city"
+                          type="text"
+                          value={formData.city || ''}
+                          onChange={(value) => setFormData({ ...formData, city: value })}
                           required
-                          value={formData.full_name || ''}
-                          onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                          placeholder="Jean Dupont"
+                          fieldProps={{
+                            placeholder: "Paris",
+                          }}
+                        />
+                        <MobileFormField
+                          label="Pays"
+                          name="country"
+                          type="text"
+                          value={formData.country || ''}
+                          onChange={(value) => setFormData({ ...formData, country: value })}
+                          required
+                          fieldProps={{
+                            placeholder: "France",
+                          }}
                         />
                       </div>
 
-                      <div>
-                        <Label htmlFor="date_of_birth">Date de naissance *</Label>
-                        <Input
-                          id="date_of_birth"
-                          type="date"
-                          required
-                          value={formData.date_of_birth || ''}
-                          onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
-                        />
-                      </div>
+                      <MobileFormField
+                        label="Type de document"
+                        name="document_type"
+                        type="select"
+                        value={formData.document_type || 'cni'}
+                        onChange={(value) => setFormData({ ...formData, document_type: value as any })}
+                        required
+                        selectOptions={[
+                          { value: 'cni', label: "Carte Nationale d'Identité" },
+                          { value: 'passport', label: 'Passeport' },
+                          { value: 'drivers_license', label: 'Permis de conduire' },
+                          { value: 'other', label: 'Autre' },
+                        ]}
+                      />
 
                       <div>
-                        <Label htmlFor="address">Adresse complète *</Label>
-                        <Input
-                          id="address"
-                          required
-                          value={formData.address || ''}
-                          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                          placeholder="123 Rue Example"
-                        />
-                      </div>
-
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div>
-                          <Label htmlFor="city">Ville *</Label>
-                          <Input
-                            id="city"
-                            required
-                            value={formData.city || ''}
-                            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                            placeholder="Paris"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="country">Pays *</Label>
-                          <Input
-                            id="country"
-                            required
-                            value={formData.country || ''}
-                            onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                            placeholder="France"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="document_type">Type de document *</Label>
-                        <Select
-                          value={formData.document_type}
-                          onValueChange={(value: any) => setFormData({ ...formData, document_type: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="cni">Carte Nationale d'Identité</SelectItem>
-                            <SelectItem value="passport">Passeport</SelectItem>
-                            <SelectItem value="drivers_license">Permis de conduire</SelectItem>
-                            <SelectItem value="other">Autre</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="document_front">Document (recto) * (max 5MB)</Label>
+                        <Label htmlFor="document_front" className="text-xs sm:text-sm">Document (recto) * (max 5MB)</Label>
                         <Input
                           id="document_front"
                           type="file"
@@ -214,11 +235,17 @@ const KYC = () => {
                               e.target.value = '';
                             }
                           }}
+                          className="h-9 sm:h-10 text-xs sm:text-sm mt-1.5 sm:mt-2 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs sm:file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                         />
+                        {frontFile && (
+                          <p className="text-xs text-muted-foreground mt-1.5">
+                            Fichier sélectionné : {frontFile.name}
+                          </p>
+                        )}
                       </div>
 
                       <div>
-                        <Label htmlFor="document_back">Document (verso) (optionnel, max 5MB)</Label>
+                        <Label htmlFor="document_back" className="text-xs sm:text-sm">Document (verso) (optionnel, max 5MB)</Label>
                         <Input
                           id="document_back"
                           type="file"
@@ -232,18 +259,29 @@ const KYC = () => {
                               e.target.value = '';
                             }
                           }}
+                          className="h-9 sm:h-10 text-xs sm:text-sm mt-1.5 sm:mt-2 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs sm:file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                         />
+                        {backFile && (
+                          <p className="text-xs text-muted-foreground mt-1.5">
+                            Fichier sélectionné : {backFile.name}
+                          </p>
+                        )}
                       </div>
                     </div>
 
-                    <Alert>
+                    <Alert className="border-border/50 bg-card/50 backdrop-blur-sm">
                       <Shield className="h-4 w-4" />
-                      <AlertDescription>
+                      <AlertDescription className="text-xs sm:text-sm">
                         Vos données personnelles sont sécurisées et ne seront utilisées que pour la vérification d'identité.
                       </AlertDescription>
                     </Alert>
 
-                    <Button type="submit" disabled={isSubmitting} className="w-full gradient-primary">
+                    <Button 
+                      type="submit" 
+                      disabled={isSubmitting} 
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                      size="lg"
+                    >
                       <Upload className="h-4 w-4 mr-2" />
                       {isSubmitting ? 'Envoi en cours...' : 'Soumettre ma demande'}
                     </Button>

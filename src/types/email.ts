@@ -1,10 +1,12 @@
 /**
  * Types TypeScript pour le système d'Email Marketing Universel
  * Date : 27 octobre 2025
- * Supporte: Digital, Physical, Service, Course
+ * Supporte: Digital, Physical, Service, Course, Artist
  */
 
-export type ProductType = 'digital' | 'physical' | 'service' | 'course';
+import type { RecordString } from './common';
+
+export type ProductType = 'digital' | 'physical' | 'service' | 'course' | 'artist';
 
 export type EmailCategory = 'transactional' | 'marketing' | 'notification';
 
@@ -73,7 +75,7 @@ export interface EmailLog {
   store_id?: string;
   
   // Variables utilisées
-  variables: { [key: string]: any };
+  variables: Record<string, unknown>;
   
   // SendGrid
   sendgrid_message_id?: string;
@@ -139,7 +141,7 @@ export interface SendEmailPayload {
   userId?: string;
   
   // Variables dynamiques
-  variables: { [key: string]: any };
+  variables: RecordString;
   
   // Contexte métier (optionnel)
   productType?: ProductType;
@@ -213,6 +215,22 @@ export interface CourseEmailVariables {
   certificate_available?: boolean;
 }
 
+// Artist Product
+export interface ArtistProductEmailVariables {
+  user_name: string;
+  order_id: string;
+  product_name: string;
+  artist_name: string;
+  edition_number?: string;
+  total_editions?: number;
+  certificate_available: boolean;
+  authenticity_certificate_link?: string;
+  shipping_address?: string;
+  delivery_date?: string;
+  tracking_number?: string;
+  tracking_link?: string;
+}
+
 // ============================================================
 // TYPES POUR SENDGRID
 // ============================================================
@@ -221,7 +239,7 @@ export interface SendGridEmailRequest {
   personalizations: Array<{
     to: Array<{ email: string; name?: string }>;
     subject: string;
-    dynamic_template_data?: { [key: string]: any };
+    dynamic_template_data?: RecordString;
   }>;
   from: { email: string; name: string };
   reply_to?: { email: string; name?: string };

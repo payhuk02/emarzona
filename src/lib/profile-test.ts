@@ -1,52 +1,58 @@
 import { createClient } from '@supabase/supabase-js';
+import { logger } from './logger';
 
 // Configuration Supabase
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('❌ Supabase configuration missing');
-  console.log('Please check your .env file for VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
+if (!supabaseUrl || !supabasePublishableKey) {
+  logger.error('❌ Supabase configuration missing');
+  logger.info(
+    'Please check your .env file for VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY'
+  );
 }
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = createClient(supabaseUrl, supabasePublishableKey);
 
 export async function testProfileConnection() {
   try {
-    console.log('🔄 Testing profile connection...');
-    
+    logger.info('🔄 Testing profile connection...');
+
     // Test basic connection
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError) {
-      console.error('❌ Auth error:', authError.message);
+      logger.error('❌ Auth error', { error: authError.message });
       return false;
     }
-    
+
     if (!user) {
-      console.log('ℹ️  No authenticated user');
+      logger.info('ℹ️  No authenticated user');
       return false;
     }
-    
-    console.log('✅ User authenticated:', user.email);
-    
+
+    logger.info('✅ User authenticated', { email: user.email });
+
     // Test profile table access
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
       .eq('user_id', user.id)
       .maybeSingle();
-    
+
     if (profileError) {
-      console.error('❌ Profile error:', profileError.message);
+      logger.error('❌ Profile error', { error: profileError.message });
       return false;
     }
-    
+
     if (profile) {
-      console.log('✅ Profile found:', profile);
+      logger.info('✅ Profile found', { profile });
     } else {
-      console.log('ℹ️  No profile found, will create one');
-      
+      logger.info('ℹ️  No profile found, will create one');
+
       // Try to create a profile
       const { data: newProfile, error: createError } = await supabase
         .from('profiles')
@@ -64,24 +70,27 @@ export async function testProfileConnection() {
         ])
         .select()
         .limit(1);
-      
+
       if (createError) {
-        console.error('❌ Create profile error:', createError.message);
+        logger.error('❌ Create profile error', { error: createError.message });
         return false;
       }
-      
-      console.log('✅ Profile created:', newProfile);
+
+      logger.info('✅ Profile created', { profile: newProfile });
     }
-    
+
     return true;
-    
   } catch (error) {
-    console.error('❌ Test error:', error);
+    logger.error('❌ Test error', { error });
     return false;
   }
 }
 
 // Auto-run test if this is imported
 if (typeof window !== 'undefined') {
-  testProfileConnection();
+  // Ne jamais auto-exécuter en production: éviter effets de bord (network + écritures DB).
+  // Activer uniquement en debug local via flag.
+  if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_PROFILE_TEST === 'true') {
+    testProfileConnection();
+  }
 }

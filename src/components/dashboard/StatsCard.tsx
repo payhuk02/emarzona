@@ -1,3 +1,4 @@
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -14,9 +15,9 @@ interface StatsCardProps {
   className?: string;
 }
 
-export const StatsCard = ({ title, value, description, icon: Icon, trend, className }: StatsCardProps) => {
+const StatsCardComponent = ({ title, value, description, icon: Icon, trend, className }: StatsCardProps) => {
   return (
-    <Card className={`shadow-soft hover:shadow-medium transition-smooth hover-scale ${className}`}>
+    <Card className={`shadow-soft hover:shadow-medium transition-smooth hover-scale ${className}`} style={{ willChange: 'transform' }}>
       <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-4 md:p-6">
         <CardTitle className="text-xs sm:text-sm font-medium truncate">{title}</CardTitle>
         <Icon className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
@@ -38,3 +39,17 @@ export const StatsCard = ({ title, value, description, icon: Icon, trend, classN
     </Card>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const StatsCard = React.memo(StatsCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.title === nextProps.title &&
+    prevProps.value === nextProps.value &&
+    prevProps.description === nextProps.description &&
+    prevProps.trend?.value === nextProps.trend?.value &&
+    prevProps.trend?.label === nextProps.trend?.label &&
+    prevProps.className === nextProps.className
+  );
+});
+
+StatsCard.displayName = 'StatsCard';

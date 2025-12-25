@@ -1,6 +1,9 @@
 // Script de test pour vérifier le routing SPA
 // Ce script teste que toutes les routes sont accessibles
 
+// Note: Ce fichier est un script de test/debug, les console.log sont intentionnels
+// pour le debugging dans la console du navigateur
+
 const routes = [
   // Routes publiques
   '/',

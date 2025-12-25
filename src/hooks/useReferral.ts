@@ -169,11 +169,12 @@ export const useReferral = () => {
         paidEarnings,
         commissionRate,
       });
-    } catch (error: any) {
-      logger.error('Error in fetchReferralData', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Error in fetchReferralData', { error: errorMessage });
       toast({
         title: "Erreur",
-        description: error.message || "Impossible de charger les données de parrainage",
+        description: errorMessage || "Impossible de charger les données de parrainage",
         variant: "destructive",
       });
     } finally {
@@ -237,10 +238,10 @@ export const useReferral = () => {
 
       // Récupérer les emails via RPC si disponible
       const referredIds = referredProfilesData && referredProfilesData.length > 0
-        ? referredProfilesData.map((p: any) => p.user_id)
-        : referralsData.map((r: any) => r.referred_id);
+        ? referredProfilesData.map((p: { user_id: string }) => p.user_id)
+        : referralsData.map((r: { referred_id: string }) => r.referred_id);
 
-      let emailsMap = new Map<string, string>();
+      const emailsMap = new Map<string, string>();
       
       if (referredIds.length > 0) {
         try {
@@ -248,62 +249,88 @@ export const useReferral = () => {
             .rpc('get_users_emails', { p_user_ids: referredIds });
 
           if (!emailsError && emailsData) {
-            emailsData.forEach((item: any) => {
+            emailsData.forEach((item: { user_id: string; email: string }) => {
               if (item.user_id && item.email) {
                 emailsMap.set(item.user_id, item.email);
               }
             });
             logger.info('Emails fetched via RPC', { count: emailsMap.size });
           }
-        } catch (rpcError: any) {
-          logger.debug('RPC get_users_emails not available or failed', { error: rpcError.message });
+        } catch (rpcError: unknown) {
+          const errorMessage = rpcError instanceof Error ? rpcError.message : 'Erreur inconnue';
+          logger.debug('RPC get_users_emails not available or failed', { error: errorMessage });
         }
       }
 
       // Récupérer les statistiques des commandes pour chaque filleul
-      // Utiliser customers table pour trouver les commandes
+      // OPTIMISATION: Utiliser une seule requête au lieu de N requêtes (N+1)
       const ordersStatsMap = new Map<string, { orders: number; spent: number }>();
 
       if (referredIds.length > 0) {
         try {
-          // Récupérer les customers correspondants via user_id si possible
-          // Note: customers.user_id peut exister ou on peut utiliser email
-          for (const userId of referredIds) {
-            const email = emailsMap.get(userId);
-            if (email) {
-              const { data: customerData } = await supabase
-                .from('customers')
-                .select('id')
-                .eq('email', email)
-                .limit(1)
-                .single()
-                .catch(() => ({ data: null }));
+          // Récupérer tous les customers correspondants en une seule requête
+          const emails = Array.from(emailsMap.values());
+          if (emails.length > 0) {
+            const { data: customersData } = await supabase
+              .from('customers')
+              .select('id, email')
+              .in('email', emails)
+              .catch(() => ({ data: [] }));
 
-              if (customerData?.id) {
-                const { data: ordersData } = await supabase
+            if (customersData && customersData.length > 0) {
+              // Créer un map email -> customer_id
+              const emailToCustomerMap = new Map<string, string>();
+              customersData.forEach((c: { id: string; email: string }) => {
+                emailToCustomerMap.set(c.email, c.id);
+              });
+
+              // Récupérer toutes les commandes en une seule requête
+              const customerIds = Array.from(emailToCustomerMap.values());
+              if (customerIds.length > 0) {
+                const { data: allOrdersData } = await supabase
                   .from('orders')
-                  .select('id, total_amount, status')
-                  .eq('customer_id', customerData.id)
+                  .select('id, customer_id, total_amount, status')
+                  .in('customer_id', customerIds)
                   .catch(() => ({ data: [] }));
 
-                if (ordersData && ordersData.length > 0) {
-                  const completedOrders = ordersData.filter((o: any) => 
-                    o.status === 'completed' || o.status === 'delivered'
-                  );
-                  const totalSpent = completedOrders.reduce(
-                    (sum: number, o: any) => sum + Number(o.total_amount || 0), 
-                    0
-                  );
-                  ordersStatsMap.set(userId, {
-                    orders: completedOrders.length,
-                    spent: totalSpent,
+                if (allOrdersData && allOrdersData.length > 0) {
+                  // Grouper les commandes par customer_id
+                  const ordersByCustomer = new Map<string, typeof allOrdersData>();
+                  allOrdersData.forEach((order: { customer_id: string; total_amount?: number | null; status: string }) => {
+                    if (!ordersByCustomer.has(order.customer_id)) {
+                      ordersByCustomer.set(order.customer_id, []);
+                    }
+                    ordersByCustomer.get(order.customer_id)!.push(order);
+                  });
+
+                  // Calculer les stats pour chaque userId
+                  referredIds.forEach((userId: string) => {
+                    const email = emailsMap.get(userId);
+                    if (email) {
+                      const customerId = emailToCustomerMap.get(email);
+                      if (customerId) {
+                        const customerOrders = ordersByCustomer.get(customerId) || [];
+                        const completedOrders = customerOrders.filter((o: { status: string }) => 
+                          o.status === 'completed' || o.status === 'delivered'
+                        );
+                        const totalSpent = completedOrders.reduce(
+                          (sum: number, o: { total_amount?: number | null }) => sum + Number(o.total_amount || 0), 
+                          0
+                        );
+                        ordersStatsMap.set(userId, {
+                          orders: completedOrders.length,
+                          spent: totalSpent,
+                        });
+                      }
+                    }
                   });
                 }
               }
             }
           }
-        } catch (ordersError: any) {
-          logger.debug('Could not fetch orders stats', { error: ordersError.message });
+        } catch (ordersError: unknown) {
+          const errorMessage = ordersError instanceof Error ? ordersError.message : 'Erreur inconnue';
+          logger.debug('Could not fetch orders stats', { error: errorMessage });
         }
       }
 
@@ -311,7 +338,7 @@ export const useReferral = () => {
       if (referredProfilesData && referredProfilesData.length > 0) {
         // Trouver la correspondance dans referrals pour chaque profil
         for (const profile of referredProfilesData) {
-          const referral = referralsData.find((r: any) => r.referred_id === profile.user_id);
+          const referral = referralsData.find((r: { referred_id: string }) => r.referred_id === profile.user_id);
           
           const fullName = [profile.first_name, profile.last_name]
             .filter(Boolean)
@@ -342,8 +369,8 @@ export const useReferral = () => {
           .in('user_id', referredIds)
           .catch(() => ({ data: [] }));
 
-        const profilesMap = new Map();
-        (profilesData || []).forEach((profile: any) => {
+        const profilesMap = new Map<string, { user_id: string; display_name?: string; first_name?: string; last_name?: string }>();
+        (profilesData || []).forEach((profile: { user_id: string; display_name?: string; first_name?: string; last_name?: string }) => {
           profilesMap.set(profile.user_id, profile);
         });
 
@@ -373,14 +400,16 @@ export const useReferral = () => {
 
       logger.info('Referrals list prepared', { count: referralsList.length });
       setReferrals(referralsList);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      const errorStack = error instanceof Error ? error.stack : undefined;
       logger.error('Error fetching referrals', { 
-        error: error.message,
-        stack: error.stack 
+        error: errorMessage,
+        stack: errorStack 
       });
       toast({
         title: "Erreur",
-        description: error.message || "Impossible de charger la liste des filleuls",
+        description: errorMessage || "Impossible de charger la liste des filleuls",
         variant: "destructive",
       });
       setReferrals([]); // Assurer que l'état est défini même en cas d'erreur
@@ -447,10 +476,10 @@ export const useReferral = () => {
 
       // Enrichir avec les numéros de commande si disponibles (non-bloquant)
       const orderIds = commissionsData
-        .map((comm: any) => comm.order_id)
-        .filter((id: any) => id !== null);
+        .map((comm: { order_id?: string | null }) => comm.order_id)
+        .filter((id: string | null | undefined): id is string => id !== null && id !== undefined);
 
-      let ordersMap = new Map();
+      const ordersMap = new Map<string, { id: string; order_number?: string }>();
       if (orderIds.length > 0) {
         try {
           const { data: ordersData, error: ordersError } = await supabase
@@ -461,22 +490,23 @@ export const useReferral = () => {
           if (ordersError) {
             logger.debug('Error fetching orders for commissions', { error: ordersError.message });
           } else if (ordersData) {
-            ordersData.forEach((order: any) => {
+            ordersData.forEach((order: { id: string; order_number?: string }) => {
               ordersMap.set(order.id, order);
             });
           }
-        } catch (ordersError: any) {
+        } catch (ordersError: unknown) {
           // Erreur silencieuse - on continue sans les numéros de commande
-          logger.debug('Could not fetch orders for commissions', { error: ordersError?.message || ordersError });
+          const errorMessage = ordersError instanceof Error ? ordersError.message : String(ordersError);
+          logger.debug('Could not fetch orders for commissions', { error: errorMessage });
         }
       }
 
       // Enrichir avec les emails des filleuls (non-bloquant)
       const referredIds = commissionsData
-        .map((comm: any) => comm.referred_id)
-        .filter((id: any) => id !== null);
+        .map((comm: { referred_id?: string | null }) => comm.referred_id)
+        .filter((id: string | null | undefined): id is string => id !== null && id !== undefined);
 
-      let emailsMap = new Map<string, string>();
+      const emailsMap = new Map<string, string>();
       if (referredIds.length > 0) {
         try {
           const { data: emailsData, error: emailsError } = await supabase
@@ -486,20 +516,30 @@ export const useReferral = () => {
             // Erreur silencieuse - on continue sans les emails
             logger.debug('RPC get_users_emails error for commissions', { error: emailsError.message });
           } else if (emailsData) {
-            emailsData.forEach((item: any) => {
+            emailsData.forEach((item: { user_id: string; email: string }) => {
               if (item.user_id && item.email) {
                 emailsMap.set(item.user_id, item.email);
               }
             });
           }
-        } catch (rpcError: any) {
+        } catch (rpcError: unknown) {
           // Erreur silencieuse - on continue sans les emails
-          logger.debug('RPC get_users_emails exception for commissions', { error: rpcError?.message || rpcError });
+          const errorMessage = rpcError instanceof Error ? rpcError.message : String(rpcError);
+          logger.debug('RPC get_users_emails exception for commissions', { error: errorMessage });
         }
       }
 
       // Construire les commissions enrichies
-      const enrichedCommissions = commissionsData.map((comm: any) => {
+      const enrichedCommissions = commissionsData.map((comm: { 
+        id: string; 
+        commission_amount?: number | string | null; 
+        total_amount?: number | string | null; 
+        status: string; 
+        created_at: string; 
+        paid_at?: string | null; 
+        order_id?: string | null; 
+        referred_id?: string | null;
+      }) => {
         const order = ordersMap.get(comm.order_id);
         const email = emailsMap.get(comm.referred_id) || '';
 
@@ -523,11 +563,14 @@ export const useReferral = () => {
 
       logger.info('Commissions fetched and enriched', { count: enrichedCommissions.length });
       setCommissions(enrichedCommissions);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorCode = error && typeof error === 'object' && 'code' in error ? String(error.code) : undefined;
+      const errorStack = error instanceof Error ? error.stack : undefined;
       logger.error('Error fetching commissions', { 
-        error: error?.message || error,
-        code: error?.code,
-        stack: error?.stack 
+        error: errorMessage,
+        code: errorCode,
+        stack: errorStack 
       });
       
       // Ne JAMAIS afficher le toast d'erreur pour les commissions

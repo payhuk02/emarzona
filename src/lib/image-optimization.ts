@@ -6,6 +6,7 @@
  */
 
 import imageCompression from 'browser-image-compression';
+import { logger } from './logger';
 
 /**
  * Options d'optimisation par défaut
@@ -68,13 +69,13 @@ export const optimizeImage = async (
     try {
       thumbnail = await imageCompression(file, THUMBNAIL_OPTIONS);
     } catch (thumbnailError) {
-      console.warn('Thumbnail generation failed:', thumbnailError);
+      logger.warn('Thumbnail generation failed', { error: thumbnailError });
     }
 
     const endTime = performance.now();
     const processingTime = Math.round(endTime - startTime);
 
-    console.log(`✅ Image optimized in ${processingTime}ms:`, {
+    logger.info(`✅ Image optimized in ${processingTime}ms`, {
       original: `${(originalSize / 1024 / 1024).toFixed(2)} MB`,
       optimized: `${(optimizedSize / 1024 / 1024).toFixed(2)} MB`,
       ratio: `${compressionRatio.toFixed(1)}%`,
@@ -89,7 +90,7 @@ export const optimizeImage = async (
       thumbnail,
     };
   } catch (error) {
-    console.error('Image optimization failed:', error);
+    logger.error('Image optimization failed', { error });
     // En cas d'erreur, retourner le fichier original
     return {
       originalFile: file,

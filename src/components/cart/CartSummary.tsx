@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ShoppingBag, Ticket, ArrowRight, X } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useCart } from '@/hooks/cart/useCart';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -19,14 +19,14 @@ interface CartSummaryProps {
   onCheckout?: () => void;
 }
 
-export function CartSummary({ summary, onCheckout }: CartSummaryProps) {
+const CartSummaryComponent = ({ summary, onCheckout }: CartSummaryProps) => {
   const { applyCoupon, removeCoupon, appliedCoupon, isLoading } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState('');
   const [applyingCoupon, setApplyingCoupon] = useState(false);
 
-  const handleApplyCoupon = async () => {
+  const handleApplyCoupon = useCallback(async () => {
     if (!couponCode.trim()) {
       toast({
         title: 'Code promo requis',
@@ -45,9 +45,9 @@ export function CartSummary({ summary, onCheckout }: CartSummaryProps) {
     } finally {
       setApplyingCoupon(false);
     }
-  };
+  }, [couponCode, applyCoupon, toast]);
 
-  const handleCheckout = () => {
+  const handleCheckout = useCallback(() => {
     if (summary.item_count === 0) {
       toast({
         title: 'Panier vide',
@@ -62,12 +62,12 @@ export function CartSummary({ summary, onCheckout }: CartSummaryProps) {
     } else {
       navigate('/checkout');
     }
-  };
+  }, [summary.item_count, onCheckout, navigate, toast]);
 
   return (
     <Card className="sticky top-4">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
           <ShoppingBag className="h-5 w-5" />
           Récapitulatif
         </CardTitle>
@@ -95,6 +95,7 @@ export function CartSummary({ summary, onCheckout }: CartSummaryProps) {
                   variant="ghost"
                   onClick={removeCoupon}
                   className="text-red-600 hover:text-red-700"
+                  aria-label="Retirer le code promo"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -122,6 +123,7 @@ export function CartSummary({ summary, onCheckout }: CartSummaryProps) {
                   onClick={handleApplyCoupon}
                   disabled={applyingCoupon || isLoading || !couponCode.trim()}
                   variant="outline"
+                  className="min-h-[44px] whitespace-nowrap"
                 >
                   Appliquer
                 </Button>
@@ -175,11 +177,11 @@ export function CartSummary({ summary, onCheckout }: CartSummaryProps) {
         <Button
           onClick={handleCheckout}
           disabled={summary.item_count === 0 || isLoading}
-          className="w-full"
+          className="w-full min-h-[44px] text-base sm:text-lg"
           size="lg"
         >
           Procéder au paiement
-          <ArrowRight className="ml-2 h-4 w-4" />
+          <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
 
         <p className="text-xs text-center text-muted-foreground">
@@ -188,5 +190,22 @@ export function CartSummary({ summary, onCheckout }: CartSummaryProps) {
       </CardContent>
     </Card>
   );
-}
+};
+
+CartSummaryComponent.displayName = 'CartSummaryComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const CartSummary = React.memo(CartSummaryComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.summary.item_count === nextProps.summary.item_count &&
+    prevProps.summary.total === nextProps.summary.total &&
+    prevProps.summary.subtotal === nextProps.summary.subtotal &&
+    prevProps.summary.discount_amount === nextProps.summary.discount_amount &&
+    prevProps.summary.shipping_amount === nextProps.summary.shipping_amount &&
+    prevProps.summary.tax_amount === nextProps.summary.tax_amount &&
+    prevProps.onCheckout === nextProps.onCheckout
+  );
+});
+
+CartSummary.displayName = 'CartSummary';
 

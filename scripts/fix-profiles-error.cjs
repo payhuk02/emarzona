@@ -17,11 +17,11 @@ if (fs.existsSync(envPath)) {
 }
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('❌ Variables d\'environnement Supabase manquantes');
-  console.log('Veuillez vérifier que VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY sont définies dans .env');
+  console.log('Veuillez vérifier que VITE_SUPABASE_URL et VITE_SUPABASE_PUBLISHABLE_KEY sont définies dans .env');
   process.exit(1);
 }
 

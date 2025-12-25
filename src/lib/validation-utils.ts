@@ -9,7 +9,7 @@
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
 // URL : HTTP/HTTPS avec domaine valide
-const URL_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
+const URL_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/;
 
 // Téléphone international (avec ou sans +)
 const PHONE_REGEX = /^\+?[1-9]\d{1,14}$/;
@@ -182,8 +182,8 @@ export const validateURL = (
     const urlObj = new URL(sanitized);
 
     // Protocole autorisé
-    const protocol = urlObj.protocol.replace(':', '');
-    if (!protocols.includes(protocol as any)) {
+    const protocol = urlObj.protocol.replace(':', '') as 'http' | 'https';
+    if (!protocols.includes(protocol)) {
       return {
         valid: false,
         error: `Seuls les protocoles ${protocols.join(', ')} sont autorisés`

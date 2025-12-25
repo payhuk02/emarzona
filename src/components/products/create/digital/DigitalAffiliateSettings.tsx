@@ -1,34 +1,34 @@
 /**
  * Digital Product Affiliate Settings
  * Date: 28 octobre 2025
- * 
+ *
  * Configuration de l'affiliation spécifique aux produits digitaux
  */
 
-import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  TrendingUp, 
-  Users, 
-  Clock, 
-  DollarSign, 
+import {
+  TrendingUp,
+  Users,
+  Clock,
+  DollarSign,
   Info,
   CheckCircle2,
-  Sparkles
-} from 'lucide-react';
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@/components/ui/alert';
+  Sparkles,
+} from '@/components/icons';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface AffiliateSettings {
   enabled: boolean;
@@ -52,15 +52,13 @@ interface DigitalAffiliateSettingsProps {
 
 export const DigitalAffiliateSettings = ({
   productPrice,
-  productName,
   data,
   onUpdate,
 }: DigitalAffiliateSettingsProps) => {
-
   const calculateCommission = () => {
     if (data.commission_type === 'percentage') {
       // Commission sur le montant vendeur (après commission plateforme 10%)
-      const sellerAmount = productPrice * 0.90;
+      const sellerAmount = productPrice * 0.9;
       return (sellerAmount * (data.commission_rate || 20)) / 100;
     }
     return data.fixed_commission_amount || 0;
@@ -84,7 +82,10 @@ export const DigitalAffiliateSettings = ({
             </div>
             <Switch
               checked={data.enabled || false}
-              onCheckedChange={(checked) => onUpdate({ ...data, enabled: checked })}
+              onCheckedChange={checked => {
+                const updatedData = { ...data, enabled: checked };
+                onUpdate(updatedData);
+              }}
             />
           </div>
         </CardHeader>
@@ -95,7 +96,8 @@ export const DigitalAffiliateSettings = ({
               <CheckCircle2 className="h-4 w-4" />
               <AlertTitle>Programme activé ✨</AlertTitle>
               <AlertDescription>
-                Vos affiliés pourront créer des liens personnalisés et gagner des commissions sur chaque vente
+                Vos affiliés pourront créer des liens personnalisés et gagner des commissions sur
+                chaque vente
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -109,25 +111,27 @@ export const DigitalAffiliateSettings = ({
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Type de commission</CardTitle>
-              <CardDescription>
-                Choisissez comment récompenser vos affiliés
-              </CardDescription>
+              <CardDescription>Choisissez comment récompenser vos affiliés</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
-                <Card 
+                <Card
                   className={`cursor-pointer transition-all ${
-                    data.commission_type === 'percentage' 
-                      ? 'border-2 border-primary bg-primary/5' 
+                    data.commission_type === 'percentage'
+                      ? 'border-2 border-primary bg-primary/5'
                       : 'border-2 border-transparent hover:border-muted'
                   }`}
                   onClick={() => onUpdate({ ...data, commission_type: 'percentage' })}
                 >
                   <CardContent className="pt-6">
                     <div className="flex items-start gap-3">
-                      <TrendingUp className={`h-5 w-5 mt-0.5 ${
-                        data.commission_type === 'percentage' ? 'text-primary' : 'text-muted-foreground'
-                      }`} />
+                      <TrendingUp
+                        className={`h-5 w-5 mt-0.5 ${
+                          data.commission_type === 'percentage'
+                            ? 'text-primary'
+                            : 'text-muted-foreground'
+                        }`}
+                      />
                       <div>
                         <h4 className="font-semibold">Pourcentage</h4>
                         <p className="text-sm text-muted-foreground mt-1">
@@ -138,19 +142,23 @@ export const DigitalAffiliateSettings = ({
                   </CardContent>
                 </Card>
 
-                <Card 
+                <Card
                   className={`cursor-pointer transition-all ${
-                    data.commission_type === 'fixed' 
-                      ? 'border-2 border-primary bg-primary/5' 
+                    data.commission_type === 'fixed'
+                      ? 'border-2 border-primary bg-primary/5'
                       : 'border-2 border-transparent hover:border-muted'
                   }`}
                   onClick={() => onUpdate({ ...data, commission_type: 'fixed' })}
                 >
                   <CardContent className="pt-6">
                     <div className="flex items-start gap-3">
-                      <DollarSign className={`h-5 w-5 mt-0.5 ${
-                        data.commission_type === 'fixed' ? 'text-primary' : 'text-muted-foreground'
-                      }`} />
+                      <DollarSign
+                        className={`h-5 w-5 mt-0.5 ${
+                          data.commission_type === 'fixed'
+                            ? 'text-primary'
+                            : 'text-muted-foreground'
+                        }`}
+                      />
                       <div>
                         <h4 className="font-semibold">Montant fixe</h4>
                         <p className="text-sm text-muted-foreground mt-1">
@@ -168,7 +176,9 @@ export const DigitalAffiliateSettings = ({
           <Card>
             <CardHeader>
               <CardTitle className="text-base">
-                {data.commission_type === 'percentage' ? 'Taux de commission' : 'Montant de commission'}
+                {data.commission_type === 'percentage'
+                  ? 'Taux de commission'
+                  : 'Montant de commission'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -181,27 +191,42 @@ export const DigitalAffiliateSettings = ({
                       max="100"
                       step="0.5"
                       value={data.commission_rate || 20}
-                      onChange={(e) => onUpdate({ ...data, commission_rate: parseFloat(e.target.value) })}
+                      onChange={e =>
+                        onUpdate({ ...data, commission_rate: parseFloat(e.target.value) })
+                      }
                       className="max-w-xs"
                     />
                     <Badge variant="outline" className="text-base px-4 py-2">
                       {data.commission_rate || 20}%
                     </Badge>
                   </div>
-                  
+
                   {/* Calcul exemple */}
                   <Alert>
                     <Info className="h-4 w-4" />
                     <AlertTitle>Exemple de calcul</AlertTitle>
                     <AlertDescription>
                       <div className="mt-2 space-y-1 text-sm">
-                        <p>Prix produit : <strong>{productPrice} XOF</strong></p>
-                        <p>Commission plateforme (10%) : <strong>{(productPrice * 0.10).toFixed(0)} XOF</strong></p>
-                        <p>Montant vendeur : <strong>{(productPrice * 0.90).toFixed(0)} XOF</strong></p>
-                        <p className="text-primary font-semibold">
-                          Commission affilié ({data.commission_rate || 20}%) : {calculateCommission().toFixed(0)} XOF
+                        <p>
+                          Prix produit : <strong>{productPrice} XOF</strong>
                         </p>
-                        <p>Vous recevrez : <strong>{(productPrice * 0.90 - calculateCommission()).toFixed(0)} XOF</strong></p>
+                        <p>
+                          Commission plateforme (10%) :{' '}
+                          <strong>{(productPrice * 0.1).toFixed(0)} XOF</strong>
+                        </p>
+                        <p>
+                          Montant vendeur : <strong>{(productPrice * 0.9).toFixed(0)} XOF</strong>
+                        </p>
+                        <p className="text-primary font-semibold">
+                          Commission affilié ({data.commission_rate || 20}%) :{' '}
+                          {calculateCommission().toFixed(0)} XOF
+                        </p>
+                        <p>
+                          Vous recevrez :{' '}
+                          <strong>
+                            {(productPrice * 0.9 - calculateCommission()).toFixed(0)} XOF
+                          </strong>
+                        </p>
                       </div>
                     </AlertDescription>
                   </Alert>
@@ -213,7 +238,9 @@ export const DigitalAffiliateSettings = ({
                     min="0"
                     step="100"
                     value={data.fixed_commission_amount || 0}
-                    onChange={(e) => onUpdate({ ...data, fixed_commission_amount: parseFloat(e.target.value) })}
+                    onChange={e =>
+                      onUpdate({ ...data, fixed_commission_amount: parseFloat(e.target.value) })
+                    }
                     className="max-w-xs"
                   />
                   <p className="text-sm text-muted-foreground">
@@ -238,12 +265,14 @@ export const DigitalAffiliateSettings = ({
             <CardContent>
               <Select
                 value={(data.cookie_duration_days || 30).toString()}
-                onValueChange={(value) => onUpdate({ ...data, cookie_duration_days: parseInt(value) })}
+                onValueChange={value =>
+                  onUpdate({ ...data, cookie_duration_days: parseInt(value) })
+                }
               >
-                <SelectTrigger className="max-w-xs">
+                <SelectTrigger className="max-w-full sm:max-w-xs">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent mobileVariant="sheet">
                   <SelectItem value="7">7 jours</SelectItem>
                   <SelectItem value="15">15 jours</SelectItem>
                   <SelectItem value="30">30 jours (recommandé)</SelectItem>
@@ -261,16 +290,16 @@ export const DigitalAffiliateSettings = ({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
-                <Label htmlFor="min_order">
-                  Montant minimum de commande (XOF)
-                </Label>
+                <Label htmlFor="min_order">Montant minimum de commande (XOF)</Label>
                 <Input
                   id="min_order"
                   type="number"
                   min="0"
                   step="1000"
                   value={data.min_order_amount || 0}
-                  onChange={(e) => onUpdate({ ...data, min_order_amount: parseFloat(e.target.value) })}
+                  onChange={e =>
+                    onUpdate({ ...data, min_order_amount: parseFloat(e.target.value) })
+                  }
                   className="max-w-xs"
                 />
                 <p className="text-xs text-muted-foreground">
@@ -289,7 +318,7 @@ export const DigitalAffiliateSettings = ({
                 </div>
                 <Switch
                   checked={data.allow_self_referral || false}
-                  onCheckedChange={(checked) => onUpdate({ ...data, allow_self_referral: checked })}
+                  onCheckedChange={checked => onUpdate({ ...data, allow_self_referral: checked })}
                 />
               </div>
 
@@ -302,7 +331,7 @@ export const DigitalAffiliateSettings = ({
                 </div>
                 <Switch
                   checked={data.require_approval || false}
-                  onCheckedChange={(checked) => onUpdate({ ...data, require_approval: checked })}
+                  onCheckedChange={checked => onUpdate({ ...data, require_approval: checked })}
                 />
               </div>
             </CardContent>
@@ -312,15 +341,13 @@ export const DigitalAffiliateSettings = ({
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Conditions spécifiques (optionnel)</CardTitle>
-              <CardDescription>
-                Règles supplémentaires pour vos affiliés
-              </CardDescription>
+              <CardDescription>Règles supplémentaires pour vos affiliés</CardDescription>
             </CardHeader>
             <CardContent>
               <Textarea
                 placeholder="Ex: Les affiliés doivent promouvoir le produit de manière éthique et respectueuse..."
                 value={data.terms_and_conditions || ''}
-                onChange={(e) => onUpdate({ ...data, terms_and_conditions: e.target.value })}
+                onChange={e => onUpdate({ ...data, terms_and_conditions: e.target.value })}
                 rows={4}
               />
             </CardContent>
@@ -334,11 +361,11 @@ export const DigitalAffiliateSettings = ({
           <Info className="h-4 w-4" />
           <AlertTitle>Programme d'affiliation désactivé</AlertTitle>
           <AlertDescription>
-            Activez le programme pour permettre à des affiliés de promouvoir votre produit digital et augmenter vos ventes jusqu'à 30%+
+            Activez le programme pour permettre à des affiliés de promouvoir votre produit digital
+            et augmenter vos ventes jusqu'à 30%+
           </AlertDescription>
         </Alert>
       )}
     </div>
   );
 };
-

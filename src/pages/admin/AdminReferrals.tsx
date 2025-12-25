@@ -2,8 +2,10 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -14,9 +16,30 @@ import { formatCurrency } from '@/lib/utils';
 import { UserPlus, Download, Search, TrendingUp, Users } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Type pour les parrainages avec relations depuis Supabase
+type ReferralWithRelations = {
+  id: string;
+  referrer_id: string;
+  referred_id: string;
+  referral_code: string;
+  status: string;
+  created_at: string;
+  referrer?: {
+    display_name?: string;
+    first_name?: string;
+    last_name?: string;
+  } | null;
+  referred?: {
+    display_name?: string;
+    first_name?: string;
+    last_name?: string;
+  } | null;
+};
+
 const AdminReferrals = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -71,7 +94,7 @@ const AdminReferrals = () => {
 
     const csvContent = [
       ['Parrain', 'Filleul', 'Code', 'Statut', 'Date'].join(','),
-      ...referrals.map((ref: any) =>
+      ...referrals.map((ref: ReferralWithRelations) =>
         [
           ref.referrer?.display_name || 'N/A',
           ref.referred?.display_name || 'N/A',
@@ -97,7 +120,7 @@ const AdminReferrals = () => {
     });
   }, [referrals, toast]);
 
-  const filteredReferrals = useMemo(() => referrals?.filter((ref: any) =>
+  const filteredReferrals = useMemo(() => referrals?.filter((ref: ReferralWithRelations) =>
     ref.referrer?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     ref.referred?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     ref.referral_code?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -198,7 +221,7 @@ const AdminReferrals = () => {
                   Tous les parrainages de la plateforme
                 </CardDescription>
               </div>
-              <Button onClick={exportToCSV} variant="outline" size="sm">
+              <Button onClick={exportToCSV} variant="outline" size="sm" className="min-h-[44px]">
                 <Download className="h-4 w-4 mr-2" />
                 Exporter CSV
               </Button>
@@ -209,50 +232,111 @@ const AdminReferrals = () => {
                 placeholder="Rechercher par nom ou code..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 min-h-[44px]"
               />
             </div>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Parrain</TableHead>
-                  <TableHead>Filleul</TableHead>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredReferrals?.map((referral: any) => (
-                  <TableRow key={referral.id}>
-                    <TableCell className="font-medium">
-                      {referral.referrer?.display_name || 
-                       `${referral.referrer?.first_name || ''} ${referral.referrer?.last_name || ''}`.trim() || 
-                       'N/A'}
-                    </TableCell>
-                    <TableCell>
-                      {referral.referred?.display_name || 
-                       `${referral.referred?.first_name || ''} ${referral.referred?.last_name || ''}`.trim() || 
-                       'N/A'}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{referral.referral_code}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={referral.status === 'active' ? 'default' : 'secondary'}>
-                        {referral.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {new Date(referral.created_at).toLocaleDateString('fr-FR')}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {filteredReferrals?.length === 0 && (
+            {filteredReferrals && filteredReferrals.length > 0 ? (
+              isMobile ? (
+                <MobileTableCard
+                  data={filteredReferrals.map((r: ReferralWithRelations) => ({ ...r, id: r.id }))}
+                  columns={[
+                    {
+                      key: 'referrer',
+                      header: 'Parrain',
+                      priority: 'high',
+                      render: (row: ReferralWithRelations) => (
+                        <span className="font-medium">
+                          {row.referrer?.display_name || 
+                           `${row.referrer?.first_name || ''} ${row.referrer?.last_name || ''}`.trim() || 
+                           'N/A'}
+                        </span>
+                      ),
+                    },
+                    {
+                      key: 'referred',
+                      header: 'Filleul',
+                      priority: 'high',
+                      render: (row: ReferralWithRelations) => (
+                        row.referred?.display_name || 
+                        `${row.referred?.first_name || ''} ${row.referred?.last_name || ''}`.trim() || 
+                        'N/A'
+                      ),
+                    },
+                    {
+                      key: 'referral_code',
+                      header: 'Code',
+                      priority: 'medium',
+                      render: (row: ReferralWithRelations) => (
+                        <Badge variant="outline">{row.referral_code}</Badge>
+                      ),
+                    },
+                    {
+                      key: 'status',
+                      header: 'Statut',
+                      priority: 'high',
+                      render: (row: ReferralWithRelations) => (
+                        <Badge variant={row.status === 'active' ? 'default' : 'secondary'}>
+                          {row.status}
+                        </Badge>
+                      ),
+                    },
+                    {
+                      key: 'created_at',
+                      header: 'Date',
+                      priority: 'low',
+                      render: (row: ReferralWithRelations) => (
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(row.created_at).toLocaleDateString('fr-FR')}
+                        </span>
+                      ),
+                    },
+                  ]}
+                />
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Parrain</TableHead>
+                        <TableHead>Filleul</TableHead>
+                        <TableHead>Code</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead>Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredReferrals.map((referral: ReferralWithRelations) => (
+                        <TableRow key={referral.id}>
+                          <TableCell className="font-medium">
+                            {referral.referrer?.display_name || 
+                             `${referral.referrer?.first_name || ''} ${referral.referrer?.last_name || ''}`.trim() || 
+                             'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            {referral.referred?.display_name || 
+                             `${referral.referred?.first_name || ''} ${referral.referred?.last_name || ''}`.trim() || 
+                             'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{referral.referral_code}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={referral.status === 'active' ? 'default' : 'secondary'}>
+                              {referral.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {new Date(referral.created_at).toLocaleDateString('fr-FR')}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )
+            ) : (
               <div className="text-center py-12 text-muted-foreground">
                 Aucun parrainage trouvé
               </div>

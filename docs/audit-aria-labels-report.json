@@ -1,0 +1,107 @@
+{
+  "total": 19,
+  "byType": {
+    "link": 3,
+    "input": 4,
+    "button": 12
+  },
+  "byFile": {
+    "components\\accessibility\\SkipLink.tsx": 1,
+    "components\\accessibility\\SkipToMainContent.tsx": 1,
+    "components\\admin\\customization\\ContentManagementSection.tsx": 2,
+    "components\\admin\\customization\\PlatformSettingsSection.tsx": 1,
+    "components\\marketplace\\MarketplaceFooter.tsx": 1,
+    "components\\marketplace\\MarketplaceHeader.tsx": 2,
+    "components\\products\\create\\digital\\DigitalBasicInfoForm.tsx": 2,
+    "components\\products\\create\\digital\\DigitalFilesUploader.tsx": 1,
+    "components\\products\\create\\physical\\PhysicalSizeChartSelector.tsx": 2,
+    "components\\service\\ServiceBookingCalendar.tsx": 2,
+    "pages\\admin\\AdminLoyaltyManagement.tsx": 4
+  },
+  "critical": [
+    {
+      "file": "C:\\Users\\SAWADOGO\\Desktop\\emarzona\\src\\components\\marketplace\\MarketplaceHeader.tsx",
+      "line": 76,
+      "element": "              <Button size=\"sm\" className=\"gradient-accent text-accent-foreground font-semibold hover:shadow-glow\">                 {t('auth.signup.ti",
+      "type": "button",
+      "isIconOnly": true
+    },
+    {
+      "file": "C:\\Users\\SAWADOGO\\Desktop\\emarzona\\src\\components\\marketplace\\MarketplaceHeader.tsx",
+      "line": 76,
+      "element": "              <Button size=\"sm\" className=\"gradient-accent text-accent-foreground font-semibold hover:shadow-glow\">                 {t('auth.signup.ti",
+      "type": "button",
+      "isIconOnly": true
+    },
+    {
+      "file": "C:\\Users\\SAWADOGO\\Desktop\\emarzona\\src\\components\\products\\create\\digital\\DigitalBasicInfoForm.tsx",
+      "line": 495,
+      "element": "                <Button                   type=\"button\"                   variant=\"destructive\"                   size=\"icon\"                   classN",
+      "type": "button",
+      "isIconOnly": true
+    },
+    {
+      "file": "C:\\Users\\SAWADOGO\\Desktop\\emarzona\\src\\components\\products\\create\\digital\\DigitalBasicInfoForm.tsx",
+      "line": 495,
+      "element": "                <Button                   type=\"button\"                   variant=\"destructive\"                   size=\"icon\"                   classN",
+      "type": "button",
+      "isIconOnly": true
+    },
+    {
+      "file": "C:\\Users\\SAWADOGO\\Desktop\\emarzona\\src\\components\\products\\create\\physical\\PhysicalSizeChartSelector.tsx",
+      "line": 277,
+      "element": "                <Button variant=\"outline\">\r                   <Plus className=\"h-4 w-4 mr-2\" />\r                   Créer\r                 </Button>\r  ",
+      "type": "button",
+      "isIconOnly": true
+    },
+    {
+      "file": "C:\\Users\\SAWADOGO\\Desktop\\emarzona\\src\\components\\products\\create\\physical\\PhysicalSizeChartSelector.tsx",
+      "line": 277,
+      "element": "                <Button variant=\"outline\">\r                   <Plus className=\"h-4 w-4 mr-2\" />\r                   Créer\r                 </Button>\r  ",
+      "type": "button",
+      "isIconOnly": true
+    },
+    {
+      "file": "C:\\Users\\SAWADOGO\\Desktop\\emarzona\\src\\components\\service\\ServiceBookingCalendar.tsx",
+      "line": 304,
+      "element": "            <Button \r               size=\"sm\" \r               onClick={goToBack}\r               className=\"bg-gradient-to-r from-purple-600 to-pink-60",
+      "type": "button",
+      "isIconOnly": true
+    },
+    {
+      "file": "C:\\Users\\SAWADOGO\\Desktop\\emarzona\\src\\components\\service\\ServiceBookingCalendar.tsx",
+      "line": 304,
+      "element": "            <Button \r               size=\"sm\" \r               onClick={goToBack}\r               className=\"bg-gradient-to-r from-purple-600 to-pink-60",
+      "type": "button",
+      "isIconOnly": true
+    },
+    {
+      "file": "C:\\Users\\SAWADOGO\\Desktop\\emarzona\\src\\pages\\admin\\AdminLoyaltyManagement.tsx",
+      "line": 864,
+      "element": "                  <Button \r                     type=\"submit\" \r                     disabled={!tierFormData.name}\r                     className=\"bg-g",
+      "type": "button",
+      "isIconOnly": true
+    },
+    {
+      "file": "C:\\Users\\SAWADOGO\\Desktop\\emarzona\\src\\pages\\admin\\AdminLoyaltyManagement.tsx",
+      "line": 969,
+      "element": "                <Button \r                   type=\"submit\" \r                   disabled={!rewardFormData.name || !rewardFormData.points_cost}\r         ",
+      "type": "button",
+      "isIconOnly": true
+    },
+    {
+      "file": "C:\\Users\\SAWADOGO\\Desktop\\emarzona\\src\\pages\\admin\\AdminLoyaltyManagement.tsx",
+      "line": 864,
+      "element": "                  <Button \r                     type=\"submit\" \r                     disabled={!tierFormData.name}\r                     className=\"bg-g",
+      "type": "button",
+      "isIconOnly": true
+    },
+    {
+      "file": "C:\\Users\\SAWADOGO\\Desktop\\emarzona\\src\\pages\\admin\\AdminLoyaltyManagement.tsx",
+      "line": 969,
+      "element": "                <Button \r                   type=\"submit\" \r                   disabled={!rewardFormData.name || !rewardFormData.points_cost}\r         ",
+      "type": "button",
+      "isIconOnly": true
+    }
+  ]
+}

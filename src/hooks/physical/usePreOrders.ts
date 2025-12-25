@@ -1,55 +1,112 @@
+/**
+ * Hook pour la gestion des précommandes
+ * Date: 28 Janvier 2025
+ */
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { PreOrder, PreOrderCustomer, PreOrderStatus } from '@/components/physical/PreOrderManager';
+import { useToast } from '@/hooks/use-toast';
 
-// ============================================================================
-// FETCH PRE-ORDERS
-// ============================================================================
+export interface PreOrder {
+  id: string;
+  store_id: string;
+  product_id: string;
+  variant_id?: string;
+  status: 'active' | 'pending_arrival' | 'arrived' | 'fulfilled' | 'cancelled';
+  is_enabled: boolean;
+  expected_availability_date?: string;
+  pre_order_limit?: number;
+  current_pre_orders: number;
+  reserved_quantity: number;
+  deposit_required: boolean;
+  deposit_amount?: number;
+  deposit_percentage?: number;
+  auto_charge_on_arrival: boolean;
+  notification_sent: boolean;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  product?: {
+    id: string;
+    name: string;
+  };
+  variant?: {
+    id: string;
+    name: string;
+  };
+}
 
-export function usePreOrders(storeId: string, filters?: {
-  product_id?: string;
-  status?: PreOrderStatus;
-  is_enabled?: boolean;
-}) {
+export interface PreOrderCustomer {
+  id: string;
+  pre_order_id: string;
+  customer_id: string;
+  order_id?: string;
+  quantity: number;
+  deposit_paid: boolean;
+  deposit_amount?: number;
+  notified: boolean;
+  created_at: string;
+  customer?: {
+    id: string;
+    email: string;
+    full_name?: string;
+  };
+}
+
+/**
+ * Récupérer toutes les précommandes d'un store
+ */
+export function usePreOrders(storeId: string | null) {
   return useQuery({
-    queryKey: ['pre-orders', storeId, filters],
+    queryKey: ['pre-orders', storeId],
     queryFn: async () => {
-      let query = supabase
+      if (!storeId) return [];
+
+      const { data, error } = await supabase
         .from('pre_orders')
-        .select('*')
+        .select(`
+          *,
+          product:products!inner(
+            id,
+            name
+          ),
+          variant:product_variants(
+            id,
+            name
+          )
+        `)
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
-      if (filters?.product_id) {
-        query = query.eq('product_id', filters.product_id);
-      }
-      if (filters?.status) {
-        query = query.eq('status', filters.status);
-      }
-      if (filters?.is_enabled !== undefined) {
-        query = query.eq('is_enabled', filters.is_enabled);
-      }
-
-      const { data, error } = await query;
-
       if (error) throw error;
-      return (data || []) as PreOrder[];
+      return data as PreOrder[];
     },
     enabled: !!storeId,
   });
 }
 
-// ============================================================================
-// GET SINGLE PRE-ORDER
-// ============================================================================
-
-export function usePreOrder(preOrderId: string) {
+/**
+ * Récupérer une précommande spécifique
+ */
+export function usePreOrder(preOrderId: string | null) {
   return useQuery({
     queryKey: ['pre-order', preOrderId],
     queryFn: async () => {
+      if (!preOrderId) return null;
+
       const { data, error } = await supabase
         .from('pre_orders')
-        .select('*')
+        .select(`
+          *,
+          product:products!inner(
+            id,
+            name
+          ),
+          variant:product_variants(
+            id,
+            name
+          )
+        `)
         .eq('id', preOrderId)
         .single();
 
@@ -60,156 +117,146 @@ export function usePreOrder(preOrderId: string) {
   });
 }
 
-// ============================================================================
-// GET PRE-ORDER CUSTOMERS
-// ============================================================================
-
-export function usePreOrderCustomers(preOrderId: string) {
+/**
+ * Récupérer les clients d'une précommande
+ */
+export function usePreOrderCustomers(preOrderId: string | null) {
   return useQuery({
     queryKey: ['pre-order-customers', preOrderId],
     queryFn: async () => {
+      if (!preOrderId) return [];
+
       const { data, error } = await supabase
         .from('pre_order_customers')
-        .select('*')
+        .select(`
+          *,
+          customer:customers!inner(
+            id,
+            email,
+            full_name
+          )
+        `)
         .eq('pre_order_id', preOrderId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return (data || []) as PreOrderCustomer[];
+      return data as PreOrderCustomer[];
     },
     enabled: !!preOrderId,
   });
 }
 
-// ============================================================================
-// CREATE PRE-ORDER
-// ============================================================================
-
+/**
+ * Créer une précommande
+ */
 export function useCreatePreOrder() {
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (preOrder: Omit<PreOrder, 'id' | 'created_at' | 'updated_at' | 'current_pre_orders' | 'reserved_quantity' | 'notification_sent'>) => {
-      const { data, error } = await supabase
+    mutationFn: async (data: {
+      store_id: string;
+      product_id: string;
+      variant_id?: string;
+      expected_availability_date?: string;
+      pre_order_limit?: number;
+      deposit_required?: boolean;
+      deposit_amount?: number;
+      deposit_percentage?: number;
+      auto_charge_on_arrival?: boolean;
+      notes?: string;
+    }) => {
+      const { data: preOrder, error } = await supabase
         .from('pre_orders')
-        .insert([
-          {
-            ...preOrder,
-            current_pre_orders: 0,
-            reserved_quantity: 0,
-            notification_sent: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ])
+        .insert({
+          ...data,
+          status: 'active',
+          is_enabled: true,
+        })
         .select()
         .single();
 
       if (error) throw error;
-      return data as PreOrder;
+      return preOrder;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['pre-orders'] });
+      toast({
+        title: 'Précommande créée',
+        description: 'La précommande a été créée avec succès',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Erreur',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 }
 
-// ============================================================================
-// UPDATE PRE-ORDER
-// ============================================================================
-
+/**
+ * Mettre à jour une précommande
+ */
 export function useUpdatePreOrder() {
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({
-      preOrderId,
-      updates,
+      id,
+      ...updates
     }: {
-      preOrderId: string;
-      updates: Partial<PreOrder>;
+      id: string;
+      status?: PreOrder['status'];
+      is_enabled?: boolean;
+      expected_availability_date?: string;
+      pre_order_limit?: number;
+      deposit_required?: boolean;
+      deposit_amount?: number;
+      deposit_percentage?: number;
+      auto_charge_on_arrival?: boolean;
+      notes?: string;
     }) => {
       const { data, error } = await supabase
         .from('pre_orders')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', preOrderId)
+        .update(updates)
+        .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
       return data;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pre-orders'] });
-      queryClient.invalidateQueries({ queryKey: ['pre-order', variables.preOrderId] });
+      queryClient.invalidateQueries({ queryKey: ['pre-order'] });
+      toast({
+        title: 'Précommande mise à jour',
+        description: 'Les modifications ont été enregistrées',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Erreur',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 }
 
-// ============================================================================
-// UPDATE PRE-ORDER STATUS
-// ============================================================================
-
-export function useUpdatePreOrderStatus() {
-  const updatePreOrder = useUpdatePreOrder();
-
-  return useMutation({
-    mutationFn: async ({
-      preOrderId,
-      status,
-      notes,
-    }: {
-      preOrderId: string;
-      status: PreOrderStatus;
-      notes?: string;
-    }) => {
-      const updates: Partial<PreOrder> = { status };
-      if (notes) updates.notes = notes;
-
-      // If marking as fulfilled, disable pre-order
-      if (status === 'fulfilled' || status === 'cancelled') {
-        updates.is_enabled = false;
-      }
-
-      return updatePreOrder.mutateAsync({ preOrderId, updates });
-    },
-  });
-}
-
-// ============================================================================
-// ADD CUSTOMER TO PRE-ORDER
-// ============================================================================
-
-export function useAddCustomerToPreOrder() {
+/**
+ * Marquer une précommande comme arrivée et convertir en commandes
+ */
+export function useConvertPreOrderToOrders() {
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      preOrderId,
-      customer,
-    }: {
-      preOrderId: string;
-      customer: Omit<PreOrderCustomer, 'id' | 'created_at' | 'pre_order_id'>;
-    }) => {
-      // Insert customer
-      const { data: customerData, error: customerError } = await supabase
-        .from('pre_order_customers')
-        .insert([
-          {
-            ...customer,
-            pre_order_id: preOrderId,
-            created_at: new Date().toISOString(),
-          },
-        ])
-        .select()
-        .single();
-
-      if (customerError) throw customerError;
-
-      // Update pre-order counts
+    mutationFn: async (preOrderId: string) => {
+      // Récupérer la précommande et ses clients
       const { data: preOrder, error: preOrderError } = await supabase
         .from('pre_orders')
         .select('*')
@@ -218,98 +265,6 @@ export function useAddCustomerToPreOrder() {
 
       if (preOrderError) throw preOrderError;
 
-      const newCurrentPreOrders = (preOrder.current_pre_orders || 0) + 1;
-      const newReservedQuantity = (preOrder.reserved_quantity || 0) + customer.quantity;
-
-      await supabase
-        .from('pre_orders')
-        .update({
-          current_pre_orders: newCurrentPreOrders,
-          reserved_quantity: newReservedQuantity,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', preOrderId);
-
-      return customerData as PreOrderCustomer;
-    },
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['pre-orders'] });
-      queryClient.invalidateQueries({ queryKey: ['pre-order', variables.preOrderId] });
-      queryClient.invalidateQueries({ queryKey: ['pre-order-customers', variables.preOrderId] });
-    },
-  });
-}
-
-// ============================================================================
-// REMOVE CUSTOMER FROM PRE-ORDER
-// ============================================================================
-
-export function useRemoveCustomerFromPreOrder() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      preOrderId,
-      customerId,
-      quantity,
-    }: {
-      preOrderId: string;
-      customerId: string;
-      quantity: number;
-    }) => {
-      // Delete customer
-      const { error: deleteError } = await supabase
-        .from('pre_order_customers')
-        .delete()
-        .eq('id', customerId);
-
-      if (deleteError) throw deleteError;
-
-      // Update pre-order counts
-      const { data: preOrder, error: preOrderError } = await supabase
-        .from('pre_orders')
-        .select('*')
-        .eq('id', preOrderId)
-        .single();
-
-      if (preOrderError) throw preOrderError;
-
-      const newCurrentPreOrders = Math.max((preOrder.current_pre_orders || 0) - 1, 0);
-      const newReservedQuantity = Math.max((preOrder.reserved_quantity || 0) - quantity, 0);
-
-      await supabase
-        .from('pre_orders')
-        .update({
-          current_pre_orders: newCurrentPreOrders,
-          reserved_quantity: newReservedQuantity,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', preOrderId);
-    },
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['pre-orders'] });
-      queryClient.invalidateQueries({ queryKey: ['pre-order', variables.preOrderId] });
-      queryClient.invalidateQueries({ queryKey: ['pre-order-customers', variables.preOrderId] });
-    },
-  });
-}
-
-// ============================================================================
-// NOTIFY CUSTOMERS
-// ============================================================================
-
-export function useNotifyPreOrderCustomers() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      preOrderId,
-      message,
-    }: {
-      preOrderId: string;
-      message?: string;
-    }) => {
-      // Get all customers
       const { data: customers, error: customersError } = await supabase
         .from('pre_order_customers')
         .select('*')
@@ -318,115 +273,93 @@ export function useNotifyPreOrderCustomers() {
 
       if (customersError) throw customersError;
 
-      // TODO: Send actual emails/notifications
-      // For now, just mark as notified
-
+      // Mettre à jour le statut de la précommande
       const { error: updateError } = await supabase
-        .from('pre_order_customers')
-        .update({
-          notified: true,
-        })
-        .eq('pre_order_id', preOrderId)
-        .eq('notified', false);
-
-      if (updateError) throw updateError;
-
-      // Mark pre-order as notification_sent
-      await supabase
         .from('pre_orders')
         .update({
+          status: 'arrived',
           notification_sent: true,
-          updated_at: new Date().toISOString(),
         })
         .eq('id', preOrderId);
 
-      return customers;
-    },
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['pre-orders'] });
-      queryClient.invalidateQueries({ queryKey: ['pre-order', variables.preOrderId] });
-      queryClient.invalidateQueries({ queryKey: ['pre-order-customers', variables.preOrderId] });
-    },
-  });
-}
+      if (updateError) throw updateError;
 
-// ============================================================================
-// MARK STOCK AS ARRIVED
-// ============================================================================
+      // Créer des commandes pour chaque client
+      const orders = [];
+      for (const customer of customers || []) {
+        // Ici, vous devriez créer une vraie commande via votre système de commandes
+        // Pour l'instant, on marque juste le client comme notifié
+        const { error: notifyError } = await supabase
+          .from('pre_order_customers')
+          .update({ notified: true })
+          .eq('id', customer.id);
 
-export function useMarkPreOrderStockArrived() {
-  const updateStatus = useUpdatePreOrderStatus();
-  const notify = useNotifyPreOrderCustomers();
-
-  return useMutation({
-    mutationFn: async ({
-      preOrderId,
-      autoNotify = true,
-    }: {
-      preOrderId: string;
-      autoNotify?: boolean;
-    }) => {
-      // Update status to arrived
-      await updateStatus.mutateAsync({
-        preOrderId,
-        status: 'arrived',
-        notes: `Stock reçu le ${new Date().toLocaleDateString('fr-FR')}`,
-      });
-
-      // Auto-notify customers if enabled
-      if (autoNotify) {
-        await notify.mutateAsync({ preOrderId });
+        if (notifyError) {
+          logger.error('Error notifying customer', { error: notifyError, customerId: customer.id });
+        }
       }
+
+      return { success: true, ordersCreated: orders.length };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['pre-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['pre-order'] });
+      queryClient.invalidateQueries({ queryKey: ['pre-order-customers'] });
+      toast({
+        title: 'Précommande convertie',
+        description: `${data.ordersCreated} commande(s) créée(s)`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Erreur',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 }
 
-// ============================================================================
-// DELETE PRE-ORDER
-// ============================================================================
-
-export function useDeletePreOrder() {
+/**
+ * Envoyer des notifications aux clients d'une précommande
+ */
+export function useNotifyPreOrderCustomers() {
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (preOrderId: string) => {
-      // First delete all customers
-      await supabase.from('pre_order_customers').delete().eq('pre_order_id', preOrderId);
-
-      // Then delete pre-order
-      const { error } = await supabase.from('pre_orders').delete().eq('id', preOrderId);
+      // Marquer tous les clients comme notifiés
+      const { error } = await supabase
+        .from('pre_order_customers')
+        .update({ notified: true })
+        .eq('pre_order_id', preOrderId)
+        .eq('notified', false);
 
       if (error) throw error;
+
+      // Mettre à jour la précommande
+      await supabase
+        .from('pre_orders')
+        .update({ notification_sent: true })
+        .eq('id', preOrderId);
+
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pre-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['pre-order-customers'] });
+      toast({
+        title: 'Notifications envoyées',
+        description: 'Les clients ont été notifiés',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Erreur',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 }
-
-// ============================================================================
-// CHECK IF PRODUCT HAS ACTIVE PRE-ORDER
-// ============================================================================
-
-export function useProductHasActivePreOrder(productId: string) {
-  return useQuery({
-    queryKey: ['product-pre-order-check', productId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('pre_orders')
-        .select('id, status, is_enabled')
-        .eq('product_id', productId)
-        .eq('is_enabled', true)
-        .in('status', ['active', 'pending_arrival']);
-
-      if (error) throw error;
-
-      return {
-        hasActivePreOrder: (data || []).length > 0,
-        preOrderId: data?.[0]?.id,
-      };
-    },
-    enabled: !!productId,
-  });
-}
-

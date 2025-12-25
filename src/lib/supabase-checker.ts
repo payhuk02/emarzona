@@ -1,6 +1,8 @@
 // Script de vérification des tables Supabase
 // À exécuter avec: npm run dev ou dans l'environnement Vite
 
+import { logger } from './logger';
+
 // Tables requises selon les types TypeScript
 const REQUIRED_TABLES = [
   'admin_actions',
@@ -29,7 +31,7 @@ const REQUIRED_TABLES = [
 // Fonction pour vérifier une table
 async function checkTable(supabase, tableName) {
   try {
-    console.log(`🔍 Vérification de la table: ${tableName}`);
+    logger.info(`🔍 Vérification de la table: ${tableName}`);
     
     const { data, error, count } = await supabase
       .from(tableName)
@@ -37,25 +39,25 @@ async function checkTable(supabase, tableName) {
 
     if (error) {
       if (error.message.includes('relation') && error.message.includes('does not exist')) {
-        console.log(`❌ ${tableName} - Table n'existe pas`);
+        logger.warn(`${tableName} - Table n'existe pas`, { tableName, error: error.message });
         return { exists: false, accessible: false, error: error.message };
       } else {
-        console.log(`⚠️  ${tableName} - Existe mais erreur d'accès: ${error.message}`);
+        logger.warn(`${tableName} - Existe mais erreur d'accès`, { tableName, error: error.message });
         return { exists: true, accessible: false, error: error.message };
       }
     } else {
-      console.log(`✅ ${tableName} - OK (${count || 0} lignes)`);
+      logger.info(`${tableName} - OK`, { tableName, rowCount: count || 0 });
       return { exists: true, accessible: true, rowCount: count || 0 };
     }
-  } catch (err) {
-    console.log(`❌ ${tableName} - Erreur: ${err.message}`);
+  } catch (err: any) {
+    logger.error(`${tableName} - Erreur`, { tableName, error: err.message });
     return { exists: false, accessible: false, error: err.message };
   }
 }
 
 // Fonction pour vérifier les fonctions personnalisées
 async function checkCustomFunctions(supabase) {
-  console.log('\n🔧 Vérification des fonctions personnalisées...');
+  logger.info('🔧 Vérification des fonctions personnalisées...');
   
   const functions = [
     'generate_order_number',
@@ -82,19 +84,19 @@ async function checkCustomFunctions(supabase) {
       
       const { data, error } = await supabase.rpc(funcName, params);
       if (error) {
-        console.log(`❌ ${funcName}: ${error.message}`);
+        logger.error(`${funcName} - Erreur`, { funcName, error: error.message });
       } else {
-        console.log(`✅ ${funcName}: OK`);
+        logger.info(`${funcName} - OK`, { funcName });
       }
-    } catch (err) {
-      console.log(`❌ ${funcName}: ${err.message}`);
+    } catch (err: any) {
+      logger.error(`${funcName} - Erreur`, { funcName, error: err.message });
     }
   }
 }
 
 // Fonction principale de vérification
 export async function checkSupabaseTables(supabase) {
-  console.log('🚀 Vérification des tables Supabase...\n');
+  logger.info('🚀 Vérification des tables Supabase...');
   
   const results = [];
   
@@ -103,43 +105,44 @@ export async function checkSupabaseTables(supabase) {
     results.push({ name: tableName, ...result });
   }
   
-  console.log('\n📊 Résumé:');
   const existingTables = results.filter(r => r.exists);
   const accessibleTables = results.filter(r => r.accessible);
   const missingTables = results.filter(r => !r.exists);
   
-  console.log(`✅ Tables existantes: ${existingTables.length}/${REQUIRED_TABLES.length}`);
-  console.log(`🔓 Tables accessibles: ${accessibleTables.length}/${REQUIRED_TABLES.length}`);
-  console.log(`❌ Tables manquantes: ${missingTables.length}/${REQUIRED_TABLES.length}`);
+  logger.info('📊 Résumé des tables', {
+    existing: existingTables.length,
+    accessible: accessibleTables.length,
+    missing: missingTables.length,
+    total: REQUIRED_TABLES.length
+  });
   
   if (missingTables.length > 0) {
-    console.log('\n🚨 Tables manquantes:');
-    missingTables.forEach(table => {
-      console.log(`   - ${table.name}: ${table.error}`);
+    logger.warn('🚨 Tables manquantes', {
+      missing: missingTables.map(t => ({ name: t.name, error: t.error }))
     });
   }
   
   if (accessibleTables.length !== REQUIRED_TABLES.length) {
-    console.log('\n⚠️  Certaines tables ne sont pas accessibles. Vérifiez les permissions RLS.');
+    logger.warn('⚠️  Certaines tables ne sont pas accessibles. Vérifiez les permissions RLS.');
   }
   
   // Test de connexion générale
-  console.log('\n🔗 Test de connexion générale...');
+  logger.info('🔗 Test de connexion générale...');
   try {
     const { data, error } = await supabase.auth.getSession();
     if (error) {
-      console.log(`❌ Erreur de connexion: ${error.message}`);
+      logger.error('Erreur de connexion', { error: error.message });
     } else {
-      console.log('✅ Connexion Supabase OK');
+      logger.info('✅ Connexion Supabase OK');
     }
-  } catch (err) {
-    console.log(`❌ Erreur de connexion: ${err.message}`);
+  } catch (err: any) {
+    logger.error('Erreur de connexion', { error: err.message });
   }
   
   // Vérification des fonctions
   await checkCustomFunctions(supabase);
   
-  console.log('\n🎉 Vérification terminée !');
+  logger.info('🎉 Vérification terminée !');
   
   return results;
 }

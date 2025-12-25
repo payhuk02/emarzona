@@ -39,6 +39,8 @@ export const VideoPlayer = ({
   onSeekTo,
   currentTime
 }: VideoPlayerProps) => {
+  // Si on veut utiliser le player avancé, on peut l'importer ici
+  // Pour l'instant, on garde le player de base
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const saveIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -49,14 +51,14 @@ export const VideoPlayer = ({
   const { data: progress } = useLessonProgress(enrollmentId, lessonId);
   const updatePosition = useUpdateVideoPosition();
   
-  // Hooks pour le tracking avancé
-  const videoTracking = productId ? useVideoTracking({
-    productId,
+  // Hooks pour le tracking avancé (toujours appelé, désactivé si pas de productId)
+  const videoTracking = useVideoTracking({
+    productId: productId || '',
     lessonId,
     userId: user?.id,
     sessionId: getSessionId(),
-    enabled: true,
-  }) : null;
+    enabled: !!productId,
+  });
   
   const watchTime = useWatchTime(enrollmentId, lessonId);
 

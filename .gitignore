@@ -29,3 +29,6 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Backups
+payhula-backup*/

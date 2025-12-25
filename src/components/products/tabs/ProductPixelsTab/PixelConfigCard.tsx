@@ -1,3 +1,4 @@
+import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -34,7 +35,7 @@ interface PixelConfigCardProps {
  * Carte de configuration pour un pixel de tracking spécifique
  * Gère l'ID, l'activation et les événements à tracker
  */
-export const PixelConfigCard = ({
+const PixelConfigCardComponent = ({
   platform,
   pixelId,
   isEnabled,
@@ -54,7 +55,7 @@ export const PixelConfigCard = ({
   };
 
   return (
-    <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+    <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm" style={{ willChange: 'transform' }}>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -158,4 +159,20 @@ export const PixelConfigCard = ({
     </Card>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const PixelConfigCard = React.memo(PixelConfigCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.platform.id === nextProps.platform.id &&
+    prevProps.pixelId === nextProps.pixelId &&
+    prevProps.isEnabled === nextProps.isEnabled &&
+    prevProps.isActive === nextProps.isActive &&
+    JSON.stringify(prevProps.events) === JSON.stringify(nextProps.events) &&
+    prevProps.onPixelIdChange === nextProps.onPixelIdChange &&
+    prevProps.onEnabledChange === nextProps.onEnabledChange &&
+    prevProps.onEventChange === nextProps.onEventChange
+  );
+});
+
+PixelConfigCard.displayName = 'PixelConfigCard';
 

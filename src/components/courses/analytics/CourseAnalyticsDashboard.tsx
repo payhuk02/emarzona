@@ -18,18 +18,7 @@ import {
   ArrowDown,
 } from 'lucide-react';
 import { useCourseAnalytics, useCourseViewsTimeline } from '@/hooks/courses/useCourseAnalytics';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts';
+import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
 
 interface CourseAnalyticsDashboardProps {
   productId: string;
@@ -154,45 +143,49 @@ export const CourseAnalyticsDashboard = ({ productId }: CourseAnalyticsDashboard
         </CardHeader>
         <CardContent>
           {timeline && timeline.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={timeline}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                <XAxis
-                  dataKey="date"
-                  tickFormatter={(value) => {
-                    const date = new Date(value);
-                    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-                  }}
-                  stroke="#888"
-                />
-                <YAxis stroke="#888" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '8px',
-                  }}
-                  labelFormatter={(value) => {
-                    const date = new Date(value);
-                    return date.toLocaleDateString('fr-FR', {
-                      weekday: 'long',
-                      day: 'numeric',
-                      month: 'long',
-                    });
-                  }}
-                />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="views"
-                  stroke="#3b82f6"
-                  strokeWidth={2}
-                  dot={{ fill: '#3b82f6', r: 4 }}
-                  activeDot={{ r: 6 }}
-                  name="Vues"
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <LazyRechartsWrapper>
+              {(recharts) => (
+                <recharts.ResponsiveContainer width="100%" height={300}>
+                  <recharts.LineChart data={timeline}>
+                    <recharts.CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                    <recharts.XAxis
+                      dataKey="date"
+                      tickFormatter={(value) => {
+                        const date = new Date(value);
+                        return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+                      }}
+                      stroke="#888"
+                    />
+                    <recharts.YAxis stroke="#888" />
+                    <recharts.Tooltip
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '8px',
+                      }}
+                      labelFormatter={(value) => {
+                        const date = new Date(value);
+                        return date.toLocaleDateString('fr-FR', {
+                          weekday: 'long',
+                          day: 'numeric',
+                          month: 'long',
+                        });
+                      }}
+                    />
+                    <recharts.Legend />
+                    <recharts.Line
+                      type="monotone"
+                      dataKey="views"
+                      stroke="#3b82f6"
+                      strokeWidth={2}
+                      dot={{ fill: '#3b82f6', r: 4 }}
+                      activeDot={{ r: 6 }}
+                      name="Vues"
+                    />
+                  </recharts.LineChart>
+                </recharts.ResponsiveContainer>
+              )}
+            </LazyRechartsWrapper>
           ) : (
             <div className="text-center py-12 text-muted-foreground">
               <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-50" />

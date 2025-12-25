@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { optimizeImage, formatFileSize } from "@/lib/image-optimization";
+import { logger } from "@/lib/logger";
 
 interface ImageUploadProps {
   value: string | string[];
@@ -194,11 +195,12 @@ export const ImageUpload = ({
         duration: 5000,
       });
 
-    } catch (error: any) {
-      console.error('Upload error:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Upload error', { error: errorMessage, fileCount: fileArray.length });
       toast({
         title: "Erreur de téléchargement",
-        description: error.message || "Une erreur est survenue lors du téléchargement.",
+        description: errorMessage || "Une erreur est survenue lors du téléchargement.",
         variant: "destructive",
       });
     } finally {

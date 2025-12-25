@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { optimizeImage } from '@/lib/image-optimization';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 type OptimizationType = 'standard' | 'thumbnail' | 'banner';
 
@@ -68,7 +69,7 @@ export const useImageOptimization = () => {
       const optimizedSize = (result.optimizedSize / 1024).toFixed(2);
       const reduction = result.compressionRatio.toFixed(0);
 
-      console.log(`[ImageOptimization] ${originalSize}KB → ${optimizedSize}KB (${reduction}% réduction)`);
+      logger.debug('Image optimized', { originalSize: `${originalSize}KB`, optimizedSize: `${optimizedSize}KB`, reduction: `${reduction}%` });
 
       toast({
         title: 'Image optimisée',
@@ -77,7 +78,7 @@ export const useImageOptimization = () => {
 
       return result.optimizedFile;
     } catch (error) {
-      console.error('Erreur optimisation:', error);
+      logger.error('Image optimization error', { error, fileName: file.name, type });
       toast({
         title: 'Erreur d\'optimisation',
         description: 'Impossible d\'optimiser l\'image',

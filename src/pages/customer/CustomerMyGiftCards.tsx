@@ -79,14 +79,14 @@ export default function CustomerMyGiftCards() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Gift className="h-4 w-4" />
+            <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Gift className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Solde Total
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalBalance)}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-base sm:text-xl md:text-2xl font-bold">{formatCurrency(totalBalance)}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
               {activeCards.length} carte{activeCards.length > 1 ? 's' : ''} active{activeCards.length > 1 ? 's' : ''}
             </p>
           </CardContent>
@@ -94,14 +94,14 @@ export default function CustomerMyGiftCards() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
+            <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Total Cartes
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{giftCards.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-base sm:text-xl md:text-2xl font-bold">{giftCards.length}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
               Reçues au total
             </p>
           </CardContent>
@@ -109,13 +109,13 @@ export default function CustomerMyGiftCards() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
+            <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Transactions
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{transactions.length}</div>
+            <div className="text-base sm:text-xl md:text-2xl font-bold">{transactions.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
               Historique complet
             </p>
@@ -158,7 +158,7 @@ export default function CustomerMyGiftCards() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleCopyCode(card.code)}
-                          className="h-8 w-8 p-0"
+                          className="min-h-[44px] min-w-[44px] h-11 w-11 p-0"
                         >
                           {copiedCode === card.code ? (
                             <Check className="h-4 w-4 text-green-600" />
@@ -171,7 +171,7 @@ export default function CustomerMyGiftCards() {
 
                     <div>
                       <Label className="text-xs text-muted-foreground">Solde disponible</Label>
-                      <div className="text-2xl font-bold mt-1">
+                      <div className="text-base sm:text-xl md:text-2xl font-bold mt-1">
                         {formatCurrency(card.balance || 0)}
                       </div>
                     </div>

@@ -1,0 +1,275 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+// Fonction pour déterminer l'origine autorisée pour CORS
+function getCorsOrigin(req: Request): string {
+  const origin = req.headers.get('origin');
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://payhula.vercel.app';
+  
+  // Autoriser localhost pour le développement
+  if (origin && (
+    origin.startsWith('http://localhost:') ||
+    origin.startsWith('http://127.0.0.1:') ||
+    origin.includes('localhost') ||
+    origin.includes('127.0.0.1')
+  )) {
+    return origin; // Autoriser l'origine exacte pour localhost
+  }
+  
+  // Autoriser le domaine de production
+  if (origin === siteUrl || origin === `${siteUrl}/`) {
+    return origin;
+  }
+  
+  // Par défaut, utiliser SITE_URL (sans slash final)
+  return siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl;
+}
+
+// Fonction pour créer les headers CORS dynamiques
+function getCorsHeaders(req: Request) {
+  return {
+    'Access-Control-Allow-Origin': getCorsOrigin(req),
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Max-Age': '86400',
+  };
+}
+
+// URL de base de l'API Moneroo
+// Vérifier la documentation officielle pour l'URL correcte
+const MONEROO_API_URL = Deno.env.get('MONEROO_API_URL') || 'https://api.moneroo.io/v1';
+
+serve(async (req) => {
+  // Log de début de requête pour diagnostic
+  console.log('[Moneroo Edge Function] Request received:', {
+    method: req.method,
+    url: req.url,
+    headers: Object.fromEntries(req.headers.entries()),
+    timestamp: new Date().toISOString(),
+  });
+
+  // Créer les headers CORS dynamiques basés sur l'origine de la requête
+  const corsHeaders = getCorsHeaders(req);
+  
+  // Log de l'origine et des headers CORS pour diagnostic
+  const origin = req.headers.get('origin');
+  console.log('[Moneroo Edge Function] CORS config:', {
+    origin,
+    allowedOrigin: corsHeaders['Access-Control-Allow-Origin'],
+    method: req.method,
+  });
+
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    console.log('[Moneroo Edge Function] Handling CORS preflight');
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    // Vérifier les clés API
+    const monerooApiKey = Deno.env.get('MONEROO_API_KEY');
+    console.log('[Moneroo Edge Function] API Key check:', {
+      hasApiKey: !!monerooApiKey,
+      apiKeyLength: monerooApiKey?.length || 0,
+    });
+    
+    if (!monerooApiKey) {
+      console.error('MONEROO_API_KEY is not configured');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Configuration API manquante',
+          message: 'La clé API Moneroo n\'est pas configurée dans Supabase Edge Functions Secrets',
+          hint: 'Veuillez configurer MONEROO_API_KEY dans Supabase Dashboard → Edge Functions → Secrets'
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Parser le JSON de la requête
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (jsonError) {
+      console.error('Error parsing request JSON:', jsonError);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Requête invalide',
+          message: 'Le corps de la requête n\'est pas un JSON valide',
+          details: jsonError instanceof Error ? jsonError.message : 'Unknown error'
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { action, data } = requestBody;
+    
+    if (!action) {
+      return new Response(
+        JSON.stringify({ error: 'Action manquante', message: 'Le paramètre "action" est requis' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('[Moneroo Edge Function] Processing request:', { 
+      action, 
+      hasData: !!data,
+      dataKeys: data ? Object.keys(data) : [],
+    });
+
+    let endpoint = '';
+    let method = 'POST';
+    let body = data;
+
+    // Route vers les différents endpoints Moneroo
+    switch (action) {
+      case 'create_payment':
+        endpoint = '/payments';
+        method = 'POST';
+        break;
+      
+      case 'get_payment':
+        endpoint = `/payments/${data.paymentId}`;
+        method = 'GET';
+        body = null;
+        break;
+      
+      case 'create_checkout':
+        // Utiliser /payments pour créer un paiement avec checkout
+        // Moneroo utilise /payments pour créer les paiements (pas /checkout)
+        endpoint = '/payments';
+        method = 'POST';
+        // Formater les données selon le format attendu par Moneroo
+        body = {
+          amount: data.amount,
+          currency: data.currency || 'XOF',
+          description: data.description,
+          customer_email: data.customer_email,
+          customer_name: data.customer_name,
+          return_url: data.return_url,
+          cancel_url: data.cancel_url,
+          metadata: data.metadata || {},
+        };
+        break;
+      
+      case 'verify_payment':
+        endpoint = `/payments/${data.paymentId}/verify`;
+        method = 'GET';
+        body = null;
+        break;
+      
+      case 'refund_payment':
+        endpoint = `/payments/${data.paymentId}/refund`;
+        method = 'POST';
+        // Si amount n'est pas spécifié, c'est un remboursement total
+        body = {
+          ...(data.amount && { amount: data.amount }),
+          reason: data.reason || 'Customer request',
+        };
+        break;
+      
+      case 'cancel_payment':
+        endpoint = `/payments/${data.paymentId}/cancel`;
+        method = 'POST';
+        body = null;
+        break;
+      
+      default:
+        return new Response(
+          JSON.stringify({ error: 'Action non supportée' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+    }
+
+    // Appel à l'API Moneroo
+    const monerooApiUrl = `${MONEROO_API_URL}${endpoint}`;
+    console.log('[Moneroo Edge Function] Calling Moneroo API:', {
+      url: monerooApiUrl,
+      method,
+      hasBody: !!body,
+    });
+
+    const monerooResponse = await fetch(monerooApiUrl, {
+      method,
+      headers: {
+        'Authorization': `Bearer ${monerooApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: body ? JSON.stringify(body) : null,
+    });
+
+    console.log('[Moneroo Edge Function] Moneroo API response:', {
+      status: monerooResponse.status,
+      statusText: monerooResponse.statusText,
+      ok: monerooResponse.ok,
+    });
+
+    // Parser la réponse JSON
+    let responseData;
+    try {
+      const responseText = await monerooResponse.text();
+      responseData = responseText ? JSON.parse(responseText) : {};
+    } catch (parseError) {
+      console.error('Error parsing Moneroo response:', parseError);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Erreur de réponse Moneroo',
+          message: 'Impossible de parser la réponse de l\'API Moneroo',
+          status: monerooResponse.status,
+          statusText: monerooResponse.statusText
+        }),
+        { 
+          status: monerooResponse.status || 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+    
+    if (!monerooResponse.ok) {
+      console.error('Moneroo API error:', {
+        status: monerooResponse.status,
+        statusText: monerooResponse.statusText,
+        response: responseData
+      });
+      return new Response(
+        JSON.stringify({ 
+          error: 'Erreur Moneroo API',
+          message: responseData.message || responseData.error || 'Erreur lors de l\'appel à l\'API Moneroo',
+          details: responseData,
+          status: monerooResponse.status
+        }),
+        { 
+          status: monerooResponse.status, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    console.log('Moneroo response success:', { action, status: monerooResponse.status });
+
+    return new Response(
+      JSON.stringify({ success: true, data: responseData }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur interne inconnue';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
+    console.error('Error in moneroo function:', {
+      message: errorMessage,
+      stack: errorStack,
+      error: error
+    });
+    
+    return new Response(
+      JSON.stringify({ 
+        error: 'Erreur interne Edge Function',
+        message: errorMessage,
+        hint: 'Vérifiez les logs Supabase Edge Functions pour plus de détails'
+      }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});
+

@@ -338,6 +338,32 @@ export const useLicenseManagement = (productId?: string) => {
         user_agent: navigator.userAgent,
       });
 
+      // Déclencher webhook pour activation de licence (en arrière-plan) - Système unifié
+      if (validation.license?.store_id) {
+        import('@/lib/webhooks/unified-webhook-service')
+          .then(({ triggerUnifiedWebhook }) => {
+            triggerUnifiedWebhook(
+              validation.license.store_id,
+              'digital_product.license_activated',
+              {
+                license_id: validation.license.id,
+                product_id: validation.license.digital_product_id || '',
+                customer_id: validation.license.user_id,
+                license_key: validation.license.license_key,
+                license_type: validation.license.license_type || 'standard',
+                activation_id: data.id,
+                device_name: options.device_name,
+              },
+              data.id
+            ).catch((error) => {
+              logger.error('Error triggering license_activated webhook', { error });
+            });
+          })
+          .catch((error) => {
+            logger.error('Error loading unified webhook service', { error });
+          });
+      }
+
       return { success: true, activation: data };
     },
     onSuccess: () => {

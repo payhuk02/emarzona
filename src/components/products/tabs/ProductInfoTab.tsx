@@ -1,36 +1,52 @@
-import { useState, useCallback, useMemo } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CurrencySelect } from "@/components/ui/currency-select";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
-import { CURRENCIES, getCurrencySymbol, type Currency } from "@/lib/currencies";
-import { 
-  CalendarIcon, 
-  CheckCircle2, 
-  XCircle, 
-  Package, 
-  Smartphone, 
-  Wrench, 
-  Info, 
-  Zap, 
-  Shield, 
-  Clock, 
-  Users, 
-  Target, 
-  Globe, 
-  Eye, 
-  ShoppingCart, 
+import { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { CurrencySelect } from '@/components/ui/currency-select';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Skeleton } from '@/components/ui/skeleton';
+import { CURRENCIES, getCurrencySymbol, type Currency } from '@/lib/currencies';
+import {
+  CalendarIcon,
+  CheckCircle2,
+  XCircle,
+  Package,
+  Smartphone,
+  Wrench,
+  Info,
+  Zap,
+  Shield,
+  Clock,
+  Users,
+  Target,
+  Globe,
+  Eye,
+  ShoppingCart,
   AlertCircle,
   DollarSign,
   Percent,
@@ -45,16 +61,18 @@ import {
   HelpCircle,
   ExternalLink,
   Copy,
-  RefreshCw
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-import { generateSlug } from "@/lib/store-utils";
-import { useToast } from "@/hooks/use-toast";
-import { useSlugAvailability } from "@/hooks/useSlugAvailability";
-import { ProductTypeSelector } from "./ProductInfoTab/ProductTypeSelector";
-import { ProductPricing } from "./ProductInfoTab/ProductPricing";
+  RefreshCw,
+} from 'lucide-react';
+// Import des catégories centralisées
+import { getCategoriesForProductType, type CategoryOption } from '@/constants/product-categories';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { generateSlug, generateProductUrl } from '@/lib/store-utils';
+import { useToast } from '@/hooks/use-toast';
+import { useSlugAvailability } from '@/hooks/useSlugAvailability';
+import { ProductTypeSelector } from './ProductInfoTab/ProductTypeSelector';
+import { ProductPricing } from './ProductInfoTab/ProductPricing';
 
 /**
  * Interface pour les données du formulaire de produit
@@ -77,13 +95,18 @@ interface ProductFormData {
   access_control?: 'public' | 'logged_in' | 'purchasers';
   purchase_limit?: number | null;
   hide_purchase_count?: boolean;
+  hide_likes_count?: boolean;
+  hide_recommendations_count?: boolean;
+  hide_downloads_count?: boolean;
+  hide_reviews_count?: boolean;
+  hide_rating?: boolean;
   sale_start_date?: string | null;
   sale_end_date?: string | null;
   created_at?: string;
   updated_at?: string;
   version?: string;
   status?: string;
-  [key: string]: any; // Pour les champs additionnels
+  [key: string]: string | number | boolean | null | undefined; // Pour les champs additionnels
 }
 
 /**
@@ -91,7 +114,7 @@ interface ProductFormData {
  */
 interface ProductInfoTabProps {
   formData: ProductFormData;
-  updateFormData: (field: string, value: any) => void;
+  updateFormData: (field: string, value: string | number | boolean | null | undefined) => void;
   storeId: string;
   storeSlug: string;
   checkSlugAvailability: (slug: string) => Promise<boolean>;
@@ -99,146 +122,123 @@ interface ProductInfoTabProps {
   storeCurrency?: string;
 }
 
-// Constantes pour les choix dynamiques
-const DIGITAL_CATEGORIES = [
-  { value: "formation", label: "Formation", icon: Users },
-  { value: "ebook", label: "Ebook", icon: Package },
-  { value: "template", label: "Template", icon: Settings },
-  { value: "logiciel", label: "Logiciel", icon: Smartphone },
-  { value: "cours", label: "Cours en ligne", icon: Users },
-  { value: "guide", label: "Guide", icon: Info },
-  { value: "checklist", label: "Checklist", icon: CheckCircle2 },
-  { value: "audio", label: "Fichier audio", icon: Download },
-  { value: "video", label: "Vidéo", icon: Package },
-  { value: "app", label: "Application mobile", icon: Smartphone }
-];
-
-const PHYSICAL_CATEGORIES = [
-  { value: "vetements", label: "Vêtements", icon: Package },
-  { value: "accessoires", label: "Accessoires", icon: Package },
-  { value: "artisanat", label: "Artisanat", icon: Package },
-  { value: "electronique", label: "Électronique", icon: Smartphone },
-  { value: "maison", label: "Maison & Jardin", icon: Package },
-  { value: "sport", label: "Sport", icon: Package },
-  { value: "beaute", label: "Beauté", icon: Package },
-  { value: "livres", label: "Livres", icon: Package },
-  { value: "jouets", label: "Jouets", icon: Package },
-  { value: "alimentation", label: "Alimentation", icon: Package }
-];
-
-const SERVICE_CATEGORIES = [
-  { value: "consultation", label: "Consultation", icon: Users },
-  { value: "coaching", label: "Coaching", icon: Target },
-  { value: "design", label: "Design", icon: Settings },
-  { value: "developpement", label: "Développement", icon: Settings },
-  { value: "marketing", label: "Marketing", icon: TrendingUp },
-  { value: "redaction", label: "Rédaction", icon: Package },
-  { value: "traduction", label: "Traduction", icon: Globe },
-  { value: "maintenance", label: "Maintenance", icon: Wrench },
-  { value: "formation", label: "Formation", icon: Users },
-  { value: "conseil", label: "Conseil", icon: Info }
-];
+// Import des catégories centralisées
+import { getCategoriesForProductType, type CategoryOption } from '@/constants/product-categories';
 
 const PRICING_MODELS = [
-  { 
-    value: "one-time", 
-    label: "Paiement unique", 
-    description: "Les clients paient une seule fois",
+  {
+    value: 'one-time',
+    label: 'Paiement unique',
+    description: 'Les clients paient une seule fois',
     icon: DollarSign,
-    popular: true
+    popular: true,
   },
-  { 
-    value: "subscription", 
-    label: "Abonnement", 
-    description: "Paiement récurrent mensuel/annuel",
+  {
+    value: 'subscription',
+    label: 'Abonnement',
+    description: 'Paiement récurrent mensuel/annuel',
     icon: RefreshCw,
-    popular: false
+    popular: false,
   },
-  { 
-    value: "pay-what-you-want", 
-    label: "Prix libre", 
-    description: "Le client choisit le montant",
+  {
+    value: 'pay-what-you-want',
+    label: 'Prix libre',
+    description: 'Le client choisit le montant',
     icon: Percent,
-    popular: false
+    popular: false,
   },
-  { 
-    value: "free", 
-    label: "Gratuit", 
-    description: "Produit gratuit",
+  {
+    value: 'free',
+    label: 'Gratuit',
+    description: 'Produit gratuit',
     icon: Heart,
-    popular: false
+    popular: false,
   },
 ];
 
 const ACCESS_CONTROLS = [
-  { 
-    value: "public", 
-    label: "Public", 
-    description: "Tout le monde peut voir et acheter",
+  {
+    value: 'public',
+    label: 'Public',
+    description: 'Tout le monde peut voir et acheter',
     icon: Globe,
-    popular: true
+    popular: true,
   },
-  { 
-    value: "logged_in", 
-    label: "Utilisateurs connectés", 
-    description: "Seuls les utilisateurs connectés",
+  {
+    value: 'logged_in',
+    label: 'Utilisateurs connectés',
+    description: 'Seuls les utilisateurs connectés',
     icon: Users,
-    popular: false
+    popular: false,
   },
-  { 
-    value: "purchasers", 
-    label: "Acheteurs uniquement", 
-    description: "Seuls les acheteurs précédents",
+  {
+    value: 'purchasers',
+    label: 'Acheteurs uniquement',
+    description: 'Seuls les acheteurs précédents',
     icon: Lock,
-    popular: false
+    popular: false,
   },
 ];
 
 // CURRENCIES importé depuis @/lib/currencies pour éviter la duplication
 
-export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugAvailability, validationErrors = {}, storeCurrency }: ProductInfoTabProps) => {
+export const ProductInfoTab = ({
+  formData,
+  updateFormData,
+  storeSlug,
+  checkSlugAvailability,
+  validationErrors = {},
+  storeCurrency,
+}: ProductInfoTabProps) => {
+  const { t } = useTranslation();
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [lastType, setLastType] = useState<string | null>(formData.product_type || null);
   const [showTypeChangeDialog, setShowTypeChangeDialog] = useState(false);
   const [pendingTypeChange, setPendingTypeChange] = useState<string | null>(null);
+  const [customCategory, setCustomCategory] = useState<string>('');
   const { toast } = useToast();
 
   // Hook personnalisé pour la vérification de slug
-  const { slugAvailable, checkingSlug } = useSlugAvailability(
-    formData.slug,
-    checkSlugAvailability
-  );
+  const { slugAvailable, checkingSlug } = useSlugAvailability(formData.slug, checkSlugAvailability);
 
   /**
    * Génère automatiquement le slug à partir du nom du produit
    * Le slug est auto-généré uniquement s'il n'a pas été modifié manuellement
    * @param name - Nouveau nom du produit
    */
-  const handleNameChange = useCallback((name: string) => {
-    updateFormData("name", name);
-    if (!formData.slug || formData.slug === generateSlug(formData.name)) {
-      updateFormData("slug", generateSlug(name));
-    }
-  }, [formData.name, formData.slug, updateFormData]);
+  const handleNameChange = useCallback(
+    (name: string) => {
+      updateFormData('name', name);
+      if (!formData.slug || formData.slug === generateSlug(formData.name)) {
+        updateFormData('slug', generateSlug(name));
+      }
+    },
+    [formData.name, formData.slug, updateFormData]
+  );
 
-  // URL du produit
-  const productUrl = `${window.location.origin}/${storeSlug}/${formData.slug}`;
-  
+  // URL du produit (URL publique par défaut : nomboutique.nomdedomaineplateforme.com/nomdeproduit)
+  const productUrl =
+    storeSlug && formData.slug
+      ? generateProductUrl(storeSlug, formData.slug)
+      : window.location.origin;
+
   // Copie de l'URL du produit
   const copyProductUrl = useCallback(() => {
     navigator.clipboard.writeText(productUrl);
     toast({
-      title: "URL copiée",
-      description: "L'URL du produit a été copiée dans le presse-papiers",
+      title: t('products.urlCopied', 'URL copiée'),
+      description: t(
+        'products.urlCopiedDescription',
+        "L'URL du produit a été copiée dans le presse-papiers"
+      ),
     });
-  }, [productUrl, toast]);
+  }, [productUrl, toast, t]);
 
   // Génération d'un nouveau slug
   const regenerateSlug = useCallback(() => {
     const newSlug = generateSlug(formData.name);
-    updateFormData("slug", newSlug);
+    updateFormData('slug', newSlug);
   }, [formData.name, updateFormData]);
-
 
   /**
    * Valide que la date de fin de vente est postérieure à la date de début
@@ -258,13 +258,11 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
    * Mémorisé pour éviter les recalculs inutiles
    */
   const categories = useMemo(() => {
-    switch (formData.product_type) {
-      case "digital": return DIGITAL_CATEGORIES;
-      case "physical": return PHYSICAL_CATEGORIES;
-      case "service": return SERVICE_CATEGORIES;
-      default: return [];
-    }
+    return getCategoriesForProductType(formData.product_type || '');
   }, [formData.product_type]);
+
+  // Afficher le champ personnalisé si "Autre" est sélectionné
+  const showCustomCategoryInput = formData.category === 'autre';
 
   /**
    * Retourne la couleur associée au type de produit
@@ -281,24 +279,30 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
    * @param categoryValue - Valeur de la catégorie
    * @returns Icône correspondante
    */
-  const getCategoryIcon = useCallback((categoryValue: string) => {
-    const category = categories.find(c => c.value === categoryValue);
-    return category?.icon || Package;
-  }, [categories]);
+  const getCategoryIcon = useCallback(
+    (categoryValue: string) => {
+      const category = categories.find(c => c.value === categoryValue);
+      return category?.icon || Package;
+    },
+    [categories]
+  );
 
   /**
    * Gère la demande de changement de type de produit
    * Affiche un dialog de confirmation si un type existe déjà
    */
-  const handleTypeChangeRequest = useCallback((newType: string) => {
-    if (lastType && lastType !== newType) {
-      setPendingTypeChange(newType);
-      setShowTypeChangeDialog(true);
-    } else {
-      setLastType(newType);
-      updateFormData("product_type", newType);
-    }
-  }, [lastType, updateFormData]);
+  const handleTypeChangeRequest = useCallback(
+    (newType: string) => {
+      if (lastType && lastType !== newType) {
+        setPendingTypeChange(newType);
+        setShowTypeChangeDialog(true);
+      } else {
+        setLastType(newType);
+        updateFormData('product_type', newType);
+      }
+    },
+    [lastType, updateFormData]
+  );
 
   /**
    * Confirme le changement de type de produit
@@ -306,7 +310,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
   const confirmTypeChange = useCallback(() => {
     if (pendingTypeChange) {
       setLastType(pendingTypeChange);
-      updateFormData("product_type", pendingTypeChange);
+      updateFormData('product_type', pendingTypeChange);
       setPendingTypeChange(null);
     }
     setShowTypeChangeDialog(false);
@@ -339,7 +343,9 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   <Info className="h-5 w-5 text-green-400" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-semibold text-white">Informations de base</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-white">
+                    Informations de base
+                  </CardTitle>
                   <CardDescription className="text-gray-400">
                     Renseignez les informations essentielles de votre produit
                   </CardDescription>
@@ -352,7 +358,8 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
               <div className="flex items-center gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                 <AlertCircle className="h-4 w-4 text-yellow-400" />
                 <span className="text-sm text-yellow-400">
-                  La devise du produit ({formData.currency}) diffère de celle de la boutique ({storeCurrency}). Vérifiez la cohérence des prix.
+                  La devise du produit ({formData.currency}) diffère de celle de la boutique (
+                  {storeCurrency}). Vérifiez la cohérence des prix.
                 </span>
               </div>
             )}
@@ -372,19 +379,24 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
               <Input
                 id="product-name"
                 value={formData.name}
-                onChange={(e) => handleNameChange(e.target.value)}
+                onChange={e => handleNameChange(e.target.value)}
                 placeholder="Ex: Guide complet Facebook Ads 2025"
                 aria-label="Nom du produit"
-                aria-required="true"
+                aria-required={true}
                 aria-invalid={!!validationErrors.name}
-                aria-describedby={validationErrors.name ? "name-error" : undefined}
+                aria-describedby={validationErrors.name ? 'name-error' : undefined}
                 className={cn(
-                  "bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]",
-                  validationErrors.name && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                  'bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]',
+                  validationErrors.name &&
+                    'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                 )}
               />
               {validationErrors.name && (
-                <div id="name-error" className="flex items-center gap-2 text-red-400 text-sm" role="alert">
+                <div
+                  id="name-error"
+                  className="flex items-center gap-2 text-red-400 text-sm"
+                  role="alert"
+                >
                   <AlertCircle className="h-4 w-4" aria-hidden="true" />
                   {validationErrors.name}
                 </div>
@@ -404,21 +416,22 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   </TooltipContent>
                 </Tooltip>
               </Label>
-              
+
               <div className="flex gap-2">
                 <div className="flex-1 relative">
                   <Input
                     id="product-slug"
                     value={formData.slug}
-                    onChange={(e) => updateFormData("slug", generateSlug(e.target.value))}
+                    onChange={e => updateFormData('slug', generateSlug(e.target.value))}
                     placeholder="guide-facebook-ads-2025"
                     aria-label="URL du produit (slug)"
-                    aria-required="true"
+                    aria-required={true}
                     aria-invalid={!!validationErrors.slug}
-                    aria-describedby={validationErrors.slug ? "slug-error" : "slug-status"}
+                    aria-describedby={validationErrors.slug ? 'slug-error' : 'slug-status'}
                     className={cn(
-                      "bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 pr-10 min-h-[44px]",
-                      validationErrors.slug && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                      'bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 pr-10 min-h-[44px]',
+                      validationErrors.slug &&
+                        'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                     )}
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -438,6 +451,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                       size="sm"
                       onClick={regenerateSlug}
                       className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                      aria-label="Régénérer l'URL du produit"
                     >
                       <RefreshCw className="h-4 w-4" />
                     </Button>
@@ -450,9 +464,17 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
 
               {/* Indicateur lisible de disponibilité */}
               {slugAvailable !== null && (
-                <div id="slug-status" className="flex items-center gap-2" role="status" aria-live="polite">
+                <div
+                  id="slug-status"
+                  className="flex items-center gap-2"
+                  role="status"
+                  aria-live="polite"
+                >
                   {slugAvailable ? (
-                    <Badge variant="secondary" className="text-xs bg-green-500/20 text-green-300 border-green-500/30">
+                    <Badge
+                      variant="secondary"
+                      className="text-xs bg-green-500/20 text-green-300 border-green-500/30"
+                    >
                       <CheckCircle2 className="h-3 w-3 mr-1" aria-hidden="true" />
                       Disponible
                     </Badge>
@@ -464,7 +486,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   )}
                 </div>
               )}
-              
+
               <div className="flex items-center gap-2 p-3 bg-gray-700/30 rounded-lg border border-gray-600">
                 <ExternalLink className="h-4 w-4 text-gray-400" />
                 <span className="text-sm text-gray-400">URL complète :</span>
@@ -478,6 +500,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                       size="sm"
                       onClick={copyProductUrl}
                       className="h-6 w-6 p-0 text-gray-400 hover:text-white"
+                      aria-label="Copier l'URL du produit"
                     >
                       <Copy className="h-3 w-3" />
                     </Button>
@@ -487,7 +510,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   </TooltipContent>
                 </Tooltip>
               </div>
-              
+
               {validationErrors.slug && (
                 <div className="flex items-center gap-2 text-red-400 text-sm">
                   <AlertCircle className="h-4 w-4" />
@@ -510,29 +533,34 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                     </TooltipContent>
                   </Tooltip>
                 </Label>
-                <Select 
-                  value={formData.category} 
-                  onValueChange={(value) => updateFormData("category", value)}
+                <Select
+                  value={formData.category}
+                  onValueChange={value => updateFormData('category', value)}
                 >
-                  <SelectTrigger 
+                  <SelectTrigger
                     id="product-category"
                     aria-label="Catégorie du produit"
-                    aria-required="true"
+                    aria-required={true}
                     aria-invalid={!!validationErrors.category}
                     className={cn(
-                      "bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]",
-                    validationErrors.category && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                  )}>
+                      'bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]',
+                      validationErrors.category &&
+                        'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                    )}
+                  >
                     <SelectValue placeholder="Sélectionnez une catégorie" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-600">
-                    {categories.map((category) => {
+                  <SelectContent
+                    mobileVariant="sheet"
+                    className="bg-gray-800 border-gray-600 z-[1060]"
+                  >
+                    {categories.map(category => {
                       const Icon = category.icon;
                       return (
-                        <SelectItem 
-                          key={category.value} 
-                          value={category.value} 
-                          className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                        <SelectItem
+                          key={category.value}
+                          value={category.value}
+                          className="text-white hover:bg-gray-700 focus:bg-gray-700 min-h-[44px]"
                         >
                           <div className="flex items-center gap-2">
                             <Icon className="h-4 w-4" />
@@ -543,6 +571,23 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                     })}
                   </SelectContent>
                 </Select>
+                {showCustomCategoryInput && (
+                  <div className="mt-2">
+                    <Label className="text-sm font-medium text-white">
+                      Précisez la catégorie <span className="text-red-400">*</span>
+                    </Label>
+                    <Input
+                      value={customCategory}
+                      onChange={e => {
+                        setCustomCategory(e.target.value);
+                        // Mettre à jour la catégorie avec la valeur personnalisée
+                        updateFormData('category', e.target.value);
+                      }}
+                      placeholder="Ex: Formation en développement web"
+                      className="bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 mt-1"
+                    />
+                  </div>
+                )}
                 {validationErrors.category && (
                   <div className="flex items-center gap-2 text-red-400 text-sm">
                     <AlertCircle className="h-4 w-4" />
@@ -550,7 +595,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   </div>
                 )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-white flex items-center gap-2">
                   Modèle de tarification <span className="text-red-400">*</span>
@@ -563,29 +608,34 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                     </TooltipContent>
                   </Tooltip>
                 </Label>
-                <Select 
-                  value={formData.pricing_model} 
-                  onValueChange={(value) => updateFormData("pricing_model", value)}
+                <Select
+                  value={formData.pricing_model}
+                  onValueChange={value => updateFormData('pricing_model', value)}
                 >
-                  <SelectTrigger 
+                  <SelectTrigger
                     id="pricing-model"
                     aria-label="Modèle de tarification"
-                    aria-required="true"
+                    aria-required={true}
                     aria-invalid={!!validationErrors.pricing_model}
                     className={cn(
-                      "bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]",
-                    validationErrors.pricing_model && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                  )}>
+                      'bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]',
+                      validationErrors.pricing_model &&
+                        'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                    )}
+                  >
                     <SelectValue placeholder="Sélectionnez un modèle" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-600">
-                    {PRICING_MODELS.map((model) => {
+                  <SelectContent
+                    mobileVariant="sheet"
+                    className="bg-gray-800 border-gray-600 z-[1060]"
+                  >
+                    {PRICING_MODELS.map(model => {
                       const Icon = model.icon;
                       return (
-                        <SelectItem 
-                          key={model.value} 
-                          value={model.value} 
-                          className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                        <SelectItem
+                          key={model.value}
+                          value={model.value}
+                          className="text-white hover:bg-gray-700 focus:bg-gray-700 min-h-[44px]"
                         >
                           <div className="flex items-center justify-between w-full">
                             <div className="flex items-center gap-2">
@@ -626,9 +676,12 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                 <Shield className="h-5 w-5 text-emerald-400" />
               </div>
               <div>
-                <CardTitle className="text-lg font-semibold text-white">Droits & Licensing</CardTitle>
+                <CardTitle className="text-lg font-semibold text-white">
+                  Droits & Licensing
+                </CardTitle>
                 <CardDescription className="text-gray-400">
-                  Informez vos clients du régime de droits de votre produit (affiché sur marketplace et boutiques)
+                  Informez vos clients du régime de droits de votre produit (affiché sur marketplace
+                  et boutiques)
                 </CardDescription>
               </div>
             </div>
@@ -644,27 +697,44 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                     </TooltipTrigger>
                     <TooltipContent>
                       <div className="max-w-xs text-xs space-y-1">
-                        <p><strong>Standard</strong>: usage personnel de l'acheteur. Revente/modification non autorisée.</p>
-                        <p><strong>PLR (Private Label Rights)</strong>: l'acheteur peut modifier et revendre, selon les conditions précisées.</p>
-                        <p><strong>Droit d'auteur</strong>: contenu protégé, aucun droit de revente/modification.</p>
+                        <p>
+                          <strong>Standard</strong>: usage personnel de l'acheteur.
+                          Revente/modification non autorisée.
+                        </p>
+                        <p>
+                          <strong>PLR (Private Label Rights)</strong>: l'acheteur peut modifier et
+                          revendre, selon les conditions précisées.
+                        </p>
+                        <p>
+                          <strong>Droit d'auteur</strong>: contenu protégé, aucun droit de
+                          revente/modification.
+                        </p>
                       </div>
                     </TooltipContent>
                   </Tooltip>
                 </Label>
                 <Select
                   value={(formData.licensing_type as string) || 'standard'}
-                  onValueChange={(value) => updateFormData('licensing_type', value)}
+                  onValueChange={value => updateFormData('licensing_type', value)}
                 >
                   <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20">
                     <SelectValue placeholder="Sélectionner un type" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-600">
-                    <SelectItem value="standard" className="text-white">Standard (usage personnel)</SelectItem>
-                    <SelectItem value="plr" className="text-white">PLR - Private Label Rights</SelectItem>
-                    <SelectItem value="copyrighted" className="text-white">Protégé par droit d'auteur</SelectItem>
+                  <SelectContent className="bg-gray-800 border-gray-600 z-[1060]">
+                    <SelectItem value="standard" className="text-white min-h-[44px]">
+                      Standard (usage personnel)
+                    </SelectItem>
+                    <SelectItem value="plr" className="text-white min-h-[44px]">
+                      PLR - Private Label Rights
+                    </SelectItem>
+                    <SelectItem value="copyrighted" className="text-white min-h-[44px]">
+                      Protégé par droit d'auteur
+                    </SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-gray-400">Applicable surtout pour produits numériques et cours</p>
+                <p className="text-xs text-gray-400">
+                  Applicable surtout pour produits numériques et cours
+                </p>
               </div>
 
               <div className="space-y-2 md:col-span-2">
@@ -676,16 +746,17 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                     </TooltipTrigger>
                     <TooltipContent>
                       <div className="max-w-xs text-xs">
-                        Détaillez clairement ce que l'acheteur a le droit de faire (ex: attribution requise, revente autorisée, modifications permises, etc.).
+                        Détaillez clairement ce que l'acheteur a le droit de faire (ex: attribution
+                        requise, revente autorisée, modifications permises, etc.).
                       </div>
                     </TooltipContent>
                   </Tooltip>
                 </Label>
                 <Textarea
                   value={formData.license_terms || ''}
-                  onChange={(e) => updateFormData('license_terms', e.target.value)}
+                  onChange={e => updateFormData('license_terms', e.target.value)}
                   placeholder={
-                    (formData.licensing_type === 'plr')
+                    formData.licensing_type === 'plr'
                       ? 'Ex: Autorisé à revendre/modifier avec attribution...'
                       : 'Ex: Usage personnel uniquement. Revente/interdite...'
                   }
@@ -713,7 +784,9 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   <Eye className="h-5 w-5 text-purple-400" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-semibold text-white">Visibilité et accès</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-white">
+                    Visibilité et accès
+                  </CardTitle>
                   <CardDescription className="text-gray-400">
                     Contrôlez qui peut voir et acheter votre produit
                   </CardDescription>
@@ -750,7 +823,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                 </div>
                 <Switch
                   checked={formData.is_active || false}
-                  onCheckedChange={(checked) => updateFormData("is_active", checked)}
+                  onCheckedChange={checked => updateFormData('is_active', checked)}
                 />
               </div>
 
@@ -771,7 +844,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                 </div>
                 <Switch
                   checked={formData.is_featured || false}
-                  onCheckedChange={(checked) => updateFormData("is_featured", checked)}
+                  onCheckedChange={checked => updateFormData('is_featured', checked)}
                 />
               </div>
 
@@ -792,7 +865,7 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                 </div>
                 <Switch
                   checked={formData.hide_from_store || false}
-                  onCheckedChange={(checked) => updateFormData("hide_from_store", checked)}
+                  onCheckedChange={checked => updateFormData('hide_from_store', checked)}
                 />
               </div>
             </div>
@@ -803,7 +876,9 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                 <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Label className="text-sm font-medium text-white">Protéger par mot de passe</Label>
+                      <Label className="text-sm font-medium text-white">
+                        Protéger par mot de passe
+                      </Label>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -813,21 +888,25 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                         </TooltipContent>
                       </Tooltip>
                     </div>
-                    <p className="text-xs text-gray-400">Un mot de passe sera requis pour accéder au produit</p>
+                    <p className="text-xs text-gray-400">
+                      Un mot de passe sera requis pour accéder au produit
+                    </p>
                   </div>
                   <Switch
                     checked={formData.password_protected || false}
-                    onCheckedChange={(checked) => updateFormData("password_protected", checked)}
+                    onCheckedChange={checked => updateFormData('password_protected', checked)}
                   />
                 </div>
-                
+
                 {formData.password_protected && (
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-white">Mot de passe du produit</Label>
+                    <Label className="text-sm font-medium text-white">
+                      Mot de passe du produit
+                    </Label>
                     <Input
                       type="password"
-                      value={formData.product_password || ""}
-                      onChange={(e) => updateFormData("product_password", e.target.value)}
+                      value={formData.product_password || ''}
+                      onChange={e => updateFormData('product_password', e.target.value)}
                       placeholder="Mot de passe sécurisé"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
                     />
@@ -846,21 +925,24 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                       </TooltipContent>
                     </Tooltip>
                   </Label>
-                  <Select 
-                    value={formData.access_control || "public"} 
-                    onValueChange={(value) => updateFormData("access_control", value)}
+                  <Select
+                    value={formData.access_control || 'public'}
+                    onValueChange={value => updateFormData('access_control', value)}
                   >
                     <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20">
                       <SelectValue placeholder="Sélectionner le contrôle d'accès" />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600">
-                      {ACCESS_CONTROLS.map((control) => {
+                    <SelectContent
+                      mobileVariant="sheet"
+                      className="bg-gray-800 border-gray-600 z-[1060]"
+                    >
+                      {ACCESS_CONTROLS.map(control => {
                         const Icon = control.icon;
                         return (
-                          <SelectItem 
-                            key={control.value} 
-                            value={control.value} 
-                            className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                          <SelectItem
+                            key={control.value}
+                            value={control.value}
+                            className="text-white hover:bg-gray-700 focus:bg-gray-700 min-h-[44px]"
                           >
                             <div className="flex items-center justify-between w-full">
                               <div className="flex items-center gap-2">
@@ -907,7 +989,9 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
             <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <Label className="text-sm font-medium text-white">Limite d'achat par client</Label>
+                  <Label className="text-sm font-medium text-white">
+                    Limite d'achat par client
+                  </Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -922,8 +1006,8 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
-                  value={formData.purchase_limit || ""}
-                  onChange={(e) => updateFormData("purchase_limit", parseInt(e.target.value) || null)}
+                  value={formData.purchase_limit || ''}
+                  onChange={e => updateFormData('purchase_limit', parseInt(e.target.value) || null)}
                   placeholder="0 = illimité"
                   min="0"
                   className="w-24 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20"
@@ -935,7 +1019,9 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
             <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <Label className="text-sm font-medium text-white">Masquer le nombre d'achats</Label>
+                  <Label className="text-sm font-medium text-white">
+                    Masquer le nombre d'achats
+                  </Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-3 w-3 text-gray-400" />
@@ -949,9 +1035,144 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
               </div>
               <Switch
                 checked={formData.hide_purchase_count || false}
-                onCheckedChange={(checked) => updateFormData("hide_purchase_count", checked)}
+                onCheckedChange={checked => updateFormData('hide_purchase_count', checked)}
               />
             </div>
+
+            {/* Options d'affichage des statistiques */}
+            <Card className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-white">
+                  Affichage des Statistiques
+                </CardTitle>
+                <CardDescription className="text-gray-400">
+                  Contrôlez quelles statistiques sont visibles sur les cartes produits
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium text-white">
+                        Masquer le nombre de likes
+                      </Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ne pas afficher le nombre de likes sur les cartes produits</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <p className="text-xs text-gray-400">Masquer le nombre de likes</p>
+                  </div>
+                  <Switch
+                    checked={formData.hide_likes_count || false}
+                    onCheckedChange={checked => updateFormData('hide_likes_count', checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium text-white">
+                        Masquer le nombre de recommandations
+                      </Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>
+                            Ne pas afficher le nombre de recommandations sur les cartes produits
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <p className="text-xs text-gray-400">Masquer le nombre de recommandations</p>
+                  </div>
+                  <Switch
+                    checked={formData.hide_recommendations_count || false}
+                    onCheckedChange={checked =>
+                      updateFormData('hide_recommendations_count', checked)
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium text-white">
+                        Masquer le nombre de téléchargements
+                      </Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>
+                            Ne pas afficher le nombre de téléchargements (produits digitaux
+                            uniquement)
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <p className="text-xs text-gray-400">Masquer le nombre de téléchargements</p>
+                  </div>
+                  <Switch
+                    checked={formData.hide_downloads_count || false}
+                    onCheckedChange={checked => updateFormData('hide_downloads_count', checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium text-white">
+                        Masquer le nombre d'avis
+                      </Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ne pas afficher le nombre d'avis sur les cartes produits</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <p className="text-xs text-gray-400">Masquer le nombre d'avis</p>
+                  </div>
+                  <Switch
+                    checked={formData.hide_reviews_count || false}
+                    onCheckedChange={checked => updateFormData('hide_reviews_count', checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium text-white">
+                        Masquer la note moyenne
+                      </Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ne pas afficher la note moyenne (étoiles) sur les cartes produits</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <p className="text-xs text-gray-400">Masquer la note moyenne</p>
+                  </div>
+                  <Switch
+                    checked={formData.hide_rating || false}
+                    onCheckedChange={checked => updateFormData('hide_rating', checked)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </CardContent>
         </Card>
 
@@ -989,25 +1210,37 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal bg-gray-700/50 border-gray-600 text-white hover:bg-gray-700",
-                        !formData.sale_start_date && "text-gray-400"
+                        'w-full justify-start text-left font-normal bg-gray-700/50 border-gray-600 text-white hover:bg-gray-700',
+                        !formData.sale_start_date && 'text-gray-400'
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.sale_start_date ? format(new Date(formData.sale_start_date), "PPP", { locale: fr }) : <span>Sélectionner une date</span>}
+                      {formData.sale_start_date ? (
+                        format(new Date(formData.sale_start_date), 'PPP', { locale: fr })
+                      ) : (
+                        <span>Sélectionner une date</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-600 z-50" align="start" sideOffset={5}>
+                  <PopoverContent
+                    className="w-auto p-0 bg-gray-800 border-gray-600 z-50"
+                    align="start"
+                    sideOffset={5}
+                  >
                     <Calendar
                       mode="single"
-                      selected={formData.sale_start_date ? new Date(formData.sale_start_date) : undefined}
-                      onSelect={(date) => updateFormData("sale_start_date", date?.toISOString() || null)}
+                      selected={
+                        formData.sale_start_date ? new Date(formData.sale_start_date) : undefined
+                      }
+                      onSelect={date =>
+                        updateFormData('sale_start_date', date?.toISOString() || null)
+                      }
                       initialFocus
                     />
                   </PopoverContent>
                 </Popover>
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-white flex items-center gap-2">
                   Date de fin de vente
@@ -1025,26 +1258,38 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal bg-gray-700/50 border-gray-600 text-white hover:bg-gray-700",
-                        !formData.sale_end_date && "text-gray-400"
+                        'w-full justify-start text-left font-normal bg-gray-700/50 border-gray-600 text-white hover:bg-gray-700',
+                        !formData.sale_end_date && 'text-gray-400'
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.sale_end_date ? format(new Date(formData.sale_end_date), "PPP", { locale: fr }) : <span>Sélectionner une date</span>}
+                      {formData.sale_end_date ? (
+                        format(new Date(formData.sale_end_date), 'PPP', { locale: fr })
+                      ) : (
+                        <span>Sélectionner une date</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-600 z-50" align="start" sideOffset={5}>
+                  <PopoverContent
+                    className="w-auto p-0 bg-gray-800 border-gray-600 z-50"
+                    align="start"
+                    sideOffset={5}
+                  >
                     <Calendar
                       mode="single"
-                      selected={formData.sale_end_date ? new Date(formData.sale_end_date) : undefined}
-                      onSelect={(date) => updateFormData("sale_end_date", date?.toISOString() || null)}
+                      selected={
+                        formData.sale_end_date ? new Date(formData.sale_end_date) : undefined
+                      }
+                      onSelect={date =>
+                        updateFormData('sale_end_date', date?.toISOString() || null)
+                      }
                       initialFocus
                     />
                   </PopoverContent>
                 </Popover>
               </div>
             </div>
-            
+
             {/* Validation des dates */}
             {!validateSaleDates() && formData.sale_start_date && formData.sale_end_date && (
               <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
@@ -1065,7 +1310,9 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                 <Globe className="h-5 w-5 text-gray-400" />
               </div>
               <div>
-                <CardTitle className="text-lg font-semibold text-white">Métadonnées techniques</CardTitle>
+                <CardTitle className="text-lg font-semibold text-white">
+                  Métadonnées techniques
+                </CardTitle>
                 <CardDescription className="text-gray-400">
                   Informations système sur le produit
                 </CardDescription>
@@ -1075,37 +1322,55 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-white">Créé le</Label>
-                <Input 
-                  value={formData.created_at ? format(new Date(formData.created_at), "PPP p", { locale: fr }) : "N/A"} 
-                  readOnly 
-                  className="bg-gray-700/50 border-gray-600 text-gray-300" 
+                <Label className="text-sm font-medium text-white">
+                  {t('products.metadata.createdAt', 'Créé le')}
+                </Label>
+                <Input
+                  value={
+                    formData.created_at
+                      ? format(new Date(formData.created_at), 'PPP p', { locale: fr })
+                      : t('common.notAvailable', 'N/A')
+                  }
+                  readOnly
+                  className="bg-gray-700/50 border-gray-600 text-gray-300"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-white">Dernière mise à jour</Label>
-                <Input 
-                  value={formData.updated_at ? format(new Date(formData.updated_at), "PPP p", { locale: fr }) : "N/A"} 
-                  readOnly 
-                  className="bg-gray-700/50 border-gray-600 text-gray-300" 
+                <Label className="text-sm font-medium text-white">
+                  {t('products.metadata.updatedAt', 'Dernière mise à jour')}
+                </Label>
+                <Input
+                  value={
+                    formData.updated_at
+                      ? format(new Date(formData.updated_at), 'PPP p', { locale: fr })
+                      : t('common.notAvailable', 'N/A')
+                  }
+                  readOnly
+                  className="bg-gray-700/50 border-gray-600 text-gray-300"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-white">Version</Label>
-                <Input 
-                  value={formData.version || "1.0.0"} 
-                  readOnly 
-                  className="bg-gray-700/50 border-gray-600 text-gray-300" 
+                <Label className="text-sm font-medium text-white">
+                  {t('products.metadata.version', 'Version')}
+                </Label>
+                <Input
+                  value={formData.version || '1.0.0'}
+                  readOnly
+                  className="bg-gray-700/50 border-gray-600 text-gray-300"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-white">Statut</Label>
+                <Label className="text-sm font-medium text-white">
+                  {t('products.metadata.status', 'Statut')}
+                </Label>
                 <div className="flex items-center gap-2">
-                  <Badge 
-                    variant={formData.status === "published" ? "default" : "secondary"}
+                  <Badge
+                    variant={formData.status === 'published' ? 'default' : 'secondary'}
                     className="text-xs"
                   >
-                    {formData.status || "Brouillon"}
+                    {formData.status
+                      ? t(`products.status.${formData.status}`, formData.status)
+                      : t('products.status.draft', 'Brouillon')}
                   </Badge>
                 </div>
               </div>
@@ -1117,20 +1382,22 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
         <AlertDialog open={showTypeChangeDialog} onOpenChange={setShowTypeChangeDialog}>
           <AlertDialogContent className="bg-gray-800 border-gray-700">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-white">Confirmer le changement de type</AlertDialogTitle>
+              <AlertDialogTitle className="text-white">
+                Confirmer le changement de type
+              </AlertDialogTitle>
               <AlertDialogDescription className="text-gray-400">
-                Changer le type de produit peut réinitialiser certains champs incompatibles (comme la catégorie). 
-                Êtes-vous sûr de vouloir continuer ?
+                Changer le type de produit peut réinitialiser certains champs incompatibles (comme
+                la catégorie). Êtes-vous sûr de vouloir continuer ?
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel 
+              <AlertDialogCancel
                 onClick={cancelTypeChange}
                 className="bg-gray-700 text-white hover:bg-gray-600 border-gray-600"
               >
                 Annuler
               </AlertDialogCancel>
-              <AlertDialogAction 
+              <AlertDialogAction
                 onClick={confirmTypeChange}
                 className="bg-primary text-white hover:bg-primary/90"
               >

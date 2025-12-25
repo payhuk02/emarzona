@@ -7,7 +7,7 @@
  * 3. Rapport d'étudiants (student report)
  * 4. Rapport de complétion (completion report)
  * 
- * @author Payhuk Team
+ * @author Emarzona Team
  * @date 29 Octobre 2025
  */
 

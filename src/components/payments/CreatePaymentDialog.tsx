@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,7 @@ interface Customer {
   email: string | null;
 }
 
-const CreatePaymentDialog = ({
+const CreatePaymentDialogComponent = ({
   open,
   onOpenChange,
   storeId,
@@ -77,21 +77,21 @@ const CreatePaymentDialog = ({
     setCustomers(data || []);
   };
 
-  const handleOrderChange = (orderId: string) => {
-    setFormData({ ...formData, order_id: orderId });
-    
+  const handleOrderChange = useCallback((orderId: string) => {
     const order = orders.find(o => o.id === orderId);
     if (order) {
-      setFormData({
-        ...formData,
+      setFormData(prev => ({
+        ...prev,
         order_id: orderId,
         customer_id: order.customer_id || "",
         amount: order.total_amount.toString(),
-      });
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, order_id: orderId }));
     }
-  };
+  }, [orders]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
@@ -127,20 +127,21 @@ const CreatePaymentDialog = ({
         transaction_id: "",
         notes: "",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [formData, storeId, onPaymentCreated, onOpenChange, toast]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nouveau paiement</DialogTitle>
         </DialogHeader>
@@ -276,5 +277,19 @@ const CreatePaymentDialog = ({
     </Dialog>
   );
 };
+
+CreatePaymentDialogComponent.displayName = 'CreatePaymentDialogComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const CreatePaymentDialog = React.memo(CreatePaymentDialogComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.open === nextProps.open &&
+    prevProps.onOpenChange === nextProps.onOpenChange &&
+    prevProps.storeId === nextProps.storeId &&
+    prevProps.onPaymentCreated === nextProps.onPaymentCreated
+  );
+});
+
+CreatePaymentDialog.displayName = 'CreatePaymentDialog';
 
 export default CreatePaymentDialog;

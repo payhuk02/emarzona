@@ -4,11 +4,11 @@
  * Date : 27 octobre 2025
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { ReviewCard } from './ReviewCard';
 import { ReviewFilter } from './ReviewFilter';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/components/icons';
 import { useProductReviews, useVoteReview } from '@/hooks/useReviews';
 import type { ReviewFilters } from '@/types/review';
 import { ReviewsListSkeleton } from './ReviewSkeleton';
@@ -18,7 +18,7 @@ interface ReviewsListProps {
   onReplyToReview?: (reviewId: string) => void;
 }
 
-export const ReviewsList: React.FC<ReviewsListProps> = ({
+const ReviewsListComponent: React.FC<ReviewsListProps> = ({
   productId,
   onReplyToReview,
 }) => {
@@ -31,16 +31,21 @@ export const ReviewsList: React.FC<ReviewsListProps> = ({
   const { data: reviews, isLoading } = useProductReviews(productId, filters);
   const voteReview = useVoteReview();
 
-  const handleVote = (reviewId: string, isHelpful: boolean) => {
+  const handleVote = useCallback((reviewId: string, isHelpful: boolean) => {
     voteReview.mutate({ reviewId, isHelpful });
-  };
+  }, [voteReview]);
 
-  const handleLoadMore = () => {
+  const handleLoadMore = useCallback(() => {
     setFilters(prev => ({
       ...prev,
       offset: (prev.offset || 0) + (prev.limit || 10),
     }));
-  };
+  }, []);
+
+  // Mémoriser le calcul de hasMore
+  const hasMore = useMemo(() => {
+    return reviews ? reviews.length >= (filters.limit || 10) : false;
+  }, [reviews, filters.limit]);
 
   if (isLoading) {
     return <ReviewsListSkeleton count={3} />;
@@ -66,11 +71,12 @@ export const ReviewsList: React.FC<ReviewsListProps> = ({
             onVote={(isHelpful) => handleVote(review.id, isHelpful)}
             onReply={onReplyToReview ? () => onReplyToReview(review.id) : undefined}
             currentUserVote={review.user_vote}
+            isLoading={voteReview.isPending}
           />
         ))}
       </div>
 
-      {reviews.length >= (filters.limit || 10) && (
+      {hasMore && (
         <div className="text-center">
           <Button onClick={handleLoadMore} variant="outline">
             Charger plus d'avis
@@ -80,4 +86,14 @@ export const ReviewsList: React.FC<ReviewsListProps> = ({
     </div>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const ReviewsList = React.memo(ReviewsListComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.productId === nextProps.productId &&
+    prevProps.onReplyToReview === nextProps.onReplyToReview
+  );
+});
+
+ReviewsList.displayName = 'ReviewsList';
 

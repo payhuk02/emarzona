@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useResponsiveModal } from '@/hooks/use-responsive-modal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +25,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { BottomSheet, BottomSheetContent } from '@/components/ui/bottom-sheet';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
+import { MobileFormField } from '@/components/ui/mobile-form-field';
 import {
   Select,
   SelectContent,
@@ -39,7 +45,7 @@ import {
   Tag,
   AlertCircle,
   CheckCircle2,
-} from 'lucide-react';
+} from '@/components/icons';
 import { cn } from '@/lib/utils';
 
 // ============================================================================
@@ -150,6 +156,8 @@ export function ProductBundleBuilder({
   onSave,
   className,
 }: ProductBundleBuilderProps) {
+  const isMobile = useIsMobile();
+  const { useBottomSheet } = useResponsiveModal();
   const [bundle, setBundle] = useState<Partial<ProductBundle>>(
     initialBundle || {
       name: '',
@@ -168,6 +176,7 @@ export function ProductBundleBuilder({
 
   const [showProductPicker, setShowProductPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Calculate prices
   const calculatePrices = (products: BundleProduct[], bundlePrice?: number) => {
@@ -294,19 +303,21 @@ export function ProductBundleBuilder({
     onSave?.(finalBundle);
   };
 
-  // Filter products for picker
-  const availableProducts = MOCK_PRODUCTS.filter((p) => {
-    if (bundle.products?.some((bp) => bp.product_id === p.id)) return false;
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        p.name.toLowerCase().includes(query) ||
-        p.sku?.toLowerCase().includes(query) ||
-        p.variant_label?.toLowerCase().includes(query)
-      );
-    }
-    return true;
-  });
+  // Filter products for picker with debounce and memoization
+  const availableProducts = useMemo(() => {
+    return MOCK_PRODUCTS.filter((p) => {
+      if (bundle.products?.some((bp) => bp.product_id === p.id)) return false;
+      if (debouncedSearchQuery) {
+        const query = debouncedSearchQuery.toLowerCase();
+        return (
+          p.name.toLowerCase().includes(query) ||
+          p.sku?.toLowerCase().includes(query) ||
+          p.variant_label?.toLowerCase().includes(query)
+        );
+      }
+      return true;
+    });
+  }, [bundle.products, debouncedSearchQuery]);
 
   return (
     <div className={cn('space-y-6', className)}>
@@ -328,45 +339,44 @@ export function ProductBundleBuilder({
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Basic Info */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="bundle-name">Nom du Pack *</Label>
-              <Input
-                id="bundle-name"
-                placeholder="Ex: Pack Sportif Complet"
-                value={bundle.name || ''}
-                onChange={(e) => setBundle({ ...bundle, name: e.target.value })}
-              />
-            </div>
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+            <MobileFormField
+              label="Nom du Pack"
+              name="bundle-name"
+              type="text"
+              value={bundle.name || ''}
+              onChange={(value) => setBundle({ ...bundle, name: value })}
+              required
+              fieldProps={{
+                placeholder: "Ex: Pack Sportif Complet",
+              }}
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="bundle-type">Type de Pack</Label>
-              <Select
-                value={bundle.type || 'fixed'}
-                onValueChange={(value: BundleType) => setBundle({ ...bundle, type: value })}
-              >
-                <SelectTrigger id="bundle-type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fixed">Fixe (tous les produits inclus)</SelectItem>
-                  <SelectItem value="flexible">Flexible (client choisit)</SelectItem>
-                  <SelectItem value="mix_and_match">Mix & Match</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              placeholder="Décrivez le pack et ses avantages..."
-              value={bundle.description || ''}
-              onChange={(e) => setBundle({ ...bundle, description: e.target.value })}
-              rows={2}
+            <MobileFormField
+              label="Type de Pack"
+              name="bundle-type"
+              type="select"
+              value={bundle.type || 'fixed'}
+              onChange={(value) => setBundle({ ...bundle, type: value as BundleType })}
+              selectOptions={[
+                { value: 'fixed', label: 'Fixe (tous les produits inclus)' },
+                { value: 'flexible', label: 'Flexible (client choisit)' },
+                { value: 'mix_and_match', label: 'Mix & Match' },
+              ]}
             />
           </div>
+
+          <MobileFormField
+            label="Description"
+            name="description"
+            type="textarea"
+            value={bundle.description || ''}
+            onChange={(value) => setBundle({ ...bundle, description: value })}
+            fieldProps={{
+              placeholder: "Décrivez le pack et ses avantages...",
+              rows: 2,
+            }}
+          />
 
           {/* Products in Bundle */}
           <div className="space-y-4">
@@ -392,11 +402,91 @@ export function ProductBundleBuilder({
                 <p className="text-sm text-muted-foreground mb-4">
                   Ajoutez des produits pour créer votre pack
                 </p>
-                <Button onClick={() => setShowProductPicker(true)} className="gap-2">
+                <Button onClick={() => setShowProductPicker(true)} className="gap-2 w-full sm:w-auto">
                   <Plus className="h-4 w-4" />
                   Ajouter des produits
                 </Button>
               </div>
+            ) : isMobile ? (
+              <MobileTableCard
+                data={bundle.products.map((p) => ({ id: p.product_id, ...p }))}
+                columns={[
+                  {
+                    key: 'product_name',
+                    header: 'Produit',
+                    priority: 'high',
+                    render: (row) => (
+                      <div className="flex items-center gap-3">
+                        {row.image_url ? (
+                          <img
+                            src={row.image_url}
+                            alt={row.product_name}
+                            className="h-10 w-10 rounded object-cover"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
+                            <Package className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-medium">{row.product_name}</p>
+                          {row.variant_label && (
+                            <p className="text-xs text-muted-foreground">{row.variant_label}</p>
+                          )}
+                          {row.sku && (
+                            <p className="text-xs text-muted-foreground font-mono">{row.sku}</p>
+                          )}
+                        </div>
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 'price',
+                    header: 'Prix Unitaire',
+                    priority: 'high',
+                    render: (row) => (
+                      <span className="font-medium">{row.price.toLocaleString()} XOF</span>
+                    ),
+                  },
+                  {
+                    key: 'quantity',
+                    header: 'Quantité',
+                    priority: 'high',
+                    render: (row) => (
+                      <Input
+                        type="number"
+                        min="1"
+                        value={row.quantity}
+                        onChange={(e) =>
+                          handleUpdateQuantity(row.product_id, Number(e.target.value))
+                        }
+                        className="w-20 min-h-[44px]"
+                      />
+                    ),
+                  },
+                  {
+                    key: 'subtotal',
+                    header: 'Sous-total',
+                    priority: 'high',
+                    render: (row) => (
+                      <span className="font-bold">
+                        {(row.price * row.quantity).toLocaleString()} XOF
+                      </span>
+                    ),
+                    className: 'font-bold',
+                  },
+                ]}
+                actions={(row) => (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveProduct(row.product_id)}
+                    className="min-h-[44px] min-w-[44px]"
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                )}
+              />
             ) : (
               <div className="rounded-md border">
                 <Table>
@@ -489,29 +579,32 @@ export function ProductBundleBuilder({
                 <CardTitle className="text-base">Tarification du Pack</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                   <div className="space-y-2">
                     <Label>Prix Total Original</Label>
-                    <div className="text-2xl font-bold text-muted-foreground line-through">
+                    <div className="text-xl sm:text-2xl font-bold text-muted-foreground line-through">
                       {bundle.original_price?.toLocaleString()} XOF
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="bundle-price">Prix du Pack *</Label>
-                    <Input
-                      id="bundle-price"
+                    <MobileFormField
+                      label="Prix du Pack"
+                      name="bundle-price"
                       type="number"
-                      min="0"
                       value={bundle.bundle_price || 0}
-                      onChange={(e) => handleUpdateBundlePrice(Number(e.target.value))}
-                      className="text-xl font-bold"
+                      onChange={(value) => handleUpdateBundlePrice(Number(value))}
+                      required
+                      fieldProps={{
+                        min: 0,
+                        className: "text-lg sm:text-xl font-bold",
+                      }}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="discount-percentage">Remise (%)</Label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Input
                         id="discount-percentage"
                         type="number"
@@ -520,8 +613,9 @@ export function ProductBundleBuilder({
                         step="5"
                         value={bundle.discount_percentage?.toFixed(0) || 0}
                         onChange={(e) => handleApplyDiscountPercentage(Number(e.target.value))}
+                        className="min-h-[44px] flex-1"
                       />
-                      <Badge variant="destructive" className="text-lg px-4 flex items-center gap-2">
+                      <Badge variant="destructive" className="text-base sm:text-lg px-3 sm:px-4 flex items-center gap-2 justify-center min-h-[44px]">
                         <TrendingDown className="h-4 w-4" />
                         -{bundle.discount_percentage?.toFixed(0)}%
                       </Badge>
@@ -613,25 +707,89 @@ export function ProductBundleBuilder({
       </Card>
 
       {/* Product Picker Dialog */}
-      <Dialog open={showProductPicker} onOpenChange={setShowProductPicker}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Ajouter des Produits au Pack</DialogTitle>
-            <DialogDescription>
-              Sélectionnez les produits à inclure dans le pack
-            </DialogDescription>
-          </DialogHeader>
+      {useBottomSheet ? (
+        <BottomSheet open={showProductPicker} onOpenChange={setShowProductPicker}>
+          <BottomSheetContent
+            title="Ajouter des Produits au Pack"
+            description="Sélectionnez les produits à inclure dans le pack"
+            className="max-h-[90vh] overflow-y-auto"
+          >
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher un produit..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 min-h-[44px] h-11"
+                  aria-label="Rechercher un produit à ajouter au pack"
+                />
+              </div>
 
-          <div className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher un produit..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+              {availableProducts.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Aucun produit disponible</p>
+                </div>
+              ) : (
+                <div className="max-h-[400px] overflow-y-auto space-y-2">
+                  {availableProducts.map((product) => (
+                    <Card
+                      key={product.id}
+                      className="cursor-pointer hover:border-primary active:scale-[0.98] transition-transform"
+                      onClick={() => {
+                        handleAddProduct(product);
+                        setShowProductPicker(false);
+                        setSearchQuery('');
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                          <div className="h-16 w-16 rounded bg-muted flex items-center justify-center flex-shrink-0">
+                            <Package className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{product.name}</p>
+                            {product.variant_label && (
+                              <p className="text-sm text-muted-foreground truncate">{product.variant_label}</p>
+                            )}
+                            {product.sku && (
+                              <p className="text-xs text-muted-foreground font-mono truncate">{product.sku}</p>
+                            )}
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <p className="text-lg font-bold">{product.price.toLocaleString()} XOF</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
+          </BottomSheetContent>
+        </BottomSheet>
+      ) : (
+        <Dialog open={showProductPicker} onOpenChange={setShowProductPicker}>
+          <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Ajouter des Produits au Pack</DialogTitle>
+              <DialogDescription>
+                Sélectionnez les produits à inclure dans le pack
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher un produit..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 min-h-[44px] h-11"
+                  aria-label="Rechercher un produit à ajouter au pack"
+                />
+              </div>
 
             {availableProducts.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
@@ -675,13 +833,14 @@ export function ProductBundleBuilder({
             )}
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowProductPicker(false)}>
-              Fermer
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowProductPicker(false)} className="w-full sm:w-auto">
+                  Fermer
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+      )}
     </div>
   );
 }

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { getPerformanceMonitor } from '@/lib/performance-monitor';
+import { logger } from '@/lib/logger';
 
 /**
  * Composant d'optimisation des performances mobile
@@ -8,23 +10,32 @@ export const MobilePerformanceOptimizer = () => {
   useEffect(() => {
     const optimizeForMobile = () => {
       const isMobile = window.innerWidth < 768;
-      
+
       if (isMobile) {
         // Réduire les animations sur mobile pour économiser la batterie
         document.documentElement.style.setProperty('--transition-smooth', 'all 0.2s ease');
-        
+
         // Optimiser les images pour mobile
+        // ⚠️ LCP: ne pas forcer `loading="lazy"` sur les images au-dessus de la ligne de flottaison.
+        // On vise uniquement les images hors écran / non critiques.
         const images = document.querySelectorAll('img');
         images.forEach(img => {
-          img.loading = 'lazy';
+          const rect = img.getBoundingClientRect();
+          const isAboveTheFold = rect.top >= 0 && rect.top < window.innerHeight;
+          const isExplicitEager = img.getAttribute('loading') === 'eager';
+          const isOptOut = img.hasAttribute('data-no-mobile-opt');
+
+          if (!isAboveTheFold && !isExplicitEager && !isOptOut) {
+            img.loading = 'lazy';
+          }
           img.decoding = 'async';
-          
+
           // Ajouter des attributs pour l'optimisation mobile
           if (!img.getAttribute('sizes')) {
             img.setAttribute('sizes', '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw');
           }
         });
-        
+
         // Suppression des préchargements non garantis (évite 404/CSP en production)
       }
     };
@@ -38,7 +49,7 @@ export const MobilePerformanceOptimizer = () => {
     };
 
     window.addEventListener('resize', handleResize);
-    
+
     return () => {
       window.removeEventListener('resize', handleResize);
     };
@@ -55,39 +66,28 @@ export const AccessibilityEnhancer = () => {
   useEffect(() => {
     // Ajouter des attributs ARIA manquants
     const enhanceAccessibility = () => {
-      // Boutons sans texte
-      const buttons = document.querySelectorAll('button');
-      buttons.forEach(button => {
+      // ⚠️ PERF: éviter de scanner tout le DOM et d'ajouter des listeners à chaque élément.
+      // On applique uniquement des fallbacks légers d'attributs quand ils sont manquants.
+
+      // Boutons sans texte (souvent des boutons icône)
+      document.querySelectorAll('button').forEach(button => {
         if (!button.getAttribute('aria-label') && !button.textContent?.trim()) {
           button.setAttribute('aria-label', 'Bouton');
         }
       });
 
-      // Images sans alt
-      const images = document.querySelectorAll('img');
-      images.forEach(img => {
+      // Images sans alt (fallback minimal)
+      document.querySelectorAll('img').forEach(img => {
         if (!img.getAttribute('alt')) {
           img.setAttribute('alt', 'Image');
         }
       });
 
-      // Liens sans texte
-      const links = document.querySelectorAll('a');
-      links.forEach(link => {
+      // Liens sans texte (fallback minimal)
+      document.querySelectorAll('a').forEach(link => {
         if (!link.getAttribute('aria-label') && !link.textContent?.trim()) {
           link.setAttribute('aria-label', 'Lien');
         }
-      });
-
-      // Améliorer la navigation au clavier
-      const focusableElements = document.querySelectorAll('button, input, select, textarea, a[href]');
-      focusableElements.forEach(element => {
-        element.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            element.click();
-          }
-        });
       });
     };
 
@@ -95,16 +95,29 @@ export const AccessibilityEnhancer = () => {
     enhanceAccessibility();
 
     // Observer les changements DOM pour appliquer aux nouveaux éléments
-    const observer = new MutationObserver(() => {
-      enhanceAccessibility();
+    let rafId: number | null = null;
+    const observer = new MutationObserver(mutations => {
+      // Filtrer: ne réagir que si des noeuds sont ajoutés.
+      const hasAddedNodes = mutations.some(m => m.addedNodes && m.addedNodes.length > 0);
+      if (!hasAddedNodes) return;
+
+      // Debounce via rAF pour éviter d'exécuter N fois par frame.
+      if (rafId != null) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        enhanceAccessibility();
+      });
     });
 
     observer.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
     });
 
     return () => {
+      if (rafId != null) {
+        window.cancelAnimationFrame(rafId);
+      }
       observer.disconnect();
     };
   }, []);
@@ -119,7 +132,7 @@ export const useUserPreferences = () => {
   const [preferences, setPreferences] = useState({
     reducedMotion: false,
     darkMode: false,
-    highContrast: false
+    highContrast: false,
   });
 
   useEffect(() => {
@@ -127,14 +140,14 @@ export const useUserPreferences = () => {
     const mediaQueries = {
       reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)'),
       darkMode: window.matchMedia('(prefers-color-scheme: dark)'),
-      highContrast: window.matchMedia('(prefers-contrast: high)')
+      highContrast: window.matchMedia('(prefers-contrast: high)'),
     };
 
     const updatePreferences = () => {
       setPreferences({
         reducedMotion: mediaQueries.reducedMotion.matches,
         darkMode: mediaQueries.darkMode.matches,
-        highContrast: mediaQueries.highContrast.matches
+        highContrast: mediaQueries.highContrast.matches,
       });
     };
 
@@ -163,6 +176,16 @@ export const PerformanceOptimizer = () => {
   const preferences = useUserPreferences();
 
   useEffect(() => {
+    // Initialiser le monitoring des performances
+    const monitor = getPerformanceMonitor();
+
+    // Logger le rapport de performance après 5 secondes
+    setTimeout(() => {
+      const report = monitor.getReport();
+      if (import.meta.env.DEV) {
+        logger.info('📊 Performance Report', { report });
+      }
+    }, 5000);
     // Appliquer les préférences utilisateur
     if (preferences.reducedMotion) {
       document.documentElement.classList.add('reduce-motion');
@@ -180,7 +203,7 @@ export const PerformanceOptimizer = () => {
     const optimizePerformance = () => {
       // Lazy loading pour les images
       const images = document.querySelectorAll('img[data-src]');
-      const imageObserver = new IntersectionObserver((entries) => {
+      const imageObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             const img = entry.target as HTMLImageElement;

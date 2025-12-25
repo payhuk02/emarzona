@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK DIGITAL PRODUCT DRIP CONTENT SYSTEM
+-- EMARZONA DIGITAL PRODUCT DRIP CONTENT SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système de libération progressive du contenu (drip content)
 -- =====================================================

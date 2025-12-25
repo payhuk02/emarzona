@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK COURSES DRIP CONTENT LOGIC
+-- EMARZONA COURSES DRIP CONTENT LOGIC
 -- Date: 27 Janvier 2025
 -- Description: Logique de déverrouillage automatique pour drip content
 -- Version: 1.0

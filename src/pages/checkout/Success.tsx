@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { CheckCircle, ArrowRight, Loader2, Shield } from "lucide-react";
-import { verifyTransactionStatus } from "@/lib/moneroo-payment";
+import { loadMonerooPayment } from "@/lib/moneroo-lazy";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
+import { SEOMeta } from "@/components/seo/SEOMeta";
 
 const CheckoutSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -24,6 +26,8 @@ const CheckoutSuccess = () => {
       }
 
       try {
+        // Charger le module Moneroo de manière asynchrone
+        const { verifyTransactionStatus } = await loadMonerooPayment();
         const result = await verifyTransactionStatus(transactionId);
         setTransaction(result);
 
@@ -40,9 +44,10 @@ const CheckoutSuccess = () => {
             .single();
           if (prod) setProduct(prod);
         }
-      } catch (err: any) {
-        console.error("Verification error:", err);
-        setError(err.message || "Erreur lors de la vérification du paiement");
+      } catch (err: unknown) {
+        logger.error("Verification error", { error: err });
+        const errorObj = err instanceof Error ? err : new Error(String(err));
+        setError(errorObj.message || "Erreur lors de la vérification du paiement");
       } finally {
         setLoading(false);
       }

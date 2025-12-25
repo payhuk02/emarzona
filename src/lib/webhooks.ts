@@ -6,6 +6,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from './logger';
 import type { WebhookEventType } from '@/types/webhooks';
 
 /**
@@ -32,7 +33,7 @@ export async function triggerWebhook(
     });
 
     if (error) {
-      console.error(`[Webhook] Erreur lors du déclenchement de ${eventType}:`, error);
+      logger.error('Webhook trigger error', { error, eventType, eventId, storeId });
       // Ne pas throw pour éviter de bloquer le flux principal
       return;
     }
@@ -40,14 +41,14 @@ export async function triggerWebhook(
     if (data && data.length > 0) {
       // Les deliveries ont été créées avec succès
       // L'Edge Function se chargera de les envoyer de manière asynchrone
-      console.log(`[Webhook] ${data.length} webhook(s) déclenché(s) pour ${eventType}`);
+      logger.info('Webhooks triggered', { count: data.length, eventType, eventId });
       
       // Optionnel: Appeler l'Edge Function immédiatement pour traitement synchrone
       // Note: Ceci peut être fait via un trigger PostgreSQL ou un cron job
       // Pour l'instant, on laisse l'Edge Function être appelée par un cron ou manuellement
     }
   } catch (error: any) {
-    console.error(`[Webhook] Exception lors du déclenchement de ${eventType}:`, error);
+    logger.error('Webhook trigger exception', { error, eventType, eventId, storeId });
     // Ne pas throw pour éviter de bloquer le flux principal
   }
 }

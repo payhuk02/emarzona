@@ -6,6 +6,7 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +30,8 @@ import {
   Warehouse,
   TrendingUp,
   Sparkles,
+  Camera,
+  FileSpreadsheet,
 } from 'lucide-react';
 import {
   useInventoryItems,
@@ -44,9 +47,21 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
+import { BarcodeScanner } from '@/components/physical/barcode/BarcodeScanner';
+import { BarcodeScanResult } from '@/hooks/physical/useBarcodeScanner';
+import { InventoryCSVManager } from '@/components/physical/inventory/InventoryCSVManager';
+import { useExportInventoryCSV } from '@/hooks/physical/useInventoryCSV';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function InventoryDashboard() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { store, loading: storeLoading } = useStore();
   const { toast } = useToast();
   
@@ -57,6 +72,8 @@ export default function InventoryDashboard() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+  const { exportToCSV: exportInventoryCSV } = useExportInventoryCSV();
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -123,73 +140,14 @@ export default function InventoryDashboard() {
 
     setIsExporting(true);
     try {
-      const headers = [
-        'SKU',
-        'Produit',
-        'Quantité Disponible',
-        'Quantité Réservée',
-        'Point de Réapprovisionnement',
-        'Valeur Totale',
-        'Emplacement',
-        'Statut',
-      ];
-
-      const rows = filteredItems.map((item: any) => {
-        const productName =
-          item.physical_product?.product?.name ||
-          item.variant?.physical_product?.product?.name ||
-          'N/A';
-
-        let status = 'Disponible';
-        if (item.quantity_available === 0) {
-          status = 'Rupture';
-        } else if (item.quantity_available <= item.reorder_point) {
-          status = 'Stock Faible';
-        }
-
-        return [
-          item.sku,
-          productName,
-          item.quantity_available,
-          item.quantity_reserved,
-          item.reorder_point,
-          item.total_value || 0,
-          item.warehouse_location || 'N/A',
-          status,
-        ];
-      });
-
-      const csvContent = [
-        headers.join(','),
-        ...rows.map((row) => row.map((cell) => `"${cell}"`).join(','))
-      ].join('\n');
-
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `inventaire-${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      toast({
-        title: '✅ Export réussi',
-        description: `${filteredItems.length} article(s) exporté(s) en CSV.`,
-      });
+      await exportInventoryCSV(filteredItems);
       logger.info('Inventory exported to CSV', { count: filteredItems.length });
     } catch (error: any) {
       logger.error('Error exporting inventory', { error: error.message });
-      toast({
-        title: '❌ Erreur',
-        description: 'Impossible d\'exporter l\'inventaire.',
-        variant: 'destructive',
-      });
     } finally {
       setIsExporting(false);
     }
-  }, [filteredItems, toast]);
+  }, [filteredItems, exportInventoryCSV, toast, logger]);
 
   // Handle refresh
   const handleRefresh = useCallback(() => {
@@ -255,14 +213,14 @@ export default function InventoryDashboard() {
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <main className="flex-1 p-4 md:p-6">
-            <Card className="animate-in fade-in slide-in-from-top-4">
-              <CardContent className="p-12 text-center">
-                <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h2 className="text-2xl font-bold mb-2">Aucune boutique trouvée</h2>
-                <p className="text-muted-foreground mb-6">
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-top-4">
+              <CardContent className="p-6 sm:p-8 md:p-12 text-center">
+                <Package className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+                <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold mb-1.5 sm:mb-2">Aucune boutique trouvée</h2>
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mb-4 sm:mb-6">
                   Vous devez créer une boutique avant de gérer l'inventaire.
                 </p>
-                <Button onClick={() => (window.location.href = '/store')}>
+                <Button onClick={() => navigate('/store')} className="min-h-[44px] text-xs sm:text-sm">
                   Créer ma boutique
                 </Button>
               </CardContent>
@@ -282,15 +240,15 @@ export default function InventoryDashboard() {
           {/* Header avec animation - Style MyTemplates */}
           <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                  <Package className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+              <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                  <Package className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
                 </div>
                 <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   Gestion d'Inventaire
                 </span>
               </h1>
-              <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                 Suivez et gérez vos stocks en temps réel
               </p>
             </div>
@@ -300,23 +258,23 @@ export default function InventoryDashboard() {
                 variant="outline"
                 size="sm"
                 disabled={isExporting || filteredItems.length === 0}
-                className="h-9 sm:h-10 transition-all hover:scale-105"
+                className="min-h-[44px] h-9 sm:h-10 text-xs sm:text-sm transition-all hover:scale-105"
               >
                 {isExporting ? (
                   <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
                 ) : (
                   <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                 )}
-                <span className="hidden sm:inline text-xs sm:text-sm">Export CSV</span>
-                <span className="sm:hidden text-xs">Export</span>
+                <span className="hidden sm:inline">Export CSV</span>
+                <span className="sm:hidden">Export</span>
               </Button>
               <Button
                 onClick={handleRefresh}
                 size="sm"
-                className="h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="min-h-[44px] h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
               >
                 <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                <span className="hidden sm:inline text-xs sm:text-sm">Rafraîchir</span>
+                <span className="hidden sm:inline">Rafraîchir</span>
               </Button>
             </div>
           </div>
@@ -340,14 +298,14 @@ export default function InventoryDashboard() {
                   className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
-                    <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
-                      <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
+                    <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                      <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5 lg:h-4 lg:w-4" />
                       {stat.label}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-3 sm:p-4 pt-0">
-                    <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                    <div className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent break-words`}>
                       {stat.value}
                     </div>
                   </CardContent>
@@ -381,20 +339,32 @@ export default function InventoryDashboard() {
                     placeholder="Rechercher par nom de produit ou SKU..."
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
-                    className="pl-8 sm:pl-10 pr-8 sm:pr-20 h-9 sm:h-10 text-xs sm:text-sm"
+                    className="pl-8 sm:pl-10 pr-8 sm:pr-20 min-h-[44px] h-9 sm:h-10 text-xs sm:text-sm"
                     aria-label="Rechercher"
                   />
-                  {searchInput && (
+                  <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    {searchInput && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="min-h-[44px] min-w-[44px] h-7 w-7 sm:h-8 sm:w-8"
+                        onClick={() => setSearchInput('')}
+                        aria-label="Effacer"
+                      >
+                        <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 sm:h-8 sm:w-8"
-                      onClick={() => setSearchInput('')}
-                      aria-label="Effacer"
+                      className="min-h-[44px] min-w-[44px] h-7 w-7 sm:h-8 sm:w-8"
+                      onClick={() => setShowBarcodeScanner(true)}
+                      aria-label="Scanner code-barres"
+                      title="Scanner un code-barres"
                     >
-                      <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <Camera className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
-                  )}
+                  </div>
                   {/* Keyboard shortcut indicator */}
                   <div className="absolute right-2.5 sm:right-10 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:flex items-center">
                     <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0">
@@ -408,30 +378,42 @@ export default function InventoryDashboard() {
 
             {/* Tabs - Style MyTemplates */}
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1 w-full sm:w-auto">
+              <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1 w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 sm:gap-2 sm:inline-flex sm:w-auto">
+                <TabsTrigger value="csv" className="text-[10px] xs:text-xs sm:text-sm min-h-[44px] py-2 sm:py-1.5 md:py-2">
+                  <FileSpreadsheet className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+                  <span className="hidden sm:inline">CSV</span>
+                  <span className="sm:hidden">CSV</span>
+                </TabsTrigger>
                 <TabsTrigger 
                   value="all" 
-                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  className="flex-1 sm:flex-none gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                 >
-                  Tous ({stats.total_items})
+                  <span className="hidden sm:inline">Tous</span>
+                  <span className="sm:hidden">Tous</span>
+                  <span className="opacity-80">({stats.total_items})</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="ok" 
-                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  className="flex-1 sm:flex-none gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                 >
-                  Stock OK
+                  <span className="hidden sm:inline">Stock OK</span>
+                  <span className="sm:hidden">OK</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="low" 
-                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  className="flex-1 sm:flex-none gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                 >
-                  Stock Faible ({stats.low_stock_count})
+                  <span className="hidden sm:inline">Stock Faible</span>
+                  <span className="sm:hidden">Faible</span>
+                  <span className="opacity-80">({stats.low_stock_count})</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="out" 
-                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  className="flex-1 sm:flex-none gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
                 >
-                  Rupture ({stats.out_of_stock_count})
+                  <span className="hidden sm:inline">Rupture</span>
+                  <span className="sm:hidden">Rupture</span>
+                  <span className="opacity-80">({stats.out_of_stock_count})</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -450,21 +432,26 @@ export default function InventoryDashboard() {
 
                 {/* Analytics Chart */}
                 {filteredItems && filteredItems.length > 0 && (
-                  <Card className="mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-400">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <TrendingUp className="h-5 w-5" />
+                  <Card className="mt-4 sm:mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-400 border-border/50 bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
+                      <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg flex items-center gap-1.5 sm:gap-2">
+                        <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
                         Analyse des Stocks
                       </CardTitle>
-                      <CardDescription>
+                      <CardDescription className="text-[10px] sm:text-xs md:text-sm">
                         Visualisation de la répartition des quantités
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
                       <InventoryChart items={filteredItems} />
                     </CardContent>
                   </Card>
                 )}
+              </TabsContent>
+
+              {/* Tab Import/Export CSV */}
+              <TabsContent value="csv" className="space-y-4">
+                <InventoryCSVManager />
               </TabsContent>
             </Tabs>
         </div>
@@ -477,6 +464,30 @@ export default function InventoryDashboard() {
         />
       </main>
     </div>
+
+    {/* Dialog Scanner Code-barres */}
+    <Dialog open={showBarcodeScanner} onOpenChange={setShowBarcodeScanner}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Scanner de Code-barres</DialogTitle>
+          <DialogDescription>
+            Scannez un code-barres pour rechercher un produit dans l'inventaire
+          </DialogDescription>
+        </DialogHeader>
+        <BarcodeScanner
+          onScanSuccess={(result: BarcodeScanResult) => {
+            setSearchInput(result.code);
+            setShowBarcodeScanner(false);
+            toast({
+              title: 'Code-barres scanné',
+              description: `Recherche de: ${result.code}`,
+            });
+          }}
+          onClose={() => setShowBarcodeScanner(false)}
+          autoStop={true}
+        />
+      </DialogContent>
+    </Dialog>
   </SidebarProvider>
   );
 }

@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -43,7 +43,11 @@ export const NotificationBell = () => {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-96 p-0">
+      <DropdownMenuContent 
+        align="end" 
+        className="w-[calc(100vw-2rem)] sm:w-96 max-w-[calc(100vw-2rem)] sm:max-w-sm p-0"
+        mobileOptimized
+      >
         <NotificationDropdown onClose={() => setOpen(false)} />
       </DropdownMenuContent>
     </DropdownMenu>

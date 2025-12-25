@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, X, MapPin, Video, Home, Navigation } from 'lucide-react';
 import type { ServiceProductFormData, ServiceAvailabilitySlot } from '@/types/service-product';
 
@@ -43,7 +42,10 @@ const COMMON_DURATIONS = [
   { value: 180, label: '3 heures' },
 ];
 
-export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurationAvailabilityFormProps) => {
+export const ServiceDurationAvailabilityForm = ({
+  data,
+  onUpdate,
+}: ServiceDurationAvailabilityFormProps) => {
   const handleAddSlot = () => {
     const newSlot: ServiceAvailabilitySlot = {
       day: 1, // Lundi par défaut
@@ -62,7 +64,11 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
     onUpdate({ availability_slots: newSlots });
   };
 
-  const handleUpdateSlot = (index: number, field: keyof ServiceAvailabilitySlot, value: any) => {
+  const handleUpdateSlot = (
+    index: number,
+    field: keyof ServiceAvailabilitySlot,
+    value: string | number
+  ) => {
     const newSlots = [...(data.availability_slots || [])];
     newSlots[index] = { ...newSlots[index], [field]: value };
     onUpdate({ availability_slots: newSlots });
@@ -94,7 +100,7 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
         <CardContent className="space-y-4">
           {/* Quick Duration */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {COMMON_DURATIONS.map((duration) => (
+            {COMMON_DURATIONS.map(duration => (
               <Button
                 key={duration.value}
                 variant={data.duration_minutes === duration.value ? 'default' : 'outline'}
@@ -115,7 +121,7 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
               min="1"
               step="1"
               value={data.duration_minutes || ''}
-              onChange={(e) => onUpdate({ duration_minutes: parseInt(e.target.value) || 60 })}
+              onChange={e => onUpdate({ duration_minutes: parseInt(e.target.value) || 60 })}
             />
           </div>
         </CardContent>
@@ -133,12 +139,16 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
         <CardContent className="space-y-4">
           <Select
             value={data.location_type}
-            onValueChange={(value) => onUpdate({ location_type: value as any })}
+            onValueChange={value =>
+              onUpdate({
+                location_type: value as 'on_site' | 'online' | 'customer_location' | 'flexible',
+              })
+            }
           >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent mobileVariant="sheet">
               <SelectItem value="on_site">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
@@ -174,7 +184,7 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
                 id="location_address"
                 placeholder="123 rue de la République, Paris"
                 value={data.location_address || ''}
-                onChange={(e) => onUpdate({ location_address: e.target.value })}
+                onChange={e => onUpdate({ location_address: e.target.value })}
               />
             </div>
           )}
@@ -188,7 +198,7 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
                 type="url"
                 placeholder="https://meet.google.com/xxx ou https://zoom.us/j/xxx"
                 value={data.meeting_url || ''}
-                onChange={(e) => onUpdate({ meeting_url: e.target.value })}
+                onChange={e => onUpdate({ meeting_url: e.target.value })}
               />
               <p className="text-xs text-muted-foreground">
                 Lien envoyé automatiquement au client après réservation
@@ -208,17 +218,20 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
           {data.availability_slots && data.availability_slots.length > 0 ? (
             <div className="space-y-3">
               {data.availability_slots.map((slot, index) => (
-                <div key={index} className="flex items-center gap-3 p-4 bg-muted rounded-lg">
+                <div
+                  key={index}
+                  className="grid grid-cols-1 sm:flex sm:items-center gap-3 p-4 bg-muted rounded-lg"
+                >
                   {/* Day */}
                   <Select
                     value={slot.day.toString()}
-                    onValueChange={(value) => handleUpdateSlot(index, 'day', parseInt(value))}
+                    onValueChange={value => handleUpdateSlot(index, 'day', parseInt(value))}
                   >
-                    <SelectTrigger className="w-[140px]">
+                    <SelectTrigger className="w-full sm:w-[140px]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      {DAYS_OF_WEEK.map((day) => (
+                    <SelectContent mobileVariant="sheet">
+                      {DAYS_OF_WEEK.map(day => (
                         <SelectItem key={day.value} value={day.value.toString()}>
                           {day.label}
                         </SelectItem>
@@ -230,18 +243,18 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
                   <Input
                     type="time"
                     value={slot.start_time}
-                    onChange={(e) => handleUpdateSlot(index, 'start_time', e.target.value)}
-                    className="w-[120px]"
+                    onChange={e => handleUpdateSlot(index, 'start_time', e.target.value)}
+                    className="w-full sm:w-[120px]"
                   />
 
-                  <span className="text-muted-foreground">→</span>
+                  <span className="text-muted-foreground hidden sm:inline">→</span>
 
                   {/* End Time */}
                   <Input
                     type="time"
                     value={slot.end_time}
-                    onChange={(e) => handleUpdateSlot(index, 'end_time', e.target.value)}
-                    className="w-[120px]"
+                    onChange={e => handleUpdateSlot(index, 'end_time', e.target.value)}
+                    className="w-full sm:w-[120px]"
                   />
 
                   {/* Remove */}
@@ -249,6 +262,7 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
                     variant="ghost"
                     size="sm"
                     onClick={() => handleRemoveSlot(index)}
+                    className="justify-self-end"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -256,9 +270,7 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              Aucun créneau ajouté
-            </p>
+            <p className="text-sm text-muted-foreground text-center py-4">Aucun créneau ajouté</p>
           )}
 
           <Button onClick={handleAddSlot} variant="outline" className="w-full">
@@ -274,7 +286,7 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
         <Input
           id="timezone"
           value={data.timezone || ''}
-          onChange={(e) => onUpdate({ timezone: e.target.value })}
+          onChange={e => onUpdate({ timezone: e.target.value })}
           disabled
         />
         <p className="text-xs text-muted-foreground">
@@ -284,4 +296,3 @@ export const ServiceDurationAvailabilityForm = ({ data, onUpdate }: ServiceDurat
     </div>
   );
 };
-

@@ -3,20 +3,11 @@
  * Date : 27 octobre 2025
  */
 
-export type NotificationType =
-  | 'course_enrollment'
-  | 'lesson_complete'
-  | 'course_complete'
-  | 'certificate_ready'
-  | 'new_course'
-  | 'course_update'
-  | 'quiz_passed'
-  | 'quiz_failed'
-  | 'affiliate_sale'
-  | 'affiliate_commission'
-  | 'comment_reply'
-  | 'instructor_message'
-  | 'system';
+import type { RecordString } from './common';
+import type { NotificationType as UnifiedNotificationType } from '@/lib/notifications/unified-notifications';
+
+// Réexporter le type complet depuis unified-notifications
+export type NotificationType = UnifiedNotificationType;
 
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
 
@@ -28,7 +19,7 @@ export interface Notification {
   type: NotificationType;
   title: string;
   message: string;
-  metadata?: Record<string, any>;
+  metadata?: RecordString;
   action_url?: string;
   action_label?: string;
   is_read: boolean;
@@ -41,37 +32,42 @@ export interface Notification {
 export interface NotificationPreferences {
   id: string;
   user_id: string;
-  
-  // Email preferences
-  email_course_enrollment: boolean;
-  email_lesson_complete: boolean;
-  email_course_complete: boolean;
-  email_certificate_ready: boolean;
-  email_new_course: boolean;
-  email_course_update: boolean;
-  email_quiz_result: boolean;
-  email_affiliate_sale: boolean;
-  email_comment_reply: boolean;
-  email_instructor_message: boolean;
-  
-  // In-app preferences
-  app_course_enrollment: boolean;
-  app_lesson_complete: boolean;
-  app_course_complete: boolean;
-  app_certificate_ready: boolean;
-  app_new_course: boolean;
-  app_course_update: boolean;
-  app_quiz_result: boolean;
-  app_affiliate_sale: boolean;
-  app_comment_reply: boolean;
-  app_instructor_message: boolean;
-  
+
+  // Email preferences (nullable from database)
+  email_course_enrollment: boolean | null;
+  email_lesson_complete: boolean | null;
+  email_course_complete: boolean | null;
+  email_certificate_ready: boolean | null;
+  email_new_course: boolean | null;
+  email_course_update: boolean | null;
+  email_quiz_result: boolean | null;
+  email_affiliate_sale: boolean | null;
+  email_comment_reply: boolean | null;
+  email_instructor_message: boolean | null;
+
+  // In-app preferences (nullable from database)
+  app_course_enrollment: boolean | null;
+  app_lesson_complete: boolean | null;
+  app_course_complete: boolean | null;
+  app_certificate_ready: boolean | null;
+  app_new_course: boolean | null;
+  app_course_update: boolean | null;
+  app_quiz_result: boolean | null;
+  app_affiliate_sale: boolean | null;
+  app_comment_reply: boolean | null;
+  app_instructor_message: boolean | null;
+
+  // Global preferences (nullable from database)
+  email_notifications?: boolean | null;
+  push_notifications?: boolean | null;
+  sms_notifications?: boolean | null;
+
   // Digest
-  email_digest_frequency: EmailDigestFrequency;
-  
+  email_digest_frequency: EmailDigestFrequency | null;
+
   // Pause
-  pause_until?: string;
-  
+  pause_until?: string | null;
+
   created_at: string;
   updated_at: string;
 }
@@ -81,9 +77,8 @@ export interface CreateNotificationData {
   type: NotificationType;
   title: string;
   message: string;
-  metadata?: Record<string, any>;
+  metadata?: RecordString;
   action_url?: string;
   action_label?: string;
   priority?: NotificationPriority;
 }
-

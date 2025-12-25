@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // TYPES
@@ -336,11 +337,111 @@ export function useUpdateShipmentStatus() {
 
       return data;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: async (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['shipments'] });
       queryClient.invalidateQueries({ queryKey: ['shipment', variables.shipmentId] });
       queryClient.invalidateQueries({ queryKey: ['tracking-events', variables.shipmentId] });
       queryClient.invalidateQueries({ queryKey: ['shipping-stats'] });
+
+      // Déclencher la notification d'expédition
+      if (data.order_id) {
+        import('@/services/physical/notificationTriggers')
+          .then(({ triggerShipmentNotification }) => {
+            triggerShipmentNotification(
+              data.order_id,
+              variables.status as 'preparing' | 'shipped' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'exception' | 'returned',
+              data.tracking_number || undefined,
+              undefined, // carrierName - à récupérer depuis carrier_id si nécessaire
+              data.estimated_delivery ? new Date(data.estimated_delivery).toISOString().split('T')[0] : undefined
+            ).catch((error) => {
+              logger.error('Error triggering shipment notification', { error });
+            });
+          })
+          .catch((error) => {
+            logger.error('Error loading notification triggers', { error });
+          });
+      }
+
+      // Déclencher webhook pour expédition
+      if (data.order_id && data.store_id) {
+        const eventTypeMap: Record<string, string> = {
+          'label_created': 'shipment_created',
+          'picked_up': 'shipment_updated',
+          'in_transit': 'shipment_updated',
+          'out_for_delivery': 'shipment_updated',
+          'delivered': 'shipment_delivered',
+        };
+
+        const webhookEventType = eventTypeMap[variables.status] || 'shipment.updated';
+        if (webhookEventType) {
+          import('@/lib/webhooks/unified-webhook-service')
+            .then(({ triggerUnifiedWebhook }) => {
+              triggerUnifiedWebhook(
+                data.store_id,
+                webhookEventType,
+                {
+                  shipment_id: variables.shipmentId,
+                  order_id: data.order_id,
+                  status: variables.status,
+                  tracking_number: data.tracking_number,
+                  estimated_delivery: data.estimated_delivery,
+                },
+                variables.shipmentId
+              ).catch((error) => {
+                logger.error('Error triggering shipment webhook', { error });
+              });
+            })
+            .catch((error) => {
+              logger.error('Error loading unified webhook service', { error });
+            });
+        }
+      }
+
+      // Déclencher webhook pour expédition
+      if (data.order_id) {
+        // Récupérer le store_id depuis la commande
+        supabase
+          .from('orders')
+          .select('store_id')
+          .eq('id', data.order_id)
+          .single()
+          .then(({ data: order }) => {
+            if (order) {
+              import('@/lib/webhooks/unified-webhook-service')
+                .then(({ triggerUnifiedWebhook }) => {
+                  const eventTypeMap: Record<string, string> = {
+                    'shipped': 'shipment.created',
+                    'in_transit': 'shipment.updated',
+                    'delivered': 'shipment.delivered',
+                  };
+
+                  const eventType = eventTypeMap[variables.status] || 'shipment.updated';
+
+                  triggerUnifiedWebhook(
+                    order.store_id,
+                    eventType,
+                    {
+                      shipment_id: data.id,
+                      order_id: data.order_id,
+                      status: variables.status,
+                      tracking_number: data.tracking_number,
+                      carrier: data.carrier,
+                      estimated_delivery: data.estimated_delivery,
+                    },
+                    data.id
+                  ).catch((error) => {
+                    logger.error('Error triggering shipment webhook', { error });
+                  });
+                })
+                .catch((error) => {
+                  logger.error('Error loading webhook service', { error });
+                });
+            }
+          })
+          .catch((error) => {
+            logger.error('Error fetching order for webhook', { error });
+          });
+      }
     },
   });
 }

@@ -167,9 +167,11 @@ const EVENT_CONFIG: Record<
  * 
  * @example
  * ```tsx
+ * import { logger } from '@/lib/logger';
+ * 
  * <DownloadHistory 
  *   events={downloadEvents}
- *   onEventClick={(event) => console.log('Event:', event)}
+ *   onEventClick={(event) => logger.info('Download event clicked', { eventId: event.id })}
  *   showFilters={true}
  *   showSearch={true}
  *   variant="timeline"
@@ -239,15 +241,18 @@ export const DownloadHistory: React.FC<DownloadHistoryProps> = ({
     switch (periodFilter) {
       case 'today':
         return eventDate.toDateString() === now.toDateString();
-      case 'week':
+      case 'week': {
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         return eventDate >= weekAgo;
-      case 'month':
+      }
+      case 'month': {
         const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
         return eventDate >= monthAgo;
-      case 'year':
+      }
+      case 'year': {
         const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
         return eventDate >= yearAgo;
+      }
       default:
         return true;
     }

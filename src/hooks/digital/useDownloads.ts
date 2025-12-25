@@ -192,6 +192,46 @@ export const useTrackDownload = () => {
         .single();
 
       if (error) throw error;
+
+      // Déclencher webhook pour téléchargement (en arrière-plan) - Système unifié
+      if (result) {
+        // Récupérer le store_id depuis le produit digital
+        supabase
+          .from('digital_products')
+          .select('product:products(store_id)')
+          .eq('id', data.digitalProductId)
+          .single()
+          .then(({ data: productData }) => {
+            if (productData?.product?.store_id) {
+              import('@/lib/webhooks/unified-webhook-service')
+                .then(({ triggerUnifiedWebhook }) => {
+                  triggerUnifiedWebhook(
+                    productData.product.store_id,
+                    'digital_product.downloaded',
+                    {
+                      download_id: result.id,
+                      product_id: data.digitalProductId,
+                      customer_id: user.id,
+                      license_key: data.licenseKey,
+                      download_url: result.download_url || '',
+                      file_id: data.fileId,
+                      file_version: data.fileVersion,
+                    },
+                    result.id
+                  ).catch((error) => {
+                    logger.error('Error triggering download webhook', { error });
+                  });
+                })
+                .catch((error) => {
+                  logger.error('Error loading unified webhook service', { error });
+                });
+            }
+          })
+          .catch((error) => {
+            logger.error('Error fetching product for webhook', { error });
+          });
+      }
+
       return result;
     },
     onSuccess: (_, variables) => {
@@ -206,27 +246,70 @@ export const useTrackDownload = () => {
 };
 
 /**
- * Create secure download link
+ * Create secure download link with retry logic and enhanced error handling
  */
 export const useGenerateDownloadLink = () => {
   const { toast } = useToast();
+
+  // Retry function with exponential backoff
+  const retryWithBackoff = async <T>(
+    fn: () => Promise<T>,
+    maxRetries: number = 3,
+    baseDelay: number = 1000
+  ): Promise<T> => {
+    let lastError: Error | null = null;
+    
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error: any) {
+        lastError = error;
+        
+        // Ne pas réessayer pour les erreurs d'authentification ou d'autorisation
+        if (error.message?.includes('non autorisé') || 
+            error.message?.includes('Not authenticated') ||
+            error.message?.includes('Accès non autorisé')) {
+          throw error;
+        }
+        
+        // Calculer le délai avec backoff exponentiel
+        const delay = baseDelay * Math.pow(2, attempt);
+        
+        if (attempt < maxRetries - 1) {
+          logger.debug(`Retrying download link generation (attempt ${attempt + 1}/${maxRetries})`, {
+            delay,
+            error: error.message,
+          });
+          
+          // Attendre avant de réessayer
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+    
+    throw lastError || new Error('Max retries exceeded');
+  };
 
   return useMutation({
     mutationFn: async (params: {
       fileId: string;
       expiresIn?: number; // seconds, default 3600 (1h)
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      return await retryWithBackoff(async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
 
-      // Get file info
-      const { data: file, error: fileError } = await supabase
-        .from('digital_product_files')
-        .select('*, digital_product:digital_products (*)')
-        .eq('id', params.fileId)
-        .single();
+        // Get file info with retry
+        const { data: file, error: fileError } = await supabase
+          .from('digital_product_files')
+          .select('*, digital_product:digital_products (*)')
+          .eq('id', params.fileId)
+          .single();
 
-      if (fileError) throw fileError;
+        if (fileError) {
+          logger.error('Error fetching file info', { error: fileError, fileId: params.fileId });
+          throw new Error(`Erreur lors de la récupération du fichier: ${fileError.message}`);
+        }
 
       // ⚠️ CRITIQUE: Vérifier explicitement l'accès avec paiement confirmé
       // Vérification par email
@@ -316,15 +399,52 @@ export const useGenerateDownloadLink = () => {
         throw new Error('Le paiement n\'a pas été confirmé. Veuillez réessayer plus tard.');
       }
 
-      // Generate signed URL
-      const { data: signedUrl, error: signError } = await supabase.storage
-        .from('products')
-        .createSignedUrl(
-          file.file_url,
-          params.expiresIn || 3600
-        );
+      // Generate signed URL with retry
+      let signedUrl = null;
+      let signError = null;
+      let attempts = 0;
+      const maxSignRetries = 3;
 
-      if (signError) throw signError;
+      while (attempts < maxSignRetries && !signedUrl) {
+        const { data, error } = await supabase.storage
+          .from('products')
+          .createSignedUrl(
+            file.file_url,
+            params.expiresIn || 3600
+          );
+
+        if (error) {
+          signError = error;
+          attempts++;
+          
+          if (attempts < maxSignRetries) {
+            logger.debug(`Retrying signed URL generation (attempt ${attempts}/${maxSignRetries})`, {
+              error: error.message,
+            });
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+          }
+        } else {
+          signedUrl = data;
+        }
+      }
+
+      if (signError || !signedUrl) {
+        logger.error('Error generating signed URL after retries', {
+          error: signError,
+          fileId: params.fileId,
+          attempts,
+        });
+        throw new Error(
+          signError?.message || 
+          'Impossible de générer le lien de téléchargement. Veuillez réessayer.'
+        );
+      }
+
+      logger.info('Download link generated successfully', {
+        fileId: params.fileId,
+        fileName: file.name,
+        expiresIn: params.expiresIn || 3600,
+      });
 
       return {
         url: signedUrl.signedUrl,
@@ -332,16 +452,37 @@ export const useGenerateDownloadLink = () => {
         fileName: file.name,
         fileSize: file.file_size_mb,
       };
+    });
     },
     staleTime: 30 * 60 * 1000, // Cache 30 minutes
     cacheTime: 60 * 60 * 1000, // Garder en cache 1 heure
-    onError: (error: any) => {
-      logger.error('Error generating download link', { error, fileId: params.fileId });
-      toast({
-        title: 'Erreur',
-        description: error.message,
-        variant: 'destructive',
+    retry: 2, // Retry automatique de React Query
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    onError: (error: Error) => {
+      logger.error('Error generating download link', {
+        error: error.message,
+        stack: error.stack,
       });
+      
+      // Message d'erreur plus spécifique selon le type d'erreur
+      let errorMessage = error.message;
+      if (error.message.includes('non autorisé') || error.message.includes('Accès non autorisé')) {
+        errorMessage = 'Vous n\'avez pas accès à ce fichier. Veuillez d\'abord acheter ce produit.';
+      } else if (error.message.includes('network') || error.message.includes('fetch')) {
+        errorMessage = 'Erreur de connexion. Vérifiez votre connexion internet et réessayez.';
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Le téléchargement a pris trop de temps. Veuillez réessayer.';
+      }
+
+      toast({
+        title: 'Erreur de téléchargement',
+        description: errorMessage,
+        variant: 'destructive',
+        duration: 5000,
+      });
+    },
+    onSuccess: () => {
+      logger.debug('Download link generated successfully');
     },
   });
 };

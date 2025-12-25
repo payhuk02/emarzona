@@ -1,11 +1,13 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, Shield } from "lucide-react";
-import { useStore } from "@/hooks/use-store";
+import { useStore } from "@/hooks/useStore";
 
 const AdvancedOrderManagementSimple = () => {
+  const { t } = useTranslation();
   const { store, loading: storeLoading } = useStore();
 
   if (storeLoading) {
@@ -16,7 +18,7 @@ const AdvancedOrderManagementSimple = () => {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-              <p className="mt-2 text-muted-foreground">Chargement...</p>
+              <p className="mt-2 text-muted-foreground">{t('common.loading', 'Chargement...')}</p>
             </div>
           </div>
         </div>
@@ -37,11 +39,11 @@ const AdvancedOrderManagementSimple = () => {
                     <Package className="h-8 w-8 text-muted-foreground" />
                   </div>
                 </div>
-                <CardTitle>Créez votre boutique d'abord</CardTitle>
+                <CardTitle>{t('dashboard.createStorePrompt', 'Créez votre boutique d\'abord')}</CardTitle>
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-muted-foreground">
-                  Vous devez créer une boutique avant de pouvoir gérer les commandes avancées
+                  {t('dashboard.createStoreDescription', 'Vous devez créer une boutique avant de pouvoir gérer les commandes avancées')}
                 </p>
               </CardContent>
             </Card>

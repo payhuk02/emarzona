@@ -1,7 +1,7 @@
 -- ============================================================================
 -- MIGRATION: Digital Product License Management System
 -- Date: 2025-10-29
--- Author: Payhula Team
+-- Author: Emarzona Team
 -- Description: Système complet de gestion des licences pour produits digitaux
 --              Inspiré de Gumroad, Sellfy, et SendOwl
 -- ============================================================================

@@ -10,13 +10,12 @@ import {
   ShoppingCart, 
   Users, 
   DollarSign,
-  Calendar,
   Download,
   RefreshCw
-} from "lucide-react";
-import { useStore } from "@/hooks/useStore";
+} from '@/components/icons';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 interface StoreAnalyticsProps {
   storeId: string;
@@ -56,7 +55,7 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d" | "1y">("30d");
+  const [timeRange] = useState<"7d" | "30d" | "90d" | "1y">("30d");
   const { toast } = useToast();
 
   const fetchAnalytics = async () => {
@@ -66,8 +65,48 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
     setError(null);
     
     try {
+      // Calculer les périodes pour comparaison de croissance
+      const now = new Date();
+      const currentPeriodStart = new Date(now);
+      const currentPeriodEnd = now;
+      
+      // Période précédente (même durée)
+      let previousPeriodStart: Date;
+      let previousPeriodEnd: Date;
+      
+      if (timeRange === '7d') {
+        currentPeriodStart.setDate(now.getDate() - 7);
+        previousPeriodStart = new Date(currentPeriodStart);
+        previousPeriodStart.setDate(previousPeriodStart.getDate() - 7);
+        previousPeriodEnd = new Date(currentPeriodStart);
+      } else if (timeRange === '30d') {
+        currentPeriodStart.setDate(now.getDate() - 30);
+        previousPeriodStart = new Date(currentPeriodStart);
+        previousPeriodStart.setDate(previousPeriodStart.getDate() - 30);
+        previousPeriodEnd = new Date(currentPeriodStart);
+      } else if (timeRange === '90d') {
+        currentPeriodStart.setDate(now.getDate() - 90);
+        previousPeriodStart = new Date(currentPeriodStart);
+        previousPeriodStart.setDate(previousPeriodStart.getDate() - 90);
+        previousPeriodEnd = new Date(currentPeriodStart);
+      } else { // 1y
+        currentPeriodStart.setFullYear(now.getFullYear() - 1);
+        previousPeriodStart = new Date(currentPeriodStart);
+        previousPeriodStart.setFullYear(previousPeriodStart.getFullYear() - 1);
+        previousPeriodEnd = new Date(currentPeriodStart);
+      }
+
       // Utiliser Promise.allSettled pour éviter les erreurs de requêtes individuelles
-      const [productsResult, ordersResult, customersResult, recentOrdersResult] = await Promise.allSettled([
+      const [
+        productsResult, 
+        ordersResult, 
+        previousOrdersResult,
+        customersResult, 
+        previousCustomersResult,
+        recentOrdersResult,
+        viewsResult,
+        previousViewsResult
+      ] = await Promise.allSettled([
         supabase
           .from("products")
           .select("id, name, price, sales_count")
@@ -77,51 +116,136 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
         supabase
           .from("orders")
           .select("id, order_number, total_amount, status, created_at")
-          .eq("store_id", storeId),
+          .eq("store_id", storeId)
+          .gte("created_at", currentPeriodStart.toISOString())
+          .lte("created_at", currentPeriodEnd.toISOString()),
+        
+        supabase
+          .from("orders")
+          .select("id, order_number, total_amount, status, created_at")
+          .eq("store_id", storeId)
+          .gte("created_at", previousPeriodStart.toISOString())
+          .lt("created_at", previousPeriodEnd.toISOString()),
         
         supabase
           .from("customers")
           .select("*", { count: "exact", head: true })
-          .eq("store_id", storeId),
+          .eq("store_id", storeId)
+          .gte("created_at", currentPeriodStart.toISOString())
+          .lte("created_at", currentPeriodEnd.toISOString()),
+        
+        supabase
+          .from("customers")
+          .select("*", { count: "exact", head: true })
+          .eq("store_id", storeId)
+          .gte("created_at", previousPeriodStart.toISOString())
+          .lt("created_at", previousPeriodEnd.toISOString()),
         
         supabase
           .from("orders")
           .select("id, order_number, total_amount, status, created_at")
           .eq("store_id", storeId)
           .order("created_at", { ascending: false })
-          .limit(10)
+          .limit(10),
+        
+        // Compter les vues depuis store_analytics_events (si la table existe)
+        supabase
+          .from("store_analytics_events")
+          .select("*", { count: "exact", head: true })
+          .eq("store_id", storeId)
+          .eq("event_type", "store_view")
+          .gte("created_at", currentPeriodStart.toISOString())
+          .lte("created_at", currentPeriodEnd.toISOString()),
+        
+        supabase
+          .from("store_analytics_events")
+          .select("*", { count: "exact", head: true })
+          .eq("store_id", storeId)
+          .eq("event_type", "store_view")
+          .gte("created_at", previousPeriodStart.toISOString())
+          .lt("created_at", previousPeriodEnd.toISOString())
       ]);
 
       const products = productsResult.status === 'fulfilled' && productsResult.value.data ? productsResult.value.data : [];
       const orders = ordersResult.status === 'fulfilled' && ordersResult.value.data ? ordersResult.value.data : [];
+      const previousOrders = previousOrdersResult.status === 'fulfilled' && previousOrdersResult.value.data ? previousOrdersResult.value.data : [];
       const customersCount = customersResult.status === 'fulfilled' && customersResult.value.count !== null ? customersResult.value.count : 0;
+      const previousCustomersCount = previousCustomersResult.status === 'fulfilled' && previousCustomersResult.value.count !== null ? previousCustomersResult.value.count : 0;
       const recentOrders = recentOrdersResult.status === 'fulfilled' && recentOrdersResult.value.data ? recentOrdersResult.value.data : [];
+      
+      // Vues depuis store_analytics_events (0 si table n'existe pas ou pas de données)
+      const totalViews = viewsResult.status === 'fulfilled' && viewsResult.value.count !== null ? viewsResult.value.count : 0;
+      const previousViews = previousViewsResult.status === 'fulfilled' && previousViewsResult.value.count !== null ? previousViewsResult.value.count : 0;
 
-      // Calculer les statistiques
-      const totalViews = Math.floor(Math.random() * 10000) + 1000; // Simulation
+      // Calculer les statistiques réelles
       const totalOrders = orders.length;
       const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total_amount.toString()), 0);
       const totalCustomers = customersCount;
 
-      // Simuler la croissance (pour la démo)
-      const viewsGrowth = Math.floor(Math.random() * 50) + 10;
-      const ordersGrowth = Math.floor(Math.random() * 30) + 5;
-      const revenueGrowth = Math.floor(Math.random() * 40) + 8;
-      const customersGrowth = Math.floor(Math.random() * 25) + 3;
+      // Calculer la croissance depuis les données réelles
+      const calculateGrowth = (current: number, previous: number): number => {
+        if (previous === 0) return current > 0 ? 100 : 0;
+        return Math.round(((current - previous) / previous) * 100 * 100) / 100; // 2 décimales
+      };
 
-      // Top produits (simulation basée sur les données réelles)
-      const topProducts = products.map(product => ({
-        ...product,
-        sales_count: Math.floor(Math.random() * 100) + 1
-      })).sort((a, b) => b.sales_count - a.sales_count).slice(0, 5);
+      const viewsGrowth = calculateGrowth(totalViews, previousViews);
+      const ordersGrowth = calculateGrowth(totalOrders, previousOrders.length);
+      
+      const previousRevenue = previousOrders.reduce((sum, order) => sum + parseFloat(order.total_amount.toString()), 0);
+      const revenueGrowth = calculateGrowth(totalRevenue, previousRevenue);
+      const customersGrowth = calculateGrowth(totalCustomers, previousCustomersCount);
 
-      // Statistiques mensuelles (simulation)
-      const monthlyStats = Array.from({ length: 12 }, (_, i) => ({
-        month: new Date(2024, i).toLocaleDateString('fr-FR', { month: 'short' }),
-        views: Math.floor(Math.random() * 1000) + 100,
-        orders: Math.floor(Math.random() * 50) + 5,
-        revenue: Math.floor(Math.random() * 50000) + 5000
-      }));
+      // Top produits - utiliser le sales_count réel de la DB (ou 0 si null)
+      const topProducts = products
+        .map(product => ({
+          ...product,
+          sales_count: product.sales_count || 0
+        }))
+        .sort((a, b) => b.sales_count - a.sales_count)
+        .slice(0, 5);
+
+      // Récupérer toutes les commandes (sans filtre de période) pour statistiques mensuelles
+      const { data: allOrders } = await supabase
+        .from("orders")
+        .select("id, total_amount, created_at")
+        .eq("store_id", storeId)
+        .order("created_at", { ascending: true });
+
+      // Récupérer toutes les vues (si store_analytics_events disponible)
+      const { data: allViews } = await supabase
+        .from("store_analytics_events")
+        .select("created_at")
+        .eq("store_id", storeId)
+        .eq("event_type", "store_view")
+        .order("created_at", { ascending: true });
+
+      // Statistiques mensuelles depuis les données réelles (12 derniers mois)
+      const monthlyStats = Array.from({ length: 12 }, (_, i) => {
+        const monthDate = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
+        const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+        const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0, 23, 59, 59);
+        
+        // Filtrer les commandes de ce mois depuis toutes les commandes
+        const monthOrders = (allOrders || []).filter(order => {
+          const orderDate = new Date(order.created_at);
+          return orderDate >= monthStart && orderDate <= monthEnd;
+        });
+        
+        const monthRevenue = monthOrders.reduce((sum, order) => sum + parseFloat(order.total_amount.toString()), 0);
+        
+        // Filtrer les vues de ce mois depuis toutes les vues
+        const monthViews = (allViews || []).filter(view => {
+          const viewDate = new Date(view.created_at);
+          return viewDate >= monthStart && viewDate <= monthEnd;
+        }).length;
+        
+        return {
+          month: monthDate.toLocaleDateString('fr-FR', { month: 'short' }),
+          views: monthViews,
+          orders: monthOrders.length,
+          revenue: monthRevenue
+        };
+      });
 
       setAnalytics({
         totalViews,
@@ -137,9 +261,10 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
         monthlyStats
       });
 
-    } catch (err: any) {
-      console.error("Error fetching analytics:", err);
-      setError(err.message || "Impossible de charger les statistiques");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Impossible de charger les statistiques";
+      logger.error("Error fetching analytics", { error: err, storeId });
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -153,12 +278,43 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
     fetchAnalytics();
   };
 
-  const handleExport = () => {
-    // Simulation d'export
-    toast({
-      title: "Export en cours",
-      description: "Les données sont en cours d'exportation..."
-    });
+  const handleExport = async () => {
+    if (!analytics) return;
+    
+    try {
+      // Générer un CSV avec les données réelles
+      const csvContent = [
+        ['Mois', 'Vues', 'Commandes', 'Revenus (FCFA)'],
+        ...analytics.monthlyStats.map(stat => [
+          stat.month,
+          stat.views.toString(),
+          stat.orders.toString(),
+          stat.revenue.toString()
+        ])
+      ].map(row => row.join(',')).join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `analytics-boutique-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Export réussi",
+        description: "Les données ont été exportées avec succès."
+      });
+    } catch (error) {
+      logger.error("Error exporting analytics", { error });
+      toast({
+        title: "Erreur d'export",
+        description: "Impossible d'exporter les données.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (loading) {
@@ -269,10 +425,22 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
                       <ShoppingCart className="h-8 w-8 text-green-500" />
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                      <TrendingUp className="h-4 w-4 text-green-500" />
-                      <Badge variant="secondary" className="text-xs">
-                        +{analytics.ordersGrowth}%
-                      </Badge>
+                      {analytics.ordersGrowth !== 0 ? (
+                        <>
+                          {analytics.ordersGrowth > 0 ? (
+                            <TrendingUp className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <TrendingUp className="h-4 w-4 text-red-500 rotate-180" />
+                          )}
+                          <Badge variant="secondary" className={`text-xs ${analytics.ordersGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {analytics.ordersGrowth > 0 ? '+' : ''}{analytics.ordersGrowth.toFixed(1)}%
+                          </Badge>
+                        </>
+                      ) : (
+                        <Badge variant="secondary" className="text-xs">
+                          N/A
+                        </Badge>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -287,10 +455,22 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
                       <DollarSign className="h-8 w-8 text-yellow-500" />
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                      <TrendingUp className="h-4 w-4 text-green-500" />
-                      <Badge variant="secondary" className="text-xs">
-                        +{analytics.revenueGrowth}%
-                      </Badge>
+                      {analytics.revenueGrowth !== 0 ? (
+                        <>
+                          {analytics.revenueGrowth > 0 ? (
+                            <TrendingUp className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <TrendingUp className="h-4 w-4 text-red-500 rotate-180" />
+                          )}
+                          <Badge variant="secondary" className={`text-xs ${analytics.revenueGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {analytics.revenueGrowth > 0 ? '+' : ''}{analytics.revenueGrowth.toFixed(1)}%
+                          </Badge>
+                        </>
+                      ) : (
+                        <Badge variant="secondary" className="text-xs">
+                          N/A
+                        </Badge>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -305,10 +485,22 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
                       <Users className="h-8 w-8 text-purple-500" />
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                      <TrendingUp className="h-4 w-4 text-green-500" />
-                      <Badge variant="secondary" className="text-xs">
-                        +{analytics.customersGrowth}%
-                      </Badge>
+                      {analytics.customersGrowth !== 0 ? (
+                        <>
+                          {analytics.customersGrowth > 0 ? (
+                            <TrendingUp className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <TrendingUp className="h-4 w-4 text-red-500 rotate-180" />
+                          )}
+                          <Badge variant="secondary" className={`text-xs ${analytics.customersGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {analytics.customersGrowth > 0 ? '+' : ''}{analytics.customersGrowth.toFixed(1)}%
+                          </Badge>
+                        </>
+                      ) : (
+                        <Badge variant="secondary" className="text-xs">
+                          N/A
+                        </Badge>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

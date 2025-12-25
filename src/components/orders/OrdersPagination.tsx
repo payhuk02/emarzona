@@ -38,7 +38,7 @@ export const OrdersPagination = ({
             value={pageSize.toString()}
             onValueChange={(value) => onPageSizeChange(Number(value))}
           >
-            <SelectTrigger className="w-[70px] h-8">
+            <SelectTrigger className="w-[70px] min-h-[44px] h-11">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -55,20 +55,22 @@ export const OrdersPagination = ({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="min-h-[44px] min-w-[44px] h-11 w-11"
             onClick={() => onPageChange(0)}
             disabled={currentPage === 0}
+            aria-label="Première page"
           >
-            <ChevronsLeft className="h-4 w-4" />
+            <ChevronsLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="min-h-[44px] min-w-[44px] h-11 w-11"
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 0}
+            aria-label="Page précédente"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
 
           <div className="flex items-center gap-1 px-2">
@@ -80,20 +82,22 @@ export const OrdersPagination = ({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="min-h-[44px] min-w-[44px] h-11 w-11"
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage >= totalPages - 1}
+            aria-label="Page suivante"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="min-h-[44px] min-w-[44px] h-11 w-11"
             onClick={() => onPageChange(totalPages - 1)}
             disabled={currentPage >= totalPages - 1}
+            aria-label="Dernière page"
           >
-            <ChevronsRight className="h-4 w-4" />
+            <ChevronsRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface Profile {
   id: string;
@@ -46,7 +47,7 @@ export const useProfile = () => {
 
     try {
       setLoading(true);
-      console.log('🔄 Fetching profile for user:', user.id);
+      logger.info('Fetching profile for user', { userId: user.id });
       
       // Charger tous les champs du profil
       const { data, error } = await supabase
@@ -76,13 +77,13 @@ export const useProfile = () => {
         .limit(1);
 
       if (error) {
-        console.error('❌ Profile fetch error:', error);
+        logger.error('Profile fetch error', { error });
         throw error;
       }
 
       // Créer le profil s'il n'existe pas
       if (!data || data.length === 0) {
-        console.log('ℹ️  No profile found, creating new one...');
+        logger.info('No profile found, creating new one');
         const { data: newProfile, error: createError } = await supabase
           .from('profiles')
           .insert([
@@ -121,21 +122,22 @@ export const useProfile = () => {
           .limit(1);
 
         if (createError) {
-          console.error('❌ Profile creation error:', createError);
+          logger.error('Profile creation error', { error: createError });
           throw createError;
         }
         
-        console.log('✅ Profile created:', newProfile);
+        logger.info('Profile created', { profile: newProfile });
         setProfile(newProfile && newProfile.length > 0 ? newProfile[0] : null);
       } else {
-        console.log('✅ Profile found:', data);
+        logger.info('Profile found', { profile: data });
         setProfile(data[0]);
       }
-    } catch (error: any) {
-      console.error('❌ Error fetching profile:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error fetching profile', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de charger le profil',
+        description: errorMessage || 'Impossible de charger le profil',
         variant: 'destructive',
       });
       setProfile(null);
@@ -212,11 +214,12 @@ export const useProfile = () => {
       });
 
       return publicUrl;
-    } catch (error: any) {
-      console.error('Error uploading avatar:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error uploading avatar', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors du téléchargement',
+        description: errorMessage || 'Erreur lors du téléchargement',
         variant: 'destructive',
       });
       return null;
@@ -253,11 +256,12 @@ export const useProfile = () => {
         title: 'Succès',
         description: 'Photo de profil supprimée',
       });
-    } catch (error: any) {
-      console.error('Error removing avatar:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error removing avatar', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la suppression',
+        description: errorMessage || 'Erreur lors de la suppression',
         variant: 'destructive',
       });
     } finally {
@@ -284,11 +288,12 @@ export const useProfile = () => {
       });
 
       return true;
-    } catch (error: any) {
-      console.error('Error updating display name:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error updating display name', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la mise à jour',
+        description: errorMessage || 'Erreur lors de la mise à jour',
         variant: 'destructive',
       });
       return false;
@@ -308,7 +313,7 @@ export const useProfile = () => {
 
     try {
       // Mettre à jour tous les champs disponibles
-      const safeUpdates: any = {};
+      const safeUpdates: Record<string, unknown> = {};
       
       if (updates.first_name !== undefined) safeUpdates.first_name = updates.first_name;
       if (updates.last_name !== undefined) safeUpdates.last_name = updates.last_name;
@@ -333,11 +338,12 @@ export const useProfile = () => {
       });
 
       return true;
-    } catch (error: any) {
-      console.error('Error updating profile:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error updating profile', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la mise à jour',
+        description: errorMessage || 'Erreur lors de la mise à jour',
         variant: 'destructive',
       });
       return false;
@@ -354,8 +360,9 @@ export const useProfile = () => {
 
       if (error) throw error;
       return data;
-    } catch (error: any) {
-      console.error('Error getting profile stats:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error getting profile stats', { error });
       return null;
     }
   };
@@ -392,8 +399,9 @@ export const useProfile = () => {
 
       if (error) throw error;
       return data && data.length > 0 ? data[0] : null;
-    } catch (error: any) {
-      console.error('Error getting referral info:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error getting referral info', { error });
       return null;
     }
   };
@@ -411,8 +419,9 @@ export const useProfile = () => {
 
       if (error) throw error;
       return data || [];
-    } catch (error: any) {
-      console.error('Error getting referred profiles:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error getting referred profiles', { error });
       return [];
     }
   };

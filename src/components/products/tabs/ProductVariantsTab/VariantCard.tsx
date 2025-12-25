@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -37,7 +37,7 @@ interface VariantCardProps {
  * Carte pour afficher et éditer une variante de produit
  * Supporte le mode édition et l'affichage compact
  */
-export const VariantCard = ({
+const VariantCardComponent = ({
   variant,
   index,
   isEditing,
@@ -53,7 +53,7 @@ export const VariantCard = ({
       variant.is_active 
         ? "border-gray-700 bg-gray-800/50" 
         : "border-gray-700/50 bg-gray-800/30 opacity-70"
-    )}>
+    )} style={{ willChange: 'transform' }}>
       <CardContent className="p-4">
         <div className="flex items-start gap-4">
           <div className="flex items-center gap-2 touch-manipulation">
@@ -259,4 +259,25 @@ export const VariantCard = ({
     </Card>
   );
 };
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const VariantCard = React.memo(VariantCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.variant.id === nextProps.variant.id &&
+    prevProps.variant.name === nextProps.variant.name &&
+    prevProps.variant.sku === nextProps.variant.sku &&
+    prevProps.variant.price === nextProps.variant.price &&
+    prevProps.variant.stock === nextProps.variant.stock &&
+    prevProps.variant.is_active === nextProps.variant.is_active &&
+    prevProps.isEditing === nextProps.isEditing &&
+    prevProps.index === nextProps.index &&
+    prevProps.currencySymbol === nextProps.currencySymbol &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onToggleActive === nextProps.onToggleActive &&
+    prevProps.onUpdate === nextProps.onUpdate
+  );
+});
+
+VariantCard.displayName = 'VariantCard';
 

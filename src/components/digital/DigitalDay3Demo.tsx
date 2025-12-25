@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { DownloadHistory, DownloadEvent } from './DownloadHistory';
 import { BulkDigitalUpdate, BulkUpdateDigitalProduct } from './BulkDigitalUpdate';
+import { logger } from '@/lib/logger';
 
 /**
  * Données de démonstration - Événements de téléchargement
@@ -306,7 +307,7 @@ export const DigitalDay3Demo: React.FC = () => {
         <DownloadHistory
           events={mockEvents}
           onEventClick={(event) => {
-            console.log('Event clicked:', event);
+            logger.info('Event clicked', { eventId: event.id, eventType: event.type });
             alert(`Événement: ${event.type}\nProduit: ${event.productName}\nClient: ${event.customerName}`);
           }}
           showFilters={true}
@@ -328,7 +329,7 @@ export const DigitalDay3Demo: React.FC = () => {
         <BulkDigitalUpdate
           products={mockProducts}
           onSave={(productIds, changes) => {
-            console.log('Bulk update:', { productIds, changes });
+            logger.info('Bulk update', { productIds, changesCount: changes.length });
             alert(
               `Mise à jour groupée appliquée!\n\n` +
               `Produits: ${productIds.length}\n` +
@@ -336,7 +337,7 @@ export const DigitalDay3Demo: React.FC = () => {
               `Détails: ${JSON.stringify(changes, null, 2)}`
             );
           }}
-          onCancel={() => console.log('Bulk update cancelled')}
+          onCancel={() => logger.info('Bulk update cancelled')}
         />
       </div>
 

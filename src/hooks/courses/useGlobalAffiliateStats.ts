@@ -139,10 +139,23 @@ export const usePromotedCourses = () => {
       }
 
       // Grouper par produit
-      const productMap = new Map<string, any>();
+      type LinkWithProduct = typeof links[0] & { products?: { id: string; name: string; slug: string; price: number } };
+      const productMap = new Map<string, {
+        product_id: string;
+        product_name: string;
+        product_slug: string;
+        product_price: number;
+        commission_rate: number;
+        commission_type: 'percentage' | 'fixed';
+        total_links: number;
+        total_clicks: number;
+        total_conversions: number;
+        total_commission: number;
+        link_ids: string[];
+      }>();
 
-      for (const link of links) {
-        const product = (link as any).products;
+      for (const link of links as LinkWithProduct[]) {
+        const product = link.products;
         if (!product) continue;
 
         if (!productMap.has(product.id)) {

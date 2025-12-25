@@ -4,11 +4,13 @@
  * Note: CustomerMyGiftCards est un composant simple sans layout, donc on ajoute le layout ici
  */
 
+import { useTranslation } from 'react-i18next';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import CustomerMyGiftCards from './CustomerMyGiftCards';
 
 export default function CustomerMyGiftCardsPage() {
+  const { t } = useTranslation();
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50 dark:bg-gray-900">

@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAdjustStock } from '@/hooks/physical/useInventory';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Minus } from 'lucide-react';
+import { Plus, Minus } from '@/components/icons';
 
 interface StockAdjustmentDialogProps {
   open: boolean;

@@ -3,9 +3,27 @@
  */
 
 import React from 'react';
-import { AlertCircle, RefreshCw, Home, ArrowLeft } from 'lucide-react';
+import { RefreshCw, Home, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+
+// Icône d'alerte simple en SVG pour éviter les problèmes de lazy loading
+const AlertIcon = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
 
 interface ErrorFallbackProps {
   error: Error | null;
@@ -25,7 +43,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
         <Card className="max-w-lg w-full p-8 space-y-6">
           <div className="flex justify-center">
             <div className="w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
-              <AlertCircle className="w-10 h-10 text-red-600 dark:text-red-400" />
+              <AlertIcon className="w-10 h-10 text-red-600 dark:text-red-400" />
             </div>
           </div>
           
@@ -76,7 +94,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
         <Card className="max-w-md w-full p-6 space-y-4">
           <div className="flex justify-center">
             <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
-              <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
+              <AlertIcon className="w-8 h-8 text-red-600 dark:text-red-400" />
             </div>
           </div>
           
@@ -120,7 +138,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
       <Card className="p-6 m-4 border-red-200 dark:border-red-800">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center shrink-0">
-            <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+            <AlertIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
           </div>
           
           <div className="flex-1 space-y-2">
@@ -155,7 +173,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   return (
     <div className="p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg">
       <div className="flex items-center gap-3">
-        <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
+        <AlertIcon className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-900 dark:text-white">
             Erreur de chargement
@@ -171,6 +189,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
           variant="ghost"
           size="sm"
           className="shrink-0"
+          aria-label="Réessayer"
         >
           <RefreshCw className="w-4 h-4" />
         </Button>
@@ -229,7 +248,7 @@ export const NetworkErrorFallback: React.FC<{ retry?: () => void }> = ({ retry }
     <Card className="p-6 m-4 border-orange-200 dark:border-orange-800">
       <div className="flex items-start gap-4">
         <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-lg flex items-center justify-center shrink-0">
-          <AlertCircle className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+          <AlertIcon className="w-6 h-6 text-orange-600 dark:text-orange-400" />
         </div>
         
         <div className="flex-1 space-y-2">

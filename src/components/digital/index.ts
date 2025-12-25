@@ -40,6 +40,13 @@ export {
   type DigitalProductsListProps,
 } from './DigitalProductsList';
 
+// Liste virtualisée (optimisée pour grandes listes)
+export {
+  DigitalProductsListVirtualized,
+  type DigitalProductItem,
+  type DigitalProductsListVirtualizedProps,
+} from './DigitalProductsListVirtualized';
+
 // Gestion des bundles
 export {
   DigitalBundleManager,
@@ -116,8 +123,41 @@ export {
   DigitalDownloadButtonCompact,
 } from './DigitalDownloadButton';
 
+// File Preview
+export {
+  DigitalFilePreview,
+  DigitalFilePreviewCompact,
+} from './DigitalFilePreview';
+
+// Recommendations
+export {
+  DigitalProductRecommendations,
+  BoughtTogetherRecommendations,
+  YouMightLikeRecommendations,
+} from './DigitalProductRecommendations';
+
+// Dynamic Bundles
+export {
+  DynamicBundleSelector,
+  type DynamicBundleProduct,
+  type DynamicBundleConfig,
+  type DynamicBundleSelectorProps,
+} from './DynamicBundleSelector';
+
 // Analytics
 export { DigitalAnalyticsDashboard } from './DigitalAnalyticsDashboard';
+
+// Subscription Management
+export {
+  SubscriptionManagement,
+  type SubscriptionManagementProps,
+} from './SubscriptionManagement';
+
+// Combined Coupons
+export {
+  CombinedCouponInput,
+  type CombinedCouponInputProps,
+} from './CombinedCouponInput';
 
 // License Management
 export { LicenseTable } from './LicenseTable';

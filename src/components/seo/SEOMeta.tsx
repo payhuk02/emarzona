@@ -52,10 +52,10 @@ export const SEOMeta = ({
   title,
   description,
   keywords,
-  author = 'Payhula',
+  author = 'Emarzona',
   url,
   canonical,
-  image = 'https://payhula.vercel.app/og-default.jpg',
+  image = 'https://emarzona.vercel.app/og-default.jpg',
   imageAlt,
   imageWidth = '1200',
   imageHeight = '630',
@@ -71,8 +71,8 @@ export const SEOMeta = ({
   noindex = false,
   nofollow = false,
   twitterCard = 'summary_large_image',
-  twitterSite = '@payhuk',
-  twitterCreator = '@payhuk',
+  twitterSite = '@emarzona',
+  twitterCreator = '@emarzona',
 }: SEOMetaProps) => {
   
   // Conversion sécurisée en string
@@ -87,11 +87,11 @@ export const SEOMeta = ({
   };
   
   // Titre complet avec branding
-  const safeTitle = safeString(title, 'Payhula');
-  const fullTitle = safeTitle.includes('Payhula') ? safeTitle : `${safeTitle} | Payhula`;
-  
+  const safeTitle = safeString(title, 'Emarzona');
+  const fullTitle = safeTitle.includes('Emarzona') ? safeTitle : `${safeTitle} | Emarzona`;
+
   // Description tronquée si trop longue
-  const safeDescription = safeString(description, 'Marketplace Payhula');
+  const safeDescription = safeString(description, 'Emarzona - Plateforme de ecommerce et marketing');
   const truncatedDescription = safeDescription.length > 160 
     ? safeDescription.substring(0, 157) + '...' 
     : safeDescription;
@@ -111,7 +111,7 @@ export const SEOMeta = ({
       <title>{fullTitle}</title>
       <meta name="description" content={truncatedDescription} />
       {keywords ? <meta name="keywords" content={safeString(keywords)} /> : null}
-      <meta name="author" content={safeString(author, 'Payhula')} />
+      <meta name="author" content={safeString(author, 'Emarzona')} />
       <meta name="robots" content={robotsContent} />
       
       {/* Canonical URL */}
@@ -119,14 +119,14 @@ export const SEOMeta = ({
       
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={safeString(type, 'website')} />
-      <meta property="og:site_name" content="Payhula" />
+      <meta property="og:site_name" content="Emarzona" />
       <meta property="og:title" content={safeTitle} />
       <meta property="og:description" content={truncatedDescription} />
       <meta property="og:url" content={safeString(url, window.location.origin)} />
       <meta property="og:locale" content={safeString(locale, 'fr_FR')} />
       
       {/* Images OG */}
-      <meta property="og:image" content={safeString(image, 'https://payhula.vercel.app/og-default.jpg')} />
+      <meta property="og:image" content={safeString(image, 'https://emarzona.vercel.app/og-default.jpg')} />
       {imageAlt ? <meta property="og:image:alt" content={safeString(imageAlt)} /> : null}
       <meta property="og:image:width" content={safeString(imageWidth, '1200')} />
       <meta property="og:image:height" content={safeString(imageHeight, '630')} />
@@ -149,11 +149,11 @@ export const SEOMeta = ({
       
       {/* Twitter Card */}
       <meta name="twitter:card" content={safeString(twitterCard, 'summary_large_image')} />
-      <meta name="twitter:site" content={safeString(twitterSite, '@payhuk')} />
-      <meta name="twitter:creator" content={safeString(twitterCreator, '@payhuk')} />
+      <meta name="twitter:site" content={safeString(twitterSite, '@emarzona')} />
+      <meta name="twitter:creator" content={safeString(twitterCreator, '@emarzona')} />
       <meta name="twitter:title" content={safeTitle} />
       <meta name="twitter:description" content={truncatedDescription} />
-      <meta name="twitter:image" content={safeString(image, 'https://payhula.vercel.app/og-default.jpg')} />
+      <meta name="twitter:image" content={safeString(image, 'https://emarzona.vercel.app/og-default.jpg')} />
       {imageAlt ? <meta name="twitter:image:alt" content={safeString(imageAlt)} /> : null}
       
       {/* Additional Meta */}

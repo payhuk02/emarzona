@@ -113,9 +113,10 @@ serve(async (req) => {
       }
 
       // Générer le lien de retour au panier
+      const siteUrl = Deno.env.get('SITE_URL') || 'https://payhula.vercel.app';
       const returnUrl = cart.user_id
-        ? `${Deno.env.get('SITE_URL')}/cart`
-        : `${Deno.env.get('SITE_URL')}/cart?session=${cart.session_id}`;
+        ? `${siteUrl}/cart`
+        : `${siteUrl}/cart?session=${cart.session_id}`;
 
       emailBody += `\nRetourner au panier: ${returnUrl}\n\nÀ bientôt,\nL'équipe Payhula`;
 

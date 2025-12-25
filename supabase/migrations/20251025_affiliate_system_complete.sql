@@ -167,7 +167,7 @@ CREATE TABLE public.affiliate_links (
   
   -- Lien unique
   link_code TEXT NOT NULL UNIQUE,  -- Ex: "JOHN-REACT-2024" ou hash court
-  full_url TEXT NOT NULL,  -- URL complète : https://payhuk.com/products/formation-react?aff=JOHN-REACT-2024
+  full_url TEXT NOT NULL,  -- URL complète : https://emarzona.com/products/formation-react?aff=JOHN-REACT-2024
   
   -- Statistiques
   total_clicks INTEGER DEFAULT 0,

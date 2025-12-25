@@ -45,6 +45,16 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import type { Affiliate } from '@/types/affiliate';
+
+// Type pour les performances d'affiliés
+type AffiliatePerformance = {
+  affiliate?: Affiliate;
+  total_clicks: number;
+  total_sales: number;
+  total_revenue: number;
+  total_commission: number;
+};
 
 export default function StoreAffiliates() {
   const { store, loading: storeLoading } = useStore();
@@ -67,6 +77,7 @@ export default function StoreAffiliates() {
   const tableRef = useScrollAnimation<HTMLDivElement>();
 
   // Regrouper les affiliés par performance
+  type AffiliatePerformanceWithCount = AffiliatePerformance & { links_count: number };
   const affiliatePerformance = useMemo(() => {
     return links.reduce((acc, link) => {
     const affiliateId = link.affiliate_id;
@@ -86,12 +97,12 @@ export default function StoreAffiliates() {
     acc[affiliateId].total_commission += link.total_commission;
     acc[affiliateId].links_count += 1;
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, AffiliatePerformanceWithCount>);
   }, [links]);
 
   const topAffiliates = useMemo(() => {
     return Object.values(affiliatePerformance)
-      .sort((a: any, b: any) => b.total_revenue - a.total_revenue);
+      .sort((a: AffiliatePerformance, b: AffiliatePerformance) => b.total_revenue - a.total_revenue);
   }, [affiliatePerformance]);
 
   // Filtrer les commissions
@@ -142,7 +153,7 @@ export default function StoreAffiliates() {
     if (!topAffiliates) return [];
 
     const searchLower = debouncedSearch.toLowerCase();
-    return topAffiliates.filter((aff: any) =>
+    return topAffiliates.filter((aff: AffiliatePerformance) =>
       searchLower === '' ||
       aff.affiliate?.display_name?.toLowerCase().includes(searchLower) ||
       aff.affiliate?.email?.toLowerCase().includes(searchLower) ||
@@ -170,11 +181,11 @@ export default function StoreAffiliates() {
     setIsExporting(true);
     try {
       let headers: string[] = [];
-      let rows: any[][] = [];
+      let rows: Array<Array<string | number>> = [];
 
       if (activeTab === 'affiliates') {
         headers = ['Rang', 'Affilié', 'Email', 'Code', 'Clics', 'Ventes', 'CA Généré', 'Commissions', 'Conversion %'];
-        rows = filteredTopAffiliates.map((aff: any, index: number) => {
+        rows = filteredTopAffiliates.map((aff: AffiliatePerformance, index: number) => {
           const conversionRate = aff.total_clicks > 0 
             ? ((aff.total_sales / aff.total_clicks) * 100).toFixed(1)
             : '0';
@@ -236,7 +247,7 @@ export default function StoreAffiliates() {
 
       const csvContent = [
         headers.join(','),
-        ...rows.map((row: any[]) => row.map((cell: any) => `"${String(cell)}"`).join(','))
+        ...rows.map((row: Array<string | number>) => row.map((cell: string | number) => `"${String(cell)}"`).join(','))
       ].join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -254,8 +265,9 @@ export default function StoreAffiliates() {
         description: `${rows.length} ligne(s) exportée(s) en CSV.`,
       });
       logger.info(`Affiliation ${activeTab} exported to CSV`, { count: rows.length });
-    } catch (error: any) {
-      logger.error('Error exporting to CSV', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error exporting to CSV', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'exporter les données.',
@@ -275,8 +287,9 @@ export default function StoreAffiliates() {
         description: 'Les données ont été mises à jour.',
       });
       logger.info('Affiliation data refreshed');
-    } catch (error: any) {
-      logger.error('Error refreshing data', { error: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error refreshing data', { error: errorMessage });
       toast({
         title: '❌ Erreur',
         description: 'Impossible d\'actualiser les données.',
@@ -343,11 +356,14 @@ export default function StoreAffiliates() {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
 
-        <div className="flex-1 flex flex-col">
-          {/* Header */}
-          <div ref={headerRef} className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 sm:p-6">
-          <div>
+        <main className="flex-1 overflow-auto">
+          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 overflow-x-hidden">
+            {/* Header - Responsive & Animated */}
+            <div
+              ref={headerRef}
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+            >
+              <div>
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
                   <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
                     <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
@@ -357,16 +373,16 @@ export default function StoreAffiliates() {
                   </span>
                 </h1>
                 <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
-              Gérez vos affiliés et suivez leurs performances
-            </p>
+                  Gérez vos affiliés et suivez leurs performances
+                </p>
               </div>
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleRefresh}
                   disabled={storeLoading || productsLoading || linksLoading || commissionsLoading}
-                  className="flex-1 sm:flex-none transition-all hover:scale-105"
+                  className="h-9 sm:h-10 transition-all hover:scale-105"
                 >
                   {(storeLoading || productsLoading || linksLoading || commissionsLoading) ? (
                     <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
@@ -377,142 +393,142 @@ export default function StoreAffiliates() {
                 </Button>
               </div>
             </div>
-          </div>
-
-          <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-background via-background to-purple-50/30 dark:to-purple-950/20">
-            <div className="max-w-7xl mx-auto space-y-6">
-          {/* Stats Cards */}
-              <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
-                {/* Carte Produits avec affiliation */}
-                <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-blue-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                  <CardHeader className="pb-3 relative z-10">
-                    <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
-                      <ShoppingCart className="h-4 w-4 text-blue-400 drop-shadow-lg" />
-                  Produits avec affiliation
-                </CardTitle>
-              </CardHeader>
-                  <CardContent className="relative z-10">
-                    <div className="text-2xl md:text-3xl font-bold text-blue-400 drop-shadow-lg">
-                      {productsLoading ? '...' : statsData.productsWithAffiliation}
-                </div>
-                    <p className="text-xs text-purple-200/90 mt-1 font-medium">Produits disponibles</p>
-              </CardContent>
-                  <div className="absolute top-2 right-2 h-2 w-2 bg-blue-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-blue-400/50"></div>
-            </Card>
-
-                {/* Carte Affiliés actifs */}
-                <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-green-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                  <CardHeader className="pb-3 relative z-10">
-                    <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
-                      <Users className="h-4 w-4 text-green-400 drop-shadow-lg" />
-                  Affiliés actifs
-                </CardTitle>
-              </CardHeader>
-                  <CardContent className="relative z-10">
-                    <div className="text-2xl md:text-3xl font-bold text-green-400 drop-shadow-lg">
-                      {linksLoading ? '...' : statsData.activeAffiliates}
-                </div>
-                    <p className="text-xs text-purple-200/90 mt-1 font-medium">Créant du contenu</p>
-              </CardContent>
-                  <div className="absolute top-2 right-2 h-2 w-2 bg-green-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-green-400/50"></div>
-            </Card>
-
-                {/* Carte Ventes générées */}
-                <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-purple-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                  <CardHeader className="pb-3 relative z-10">
-                    <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-purple-200" />
-                  Ventes générées
-                </CardTitle>
-              </CardHeader>
-                  <CardContent className="relative z-10">
-                    <div className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
-                      {commissionsLoading ? '...' : statsData.totalSales}
-                </div>
-                    <p className="text-xs text-purple-200/90 mt-1 font-medium">Via affiliation</p>
-              </CardContent>
-                  <div className="absolute top-2 right-2 h-2 w-2 bg-purple-300 rounded-full opacity-60 group-hover:opacity-100 transition-opacity"></div>
-            </Card>
-
-                {/* Carte Commissions versées */}
-                <Card className="group relative overflow-hidden border-2 border-purple-500/30 hover:border-orange-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/20 hover:scale-[1.02] bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 dark:from-purple-900 dark:via-purple-800 dark:to-purple-900 backdrop-blur-sm">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                  <CardHeader className="pb-3 relative z-10">
-                    <CardTitle className="text-sm font-semibold text-purple-100 flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-orange-400 drop-shadow-lg" />
-                  Commissions versées
-                </CardTitle>
-              </CardHeader>
-                  <CardContent className="relative z-10">
-                    <div className="text-2xl md:text-3xl font-bold text-orange-400 drop-shadow-lg">
-                      {commissionsLoading ? '...' : formatCurrency(statsData.totalCommissionPaid)}
-                </div>
-                    <p className="text-xs text-purple-200/90 mt-1 font-medium">Total payé</p>
-              </CardContent>
-                  <div className="absolute top-2 right-2 h-2 w-2 bg-orange-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity shadow-lg shadow-orange-400/50"></div>
-            </Card>
-          </div>
-
-              {/* Search & Filters */}
-              <Card ref={filtersRef} className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    {/* Search */}
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="search-affiliation"
-                        placeholder="Rechercher par affilié, produit, commande..."
-                        value={searchInput}
-                        onChange={(e) => setSearchInput(e.target.value)}
-                        className="pl-9 pr-9 h-10 sm:h-11 bg-background border-purple-200/50 dark:border-purple-800/50 focus:border-purple-500 focus:ring-purple-500/20"
-                      />
-                      {searchInput && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSearchInput('')}
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {/* Keyboard shortcut indicator */}
-                      <div className="absolute right-2.5 sm:right-10 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:flex items-center">
-                        <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0">
-                          ⌘K
-                        </Badge>
-                      </div>
+            {/* Stats Cards - Responsive */}
+            <div
+              ref={statsRef}
+              className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
+            >
+              {/* Carte Produits avec affiliation */}
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Produits avec affiliation</p>
+                      <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                        {productsLoading ? '...' : statsData.productsWithAffiliation}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Produits disponibles</p>
                     </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleExportCSV}
-                        disabled={isExporting || (activeTab === 'affiliates' && filteredTopAffiliates.length === 0) || (activeTab === 'commissions' && filteredCommissions.length === 0) || (activeTab === 'products' && filteredProducts.length === 0) || (activeTab === 'links' && filteredLinks.length === 0)}
-                        className="h-10 sm:h-11 transition-all hover:scale-105"
-                      >
-                        {isExporting ? (
-                          <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
-                        ) : (
-                          <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                        )}
-                        <span className="hidden sm:inline text-xs sm:text-sm">Export CSV</span>
-                        <span className="sm:hidden">CSV</span>
-                      </Button>
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5">
+                      <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Tabs */}
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1 w-full grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 sm:inline-flex sm:w-auto">
+              {/* Carte Affiliés actifs */}
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Affiliés actifs</p>
+                      <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                        {linksLoading ? '...' : statsData.activeAffiliates}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Créant du contenu</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5">
+                      <Users className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Carte Ventes générées */}
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Ventes générées</p>
+                      <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        {commissionsLoading ? '...' : statsData.totalSales}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Via affiliation</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5">
+                      <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Carte Commissions versées */}
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Commissions versées</p>
+                      <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                        {commissionsLoading ? '...' : formatCurrency(statsData.totalCommissionPaid)}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Total payé</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5">
+                      <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Search & Filters */}
+            <Card ref={filtersRef} className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                  {/* Search */}
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                    <Input
+                      id="search-affiliation"
+                      placeholder="Rechercher par affilié, produit, commande..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      className="pl-9 pr-9 h-9 sm:h-10 text-xs sm:text-sm border-border focus:border-purple-500 focus:ring-purple-500/20"
+                    />
+                    {searchInput && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setSearchInput('')}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 hover:bg-muted"
+                        aria-label="Effacer la recherche"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                    {/* Keyboard shortcut indicator */}
+                    <div className="absolute right-2.5 sm:right-10 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:flex items-center">
+                      <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0">
+                        ⌘K
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleExportCSV}
+                      disabled={isExporting || (activeTab === 'affiliates' && filteredTopAffiliates.length === 0) || (activeTab === 'commissions' && filteredCommissions.length === 0) || (activeTab === 'products' && filteredProducts.length === 0) || (activeTab === 'links' && filteredLinks.length === 0)}
+                      className="h-9 sm:h-10 transition-all hover:scale-105"
+                    >
+                      {isExporting ? (
+                        <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
+                      ) : (
+                        <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                      )}
+                      <span className="hidden sm:inline text-xs sm:text-sm">Export CSV</span>
+                      <span className="sm:hidden text-xs">CSV</span>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+              <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1 w-full grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 sm:inline-flex sm:w-auto overflow-x-auto">
                   <TabsTrigger 
                     value="affiliates" 
                     className="w-full sm:w-auto gap-1 sm:gap-1.5 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
@@ -548,7 +564,7 @@ export default function StoreAffiliates() {
                 <TabsContent value="affiliates" className="mt-6">
                   <div ref={tableRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
                     {linksLoading ? (
-                      <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50">
+                      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                         <CardContent className="py-12">
                           <div className="space-y-3">
                             {[...Array(5)].map((_, i) => (
@@ -558,11 +574,13 @@ export default function StoreAffiliates() {
                         </CardContent>
                       </Card>
                     ) : filteredTopAffiliates.length === 0 ? (
-                      <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50">
-                        <CardContent className="py-12 text-center">
-                          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-                          <h3 className="text-lg font-semibold mb-2">Aucun affilié actif</h3>
-                          <p className="text-muted-foreground mb-4">
+                      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                        <CardContent className="py-12 sm:py-16 text-center">
+                          <div className="p-4 rounded-full bg-gradient-to-br from-purple-500/10 to-pink-500/5 mb-4 animate-in zoom-in duration-500 inline-block">
+                            <Users className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground opacity-20" />
+                          </div>
+                          <h3 className="text-lg sm:text-xl font-semibold mb-2 text-foreground">Aucun affilié actif</h3>
+                          <p className="text-sm sm:text-base text-muted-foreground mb-4 max-w-md mx-auto">
                             Aucun affilié actif pour le moment.
                           </p>
                           <Button
@@ -570,37 +588,40 @@ export default function StoreAffiliates() {
                             onClick={() => {
                               setSearchInput('');
                             }}
+                            className="h-9 sm:h-10"
                           >
                             Effacer les filtres
                           </Button>
                         </CardContent>
                       </Card>
                     ) : (
-                      <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50 overflow-hidden">
-                <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <TrendingUp className="h-5 w-5 text-purple-500" />
+                      <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                            <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
                             Meilleurs affiliés
                           </CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                    Classement par chiffre d'affaires généré
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            Classement par chiffre d'affaires généré
                           </p>
-                </CardHeader>
-                        <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
+                        </CardHeader>
+                        {/* Desktop Table View */}
+                        <div className="hidden lg:block">
+                          <div className="overflow-x-auto">
+                            <Table>
+                            <TableHeader>
                               <TableRow className="bg-muted/50">
-                                <TableHead className="font-semibold">Rang</TableHead>
-                                <TableHead className="font-semibold">Affilié</TableHead>
-                                <TableHead className="font-semibold text-right hidden sm:table-cell">Clics</TableHead>
-                                <TableHead className="font-semibold text-right">Ventes</TableHead>
-                                <TableHead className="font-semibold text-right hidden md:table-cell">CA généré</TableHead>
-                                <TableHead className="font-semibold text-right hidden lg:table-cell">Commissions</TableHead>
-                                <TableHead className="font-semibold text-right">Conversion</TableHead>
-                        </TableRow>
-                      </TableHeader>
+                                <TableHead className="text-xs sm:text-sm font-semibold">Rang</TableHead>
+                                <TableHead className="text-xs sm:text-sm font-semibold">Affilié</TableHead>
+                                <TableHead className="text-xs sm:text-sm font-semibold text-right">Clics</TableHead>
+                                <TableHead className="text-xs sm:text-sm font-semibold text-right">Ventes</TableHead>
+                                <TableHead className="text-xs sm:text-sm font-semibold text-right">CA généré</TableHead>
+                                <TableHead className="text-xs sm:text-sm font-semibold text-right">Commissions</TableHead>
+                                <TableHead className="text-xs sm:text-sm font-semibold text-right">Conversion</TableHead>
+                              </TableRow>
+                            </TableHeader>
                       <TableBody>
-                              {filteredTopAffiliates.map((aff: any, index: number) => {
+                              {filteredTopAffiliates.map((aff: AffiliatePerformance, index: number) => {
                           const conversionRate = aff.total_clicks > 0 
                             ? ((aff.total_sales / aff.total_clicks) * 100).toFixed(1) 
                             : '0';
@@ -608,47 +629,115 @@ export default function StoreAffiliates() {
                           return (
                                   <TableRow
                                     key={index}
-                                    className="animate-in fade-in slide-in-from-left-4"
+                                    className="hover:bg-muted/50 transition-colors animate-in fade-in slide-in-from-left-4"
                                     style={{ animationDelay: `${index * 50}ms` }}
                                   >
-                              <TableCell>
-                                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
-                                    {index + 1}
-                                  </div>
+                                    <TableCell className="text-xs sm:text-sm">
+                                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-xs sm:text-sm">
+                                        {index + 1}
+                                      </div>
                                     </TableCell>
-                                    <TableCell>
-                                  <div>
-                                    <p className="font-medium">{aff.affiliate?.display_name || 'N/A'}</p>
-                                    <p className="text-xs text-muted-foreground">
-                                      {aff.links_count} {aff.links_count > 1 ? 'liens' : 'lien'}
-                                    </p>
-                                  </div>
+                                    <TableCell className="text-xs sm:text-sm">
+                                      <div>
+                                        <p className="font-medium">{aff.affiliate?.display_name || 'N/A'}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                          {aff.links_count} {aff.links_count > 1 ? 'liens' : 'lien'}
+                                        </p>
+                                      </div>
                                     </TableCell>
-                                    <TableCell className="text-right hidden sm:table-cell">
+                                    <TableCell className="text-right text-xs sm:text-sm">
                                       <div className="flex items-center justify-end gap-1">
                                         <MousePointerClick className="h-3 w-3 text-muted-foreground" />
                                         {aff.total_clicks}
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-right font-semibold">{aff.total_sales}</TableCell>
-                                    <TableCell className="text-right font-bold text-purple-600 hidden md:table-cell">
-                                {formatCurrency(aff.total_revenue)}
-                              </TableCell>
-                                    <TableCell className="text-right text-orange-600 font-semibold hidden lg:table-cell">
-                                {formatCurrency(aff.total_commission)}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                      <Badge variant={parseFloat(conversionRate) > 2 ? 'default' : 'outline'} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
-                                  {conversionRate}%
-                                </Badge>
-                              </TableCell>
-                            </TableRow>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell className="text-right text-xs sm:text-sm font-semibold">{aff.total_sales}</TableCell>
+                                    <TableCell className="text-right text-xs sm:text-sm font-bold text-purple-600">
+                                      {formatCurrency(aff.total_revenue)}
+                                    </TableCell>
+                                    <TableCell className="text-right text-xs sm:text-sm text-orange-600 font-semibold">
+                                      {formatCurrency(aff.total_commission)}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                      <Badge variant={parseFloat(conversionRate) > 2 ? 'default' : 'outline'} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs">
+                                        {conversionRate}%
+                                      </Badge>
+                                    </TableCell>
+                                  </TableRow>
                           );
                         })}
                       </TableBody>
                     </Table>
                         </div>
-                      </Card>
+                      </div>
+
+                      {/* Mobile Card View */}
+                      <div className="lg:hidden space-y-3 sm:space-y-4 p-4 sm:p-5">
+                        {filteredTopAffiliates.map((aff: AffiliatePerformance, index: number) => {
+                          const conversionRate = aff.total_clicks > 0 
+                            ? ((aff.total_sales / aff.total_clicks) * 100).toFixed(1) 
+                            : '0';
+                          
+                          return (
+                            <Card
+                              key={index}
+                              className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
+                              style={{ animationDelay: `${index * 50}ms` }}
+                            >
+                              <CardContent className="p-4 sm:p-5">
+                                <div className="flex items-start justify-between mb-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm sm:text-base">
+                                      {index + 1}
+                                    </div>
+                                    <div>
+                                      <h3 className="font-semibold text-base sm:text-lg">{aff.affiliate?.display_name || 'N/A'}</h3>
+                                      <p className="text-xs text-muted-foreground">
+                                        {aff.links_count} {aff.links_count > 1 ? 'liens' : 'lien'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <Badge variant={parseFloat(conversionRate) > 2 ? 'default' : 'outline'} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs">
+                                    {conversionRate}%
+                                  </Badge>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border/50">
+                                  <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                                    <MousePointerClick className="h-4 w-4 text-blue-500" />
+                                    <div>
+                                      <p className="text-xs text-muted-foreground">Clics</p>
+                                      <p className="text-sm font-semibold">{aff.total_clicks}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                                    <TrendingUp className="h-4 w-4 text-green-500" />
+                                    <div>
+                                      <p className="text-xs text-muted-foreground">Ventes</p>
+                                      <p className="text-sm font-semibold">{aff.total_sales}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                                    <DollarSign className="h-4 w-4 text-purple-500" />
+                                    <div>
+                                      <p className="text-xs text-muted-foreground">CA généré</p>
+                                      <p className="text-sm font-semibold text-purple-600">{formatCurrency(aff.total_revenue)}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                                    <DollarSign className="h-4 w-4 text-orange-500" />
+                                    <div>
+                                      <p className="text-xs text-muted-foreground">Commissions</p>
+                                      <p className="text-sm font-semibold text-orange-600">{formatCurrency(aff.total_commission)}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
+                    </Card>
                   )}
                   </div>
             </TabsContent>
@@ -657,21 +746,23 @@ export default function StoreAffiliates() {
                 <TabsContent value="products" className="mt-6">
                   <div ref={tableRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
                   {productsLoading ? (
-                      <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50">
+                      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                         <CardContent className="py-12">
-                    <div className="space-y-3">
-                      {[...Array(3)].map((_, i) => (
-                        <Skeleton key={i} className="h-20" />
-                      ))}
-                    </div>
+                          <div className="space-y-3">
+                            {[...Array(3)].map((_, i) => (
+                              <Skeleton key={i} className="h-20" />
+                            ))}
+                          </div>
                         </CardContent>
                       </Card>
                     ) : filteredProducts.length === 0 ? (
-                      <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50">
-                        <CardContent className="py-12 text-center">
-                          <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-                          <h3 className="text-lg font-semibold mb-2">Aucun produit</h3>
-                          <p className="text-muted-foreground mb-4">
+                      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                        <CardContent className="py-12 sm:py-16 text-center">
+                          <div className="p-4 rounded-full bg-gradient-to-br from-purple-500/10 to-pink-500/5 mb-4 animate-in zoom-in duration-500 inline-block">
+                            <ShoppingCart className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground opacity-20" />
+                          </div>
+                          <h3 className="text-lg sm:text-xl font-semibold mb-2 text-foreground">Aucun produit</h3>
+                          <p className="text-sm sm:text-base text-muted-foreground mb-4 max-w-md mx-auto">
                             Aucun produit avec affiliation activée.
                           </p>
                           <Button
@@ -679,57 +770,60 @@ export default function StoreAffiliates() {
                             onClick={() => {
                               setSearchInput('');
                             }}
+                            className="h-9 sm:h-10"
                           >
                             Effacer les filtres
                           </Button>
                         </CardContent>
                       </Card>
                     ) : (
-                      <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50">
+                      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                         <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <ShoppingCart className="h-5 w-5 text-purple-500" />
+                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                            <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
                             Produits avec affiliation
                           </CardTitle>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs sm:text-sm text-muted-foreground">
                             Liste de vos produits disponibles pour l'affiliation
                           </p>
                         </CardHeader>
                         <CardContent>
-                    <div className="space-y-4">
+                          <div className="space-y-3 sm:space-y-4">
                             {filteredProducts.map((product, index) => (
-                              <Card key={product.id} className="overflow-hidden border-2 border-purple-200/50 dark:border-purple-800/50 hover:border-purple-400/60 transition-all duration-300 hover:shadow-lg animate-in fade-in slide-in-from-left-4" style={{ animationDelay: `${index * 50}ms` }}>
-                          <CardContent className="p-4">
+                              <Card key={product.id} className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.01] animate-in fade-in slide-in-from-left-4" style={{ animationDelay: `${index * 50}ms` }}>
+                                <CardContent className="p-4 sm:p-5">
                                   <div className="flex items-center justify-between gap-4">
                                     <div className="flex items-center gap-4 flex-1 min-w-0">
-                                {product.product?.image_url && (
-                                  <img
-                                    src={product.product.image_url}
-                                    alt={product.product.name}
+                                      {product.product?.image_url && (
+                                        <img
+                                          src={product.product.image_url}
+                                          alt={product.product.name}
                                           className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg flex-shrink-0"
-                                  />
-                                )}
+                                          loading="lazy"
+                                          decoding="async"
+                                        />
+                                      )}
                                       <div className="flex-1 min-w-0">
-                                        <h4 className="font-semibold truncate">{product.product?.name}</h4>
-                                  <p className="text-sm text-muted-foreground">
+                                        <h4 className="font-semibold text-sm sm:text-base truncate">{product.product?.name}</h4>
+                                        <p className="text-xs sm:text-sm text-muted-foreground">
                                           Commission : <span className="font-semibold text-purple-600">{product.commission_rate}%</span> • Cookie : {product.cookie_duration_days} jours
-                                  </p>
-                                </div>
-                              </div>
+                                        </p>
+                                      </div>
+                                    </div>
                                     <div className="text-right flex-shrink-0">
-                                      <Badge variant="outline" className="mb-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0">
-                                  <CheckCircle2 className="h-3 w-3 mr-1" />
-                                  Actif
-                                </Badge>
-                                <p className="text-sm font-semibold">{formatCurrency(product.product?.price || 0)}</p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                </CardContent>
-              </Card>
+                                      <Badge variant="outline" className="mb-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 text-xs">
+                                        <CheckCircle2 className="h-3 w-3 mr-1" />
+                                        Actif
+                                      </Badge>
+                                      <p className="text-xs sm:text-sm font-semibold">{formatCurrency(product.product?.price || 0)}</p>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
                     )}
                   </div>
             </TabsContent>
@@ -737,18 +831,18 @@ export default function StoreAffiliates() {
             {/* Commissions */}
                 <TabsContent value="commissions" className="mt-6">
                   <div ref={tableRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
-                    <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50">
-                <CardHeader>
+                    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                      <CardHeader>
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div>
-                            <CardTitle className="flex items-center gap-2">
-                              <DollarSign className="h-5 w-5 text-purple-500" />
+                          <div>
+                            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
                               Commissions d'affiliation
                             </CardTitle>
-                            <p className="text-sm text-muted-foreground mt-1">
-                        Historique des commissions versées à vos affiliés
+                            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                              Historique des commissions versées à vos affiliés
                             </p>
-                    </div>
+                          </div>
                           <div className="flex gap-2 w-full sm:w-auto">
                       <Select value={statusFilter} onValueChange={setStatusFilter}>
                               <SelectTrigger className="w-full sm:w-40 h-10 sm:h-11">
@@ -773,84 +867,169 @@ export default function StoreAffiliates() {
                       ))}
                     </div>
                   ) : filteredCommissions.length === 0 ? (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                            <h3 className="text-lg font-semibold mb-2">Aucune commission</h3>
-                            <p className="text-muted-foreground">
-                              Aucune commission trouvée avec ces critères.
-                            </p>
+                    <div className="text-center py-12 sm:py-16 text-muted-foreground">
+                      <div className="p-4 rounded-full bg-gradient-to-br from-purple-500/10 to-pink-500/5 mb-4 animate-in zoom-in duration-500 inline-block">
+                        <DollarSign className="h-12 w-12 sm:h-16 sm:w-16 opacity-20" />
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-semibold mb-2 text-foreground">Aucune commission</h3>
+                      <p className="text-sm sm:text-base max-w-md mx-auto">
+                        Aucune commission trouvée avec ces critères.
+                      </p>
                     </div>
                   ) : (
-                          <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                                <TableRow className="bg-muted/50">
-                                  <TableHead className="font-semibold">Date</TableHead>
-                                  <TableHead className="font-semibold">Affilié</TableHead>
-                                  <TableHead className="font-semibold hidden md:table-cell">Produit</TableHead>
-                                  <TableHead className="font-semibold hidden lg:table-cell">Commande</TableHead>
-                                  <TableHead className="font-semibold text-right hidden sm:table-cell">Montant vente</TableHead>
-                                  <TableHead className="font-semibold text-right">Commission</TableHead>
-                                  <TableHead className="font-semibold">Statut</TableHead>
-                        </TableRow>
-                      </TableHeader>
+                    <>
+                      {/* Desktop Table View */}
+                      <div className="hidden lg:block">
+                        <div className="overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="bg-muted/50">
+                                <TableHead className="text-xs sm:text-sm font-semibold">Date</TableHead>
+                                <TableHead className="text-xs sm:text-sm font-semibold">Affilié</TableHead>
+                                <TableHead className="text-xs sm:text-sm font-semibold">Produit</TableHead>
+                                <TableHead className="text-xs sm:text-sm font-semibold">Commande</TableHead>
+                                <TableHead className="text-xs sm:text-sm font-semibold text-right">Montant vente</TableHead>
+                                <TableHead className="text-xs sm:text-sm font-semibold text-right">Commission</TableHead>
+                                <TableHead className="text-xs sm:text-sm font-semibold">Statut</TableHead>
+                              </TableRow>
+                            </TableHeader>
                       <TableBody>
                                 {filteredCommissions.map((commission, index) => (
                                   <TableRow
                                     key={commission.id}
-                                    className="animate-in fade-in slide-in-from-left-4"
+                                    className="hover:bg-muted/50 transition-colors animate-in fade-in slide-in-from-left-4"
                                     style={{ animationDelay: `${index * 50}ms` }}
                                   >
-                                    <TableCell className="text-sm">
+                                    <TableCell className="text-xs sm:text-sm font-medium">
                                       {format(new Date(commission.created_at), 'dd/MM/yyyy', { locale: fr })}
                                     </TableCell>
-                            <TableCell>
-                              <div>
-                                <p className="font-medium">{commission.affiliate?.display_name || 'N/A'}</p>
-                                        <p className="text-xs text-muted-foreground hidden sm:block">{commission.affiliate?.email}</p>
-                              </div>
-                            </TableCell>
-                                    <TableCell className="hidden md:table-cell">{commission.product?.name}</TableCell>
-                                    <TableCell className="hidden lg:table-cell">
-                              <Badge variant="outline">{commission.order?.order_number}</Badge>
-                            </TableCell>
-                                    <TableCell className="text-right font-semibold hidden sm:table-cell">
-                              {formatCurrency(commission.order_total)}
-                            </TableCell>
-                            <TableCell className="text-right font-bold text-orange-600">
-                              {formatCurrency(commission.commission_amount)}
-                            </TableCell>
-                            <TableCell>
-                              {commission.status === 'pending' && (
-                                <Badge variant="outline" className="gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  En attente
-                                </Badge>
-                              )}
-                              {commission.status === 'approved' && (
-                                <Badge variant="secondary" className="gap-1">
-                                  <CheckCircle2 className="h-3 w-3" />
-                                  Approuvé
-                                </Badge>
-                              )}
-                              {commission.status === 'paid' && (
-                                        <Badge className="gap-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white">
-                                  <CheckCircle2 className="h-3 w-3" />
-                                  Payé
-                                </Badge>
-                              )}
-                              {commission.status === 'rejected' && (
-                                <Badge variant="destructive" className="gap-1">
-                                  <Ban className="h-3 w-3" />
-                                  Rejeté
-                                </Badge>
-                              )}
-                            </TableCell>
+                                    <TableCell className="text-xs sm:text-sm">
+                                      <div>
+                                        <p className="font-medium">{commission.affiliate?.display_name || 'N/A'}</p>
+                                        <p className="text-xs text-muted-foreground">{commission.affiliate?.email}</p>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell className="text-xs sm:text-sm">{commission.product?.name}</TableCell>
+                                    <TableCell>
+                                      <Badge variant="outline" className="text-xs">{commission.order?.order_number}</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right text-xs sm:text-sm font-semibold">
+                                      {formatCurrency(commission.order_total)}
+                                    </TableCell>
+                                    <TableCell className="text-right text-xs sm:text-sm font-bold text-orange-600">
+                                      {formatCurrency(commission.commission_amount)}
+                                    </TableCell>
+                                    <TableCell>
+                                      {commission.status === 'pending' && (
+                                        <Badge variant="outline" className="gap-1 text-xs">
+                                          <Clock className="h-3 w-3" />
+                                          En attente
+                                        </Badge>
+                                      )}
+                                      {commission.status === 'approved' && (
+                                        <Badge variant="secondary" className="gap-1 text-xs">
+                                          <CheckCircle2 className="h-3 w-3" />
+                                          Approuvé
+                                        </Badge>
+                                      )}
+                                      {commission.status === 'paid' && (
+                                        <Badge className="gap-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs">
+                                          <CheckCircle2 className="h-3 w-3" />
+                                          Payé
+                                        </Badge>
+                                      )}
+                                      {commission.status === 'rejected' && (
+                                        <Badge variant="destructive" className="gap-1 text-xs">
+                                          <Ban className="h-3 w-3" />
+                                          Rejeté
+                                        </Badge>
+                                      )}
+                                    </TableCell>
                           </TableRow>
                         ))}
-                      </TableBody>
-                    </Table>
-                          </div>
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden space-y-3 sm:space-y-4">
+                      {filteredCommissions.map((commission, index) => (
+                        <Card
+                          key={commission.id}
+                          className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
+                          style={{ animationDelay: `${index * 50}ms` }}
+                        >
+                          <CardContent className="p-4 sm:p-5">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h3 className="font-semibold text-base sm:text-lg">
+                                    {commission.affiliate?.display_name || 'N/A'}
+                                  </h3>
+                                  {commission.status === 'pending' && (
+                                    <Badge variant="outline" className="text-xs gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      En attente
+                                    </Badge>
+                                  )}
+                                  {commission.status === 'approved' && (
+                                    <Badge variant="secondary" className="text-xs gap-1">
+                                      <CheckCircle2 className="h-3 w-3" />
+                                      Approuvé
+                                    </Badge>
+                                  )}
+                                  {commission.status === 'paid' && (
+                                    <Badge className="text-xs gap-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+                                      <CheckCircle2 className="h-3 w-3" />
+                                      Payé
+                                    </Badge>
+                                  )}
+                                  {commission.status === 'rejected' && (
+                                    <Badge variant="destructive" className="text-xs gap-1">
+                                      <Ban className="h-3 w-3" />
+                                      Rejeté
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs sm:text-sm text-muted-foreground mb-1">
+                                  {commission.affiliate?.email}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {format(new Date(commission.created_at), 'dd/MM/yyyy', { locale: fr })}
+                                </p>
+                                {commission.product?.name && (
+                                  <p className="text-xs sm:text-sm font-medium mt-1">{commission.product.name}</p>
+                                )}
+                                {commission.order?.order_number && (
+                                  <Badge variant="outline" className="text-xs mt-1">
+                                    Commande: {commission.order.order_number}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border/50">
+                              <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                                <DollarSign className="h-4 w-4 text-blue-500" />
+                                <div>
+                                  <p className="text-xs text-muted-foreground">Montant vente</p>
+                                  <p className="text-sm font-semibold">{formatCurrency(commission.order_total)}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                                <DollarSign className="h-4 w-4 text-orange-500" />
+                                <div>
+                                  <p className="text-xs text-muted-foreground">Commission</p>
+                                  <p className="text-sm font-semibold text-orange-600">{formatCurrency(commission.commission_amount)}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </>
                   )}
                 </CardContent>
               </Card>
@@ -861,21 +1040,23 @@ export default function StoreAffiliates() {
                 <TabsContent value="links" className="mt-6">
                   <div ref={tableRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
                   {linksLoading ? (
-                      <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50">
+                      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                         <CardContent className="py-12">
-                    <div className="space-y-3">
-                      {[...Array(5)].map((_, i) => (
-                        <Skeleton key={i} className="h-20" />
-                      ))}
-                    </div>
+                          <div className="space-y-3">
+                            {[...Array(5)].map((_, i) => (
+                              <Skeleton key={i} className="h-20" />
+                            ))}
+                          </div>
                         </CardContent>
                       </Card>
                     ) : filteredLinks.length === 0 ? (
-                      <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50">
-                        <CardContent className="py-12 text-center">
-                          <LinkIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-                          <h3 className="text-lg font-semibold mb-2">Aucun lien</h3>
-                          <p className="text-muted-foreground mb-4">
+                      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                        <CardContent className="py-12 sm:py-16 text-center">
+                          <div className="p-4 rounded-full bg-gradient-to-br from-purple-500/10 to-pink-500/5 mb-4 animate-in zoom-in duration-500 inline-block">
+                            <LinkIcon className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground opacity-20" />
+                          </div>
+                          <h3 className="text-lg sm:text-xl font-semibold mb-2 text-foreground">Aucun lien</h3>
+                          <p className="text-sm sm:text-base text-muted-foreground mb-4 max-w-md mx-auto">
                             Aucun lien d'affiliation créé pour le moment.
                           </p>
                           <Button
@@ -883,82 +1064,142 @@ export default function StoreAffiliates() {
                             onClick={() => {
                               setSearchInput('');
                             }}
+                            className="h-9 sm:h-10"
                           >
                             Effacer les filtres
                           </Button>
                         </CardContent>
                       </Card>
                     ) : (
-                      <Card className="shadow-lg border-2 border-purple-200/50 dark:border-purple-800/50 overflow-hidden">
+                      <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
                         <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <LinkIcon className="h-5 w-5 text-purple-500" />
+                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                            <LinkIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
                             Liens d'affiliation actifs
                           </CardTitle>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs sm:text-sm text-muted-foreground">
                             Tous les liens créés par les affiliés pour vos produits
                           </p>
                         </CardHeader>
-                        <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                              <TableRow className="bg-muted/50">
-                                <TableHead className="font-semibold">Affilié</TableHead>
-                                <TableHead className="font-semibold hidden md:table-cell">Code</TableHead>
-                                <TableHead className="font-semibold">Produit</TableHead>
-                                <TableHead className="font-semibold text-right hidden sm:table-cell">Clics</TableHead>
-                                <TableHead className="font-semibold text-right">Ventes</TableHead>
-                                <TableHead className="font-semibold text-right hidden lg:table-cell">CA</TableHead>
-                                <TableHead className="font-semibold text-right hidden lg:table-cell">Commission</TableHead>
-                                <TableHead className="font-semibold">Statut</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                              {filteredLinks.map((link, index) => (
-                                <TableRow
-                                  key={link.id}
-                                  className="animate-in fade-in slide-in-from-left-4"
-                                  style={{ animationDelay: `${index * 50}ms` }}
-                                >
-                            <TableCell>
-                              <div>
-                                <p className="font-medium">{link.affiliate?.display_name || 'N/A'}</p>
-                                      <p className="text-xs text-muted-foreground hidden sm:block">{link.affiliate?.affiliate_code}</p>
-                              </div>
-                            </TableCell>
-                                  <TableCell className="hidden md:table-cell">
-                                    <Badge variant="outline">{link.affiliate?.affiliate_code}</Badge>
-                                  </TableCell>
-                                  <TableCell className="truncate max-w-[200px]">{link.product?.name}</TableCell>
-                                  <TableCell className="text-right hidden sm:table-cell">
-                              <div className="flex items-center justify-end gap-1">
-                                      <MousePointerClick className="h-3 w-3 text-muted-foreground" />
-                                {link.total_clicks}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right font-semibold">{link.total_sales}</TableCell>
-                                  <TableCell className="text-right hidden lg:table-cell">{formatCurrency(link.total_revenue)}</TableCell>
-                                  <TableCell className="text-right font-semibold text-orange-600 hidden lg:table-cell">
-                              {formatCurrency(link.total_commission)}
-                            </TableCell>
-                            <TableCell>
-                                    <Badge variant={link.status === 'active' ? 'default' : 'secondary'} className={link.status === 'active' ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white' : ''}>
-                                      {link.status === 'active' ? 'Actif' : link.status}
-                              </Badge>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        {/* Desktop Table View */}
+                        <div className="hidden lg:block">
+                          <div className="overflow-x-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow className="bg-muted/50">
+                                  <TableHead className="text-xs sm:text-sm font-semibold">Affilié</TableHead>
+                                  <TableHead className="text-xs sm:text-sm font-semibold">Code</TableHead>
+                                  <TableHead className="text-xs sm:text-sm font-semibold">Produit</TableHead>
+                                  <TableHead className="text-xs sm:text-sm font-semibold text-right">Clics</TableHead>
+                                  <TableHead className="text-xs sm:text-sm font-semibold text-right">Ventes</TableHead>
+                                  <TableHead className="text-xs sm:text-sm font-semibold text-right">CA</TableHead>
+                                  <TableHead className="text-xs sm:text-sm font-semibold text-right">Commission</TableHead>
+                                  <TableHead className="text-xs sm:text-sm font-semibold">Statut</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {filteredLinks.map((link, index) => (
+                                  <TableRow
+                                    key={link.id}
+                                    className="hover:bg-muted/50 transition-colors animate-in fade-in slide-in-from-left-4"
+                                    style={{ animationDelay: `${index * 50}ms` }}
+                                  >
+                                    <TableCell className="text-xs sm:text-sm">
+                                      <div>
+                                        <p className="font-medium">{link.affiliate?.display_name || 'N/A'}</p>
+                                        <p className="text-xs text-muted-foreground">{link.affiliate?.affiliate_code}</p>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Badge variant="outline" className="text-xs">{link.affiliate?.affiliate_code}</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-xs sm:text-sm truncate max-w-[200px]">{link.product?.name}</TableCell>
+                                    <TableCell className="text-right text-xs sm:text-sm">
+                                      <div className="flex items-center justify-end gap-1">
+                                        <MousePointerClick className="h-3 w-3 text-muted-foreground" />
+                                        {link.total_clicks}
+                                      </div>
+                                    </TableCell>
+                                    <TableCell className="text-right text-xs sm:text-sm font-semibold">{link.total_sales}</TableCell>
+                                    <TableCell className="text-right text-xs sm:text-sm">{formatCurrency(link.total_revenue)}</TableCell>
+                                    <TableCell className="text-right text-xs sm:text-sm font-semibold text-orange-600">
+                                      {formatCurrency(link.total_commission)}
+                                    </TableCell>
+                                    <TableCell>
+                                      <Badge variant={link.status === 'active' ? 'default' : 'secondary'} className={link.status === 'active' ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs' : 'text-xs'}>
+                                        {link.status === 'active' ? 'Actif' : link.status}
+                                      </Badge>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+
+                        {/* Mobile Card View */}
+                        <div className="lg:hidden space-y-3 sm:space-y-4 p-4 sm:p-5">
+                          {filteredLinks.map((link, index) => (
+                            <Card
+                              key={link.id}
+                              className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
+                              style={{ animationDelay: `${index * 50}ms` }}
+                            >
+                              <CardContent className="p-4 sm:p-5">
+                                <div className="flex items-start justify-between mb-3">
+                                  <div className="flex-1">
+                                    <h3 className="font-semibold text-base sm:text-lg mb-1">{link.affiliate?.display_name || 'N/A'}</h3>
+                                    <p className="text-xs text-muted-foreground mb-2">
+                                      Code: <span className="font-mono">{link.affiliate?.affiliate_code}</span>
+                                    </p>
+                                    <p className="text-xs sm:text-sm font-medium">{link.product?.name}</p>
+                                  </div>
+                                  <Badge variant={link.status === 'active' ? 'default' : 'secondary'} className={link.status === 'active' ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs' : 'text-xs'}>
+                                    {link.status === 'active' ? 'Actif' : link.status}
+                                  </Badge>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border/50">
+                                  <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                                    <MousePointerClick className="h-4 w-4 text-blue-500" />
+                                    <div>
+                                      <p className="text-xs text-muted-foreground">Clics</p>
+                                      <p className="text-sm font-semibold">{link.total_clicks}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                                    <TrendingUp className="h-4 w-4 text-green-500" />
+                                    <div>
+                                      <p className="text-xs text-muted-foreground">Ventes</p>
+                                      <p className="text-sm font-semibold">{link.total_sales}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                                    <DollarSign className="h-4 w-4 text-purple-500" />
+                                    <div>
+                                      <p className="text-xs text-muted-foreground">CA</p>
+                                      <p className="text-sm font-semibold text-purple-600">{formatCurrency(link.total_revenue)}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                                    <DollarSign className="h-4 w-4 text-orange-500" />
+                                    <div>
+                                      <p className="text-xs text-muted-foreground">Commission</p>
+                                      <p className="text-sm font-semibold text-orange-600">{formatCurrency(link.total_commission)}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
                         </div>
                       </Card>
-                  )}
+                    )}
                   </div>
             </TabsContent>
           </Tabs>
-            </div>
+          </div>
         </main>
-        </div>
       </div>
     </SidebarProvider>
   );

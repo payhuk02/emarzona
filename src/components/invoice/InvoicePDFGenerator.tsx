@@ -5,16 +5,19 @@
  * Utilise jsPDF + jspdf-autotable pour créer des factures PDF
  */
 
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { loadPDFModules } from '@/lib/pdf-loader';
 import type { Invoice, InvoiceItem } from '@/types/invoice';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { logger } from '@/lib/logger';
 
 /**
  * Génère un PDF professionnel pour une facture
  */
 export async function generateInvoicePDF(invoice: Invoice): Promise<Blob> {
+  // Charger jspdf et autotable de manière asynchrone
+  const { jsPDF, autoTable } = await loadPDFModules();
+  
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -39,7 +42,7 @@ export async function generateInvoicePDF(invoice: Invoice): Promise<Blob> {
       doc.addImage(img, 'PNG', margin, yPosition, logoWidth, Math.min(logoHeight, 20));
       yPosition += Math.min(logoHeight, 20) + 5;
     } catch (error) {
-      console.error('Error loading logo:', error);
+      logger.error('Error loading logo', { error, logoUrl: invoice.store_info.logo_url });
     }
   }
 

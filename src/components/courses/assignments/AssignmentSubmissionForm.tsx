@@ -16,6 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 
 interface AssignmentSubmissionFormProps {
   assignment: CourseAssignment;
@@ -33,6 +34,7 @@ export const AssignmentSubmissionForm = ({
   const { user } = useAuth();
   const { toast } = useToast();
   const submitAssignment = useSubmitAssignment();
+  const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
 
   const [submissionText, setSubmissionText] = useState('');
   const [submissionUrl, setSubmissionUrl] = useState('');
@@ -215,6 +217,7 @@ export const AssignmentSubmissionForm = ({
               id="submission-text"
               value={submissionText}
               onChange={(e) => setSubmissionText(e.target.value)}
+              onKeyDown={handleSpaceKeyDown}
               placeholder="Saisissez votre réponse ici..."
               rows={10}
               className="resize-none"
@@ -245,6 +248,7 @@ export const AssignmentSubmissionForm = ({
               id="submission-code"
               value={submissionCode}
               onChange={(e) => setSubmissionCode(e.target.value)}
+              onKeyDown={handleSpaceKeyDown}
               placeholder="// Votre code ici..."
               rows={15}
               className="font-mono resize-none"

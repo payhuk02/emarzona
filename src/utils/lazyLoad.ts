@@ -4,6 +4,7 @@
  */
 
 import { lazy, ComponentType } from 'react';
+import { logger } from '@/lib/logger';
 
 /**
  * Lazy load avec retry automatique en cas d'échec
@@ -24,7 +25,7 @@ export function lazyWithRetry<T extends ComponentType<any>>(
               reject(error);
             } else {
               setTimeout(() => {
-                console.log(`Retry loading component (attempt ${attemptNumber + 1}/${retries})`);
+                logger.debug(`Retry loading component (attempt ${attemptNumber + 1}/${retries})`);
                 attemptLoad(attemptNumber + 1);
               }, interval);
             }

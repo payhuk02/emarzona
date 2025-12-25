@@ -35,7 +35,8 @@ import {
   CheckCircle2,
   Copy,
   FileText,
-  Sparkles
+  Sparkles,
+  Eye,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -62,6 +63,8 @@ export const TemplateSelector = ({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<ProductTemplate | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<ProductTemplate | null>(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [activeTab, setActiveTab] = useState(currentType || 'popular');
 
   const handleApplyTemplate = () => {
@@ -165,6 +168,21 @@ export const TemplateSelector = ({
                   </Badge>
                 )}
               </div>
+              <div className="flex gap-2 mt-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPreviewTemplate(template);
+                    setShowPreviewModal(true);
+                  }}
+                  className="flex-1 text-xs"
+                >
+                  <Eye className="h-3 w-3 mr-1.5" />
+                  Aperçu
+                </Button>
+              </div>
               {isSelected && (
                 <div className="mt-3 pt-3 border-t">
                   <p className="text-xs font-medium mb-2">Caractéristiques incluses :</p>
@@ -193,7 +211,7 @@ export const TemplateSelector = ({
           Utiliser un template
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -325,6 +343,79 @@ export const TemplateSelector = ({
           </div>
         </DialogFooter>
       </DialogContent>
+
+      {/* Preview Modal */}
+      {previewTemplate && (
+        <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
+          <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5" />
+                Aperçu: {previewTemplate.name}
+              </DialogTitle>
+              <DialogDescription>
+                {previewTemplate.description}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Badge variant="outline">{previewTemplate.category}</Badge>
+                  {previewTemplate.popularityScore >= 85 && (
+                    <Badge variant="secondary" className="gap-1">
+                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                      Populaire
+                    </Badge>
+                  )}
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">Caractéristiques incluses</h4>
+                  <ul className="space-y-2 text-sm">
+                    {previewTemplate.config.features?.map((feature: string, i: number) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {previewTemplate.config.defaultValues && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Configuration par défaut</h4>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      {Object.entries(previewTemplate.config.defaultValues).slice(0, 5).map(([key, value]) => (
+                        <div key={key} className="flex justify-between">
+                          <span className="capitalize">{key}:</span>
+                          <span className="font-medium">{String(value)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPreviewModal(false)}>
+                Fermer
+              </Button>
+              <Button
+                onClick={() => {
+                  setSelectedTemplate(previewTemplate);
+                  setShowPreviewModal(false);
+                }}
+                className="gap-2"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                Utiliser ce Template
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </Dialog>
   );
 };

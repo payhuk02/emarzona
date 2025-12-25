@@ -1,8 +1,11 @@
-import * as React from "react";
-import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import { Check, ChevronRight, Circle } from "lucide-react";
+import * as React from 'react';
+import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
+import { Check, ChevronRight, Circle } from 'lucide-react';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MOBILE_COLLISION_PADDING, DESKTOP_COLLISION_PADDING } from '@/constants/mobile';
+import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
@@ -25,9 +28,9 @@ const DropdownMenuSubTrigger = React.forwardRef<
   <DropdownMenuPrimitive.SubTrigger
     ref={ref}
     className={cn(
-      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[state=open]:bg-accent focus:bg-accent",
-      inset && "pl-8",
-      className,
+      'flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none data-[state=open]:bg-accent focus:bg-accent touch-manipulation',
+      inset && 'pl-8',
+      className
     )}
     {...props}
   >
@@ -44,48 +47,271 @@ const DropdownMenuSubContent = React.forwardRef<
   <DropdownMenuPrimitive.SubContent
     ref={ref}
     className={cn(
-      "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      className,
+      'z-50 min-w-[8rem] max-w-[calc(100vw-2rem)] max-h-[min(24rem,calc(100dvh-6rem))] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+      className
     )}
     {...props}
   />
 ));
 DropdownMenuSubContent.displayName = DropdownMenuPrimitive.SubContent.displayName;
 
+/**
+ * Contenu du DropdownMenu - Menu déroulant
+ *
+ * Optimisé automatiquement pour mobile avec :
+ * - Positionnement adaptatif (bottom sur mobile)
+ * - Animations simplifiées
+ * - Collision padding adaptatif
+ *
+ * @example
+ * ```tsx
+ * <DropdownMenuContent>
+ *   <DropdownMenuItem>Option 1</DropdownMenuItem>
+ *   <DropdownMenuItem>Option 2</DropdownMenuItem>
+ * </DropdownMenuContent>
+ * ```
+ */
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
-  <DropdownMenuPrimitive.Portal>
-    <DropdownMenuPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn(
-        "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-        className,
-      )}
-      {...props}
-    />
-  </DropdownMenuPrimitive.Portal>
-));
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> & {
+    /**
+     * Activer l'optimisation mobile (positionnement et animations)
+     * @default true
+     */
+    mobileOptimized?: boolean;
+    /**
+     * Variante d'affichage spécifique au mobile.
+     * - "default": menu classique ancré au trigger
+     * - "sheet": bottom sheet en bas de l'écran
+     * @default "default"
+     */
+    mobileVariant?: 'default' | 'sheet';
+  }
+>(
+  (
+    { className, sideOffset = 4, mobileOptimized = true, mobileVariant = 'default', ...props },
+    ref
+  ) => {
+    const isMobile = useIsMobile();
+    const contentRef = React.useRef<HTMLDivElement>(null);
+    const [isOpen, setIsOpen] = React.useState(false);
+    const isMobileSheet = isMobile && mobileOptimized && mobileVariant === 'sheet';
+
+    // Bloquer le scroll du body uniquement sur mobile quand le menu est ouvert
+    useBodyScrollLock(isMobile && mobileOptimized && isOpen);
+
+    // Combiner les refs
+    React.useImperativeHandle(
+      ref,
+      () => contentRef.current as React.ElementRef<typeof DropdownMenuPrimitive.Content>
+    );
+
+    // Détecter l'état d'ouverture via les attributs data
+    React.useEffect(() => {
+      if (!contentRef.current) return;
+
+      const observer = new MutationObserver(() => {
+        if (contentRef.current) {
+          const state = contentRef.current.getAttribute('data-state');
+          setIsOpen(state === 'open');
+        }
+      });
+
+      observer.observe(contentRef.current, {
+        attributes: true,
+        attributeFilter: ['data-state'],
+      });
+
+      // Vérifier l'état initial
+      if (contentRef.current) {
+        const state = contentRef.current.getAttribute('data-state');
+        setIsOpen(state === 'open');
+      }
+
+      return () => observer.disconnect();
+    }, []);
+
+    // Verrouiller la position sur mobile quand le menu est ouvert pour garantir la stabilité
+    React.useEffect(() => {
+      if (!isMobile || !mobileOptimized || !isOpen || !contentRef.current) return;
+      // En mode bottom sheet mobile, on laisse le layout fixe gérer le positionnement
+      if (isMobileSheet) return;
+
+      const menuElement = contentRef.current;
+      let lockedPosition: { top: number; left: number; width: number } | null = null;
+
+      // Fonction pour verrouiller la position
+      const lockPosition = () => {
+        if (!menuElement) return;
+
+        const rect = menuElement.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) {
+          // Le menu n'est pas encore positionné, réessayer (sans boucle infinie)
+          return;
+        }
+
+        lockedPosition = {
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+        };
+
+        // Forcer la position fixe pour éviter les mouvements
+        menuElement.style.position = 'fixed';
+        menuElement.style.top = `${lockedPosition.top}px`;
+        menuElement.style.left = `${lockedPosition.left}px`;
+        menuElement.style.width = `${lockedPosition.width}px`;
+        menuElement.style.maxWidth = `${lockedPosition.width}px`;
+      };
+
+      // Attendre que le menu soit positionné par Radix UI
+      const lockTimeout = setTimeout(() => {
+        lockPosition();
+      }, 200);
+
+      return () => {
+        clearTimeout(lockTimeout);
+        if (menuElement && lockedPosition) {
+          // Restaurer les styles à la fermeture
+          menuElement.style.position = '';
+          menuElement.style.top = '';
+          menuElement.style.left = '';
+          menuElement.style.width = '';
+          menuElement.style.maxWidth = '';
+        }
+      };
+    }, [isMobile, mobileOptimized, isOpen, isMobileSheet]);
+
+    return (
+      <DropdownMenuPrimitive.Portal>
+        <DropdownMenuPrimitive.Content
+          ref={contentRef}
+          sideOffset={sideOffset}
+          side={isMobileSheet ? 'bottom' : isMobile && mobileOptimized ? 'bottom' : props.side}
+          align={isMobileSheet ? 'center' : isMobile && mobileOptimized ? 'end' : props.align}
+          // En mode sheet mobile, on gère nous-mêmes le positionnement (pas de collisions Radix)
+          avoidCollisions={isMobileSheet ? false : (props.avoidCollisions ?? true)}
+          collisionPadding={
+            isMobileSheet
+              ? MOBILE_COLLISION_PADDING
+              : isMobile && mobileOptimized
+                ? MOBILE_COLLISION_PADDING
+                : (props.collisionPadding ?? DESKTOP_COLLISION_PADDING)
+          }
+          sticky={
+            isMobileSheet
+              ? 'always'
+              : isMobile && mobileOptimized
+                ? 'always'
+                : (props.sticky ?? 'partial')
+          }
+          style={{
+            ...props.style,
+            ...(isMobileSheet && {
+              position: 'fixed',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              top: 'auto',
+              transform: 'none',
+              width: '100vw',
+              maxWidth: '100vw',
+            }),
+          }}
+          // Empêcher la fermeture du menu lors d'interactions à l'intérieur
+          onInteractOutside={e => {
+            // Sur mobile, empêcher la fermeture si l'interaction est dans le menu
+            if (isMobile && mobileOptimized && contentRef.current) {
+              const target = e.target as HTMLElement;
+              if (contentRef.current.contains(target)) {
+                e.preventDefault();
+              }
+            }
+            props.onInteractOutside?.(e);
+          }}
+          onPointerDownOutside={e => {
+            // Sur mobile, empêcher la fermeture si le clic est dans le menu
+            if (isMobile && mobileOptimized && contentRef.current) {
+              const target = e.target as HTMLElement;
+              if (contentRef.current.contains(target)) {
+                e.preventDefault();
+              }
+            }
+            props.onPointerDownOutside?.(e);
+          }}
+          className={cn(
+            // Conteneur principal
+            isMobileSheet
+              ? 'fixed inset-x-0 bottom-0 z-[1060] w-screen max-h-[80vh] overflow-hidden rounded-t-2xl border bg-popover p-1 text-popover-foreground shadow-lg sm:relative sm:inset-auto sm:w-auto sm:max-h-[min(24rem,80vh)] sm:rounded-md'
+              : 'z-[100] min-w-[8rem] max-w-[calc(100vw-1rem)] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md',
+            // Scroll interne mobile (menus longs)
+            isMobileSheet &&
+              'max-h-[min(24rem,calc(100dvh-6rem))] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]',
+            !isMobileSheet &&
+              isMobile &&
+              mobileOptimized &&
+              'max-h-[min(24rem,calc(100dvh-6rem))] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]',
+            // Animations optimisées pour mobile - CSS only
+            isMobileSheet
+              ? 'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:slide-out-to-bottom-4 data-[state=open]:duration-150 data-[state=closed]:duration-100'
+              : isMobile && mobileOptimized
+                ? 'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:duration-150 data-[state=closed]:duration-100'
+                : 'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+            className
+          )}
+          {...props}
+        />
+      </DropdownMenuPrimitive.Portal>
+    );
+  }
+);
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 
+/**
+ * Item du DropdownMenu - Option individuelle dans le menu
+ *
+ * Chaque item a une hauteur minimale de 44px pour respecter les guidelines de touch targets.
+ *
+ * @example
+ * ```tsx
+ * <DropdownMenuItem onSelect={() => console.log('Selected')}>
+ *   Option 1
+ * </DropdownMenuItem>
+ * ```
+ */
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
+    /**
+     * Ajouter un padding à gauche (pour les items avec icônes)
+     */
     inset?: boolean;
   }
->(({ className, inset, ...props }, ref) => (
-  <DropdownMenuPrimitive.Item
-    ref={ref}
-    className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
-      inset && "pl-8",
-      className,
-    )}
-    {...props}
-  />
-));
+>(({ className, inset, ...props }, ref) => {
+  const isMobile = useIsMobile();
+
+  return (
+    <DropdownMenuPrimitive.Item
+      ref={ref}
+      className={cn(
+        'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none',
+        'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+        'focus:bg-accent focus:text-accent-foreground',
+        'active:bg-accent active:text-accent-foreground',
+        // Optimisations tactiles
+        'touch-manipulation',
+        // Transition légère pour le feedback
+        'transition-colors duration-75',
+        // Zone de clic plus large sur mobile
+        isMobile && 'py-2.5',
+        inset && 'pl-8',
+        className
+      )}
+      role="menuitem"
+      {...props}
+    />
+  );
+});
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
 
 const DropdownMenuCheckboxItem = React.forwardRef<
@@ -95,8 +321,8 @@ const DropdownMenuCheckboxItem = React.forwardRef<
   <DropdownMenuPrimitive.CheckboxItem
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
-      className,
+      'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 min-h-[44px] text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation',
+      className
     )}
     checked={checked}
     {...props}
@@ -118,8 +344,8 @@ const DropdownMenuRadioItem = React.forwardRef<
   <DropdownMenuPrimitive.RadioItem
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
-      className,
+      'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 min-h-[44px] text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground touch-manipulation',
+      className
     )}
     {...props}
   >
@@ -141,7 +367,7 @@ const DropdownMenuLabel = React.forwardRef<
 >(({ className, inset, ...props }, ref) => (
   <DropdownMenuPrimitive.Label
     ref={ref}
-    className={cn("px-2 py-1.5 text-sm font-semibold", inset && "pl-8", className)}
+    className={cn('px-2 py-1.5 text-sm font-semibold', inset && 'pl-8', className)}
     {...props}
   />
 ));
@@ -151,14 +377,20 @@ const DropdownMenuSeparator = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>
 >(({ className, ...props }, ref) => (
-  <DropdownMenuPrimitive.Separator ref={ref} className={cn("-mx-1 my-1 h-px bg-muted", className)} {...props} />
+  <DropdownMenuPrimitive.Separator
+    ref={ref}
+    className={cn('-mx-1 my-1 h-px bg-muted', className)}
+    {...props}
+  />
 ));
 DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName;
 
 const DropdownMenuShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
-  return <span className={cn("ml-auto text-xs tracking-widest opacity-60", className)} {...props} />;
+  return (
+    <span className={cn('ml-auto text-xs tracking-widest opacity-60', className)} {...props} />
+  );
 };
-DropdownMenuShortcut.displayName = "DropdownMenuShortcut";
+DropdownMenuShortcut.displayName = 'DropdownMenuShortcut';
 
 export {
   DropdownMenu,

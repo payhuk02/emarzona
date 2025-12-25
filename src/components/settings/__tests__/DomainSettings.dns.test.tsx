@@ -14,8 +14,6 @@ vi.mock('@/hooks/useStores', () => ({
     updateStore: vi.fn().mockResolvedValue(true),
     createStore: vi.fn(),
     deleteStore: vi.fn(),
-    canCreateStore: () => true,
-    getRemainingStores: () => 2,
     refetch: vi.fn()
   })
 }));
@@ -35,7 +33,7 @@ const mockStoreWithDomain = {
   is_active: true,
   custom_domain: 'example.com',
   domain_status: 'pending' as const,
-  domain_verification_token: 'payhula-verify-test123',
+  domain_verification_token: 'emarzona-verify-test123',
   ssl_enabled: false,
   redirect_https: false,
   redirect_www: false,
@@ -94,7 +92,7 @@ describe('DomainSettings - Vérification DNS (Intégration)', () => {
       ok: true,
       json: async () => ({
         Answer: [
-          { name: '_payhula-verification.example.com', type: 16, data: '"payhula-verify-test123"' }
+          { name: '_emarzona-verification.example.com', type: 16, data: '"emarzona-verify-test123"' }
         ]
       })
     } as Response);
@@ -112,7 +110,7 @@ describe('DomainSettings - Vérification DNS (Intégration)', () => {
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('https://dns.google/resolve?name=example.com&type=A');
       expect(fetch).toHaveBeenCalledWith('https://dns.google/resolve?name=www.example.com&type=A');
-      expect(fetch).toHaveBeenCalledWith('https://dns.google/resolve?name=_payhula-verification.example.com&type=TXT');
+      expect(fetch).toHaveBeenCalledWith('https://dns.google/resolve?name=_emarzona-verification.example.com&type=TXT');
     });
   });
 
@@ -144,7 +142,7 @@ describe('DomainSettings - Vérification DNS (Intégration)', () => {
       ok: true,
       json: async () => ({
         Answer: [
-          { name: '_payhula-verification.example.com', type: 16, data: '"payhula-verify-test123"' }
+          { name: '_emarzona-verification.example.com', type: 16, data: '"emarzona-verify-test123"' }
         ]
       })
     } as Response);

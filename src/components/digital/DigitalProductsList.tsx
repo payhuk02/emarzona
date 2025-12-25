@@ -167,17 +167,19 @@ const CATEGORY_CONFIG: Record<DigitalCategory, { label: string; color: string }>
  * 
  * @example
  * ```tsx
+ * import { logger } from '@/lib/logger';
+ * 
  * <DigitalProductsList 
  *   products={digitalProducts}
- *   onEdit={(id) => console.log('Edit:', id)}
- *   onDelete={(id) => console.log('Delete:', id)}
+ *   onEdit={(id) => logger.info('Edit product', { productId: id })}
+ *   onDelete={(id) => logger.info('Delete product', { productId: id })}
  *   showBulkActions={true}
  *   showFilters={true}
  *   showSearch={true}
  * />
  * ```
  */
-export const DigitalProductsList: React.FC<DigitalProductsListProps> = ({
+const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
   products,
   onSelect,
   onEdit,
@@ -240,8 +242,8 @@ export const DigitalProductsList: React.FC<DigitalProductsListProps> = ({
 
     // Tri
     result.sort((a, b) => {
-      let aValue: any = a[sortField];
-      let bValue: any = b[sortField];
+      let aValue: string | number | Date | undefined = a[sortField as keyof DigitalProductListItem];
+      let bValue: string | number | Date | undefined = b[sortField as keyof DigitalProductListItem];
 
       // Convertir les dates en timestamps
       if (sortField === 'created_at' || sortField === 'updated_at') {
@@ -339,7 +341,7 @@ export const DigitalProductsList: React.FC<DigitalProductsListProps> = ({
                 value={selectedCategory}
                 onValueChange={(value) => setSelectedCategory(value as DigitalCategory | 'all')}
               >
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] min-h-[44px] h-11">
                   <SelectValue placeholder="Catégorie" />
                 </SelectTrigger>
                 <SelectContent>
@@ -357,7 +359,7 @@ export const DigitalProductsList: React.FC<DigitalProductsListProps> = ({
                 value={selectedStatus}
                 onValueChange={(value) => setSelectedStatus(value as DigitalProductStatus | 'all')}
               >
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] min-h-[44px] h-11">
                   <SelectValue placeholder="Statut" />
                 </SelectTrigger>
                 <SelectContent>
@@ -626,7 +628,7 @@ export const DigitalProductsList: React.FC<DigitalProductsListProps> = ({
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions pour ${product.name || product.id}`}>
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -760,6 +762,27 @@ export const DigitalProductsList: React.FC<DigitalProductsListProps> = ({
     </div>
   );
 };
+
+DigitalProductsListComponent.displayName = 'DigitalProductsListComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const DigitalProductsList = React.memo(DigitalProductsListComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.products.length === nextProps.products.length &&
+    prevProps.onSelect === nextProps.onSelect &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onDuplicate === nextProps.onDuplicate &&
+    prevProps.onArchive === nextProps.onArchive &&
+    prevProps.onView === nextProps.onView &&
+    // Comparaison superficielle des products (comparer les IDs)
+    prevProps.products.every((product, index) => 
+      product.id === nextProps.products[index]?.id &&
+      product.is_active === nextProps.products[index]?.is_active &&
+      product.price === nextProps.products[index]?.price
+    )
+  );
+});
 
 DigitalProductsList.displayName = 'DigitalProductsList';
 

@@ -1,5 +1,5 @@
 -- =====================================================
--- PAYHUK SUPPLIERS MANAGEMENT SYSTEM
+-- EMARZONA SUPPLIERS MANAGEMENT SYSTEM
 -- Date: 27 Janvier 2025
 -- Description: Système de gestion des fournisseurs et commandes automatiques
 --              Réapprovisionnement automatique, gestion coûts, tracking

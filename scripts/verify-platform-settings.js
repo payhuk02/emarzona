@@ -12,12 +12,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('❌ Variables d\'environnement manquantes!');
   console.error('VITE_SUPABASE_URL:', supabaseUrl ? '✓' : '✗');
-  console.error('VITE_SUPABASE_ANON_KEY:', supabaseKey ? '✓' : '✗');
+  console.error('VITE_SUPABASE_PUBLISHABLE_KEY:', supabaseKey ? '✓' : '✗');
   process.exit(1);
 }
 

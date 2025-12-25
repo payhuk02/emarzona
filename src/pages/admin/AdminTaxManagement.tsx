@@ -1,7 +1,7 @@
 /**
  * Page Admin Tax Management - Gestion des configurations de taxes
  * Date: 26 Janvier 2025
- * 
+ *
  * Fonctionnalités:
  * - Liste toutes les configurations de taxes
  * - Créer/Modifier/Supprimer configurations
@@ -17,7 +17,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Dialog,
@@ -36,7 +45,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { useTaxConfigurations, useCreateTaxConfiguration, useUpdateTaxConfiguration, useDeleteTaxConfiguration } from '@/hooks/admin/useTaxConfigurations';
+import {
+  useTaxConfigurations,
+  useCreateTaxConfiguration,
+  useUpdateTaxConfiguration,
+  useDeleteTaxConfiguration,
+} from '@/hooks/admin/useTaxConfigurations';
 import {
   Receipt,
   Plus,
@@ -59,7 +73,7 @@ import type { TaxConfiguration, TaxType } from '@/types/invoice';
 // Liste des pays d'Afrique de l'Ouest
 const WEST_AFRICA_COUNTRIES = [
   { code: 'BF', name: 'Burkina Faso' },
-  { code: 'CI', name: 'Côte d\'Ivoire' },
+  { code: 'CI', name: "Côte d'Ivoire" },
   { code: 'SN', name: 'Sénégal' },
   { code: 'ML', name: 'Mali' },
   { code: 'NE', name: 'Niger' },
@@ -78,6 +92,7 @@ const TAX_TYPES: { value: TaxType; label: string }[] = [
 ];
 
 export default function AdminTaxManagement() {
+  const isMobile = useIsMobile();
   const { data: taxConfigs, isLoading } = useTaxConfigurations();
   const createTax = useCreateTaxConfiguration();
   const updateTax = useUpdateTaxConfiguration();
@@ -179,7 +194,7 @@ export default function AdminTaxManagement() {
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-6 pb-16 md:pb-0">
             <div className="max-w-7xl mx-auto space-y-6">
               <Skeleton className="h-10 w-64" />
               <Skeleton className="h-96" />
@@ -194,7 +209,7 @@ export default function AdminTaxManagement() {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50 dark:bg-gray-900">
         <AppSidebar />
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 pb-16 md:pb-0">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -209,7 +224,7 @@ export default function AdminTaxManagement() {
               </div>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button onClick={handleOpenCreate}>
+                  <Button onClick={handleOpenCreate} className="min-h-[44px]">
                     <Plus className="h-4 w-4 mr-2" />
                     Nouvelle Configuration
                   </Button>
@@ -229,13 +244,13 @@ export default function AdminTaxManagement() {
                         <Label htmlFor="country_code">Pays *</Label>
                         <Select
                           value={formData.country_code}
-                          onValueChange={(value) => setFormData({ ...formData, country_code: value })}
+                          onValueChange={value => setFormData({ ...formData, country_code: value })}
                         >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {WEST_AFRICA_COUNTRIES.map((country) => (
+                            {WEST_AFRICA_COUNTRIES.map(country => (
                               <SelectItem key={country.code} value={country.code}>
                                 {country.name}
                               </SelectItem>
@@ -249,8 +264,14 @@ export default function AdminTaxManagement() {
                         <Input
                           id="state_province"
                           value={formData.state_province || ''}
-                          onChange={(e) => setFormData({ ...formData, state_province: e.target.value || undefined })}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              state_province: e.target.value || undefined,
+                            })
+                          }
                           placeholder="Ex: Ouagadougou, Abidjan..."
+                          className="min-h-[44px]"
                         />
                       </div>
                     </div>
@@ -260,13 +281,15 @@ export default function AdminTaxManagement() {
                         <Label htmlFor="tax_type">Type de taxe *</Label>
                         <Select
                           value={formData.tax_type}
-                          onValueChange={(value) => setFormData({ ...formData, tax_type: value as TaxType })}
+                          onValueChange={value =>
+                            setFormData({ ...formData, tax_type: value as TaxType })
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {TAX_TYPES.map((type) => (
+                            {TAX_TYPES.map(type => (
                               <SelectItem key={type.value} value={type.value}>
                                 {type.label}
                               </SelectItem>
@@ -280,9 +303,10 @@ export default function AdminTaxManagement() {
                         <Input
                           id="tax_name"
                           value={formData.tax_name || ''}
-                          onChange={(e) => setFormData({ ...formData, tax_name: e.target.value })}
+                          onChange={e => setFormData({ ...formData, tax_name: e.target.value })}
                           placeholder="Ex: TVA, GST..."
                           required
+                          className="min-h-[44px]"
                         />
                       </div>
                     </div>
@@ -297,8 +321,11 @@ export default function AdminTaxManagement() {
                           min="0"
                           max="100"
                           value={formData.rate || 0}
-                          onChange={(e) => setFormData({ ...formData, rate: parseFloat(e.target.value) || 0 })}
+                          onChange={e =>
+                            setFormData({ ...formData, rate: parseFloat(e.target.value) || 0 })
+                          }
                           required
+                          className="min-h-[44px]"
                         />
                       </div>
 
@@ -308,7 +335,10 @@ export default function AdminTaxManagement() {
                           id="priority"
                           type="number"
                           value={formData.priority || 0}
-                          onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })}
+                          onChange={e =>
+                            setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })
+                          }
+                          className="min-h-[44px]"
                         />
                         <p className="text-xs text-muted-foreground mt-1">
                           Plus élevé = appliqué en premier
@@ -323,8 +353,11 @@ export default function AdminTaxManagement() {
                           id="effective_from"
                           type="date"
                           value={formData.effective_from || ''}
-                          onChange={(e) => setFormData({ ...formData, effective_from: e.target.value })}
+                          onChange={e =>
+                            setFormData({ ...formData, effective_from: e.target.value })
+                          }
                           required
+                          className="min-h-[44px]"
                         />
                       </div>
 
@@ -334,7 +367,10 @@ export default function AdminTaxManagement() {
                           id="effective_to"
                           type="date"
                           value={formData.effective_to || ''}
-                          onChange={(e) => setFormData({ ...formData, effective_to: e.target.value || undefined })}
+                          onChange={e =>
+                            setFormData({ ...formData, effective_to: e.target.value || undefined })
+                          }
+                          className="min-h-[44px]"
                         />
                       </div>
                     </div>
@@ -342,7 +378,9 @@ export default function AdminTaxManagement() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <div>
-                          <Label htmlFor="applies_to_shipping">S'applique aux frais de livraison</Label>
+                          <Label htmlFor="applies_to_shipping">
+                            S'applique aux frais de livraison
+                          </Label>
                           <p className="text-xs text-muted-foreground">
                             La taxe sera calculée aussi sur les frais de livraison
                           </p>
@@ -350,7 +388,9 @@ export default function AdminTaxManagement() {
                         <Switch
                           id="applies_to_shipping"
                           checked={formData.applies_to_shipping || false}
-                          onCheckedChange={(checked) => setFormData({ ...formData, applies_to_shipping: checked })}
+                          onCheckedChange={checked =>
+                            setFormData({ ...formData, applies_to_shipping: checked })
+                          }
                         />
                       </div>
 
@@ -364,7 +404,9 @@ export default function AdminTaxManagement() {
                         <Switch
                           id="tax_inclusive"
                           checked={formData.tax_inclusive || false}
-                          onCheckedChange={(checked) => setFormData({ ...formData, tax_inclusive: checked })}
+                          onCheckedChange={checked =>
+                            setFormData({ ...formData, tax_inclusive: checked })
+                          }
                         />
                       </div>
 
@@ -378,7 +420,9 @@ export default function AdminTaxManagement() {
                         <Switch
                           id="is_active"
                           checked={formData.is_active !== false}
-                          onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                          onCheckedChange={checked =>
+                            setFormData({ ...formData, is_active: checked })
+                          }
                         />
                       </div>
                     </div>
@@ -391,10 +435,7 @@ export default function AdminTaxManagement() {
                       >
                         Annuler
                       </Button>
-                      <Button
-                        type="submit"
-                        disabled={createTax.isPending || updateTax.isPending}
-                      >
+                      <Button type="submit" disabled={createTax.isPending || updateTax.isPending}>
                         {editingTax ? 'Modifier' : 'Créer'}
                       </Button>
                     </DialogFooter>
@@ -411,7 +452,7 @@ export default function AdminTaxManagement() {
                   <Input
                     placeholder="Rechercher par pays, nom de taxe..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                     className="pl-10"
                   />
                 </div>
@@ -423,7 +464,8 @@ export default function AdminTaxManagement() {
               <CardHeader>
                 <CardTitle>Configurations de Taxes</CardTitle>
                 <CardDescription>
-                  {filteredConfigs.length} configuration{filteredConfigs.length > 1 ? 's' : ''} trouvée{filteredConfigs.length > 1 ? 's' : ''}
+                  {filteredConfigs.length} configuration{filteredConfigs.length > 1 ? 's' : ''}{' '}
+                  trouvée{filteredConfigs.length > 1 ? 's' : ''}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -433,6 +475,119 @@ export default function AdminTaxManagement() {
                       Aucune configuration de taxe trouvée. Créez-en une pour commencer.
                     </AlertDescription>
                   </Alert>
+                ) : isMobile ? (
+                  <MobileTableCard
+                    data={filteredConfigs.map(c => ({ ...c, id: c.id }))}
+                    columns={[
+                      {
+                        key: 'country',
+                        label: 'Pays/Région',
+                        priority: 'high',
+                        render: (row: TaxConfiguration) => (
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <div className="font-medium">{getCountryName(row.country_code)}</div>
+                              {row.state_province && (
+                                <div className="text-xs text-muted-foreground">
+                                  {row.state_province}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ),
+                      },
+                      {
+                        key: 'type',
+                        label: 'Type',
+                        priority: 'medium',
+                        render: (row: TaxConfiguration) => (
+                          <Badge variant="outline">{row.tax_type}</Badge>
+                        ),
+                      },
+                      {
+                        key: 'name',
+                        label: 'Nom',
+                        priority: 'high',
+                        render: (row: TaxConfiguration) => (
+                          <span className="font-medium">{row.tax_name}</span>
+                        ),
+                      },
+                      {
+                        key: 'rate',
+                        label: 'Taux',
+                        priority: 'high',
+                        render: (row: TaxConfiguration) => (
+                          <div className="flex items-center gap-1">
+                            <Percent className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-semibold">{row.rate}%</span>
+                          </div>
+                        ),
+                      },
+                      {
+                        key: 'period',
+                        label: 'Période',
+                        priority: 'low',
+                        render: (row: TaxConfiguration) => (
+                          <div className="text-sm">
+                            <div>
+                              Dès{' '}
+                              {format(new Date(row.effective_from), 'dd/MM/yyyy', { locale: fr })}
+                            </div>
+                            {row.effective_to && (
+                              <div className="text-muted-foreground">
+                                Jusqu'au{' '}
+                                {format(new Date(row.effective_to), 'dd/MM/yyyy', { locale: fr })}
+                              </div>
+                            )}
+                          </div>
+                        ),
+                      },
+                      {
+                        key: 'status',
+                        label: 'Statut',
+                        priority: 'high',
+                        render: (row: TaxConfiguration) =>
+                          row.is_active ? (
+                            <Badge variant="default" className="flex items-center gap-1 w-fit">
+                              <CheckCircle className="h-3 w-3" />
+                              Active
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                              <XCircle className="h-3 w-3" />
+                              Inactive
+                            </Badge>
+                          ),
+                      },
+                    ]}
+                    actions={row => {
+                      const config = row as TaxConfiguration;
+                      return (
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleOpenEdit(config)}
+                            className="min-h-[44px] flex-1"
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Modifier
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDelete(config.id)}
+                            disabled={deleteTax.isPending}
+                            className="min-h-[44px] flex-1"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Supprimer
+                          </Button>
+                        </div>
+                      );
+                    }}
+                  />
                 ) : (
                   <Table>
                     <TableHeader>
@@ -447,13 +602,15 @@ export default function AdminTaxManagement() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredConfigs.map((config) => (
+                      {filteredConfigs.map(config => (
                         <TableRow key={config.id}>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <MapPin className="h-4 w-4 text-muted-foreground" />
                               <div>
-                                <div className="font-medium">{getCountryName(config.country_code)}</div>
+                                <div className="font-medium">
+                                  {getCountryName(config.country_code)}
+                                </div>
                                 {config.state_province && (
                                   <div className="text-xs text-muted-foreground">
                                     {config.state_province}
@@ -474,10 +631,18 @@ export default function AdminTaxManagement() {
                           </TableCell>
                           <TableCell>
                             <div className="text-sm">
-                              <div>Dès {format(new Date(config.effective_from), 'dd/MM/yyyy', { locale: fr })}</div>
+                              <div>
+                                Dès{' '}
+                                {format(new Date(config.effective_from), 'dd/MM/yyyy', {
+                                  locale: fr,
+                                })}
+                              </div>
                               {config.effective_to && (
                                 <div className="text-muted-foreground">
-                                  Jusqu'au {format(new Date(config.effective_to), 'dd/MM/yyyy', { locale: fr })}
+                                  Jusqu'au{' '}
+                                  {format(new Date(config.effective_to), 'dd/MM/yyyy', {
+                                    locale: fr,
+                                  })}
                                 </div>
                               )}
                             </div>
@@ -527,4 +692,3 @@ export default function AdminTaxManagement() {
     </SidebarProvider>
   );
 }
-

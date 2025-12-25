@@ -26,7 +26,7 @@ import {
   Save,
   Trash2,
   CheckCircle2
-} from 'lucide-react';
+} from '@/components/icons';
 import {
   Alert,
   AlertDescription,

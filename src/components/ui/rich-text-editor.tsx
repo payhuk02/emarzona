@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { 
-  Bold, 
-  Italic, 
-  Underline, 
+import { useState, useRef, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import {
+  Bold,
+  Italic,
+  Underline,
   Strikethrough,
   List,
   ListOrdered,
@@ -24,9 +24,9 @@ import {
   Table,
   Video,
   FileText,
-  CheckSquare
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+  CheckSquare,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface RichTextEditorProps {
   content: string;
@@ -36,12 +36,12 @@ interface RichTextEditorProps {
   disabled?: boolean;
 }
 
-export const RichTextEditor = ({ 
-  content, 
-  onChange, 
-  placeholder = "Commencez à écrire...", 
+export const RichTextEditor = ({
+  content,
+  onChange,
+  placeholder = 'Commencez à écrire...',
   className,
-  disabled = false 
+  disabled = false,
 }: RichTextEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -65,7 +65,7 @@ export const RichTextEditor = ({
     if (editorRef.current) {
       const html = editorRef.current.innerHTML;
       onChange(html);
-      
+
       // Vérifier les états undo/redo
       setCanUndo(document.queryCommandEnabled('undo'));
       setCanRedo(document.queryCommandEnabled('redo'));
@@ -74,7 +74,7 @@ export const RichTextEditor = ({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (disabled) return;
-    
+
     // Raccourcis clavier
     if (e.ctrlKey || e.metaKey) {
       switch (e.key) {
@@ -90,11 +90,12 @@ export const RichTextEditor = ({
           e.preventDefault();
           execCommand('underline');
           break;
-        case 'k':
+        case 'k': {
           e.preventDefault();
-          const url = prompt('Entrez l\'URL:');
+          const url = prompt("Entrez l'URL:");
           if (url) execCommand('createLink', url);
           break;
+        }
         case 'z':
           if (e.shiftKey) {
             e.preventDefault();
@@ -109,7 +110,7 @@ export const RichTextEditor = ({
   };
 
   const insertImage = () => {
-    const url = prompt('Entrez l\'URL de l\'image:');
+    const url = prompt("Entrez l'URL de l'image:");
     if (url) {
       execCommand('insertImage', url);
     }
@@ -118,7 +119,7 @@ export const RichTextEditor = ({
   const insertTable = () => {
     const rows = prompt('Nombre de lignes:', '3');
     const cols = prompt('Nombre de colonnes:', '3');
-    
+
     if (rows && cols) {
       let table = '<table border="1" style="border-collapse: collapse; width: 100%;">';
       for (let i = 0; i < parseInt(rows); i++) {
@@ -129,7 +130,7 @@ export const RichTextEditor = ({
         table += '</tr>';
       }
       table += '</table>';
-      
+
       execCommand('insertHTML', table);
     }
   };
@@ -137,44 +138,49 @@ export const RichTextEditor = ({
   const insertChecklist = () => {
     const items = prompt('Entrez les éléments de la liste (séparés par des virgules):');
     if (items) {
-      const itemList = items.split(',').map(item => 
-        `<div style="display: flex; align-items: center; margin: 4px 0;">
+      const itemList = items
+        .split(',')
+        .map(
+          item =>
+            `<div style="display: flex; align-items: center; margin: 4px 0;">
           <input type="checkbox" style="margin-right: 8px;">
           <span>${item.trim()}</span>
         </div>`
-      ).join('');
-      
+        )
+        .join('');
+
       execCommand('insertHTML', itemList);
     }
   };
 
-  const ToolbarButton = ({ 
-    onClick, 
-    icon: Icon, 
-    title, 
+  const ToolbarButton = ({
+    onClick,
+    icon: Icon,
+    title,
     isActive = false,
-    disabled: btnDisabled = false 
+    disabled: btnDisabled = false,
   }: {
     onClick: () => void;
-    icon: any;
+    icon: React.ComponentType<{ className?: string }>;
     title: string;
     isActive?: boolean;
     disabled?: boolean;
   }) => (
     <Button
-      variant={isActive ? "default" : "ghost"}
+      variant={isActive ? 'default' : 'ghost'}
       size="sm"
       onClick={onClick}
       disabled={disabled || btnDisabled}
-      className="h-8 w-8 p-0"
+      className="h-11 w-11 p-0 sm:h-8 sm:w-8"
       title={title}
+      aria-label={title}
     >
       <Icon className="h-4 w-4" />
     </Button>
   );
 
   return (
-    <Card className={cn("w-full", className)}>
+    <Card className={cn('w-full', className)}>
       {/* Toolbar */}
       <div className="border-b p-2">
         <div className="flex flex-wrap items-center gap-1">
@@ -246,11 +252,7 @@ export const RichTextEditor = ({
               icon={ListOrdered}
               title="Liste numérotée"
             />
-            <ToolbarButton
-              onClick={insertChecklist}
-              icon={CheckSquare}
-              title="Liste de tâches"
-            />
+            <ToolbarButton onClick={insertChecklist} icon={CheckSquare} title="Liste de tâches" />
           </div>
 
           <Separator orientation="vertical" className="h-6" />
@@ -264,22 +266,14 @@ export const RichTextEditor = ({
             />
             <ToolbarButton
               onClick={() => {
-                const url = prompt('Entrez l\'URL:');
+                const url = prompt("Entrez l'URL:");
                 if (url) execCommand('createLink', url);
               }}
               icon={Link}
               title="Lien (Ctrl+K)"
             />
-            <ToolbarButton
-              onClick={insertImage}
-              icon={Image}
-              title="Image"
-            />
-            <ToolbarButton
-              onClick={insertTable}
-              icon={Table}
-              title="Tableau"
-            />
+            <ToolbarButton onClick={insertImage} icon={Image} title="Image" />
+            <ToolbarButton onClick={insertTable} icon={Table} title="Tableau" />
             <ToolbarButton
               onClick={() => execCommand('insertHTML', '<code>Code</code>')}
               icon={Code}
@@ -310,14 +304,14 @@ export const RichTextEditor = ({
           {/* Styles de titre */}
           <div className="flex items-center gap-1">
             <select
-              onChange={(e) => {
+              onChange={e => {
                 if (e.target.value === '') {
                   execCommand('formatBlock', 'div');
                 } else {
                   execCommand('formatBlock', e.target.value);
                 }
               }}
-              className="h-8 px-2 text-sm border rounded"
+              className="h-10 sm:h-8 px-2 text-sm border rounded min-h-[44px] touch-manipulation cursor-pointer"
               disabled={disabled}
             >
               <option value="">Normal</option>
@@ -342,9 +336,9 @@ export const RichTextEditor = ({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           className={cn(
-            "min-h-[300px] p-4 focus:outline-none",
-            isFocused && "ring-2 ring-blue-500 ring-offset-2",
-            disabled && "bg-gray-50 cursor-not-allowed"
+            'min-h-[300px] p-4 focus:outline-none',
+            isFocused && 'ring-2 ring-blue-500 ring-offset-2',
+            disabled && 'bg-gray-50 cursor-not-allowed'
           )}
           style={{
             fontSize: '14px',

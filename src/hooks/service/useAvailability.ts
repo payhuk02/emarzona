@@ -350,10 +350,17 @@ export const useAvailableTimeSlots = (serviceProductId: string, date: string) =>
 
       if (bookingsError) throw bookingsError;
 
+      // Type pour les créneaux horaires disponibles
+      interface AvailableTimeSlot {
+        time: string;
+        availableSpots: number;
+        maxParticipants: number;
+      }
+
       // Generate time slots
       const duration = service?.duration_minutes || 60;
       const maxParticipants = service?.max_participants || 1;
-      const availableSlots: any[] = [];
+      const availableSlots: AvailableTimeSlot[] = [];
 
       slots.forEach((slot) => {
         let currentTime = slot.start_time;

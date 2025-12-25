@@ -5,15 +5,20 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Key, Download, Calendar, Shield } from 'lucide-react';
+import { Key, Download, Shield } from '@/components/icons';
 
 interface DigitalLicenseConfigProps {
-  formData: any;
-  updateFormData: (updates: any) => void;
+  formData: Record<string, unknown>;
+  updateFormData: (updates: Record<string, unknown>) => void;
 }
 
 const LICENSE_TYPES = [
@@ -37,10 +42,7 @@ const LICENSE_TYPES = [
   },
 ];
 
-export const DigitalLicenseConfig = ({
-  formData,
-  updateFormData,
-}: DigitalLicenseConfigProps) => {
+export const DigitalLicenseConfig = ({ formData, updateFormData }: DigitalLicenseConfigProps) => {
   return (
     <div className="space-y-6">
       {/* License Type */}
@@ -56,7 +58,7 @@ export const DigitalLicenseConfig = ({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-3">
-            {LICENSE_TYPES.map((type) => (
+            {LICENSE_TYPES.map(type => (
               <div
                 key={type.value}
                 className={`relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all ${
@@ -73,9 +75,7 @@ export const DigitalLicenseConfig = ({
                       {type.badge}
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {type.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{type.description}</p>
                 </div>
                 {formData.license_type === type.value && (
                   <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
@@ -95,23 +95,19 @@ export const DigitalLicenseConfig = ({
             <Download className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg">Paramètres de téléchargement</CardTitle>
           </div>
-          <CardDescription>
-            Contrôlez comment les clients téléchargent le produit
-          </CardDescription>
+          <CardDescription>Contrôlez comment les clients téléchargent le produit</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="download_limit">
-              Nombre de téléchargements autorisés
-            </Label>
+            <Label htmlFor="download_limit">Nombre de téléchargements autorisés</Label>
             <Select
               value={String(formData.download_limit || 5)}
-              onValueChange={(value) => updateFormData({ download_limit: parseInt(value) })}
+              onValueChange={value => updateFormData({ download_limit: parseInt(value) })}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent mobileVariant="sheet">
                 <SelectItem value="1">1 téléchargement</SelectItem>
                 <SelectItem value="3">3 téléchargements</SelectItem>
                 <SelectItem value="5">5 téléchargements</SelectItem>
@@ -120,22 +116,23 @@ export const DigitalLicenseConfig = ({
               </SelectContent>
             </Select>
             <p className="text-sm text-muted-foreground">
-              Le client pourra télécharger le fichier {formData.download_limit === -1 ? 'un nombre illimité de fois' : `${formData.download_limit} fois`}
+              Le client pourra télécharger le fichier{' '}
+              {formData.download_limit === -1
+                ? 'un nombre illimité de fois'
+                : `${formData.download_limit} fois`}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="download_expiry_days">
-              Durée de validité du lien (jours)
-            </Label>
+            <Label htmlFor="download_expiry_days">Durée de validité du lien (jours)</Label>
             <Select
               value={String(formData.download_expiry_days || 30)}
-              onValueChange={(value) => updateFormData({ download_expiry_days: parseInt(value) })}
+              onValueChange={value => updateFormData({ download_expiry_days: parseInt(value) })}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent mobileVariant="sheet">
                 <SelectItem value="7">7 jours</SelectItem>
                 <SelectItem value="14">14 jours</SelectItem>
                 <SelectItem value="30">30 jours</SelectItem>
@@ -146,7 +143,10 @@ export const DigitalLicenseConfig = ({
               </SelectContent>
             </Select>
             <p className="text-sm text-muted-foreground">
-              Le lien de téléchargement expirera après {formData.download_expiry_days === -1 ? 'jamais' : `${formData.download_expiry_days} jours`}
+              Le lien de téléchargement expirera après{' '}
+              {formData.download_expiry_days === -1
+                ? 'jamais'
+                : `${formData.download_expiry_days} jours`}
             </p>
           </div>
         </CardContent>
@@ -159,9 +159,7 @@ export const DigitalLicenseConfig = ({
             <Shield className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg">Protection et sécurité</CardTitle>
           </div>
-          <CardDescription>
-            Ajoutez des mesures de protection supplémentaires
-          </CardDescription>
+          <CardDescription>Ajoutez des mesures de protection supplémentaires</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
@@ -174,14 +172,15 @@ export const DigitalLicenseConfig = ({
             <Switch
               id="watermark"
               checked={formData.watermark_enabled || false}
-              onCheckedChange={(checked) => updateFormData({ watermark_enabled: checked })}
+              onCheckedChange={checked => updateFormData({ watermark_enabled: checked })}
             />
           </div>
 
           {formData.watermark_enabled && (
             <div className="p-4 bg-muted rounded-lg">
               <p className="text-sm">
-                ✓ Un filigrane contenant l'email de l'acheteur sera automatiquement ajouté aux fichiers PDF.
+                ✓ Un filigrane contenant l'email de l'acheteur sera automatiquement ajouté aux
+                fichiers PDF.
               </p>
             </div>
           )}
@@ -197,7 +196,8 @@ export const DigitalLicenseConfig = ({
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Type de license</span>
             <Badge>
-              {LICENSE_TYPES.find(t => t.value === formData.license_type)?.label || 'License unique'}
+              {LICENSE_TYPES.find(t => t.value === formData.license_type)?.label ||
+                'License unique'}
             </Badge>
           </div>
           <div className="flex items-center justify-between text-sm">
@@ -209,7 +209,9 @@ export const DigitalLicenseConfig = ({
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Validité du lien</span>
             <span className="font-medium">
-              {formData.download_expiry_days === -1 ? 'Permanent' : `${formData.download_expiry_days} jours`}
+              {formData.download_expiry_days === -1
+                ? 'Permanent'
+                : `${formData.download_expiry_days} jours`}
             </span>
           </div>
           <div className="flex items-center justify-between text-sm">
@@ -223,5 +225,3 @@ export const DigitalLicenseConfig = ({
     </div>
   );
 };
-
-

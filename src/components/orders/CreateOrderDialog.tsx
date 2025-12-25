@@ -1,16 +1,28 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useCustomers } from "@/hooks/useCustomers";
-import { useProducts } from "@/hooks/useProducts";
-import { Plus, Trash2 } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import React, { useState, useCallback, useMemo } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useCustomers } from '@/hooks/useCustomers';
+import { useProductsOptimized } from '@/hooks/useProductsOptimized';
+import { Plus, Trash2 } from '@/components/icons';
+import { Card } from '@/components/ui/card';
 
 interface CreateOrderDialogProps {
   open: boolean;
@@ -27,22 +39,36 @@ interface OrderItem {
   currency: string;
 }
 
-export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: CreateOrderDialogProps) => {
+const CreateOrderDialogComponent = ({
+  open,
+  onOpenChange,
+  onSuccess,
+  storeId,
+}: CreateOrderDialogProps) => {
   const { toast } = useToast();
-  const { customers } = useCustomers(storeId);
-  const { products } = useProducts(storeId);
-  const [loading, setLoading] = useState(false);
-  const [customerId, setCustomerId] = useState<string>("");
-  const [items, setItems] = useState<OrderItem[]>([]);
-  const [notes, setNotes] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<string>("cash");
+  // Utiliser avec limite pour sélection dans dialog
+  const { data: customersResult } = useCustomers(storeId, { page: 1, pageSize: 100 });
+  const customers = customersResult?.data || [];
+  const { products } = useProductsOptimized(storeId, { page: 1, itemsPerPage: 100 });
 
-  const handleAddItem = () => {
+  // ✅ PHASE 4: Mémoriser les produits actifs pour éviter recalculs à chaque render
+  const activeProducts = useMemo(() => {
+    return products?.filter(p => p.is_active) || [];
+  }, [products]);
+
+  const [loading, setLoading] = useState(false);
+  const [customerId, setCustomerId] = useState<string>('');
+  const [items, setItems] = useState<OrderItem[]>([]);
+  const [notes, setNotes] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<string>('cash');
+
+  // ✅ PHASE 6: Optimiser handleAddItem avec forme fonctionnelle de setState pour éviter dépendance items
+  const handleAddItem = useCallback(() => {
     if (!products || products.length === 0) {
       toast({
-        title: "Attention",
-        description: "Aucun produit disponible",
-        variant: "destructive",
+        title: 'Attention',
+        description: 'Aucun produit disponible',
+        variant: 'destructive',
       });
       return;
     }
@@ -50,15 +76,15 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
     const firstActiveProduct = products.find(p => p.is_active);
     if (!firstActiveProduct) {
       toast({
-        title: "Attention",
-        description: "Aucun produit actif disponible",
-        variant: "destructive",
+        title: 'Attention',
+        description: 'Aucun produit actif disponible',
+        variant: 'destructive',
       });
       return;
     }
 
-    setItems([
-      ...items,
+    setItems(prev => [
+      ...prev,
       {
         productId: firstActiveProduct.id,
         productName: firstActiveProduct.name,
@@ -67,115 +93,150 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
         currency: firstActiveProduct.currency || 'FCFA',
       },
     ]);
-  };
+  }, [products, toast]);
 
-  const handleRemoveItem = (index: number) => {
-    setItems(items.filter((_, i) => i !== index));
-  };
+  const handleRemoveItem = useCallback((index: number) => {
+    setItems(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
-  const handleItemChange = (index: number, field: keyof OrderItem, value: any) => {
-    const newItems = [...items];
-    newItems[index] = { ...newItems[index], [field]: value };
+  const handleItemChange = useCallback(
+    (index: number, field: keyof OrderItem, value: string | number) => {
+      setItems(prev => {
+        const newItems = [...prev];
+        newItems[index] = { ...newItems[index], [field]: value };
 
-    // Si on change le produit, mettre à jour le prix et le nom
-    if (field === 'productId') {
-      const selectedProduct = products?.find(p => p.id === value);
-      if (selectedProduct) {
-        newItems[index].productName = selectedProduct.name;
-        newItems[index].unitPrice = Number(selectedProduct.price);
-        newItems[index].currency = selectedProduct.currency || 'FCFA';
+        // Si on change le produit, mettre à jour le prix et le nom
+        if (field === 'productId') {
+          const selectedProduct = products?.find(p => p.id === value);
+          if (selectedProduct) {
+            newItems[index].productName = selectedProduct.name;
+            newItems[index].unitPrice = Number(selectedProduct.price);
+            newItems[index].currency = selectedProduct.currency || 'FCFA';
+          }
+        }
+
+        return newItems;
+      });
+    },
+    [products]
+  );
+
+  const calculateTotal = useMemo(() => {
+    return items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+  }, [items]);
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (items.length === 0) {
+        toast({
+          title: 'Erreur',
+          description: 'Ajoutez au moins un produit à la commande',
+          variant: 'destructive',
+        });
+        return;
       }
-    }
 
-    setItems(newItems);
-  };
+      setLoading(true);
 
-  const calculateTotal = () => {
-    return items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-  };
+      try {
+        const totalAmount = calculateTotal;
+        const currency = items[0]?.currency || 'FCFA';
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+        // Generate order number
+        const { data: orderNumberData } = await supabase.rpc('generate_order_number');
+        const orderNumber = orderNumberData || `ORD-${Date.now()}`;
 
-    if (items.length === 0) {
-      toast({
-        title: "Erreur",
-        description: "Ajoutez au moins un produit à la commande",
-        variant: "destructive",
-      });
-      return;
-    }
+        // Create order
+        const { data: order, error: orderError } = await supabase
+          .from('orders')
+          .insert({
+            store_id: storeId,
+            customer_id: customerId || null,
+            order_number: orderNumber,
+            total_amount: totalAmount,
+            currency: currency,
+            payment_method: paymentMethod,
+            payment_status: 'pending',
+            status: 'pending',
+            notes,
+          })
+          .select()
+          .single();
 
-    setLoading(true);
+        if (orderError) throw orderError;
 
-    try {
-      const totalAmount = calculateTotal();
-      const currency = items[0]?.currency || 'FCFA';
+        // Create order items
+        const orderItems = items.map(item => ({
+          order_id: order.id,
+          product_id: item.productId,
+          product_name: item.productName,
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+          total_price: item.quantity * item.unitPrice,
+        }));
 
-      // Generate order number
-      const { data: orderNumberData } = await supabase.rpc('generate_order_number');
-      const orderNumber = orderNumberData || `ORD-${Date.now()}`;
+        const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
 
-      // Create order
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          store_id: storeId,
-          customer_id: customerId || null,
-          order_number: orderNumber,
-          total_amount: totalAmount,
-          currency: currency,
-          payment_method: paymentMethod,
-          payment_status: 'pending',
-          status: 'pending',
-          notes,
-        })
-        .select()
-        .single();
+        if (itemsError) throw itemsError;
 
-      if (orderError) throw orderError;
+        // Déclencher webhook order.created (asynchrone)
+        if (order) {
+          import('@/lib/webhooks/webhook-system').then(({ triggerWebhook }) => {
+            triggerWebhook(storeId, 'order.created', {
+              order_id: order.id,
+              order_number: order.order_number,
+              customer_id: order.customer_id,
+              total_amount: order.total_amount,
+              currency: order.currency,
+              status: order.status,
+              payment_status: order.payment_status,
+              created_at: order.created_at,
+            }).catch(err => {
+              logger.error('Error triggering webhook', { error: err, orderId: order.id });
+            });
+          });
+        }
 
-      // Create order items
-      const orderItems = items.map(item => ({
-        order_id: order.id,
-        product_id: item.productId,
-        product_name: item.productName,
-        quantity: item.quantity,
-        unit_price: item.unitPrice,
-        total_price: item.quantity * item.unitPrice,
-      }));
+        toast({
+          title: 'Succès',
+          description: `Commande ${orderNumber} créée avec succès`,
+        });
 
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
+        onSuccess();
+        onOpenChange(false);
+        resetForm();
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
+        toast({
+          title: 'Erreur',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [
+      items,
+      customerId,
+      paymentMethod,
+      notes,
+      storeId,
+      onSuccess,
+      onOpenChange,
+      toast,
+      calculateTotal,
+    ]
+  );
 
-      if (itemsError) throw itemsError;
-
-      toast({
-        title: "Succès",
-        description: `Commande ${orderNumber} créée avec succès`,
-      });
-
-      onSuccess();
-      onOpenChange(false);
-      resetForm();
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resetForm = () => {
-    setCustomerId("");
+  const resetForm = useCallback(() => {
+    setCustomerId('');
     setItems([]);
-    setNotes("");
-    setPaymentMethod("cash");
-  };
+    setNotes('');
+    setPaymentMethod('cash');
+  }, []);
 
   const formatPrice = (price: number) => {
     return price.toLocaleString('fr-FR', {
@@ -186,12 +247,10 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nouvelle commande</DialogTitle>
-          <DialogDescription>
-            Créez une nouvelle commande pour votre boutique
-          </DialogDescription>
+          <DialogDescription>Créez une nouvelle commande pour votre boutique</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -203,7 +262,7 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
                 <SelectValue placeholder="Sélectionner un client" />
               </SelectTrigger>
               <SelectContent>
-                {customers?.map((customer) => (
+                {customers?.map(customer => (
                   <SelectItem key={customer.id} value={customer.id}>
                     {customer.name}
                   </SelectItem>
@@ -216,12 +275,7 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>Produits *</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleAddItem}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
                 <Plus className="h-4 w-4 mr-2" />
                 Ajouter un produit
               </Button>
@@ -243,15 +297,16 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
                         <Label className="text-xs">Produit</Label>
                         <Select
                           value={item.productId}
-                          onValueChange={(value) => handleItemChange(index, 'productId', value)}
+                          onValueChange={value => handleItemChange(index, 'productId', value)}
                         >
                           <SelectTrigger className="h-9">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {products?.filter(p => p.is_active).map((product) => (
+                            {activeProducts.map(product => (
                               <SelectItem key={product.id} value={product.id}>
-                                {product.name} - {formatPrice(Number(product.price))} {product.currency}
+                                {product.name} - {formatPrice(Number(product.price))}{' '}
+                                {product.currency}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -265,7 +320,9 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
                           type="number"
                           min="1"
                           value={item.quantity}
-                          onChange={(e) => handleItemChange(index, 'quantity', Number(e.target.value))}
+                          onChange={e =>
+                            handleItemChange(index, 'quantity', Number(e.target.value))
+                          }
                           className="h-9"
                         />
                       </div>
@@ -276,7 +333,9 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
                         <Input
                           type="number"
                           value={item.unitPrice}
-                          onChange={(e) => handleItemChange(index, 'unitPrice', Number(e.target.value))}
+                          onChange={e =>
+                            handleItemChange(index, 'unitPrice', Number(e.target.value))
+                          }
                           className="h-9"
                         />
                       </div>
@@ -297,6 +356,7 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
                           size="icon"
                           onClick={() => handleRemoveItem(index)}
                           className="h-9 w-9 text-destructive hover:text-destructive"
+                          aria-label={`Supprimer l'article ${index + 1}`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -314,7 +374,7 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
               <div className="flex justify-between items-center">
                 <span className="font-semibold">Total de la commande</span>
                 <span className="text-2xl font-bold">
-                  {formatPrice(calculateTotal())} {items[0]?.currency || 'FCFA'}
+                  {formatPrice(calculateTotal)} {items[0]?.currency || 'FCFA'}
                 </span>
               </div>
             </Card>
@@ -342,7 +402,7 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
             <Textarea
               id="notes"
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={e => setNotes(e.target.value)}
               placeholder="Notes sur la commande..."
               rows={3}
             />
@@ -359,7 +419,7 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
               Annuler
             </Button>
             <Button type="submit" disabled={loading || items.length === 0}>
-              {loading ? "Création..." : "Créer la commande"}
+              {loading ? 'Création...' : 'Créer la commande'}
             </Button>
           </div>
         </form>
@@ -367,3 +427,17 @@ export const CreateOrderDialog = ({ open, onOpenChange, onSuccess, storeId }: Cr
     </Dialog>
   );
 };
+
+CreateOrderDialogComponent.displayName = 'CreateOrderDialogComponent';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export const CreateOrderDialog = React.memo(CreateOrderDialogComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.open === nextProps.open &&
+    prevProps.onOpenChange === nextProps.onOpenChange &&
+    prevProps.onSuccess === nextProps.onSuccess &&
+    prevProps.storeId === nextProps.storeId
+  );
+});
+
+CreateOrderDialog.displayName = 'CreateOrderDialog';

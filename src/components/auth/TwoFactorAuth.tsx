@@ -16,6 +16,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, Smartphone, Key, CheckCircle2, AlertCircle, Copy, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 import QRCode from 'qrcode';
 
 interface Factor {
@@ -58,7 +59,7 @@ export const TwoFactorAuth = () => {
       setFactors([]);
       
     } catch (error) {
-      console.error('Erreur chargement 2FA:', error);
+      logger.error('Erreur chargement 2FA', { error });
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les paramètres 2FA',
@@ -95,7 +96,7 @@ export const TwoFactorAuth = () => {
         });
       }
     } catch (error: any) {
-      console.error('Erreur activation 2FA:', error);
+      logger.error('Erreur activation 2FA', { error });
       toast({
         title: 'Erreur',
         description: error.message || 'Impossible d\'activer le 2FA',
@@ -148,7 +149,7 @@ export const TwoFactorAuth = () => {
         await loadFactors();
       }
     } catch (error: any) {
-      console.error('Erreur vérification 2FA:', error);
+      logger.error('Erreur vérification 2FA', { error, factorId });
       toast({
         title: 'Code incorrect',
         description: error.message || 'Le code saisi est invalide',
@@ -316,7 +317,7 @@ export const TwoFactorAuth = () => {
                     readOnly 
                     className="font-mono text-sm"
                   />
-                  <Button variant="outline" size="icon" onClick={copySecret}>
+                  <Button variant="outline" size="icon" onClick={copySecret} aria-label="Copier le secret 2FA">
                     <Copy className="h-4 w-4" />
                   </Button>
                 </div>

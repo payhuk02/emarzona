@@ -2,7 +2,7 @@
  * Index d'export pour les hooks courses
  * Facilite les imports dans toute l'application
  * 
- * @author Payhuk Team
+ * @author Emarzona Team
  * @date 29 Octobre 2025
  */
 

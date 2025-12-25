@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 import type { CourseEnrollment } from '@/types/courses';
 import { notifyCourseEnrollment, notifyLessonComplete, notifyCourseComplete } from '@/lib/notifications/helpers';
 
@@ -165,9 +166,13 @@ export const useCreateEnrollment = () => {
                 enrolled_at: data.enrollment_date || data.created_at,
               },
               product?.store_id
-            ).catch(console.error);
+            ).catch((err) => {
+              logger.error('Error in analytics tracking for course enrollment', { error: err, enrollmentId: data.id });
+            });
           })
-          .catch(console.error);
+          .catch((err) => {
+            logger.error('Error in notification for course enrollment', { error: err, courseId, userId: targetUserId });
+          });
       });
       
       return data as CourseEnrollment;

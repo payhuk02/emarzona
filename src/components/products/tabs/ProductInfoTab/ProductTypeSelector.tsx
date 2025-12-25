@@ -1,8 +1,8 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import {
   Package,
   Smartphone,
@@ -12,46 +12,56 @@ import {
   Star,
   AlertCircle,
   GraduationCap,
-} from "lucide-react";
+  Palette,
+} from 'lucide-react';
 
 /**
  * Types de produits disponibles
  */
 const PRODUCT_TYPES = [
   {
-    value: "digital",
-    label: "Produit Digital",
+    value: 'digital',
+    label: 'Produit Digital',
     icon: Smartphone,
-    description: "Ebooks, formations, logiciels, templates, fichiers téléchargeables",
-    features: ["Téléchargement instantané", "Pas de stock", "Livraison automatique"],
-    color: "blue",
+    description: 'Ebooks, formations, logiciels, templates, fichiers téléchargeables',
+    features: ['Téléchargement instantané', 'Pas de stock', 'Livraison automatique'],
+    color: 'blue',
     popular: true,
   },
   {
-    value: "course",
-    label: "Cours en ligne",
+    value: 'course',
+    label: 'Cours en ligne',
     icon: GraduationCap,
-    description: "Cours vidéo, masterclass, formations structurées avec quiz et certificats",
-    features: ["Vidéos HD", "Quiz & Certificats", "Suivi progression"],
-    color: "orange",
+    description: 'Cours vidéo, masterclass, formations structurées avec quiz et certificats',
+    features: ['Vidéos HD', 'Quiz & Certificats', 'Suivi progression'],
+    color: 'orange',
     popular: true,
   },
   {
-    value: "physical",
-    label: "Produit Physique",
+    value: 'physical',
+    label: 'Produit Physique',
     icon: Package,
-    description: "Vêtements, accessoires, objets artisanaux, produits manufacturés",
-    features: ["Livraison requise", "Gestion stock", "Adresse client"],
-    color: "green",
+    description: 'Vêtements, accessoires, objets artisanaux, produits manufacturés',
+    features: ['Livraison requise', 'Gestion stock', 'Adresse client'],
+    color: 'green',
     popular: false,
   },
   {
-    value: "service",
-    label: "Service",
+    value: 'service',
+    label: 'Service',
     icon: Wrench,
-    description: "Consultations, coaching, design, développement, maintenance",
-    features: ["Rendez-vous", "Prestation", "Sur mesure"],
-    color: "purple",
+    description: 'Consultations, coaching, design, développement, maintenance',
+    features: ['Rendez-vous', 'Prestation', 'Sur mesure'],
+    color: 'purple',
+    popular: false,
+  },
+  {
+    value: 'artist',
+    label: "Oeuvre d'artiste",
+    icon: Palette,
+    description: "Oeuvres d'art, créations artistiques, NFT, art digital",
+    features: ['Création unique', "Certificat d'authenticité", 'Valeur artistique'],
+    color: 'pink',
     popular: false,
   },
 ];
@@ -70,13 +80,13 @@ interface ProductTypeSelectorProps {
 
 /**
  * Composant de sélection du type de produit
- * 
+ *
  * Permet de choisir entre quatre types de produits :
  * - Produit Digital (ebooks, logiciels, templates, etc.)
  * - Cours en ligne (formations vidéo structurées avec quiz)
  * - Produit Physique (vêtements, accessoires, etc.)
  * - Service (consultations, coaching, etc.)
- * 
+ *
  * @example
  * ```tsx
  * <ProductTypeSelector
@@ -108,7 +118,12 @@ export const ProductTypeSelector = ({
           </div>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-white"
+                aria-label="Aide sur le type de produit"
+              >
                 <HelpCircle className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -120,35 +135,35 @@ export const ProductTypeSelector = ({
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {PRODUCT_TYPES.map((type) => {
+          {PRODUCT_TYPES.map(type => {
             const Icon = type.icon;
             const isSelected = selectedType === type.value;
             const colorClasses = {
               blue: isSelected
-                ? "border-blue-400 bg-blue-400/10"
-                : "border-gray-600 hover:border-blue-400",
+                ? 'border-blue-400 bg-blue-400/10'
+                : 'border-gray-600 hover:border-blue-400',
               orange: isSelected
-                ? "border-orange-400 bg-orange-400/10"
-                : "border-gray-600 hover:border-orange-400",
+                ? 'border-orange-400 bg-orange-400/10'
+                : 'border-gray-600 hover:border-orange-400',
               green: isSelected
-                ? "border-green-400 bg-green-400/10"
-                : "border-gray-600 hover:border-green-400",
+                ? 'border-green-400 bg-green-400/10'
+                : 'border-gray-600 hover:border-green-400',
               purple: isSelected
-                ? "border-purple-400 bg-purple-400/10"
-                : "border-gray-600 hover:border-purple-400",
+                ? 'border-purple-400 bg-purple-400/10'
+                : 'border-gray-600 hover:border-purple-400',
             };
             const iconColorClasses = {
-              blue: "text-blue-400",
-              orange: "text-orange-400",
-              green: "text-green-400",
-              purple: "text-purple-400",
+              blue: 'text-blue-400',
+              orange: 'text-orange-400',
+              green: 'text-green-400',
+              purple: 'text-purple-400',
             };
 
             return (
               <Card
                 key={type.value}
                 className={cn(
-                  "cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-2 touch-manipulation min-h-[140px] sm:min-h-[160px]",
+                  'cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-2 touch-manipulation min-h-[140px] sm:min-h-[160px]',
                   colorClasses[type.color as keyof typeof colorClasses]
                 )}
                 role="button"
@@ -156,8 +171,8 @@ export const ProductTypeSelector = ({
                 aria-label={`Sélectionner le type de produit ${type.label}`}
                 aria-pressed={selectedType === type.value}
                 onClick={() => onTypeChange(type.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     onTypeChange(type.value);
                   }
@@ -168,13 +183,13 @@ export const ProductTypeSelector = ({
                     <div className="flex items-center gap-3">
                       <div
                         className={cn(
-                          "p-2 rounded-lg",
-                          isSelected ? "bg-current/20" : "bg-gray-700"
+                          'p-2 rounded-lg',
+                          isSelected ? 'bg-current/20' : 'bg-gray-700'
                         )}
                       >
                         <Icon
                           className={cn(
-                            "h-6 w-6",
+                            'h-6 w-6',
                             iconColorClasses[type.color as keyof typeof iconColorClasses]
                           )}
                         />
@@ -192,9 +207,7 @@ export const ProductTypeSelector = ({
                     {isSelected && <CheckCircle2 className="h-5 w-5 text-green-400" />}
                   </div>
 
-                  <p className="text-sm text-gray-400 mb-4 leading-relaxed">
-                    {type.description}
-                  </p>
+                  <p className="text-sm text-gray-400 mb-4 leading-relaxed">{type.description}</p>
 
                   <div className="flex flex-wrap gap-2">
                     {type.features.map((feature, index) => (
@@ -225,4 +238,3 @@ export const ProductTypeSelector = ({
     </Card>
   );
 };
-

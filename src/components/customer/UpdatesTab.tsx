@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCustomerProductUpdates, useCustomerProductVersions } from '@/hooks/digital/useProductUpdates';
-import { Download, AlertCircle, Package, Sparkles, Shield } from 'lucide-react';
+import { Download, AlertCircle, Package, Sparkles, Shield } from '@/components/icons';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';

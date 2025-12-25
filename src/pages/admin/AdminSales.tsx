@@ -2,8 +2,10 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -14,9 +16,12 @@ import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/utils';
 import { ShoppingCart, Download, Search, TrendingUp, DollarSign } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { Payment } from '@/hooks/usePayments';
+import type { PlatformCommission } from '@/hooks/usePlatformCommissions';
 
 const AdminSales = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const isMobile = useIsMobile();
   const { toast } = useToast();
 
   // Animations au scroll
@@ -78,7 +83,7 @@ const AdminSales = () => {
       type === 'sales'
         ? ['Date', 'Montant', 'Boutique', 'Commande', 'Statut'].join(',')
         : ['Date', 'Montant Total', 'Commission', 'Vendeur', 'Statut'].join(','),
-      ...data.map((item: any) =>
+      ...data.map((item: Payment | PlatformCommission) =>
         type === 'sales'
           ? [
               new Date(item.created_at).toLocaleDateString(),
@@ -112,7 +117,7 @@ const AdminSales = () => {
     });
   }, [sales, commissions, toast]);
 
-  const filteredSales = useMemo(() => sales?.filter((sale: any) => {
+  const filteredSales = useMemo(() => sales?.filter((sale: Payment) => {
     const storeName = sale.stores?.[0]?.name || '';
     const orderNumber = sale.orders?.[0]?.order_number || '';
     return storeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -140,10 +145,10 @@ const AdminSales = () => {
         {/* Header */}
         <div ref={headerRef} className="flex items-center justify-between" role="banner">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-sales-title">
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent" id="admin-sales-title">
               Gestion des ventes
             </h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-2">
               Suivi des ventes et commissions de la plateforme
             </p>
           </div>
@@ -154,16 +159,16 @@ const AdminSales = () => {
         <div ref={statsRef} className="grid gap-6 md:grid-cols-3" role="region" aria-label="Statistiques des ventes">
           <Card className="hover-scale">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground">
                 Revenu Total
               </CardTitle>
-              <DollarSign className="h-4 w-4 text-emerald-600" />
+              <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-emerald-600">
+              <div className="text-base sm:text-xl md:text-2xl font-bold text-emerald-600">
                 {formatCurrency(totalRevenue)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                 {sales?.length || 0} ventes
               </p>
             </CardContent>
@@ -171,16 +176,16 @@ const AdminSales = () => {
 
           <Card className="hover-scale">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground">
                 Commissions Totales
               </CardTitle>
-              <TrendingUp className="h-4 w-4 text-cyan-600" />
+              <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-cyan-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-cyan-600">
+              <div className="text-base sm:text-xl md:text-2xl font-bold text-cyan-600">
                 {formatCurrency(totalCommissions)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                 10% de commission
               </p>
             </CardContent>
@@ -188,16 +193,16 @@ const AdminSales = () => {
 
           <Card className="hover-scale">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground">
                 Montant Vendeurs
               </CardTitle>
-              <DollarSign className="h-4 w-4 text-blue-600" />
+              <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-base sm:text-xl md:text-2xl font-bold text-blue-600">
                 {formatCurrency(totalRevenue - totalCommissions)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                 Après commission
               </p>
             </CardContent>
@@ -207,8 +212,8 @@ const AdminSales = () => {
         {/* Tabs */}
         <Tabs defaultValue="sales" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="sales">Ventes</TabsTrigger>
-            <TabsTrigger value="commissions">Commissions</TabsTrigger>
+            <TabsTrigger value="sales" className="min-h-[44px]">Ventes</TabsTrigger>
+            <TabsTrigger value="commissions" className="min-h-[44px]">Commissions</TabsTrigger>
           </TabsList>
 
           <TabsContent value="sales" className="space-y-4">
@@ -221,7 +226,7 @@ const AdminSales = () => {
                       Toutes les transactions effectuées
                     </CardDescription>
                   </div>
-                  <Button onClick={() => exportToCSV('sales')} variant="outline" size="sm">
+                  <Button onClick={() => exportToCSV('sales')} variant="outline" size="sm" className="min-h-[44px]">
                     <Download className="h-4 w-4 mr-2" />
                     Exporter CSV
                   </Button>
@@ -232,47 +237,98 @@ const AdminSales = () => {
                     placeholder="Rechercher par boutique ou numéro de commande..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 min-h-[44px]"
                   />
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Commande</TableHead>
-                      <TableHead>Boutique</TableHead>
-                      <TableHead>Montant</TableHead>
-                      <TableHead>Commission</TableHead>
-                      <TableHead>Statut</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredSales?.map((sale: any) => (
-                      <TableRow key={sale.id}>
-                        <TableCell>
-                          {new Date(sale.created_at).toLocaleDateString('fr-FR')}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {sale.orders?.[0]?.order_number || 'N/A'}
-                        </TableCell>
-                        <TableCell>{sale.stores?.[0]?.name || 'N/A'}</TableCell>
-                        <TableCell className="font-bold">
-                          {formatCurrency(sale.amount)}
-                        </TableCell>
-                        <TableCell className="text-cyan-600">
-                          {formatCurrency(sale.commission_amount || 0)}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={sale.status === 'completed' ? 'default' : 'secondary'}>
-                            {sale.status}
+                {isMobile ? (
+                  <MobileTableCard
+                    data={filteredSales || []}
+                    columns={[
+                      { 
+                        key: 'created_at', 
+                        label: 'Date', 
+                        priority: 'high',
+                        render: (value) => new Date(value).toLocaleDateString('fr-FR')
+                      },
+                      { 
+                        key: 'orders', 
+                        label: 'Commande', 
+                        priority: 'high',
+                        render: (value) => value?.[0]?.order_number || 'N/A',
+                        className: 'font-medium'
+                      },
+                      { 
+                        key: 'stores', 
+                        label: 'Boutique', 
+                        priority: 'medium',
+                        render: (value) => value?.[0]?.name || 'N/A'
+                      },
+                      { 
+                        key: 'amount', 
+                        label: 'Montant', 
+                        priority: 'high',
+                        render: (value) => formatCurrency(value),
+                        className: 'font-bold'
+                      },
+                      { 
+                        key: 'commission_amount', 
+                        label: 'Commission', 
+                        priority: 'medium',
+                        render: (value, row) => formatCurrency(value || 0),
+                        className: 'text-cyan-600'
+                      },
+                      { 
+                        key: 'status', 
+                        label: 'Statut', 
+                        priority: 'high',
+                        render: (value) => (
+                          <Badge variant={value === 'completed' ? 'default' : 'secondary'}>
+                            {value}
                           </Badge>
-                        </TableCell>
+                        )
+                      },
+                    ]}
+                  />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Commande</TableHead>
+                        <TableHead>Boutique</TableHead>
+                        <TableHead>Montant</TableHead>
+                        <TableHead>Commission</TableHead>
+                        <TableHead>Statut</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredSales?.map((sale: Payment) => (
+                        <TableRow key={sale.id}>
+                          <TableCell>
+                            {new Date(sale.created_at).toLocaleDateString('fr-FR')}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {sale.orders?.[0]?.order_number || 'N/A'}
+                          </TableCell>
+                          <TableCell>{sale.stores?.[0]?.name || 'N/A'}</TableCell>
+                          <TableCell className="font-bold">
+                            {formatCurrency(sale.amount)}
+                          </TableCell>
+                          <TableCell className="text-cyan-600">
+                            {formatCurrency(sale.commission_amount || 0)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={sale.status === 'completed' ? 'default' : 'secondary'}>
+                              {sale.status}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
                 {filteredSales?.length === 0 && (
                   <div className="text-center py-12 text-muted-foreground">
                     Aucune vente trouvée
@@ -292,7 +348,7 @@ const AdminSales = () => {
                       10% de commission sur chaque vente
                     </CardDescription>
                   </div>
-                  <Button onClick={() => exportToCSV('commissions')} variant="outline" size="sm">
+                  <Button onClick={() => exportToCSV('commissions')} variant="outline" size="sm" className="min-h-[44px]">
                     <Download className="h-4 w-4 mr-2" />
                     Exporter CSV
                   </Button>
