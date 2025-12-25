@@ -182,7 +182,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
 
   return (
     <article
-      className="group relative flex flex-col rounded-2xl bg-card overflow-hidden product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop min-h-[400px] xs:min-h-[450px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px]"
+      className="group relative flex flex-col rounded-xl bg-transparent border border-gray-200 dark:border-gray-700 overflow-hidden product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop min-h-[400px] xs:min-h-[450px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
       role="article"
       aria-labelledby={`product-title-${product.id}`}
       aria-describedby={`product-description-${product.id}`}
@@ -190,7 +190,8 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
       {/* Bannière produit - 60% de la hauteur de la carte */}
       <div className="product-card-container flex-[0.6] relative overflow-hidden w-full group">
         {/* ✅ Ratio 3:2 (1536×1024) aligné avec le format produit, évite les hauteurs variables / CLS */}
-        <div className="relative w-full aspect-[3/2] overflow-hidden rounded-lg sm:rounded-xl lg:rounded-2xl bg-muted/30">
+        {/* ✅ Bordures bien définies comme sur le Marketplace : border-2 avec couleurs cohérentes */}
+        <div className="relative w-full aspect-[3/2] overflow-hidden bg-muted/30 border-2 border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300">
           <Link
             to={`/stores/${storeSlug}/products/${product.slug}`}
             className="block w-full h-full"
@@ -203,6 +204,9 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
               fill={true}
               context="grid"
               priority={false}
+              // Format 1536x1024 toujours
+              width={1536}
+              height={1024}
             />
           </Link>
 
@@ -302,7 +306,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
                   className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
                   loading="lazy"
                   decoding="async"
-                  onError={(e) => {
+                  onError={e => {
                     // Fallback si l'image ne charge pas
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';

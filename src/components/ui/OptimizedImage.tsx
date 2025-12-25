@@ -64,7 +64,8 @@ function getOptimizedImageUrl(
   src: string,
   width?: number,
   quality: number = 80,
-  format?: 'webp' | 'avif' | 'auto'
+  format?: 'webp' | 'avif' | 'auto',
+  height?: number
 ): string {
   // Si l'image est déjà une URL complète avec paramètres, la retourner telle quelle
   if (src.includes('?') || src.includes('&')) {
@@ -75,6 +76,7 @@ function getOptimizedImageUrl(
   if (src.includes('supabase.co/storage')) {
     const params = new URLSearchParams();
     if (width) params.set('width', width.toString());
+    if (height) params.set('height', height.toString());
     params.set('quality', quality.toString());
 
     // Support format moderne
@@ -141,11 +143,12 @@ function generateSrcSet(
   src: string,
   widths: number[],
   quality: number = 80,
-  format?: 'webp' | 'avif' | 'auto'
+  format?: 'webp' | 'avif' | 'auto',
+  height?: number
 ): string {
   return widths
     .map(width => {
-      const url = getOptimizedImageUrl(src, width, quality, format);
+      const url = getOptimizedImageUrl(src, width, quality, format, height);
       return `${url} ${width}w`;
     })
     .join(', ');
@@ -216,14 +219,14 @@ export const OptimizedImage = React.memo<OptimizedImageProps>(
 
     // URL optimisée de l'image
     const optimizedSrc = useMemo(
-      () => getOptimizedImageUrl(src, width, quality, format),
-      [src, width, quality, format]
+      () => getOptimizedImageUrl(src, width, quality, format, height),
+      [src, width, quality, format, height]
     );
 
     // Srcset pour différentes résolutions
     const srcset = useMemo(
-      () => generateSrcSet(src, srcsetWidths, quality, format),
-      [src, srcsetWidths, quality, format]
+      () => generateSrcSet(src, srcsetWidths, quality, format, height),
+      [src, srcsetWidths, quality, format, height]
     );
 
     // Sizes par défaut si non fourni

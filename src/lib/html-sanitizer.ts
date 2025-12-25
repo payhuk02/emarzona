@@ -1,6 +1,6 @@
 /**
  * 🔒 HTML SANITIZER - PRÉVENTION XSS
- * 
+ *
  * Nettoie le HTML pour prévenir les attaques XSS
  * Utilisé pour les descriptions de produits, commentaires, etc.
  */
@@ -17,16 +17,37 @@ import DOMPurify from 'dompurify';
  */
 const PRODUCT_DESCRIPTION_CONFIG: DOMPurify.Config = {
   ALLOWED_TAGS: [
-    'p', 'br', 'strong', 'em', 'u', 'b', 'i',
-    'a', 'ul', 'ol', 'li', 'h3', 'h4', 'h5',
-    'blockquote', 'code', 'pre',
+    'p',
+    'br',
+    'strong',
+    'em',
+    'u',
+    'b',
+    'i',
+    's',
+    'strike',
+    'a',
+    'ul',
+    'ol',
+    'li',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'blockquote',
+    'code',
+    'pre',
+    'span',
+    'div',
   ],
-  ALLOWED_ATTR: [
-    'href', 'target', 'rel', 'class',
-  ],
+  ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'style'],
   ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
   ALLOW_DATA_ATTR: false,
   ALLOW_UNKNOWN_PROTOCOLS: false,
+  // Permettre les styles inline pour les couleurs, soulignement, etc.
+  ALLOW_STYLE: true,
 };
 
 /**
@@ -55,20 +76,20 @@ const PLAIN_TEXT_CONFIG: DOMPurify.Config = {
 
 /**
  * Nettoie le HTML d'une description de produit
- * 
+ *
  * Permet un formatage riche mais sécurisé pour les descriptions de produits.
  * Autorise les balises de formatage de base (p, strong, em, ul, ol, etc.) mais bloque
  * les scripts et attributs dangereux pour prévenir les attaques XSS.
- * 
+ *
  * @param html - HTML à nettoyer (peut être null ou undefined)
  * @returns HTML nettoyé et sécurisé, ou chaîne vide si html est null/undefined
- * 
+ *
  * @example
  * ```typescript
  * const clean = sanitizeProductDescription(product.description);
  * return <div dangerouslySetInnerHTML={{ __html: clean }} />;
  * ```
- * 
+ *
  * @see {@link PRODUCT_DESCRIPTION_CONFIG} pour la configuration de sécurité
  */
 export function sanitizeProductDescription(html: string | null | undefined): string {
@@ -79,7 +100,7 @@ export function sanitizeProductDescription(html: string | null | undefined): str
 /**
  * Nettoie le HTML d'un avis/commentaire
  * Plus restrictif que les descriptions de produits
- * 
+ *
  * @param html - HTML à nettoyer
  * @returns HTML nettoyé
  */
@@ -91,7 +112,7 @@ export function sanitizeReview(html: string | null | undefined): string {
 /**
  * Nettoie du HTML générique
  * Configuration par défaut de DOMPurify
- * 
+ *
  * @param html - HTML à nettoyer
  * @returns HTML nettoyé
  */
@@ -103,7 +124,7 @@ export function sanitizeHTML(html: string | null | undefined): string {
 /**
  * Convertit du HTML en texte brut sécurisé
  * Supprime TOUTES les balises HTML
- * 
+ *
  * @param html - HTML à convertir
  * @returns Texte brut
  */
@@ -115,10 +136,10 @@ export function htmlToPlainText(html: string | null | undefined): string {
 /**
  * Convertit du texte brut en HTML sécurisé
  * Échappe les caractères HTML et convertit les retours à la ligne
- * 
+ *
  * @param text - Texte brut
  * @returns HTML sécurisé
- * 
+ *
  * @example
  * ```typescript
  * const html = textToSafeHTML("Bonjour\nMonde");
@@ -127,7 +148,7 @@ export function htmlToPlainText(html: string | null | undefined): string {
  */
 export function textToSafeHTML(text: string | null | undefined): string {
   if (!text) return '';
-  
+
   return text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -139,24 +160,24 @@ export function textToSafeHTML(text: string | null | undefined): string {
 
 /**
  * Nettoie une URL pour utilisation dans href
- * 
+ *
  * @param url - URL à nettoyer
  * @returns URL nettoyée ou '#' si invalide
  */
 export function sanitizeURL(url: string | null | undefined): string {
   if (!url) return '#';
-  
+
   // Supprimer les protocoles dangereux
   const dangerousProtocols = ['javascript:', 'data:', 'vbscript:'];
   const lowerUrl = url.toLowerCase().trim();
-  
+
   for (const protocol of dangerousProtocols) {
     if (lowerUrl.startsWith(protocol)) {
       // Protocole dangereux bloqué - log via logger si nécessaire
       return '#';
     }
   }
-  
+
   // Nettoyer avec DOMPurify
   return DOMPurify.sanitize(url, { ALLOWED_TAGS: [] });
 }
@@ -167,7 +188,7 @@ export function sanitizeURL(url: string | null | undefined): string {
 
 /**
  * Tronque du HTML à une longueur maximale tout en préservant les balises
- * 
+ *
  * @param html - HTML à tronquer
  * @param maxLength - Longueur maximale du texte (sans les balises)
  * @param suffix - Suffixe à ajouter si tronqué (par défaut '...')
@@ -179,17 +200,17 @@ export function truncateHTML(
   suffix: string = '...'
 ): string {
   if (!html) return '';
-  
+
   // Convertir en texte pour mesurer la longueur
   const plainText = htmlToPlainText(html);
-  
+
   if (plainText.length <= maxLength) {
     return sanitizeHTML(html);
   }
-  
+
   // Tronquer le texte brut
   const truncated = plainText.substring(0, maxLength) + suffix;
-  
+
   // Reconvertir en HTML sécurisé
   return textToSafeHTML(truncated);
 }
@@ -197,7 +218,7 @@ export function truncateHTML(
 /**
  * Extrait le texte brut d'un HTML avec limite de longueur
  * Utile pour les meta descriptions, previews, etc.
- * 
+ *
  * @param html - HTML source
  * @param maxLength - Longueur maximale
  * @returns Texte brut tronqué
@@ -207,25 +228,23 @@ export function extractPlainTextExcerpt(
   maxLength: number = 160
 ): string {
   if (!html) return '';
-  
+
   const plainText = htmlToPlainText(html);
-  
+
   if (plainText.length <= maxLength) {
     return plainText;
   }
-  
+
   // Tronquer au dernier mot complet
   const truncated = plainText.substring(0, maxLength);
   const lastSpace = truncated.lastIndexOf(' ');
-  
-  return lastSpace > 0 
-    ? truncated.substring(0, lastSpace) + '...'
-    : truncated + '...';
+
+  return lastSpace > 0 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
 }
 
 /**
  * Vérifie si une chaîne contient du HTML
- * 
+ *
  * @param text - Texte à vérifier
  * @returns true si contient du HTML
  */
@@ -240,7 +259,7 @@ export function containsHTML(text: string | null | undefined): boolean {
  */
 export function configureDOMPurify(): void {
   // Ajouter des hooks personnalisés si nécessaire
-  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  DOMPurify.addHook('afterSanitizeAttributes', node => {
     // Forcer target="_blank" pour tous les liens externes
     if (node.tagName === 'A' && node.hasAttribute('href')) {
       const href = node.getAttribute('href');
@@ -250,7 +269,7 @@ export function configureDOMPurify(): void {
       }
     }
   });
-  
+
   // DOMPurify configuré - pas besoin de log
 }
 
@@ -269,11 +288,11 @@ export interface SanitizedHTMLProps {
 
 /**
  * Helper pour créer des props dangerouslySetInnerHTML sécurisées
- * 
+ *
  * @param html - HTML à sanitizer
  * @param config - Configuration optionnelle
  * @returns Objet pour dangerouslySetInnerHTML
- * 
+ *
  * @example
  * ```tsx
  * <div {...createSafeInnerHTML(product.description)} />
@@ -289,4 +308,3 @@ export function createSafeInnerHTML(
     },
   };
 }
-

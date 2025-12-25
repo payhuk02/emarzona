@@ -25,6 +25,14 @@ interface ResponsiveProductImageProps {
    * @default true
    */
   fill?: boolean;
+  /**
+   * Width of the image for optimization (overrides context-based defaults)
+   */
+  width?: number;
+  /**
+   * Height of the image for optimization (overrides context-based defaults)
+   */
+  height?: number;
 }
 
 export const ResponsiveProductImage = ({
@@ -40,6 +48,8 @@ export const ResponsiveProductImage = ({
   context = 'grid',
   fit = 'cover',
   fill = true,
+  width: propWidth,
+  height: propHeight,
 }: ResponsiveProductImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -125,43 +135,59 @@ export const ResponsiveProductImage = ({
       {/* Image optimisée avec rendu professionnel - Stable et optimisée */}
       {isInView && (
         <img
-          src={src ? (() => {
-            // ✅ OPTIMISATION: Utiliser WebP/AVIF pour Supabase Storage
-            if (src.includes('supabase.co/storage')) {
-              const params = new URLSearchParams();
-              const width = context === 'thumbnail' ? 768 : context === 'detail' ? 1536 : 1152;
-              params.set('width', width.toString());
-              params.set('quality', '85');
-              
-              // Détecter le meilleur format supporté
-              if (typeof document !== 'undefined') {
-                try {
-                  const canvas = document.createElement('canvas');
-                  canvas.width = 1;
-                  canvas.height = 1;
-                  if (canvas.toDataURL('image/avif').indexOf('data:image/avif') === 0) {
-                    params.set('format', 'avif');
-                  } else if (canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0) {
-                    params.set('format', 'webp');
+          src={
+            src
+              ? (() => {
+                  // ✅ OPTIMISATION: Utiliser WebP/AVIF pour Supabase Storage
+                  if (src.includes('supabase.co/storage')) {
+                    const params = new URLSearchParams();
+                    // Utiliser les props width/height si fournies, sinon utiliser les valeurs par défaut basées sur le contexte
+                    const width =
+                      propWidth ??
+                      (context === 'thumbnail' ? 768 : context === 'detail' ? 1536 : 1536);
+                    const height =
+                      propHeight ??
+                      (context === 'thumbnail' ? 512 : context === 'detail' ? 1024 : 1024);
+                    params.set('width', width.toString());
+                    params.set('height', height.toString());
+                    params.set('quality', '85');
+
+                    // Détecter le meilleur format supporté
+                    if (typeof document !== 'undefined') {
+                      try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 1;
+                        canvas.height = 1;
+                        if (canvas.toDataURL('image/avif').indexOf('data:image/avif') === 0) {
+                          params.set('format', 'avif');
+                        } else if (
+                          canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0
+                        ) {
+                          params.set('format', 'webp');
+                        }
+                      } catch {
+                        // Fallback vers format original
+                      }
+                    }
+
+                    return `${src}?${params.toString()}`;
                   }
-                } catch {
-                  // Fallback vers format original
-                }
-              }
-              
-              return `${src}?${params.toString()}`;
-            }
-            return src;
-          })() : undefined}
+                  return src;
+                })()
+              : undefined
+          }
           alt={alt}
           width={
-            context === 'thumbnail'
+            propWidth ??
+            (context === 'thumbnail'
               ? 768 // 3:2 thumbnail aligné avec IMAGE_FORMATS.thumbnail
               : context === 'detail'
                 ? 1536 // format produit principal
-                : 1152 // 3:2 pour les grilles (cartes produits)
+                : 1536) // Format 1536x1024 pour les grilles (cartes produits) - ratio 3:2
           }
-          height={context === 'thumbnail' ? 512 : context === 'detail' ? 1024 : 768}
+          height={
+            propHeight ?? (context === 'thumbnail' ? 512 : context === 'detail' ? 1024 : 1024)
+          }
           className={cn('w-full h-full', 'product-image', isLoaded ? 'opacity-100' : 'opacity-100')}
           onLoad={handleLoad}
           onError={handleError}

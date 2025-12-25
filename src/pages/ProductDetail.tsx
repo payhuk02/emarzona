@@ -34,13 +34,11 @@ import {
   MessageSquare,
   TrendingUp,
 } from 'lucide-react';
-import ProductCard from '@/components/marketplace/ProductCard';
-import { ProductGrid } from '@/components/ui/ProductGrid';
 import StoreFooter from '@/components/storefront/StoreFooter';
-import { useProductsOptimized } from '@/hooks/useProductsOptimized';
 import { sanitizeProductDescription } from '@/lib/html-sanitizer';
 import { ProductImageGallery } from '@/components/ui/ProductImageGallery';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
+import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { CountdownTimer } from '@/components/ui/countdown-timer';
 import { CustomFieldsDisplay } from '@/components/products/CustomFieldsDisplay';
 import { ProductVariantSelector } from '@/components/products/ProductVariantSelector';
@@ -81,15 +79,6 @@ const ProductDetails = () => {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { toast } = useToast();
-
-  // ID stable pour éviter les violations des règles des hooks
-  const storeId = store?.id || null;
-  // Utiliser useProductsOptimized avec limite pour produits similaires
-  const { products: similarProductsData } = useProductsOptimized(storeId, {
-    page: 1,
-    itemsPerPage: 20, // Limite raisonnable pour produits similaires
-  });
-  const similarProducts = similarProductsData || [];
 
   const fetchData = useCallback(async () => {
     if (!slug || !productSlug) {
@@ -202,11 +191,6 @@ const ProductDetails = () => {
         ? `${window.location.origin}/stores/${store.slug}/products/${product.slug}`
         : '',
     [product, store]
-  );
-
-  const relatedProducts = useMemo(
-    () => (product ? similarProducts.filter(p => p.id !== product.id).slice(0, 4) : []),
-    [product, similarProducts]
   );
 
   const safeDescription = useMemo(
@@ -480,11 +464,11 @@ const ProductDetails = () => {
         {/* Contenu principal */}
         <main className="flex-1" role="main">
           <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-10 md:mb-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-10 md:mb-12 lg:items-start">
               {/* 🖼️ Galerie d'images inspirée du design professionnel - Image principale à gauche, miniatures à droite */}
               <div
                 ref={galleryRef}
-                className="flex flex-col lg:flex-row gap-3 sm:gap-4"
+                className="flex flex-col lg:flex-row gap-3 sm:gap-4 lg:items-start"
                 role="group"
                 aria-label="Galerie du produit"
               >
@@ -515,6 +499,7 @@ const ProductDetails = () => {
                   }
 
                   const currentImage = allImages[selectedImageIndex] || product.image_url;
+                  const hasMultipleImages = allImages.length > 1;
 
                   if (allImages.length === 0 && !product.image_url) {
                     return null;
@@ -522,28 +507,48 @@ const ProductDetails = () => {
 
                   return (
                     <>
-                      {/* Image principale - Grande taille à gauche (ou en haut sur mobile) */}
-                      <div className="w-full lg:w-[75%] lg:flex-none">
+                      {/* Image principale - Pleine largeur si pas d'images secondaires, sinon 75% avec miniatures */}
+                      <div
+                        className={cn(
+                          'w-full lg:flex-none',
+                          hasMultipleImages ? 'lg:w-[75%]' : 'lg:w-full'
+                        )}
+                      >
                         {/* ✅ Mobile stable: ratio fixe pour éviter CLS + éviter les styles globaux product-image-container */}
-                        <div className="rounded-lg overflow-hidden border border-border shadow-sm bg-transparent">
-                          <div className="relative flex items-center justify-center w-full aspect-[4/3] sm:aspect-[16/9] lg:aspect-auto lg:h-[520px] bg-muted/30">
+                        {/* ✅ Format 1536x1024 (ratio 3:2) - Style identique au Marketplace */}
+                        {/* ✅ Alignée en haut au même niveau que le titre */}
+                        <div className="relative w-full aspect-[3/2] overflow-hidden bg-muted/30 border-2 border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300 group">
+                          <Link
+                            to={`/stores/${store.slug}/products/${product.slug}`}
+                            className="block w-full h-full"
+                          >
                             {currentImage && (
-                              <OptimizedImage
+                              <ResponsiveProductImage
                                 src={currentImage}
                                 alt={product.name}
-                                containerClassName="w-full h-full"
-                                imageClassName="w-full h-full object-contain object-center bg-muted/30 transition-none sm:transition-opacity sm:duration-300"
+                                className="w-full h-full transition-transform duration-300 group-hover:scale-110"
+                                fit="contain"
+                                fill={true}
+                                context="grid"
                                 priority={selectedImageIndex === 0}
-                                showPlaceholder={true}
+                                width={1536}
+                                height={1024}
                               />
                             )}
-                          </div>
+                          </Link>
+
+                          {/* Fallback icon (si pas d'image) */}
+                          {!currentImage && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <ShoppingCart className="h-16 w-16 opacity-20" />
+                            </div>
+                          )}
                         </div>
                       </div>
 
-                      {/* Miniatures à droite (ou en bas sur mobile) - Colonne verticale */}
-                      {allImages.length > 1 && (
-                        <div className="flex lg:flex-col gap-2 sm:gap-3 lg:w-[25%] overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 lg:h-[520px] lg:overflow-y-auto lg:overscroll-contain lg:[-webkit-overflow-scrolling:touch]">
+                      {/* Miniatures à droite (ou en bas sur mobile) - Colonne verticale - Uniquement si images secondaires */}
+                      {hasMultipleImages && (
+                        <div className="flex lg:flex-col gap-2 sm:gap-3 lg:w-[25%] overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 lg:h-[520px] lg:overflow-y-auto lg:overscroll-contain lg:[-webkit-overflow-scrolling:touch] snap-x snap-mandatory lg:snap-none">
                           {allImages.map((imageUrl, index) => (
                             <button
                               key={index}
@@ -551,11 +556,14 @@ const ProductDetails = () => {
                               className={cn(
                                 'flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all duration-200',
                                 'w-20 h-20 sm:w-24 sm:h-24 lg:w-full lg:h-[96px]',
+                                'snap-start lg:snap-none',
+                                'touch-manipulation min-h-[80px] min-w-[80px] sm:min-h-[96px] sm:min-w-[96px]',
                                 selectedImageIndex === index
                                   ? 'border-amber-500 ring-2 ring-amber-500/30 shadow-md scale-105'
-                                  : 'border-gray-300 hover:border-amber-400 hover:shadow-sm opacity-75 hover:opacity-100'
+                                  : 'border-gray-300 hover:border-amber-400 hover:shadow-sm opacity-75 hover:opacity-100 active:scale-95'
                               )}
                               aria-label={`Voir l'image ${index + 1} de ${product.name}`}
+                              aria-pressed={selectedImageIndex === index}
                             >
                               <OptimizedImage
                                 src={imageUrl}
@@ -571,32 +579,28 @@ const ProductDetails = () => {
                           ))}
                         </div>
                       )}
-
-                      {/* Spacer desktop: garder la "place dédiée" des miniatures même si aucune n'est uploadée */}
-                      {allImages.length <= 1 && (
-                        <div className="hidden lg:block lg:w-[25%]" aria-hidden="true" />
-                      )}
                     </>
                   );
                 })()}
 
                 {/* 🎥 Vidéo produit */}
                 {product.video_url && (
-                  <div className="aspect-video rounded-lg overflow-hidden border border-border shadow-sm bg-card">
+                  <div className="aspect-video rounded-lg overflow-hidden border border-border shadow-sm bg-card mt-3 sm:mt-4">
                     <iframe
                       src={product.video_url}
                       title={`Vidéo de ${product.name}`}
-                      className="w-full h-full"
+                      className="w-full h-full min-h-[200px] sm:min-h-[300px]"
                       allowFullScreen
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       loading="lazy"
+                      aria-label={`Vidéo de présentation de ${product.name}`}
                     />
                   </div>
                 )}
               </div>
 
               {/* Infos produit */}
-              <div ref={detailsRef} className="space-y-4 sm:space-y-5 md:space-y-6">
+              <div ref={detailsRef} className="space-y-4 sm:space-y-5 md:space-y-6 lg:pt-0">
                 <h1
                   className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight"
                   id="product-title"
@@ -606,9 +610,14 @@ const ProductDetails = () => {
 
                 {/* Licensing banner */}
                 {product.licensing_type && (
-                  <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border bg-muted/50">
+                  <div
+                    className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border bg-muted/50"
+                    role="region"
+                    aria-label="Informations de licence"
+                  >
                     <div
                       className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center flex-shrink-0 ${product.licensing_type === 'plr' ? 'bg-emerald-100' : product.licensing_type === 'copyrighted' ? 'bg-red-100' : 'bg-gray-100'}`}
+                      aria-hidden="true"
                     >
                       <Shield
                         className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${product.licensing_type === 'plr' ? 'text-emerald-700' : product.licensing_type === 'copyrighted' ? 'text-red-700' : 'text-gray-700'}`}
@@ -725,29 +734,34 @@ const ProductDetails = () => {
 
                 {/* Lien vers produit preview ou payant */}
                 {product.is_free_preview && product.paid_product && (
-                  <div className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800">
-                    <div className="flex items-start gap-3">
-                      <Gift className="h-5 w-5 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="font-semibold text-purple-900 dark:text-purple-100 mb-1">
+                  <div className="p-3 sm:p-4 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <Gift
+                        className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0"
+                        aria-hidden="true"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-purple-900 dark:text-purple-100 mb-1 text-sm sm:text-base break-words">
                           Version Preview Gratuite
                         </p>
                         {product.preview_content_description && (
-                          <p className="text-sm text-purple-800 dark:text-purple-200 mb-3">
+                          <p className="text-xs sm:text-sm text-purple-800 dark:text-purple-200 mb-3 break-words">
                             {product.preview_content_description}
                           </p>
                         )}
                         <Link
                           to={`/${slug}/${product.paid_product.slug}`}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-colors font-medium text-sm"
+                          className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-colors font-medium text-xs sm:text-sm touch-manipulation min-h-[44px] w-full sm:w-auto justify-center sm:justify-start"
                         >
-                          <Package className="h-4 w-4" />
-                          Accéder à la version complète (
-                          {formatPrice(
-                            product.paid_product.price,
-                            product.paid_product.currency || 'FCFA'
-                          )}
-                          )
+                          <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                          <span className="break-words">
+                            Accéder à la version complète (
+                            {formatPrice(
+                              product.paid_product.price,
+                              product.paid_product.currency || 'FCFA'
+                            )}
+                            )
+                          </span>
                         </Link>
                       </div>
                     </div>
@@ -756,23 +770,28 @@ const ProductDetails = () => {
 
                 {/* Lien vers preview gratuit si produit payant */}
                 {product.free_product && !product.is_free_preview && (
-                  <div className="p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800">
-                    <div className="flex items-start gap-3">
-                      <Eye className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="font-semibold text-green-900 dark:text-green-100 mb-1">
+                  <div className="p-3 sm:p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <Eye
+                        className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0"
+                        aria-hidden="true"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-green-900 dark:text-green-100 mb-1 text-sm sm:text-base break-words">
                           Version Preview Gratuite Disponible
                         </p>
-                        <p className="text-sm text-green-800 dark:text-green-200 mb-3">
+                        <p className="text-xs sm:text-sm text-green-800 dark:text-green-200 mb-3 break-words">
                           Téléchargez gratuitement un aperçu de ce produit avant d'acheter la
                           version complète.
                         </p>
                         <Link
                           to={`/${slug}/${product.free_product.slug}`}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-colors font-medium text-sm"
+                          className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-colors font-medium text-xs sm:text-sm touch-manipulation min-h-[44px] w-full sm:w-auto justify-center sm:justify-start"
                         >
-                          <Gift className="h-4 w-4" />
-                          Télécharger la version preview gratuite
+                          <Gift className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                          <span className="break-words">
+                            Télécharger la version preview gratuite
+                          </span>
                         </Link>
                       </div>
                     </div>
@@ -781,11 +800,13 @@ const ProductDetails = () => {
 
                 {/* ⏰ NOUVEAU: Countdown promo */}
                 {product.sale_end_date && (
-                  <div className="flex justify-center sm:justify-start">
-                    <CountdownTimer
-                      endDate={product.sale_end_date}
-                      startDate={product.sale_start_date}
-                    />
+                  <div className="flex justify-center sm:justify-start w-full">
+                    <div className="w-full sm:w-auto">
+                      <CountdownTimer
+                        endDate={product.sale_end_date}
+                        startDate={product.sale_start_date}
+                      />
+                    </div>
                   </div>
                 )}
 
@@ -922,8 +943,14 @@ const ProductDetails = () => {
 
                 {/* Messages détaillés */}
                 {product.password_protected && (
-                  <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg bg-yellow-500/5 border border-yellow-500/20">
-                    <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <div
+                    className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg bg-yellow-500/5 border border-yellow-500/20"
+                    role="alert"
+                  >
+                    <Lock
+                      className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600 flex-shrink-0 mt-0.5"
+                      aria-hidden="true"
+                    />
                     <div className="text-xs sm:text-sm min-w-0 flex-1">
                       <p className="font-semibold text-yellow-700 mb-1">
                         Produit à accès restreint
@@ -936,8 +963,14 @@ const ProductDetails = () => {
                 )}
 
                 {product.purchase_limit && product.purchase_limit > 0 && (
-                  <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg bg-orange-500/5 border border-orange-500/20">
-                    <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                  <div
+                    className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg bg-orange-500/5 border border-orange-500/20"
+                    role="alert"
+                  >
+                    <AlertTriangle
+                      className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 flex-shrink-0 mt-0.5"
+                      aria-hidden="true"
+                    />
                     <div className="text-xs sm:text-sm min-w-0 flex-1">
                       <p className="font-semibold text-orange-700 mb-1">
                         Limite d'achat par personne
@@ -956,7 +989,7 @@ const ProductDetails = () => {
                   product.features.length > 0 && (
                     <div className="pt-4 sm:pt-6 border-t border-border">
                       <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                        <Package className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                        <Package className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
                         <h2 className="text-lg sm:text-xl font-semibold">
                           Caractéristiques principales
                         </h2>
@@ -965,10 +998,10 @@ const ProductDetails = () => {
                         {product.features.map((feature: string, index: number) => (
                           <div
                             key={index}
-                            className="flex items-start gap-2 p-2 sm:p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                            className="flex items-start gap-2 p-2.5 sm:p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                           >
                             <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                            <span className="text-xs sm:text-sm leading-relaxed break-words">
+                            <span className="text-xs sm:text-sm leading-relaxed break-words flex-1 min-w-0">
                               {feature}
                             </span>
                           </div>
@@ -979,12 +1012,14 @@ const ProductDetails = () => {
 
                 {/* 📜 Conditions de licence */}
                 {product.licensing_type && (
-                  <div className="pt-6 border-t border-border">
-                    <h2 className="text-xl font-semibold mb-3">Conditions de licence</h2>
-                    <div className="text-sm text-muted-foreground space-y-2">
+                  <div className="pt-4 sm:pt-6 border-t border-border">
+                    <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
+                      Conditions de licence
+                    </h2>
+                    <div className="text-xs sm:text-sm text-muted-foreground space-y-2 break-words">
                       <p>
                         Type de licence:{' '}
-                        <strong>
+                        <strong className="text-foreground">
                           {product.licensing_type === 'plr'
                             ? 'PLR (droits de label privé)'
                             : product.licensing_type === 'copyrighted'
@@ -993,7 +1028,7 @@ const ProductDetails = () => {
                         </strong>
                       </p>
                       {product.license_terms ? (
-                        <p className="whitespace-pre-wrap">{product.license_terms}</p>
+                        <p className="whitespace-pre-wrap break-words">{product.license_terms}</p>
                       ) : (
                         <p>Les conditions détaillées de licence seront précisées par le vendeur.</p>
                       )}
@@ -1005,13 +1040,16 @@ const ProductDetails = () => {
                 {product.specifications &&
                   Array.isArray(product.specifications) &&
                   product.specifications.length > 0 && (
-                    <div className="pt-6 border-t border-border">
-                      <div className="flex items-center gap-2 mb-4">
-                        <ClipboardList className="h-5 w-5 text-primary" />
-                        <h2 className="text-xl font-semibold">Spécifications techniques</h2>
+                    <div className="pt-4 sm:pt-6 border-t border-border">
+                      <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                        <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+                        <h2 className="text-lg sm:text-xl font-semibold">
+                          Spécifications techniques
+                        </h2>
                       </div>
                       <div className="rounded-lg border border-border overflow-hidden bg-card">
-                        <div className="overflow-x-auto">
+                        {/* Desktop: Table layout */}
+                        <div className="hidden sm:block overflow-x-auto">
                           <Table className="min-w-[480px]">
                             <TableBody>
                               {product.specifications.map(
@@ -1020,15 +1058,30 @@ const ProductDetails = () => {
                                     key={index}
                                     className={index % 2 === 0 ? 'bg-muted/50' : ''}
                                   >
-                                    <TableCell className="font-medium w-1/3 py-3">
+                                    <TableCell className="font-medium w-1/3 py-3 px-4">
                                       {spec.name || spec.label || spec.key}
                                     </TableCell>
-                                    <TableCell className="py-3 break-words">{spec.value}</TableCell>
+                                    <TableCell className="py-3 px-4 break-words">
+                                      {spec.value}
+                                    </TableCell>
                                   </TableRow>
                                 )
                               )}
                             </TableBody>
                           </Table>
+                        </div>
+                        {/* Mobile: Card layout */}
+                        <div className="sm:hidden divide-y divide-border">
+                          {product.specifications.map(
+                            (spec: ProductSpecification, index: number) => (
+                              <div key={index} className="p-3 sm:p-4 bg-card">
+                                <div className="font-medium text-sm mb-1.5 text-muted-foreground">
+                                  {spec.name || spec.label || spec.key}
+                                </div>
+                                <div className="text-sm break-words">{spec.value}</div>
+                              </div>
+                            )
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1038,38 +1091,38 @@ const ProductDetails = () => {
                 {product.downloadable_files &&
                   Array.isArray(product.downloadable_files) &&
                   product.downloadable_files.length > 0 && (
-                    <div className="pt-6 border-t border-border">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Download className="h-5 w-5 text-primary" />
-                        <h2 className="text-xl font-semibold">Fichiers inclus</h2>
+                    <div className="pt-4 sm:pt-6 border-t border-border">
+                      <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                        <Download className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+                        <h2 className="text-lg sm:text-xl font-semibold">Fichiers inclus</h2>
                       </div>
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border border-border">
-                          <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                              <Download className="h-5 w-5 text-primary" />
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg bg-muted/50 border border-border">
+                          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                              <Download className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                             </div>
-                            <div>
-                              <p className="font-medium">
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-sm sm:text-base break-words">
                                 {product.downloadable_files.length} fichier
                                 {product.downloadable_files.length > 1 ? 's' : ''} téléchargeable
                                 {product.downloadable_files.length > 1 ? 's' : ''}
                               </p>
-                              <p className="text-sm text-muted-foreground">
+                              <p className="text-xs sm:text-sm text-muted-foreground">
                                 Accès immédiat après l'achat
                               </p>
                             </div>
                           </div>
                           {product.download_limit && (
-                            <div className="text-sm text-muted-foreground">
+                            <div className="text-xs sm:text-sm text-muted-foreground flex-shrink-0">
                               Limite: {product.download_limit} téléchargement
                               {product.download_limit > 1 ? 's' : ''}
                             </div>
                           )}
                         </div>
                         {product.download_expiry_days && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground px-4">
-                            <Clock className="h-4 w-4" />
+                          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground px-3 sm:px-4">
+                            <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                             <span>Disponible pendant {product.download_expiry_days} jours</span>
                           </div>
                         )}
@@ -1085,27 +1138,31 @@ const ProductDetails = () => {
                   )}
 
                 {/* Catégorie et Type */}
-                <div className="pt-6 border-t border-border space-y-2 text-sm">
+                <div className="pt-4 sm:pt-6 border-t border-border space-y-2 text-xs sm:text-sm">
                   {product.category && (
-                    <div>
-                      <strong>Catégorie :</strong> {product.category}
+                    <div className="break-words">
+                      <strong className="text-foreground">Catégorie :</strong>{' '}
+                      <span className="text-muted-foreground">{product.category}</span>
                     </div>
                   )}
                   {product.product_type && (
-                    <div>
-                      <strong>Type :</strong> {product.product_type}
+                    <div className="break-words">
+                      <strong className="text-foreground">Type :</strong>{' '}
+                      <span className="text-muted-foreground">{product.product_type}</span>
                     </div>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* ✅ Description complète du produit */}
+            {/* ✅ Description complète du produit - Professionnelle et responsive */}
             {safeDescription && (
               <div className="mb-8 sm:mb-10 md:mb-12 pt-6 sm:pt-8 border-t border-border">
-                <h2 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">Description</h2>
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6 text-foreground">
+                  Description
+                </h2>
                 <div
-                  className="bg-white dark:bg-white text-black dark:text-black text-sm sm:text-base leading-relaxed prose prose-sm sm:prose-base max-w-none prose-headings:text-black dark:prose-headings:text-black prose-p:text-black dark:prose-p:text-black prose-a:text-primary prose-strong:text-black dark:prose-strong:text-black p-4 sm:p-6 rounded-lg"
+                  className="product-description-content bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6 md:p-8 shadow-sm"
                   dangerouslySetInnerHTML={{ __html: safeDescription }}
                 />
               </div>
@@ -1115,7 +1172,7 @@ const ProductDetails = () => {
             {product.faqs && Array.isArray(product.faqs) && product.faqs.length > 0 && (
               <div className="mb-8 sm:mb-10 md:mb-12">
                 <div className="flex items-center gap-2 mb-4 sm:mb-6">
-                  <HelpCircle className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                  <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary flex-shrink-0" />
                   <h2 className="text-xl sm:text-2xl font-bold">Questions fréquentes</h2>
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-2">
@@ -1125,8 +1182,10 @@ const ProductDetails = () => {
                       value={`faq-${index}`}
                       className="border border-border rounded-lg px-3 sm:px-4 bg-card"
                     >
-                      <AccordionTrigger className="text-left hover:no-underline text-sm sm:text-base py-3 sm:py-4">
-                        <span className="font-medium break-words pr-4">{faq.question}</span>
+                      <AccordionTrigger className="text-left hover:no-underline text-sm sm:text-base py-3 sm:py-4 min-h-[44px]">
+                        <span className="font-medium break-words pr-4 flex-1 text-left">
+                          {faq.question}
+                        </span>
                       </AccordionTrigger>
                       <AccordionContent className="text-xs sm:text-sm text-muted-foreground leading-relaxed pb-3 sm:pb-4 break-words">
                         {faq.answer}
@@ -1168,34 +1227,6 @@ const ProductDetails = () => {
                   limit={6}
                   title="Produits similaires"
                 />
-              </div>
-            )}
-
-            {/* Produits similaires (fallback si pas de recommandations) */}
-            {relatedProducts.length > 0 && (
-              <div
-                role="region"
-                aria-labelledby="related-products-heading"
-                className="mb-8 sm:mb-10 md:mb-12"
-              >
-                <h2
-                  id="related-products-heading"
-                  className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 px-2 sm:px-0"
-                >
-                  Autres produits de cette boutique
-                </h2>
-                <ProductGrid>
-                  {relatedProducts.map((related, index) => (
-                    <div
-                      key={related.id}
-                      role="listitem"
-                      className="animate-in fade-in slide-in-from-bottom-4"
-                      style={{ animationDelay: `${index * 0.1}s` }}
-                    >
-                      <ProductCard product={related} storeSlug={store.slug} />
-                    </div>
-                  ))}
-                </ProductGrid>
               </div>
             )}
           </div>

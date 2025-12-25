@@ -322,7 +322,7 @@ export function ArtistProductCard({
                 <Store className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500 dark:text-gray-400" />
               </div>
             )}
-            <span className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white truncate">
+            <span className="text-xs sm:text-sm font-semibold text-white truncate">
               {product.store.name}
             </span>
             <CheckCircle
@@ -338,7 +338,7 @@ export function ArtistProductCard({
             <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center flex-shrink-0">
               <User className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
             </div>
-            <span className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
+            <span className="text-xs sm:text-sm font-semibold text-white">
               {product.artist_name}
             </span>
             <CheckCircle2
@@ -355,7 +355,7 @@ export function ArtistProductCard({
             className={cn(
               'font-semibold leading-tight line-clamp-2 mb-3',
               'text-sm sm:text-base lg:text-lg',
-              'text-gray-900 dark:text-white',
+              'text-white',
               'hover:text-primary transition-colors',
               isCompact && 'text-sm'
             )}
