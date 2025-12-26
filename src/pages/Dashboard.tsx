@@ -46,56 +46,69 @@ import {
 } from '@/components/dashboard/AdvancedDashboardComponents';
 import { RecentOrdersCard } from '@/components/dashboard/RecentOrdersCard';
 import { TopProductsCard } from '@/components/dashboard/TopProductsCard';
+import { ProductTypeBreakdown } from '@/components/dashboard/ProductTypeBreakdown';
+import {
+  ProductTypeQuickFilters,
+  type ProductTypeFilter,
+} from '@/components/dashboard/ProductTypeQuickFilters';
+import { ProductTypeCharts } from '@/components/dashboard/ProductTypeCharts';
+import { ProductTypePerformanceMetrics } from '@/components/dashboard/ProductTypePerformanceMetrics';
 import { PeriodFilter, PeriodType } from '@/components/dashboard/PeriodFilter';
+import {
+  useNotifications,
+  useUnreadCount,
+  useRealtimeNotifications,
+} from '@/hooks/useNotifications';
 import '@/styles/dashboard-responsive.css';
 
 const Dashboard = () => {
   const { t } = useTranslation();
   const { getValue } = usePageCustomization('dashboard');
   const { store, loading: storeLoading } = useStore();
-  const { stats, loading, error: hookError, refetch } = useDashboardStats();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState<PeriodType>('30d');
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
+  const {
+    stats,
+    loading,
+    error: hookError,
+    refetch,
+  } = useDashboardStats({
+    period,
+    customStartDate,
+    customEndDate,
+  });
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedProductType, setSelectedProductType] = useState<ProductTypeFilter>('all');
 
-  // Données simulées pour les notifications
-  const notifications = useMemo(
-    () => [
-      {
-        id: '1',
-        title: t('dashboard.notifications.newOrder'),
-        message: t('dashboard.notifications.newOrderMessage', {
-          orderNumber: 'ORD-20250121-0001',
-          amount: '25,000',
-        }),
-        type: 'success' as const,
-        timestamp: new Date().toISOString(),
-        read: false,
-      },
-      {
-        id: '2',
-        title: t('dashboard.notifications.outOfStock'),
-        message: t('dashboard.notifications.outOfStockMessage', {
-          productName: 'Formation Expert',
-        }),
-        type: 'warning' as const,
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        read: false,
-      },
-      {
-        id: '3',
-        title: t('dashboard.notifications.paymentReceived'),
-        message: t('dashboard.notifications.paymentReceivedMessage', { amount: '15,000' }),
-        type: 'success' as const,
-        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-        read: true,
-      },
-    ],
-    [t]
-  );
+  // Récupérer les vraies notifications depuis Supabase (inclut les messages)
+  const { data: notificationsResult } = useNotifications({
+    page: 1,
+    pageSize: 5, // Afficher les 5 dernières notifications
+    includeArchived: false,
+  });
+  const { data: unreadCount = 0 } = useUnreadCount();
+
+  // S'abonner aux notifications en temps réel
+  useRealtimeNotifications();
+
+  // Transformer les notifications Supabase en format compatible avec le Dashboard
+  const notifications = useMemo(() => {
+    const dbNotifications = notificationsResult?.data || [];
+    return dbNotifications.map(notif => ({
+      id: notif.id,
+      title: notif.title,
+      message: notif.message,
+      type:
+        notif.priority === 'urgent' || notif.priority === 'high'
+          ? ('warning' as const)
+          : ('success' as const),
+      timestamp: notif.created_at,
+      read: notif.is_read || false,
+    }));
+  }, [notificationsResult?.data]);
 
   const handleRefresh = useCallback(async () => {
     try {
@@ -265,6 +278,31 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                {/* Notifications Bell - Desktop */}
+                <div className="hidden sm:block relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="min-h-[44px] min-w-[44px] p-0 relative"
+                    aria-label="Notifications"
+                    title="Notifications"
+                    onClick={() => {
+                      // Naviguer vers la page des notifications
+                      navigate('/notifications');
+                    }}
+                  >
+                    <Bell className="h-5 w-5" aria-hidden="true" />
+                    {unreadCount > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] font-semibold"
+                      >
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </div>
+
                 {/* Desktop controls */}
                 <PeriodFilter
                   period={period}
@@ -321,6 +359,22 @@ const Dashboard = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] max-w-sm">
+                    {/* Notifications on Mobile */}
+                    {unreadCount > 0 && (
+                      <>
+                        <DropdownMenuItem
+                          className="min-h-[44px]"
+                          onClick={() => navigate('/notifications')}
+                        >
+                          <Bell className="h-4 w-4 mr-2" aria-hidden="true" />
+                          <span className="flex-1">Notifications</span>
+                          <Badge variant="destructive" className="ml-2">
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                          </Badge>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
                     {/* Period Filter on Mobile */}
                     <div className="px-2 py-2">
                       <div className="text-xs font-medium mb-2 text-muted-foreground">Période</div>
@@ -609,6 +663,53 @@ const Dashboard = () => {
               </div>
             )}
 
+            {/* Product Type Quick Filters */}
+            {stats && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                  <CardContent className="p-3 sm:p-4 md:p-6">
+                    <ProductTypeQuickFilters
+                      selectedType={selectedProductType}
+                      onTypeChange={setSelectedProductType}
+                      stats={stats}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Product Type Breakdown */}
+            {stats && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <ProductTypeBreakdown
+                  productsByType={stats.productsByType}
+                  revenueByType={stats.revenueByType}
+                  ordersByType={stats.ordersByType}
+                />
+              </div>
+            )}
+
+            {/* Product Type Charts */}
+            {stats && stats.revenueByTypeAndMonth && stats.revenueByTypeAndMonth.length > 0 && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <ProductTypeCharts
+                  revenueByTypeAndMonth={stats.revenueByTypeAndMonth}
+                  ordersByType={stats.ordersByType}
+                  selectedType={selectedProductType}
+                />
+              </div>
+            )}
+
+            {/* Product Type Performance Metrics */}
+            {stats && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <ProductTypePerformanceMetrics
+                  performanceMetricsByType={stats.performanceMetricsByType}
+                  selectedType={selectedProductType}
+                />
+              </div>
+            )}
+
             {/* Top Products & Recent Orders */}
             {stats && (stats.topProducts.length > 0 || stats.recentOrders.length > 0) && (
               <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -629,6 +730,7 @@ const Dashboard = () => {
             >
               {/* Notifications */}
               <Card
+                id="notifications-section"
                 className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300"
                 role="region"
                 aria-labelledby="notifications-title"

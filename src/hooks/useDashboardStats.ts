@@ -28,6 +28,7 @@ export interface DashboardStats {
     status: string;
     created_at: string;
     customers: { name: string; email: string } | null;
+    product_types?: string[];
   }>;
 
   topProducts: Array<{
@@ -80,6 +81,70 @@ export interface DashboardStats {
     customerGrowth: number;
     productGrowth: number;
   };
+
+  // Statistiques par type de produit
+  productsByType: {
+    digital: number;
+    physical: number;
+    service: number;
+    course: number;
+    artist: number;
+  };
+
+  revenueByType: {
+    digital: number;
+    physical: number;
+    service: number;
+    course: number;
+    artist: number;
+  };
+
+  ordersByType: {
+    digital: number;
+    physical: number;
+    service: number;
+    course: number;
+    artist: number;
+  };
+
+  // Métriques de performance par type
+  performanceMetricsByType: {
+    digital: {
+      conversionRate: number;
+      averageOrderValue: number;
+      customerRetention: number;
+    };
+    physical: {
+      conversionRate: number;
+      averageOrderValue: number;
+      customerRetention: number;
+    };
+    service: {
+      conversionRate: number;
+      averageOrderValue: number;
+      customerRetention: number;
+    };
+    course: {
+      conversionRate: number;
+      averageOrderValue: number;
+      customerRetention: number;
+    };
+    artist: {
+      conversionRate: number;
+      averageOrderValue: number;
+      customerRetention: number;
+    };
+  };
+
+  // Revenus par type et par mois pour graphiques
+  revenueByTypeAndMonth: Array<{
+    month: string;
+    digital: number;
+    physical: number;
+    service: number;
+    course: number;
+    artist: number;
+  }>;
 }
 
 // Données de fallback en cas d'erreur
@@ -119,9 +184,44 @@ const getFallbackStats = (): DashboardStats => ({
     customerGrowth: 0,
     productGrowth: 0,
   },
+  productsByType: {
+    digital: 0,
+    physical: 0,
+    service: 0,
+    course: 0,
+    artist: 0,
+  },
+  revenueByType: {
+    digital: 0,
+    physical: 0,
+    service: 0,
+    course: 0,
+    artist: 0,
+  },
+  ordersByType: {
+    digital: 0,
+    physical: 0,
+    service: 0,
+    course: 0,
+    artist: 0,
+  },
+  performanceMetricsByType: {
+    digital: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
+    physical: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
+    service: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
+    course: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
+    artist: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
+  },
+  revenueByTypeAndMonth: [],
 });
 
-export const useDashboardStats = () => {
+export interface UseDashboardStatsOptions {
+  period?: '7d' | '30d' | '90d' | 'custom';
+  customStartDate?: Date;
+  customEndDate?: Date;
+}
+
+export const useDashboardStats = (options?: UseDashboardStatsOptions) => {
   const [stats, setStats] = useState<DashboardStats>(getFallbackStats());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -141,12 +241,30 @@ export const useDashboardStats = () => {
       logger.info('🔄 [useDashboardStats] Récupération des stats pour la boutique:', {
         storeId: store.id,
         storeName: store.name,
+        period: options?.period,
       });
 
-      // Calculer les dates pour les tendances (période actuelle vs précédente)
+      // Calculer les dates selon la période sélectionnée
       const now = new Date();
-      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+      let startDate: Date;
+      let endDate: Date = now;
+
+      if (options?.period === 'custom' && options?.customStartDate && options?.customEndDate) {
+        startDate = options.customStartDate;
+        endDate = options.customEndDate;
+      } else if (options?.period === '7d') {
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      } else if (options?.period === '90d') {
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      } else {
+        // Par défaut: 30 jours
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      }
+
+      // Calculer les dates pour les tendances (période actuelle vs précédente)
+      const periodDuration = endDate.getTime() - startDate.getTime();
+      const previousStartDate = new Date(startDate.getTime() - periodDuration);
+      const previousEndDate = startDate;
 
       // Récupérer d'abord les IDs des commandes complétées pour les order_items
       const completedOrdersResponse = await supabase
@@ -165,46 +283,53 @@ export const useDashboardStats = () => {
         // Produits
         supabase.from('products').select('id, is_active, created_at').eq('store_id', store.id),
 
-        // Commandes (toutes)
+        // Commandes (toutes pour stats globales)
         supabase
           .from('orders')
           .select('id, status, total_amount, created_at')
           .eq('store_id', store.id),
 
-        // Commandes période actuelle (30 derniers jours)
+        // Commandes période actuelle (selon filtre)
         supabase
           .from('orders')
           .select('id, status, total_amount, created_at')
           .eq('store_id', store.id)
-          .gte('created_at', thirtyDaysAgo.toISOString()),
+          .gte('created_at', startDate.toISOString())
+          .lte('created_at', endDate.toISOString()),
 
-        // Commandes période précédente (30-60 jours)
+        // Commandes période précédente (pour calculer les tendances)
         supabase
           .from('orders')
           .select('id, status, total_amount, created_at')
           .eq('store_id', store.id)
-          .gte('created_at', sixtyDaysAgo.toISOString())
-          .lt('created_at', thirtyDaysAgo.toISOString()),
+          .gte('created_at', previousStartDate.toISOString())
+          .lt('created_at', previousEndDate.toISOString()),
 
         // Clients (avec dates pour calculer par mois)
-        supabase.from('customers').select('id, created_at').eq('store_id', store.id),
+        supabase
+          .from('customers')
+          .select('id, created_at')
+          .eq('store_id', store.id)
+          .gte('created_at', startDate.toISOString())
+          .lte('created_at', endDate.toISOString()),
 
         // Clients période actuelle
         supabase
           .from('customers')
           .select('id', { count: 'exact', head: true })
           .eq('store_id', store.id)
-          .gte('created_at', thirtyDaysAgo.toISOString()),
+          .gte('created_at', startDate.toISOString())
+          .lte('created_at', endDate.toISOString()),
 
         // Clients période précédente
         supabase
           .from('customers')
           .select('id', { count: 'exact', head: true })
           .eq('store_id', store.id)
-          .gte('created_at', sixtyDaysAgo.toISOString())
-          .lt('created_at', thirtyDaysAgo.toISOString()),
+          .gte('created_at', previousStartDate.toISOString())
+          .lt('created_at', previousEndDate.toISOString()),
 
-        // Commandes récentes avec clients
+        // Commandes récentes avec clients et types de produits (filtrées par période)
         supabase
           .from('orders')
           .select(
@@ -214,20 +339,26 @@ export const useDashboardStats = () => {
             total_amount, 
             status, 
             created_at,
-            customers(id, name, email)
+            customers(id, name, email),
+            order_items(product_type, products(product_type))
           `
           )
           .eq('store_id', store.id)
+          .gte('created_at', startDate.toISOString())
+          .lte('created_at', endDate.toISOString())
           .order('created_at', { ascending: false })
           .limit(5),
 
         // Order items pour calculer les top produits (inclut tous les 5 types: digital, physical, service, course, artist)
         // Note: product_type est inclus pour permettre un filtrage futur par type si nécessaire
         // Utilise total_price ou unit_price * quantity pour le calcul du revenu
+        // Inclut order_id pour calculer les revenus par mois
         completedOrderIds.length > 0
           ? supabase
               .from('order_items')
-              .select('product_id, quantity, unit_price, total_price, product_type')
+              .select(
+                'product_id, quantity, unit_price, total_price, product_type, order_id, products(product_type)'
+              )
               .in('order_id', completedOrderIds)
           : Promise.resolve({ data: [], error: null }),
 
@@ -481,12 +612,13 @@ export const useDashboardStats = () => {
             : 0;
 
       // Calculer la croissance des produits (nouveaux produits créés)
-      const productsCurrent = products.filter(
-        (p: { created_at: string }) => new Date(p.created_at) >= thirtyDaysAgo
-      ).length;
+      const productsCurrent = products.filter((p: { created_at: string }) => {
+        const created = new Date(p.created_at);
+        return created >= startDate && created <= endDate;
+      }).length;
       const productsPrevious = products.filter((p: { created_at: string }) => {
         const created = new Date(p.created_at);
-        return created >= sixtyDaysAgo && created < thirtyDaysAgo;
+        return created >= previousStartDate && created < previousEndDate;
       }).length;
       const productGrowth =
         productsPrevious > 0
@@ -527,6 +659,172 @@ export const useDashboardStats = () => {
         productGrowth,
       };
 
+      // Calculer les statistiques par type de produit
+      const productsByType = {
+        digital: 0,
+        physical: 0,
+        service: 0,
+        course: 0,
+        artist: 0,
+      };
+
+      const safeProducts = Array.isArray(products) ? products : [];
+      safeProducts.forEach((product: { product_type?: string }) => {
+        const type = product.product_type as keyof typeof productsByType;
+        if (type && type in productsByType) {
+          productsByType[type]++;
+        }
+      });
+
+      // Calculer les revenus par type de produit
+      const revenueByType = {
+        digital: 0,
+        physical: 0,
+        service: 0,
+        course: 0,
+        artist: 0,
+      };
+
+      const ordersByType = {
+        digital: 0,
+        physical: 0,
+        service: 0,
+        course: 0,
+        artist: 0,
+      };
+
+      // Calculer les revenus et commandes par type depuis les order_items
+      // Aussi calculer les revenus par type et par mois pour les graphiques
+      // OPTIMISATION: Créer un Map pour O(1) lookup au lieu de O(n) avec find()
+      const ordersMap = new Map(orders.map((o: { id: string; created_at: string }) => [o.id, o]));
+
+      const revenueByTypeAndMonthMap: Record<
+        string,
+        {
+          digital: number;
+          physical: number;
+          service: number;
+          course: number;
+          artist: number;
+        }
+      > = {};
+
+      safeOrderItems.forEach(
+        (item: {
+          product_id: string | null;
+          quantity: number | null;
+          unit_price: number | null;
+          total_price: number | null;
+          product_type?: string;
+          products?: { product_type?: string } | null;
+          order_id: string;
+        }) => {
+          // Utiliser product_type depuis order_items ou depuis products si disponible
+          const type = (item.product_type ||
+            item.products?.product_type) as keyof typeof revenueByType;
+
+          if (type && type in revenueByType) {
+            const itemRevenue =
+              item.total_price ||
+              (item.unit_price && item.quantity ? item.unit_price * item.quantity : 0);
+            revenueByType[type] += Number(itemRevenue) || 0;
+            ordersByType[type] += 1;
+
+            // Utiliser le Map pour O(1) lookup au lieu de find() O(n)
+            if (item.order_id) {
+              const order = ordersMap.get(item.order_id);
+              if (order && order.created_at) {
+                const month = new Date(order.created_at).toLocaleString('fr-FR', {
+                  month: 'short',
+                  year: 'numeric',
+                });
+                if (!revenueByTypeAndMonthMap[month]) {
+                  revenueByTypeAndMonthMap[month] = {
+                    digital: 0,
+                    physical: 0,
+                    service: 0,
+                    course: 0,
+                    artist: 0,
+                  };
+                }
+                revenueByTypeAndMonthMap[month][type] += Number(itemRevenue) || 0;
+              }
+            }
+          }
+        }
+      );
+
+      // Convertir en tableau et trier
+      const revenueByTypeAndMonthArray = Object.entries(revenueByTypeAndMonthMap)
+        .map(([month, data]) => ({
+          month,
+          ...data,
+        }))
+        .sort((a, b) => {
+          const dateA = new Date(a.month);
+          const dateB = new Date(b.month);
+          return dateA.getTime() - dateB.getTime();
+        });
+
+      // Calculer les métriques de performance par type
+      const performanceMetricsByType = {
+        digital: {
+          conversionRate:
+            ordersByType.digital > 0 && totalCustomers > 0
+              ? Math.min(Math.round((ordersByType.digital / totalCustomers) * 100), 100)
+              : 0,
+          averageOrderValue:
+            ordersByType.digital > 0 ? revenueByType.digital / ordersByType.digital : 0,
+          customerRetention: Math.round(
+            totalCustomers * 0.3 * (ordersByType.digital / totalOrders || 0)
+          ),
+        },
+        physical: {
+          conversionRate:
+            ordersByType.physical > 0 && totalCustomers > 0
+              ? Math.min(Math.round((ordersByType.physical / totalCustomers) * 100), 100)
+              : 0,
+          averageOrderValue:
+            ordersByType.physical > 0 ? revenueByType.physical / ordersByType.physical : 0,
+          customerRetention: Math.round(
+            totalCustomers * 0.3 * (ordersByType.physical / totalOrders || 0)
+          ),
+        },
+        service: {
+          conversionRate:
+            ordersByType.service > 0 && totalCustomers > 0
+              ? Math.min(Math.round((ordersByType.service / totalCustomers) * 100), 100)
+              : 0,
+          averageOrderValue:
+            ordersByType.service > 0 ? revenueByType.service / ordersByType.service : 0,
+          customerRetention: Math.round(
+            totalCustomers * 0.3 * (ordersByType.service / totalOrders || 0)
+          ),
+        },
+        course: {
+          conversionRate:
+            ordersByType.course > 0 && totalCustomers > 0
+              ? Math.min(Math.round((ordersByType.course / totalCustomers) * 100), 100)
+              : 0,
+          averageOrderValue:
+            ordersByType.course > 0 ? revenueByType.course / ordersByType.course : 0,
+          customerRetention: Math.round(
+            totalCustomers * 0.3 * (ordersByType.course / totalOrders || 0)
+          ),
+        },
+        artist: {
+          conversionRate:
+            ordersByType.artist > 0 && totalCustomers > 0
+              ? Math.min(Math.round((ordersByType.artist / totalCustomers) * 100), 100)
+              : 0,
+          averageOrderValue:
+            ordersByType.artist > 0 ? revenueByType.artist / ordersByType.artist : 0,
+          customerRetention: Math.round(
+            totalCustomers * 0.3 * (ordersByType.artist / totalOrders || 0)
+          ),
+        },
+      };
+
       setStats({
         totalProducts,
         activeProducts,
@@ -552,6 +850,20 @@ export const useDashboardStats = () => {
               };
             }
           }
+
+          // Extraire les types de produits depuis order_items
+          const productTypes: string[] = [];
+          if (order.order_items && Array.isArray(order.order_items)) {
+            order.order_items.forEach(
+              (item: { product_type?: string; products?: { product_type?: string } | null }) => {
+                const type = item.product_type || item.products?.product_type;
+                if (type && !productTypes.includes(type)) {
+                  productTypes.push(type);
+                }
+              }
+            );
+          }
+
           return {
             id: order.id,
             order_number: order.order_number || 'N/A',
@@ -559,6 +871,7 @@ export const useDashboardStats = () => {
             status: order.status || 'unknown',
             created_at: order.created_at || new Date().toISOString(),
             customers: customerData,
+            product_types: productTypes,
           };
         }),
         topProducts: topProductsList,
@@ -567,6 +880,11 @@ export const useDashboardStats = () => {
         recentActivity,
         performanceMetrics,
         trends,
+        productsByType,
+        revenueByType,
+        ordersByType,
+        performanceMetricsByType,
+        revenueByTypeAndMonth: revenueByTypeAndMonthArray,
       });
 
       logger.info('✅ Dashboard stats loaded successfully');
@@ -589,7 +907,7 @@ export const useDashboardStats = () => {
     } finally {
       setLoading(false);
     }
-  }, [store, toast]);
+  }, [store, toast, options?.period, options?.customStartDate, options?.customEndDate]);
 
   useEffect(() => {
     fetchStats();
